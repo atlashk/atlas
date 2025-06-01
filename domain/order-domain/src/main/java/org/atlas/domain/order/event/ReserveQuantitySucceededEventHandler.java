@@ -1,26 +1,26 @@
 package org.atlas.domain.order.event;
 
-import lombok.RequiredArgsConstructor;
 import org.atlas.domain.order.entity.OrderEntity;
 import org.atlas.domain.order.port.messaging.OrderMessagePublisherPort;
 import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.shared.enums.OrderStatus;
 import org.atlas.framework.config.ApplicationConfigPort;
-import org.atlas.framework.error.AppError;
 import org.atlas.framework.domain.event.contract.order.OrderConfirmedEvent;
 import org.atlas.framework.domain.event.contract.product.ReserveQuantitySucceededEvent;
-import org.atlas.framework.domain.event.handler.EventHandler;
+import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.exception.DomainException;
+import org.atlas.framework.error.AppError;
 
+import lombok.RequiredArgsConstructor;
+
+@DomainEventHandler
 @RequiredArgsConstructor
-public class ReserveQuantitySucceededEventHandler implements
-    EventHandler<ReserveQuantitySucceededEvent> {
+public class ReserveQuantitySucceededEventHandler {
 
   private final OrderRepository orderRepository;
   private final ApplicationConfigPort applicationConfigPort;
   private final OrderMessagePublisherPort orderMessagePublisherPort;
 
-  @Override
   public void handle(ReserveQuantitySucceededEvent reserveQuantitySucceededEvent) {
     // Find order
     OrderEntity orderEntity = orderRepository.findById(reserveQuantitySucceededEvent.getOrderId())

@@ -32,6 +32,10 @@ public class PagingRequest {
     return instance;
   }
 
+  public static PagingRequest of(Integer page, Integer size, String sortBy, SortOrder sortOrder) {
+    return new PagingRequest(page, size, sortBy, sortOrder);
+  }
+
   public static PagingRequest unpaged() {
     return of(0, 0);
   }

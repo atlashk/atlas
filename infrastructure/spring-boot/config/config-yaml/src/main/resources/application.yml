@@ -5,8 +5,7 @@ app:
         locale: en-US
         cors:
           allowed-origins:
-            - http://localhost:9000
-            - http://localhost:9100
+            - http://localhost:9000 # Frontend
           allowed-methods:
             - "GET"
             - "POST"

@@ -21,7 +21,7 @@ public class UserDetailsImpl implements UserDetails {
   private String sessionId;
 
   public UserDetailsImpl(UserEntity userEntity) {
-    this.userId = userEntity.getUserId();
+    this.userId = userEntity.getId();
     this.username = userEntity.getUsername();
     this.password = userEntity.getPassword();
     this.authorities = Collections.singletonList(

@@ -1,8 +1,8 @@
 <template>
-  <div class="container-fluid px-4 py-4">
+  <div class="container-fluid px-5 py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h2 class="h2 mb-1">Order Management</h2>
+        <h3 class="mb-1">Order Management</h3>
         <p class="text-muted mb-0">Manage customer orders</p>
       </div>
     </div>
@@ -16,30 +16,30 @@
         <form @submit.prevent="applyFilters(1)">
           <div class="row g-4">
             <div class="col-md-6">
-              <label for="orderId" class="form-label fw-medium">Order ID</label>
+              <label for="orderId" class="form-label">Order ID</label>
               <input
                 id="orderId"
                 v-model.trim="filters.orderId"
                 type="text"
                 placeholder="Enter order ID..."
-                class="form-control form-control-lg"
+                class="form-control"
               />
             </div>
 
             <div class="col-md-6">
-              <label for="userId" class="form-label fw-medium">User ID</label>
+              <label for="userId" class="form-label">User ID</label>
               <input
                 id="userId"
                 v-model.trim="filters.userId"
                 type="text"
                 placeholder="Enter user ID..."
-                class="form-control form-control-lg"
+                class="form-control"
               />
             </div>
 
             <div class="col-md-6">
-              <label for="status" class="form-label fw-medium">Status</label>
-              <select id="status" v-model="filters.status" class="form-select form-select-lg">
+              <label for="status" class="form-label">Status</label>
+              <select id="status" v-model="filters.status" class="form-select">
                 <option value="">All statuses</option>
                 <option v-for="status in orderStatuses" :key="status" :value="status">
                   {{ formatOrderStatusLabel(status) }}
@@ -48,8 +48,8 @@
             </div>
 
             <div class="col-md-6">
-              <label class="form-label fw-medium">Date Range</label>
-              <div class="input-group input-group-lg">
+              <label class="form-label">Date Range</label>
+              <div class="input-group">
                 <input
                   v-model="filters.startDate"
                   type="date"
@@ -68,11 +68,11 @@
           </div>
 
           <div class="d-flex gap-2 mt-4 pt-3 border-top">
-            <button type="submit" class="btn btn-primary px-3">
-              <i class="bi bi-search me-2"></i> Search
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-search"></i> Search
             </button>
-            <button type="button" @click="resetFilters" class="btn btn-outline-secondary px-3">
-              <i class="bi bi-arrow-counterclockwise me-2"></i> Reset
+            <button type="button" @click="resetFilters" class="btn btn-outline-secondary">
+              <i class="bi bi-arrow-counterclockwise"></i> Reset
             </button>
           </div>
         </form>
@@ -202,10 +202,10 @@
 </template>
 
 <script setup lang="ts">
+import { orderService } from '@/services';
 import { formatCurrency, formatDate, formatOrderStatusLabel, getOrderStatusBadgeClasses } from '@/utils/formatter.util';
 import { computed, onMounted, reactive, ref } from 'vue';
 import { toast } from 'vue3-toastify';
-import { listOrder } from '../../services/order.admin.service';
 import { OrderStatus, type ListOrderFilters, type Order } from '../../interfaces/order.interface';
 
 const orders = ref<Order[]>([]);
@@ -240,7 +240,7 @@ const applyFilters = async (page: number) => {
     filters.page = page;
     metadata.currentPage = page;
     
-    const response = await listOrder(filters);
+    const response = await orderService.listOrder(filters);
     
     orders.value = response.data;
     Object.assign(metadata, response.metadata);

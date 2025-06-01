@@ -1,12 +1,12 @@
 <template>
-  <div class="container-fluid px-4 py-4">
+  <div class="container-fluid px-5 py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h2 class="h2 mb-1">Product Management</h2>
+        <h3 class="mb-1">Product Management</h3>
         <p class="text-muted mb-0">Manage your product catalog</p>
       </div>
-      <button class="btn btn-success px-3" @click="router.push({ name: 'adminProductAdd' })">
-        <i class="bi bi-plus-lg me-2"></i> Add New Product
+      <button class="btn btn-success" @click="router.push({ name: 'adminProductAdd' })">
+        <i class="bi bi-plus-lg"></i> Add New Product
       </button>
     </div>
 
@@ -19,35 +19,35 @@
         <form @submit.prevent="applyFilters(1)">
           <div class="row g-4">
             <div class="col-md-6">
-              <label for="productId" class="form-label fw-medium">Product ID</label>
+              <label for="productId" class="form-label">Product ID</label>
               <input
                 id="productId"
                 v-model.trim="filters.id"
                 type="text"
                 placeholder="Enter product ID..."
-                class="form-control form-control-lg"
+                class="form-control"
               />
             </div>
 
             <div class="col-md-6">
-              <label for="keyword" class="form-label fw-medium">Search</label>
+              <label for="keyword" class="form-label">Search</label>
               <input
                 id="keyword"
                 v-model.trim="filters.keyword"
                 type="text"
                 placeholder="Search by product name or description..."
-                class="form-control form-control-lg"
+                class="form-control"
               />
             </div>
 
             <div class="col-md-6">
-              <label class="form-label fw-medium">Price Range</label>
-              <div class="input-group input-group-lg">
+              <label class="form-label">Price Range</label>
+              <div class="input-group">
                 <input
                   v-model.number="filters.minPrice"
                   type="number"
                   step="0.01"
-                  placeholder="Min"
+                  placeholder="Min price"
                   class="form-control"
                 />
                 <span class="input-group-text bg-light">to</span>
@@ -55,15 +55,15 @@
                   v-model.number="filters.maxPrice"
                   type="number"
                   step="0.01"
-                  placeholder="Max"
+                  placeholder="Max price"
                   class="form-control"
                 />
               </div>
             </div>
 
             <div class="col-md-6">
-              <label for="status" class="form-label fw-medium">Status</label>
-              <select id="status" v-model="filters.status" class="form-select form-select-lg">
+              <label for="status" class="form-label">Status</label>
+              <select id="status" v-model="filters.status" class="form-select">
                 <option value="">All statuses</option>
                 <option v-for="status in productStatuses" :key="status" :value="status">
                   {{ formatProductStatusLabel(status) }}
@@ -72,17 +72,17 @@
             </div>
 
             <div class="col-md-6">
-              <label for="availableFrom" class="form-label fw-medium">Available From</label>
+              <label for="availableFrom" class="form-label">Available From</label>
               <input
                 id="availableFrom"
                 v-model="filters.availableFrom"
                 type="date"
-                class="form-control form-control-lg"
+                class="form-control"
               />
             </div>
 
             <div class="col-md-6">
-              <label class="form-label fw-medium">Activity</label>
+              <label class="form-label">Activity</label>
               <div class="border rounded p-3">
                 <div class="d-flex gap-4">
                   <div class="form-check">
@@ -110,7 +110,7 @@
             </div>
 
             <div class="col-md-6">
-              <label for="brandId" class="form-label fw-medium">Brand</label>
+              <label for="brandId" class="form-label">Brand</label>
               <div v-if="isLoadingBrands" class="text-center py-2" aria-live="polite">
                 <div class="spinner-border spinner-border-sm" role="status" aria-label="Loading brands">
                   <span class="visually-hidden">Loading...</span>
@@ -120,7 +120,7 @@
                 v-else
                 id="brandId"
                 v-model="filters.brandId"
-                class="form-select form-select-lg"
+                class="form-select"
                 :disabled="!brands.length"
               >
                 <option value="">All brands</option>
@@ -131,7 +131,7 @@
             </div>
 
             <div class="col-md-6">
-              <label for="categoryIds" class="form-label fw-medium">Categories</label>
+              <label for="categoryIds" class="form-label">Categories</label>
               <div v-if="isLoadingCategories" class="text-center py-2" aria-live="polite">
                 <div class="spinner-border spinner-border-sm" role="status" aria-label="Loading categories">
                   <span class="visually-hidden">Loading...</span>
@@ -142,7 +142,7 @@
                 id="categoryIds"
                 v-model="filters.categoryIds"
                 multiple
-                class="form-select form-select-lg"
+                class="form-select"
                 :disabled="!categories.length"
                 size="3"
               >
@@ -155,11 +155,11 @@
           </div>
 
           <div class="d-flex gap-2 mt-4 pt-3 border-top">
-            <button type="submit" class="btn btn-primary px-3">
-              <i class="bi bi-search me-2"></i> Search
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-search"></i> Search
             </button>
-            <button type="button" @click="resetFilters" class="btn btn-outline-secondary px-3">
-              <i class="bi bi-arrow-counterclockwise me-2"></i> Reset
+            <button type="button" @click="resetFilters" class="btn btn-outline-secondary">
+              <i class="bi bi-arrow-counterclockwise"></i> Reset
             </button>
           </div>
         </form>
@@ -267,10 +267,9 @@
 </template>
 
 <script setup lang="ts">
-import { deleteProduct, listProduct } from '@/services/product.admin.service';
-import { listBrand, listCategory } from '@/services/product.common.service';
-import { useFlashStore } from '@/stores/flash.store';
 import { ProductStatus, type Brand, type Category, type ListProductFilters, type Product } from '@/interfaces/product.interface';
+import { productService } from '@/services';
+import { useFlashStore } from '@/stores/flash.store';
 import { formatCurrency, formatProductStatusLabel, getProductStatusBadgeClasses } from '@/utils/formatter.util';
 import { getProductImageUrl } from '@/utils/productImage.util';
 import { computed, onMounted, reactive, ref } from 'vue';
@@ -315,7 +314,7 @@ const productStatuses = computed(() => Object.values(ProductStatus));
 const loadBrands = async () => {
   isLoadingBrands.value = true;
   try {
-    const { data } = await listBrand();
+    const { data } = await productService.listBrand();
     brands.value = data;
   } catch (error) {
     toast.error('Failed to load brands');
@@ -327,7 +326,7 @@ const loadBrands = async () => {
 const loadCategories = async () => {
   isLoadingCategories.value = true;
   try {
-    const { data } = await listCategory();
+    const { data } = await productService.listCategory();
     categories.value = data;
   } catch (error) {
     toast.error('Failed to load categories');
@@ -355,7 +354,7 @@ const applyFilters = async (page: number) => {
   try {
     filters.page = page;
     metadata.currentPage = page;
-    const response = await listProduct(filters);
+    const response = await productService.listProduct(filters);
     console.log('API response:', response);
     products.value = response.data;
     Object.assign(metadata, response.metadata);
@@ -395,7 +394,7 @@ const handleDelete = async (productId: number) => {
   if (!confirm('Are you sure you want to delete this product?')) return;
 
   try {
-    await deleteProduct(productId);
+    await productService.deleteProduct(productId);
     toast.success('Product deleted successfully');
     applyFilters(metadata.currentPage); // Preserve current page after deletion
   } catch (error) {

@@ -8,20 +8,19 @@ import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.service.ProductImageService;
 import org.atlas.domain.product.shared.enums.ProductStatus;
 import org.atlas.domain.product.usecase.front.model.FrontSearchProductInput;
+import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingResult;
 import org.atlas.framework.search.SearchPort;
-import org.atlas.framework.usecase.handler.UseCaseHandler;
 
+@UseCaseHandler
 @RequiredArgsConstructor
-public class FrontSearchProductUseCaseHandler implements
-    UseCaseHandler<FrontSearchProductInput, PagingResult<ProductEntity>> {
+public class FrontSearchProductUseCaseHandler {
 
   private final @Nullable SearchPort searchPort;
   private final ProductRepository productRepository;
   private final ProductImageService productImageService;
 
-  @Override
   public PagingResult<ProductEntity> handle(FrontSearchProductInput input) throws Exception {
     PagingResult<ProductEntity> productEntityPage = null;
     if (searchPort != null) {

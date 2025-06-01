@@ -9,17 +9,17 @@ import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.error.AppError;
 import org.atlas.framework.domain.event.contract.order.OrderCanceledEvent;
 import org.atlas.framework.domain.event.contract.product.ReserveQuantityFailedEvent;
-import org.atlas.framework.domain.event.handler.EventHandler;
+import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.exception.DomainException;
 
+@DomainEventHandler
 @RequiredArgsConstructor
-public class ReserveQuantityFailedEventHandler implements EventHandler<ReserveQuantityFailedEvent> {
+public class ReserveQuantityFailedEventHandler {
 
   private final OrderRepository orderRepository;
   private final ApplicationConfigPort applicationConfigPort;
   private final OrderMessagePublisherPort orderMessagePublisherPort;
 
-  @Override
   public void handle(ReserveQuantityFailedEvent reserveQuantityFailedEvent) {
     // Find order
     OrderEntity orderEntity = orderRepository.findById(reserveQuantityFailedEvent.getOrderId())

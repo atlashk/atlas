@@ -129,7 +129,7 @@ public class AuthService {
     revokeSession(contextInfo.getSessionId(), contextInfo.getExpiresAt());
 
     // Update last logout timestamp in Redis
-    updateLastLogoutTs(Integer.valueOf(contextInfo.getUserId()));
+    updateLastLogoutTs(contextInfo.getUserId());
   }
 
   public void forceLogoutOnAllDevices() {

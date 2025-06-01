@@ -9,7 +9,7 @@ export const APP_CONFIG = {
   }
 } as const
 
-export enum UserRole {
+export enum Role {
   ADMIN = 'ADMIN',
   USER = 'USER'
 }
@@ -18,4 +18,4 @@ export enum OrderStatus {
   PROCESSING = 'PROCESSING',
   CONFIRMED = 'CONFIRMED',
   CANCELED = 'CANCELED'
-} 
+}

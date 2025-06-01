@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import org.atlas.framework.objectmapper.ObjectMapperService;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 
 public class ModelMapperService implements ObjectMapperService {
 
@@ -12,6 +13,8 @@ public class ModelMapperService implements ObjectMapperService {
 
   public ModelMapperService() {
     MAPPER = new ModelMapper();
+    MAPPER.getConfiguration()
+        .setMatchingStrategy(MatchingStrategies.STRICT);
   }
 
   /**

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.atlas.domain.order.entity.OrderEntity;
 import org.atlas.domain.order.entity.ProductEntity;
@@ -20,8 +20,11 @@ import org.atlas.framework.internalapi.user.model.ListUserRequest;
 import org.atlas.framework.internalapi.user.model.UserResponse;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 
+import lombok.RequiredArgsConstructor;
+
+@DomainService
 @RequiredArgsConstructor
-public class OrderAggregator implements DomainService {
+public class OrderAggregator {
 
   private final UserApiPort userApiPort;
   private final ProductApiPort productApiPort;
@@ -62,7 +65,7 @@ public class OrderAggregator implements DomainService {
       UserResponse userResponse = userResponseMap.get(orderEntity.getUser().getId());
       if (userResponse != null) {
         UserEntity userEntity = ObjectMapperUtil.getInstance()
-            .map(orderEntity.getUser(), UserEntity.class);
+            .map(userResponse, UserEntity.class);
         orderEntity.setUser(userEntity);
       } else {
         if (ignoreNotFound) {

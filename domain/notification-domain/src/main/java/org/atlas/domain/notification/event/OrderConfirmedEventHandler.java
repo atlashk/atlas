@@ -6,12 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+
 import org.atlas.framework.config.Application;
 import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.domain.event.contract.order.OrderConfirmedEvent;
-import org.atlas.framework.domain.event.handler.EventHandler;
+import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.notification.email.Attachment;
 import org.atlas.framework.notification.email.EmailNotification;
 import org.atlas.framework.notification.email.EmailPort;
@@ -26,9 +25,13 @@ import org.atlas.framework.template.exception.ResolveTemplateException;
 import org.atlas.framework.util.FileUtil;
 import org.atlas.framework.util.UUIDGenerator;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@DomainEventHandler
 @RequiredArgsConstructor
 @Slf4j
-public class OrderConfirmedEventHandler implements EventHandler<OrderConfirmedEvent> {
+public class OrderConfirmedEventHandler {
 
   private final ApplicationConfigPort applicationConfigPort;
   private final EmailPort emailPort;
@@ -36,7 +39,6 @@ public class OrderConfirmedEventHandler implements EventHandler<OrderConfirmedEv
   private final TemplatePort templatePort;
   private final WebSocketPort webSocketPort;
 
-  @Override
   public void handle(OrderConfirmedEvent event) {
     CompletableFuture.allOf(
         CompletableFuture.runAsync(() -> {

@@ -1,12 +1,12 @@
 <template>
-  <div class="container-fluid px-4 py-4">
+  <div class="container-fluid px-5 py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h2 class="h2 mb-1">Edit Product</h2>
+        <h3 class="mb-1">Edit Product</h3>
         <p class="text-muted mb-0">Update product information</p>
       </div>
-      <button class="btn btn-outline-secondary px-3" @click="router.back()">
-        <i class="bi bi-arrow-left me-2"></i> Back
+      <button class="btn btn-outline-secondary" @click="router.back()">
+        <i class="bi bi-arrow-left"></i> Back
       </button>
     </div>
 
@@ -27,25 +27,25 @@
             <div class="card-body p-4">
               <div class="row g-4">
                 <div class="col-md-6">
-                  <label class="form-label fw-medium">Product Name <span class="text-danger">*</span></label>
-                  <input v-model="form.name" type="text" class="form-control form-control-lg" required />
+                  <label class="form-label">Product Name <span class="text-danger">*</span></label>
+                  <input v-model="form.name" type="text" class="form-control" required />
                 </div>
 
                 <div class="col-md-6">
-                  <label class="form-label fw-medium">Price <span class="text-danger">*</span></label>
-                  <div class="input-group input-group-lg">
+                  <label class="form-label">Price <span class="text-danger">*</span></label>
+                  <div class="input-group">
                     <span class="input-group-text">$</span>
                     <input v-model.number="form.price" type="number" step="0.01" min="0" class="form-control" required />
                   </div>
                 </div>
 
                 <div class="col-md-6">
-                  <label class="form-label fw-medium">Quantity <span class="text-danger">*</span></label>
+                  <label class="form-label">Quantity <span class="text-danger">*</span></label>
                   <input v-model.number="form.quantity" type="number" min="0" class="form-control" required />
                 </div>
 
                 <div class="col-md-6">
-                  <label class="form-label fw-medium">Status <span class="text-danger">*</span></label>
+                  <label class="form-label">Status <span class="text-danger">*</span></label>
                   <select v-model="form.status" class="form-select" required>
                     <option v-for="status in Object.values(ProductStatus)" :key="status" :value="status">
                       {{ formatStatusLabel(status) }}
@@ -54,12 +54,12 @@
                 </div>
 
                 <div class="col-md-6">
-                  <label class="form-label fw-medium">Available From <span class="text-danger">*</span></label>
+                  <label class="form-label">Available From <span class="text-danger">*</span></label>
                   <input v-model="form.availableFrom" type="datetime-local" class="form-control" required />
                 </div>
 
                 <div class="col-md-6">
-                  <label class="form-label fw-medium">Active Status <span class="text-danger">*</span></label>
+                  <label class="form-label">Active Status <span class="text-danger">*</span></label>
                   <div class="form-check form-switch">
                     <input v-model="form.isActive" class="form-check-input" type="checkbox" role="switch" id="activeSwitch">
                     <label class="form-check-label" for="activeSwitch">Product is active</label>
@@ -67,7 +67,7 @@
                 </div>
 
                 <div class="col-md-6">
-                  <label class="form-label fw-medium">Brand <span class="text-danger">*</span></label>
+                  <label class="form-label">Brand <span class="text-danger">*</span></label>
                   <select v-model.number="form.brandId" class="form-select" required :disabled="!brands.length">
                     <option :value="0">Select a brand</option>
                     <option v-for="brand in brands" :key="brand.id" :value="brand.id">
@@ -80,7 +80,7 @@
                 </div>
 
                 <div class="col-md-6">
-                  <label class="form-label fw-medium">Categories <span class="text-danger">*</span></label>
+                  <label class="form-label">Categories <span class="text-danger">*</span></label>
                   <select v-model="form.categoryIds" multiple class="form-select" required :disabled="!categories.length"
                     size="3">
                     <option v-for="category in categories" :key="category.id" :value="category.id">
@@ -94,7 +94,7 @@
                 </div>
 
                 <div class="col-12">
-                  <label class="form-label fw-medium">Product Image</label>
+                  <label class="form-label">Product Image</label>
                   <input type="file" class="form-control" @change="handleImageUpload" accept="image/*" />
                   <div v-if="imagePreview || form.image" class="mt-2">
                     <img :src="imagePreview || form.image" alt="Preview" class="img-thumbnail" style="max-height: 200px" />
@@ -112,8 +112,8 @@
             <div class="card-body p-4">
               <div class="row g-4">
                 <div class="col-12">
-                  <label class="form-label fw-medium">Description <span class="text-danger">*</span></label>
-                  <textarea v-model="form.details.description" class="form-control form-control-lg" rows="5" required></textarea>
+                  <label class="form-label">Description <span class="text-danger">*</span></label>
+                  <textarea v-model="form.details.description" class="form-control" rows="5" required></textarea>
                 </div>
               </div>
             </div>
@@ -123,28 +123,28 @@
           <div class="card shadow-sm mb-4">
             <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
               <h5 class="mb-0">Product Attributes</h5>
-              <button type="button" class="btn btn-outline-primary px-3" @click="addAttribute">
-                <i class="bi bi-plus me-2"></i> Add Attribute
+              <button type="button" class="btn btn-outline-primary" @click="addAttribute">
+                <i class="bi bi-plus"></i> Add Attribute
               </button>
             </div>
             <div v-for="(attr, index) in form.attributes" :key="index" class="row g-3 mb-3">
               <div class="col-md-5">
-                <input v-model="attr.name" type="text" class="form-control form-control-lg" placeholder="Attribute name" />
+                <input v-model="attr.name" type="text" class="form-control" placeholder="Attribute name" />
               </div>
               <div class="col-md-5">
-                <input v-model="attr.value" type="text" class="form-control form-control-lg" placeholder="Attribute value" />
+                <input v-model="attr.value" type="text" class="form-control" placeholder="Attribute value" />
               </div>
               <div class="col-md-2">
-                <button type="button" class="btn btn-outline-danger px-3" @click="removeAttribute(index)">
-                  <i class="bi bi-trash me-2"></i> Remove
+                <button type="button" class="btn btn-outline-danger" @click="removeAttribute(index)">
+                  <i class="bi bi-trash"></i> Remove
                 </button>
               </div>
             </div>
           </div>
 
           <div class="d-flex justify-content-end gap-2 mt-4">
-            <button type="button" class="btn btn-outline-secondary px-3" @click="router.back()">
-              <i class="bi bi-x me-2"></i> Cancel
+            <button type="button" class="btn btn-outline-secondary" @click="router.back()">
+              <i class="bi bi-x"></i> Cancel
             </button>
             <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
               <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-1"></span>
@@ -158,10 +158,9 @@
 </template>
 
 <script setup lang="ts">
-import { getProduct, updateProduct } from '@/services/product.admin.service';
-import { listBrand, listCategory } from '@/services/product.common.service';
-import { useFlashStore } from '@/stores/flash.store';
 import { ProductStatus, type Brand, type Category, type UpdateProductRequest } from '@/interfaces/product.interface';
+import { productService } from '@/services';
+import { useFlashStore } from '@/stores/flash.store';
 import { onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { toast } from 'vue3-toastify';
@@ -203,7 +202,7 @@ const formatStatusLabel = (status: ProductStatus): string => {
 
 const loadBrands = async () => {
   try {
-    const response = await listBrand();
+    const response = await productService.listBrand();
     if (response.success) {
       brands.value = response.data;
     }
@@ -214,7 +213,7 @@ const loadBrands = async () => {
 
 const loadCategories = async () => {
   try {
-    const response = await listCategory();
+    const response = await productService.listCategory();
     if (response.success) {
       categories.value = response.data;
     }
@@ -249,7 +248,7 @@ const removeAttribute = (index: number) => {
 
 const loadProduct = async () => {
   try {
-    const response = await getProduct(form.id);
+    const response = await productService.getProduct(form.id);
     if (response.success) {
       const product = response.data;
 
@@ -299,7 +298,7 @@ const handleSubmit = async () => {
       availableFrom: new Date(form.availableFrom).toISOString()
     };
 
-    const response = await updateProduct(formData);
+    const response = await productService.updateProduct(formData);
 
     if (response.success) {
       flashStore.setSuccess('Edited product successfully!');

@@ -1,4 +1,4 @@
-package org.atlas.framework.domain.service;
+package org.atlas.framework.domain.usecase.handler;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface DomainService {
+public @interface UseCaseHandler {
 
 }

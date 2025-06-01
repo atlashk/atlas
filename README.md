@@ -10,7 +10,6 @@
 
 - **Microservices**: Modular architecture for scalability and flexibility.
 - **Hexagonal Architecture**: Separation of concerns to enhance maintainability.
-- **CQRS (Command Query Responsibility Segregation)**: Separation of read and write operations for better performance and scalability.
 - **Cross-Cutting Concerns**: Centralized handling of concerns such as logging, security, and monitoring.
 
 ---
@@ -19,102 +18,64 @@
 
 ---
 
-## Getting started
+## Quick Start
 
-Step 1: Start MySQL, Redis, Kafka
+This method uses the default infrastructure stack, which is `local-compose-simple`.
 
-### For Spring Boot stack
+### Requirements
 
-Step 2: Build project
-
-```bash
-./gradlew -Dorg.gradle.java.home=/path/to/your-jdk-17-home clean build
-```
-
-Step 3: Run applications
-
-```bash
-./gradlew -Dorg.gradle.java.home=/path/to/your-jdk-17-home :edge.discovery-server.eureka:bootRun
-./gradlew -Dorg.gradle.java.home=/path/to/your-jdk-17-home :application.spring-boot.user:bootRun
-./gradlew -Dorg.gradle.java.home=/path/to/your-jdk-17-home :application.spring-boot.product:bootRun
-./gradlew -Dorg.gradle.java.home=/path/to/your-jdk-17-home :application.spring-boot.order:bootRun
-./gradlew -Dorg.gradle.java.home=/path/to/your-jdk-17-home :application.spring-boot.notification:bootRun
-./gradlew -Dorg.gradle.java.home=/path/to/your-jdk-17-home :edge.auth-server.spring-security-jwt:bootRun
-./gradlew -Dorg.gradle.java.home=/path/to/your-jdk-17-home :edge.api-gateway.spring-cloud-gateway:bootRun
-```
-
----
-
-## Installation
+- Installed OpenJDK 17
+- Installed Docker
 
 ### Build the Project
 
-#### Step 1: Build JAR files
+#### Build JAR files
 
 ```bash
+chmod +x ./script/build-jar.sh
 ./script/build-jar.sh
 ```
 
-The default profile is `local-compose`.
-
-If you want to change the profile, you can pass param as below:
+#### Build Docker images
 
 ```bash
-./script/build-jar.sh local-k8s
-./script/build-jar.sh aws
+chmod +x ./script/build-docker-images.sh
+./script/build-docker-images.sh
 ```
 
-#### Step 2: Build Docker images
+### Start infrastructure services
 
 ```bash
-./script/build-docker-image.sh
+chmod +x ./deployment/local/compose/start.sh
+./deployment/local/compose/start.sh infra
 ```
 
-### Running the Project Locally
+Then wait a few minutes until they start successfully.
 
-You have multiple options to start the project locally.
-
-#### Using Docker Compose
+### (Optional) Start observability services
 
 ```bash
-./script/local-compose-fully-start.sh
+./deployment/local/compose/start.sh observability
 ```
 
-#### Using Kubernetes (Minikube)
-
-Set up and run the project using Minikube with the following commands:
+### Start backend services
 
 ```bash
-# Setup
-./script/k8s-init-minikube-cluster.sh
-./script/k8s-init-dashboard.sh
-./script/k8s-init-backend.sh
-# Wait for approximately 5 minutes...
-./script/k8s-init-services.sh
-
-# Start the services
-./script/k8s-start.sh
+./deployment/local/compose/start.sh backend
 ```
 
----
+Then wait a few minutes until the start is complete.
 
-## Testing
-
-You can test the APIs using the web app built with Vue 3. 
-
-To start the frontend application, follow these steps:
+### Start frontend
 
 ```bash
 cd frontend
-npm run serve
+npm install
+npm run dev
 ```
 
 The web application will then be accessible at http://localhost:9000.
 
----
-
-## TODO
-
-- [ ] Resiliency patterns
-- [ ] Export aggOrders function on frontend
-- [ ] Feature Toggle. Ref: https://medium.com/@uptoamir/refresh-configurations-at-runtime-with-spring-cloud-bus-a-practical-guide-38a7f739eca6
+You can use the following two pre-created accounts to log in.
+- Front site: user / Aa@123456
+- Admin site: admin / Aa@123456

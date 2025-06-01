@@ -47,8 +47,8 @@ public class RelayOutboxMessageTask {
       Class<?> messageClass = Class.forName(outboxMessage.getMessageClass());
       Object messagePayload = JsonUtil.getInstance()
           .toObject(outboxMessage.getMessagePayload(), messageClass);
-      messagePublisher.publish(messagePayload, outboxMessage.getDestination(),
-          outboxMessage.getMessageKey());
+      messagePublisher.publish(messagePayload, outboxMessage.getMessageKey(),
+          outboxMessage.getDestination());
       outboxMessage.markAsProcessed();
     } catch (Exception e) {
       log.error("Failed to process outbox message {}", outboxMessage, e);

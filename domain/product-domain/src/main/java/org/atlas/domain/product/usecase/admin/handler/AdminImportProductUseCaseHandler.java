@@ -1,8 +1,7 @@
 package org.atlas.domain.product.usecase.admin.handler;
 
 import java.util.List;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.atlas.domain.product.entity.BrandEntity;
 import org.atlas.domain.product.entity.CategoryEntity;
@@ -18,15 +17,18 @@ import org.atlas.domain.product.usecase.admin.model.AdminImportProductInput;
 import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.domain.event.contract.product.ProductCreatedEvent;
 import org.atlas.framework.domain.exception.DomainException;
+import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.error.AppError;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.transaction.TransactionPort;
-import org.atlas.framework.usecase.handler.UseCaseHandler;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@UseCaseHandler
 @RequiredArgsConstructor
 @Slf4j
-public class AdminImportProductUseCaseHandler implements
-    UseCaseHandler<AdminImportProductInput, Void> {
+public class AdminImportProductUseCaseHandler {
 
   private final ProductRepository productRepository;
   private final ApplicationConfigPort applicationConfigPort;
@@ -35,7 +37,6 @@ public class AdminImportProductUseCaseHandler implements
   private final ProductMessagePublisherPort productMessagePublisherPort;
   private final TransactionPort transactionPort;
 
-  @Override
   public Void handle(AdminImportProductInput input) throws Exception {
     // Read rows from file content
     List<ProductRow> rows;

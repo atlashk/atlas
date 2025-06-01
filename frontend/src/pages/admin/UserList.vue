@@ -1,8 +1,8 @@
 <template>
-  <div class="container-fluid px-4 py-4">
+  <div class="container-fluid px-5 py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h2 class="h2 mb-1">User Management</h2>
+        <h3 class="mb-1">User Management</h3>
         <p class="text-muted mb-0">Manage your user accounts</p>
       </div>
     </div>
@@ -16,31 +16,31 @@
         <form @submit.prevent="applyFilters(1)">
           <div class="row g-4">
             <div class="col-md-6">
-              <label for="userId" class="form-label fw-medium">User ID</label>
+              <label for="userId" class="form-label">User ID</label>
               <input
                 id="userId"
                 v-model.trim="filters.id"
                 type="text"
-                class="form-control form-control-lg"
+                class="form-control"
                 placeholder="Enter user ID"
               />
             </div>
             <div class="col-md-6">
-              <label for="keyword" class="form-label fw-medium">Search</label>
+              <label for="keyword" class="form-label">Search</label>
               <input
                 id="keyword"
                 v-model.trim="filters.keyword"
                 type="text"
-                class="form-control form-control-lg"
+                class="form-control"
                 placeholder="Search by username, name, or email"
               />
             </div>
             <div class="col-md-6">
-              <label for="role" class="form-label fw-medium">Role</label>
+              <label for="role" class="form-label">Role</label>
               <select
                 id="role"
                 v-model="filters.role"
-                class="form-select form-select-lg"
+                class="form-select"
               >
                 <option value="">All Roles</option>
                 <option value="ADMIN">Admin</option>
@@ -49,11 +49,11 @@
             </div>
           </div>
           <div class="d-flex gap-2 mt-4 pt-3 border-top">
-            <button type="submit" class="btn btn-primary px-3">
-              <i class="bi bi-search me-2"></i> Search
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-search"></i> Search
             </button>
-            <button type="button" @click="resetFilters" class="btn btn-outline-secondary px-3">
-              <i class="bi bi-arrow-counterclockwise me-2"></i> Reset
+            <button type="button" @click="resetFilters" class="btn btn-outline-secondary">
+              <i class="bi bi-arrow-counterclockwise"></i> Reset
             </button>
           </div>
         </form>
@@ -91,7 +91,7 @@
                 <td class="px-4">{{ user.email }}</td>
                 <td class="px-4">{{ user.phoneNumber || 'N/A' }}</td>
                 <td class="px-4">
-                  <span :class="getRoleBadgeClasses(user.role)">
+                  <span :class="getRoleBadgeClasses(user.role as Role)">
                     {{ user.role }}
                   </span>
                 </td>
@@ -136,11 +136,12 @@
 </template>
 
 <script setup lang="ts">
+import type { Role } from '@/constants/app.constants';
 import type { ListUserFilters, User } from '@/interfaces/user.interface';
+import { userService } from '@/services';
+import { getRoleBadgeClasses } from '@/utils/formatter.util';
 import { onMounted, reactive, ref } from 'vue';
 import { toast } from 'vue3-toastify';
-import { listUser } from '../../services/user.admin.service';
-import { getRoleBadgeClasses } from '../../utils/user.util';
 
 const users = ref<User[]>([]);
 const isLoadingUsers = ref(true);
@@ -153,7 +154,7 @@ const metadata = reactive({
 const filters = reactive<ListUserFilters>({
   id: undefined,
   keyword: undefined,
-  role: undefined,
+  role: '',
   page: 1,
   size: 20,
 });
@@ -174,7 +175,7 @@ const applyFilters = async (page: number) => {
     });
 
     console.log('Fetching users with filters:', apiFilters);
-    const response = await listUser(apiFilters);
+    const response = await userService.listUser(apiFilters);
     
     if (response.success) {
       users.value = response.data || [];

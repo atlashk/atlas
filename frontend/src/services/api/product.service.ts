@@ -5,6 +5,7 @@ import type {
   CreateProductRequest,
   ListProductFilters,
   Product,
+  SearchProductFilters,
   UpdateProductRequest
 } from '@/interfaces/product.interface'
 import { BaseService } from './base.service'
@@ -24,7 +25,7 @@ export class ProductService extends BaseService {
   }
 
   // Front operations
-  async getProducts(filters: Partial<ListProductFilters> = {}): Promise<ApiResponse<Product[]>> {
+  async searchProduct(filters: Partial<SearchProductFilters> = {}): Promise<ApiResponse<Product[]>> {
     const queryParams = new URLSearchParams()
     if (filters.keyword) queryParams.append('keyword', filters.keyword)
     if (filters.minPrice) queryParams.append('min_price', filters.minPrice.toString())
@@ -34,15 +35,15 @@ export class ProductService extends BaseService {
     queryParams.append('page', (filters.page || 1).toString())
     queryParams.append('size', (filters.size || 20).toString())
 
-    return this.get<Product[]>(`/products?${queryParams.toString()}`)
+    return this.get<Product[]>(`/front/products?${queryParams.toString()}`)
   }
 
-  async getProductById(productId: number): Promise<ApiResponse<Product>> {
-    return this.get<Product>(`/products/${productId}`)
+  async getProduct(productId: number): Promise<ApiResponse<Product>> {
+    return this.get<Product>(`/front/products/${productId}`)
   }
 
   // Admin operations
-  async listProductsAdmin(filters: ListProductFilters): Promise<ApiResponse<Product[]>> {
+  async listProduct(filters: ListProductFilters): Promise<ApiResponse<Product[]>> {
     const queryParams = new URLSearchParams()
     if (filters.id) queryParams.append('id', filters.id.toString())
     if (filters.keyword) queryParams.append('keyword', filters.keyword)
@@ -59,7 +60,7 @@ export class ProductService extends BaseService {
     return this.get<Product[]>(`/admin/products?${queryParams.toString()}`)
   }
 
-  async getProductByIdAdmin(productId: number): Promise<ApiResponse<Product>> {
+  async getProductAdmin(productId: number): Promise<ApiResponse<Product>> {
     return this.get<Product>(`/admin/products/${productId}`)
   }
 

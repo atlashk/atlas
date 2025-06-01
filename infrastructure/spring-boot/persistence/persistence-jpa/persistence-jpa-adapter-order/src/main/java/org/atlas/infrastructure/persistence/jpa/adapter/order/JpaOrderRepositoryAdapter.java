@@ -9,6 +9,7 @@ import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
 import org.atlas.infrastructure.persistence.jpa.adapter.order.entity.JpaOrderEntity;
+import org.atlas.infrastructure.persistence.jpa.adapter.order.mapper.JpaOrderEntityMapper;
 import org.atlas.infrastructure.persistence.jpa.adapter.order.repository.JpaOrderRepository;
 import org.atlas.infrastructure.persistence.jpa.core.paging.PagingConverter;
 import org.springframework.data.domain.Pageable;
@@ -26,32 +27,25 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
     PagingResult<JpaOrderEntity> jpaOrderEntityPage = PagingConverter.convert(
         jpaOrderRepository.findByCriteria(criteria, pageable));
     return ObjectMapperUtil.getInstance()
-        .mapPage(jpaOrderEntityPage, OrderEntity.class);
+        .mapPage(jpaOrderEntityPage, JpaOrderEntityMapper::toOrderEntity);
   }
 
   @Override
   public Optional<OrderEntity> findById(Integer id) {
     return jpaOrderRepository.findByIdAndFetch(id)
-        .map(jpaOrderEntity ->
-            ObjectMapperUtil.getInstance()
-                .map(jpaOrderEntity, OrderEntity.class));
+        .map(JpaOrderEntityMapper::toOrderEntity);
   }
 
   @Override
   public void insert(OrderEntity orderEntity) {
-    JpaOrderEntity jpaOrder = ObjectMapperUtil.getInstance().map(orderEntity, JpaOrderEntity.class);
-
-    // To avoid null order_id
-    jpaOrder.getOrderItems().forEach(jpaOrderItem -> jpaOrderItem.setOrder(jpaOrder));
-
-    jpaOrderRepository.insert(jpaOrder);
-    orderEntity.setId(jpaOrder.getId());
+    JpaOrderEntity jpaOrderEntity = JpaOrderEntityMapper.toJpaOrderEntity(orderEntity);
+    jpaOrderRepository.insert(jpaOrderEntity);
+    orderEntity.setId(jpaOrderEntity.getId());
   }
 
   @Override
   public void update(OrderEntity orderEntity) {
-    JpaOrderEntity jpaOrder = ObjectMapperUtil.getInstance()
-        .map(orderEntity, JpaOrderEntity.class);
-    jpaOrderRepository.save(jpaOrder);
+    JpaOrderEntity jpaOrderEntity = JpaOrderEntityMapper.toJpaOrderEntity(orderEntity);
+    jpaOrderRepository.save(jpaOrderEntity);
   }
 }

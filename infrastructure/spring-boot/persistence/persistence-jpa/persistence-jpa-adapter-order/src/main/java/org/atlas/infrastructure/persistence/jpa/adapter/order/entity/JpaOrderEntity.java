@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -44,4 +45,12 @@ public class JpaOrderEntity extends JpaBaseEntity {
 
   @Column(name = "canceled_reason")
   private String canceledReason;
+
+  public void addOrderItem(JpaOrderItemEntity orderItem) {
+    orderItem.setOrder(this);
+    if (orderItems == null) {
+      orderItems = new ArrayList<>();
+    }
+    orderItems.add(orderItem);
+  }
 }

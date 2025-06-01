@@ -18,7 +18,7 @@ export class UserService extends BaseService {
   }
 
   // Admin operations
-  async listUsers(filters: ListUserFilters): Promise<ApiResponse<User[]>> {
+  async listUser(filters: ListUserFilters): Promise<ApiResponse<User[]>> {
     const queryParams = new URLSearchParams()
     if (filters.id) queryParams.append('id', filters.id)
     if (filters.keyword) queryParams.append('keyword', filters.keyword)

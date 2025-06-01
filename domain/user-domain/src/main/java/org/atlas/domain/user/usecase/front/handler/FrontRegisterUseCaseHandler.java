@@ -1,7 +1,5 @@
 package org.atlas.domain.user.usecase.front.handler;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.user.entity.UserEntity;
 import org.atlas.domain.user.port.messaging.UserMessagePublisherPort;
 import org.atlas.domain.user.repository.UserRepository;
@@ -12,20 +10,23 @@ import org.atlas.framework.auth.client.model.CreateUserRequest;
 import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.domain.event.contract.user.UserRegisteredEvent;
 import org.atlas.framework.domain.exception.DomainException;
+import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.error.AppError;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
-import org.atlas.framework.usecase.handler.UseCaseHandler;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@UseCaseHandler
 @RequiredArgsConstructor
 @Slf4j
-public class FrontRegisterUseCaseHandler implements UseCaseHandler<RegisterInput, Void> {
+public class FrontRegisterUseCaseHandler {
 
   private final UserRepository userRepository;
   private final AuthClientPort authClientPort;
   private final ApplicationConfigPort applicationConfigPort;
   private final UserMessagePublisherPort userMessagePublisherPort;
 
-  @Override
   public Void handle(RegisterInput input) throws Exception {
     checkValidity(input);
     UserEntity userEntity = createUser(input);

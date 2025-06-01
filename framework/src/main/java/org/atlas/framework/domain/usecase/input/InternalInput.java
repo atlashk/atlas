@@ -1,4 +1,4 @@
-package org.atlas.framework.usecase.input;
+package org.atlas.framework.domain.usecase.input;
 
 import lombok.Data;
 

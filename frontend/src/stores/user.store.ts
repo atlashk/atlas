@@ -1,7 +1,6 @@
 import type { ApiResponse } from '@/interfaces/api.interface'
 import type { LoginRequest } from '@/interfaces/auth.interface'
 import type { RegisterRequest, User } from '@/interfaces/user.interface'
-import { authService } from '@/services/api/auth.service'
 import { userService } from '@/services/api/user.service'
 import { defineStore } from 'pinia'
 
@@ -25,7 +24,7 @@ export const useUserStore = defineStore('user', {
   getters: {
     isAuthenticated: (state): boolean => !!state.accessToken,
     isAdmin: (state): boolean => state.profile?.role === 'ADMIN',
-    fullName: (state): string => 
+    fullName: (state): string =>
       state.profile ? `${state.profile.firstName} ${state.profile.lastName}` : '',
     hasRole: (state) => (role: string): boolean => state.profile?.role === role
   },
@@ -34,15 +33,17 @@ export const useUserStore = defineStore('user', {
     async login(credentials: LoginRequest): Promise<ApiResponse<any>> {
       this.loading = true
       this.error = null
-      
+
       try {
+        // Import authService dynamically to avoid circular dependency
+        const { authService } = await import('@/services/api/auth.service')
         const response = await authService.login(credentials)
-        
+
         if (response.success && response.data) {
           this.setTokens(response.data.accessToken, response.data.refreshToken)
           await this.fetchProfile()
         }
-        
+
         return response
       } catch (error) {
         this.error = 'Login failed'
@@ -55,7 +56,7 @@ export const useUserStore = defineStore('user', {
     async register(userData: RegisterRequest): Promise<ApiResponse<any>> {
       this.loading = true
       this.error = null
-      
+
       try {
         return await userService.register(userData)
       } catch (error) {
@@ -87,12 +88,22 @@ export const useUserStore = defineStore('user', {
     },
 
     logout(): void {
-      this.profile = null
-      this.accessToken = null
-      this.refreshToken = null
-      this.error = null
-      localStorage.removeItem('accessToken')
-      localStorage.removeItem('refreshToken')
+      // Import authService and call logout before clearing tokens
+      import('@/services/api/auth.service').then(({ authService }) => {
+        authService.logout()
+          .catch(error => {
+            console.error('Logout API error:', error)
+          })
+          .finally(() => {
+            // Clear user data after API call (whether successful or not)
+            this.profile = null
+            this.accessToken = null
+            this.refreshToken = null
+            this.error = null
+            localStorage.removeItem('accessToken')
+            localStorage.removeItem('refreshToken')
+          })
+      })
     },
 
     clearError(): void {

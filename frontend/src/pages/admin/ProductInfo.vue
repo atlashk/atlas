@@ -1,19 +1,19 @@
 <template>
-  <div class="container-fluid px-4 py-4">
+ <div class="container-fluid px-5 py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h2 class="h2 mb-1">Product Information</h2>
+        <h3 class="mb-1">Product Information</h3>
         <p class="text-muted mb-0">View product details</p>
       </div>
       <div class="d-flex gap-2">
-        <button class="btn btn-outline-primary px-3" @click="router.push({ name: 'adminProductEdit', params: { id: product?.id } })">
-          <i class="bi bi-pencil me-2"></i> Edit
+        <button class="btn btn-outline-primary" @click="router.push({ name: 'adminProductEdit', params: { id: product?.id } })">
+          <i class="bi bi-pencil"></i> Edit
         </button>
-        <button class="btn btn-outline-danger px-3" @click="handleDelete">
-          <i class="bi bi-trash me-2"></i> Delete
+        <button class="btn btn-outline-danger" @click="handleDelete">
+          <i class="bi bi-trash"></i> Delete
         </button>
-        <button class="btn btn-outline-secondary px-3" @click="router.back()">
-          <i class="bi bi-arrow-left me-2"></i> Back
+        <button class="btn btn-outline-secondary" @click="router.back()">
+          <i class="bi bi-arrow-left"></i> Back
         </button>
       </div>
     </div>
@@ -96,7 +96,7 @@
 </template>
 
 <script setup lang="ts">
-import { deleteProduct, getProduct } from '@/services/product.admin.service';
+import { productService } from '@/services';
 import { useFlashStore } from '@/stores/flash.store';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -114,10 +114,10 @@ const handleDelete = async () => {
   if (!product.value) return;
 
   if (confirm('Are you sure you want to delete this product?')) {
-    const response = await deleteProduct(product.value.id);
+    const response = await productService.deleteProduct(product.value.id);
     if (response.success) {
       flashStore.setSuccess('Deleted product successfully!');
-      router.push({ name: 'productList' });
+      router.push({ name: 'adminProductList' });
     } else {
       toast.error(response.errorMessage || 'Failed to delete product');
     }
@@ -127,12 +127,12 @@ const handleDelete = async () => {
 onMounted(async () => {
   try {
     const productId = route.params.id as string;
-    const response = await getProduct(parseInt(productId));
+    const response = await productService.getProductAdmin(parseInt(productId));
     if (response.success) {
       product.value = response.data;
     } else {
       flashStore.setError(response.errorMessage || 'Failed to load product');
-      router.push({ name: 'productList' });
+      router.push({ name: 'adminProductList' });
     }
   } finally {
     isLoadingProduct.value = false;

@@ -4,7 +4,7 @@ import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.domain.event.contract.order.OrderCanceledEvent;
-import org.atlas.framework.domain.event.handler.EventHandler;
+import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.notification.realtime.enums.RealtimeNotificationType;
 import org.atlas.framework.notification.realtime.payload.OrderStatusChangedPayload;
 import org.atlas.framework.notification.realtime.sse.SseNotification;
@@ -13,14 +13,14 @@ import org.atlas.framework.notification.realtime.websocket.WebSocketNotification
 import org.atlas.framework.notification.realtime.websocket.WebSocketPort;
 import org.atlas.framework.util.UUIDGenerator;
 
+@DomainEventHandler
 @RequiredArgsConstructor
 @Slf4j
-public class OrderCanceledEventHandler implements EventHandler<OrderCanceledEvent> {
+public class OrderCanceledEventHandler {
 
   private final SsePort<Integer> ssePort;
   private final WebSocketPort webSocketPort;
 
-  @Override
   public void handle(OrderCanceledEvent event) {
     CompletableFuture.allOf(
         CompletableFuture.runAsync(() -> notifySse(event))

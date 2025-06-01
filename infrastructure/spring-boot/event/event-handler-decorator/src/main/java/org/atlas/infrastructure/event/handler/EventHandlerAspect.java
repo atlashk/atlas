@@ -20,7 +20,7 @@ public class EventHandlerAspect {
   private final List<EventHandlerInterceptor> interceptors;
   private final TransactionPort transactionPort;
 
-  @Around("execution(* org.atlas.framework.domain.event.handler.EventHandler.handle(..))")
+  @Around("@within(org.atlas.framework.domain.event.handler.EventHandler) && execution(* handle(..))")
   public Object aroundHandle(ProceedingJoinPoint joinPoint) throws Throwable {
     // Retrieve input safely
     Object[] args = joinPoint.getArgs();

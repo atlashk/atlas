@@ -169,18 +169,35 @@ const connectSSE = (orderId: string): void => {
 const connectWebSocket = (orderId: string): void => {
   if (stompClient) stompClient.disconnect();
 
-  const socket = new SockJS(`${NOTIFICATION_BASE_URL}/notification/ws`);
-  stompClient = Stomp.over(socket);
-
-  stompClient.onStompError = (frame: any): void => {
-    console.error('WebSocket connection error:', frame);
+  // Create a WebSocket factory function for reconnection support
+  const socketFactory = () => {
+    return new SockJS(`${NOTIFICATION_BASE_URL}/notification/ws`);
   };
 
+  // Use the factory instead of passing the socket directly
+  stompClient = Stomp.over(socketFactory);
+  
+  // Continue with the rest of your code
+  stompClient.debug = (msg: string) => {
+    console.log('STOMP Debug:', msg);
+  };
+
+  // Set reconnect delay (optional)
+  stompClient.reconnectDelay = 30000;
+
   stompClient.connect({}, () => {
+    console.log('WebSocket connection established');
     stompClient.subscribe(`/topic/orders/${orderId}/status`, (message: { body: string }) => {
-      const { orderStatus, canceledReason } = JSON.parse(message.body);
-      updateOrderStatus('ws', orderStatus, canceledReason || null);
+      console.log('WebSocket received message:', message.body);
+      try {
+        const { orderStatus, canceledReason } = JSON.parse(message.body);
+        updateOrderStatus('ws', orderStatus, canceledReason || null);
+      } catch (error: any) {
+        console.error('WebSocket error parsing message:', error.message);
+      }
     });
+  }, (error: Error | string) => {
+    console.error('WebSocket connection failed:', error);
   });
 };
 

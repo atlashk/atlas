@@ -23,6 +23,14 @@ public interface ObjectMapperService {
     List<D> mappedData = mapList(source.getData(), destinationType);
     return PagingResult.of(mappedData, source.getPagination());
   }
+  
+  default <S, D> PagingResult<D> mapPage(PagingResult<S> source, Function<S, D> mapper) {
+    if (source.checkEmpty()) {
+      return PagingResult.empty();
+    }
+    List<D> mappedData = mapList(source.getData(), mapper);
+    return PagingResult.of(mappedData, source.getPagination());
+  }
 
   void merge(Object source, Object destination);
 }

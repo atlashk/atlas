@@ -16,17 +16,20 @@ import org.atlas.domain.order.usecase.front.model.FrontPlaceOrderInput;
 import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.context.Contexts;
 import org.atlas.framework.domain.event.contract.order.OrderCreatedEvent;
+import org.atlas.framework.domain.event.contract.order.model.OrderItem;
+import org.atlas.framework.domain.event.contract.order.model.Product;
+import org.atlas.framework.domain.event.contract.order.model.User;
 import org.atlas.framework.domain.exception.DomainException;
+import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.error.AppError;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.framework.sequencegenerator.enums.SequenceType;
-import org.atlas.framework.usecase.handler.UseCaseHandler;
 
+@UseCaseHandler
 @RequiredArgsConstructor
 @Slf4j
-public class FrontPlaceOrderUseCaseHandler implements
-    UseCaseHandler<FrontPlaceOrderInput, Integer> {
+public class FrontPlaceOrderUseCaseHandler {
 
   private final OrderRepository orderRepository;
   private final OrderAggregator orderAggregator;
@@ -34,7 +37,6 @@ public class FrontPlaceOrderUseCaseHandler implements
   private final OrderMessagePublisherPort orderMessagePublisherPort;
   private final SequenceGenerator sequenceGenerator;
 
-  @Override
   public Integer handle(FrontPlaceOrderInput input) {
     try {
       OrderEntity orderEntity = newOrder(input);
@@ -90,7 +92,33 @@ public class FrontPlaceOrderUseCaseHandler implements
 
   private void publishEvent(OrderEntity orderEntity) {
     OrderCreatedEvent event = new OrderCreatedEvent(applicationConfigPort.getApplicationName());
-    ObjectMapperUtil.getInstance().merge(orderEntity, event);
+
+    // Map basic fields
+    event.setOrderId(orderEntity.getId());
+    event.setAmount(orderEntity.getAmount());
+    event.setCreatedAt(orderEntity.getCreatedAt());
+
+    // Map user
+    if (orderEntity.getUser() != null) {
+      event.setUser(ObjectMapperUtil.getInstance().map(orderEntity.getUser(), User.class));
+    }
+
+    // Map order items
+    if (orderEntity.getOrderItems() != null) {
+      for (OrderItemEntity orderItemEntity : orderEntity.getOrderItems()) {
+        OrderItem orderItem = new OrderItem();
+        orderItem.setQuantity(orderItemEntity.getQuantity());
+
+        // Map product
+        if (orderItemEntity.getProduct() != null) {
+          orderItem.setProduct(
+              ObjectMapperUtil.getInstance().map(orderItemEntity.getProduct(), Product.class));
+        }
+
+        event.addOrderItem(orderItem);
+      }
+    }
+
     orderMessagePublisherPort.publish(event);
   }
 }

@@ -18,6 +18,7 @@ import org.atlas.framework.api.server.rest.response.ApiResponseWrapper;
 import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
+import org.atlas.framework.paging.PagingRequest.SortOrder;
 import org.atlas.framework.paging.PagingResult;
 import org.atlas.infrastructure.api.server.rest.adapter.order.front.model.FrontOrderStatusResponse;
 import org.atlas.infrastructure.api.server.rest.adapter.order.front.model.FrontPlaceOrderRequest;
@@ -61,7 +62,7 @@ public class FrontOrderController {
     FrontListOrderInput input = FrontListOrderInput.builder()
         .startDate(startDate)
         .endDate(endDate)
-        .pagingRequest(PagingRequest.of(page - 1, size))
+        .pagingRequest(PagingRequest.of(page - 1, size, "createdAt", SortOrder.DESC))
         .build();
 
     PagingResult<OrderEntity> orderEntityPage = frontListOrderUseCaseHandler.handle(input);

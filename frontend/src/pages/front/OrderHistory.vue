@@ -50,9 +50,7 @@
     </div>
 
     <!-- No Orders -->
-    <div v-else-if="!orders.length" class="alert alert-info">
-      No orders found.
-    </div>
+    <p v-else-if="!orders.length" class="text-center text-muted mt-3">No orders found.</p>
 
     <!-- Orders List -->
     <ul v-else class="list-group mb-4">
@@ -118,8 +116,8 @@
 </template>
 
 <script setup lang="ts">
-import { listOrder } from '@/services/order.front.service';
 import { OrderStatus, type ListOrderFilters, type Order } from '@/interfaces/order.interface';
+import { orderService } from '@/services';
 import { formatCurrency, formatDate, formatOrderStatusLabel, getOrderStatusBadgeClasses } from '@/utils/formatter.util';
 import { computed, onMounted, reactive, ref } from 'vue';
 import { toast } from 'vue3-toastify';
@@ -162,7 +160,7 @@ const applyFilters = async (page: number) => {
       }
     });
 
-    const response = await listOrder(apiFilters);
+    const response = await orderService.listOrder(apiFilters);
     orders.value = response.data;
     Object.assign(metadata, response.metadata);
   } catch (error) {

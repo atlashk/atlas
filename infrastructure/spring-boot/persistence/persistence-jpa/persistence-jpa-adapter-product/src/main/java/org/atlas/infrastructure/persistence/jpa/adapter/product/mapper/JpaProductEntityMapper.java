@@ -17,7 +17,7 @@ import org.atlas.infrastructure.persistence.jpa.adapter.product.entity.JpaProduc
 import org.atlas.infrastructure.persistence.jpa.adapter.product.entity.JpaProductEntity;
 
 @UtilityClass
-public class ProductEntityMapper {
+public class JpaProductEntityMapper {
 
   public static JpaProductEntity toJpaProductEntity(ProductEntity productEntity) {
     // Product

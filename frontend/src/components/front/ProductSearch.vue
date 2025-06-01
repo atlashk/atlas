@@ -1,7 +1,7 @@
 <template>
   <div class="search-product p-4 border bg-light shadow-sm rounded mb-3">
     <h5 class="mb-4 text-center">Store Products</h5>
-    
+
     <!-- Filters Form -->
     <form @submit.prevent="applyFilters(1)" class="bg-white p-4 rounded-3 mb-4 border">
       <div class="row g-3">
@@ -101,10 +101,10 @@
         <!-- Submit Button -->
         <div class="col-md-12 mt-3">
           <button type="submit" class="btn btn-primary">
-            <i class="bi bi-search me-1"></i> Search
+            <i class="bi bi-search"></i> Search
           </button>
           <button type="button" @click="resetFilters" class="btn btn-outline-secondary ms-2">
-            <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+            <i class="bi bi-arrow-counterclockwise"></i> Reset
           </button>
         </div>
       </div>
@@ -116,7 +116,7 @@
         <span class="visually-hidden">Loading...</span>
       </div>
     </div>
-    <div v-else-if="products.length" class="mt-4 row g-3">
+    <div v-else-if="products && products.length" class="mt-4 row g-3">
       <div v-for="product in products" :key="product.id" class="col-md-4">
         <div class="card h-100 shadow-sm">
           <img
@@ -165,15 +165,13 @@
 </template>
 
 <script setup lang="ts">
+import type { Brand, Category, Product, SearchProductFilters } from '@/interfaces/product.interface';
+import { productService } from '@/services';
+import { useCartStore } from '@/stores/cart.store';
+import { formatCurrency } from '@/utils/formatter.util';
+import { getProductImageUrl } from '@/utils/productImage.util';
 import { onMounted, reactive, ref } from 'vue';
 import { toast } from 'vue3-toastify';
-import { useCartStore } from '@/stores/cart.store';
-import { listBrand, listCategory } from '../../services/product.common.service';
-import { searchProduct } from '../../services/product.front.service';
-import { getProduct } from '../../services/product.front.service'; // Import getProduct
-import type { Brand, Category, Product, SearchProductFilters } from '../../interfaces/product.interface';
-import { getProductImageUrl } from '../../utils/productImage.util';
-import { formatCurrency } from '@/utils/formatter.util';
 import ProductDetailsModal from './ProductDetailsModal.vue';
 
 const cartStore = useCartStore();
@@ -208,7 +206,7 @@ const filters = reactive<SearchProductFilters>({
 const loadBrands = async () => {
   isLoadingBrands.value = true;
   try {
-    const { data } = await listBrand();
+    const { data } = await productService.listBrand();
     brands.value = data;
   } catch {
     toast.error('Failed to load brands');
@@ -220,7 +218,7 @@ const loadBrands = async () => {
 const loadCategories = async () => {
   isLoadingCategories.value = true;
   try {
-    const { data } = await listCategory();
+    const { data } = await productService.listCategory();
     categories.value = data;
   } catch {
     toast.error('Failed to load categories');
@@ -236,7 +234,7 @@ const applyFilters = async (page: number) => {
   try {
     filters.page = page;
     metadata.currentPage = page;
-    const response = await searchProduct(filters);
+    const response = await productService.searchProduct(filters);
     products.value = response.data;
     Object.assign(metadata, {
       currentPage: response.metadata?.currentPage ?? 1,
@@ -273,7 +271,7 @@ const resetFilters = () => {
 const showProductDetails = async (product: Product) => {
   isLoadingProduct.value = true; // Set loading state
   try {
-    const response = await getProduct(product.id); // Fetch product details
+    const response = await productService.getProduct(product.id); // Fetch product details
     selectedProduct.value = response.data; // Set fetched product
     showModal.value = true; // Open modal
   } catch (error) {

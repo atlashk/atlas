@@ -7,7 +7,7 @@ if (!infraStackName.matches('[a-zA-Z0-9-_]+')) {
 
 // Define the loadInfraStack closure for loading infra stack configuration
 def loadInfraStack = { String stackName = infraStackName ->
-    def configFile = new File("gradle/infra-stack/config/${stackName}.cfg")
+    def configFile = new File(rootDir, "gradle/infra-stack/config/${stackName}.cfg")
     if (!configFile.exists()) {
         throw new GradleException("Config file not found for stack: ${configFile.absolutePath}")
     }

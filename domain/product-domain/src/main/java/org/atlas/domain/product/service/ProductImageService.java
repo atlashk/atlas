@@ -1,8 +1,7 @@
 package org.atlas.domain.product.service;
 
 import java.io.IOException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.lang3.StringUtils;
 import org.atlas.framework.config.Application;
 import org.atlas.framework.config.ApplicationConfigPort;
@@ -14,9 +13,13 @@ import org.atlas.framework.storage.model.UploadFileRequest;
 import org.atlas.framework.util.ImageUtil;
 import org.atlas.framework.util.StringUtil;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@DomainService
 @RequiredArgsConstructor
 @Slf4j
-public class ProductImageService implements DomainService {
+public class ProductImageService {
 
   private final ApplicationConfigPort applicationConfigPort;
   private final StoragePort storagePort;

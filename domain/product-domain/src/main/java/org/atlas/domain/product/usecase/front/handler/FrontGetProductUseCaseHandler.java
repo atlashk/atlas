@@ -2,7 +2,7 @@ package org.atlas.domain.product.usecase.front.handler;
 
 import java.time.Duration;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
+
 import org.atlas.domain.product.entity.ProductEntity;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.service.ProductImageService;
@@ -10,18 +10,20 @@ import org.atlas.framework.cache.CachePort;
 import org.atlas.framework.config.Application;
 import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.domain.exception.DomainException;
+import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.error.AppError;
-import org.atlas.framework.usecase.handler.UseCaseHandler;
 
+import lombok.RequiredArgsConstructor;
+
+@UseCaseHandler
 @RequiredArgsConstructor
-public class FrontGetProductUseCaseHandler implements UseCaseHandler<Integer, ProductEntity> {
+public class FrontGetProductUseCaseHandler {
 
   private final ProductRepository productRepository;
   private final ProductImageService productImageService;
   private final ApplicationConfigPort applicationConfigPort;
   private final CachePort cachePort;
 
-  @Override
   public ProductEntity handle(Integer productId) throws Exception {
     String cacheName = Optional.ofNullable(
             applicationConfigPort.getConfig(Application.PRODUCT_SERVICE, "product-cache-name"))

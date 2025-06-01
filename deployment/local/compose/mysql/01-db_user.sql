@@ -208,5 +208,5 @@ CREATE INDEX IDX_QRTZ_FT_TG ON QRTZ_FIRED_TRIGGERS (SCHED_NAME, TRIGGER_GROUP);
 
 -- Password: Aa@123456
 INSERT INTO users (id, username, first_name, last_name, email, phone_number, role)
-VALUES (1, 'admin', 'John', 'Doe', 'admin@atlas.org', '0987654321', 'ADMIN'),
-       (2, 'user', 'John', 'Smith', 'user@atlas.org', '0987321654', 'USER');
+VALUES (1, 'admin', 'Atlas', 'Admin', 'admin@atlas.org', '0987654321', 'ADMIN'),
+       (2, 'user', 'John', 'Doe', 'user@atlas.org', '0987321654', 'USER');
