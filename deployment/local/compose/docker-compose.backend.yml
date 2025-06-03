@@ -4,7 +4,7 @@ services:
     container_name: discovery-server
     image: discovery-server:latest
     build:
-      context: ../../../edge/discovery-server/discovery-server
+      context: ../../../edge/discovery-server/discovery-server-eureka
     ports:
       - "8761:8761"
     mem_limit: 500m
