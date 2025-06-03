@@ -98,7 +98,7 @@ services:
     container_name: notification-service
     image: notification-service:latest
     build:
-      context: ../../../application/spring-boot/notification-service
+      context: ../../../application/spring-boot/notification-application
     ports:
       - "8084:8084"
     environment:
