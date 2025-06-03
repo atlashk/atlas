@@ -21,6 +21,6 @@ spring:
   datasource:
     quartz:
       driver-class-name: com.mysql.cj.jdbc.Driver
-      url: ${MYSQL_URL:jdbc:mysql://localhost:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false}
-      username: ${MYSQL_USERNAME:root}
-      password: ${MYSQL_PASSWORD:root}
+      url: ${QUARTZ_DB_URL:jdbc:mysql://localhost:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false}
+      username: ${QUARTZ_DB_USERNAME:root}
+      password: ${QUARTZ_DB_PASSWORD:root}
