@@ -111,7 +111,7 @@ done
 
 case "$CATEGORY" in
     backend)
-        COMPOSE_FILES=("-f" "$BACKEND_COMPOSE_FILE" "-f" "$INFRA_COMPOSE_FILE")
+        COMPOSE_FILES=("-f" "$BACKEND_COMPOSE_FILE")
         SERVICES=("${BACKEND_SERVICES[@]}")
         VOLUMES_TO_REMOVE=(discovery-server-log user-service-log product-service-log order-service-log notification-service-log auth-server-log api-gateway-log)
         ;;
@@ -121,7 +121,7 @@ case "$CATEGORY" in
         VOLUMES_TO_REMOVE=(mysql-data redis-data zookeeper-data zookeeper-log kafka-data rabbitmq-data keycloak-data smtp4dev-data)
         ;;
     observability)
-        COMPOSE_FILES=("-f" "$OBSERVABILITY_COMPOSE_FILE" "-f" "$INFRA_COMPOSE_FILE")
+        COMPOSE_FILES=("-f" "$OBSERVABILITY_COMPOSE_FILE")
         SERVICES=("${OBSERVABILITY_SERVICES[@]}")
         VOLUMES_TO_REMOVE=(grafana-data)
         ;;
