@@ -18,6 +18,7 @@ public class QuartzDataSourceConfig {
     return properties.initializeDataSourceBuilder().build();
   }
 
+  @Bean("quartzDataSourceProperties")
   @ConfigurationProperties("spring.datasource.quartz")
   public DataSourceProperties quartzDataSourceProperties() {
     return new DataSourceProperties();
