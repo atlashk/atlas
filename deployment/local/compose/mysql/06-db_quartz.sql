@@ -1,5 +1,9 @@
 -- https://github.com/quartznet/quartznet/blob/main/database/tables/tables_mysql_innodb.sql
 
+CREATE DATABASE IF NOT EXISTS db_quartz;
+
+USE db_quartz;
+
 CREATE TABLE QRTZ_JOB_DETAILS
 (
     SCHED_NAME        VARCHAR(120) NOT NULL,
