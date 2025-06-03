@@ -1,8 +1,8 @@
-package org.atlas.infrastructure.schedule.quartz.core.listener;
+package org.atlas.infrastructure.scheduler.quartz.core.listener;
 
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.util.DateUtil;
-import org.atlas.infrastructure.schedule.quartz.core.QuartzUtil;
+import org.atlas.infrastructure.scheduler.quartz.core.QuartzUtil;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobListener;

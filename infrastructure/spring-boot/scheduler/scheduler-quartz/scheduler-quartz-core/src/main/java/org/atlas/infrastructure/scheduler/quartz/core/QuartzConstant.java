@@ -1,4 +1,4 @@
-package org.atlas.infrastructure.schedule.quartz.core;
+package org.atlas.infrastructure.scheduler.quartz.core;
 
 import lombok.experimental.UtilityClass;
 

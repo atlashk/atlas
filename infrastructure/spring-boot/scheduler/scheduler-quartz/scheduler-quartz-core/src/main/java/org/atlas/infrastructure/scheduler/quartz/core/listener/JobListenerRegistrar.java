@@ -1,4 +1,4 @@
-package org.atlas.infrastructure.schedule.quartz.core.listener;
+package org.atlas.infrastructure.scheduler.quartz.core.listener;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;

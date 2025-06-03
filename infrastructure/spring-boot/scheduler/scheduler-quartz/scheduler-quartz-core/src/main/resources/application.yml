@@ -18,3 +18,9 @@ spring:
           threadPool:
             class: org.quartz.simpl.SimpleThreadPool
             threadCount: 10
+  datasource:
+    quartz:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: ${MYSQL_URL:jdbc:mysql://localhost:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false}
+      username: ${MYSQL_USERNAME:root}
+      password: ${MYSQL_PASSWORD:root}

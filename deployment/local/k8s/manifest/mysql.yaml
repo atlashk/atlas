@@ -12,25 +12,25 @@ kind: ConfigMap
 metadata:
   name: mysql-init
 data:
-  01_db_user.sql: |
+  01-db_user.sql: |
     CREATE DATABASE IF NOT EXISTS db_user;
 
     USE db_user;
 
     CREATE TABLE IF NOT EXISTS users
     (
-        id           INT            NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        username     VARCHAR(255)   NOT NULL,
-        password     VARCHAR(255)   NOT NULL,
-        role         VARCHAR(50)    NOT NULL,
-        first_name   VARCHAR(255)   NOT NULL,
-        last_name    VARCHAR(255)   NOT NULL,
-        email        VARCHAR(255)   NOT NULL,
-        phone_number VARCHAR(20)    NOT NULL,
-        created_at   DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_at   DATETIME                DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        id           INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        username     VARCHAR(255) NOT NULL,
+        first_name   VARCHAR(255) NOT NULL,
+        last_name    VARCHAR(255) NOT NULL,
+        email        VARCHAR(255) NOT NULL,
+        phone_number VARCHAR(20)  NOT NULL,
+        role         VARCHAR(50)  NOT NULL,
+        created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at   DATETIME              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         UNIQUE INDEX idx_username (username),
-        UNIQUE INDEX idx_email (email)
+        UNIQUE INDEX idx_email (email),
+        UNIQUE INDEX idx_phone_number (phone_number)
     ) ENGINE = InnoDB;
 
     -- Password: Aa@123456
@@ -62,7 +62,29 @@ data:
         updated_at   DATETIME               DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE = InnoDB;
 
-  02_db_product.sql: |
+  02-db_auth.sql: |
+    CREATE DATABASE IF NOT EXISTS db_auth;
+
+    USE db_auth;
+
+    CREATE TABLE IF NOT EXISTS users
+    (
+        id      INT          NOT NULL PRIMARY KEY,
+        username     VARCHAR(255) NOT NULL,
+        password     VARCHAR(255) NOT NULL,
+        email        VARCHAR(255) NOT NULL,
+        phone_number VARCHAR(20)  NOT NULL,
+        role         VARCHAR(50)  NOT NULL,
+        created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at   DATETIME              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE INDEX idx_username (username),
+        UNIQUE INDEX idx_email (email),
+        UNIQUE INDEX idx_phone_number (phone_number)
+    ) ENGINE = InnoDB;
+
+    -- Rest of 02-db_auth.sql content...
+
+  03-db_product.sql: |
     CREATE DATABASE IF NOT EXISTS db_product;
 
     USE db_product;
@@ -115,7 +137,7 @@ data:
         updated_at   DATETIME               DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE = InnoDB;
 
-  03_db_order.sql: |
+  04-db_order.sql: |
     CREATE DATABASE IF NOT EXISTS db_order;
 
     USE db_order;
@@ -156,7 +178,7 @@ data:
         updated_at   DATETIME               DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE = InnoDB;
 
-  04_db_notification.sql: |
+  05-db_notification.sql: |
     CREATE DATABASE IF NOT EXISTS db_notification;
 
     USE db_notification;
@@ -173,44 +195,7 @@ data:
         updated_at   DATETIME               DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE = InnoDB;
 
-  05_db_report.sql: |
-    CREATE DATABASE IF NOT EXISTS db_report;
-
-    USE db_report;
-
-    CREATE TABLE IF NOT EXISTS orders
-    (
-        id           INT            NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        user_id      INT            NOT NULL,
-        first_name   VARCHAR(255)   NOT NULL,
-        last_name    VARCHAR(255)   NOT NULL,
-        amount       DECIMAL(11, 2) NOT NULL,
-        created_at DATETIME         NOT NULL
-    ) ENGINE = InnoDB;
-
-    CREATE TABLE IF NOT EXISTS order_item
-    (
-        id            INT           NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        order_id      INT           NOT NULL,
-        product_id    INT           NOT NULL,
-        product_name  VARCHAR(255)  NOT NULL,
-        product_price DECIMAL(9, 2) NOT NULL,
-        quantity      INT           NOT NULL
-    ) ENGINE = InnoDB;
-
-    CREATE TABLE IF NOT EXISTS outbox_message
-    (
-        id           BIGINT        NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        payload      TEXT          NOT NULL,
-        status       VARCHAR(10)   NOT NULL,
-        processed_at DATETIME,
-        error        TEXT,
-        retries      TINYINT                DEFAULT 0,
-        created_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_at   DATETIME               DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    ) ENGINE = InnoDB;
-
-  06_db_zipkin.sql: |
+  06-db_zipkin.sql: |
     CREATE DATABASE IF NOT EXISTS db_zipkin;
     
     USE db_zipkin;
@@ -471,13 +456,13 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: mysql  # Selector should match labels below
+      app: mysql
   serviceName: mysql
   replicas: 1
   template:
     metadata:
-      labels: # Add labels here to match the selector
-        app: mysql      # These labels must match with the selector.matchLabels
+      labels:
+        app: mysql
     spec:
       containers:
         - name: mysql

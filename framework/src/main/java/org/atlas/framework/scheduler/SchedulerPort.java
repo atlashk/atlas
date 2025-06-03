@@ -1,6 +1,6 @@
-package org.atlas.framework.schedule;
+package org.atlas.framework.scheduler;
 
-public interface SchedulePort {
+public interface SchedulerPort {
 
   /**
    * Schedule a task to run once after a specified delay.

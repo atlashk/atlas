@@ -1,4 +1,4 @@
-package org.atlas.infrastructure.schedule.spring.core;
+package org.atlas.infrastructure.scheduler.spring.core;
 
 import lombok.RequiredArgsConstructor;
 import net.javacrumbs.shedlock.core.LockProvider;

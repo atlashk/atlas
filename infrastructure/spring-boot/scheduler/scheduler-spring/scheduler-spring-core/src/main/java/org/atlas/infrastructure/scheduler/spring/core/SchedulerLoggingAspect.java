@@ -1,4 +1,4 @@
-package org.atlas.infrastructure.schedule.spring.core;
+package org.atlas.infrastructure.scheduler.spring.core;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

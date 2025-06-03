@@ -1,4 +1,4 @@
-package org.atlas.infrastructure.schedule.spring.core;
+package org.atlas.infrastructure.scheduler.spring.core;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.schedule.SchedulePort;
+import org.atlas.framework.scheduler.SchedulerPort;
 import org.atlas.framework.util.UUIDGenerator;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class SpringSchedulePortAdapter implements SchedulePort {
+public class SpringSchedulePortAdapter implements SchedulerPort {
 
   private final TaskScheduler taskScheduler;
   private final Map<String, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();

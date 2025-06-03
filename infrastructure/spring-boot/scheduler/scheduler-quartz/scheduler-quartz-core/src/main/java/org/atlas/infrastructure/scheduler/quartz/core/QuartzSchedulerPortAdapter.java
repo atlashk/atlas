@@ -1,9 +1,8 @@
-package org.atlas.infrastructure.schedule.quartz.core;
+package org.atlas.infrastructure.scheduler.quartz.core;
 
 import java.util.Date;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.schedule.SchedulePort;
+
+import org.atlas.framework.scheduler.SchedulerPort;
 import org.atlas.framework.util.UUIDGenerator;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
@@ -19,6 +18,9 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 
 /**
  * Quartz-based implementation of SchedulePort.
@@ -26,7 +28,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class QuartzSchedulePortAdapter implements SchedulePort, InitializingBean,
+public class QuartzSchedulerPortAdapter implements SchedulerPort, InitializingBean,
     DisposableBean {
 
   private final Scheduler scheduler;
