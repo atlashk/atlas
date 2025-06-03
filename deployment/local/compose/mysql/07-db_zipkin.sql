@@ -1,6 +1,6 @@
-CREATE DATABASE IF NOT EXISTS db_zipkin;
-
 -- https://github.com/openzipkin/zipkin/blob/master/zipkin-storage/mysql-v1/src/main/resources/mysql.sql
+
+CREATE DATABASE IF NOT EXISTS db_zipkin;
 
 USE db_zipkin;
 
