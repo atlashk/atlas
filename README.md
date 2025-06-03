@@ -79,3 +79,21 @@ The web application will then be accessible at http://localhost:9000.
 You can use the following two pre-created accounts to log in.
 - Front site: user / Aa@123456
 - Admin site: admin / Aa@123456
+
+### Stop and clear
+
+```bash
+cd deployment/local/compose
+
+# Just stop containers
+./stop.sh all
+
+# Stop containers and remove everything
+./stop.sh all --remove-all
+
+# Stop only backend services and remove custom images
+./stop.sh backend --remove-images
+
+# Stop infrastructure and remove volumes (careful - data loss!)
+./stop.sh infra --remove-volumes
+```
