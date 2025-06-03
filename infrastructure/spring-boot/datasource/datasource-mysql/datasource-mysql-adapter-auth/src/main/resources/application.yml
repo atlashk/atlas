@@ -4,27 +4,3 @@ spring:
     url: ${MYSQL_URL:jdbc:mysql://localhost:3306/db_auth?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false}
     username: ${MYSQL_USERNAME:root}
     password: ${MYSQL_PASSWORD:root}
-    hikari:
-      # The maximum number of connections in the pool (active + idle).
-      # Best Practice: Set this based on your database’s capacity and application concurrency needs.
-      # A common starting point is 10 to 20 for small to medium applications.
-      # For high-traffic apps, calculate it as:
-      # - (number of CPU cores * 2) + 1 (accounting for I/O wait time).
-      # - Check your database’s max connections limit (e.g., PostgreSQL defaults to 100) and ensure maximumPoolSize * number of app instances < DB max connections.
-      maximum-pool-size: 15
-      # The minimum number of idle connections maintained in the pool.
-      # Best Practice: For most applications, set this equal to maximumPoolSize to keep the pool fully prepared for load spikes (fixed-size pool).
-      # If you want to save resources under low load, set it lower (e.g., 5), but this may increase latency as new connections are opened.
-      minimum-idle: 10
-      # How long (in milliseconds) an idle connection stays in the pool before being closed (only applies when minimumIdle < maximumPoolSize).
-      # Best Practice: Set to 300000 (5 minutes) or higher to avoid frequent connection churn under variable load. Ensure it’s less than maxLifetime to allow connection refresh.
-      idle-timeout: 300000
-      # The maximum lifetime (in milliseconds) of a connection in the pool, after which it’s closed and replaced.
-      # Best Practice: Set to 1800000 (30 minutes) to refresh connections periodically and avoid issues with stale connections or database-side timeouts. Ensure it’s lower than any database or network timeout (e.g., AWS RDS defaults to 24 hours).
-      max-lifetime: 1800000
-      # The maximum time (in milliseconds) a client waits to get a connection from the pool.
-      # Best Practice: Set to 30000 (30 seconds) as a reasonable balance for user experience. Lower it (e.g., 10000) for low-latency apps or increase it (e.g., 60000) if your database is under heavy load or geographically distant.
-      connection-timeout: 30000
-      # Time (in milliseconds) to wait for pool initialization before failing. If set to 0, the app fails immediately if the database is unavailable.
-      # Best Practice: Set to 0 in production to fail fast if the database is down, allowing quicker recovery via retries or circuit breakers. Use a positive value (e.g., 60000) in dev environments for more tolerance.
-      initialization-fail-timeout: 0
