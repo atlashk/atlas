@@ -6,7 +6,7 @@ set -euo pipefail
 # Get the absolute path to the directory containing this script
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Get the project root (one level up from this script)
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 INFRA_STACK_NAME=${1:-local-compose-simple}
 GRADLEW="$PROJECT_ROOT/gradlew"
