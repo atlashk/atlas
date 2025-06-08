@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -63,9 +62,7 @@ public class ProductExcelReaderAdapter implements ProductExcelReaderPort {
     productRow.setAttributeName3(row.getCell(11).getStringCellValue());
     productRow.setAttributeValue3(row.getCell(12).getStringCellValue());
     productRow.setBrandId((int) row.getCell(13).getNumericCellValue());
-    productRow.setCategoryIds(Arrays.stream(row.getCell(14).getStringCellValue().split(","))
-        .map(Integer::parseInt)
-        .toList());
+    productRow.setCategoryIds(row.getCell(14).getStringCellValue());
     return productRow;
   }
 }

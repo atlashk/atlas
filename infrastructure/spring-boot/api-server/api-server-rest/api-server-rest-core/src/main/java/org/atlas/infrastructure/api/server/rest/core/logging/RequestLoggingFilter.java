@@ -33,9 +33,21 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
-    CachedHttpServletRequest cachedRequest = new CachedHttpServletRequest(request);
-    logRequest(cachedRequest, MAX_PAYLOAD_LENGTH);
-    filterChain.doFilter(cachedRequest, response);
+    
+    // Check if this is a multipart request
+    String contentType = request.getContentType();
+    boolean isMultipartRequest = contentType != null && contentType.toLowerCase().startsWith("multipart/");
+    
+    if (isMultipartRequest) {
+      // For multipart requests, log without caching the body to avoid interfering with Spring's multipart resolver
+      logRequestWithoutBody(request);
+      filterChain.doFilter(request, response);
+    } else {
+      // For non-multipart requests, use the existing caching mechanism
+      CachedHttpServletRequest cachedRequest = new CachedHttpServletRequest(request);
+      logRequest(cachedRequest, MAX_PAYLOAD_LENGTH);
+      filterChain.doFilter(cachedRequest, response);
+    }
   }
 
   @Override
@@ -53,6 +65,17 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
     log.info(
         "Incoming request:\nIP address: {}\nMethod = {}\nURL = {}\nHeaders = {}\nBody = {}\nParameters = {}",
         ipAddress, method, fullUrl, headers, body, parameters);
+  }
+
+  private void logRequestWithoutBody(HttpServletRequest request) {
+    String ipAddress = IpAddressUtil.getIpAddress(request);
+    String method = request.getMethod();
+    String fullUrl = getFullUrl(request);
+    Map<String, String> headers = getHeaders(request);
+    String parameters = getParameters(request);
+    log.info(
+        "Incoming request (multipart):\nIP address: {}\nMethod = {}\nURL = {}\nHeaders = {}\nBody = [MULTIPART DATA - NOT LOGGED]\nParameters = {}",
+        ipAddress, method, fullUrl, headers, parameters);
   }
 
   private String getFullUrl(HttpServletRequest request) {

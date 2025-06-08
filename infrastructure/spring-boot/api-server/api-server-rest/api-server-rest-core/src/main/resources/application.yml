@@ -6,3 +6,11 @@ springdoc:
     default-models-expand-depth: -1 # Hide Schemas section
   use-fqn: true # Fix for static nested class
 #  packages-to-scan: org.atlas.service.user.adapter.api.server.rest
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB         # Limit for each uploaded file
+      max-request-size: 20MB      # Allow multiple files, so set slightly higher
+      file-size-threshold: 2MB    # Write to disk if file exceeds this size
+      location: ${java.io.tmpdir} # Use system temp directory

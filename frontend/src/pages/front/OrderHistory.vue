@@ -7,20 +7,15 @@
       <div class="card-body">
         <form @submit.prevent="applyFilters(1)">
           <div class="row g-3">
-            <div class="col-md-3">
-              <label for="orderId" class="form-label">Order ID</label>
-              <input id="orderId" v-model.number="filters.orderId" type="number" class="form-control"
-                placeholder="Enter order ID" />
-            </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
               <label for="startDate" class="form-label">Start Date</label>
               <input id="startDate" v-model="filters.startDate" type="date" class="form-control" />
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
               <label for="endDate" class="form-label">End Date</label>
               <input id="endDate" v-model="filters.endDate" type="date" class="form-control" />
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
               <label for="status" class="form-label">Status</label>
               <select id="status" v-model="filters.status" class="form-select">
                 <option value="">All Statuses</option>
@@ -126,7 +121,6 @@ const orders = ref<Order[]>([]);
 const selectedOrderId = ref<number | null>(null);
 const isLoading = ref(false);
 const filters = reactive<ListOrderFilters>({
-  orderId: undefined,
   status: '',
   startDate: undefined,
   endDate: undefined,
@@ -178,7 +172,6 @@ const changePage = (newPage: number) => {
 
 const resetFilters = () => {
   Object.assign(filters, {
-    id: undefined,
     status: '',
     startDate: undefined,
     endDate: undefined,

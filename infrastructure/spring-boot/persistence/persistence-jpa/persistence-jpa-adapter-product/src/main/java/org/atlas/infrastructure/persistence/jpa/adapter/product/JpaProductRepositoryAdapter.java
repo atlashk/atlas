@@ -57,7 +57,7 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
   @Override
   public Optional<ProductEntity> findById(Integer id) {
     return jpaProductRepository.findByIdWithAssociations(id)
-        .map(JpaProductEntityMapper::toFullProductEntity);
+        .map(JpaProductEntityMapper::toProductEntity);
   }
 
   @Override
@@ -112,7 +112,7 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
   @Override
   public void insertBatch(List<ProductEntity> productEntities) {
     List<JpaProductEntity> jpaProductEntities = ObjectMapperUtil.getInstance()
-        .mapList(productEntities, JpaProductEntity.class);
+        .mapList(productEntities, JpaProductEntityMapper::toJpaProductEntity);
     jpaProductRepository.saveAll(jpaProductEntities);
   }
 

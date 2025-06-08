@@ -2,7 +2,6 @@ package org.atlas.domain.product.port.file.model.read;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 import lombok.Data;
 import org.atlas.domain.product.shared.enums.ProductStatus;
 
@@ -23,5 +22,5 @@ public class ProductRow {
   private String attributeName3;
   private String attributeValue3;
   private Integer brandId;
-  private List<Integer> categoryIds;
+  private String categoryIds; // Split by |
 }

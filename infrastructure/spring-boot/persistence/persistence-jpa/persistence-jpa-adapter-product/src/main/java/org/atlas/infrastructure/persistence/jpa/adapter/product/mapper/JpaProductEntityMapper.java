@@ -157,12 +157,6 @@ public class JpaProductEntityMapper {
     productEntity.setStatus(jpaProductEntity.getStatus());
     productEntity.setAvailableFrom(jpaProductEntity.getAvailableFrom());
     productEntity.setIsActive(jpaProductEntity.getIsActive());
-    return productEntity;
-  }
-
-  public static ProductEntity toFullProductEntity(JpaProductEntity jpaProductEntity) {
-    // Product
-    ProductEntity productEntity = toProductEntity(jpaProductEntity);
 
     // Brand
     if (jpaProductEntity.getBrand() != null) {

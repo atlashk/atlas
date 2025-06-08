@@ -10,17 +10,19 @@ const DEVICE_ID_HEADER = 'X-Device-Id';
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000, // 30 seconds timeout
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  // Add withCredentials to handle CORS
-  withCredentials: true
+  withCredentials: true, // Add withCredentials to handle CORS
 });
 
 // Request interceptor
 apiClient.interceptors.request.use(
   (config) => {
     config.headers = config.headers || {};
+
+    // Conditionally set Content-Type header
+    // If data is FormData, let axios set the Content-Type with the correct boundary
+    if (!(config.data instanceof FormData)) {
+      config.headers['Content-Type'] = 'application/json';
+    }
 
     // Add deviceId header
     const deviceId = getOrCreateDeviceId();

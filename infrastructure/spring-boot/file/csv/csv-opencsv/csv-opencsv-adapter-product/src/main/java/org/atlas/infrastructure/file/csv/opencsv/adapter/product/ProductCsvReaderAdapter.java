@@ -2,6 +2,7 @@ package org.atlas.infrastructure.file.csv.opencsv.adapter.product;
 
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvBindByPosition;
+import com.opencsv.bean.CsvDate;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -45,6 +46,7 @@ public class ProductCsvReaderAdapter implements ProductCsvReaderPort {
 
     @CsvBindByName(column = "Available From")
     @CsvBindByPosition(position = 4)
+    @CsvDate(value = "yyyy-MM-dd HH:mm:ss")
     private Date availableFrom;
 
     @CsvBindByName(column = "Active")
@@ -85,6 +87,6 @@ public class ProductCsvReaderAdapter implements ProductCsvReaderPort {
 
     @CsvBindByName(column = "Category IDs")
     @CsvBindByPosition(position = 14)
-    private List<Integer> categoryIds;
+    private String categoryIds;
   }
 }

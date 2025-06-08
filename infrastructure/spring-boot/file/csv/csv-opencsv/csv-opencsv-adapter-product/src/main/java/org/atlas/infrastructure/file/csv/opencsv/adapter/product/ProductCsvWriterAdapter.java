@@ -88,6 +88,6 @@ public class ProductCsvWriterAdapter implements ProductCsvWriterPort {
 
     @CsvBindByName(column = "Category IDs")
     @CsvBindByPosition(position = 15)
-    private List<Integer> categoryIds;
+    private String categoryIds;
   }
 }

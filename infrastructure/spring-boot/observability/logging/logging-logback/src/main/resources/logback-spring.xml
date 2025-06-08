@@ -85,18 +85,8 @@
         <appender-ref ref="FILE"/>
     </logger>
 
-    <!-- CORS -->
-    <logger name="org.springframework.web.filter.CorsFilter" level="DEBUG" additivity="false">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </logger>
-    <logger name="org.springframework.web.cors" level="DEBUG" additivity="false">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </logger>
-
-    <!-- Spring WebSocket -->
-    <logger name="org.springframework.web.socket" level="DEBUG" additivity="false">
+    <!-- Spring Web -->
+    <logger name="org.springframework.web" level="DEBUG" additivity="false">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
     </logger>

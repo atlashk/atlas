@@ -2,7 +2,6 @@ package org.atlas.infrastructure.file.excel.poi.adapter.product;
 
 import java.io.ByteArrayOutputStream;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
@@ -176,10 +175,7 @@ public class ProductExcelWriterAdapter implements ProductExcelWriterPort {
       cell.setCellStyle(style);
 
       cell = row.createCell(15);
-      cell.setCellValue(productRow.getCategoryIds()
-          .stream()
-          .map(String::valueOf)
-          .collect(Collectors.joining(",")));
+      cell.setCellValue(productRow.getCategoryIds());
       cell.setCellStyle(style);
 
       rowIndex++;

@@ -91,3 +91,26 @@ export interface UpdateProductRequest {
   attributes: ProductAttribute[];
   categoryIds: number[];
 }
+
+export enum FileType {
+  CSV = 'csv',
+  EXCEL = 'xlsx'
+}
+
+export interface ImportProductRequest {
+  file: File
+  fileType: FileType
+}
+
+export interface ExportProductFilters {
+  id?: number
+  keyword?: string
+  minPrice?: number | null
+  maxPrice?: number | null
+  status?: ProductStatus | ''
+  availableFrom?: string
+  isActive?: boolean | null
+  brandId?: string | null
+  categoryIds?: number[]
+  fileType: FileType
+}

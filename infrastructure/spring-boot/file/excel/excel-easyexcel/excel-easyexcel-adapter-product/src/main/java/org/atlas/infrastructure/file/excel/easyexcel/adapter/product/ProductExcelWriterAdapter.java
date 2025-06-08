@@ -71,6 +71,6 @@ public class ProductExcelWriterAdapter implements ProductExcelWriterPort {
     private Integer brandId;
 
     @ExcelProperty(value = "Category IDs")
-    private List<Integer> categoryIds;
+    private String categoryIds;
   }
 }

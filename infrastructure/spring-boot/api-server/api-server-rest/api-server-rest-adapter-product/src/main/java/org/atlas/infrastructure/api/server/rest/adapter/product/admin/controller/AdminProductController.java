@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -154,14 +155,14 @@ public class AdminProductController {
   }
 
   @Operation(summary = "Import products from a file.")
-  @PostMapping(value = "/import", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   public ApiResponseWrapper<Void> importProduct(
       @Parameter(description = "The file containing products to import.")
-      @RequestParam("file") MultipartFile file,
+      @RequestPart("file") MultipartFile file,
       @Parameter(description = "The type of the file (e.g., csv, xlsx).", example = "csv")
-      @RequestParam("fileType") FileType fileType) throws Exception {
+      @RequestPart("fileType") String fileType) throws Exception {
     byte[] fileContent = file.getBytes();
-    AdminImportProductInput input = new AdminImportProductInput(fileType, fileContent);
+    AdminImportProductInput input = new AdminImportProductInput(FileType.of(fileType), fileContent);
     adminImportProductUseCaseHandler.handle(input);
     return ApiResponseWrapper.success();
   }
@@ -190,7 +191,7 @@ public class AdminProductController {
       @Parameter(description = "The type of the file to export to (e.g., csv, xlsx).", example = "csv")
       @RequestParam(name = "file_type") FileType fileType
   ) throws Exception {
-    AdminListProductInput input = AdminListProductInput.builder()
+    AdminExportProductInput input = AdminExportProductInput.builder()
         .id(id)
         .keyword(keyword)
         .minPrice(minPrice)
@@ -200,9 +201,9 @@ public class AdminProductController {
         .isActive(isActive)
         .brandId(brandId)
         .categoryIds(categoryIds)
+        .fileType(fileType)
         .build();
-    ((AdminExportProductInput) input).setFileType(fileType);
-    byte[] fileContent = adminExportProductUseCaseHandler.handle((AdminExportProductInput) input);
+    byte[] fileContent = adminExportProductUseCaseHandler.handle(input);
 
     // Exported ile info
     HttpHeaders headers = new HttpHeaders();

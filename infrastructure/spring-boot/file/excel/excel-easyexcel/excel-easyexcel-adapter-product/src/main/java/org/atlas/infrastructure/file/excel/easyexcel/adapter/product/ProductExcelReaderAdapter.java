@@ -73,6 +73,6 @@ public class ProductExcelReaderAdapter implements ProductExcelReaderPort {
     private Integer brandId;
 
     @ExcelProperty(value = "Category IDs")
-    private List<Integer> categoryIds;
+    private String categoryIds;
   }
 }

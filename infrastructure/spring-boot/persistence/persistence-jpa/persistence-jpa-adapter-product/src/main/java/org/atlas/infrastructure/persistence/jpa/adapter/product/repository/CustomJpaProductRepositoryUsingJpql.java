@@ -25,12 +25,12 @@ public class CustomJpaProductRepositoryUsingJpql implements CustomJpaProductRepo
   public List<JpaProductEntity> findByCriteria(FindProductCriteria criteria,
       PagingRequest pagingRequest) {
     StringBuilder sqlBuilder = new StringBuilder("""
-        select distinct p
+        select p
         from JpaProductEntity p
-        left join p.details d
-        left join p.attributes a
-        left join p.brand b
-        left join p.categories c
+        left join fetch p.details d
+        left join fetch p.attributes a
+        left join fetch p.brand b
+        left join fetch p.categories c
         """);
 
     Map<String, Object> params = new HashMap<>();

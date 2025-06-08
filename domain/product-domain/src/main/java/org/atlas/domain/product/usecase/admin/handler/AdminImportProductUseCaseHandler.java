@@ -1,8 +1,11 @@
 package org.atlas.domain.product.usecase.admin.handler;
 
+import java.util.Arrays;
 import java.util.List;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.atlas.domain.product.entity.BrandEntity;
 import org.atlas.domain.product.entity.CategoryEntity;
 import org.atlas.domain.product.entity.ProductAttributeEntity;
@@ -20,10 +23,6 @@ import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.error.AppError;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
-import org.atlas.framework.transaction.TransactionPort;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @UseCaseHandler
 @RequiredArgsConstructor
@@ -35,7 +34,6 @@ public class AdminImportProductUseCaseHandler {
   private final ProductCsvReaderPort productCsvReaderPort;
   private final ProductExcelReaderPort productExcelReaderPort;
   private final ProductMessagePublisherPort productMessagePublisherPort;
-  private final TransactionPort transactionPort;
 
   public Void handle(AdminImportProductInput input) throws Exception {
     // Read rows from file content
@@ -52,19 +50,16 @@ public class AdminImportProductUseCaseHandler {
 
     // Sync into DB and publish events
     try {
-      transactionPort.execute(() -> {
-        List<ProductEntity> productEntities = rows.stream()
-            .map(this::newProductEntity)
-            .toList();
-        productRepository.insertBatch(productEntities);
-        productEntities.forEach(productEntity -> {
-          ProductCreatedEvent event = new ProductCreatedEvent(
-              applicationConfigPort.getApplicationName());
-          ObjectMapperUtil.getInstance()
-              .merge(productEntity, event);
-          event.setProductId(productEntity.getId());
-          productMessagePublisherPort.publish(event);
-        });
+      List<ProductEntity> productEntities = rows.stream()
+          .map(this::toProductEntity)
+          .toList();
+      productRepository.insertBatch(productEntities);
+      productEntities.forEach(productEntity -> {
+        ProductCreatedEvent event = new ProductCreatedEvent(
+            applicationConfigPort.getApplicationName());
+        ObjectMapperUtil.getInstance().merge(productEntity, event);
+        event.setProductId(productEntity.getId());
+        productMessagePublisherPort.publish(event);
       });
       log.info("Imported {} products", rows.size());
       return null;
@@ -73,7 +68,7 @@ public class AdminImportProductUseCaseHandler {
     }
   }
 
-  private ProductEntity newProductEntity(ProductRow row) {
+  private ProductEntity toProductEntity(ProductRow row) {
     // Product
     ProductEntity productEntity = ObjectMapperUtil.getInstance().map(row, ProductEntity.class);
 
@@ -104,11 +99,11 @@ public class AdminImportProductUseCaseHandler {
     productEntity.setBrand(brandEntity);
 
     // Categories
-    List<CategoryEntity> categoryEntities = row.getCategoryIds()
-        .stream()
-        .map(categoryId -> {
+    List<CategoryEntity> categoryEntities = Arrays.stream(row.getCategoryIds().split("\\|"))
+        .filter(StringUtils::isNotBlank)
+        .map(categoryIdStr -> {
           CategoryEntity categoryEntity = new CategoryEntity();
-          categoryEntity.setId(categoryId);
+          categoryEntity.setId(Integer.parseInt(categoryIdStr.trim()));
           return categoryEntity;
         })
         .toList();

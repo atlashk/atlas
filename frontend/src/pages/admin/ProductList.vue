@@ -5,9 +5,27 @@
         <h3 class="mb-1">Product Management</h3>
         <p class="text-muted mb-0">Manage your product catalog</p>
       </div>
-      <button class="btn btn-success" @click="router.push({ name: 'adminProductAdd' })">
-        <i class="bi bi-plus-lg"></i> Add New Product
-      </button>
+      <div class="d-flex gap-2">
+        <button 
+          class="btn btn-outline-primary" 
+          @click="handleImportClick"
+          :disabled="isImporting"
+        >
+          <i class="bi bi-upload me-1"></i>
+          <span v-if="isImporting">
+            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            Importing...
+          </span>
+          <span v-else>Import</span>
+        </button>
+        <ExportDropdown 
+          :is-exporting="isExporting"
+          @export="handleExport"
+        />
+        <button class="btn btn-success" @click="router.push({ name: 'adminProductAdd' })">
+          <i class="bi bi-plus-lg"></i> Add New Product
+        </button>
+      </div>
     </div>
 
     <!-- Filters Card -->
@@ -263,11 +281,14 @@
         </div>
       </div>
     </div>
+
+    <!-- Import Modal -->
+    <ImportProductModal @imported="handleImportSuccess" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ProductStatus, type Brand, type Category, type ListProductFilters, type Product } from '@/interfaces/product.interface';
+import { ProductStatus, FileType, type Brand, type Category, type ListProductFilters, type Product, type ExportProductFilters } from '@/interfaces/product.interface';
 import { productService } from '@/services';
 import { useFlashStore } from '@/stores/flash.store';
 import { formatCurrency, formatProductStatusLabel, getProductStatusBadgeClasses } from '@/utils/formatter.util';
@@ -275,6 +296,8 @@ import { getProductImageUrl } from '@/utils/productImage.util';
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue3-toastify';
+import ExportDropdown from '@/components/admin/ExportDropdown.vue';
+import ImportProductModal from '@/components/admin/ImportProductModal.vue';
 
 const router = useRouter();
 const flashStore = useFlashStore();
@@ -289,6 +312,8 @@ const products = ref<Product[]>([]);
 const isLoadingBrands = ref(false);
 const isLoadingCategories = ref(false);
 const isLoadingProducts = ref(false);
+const isExporting = ref(false);
+const isImporting = ref(false);
 const metadata = reactive({
   currentPage: 1,
   pageSize: 20,
@@ -355,7 +380,6 @@ const applyFilters = async (page: number) => {
     filters.page = page;
     metadata.currentPage = page;
     const response = await productService.listProduct(filters);
-    console.log('API response:', response);
     products.value = response.data;
     Object.assign(metadata, response.metadata);
   } catch (error) {
@@ -402,6 +426,62 @@ const handleDelete = async (productId: number) => {
   }
 };
 
+const handleExport = async (fileType: 'csv' | 'xlsx') => {
+  if (isExporting.value) return;
+
+  isExporting.value = true;
+  try {
+    console.log('Starting export with fileType:', fileType);
+    
+    const exportFilters: ExportProductFilters = {
+      id: filters.id,
+      keyword: filters.keyword,
+      minPrice: filters.minPrice,
+      maxPrice: filters.maxPrice,
+      status: filters.status,
+      availableFrom: filters.availableFrom,
+      isActive: filters.isActive,
+      brandId: filters.brandId,
+      categoryIds: filters.categoryIds,
+      fileType: fileType === 'csv' ? FileType.CSV : FileType.EXCEL
+    };
+
+    console.log('Export filters:', exportFilters);
+
+    await productService.exportProduct(exportFilters);
+    toast.success(`Products exported successfully as ${fileType.toUpperCase()}`);
+  } catch (error) {
+    console.error('Export failed:', error);
+    toast.error('Failed to export products');
+  } finally {
+    isExporting.value = false;
+  }
+};
+
+const handleImportClick = () => {
+  const modalElement = document.getElementById('importProductModal');
+  if (modalElement) {
+    modalElement.classList.add('show');
+    modalElement.style.display = 'block';
+    modalElement.setAttribute('aria-modal', 'true');
+    modalElement.setAttribute('role', 'dialog');
+    
+    // Add backdrop
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop fade show';
+    backdrop.id = 'modal-backdrop';
+    document.body.appendChild(backdrop);
+    
+    // Add body class
+    document.body.classList.add('modal-open');
+  }
+};
+
+const handleImportSuccess = () => {
+  // Refresh the product list after successful import
+  applyFilters(1);
+};
+
 onMounted(async () => {
   try {
     await Promise.all([
@@ -411,8 +491,6 @@ onMounted(async () => {
     ]);
     if (flashStore.successMessage) toast.success(flashStore.successMessage);
     if (flashStore.errorMessage) toast.error(flashStore.errorMessage);
-  } catch (error) {
-    console.error('Error in onMounted:', error);
   } finally {
     isLoadingProducts.value = false;  // Ensure it's set to false after initial load
   }
