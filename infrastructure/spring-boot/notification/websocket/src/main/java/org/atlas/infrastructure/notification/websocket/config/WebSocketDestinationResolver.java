@@ -26,7 +26,7 @@ public class WebSocketDestinationResolver {
           throw new IllegalArgumentException(
               "Payload must be of type OrderStatusChangedPayload for ORDER_STATUS_CHANGED notification.");
         }
-        return DESTINATION_PREFIX + "/orders/" + payload.getOrderId() + "/status";
+        return String.format("%s/orders/%d/status", DESTINATION_PREFIX, payload.getOrderId());
       // Add more cases here for different notification types if needed
       default:
         throw new IllegalArgumentException("Unknown notification type: " + notificationType);

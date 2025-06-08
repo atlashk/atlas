@@ -61,27 +61,34 @@ import { OrderStatus } from '@/interfaces/order.interface';
 import { orderService } from '@/services';
 import { useCartStore } from '@/stores/cart.store';
 import { getOrderStatusBadgeClasses } from '@/utils/formatter.util';
-import { Stomp } from '@stomp/stompjs';
+import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { toast } from 'vue3-toastify';
 
+/**
+ * Interface for tracking order statuses across different communication methods
+ */
 interface OrderStatuses {
-  shortPolling: OrderStatus;
-  sse: OrderStatus;
-  ws: OrderStatus;
+  shortPolling: OrderStatus;  // Status from HTTP polling
+  sse: OrderStatus;          // Status from Server-Sent Events
+  ws: OrderStatus;           // Status from WebSocket
 }
 
+/**
+ * Interface for tracking cancellation reasons across different communication methods
+ */
 interface CanceledReasons {
   shortPolling: string | null;
   sse: string | null;
   ws: string | null;
 }
 
+// Store and computed properties
 const cartStore = useCartStore();
 const currentOrderId = computed(() => cartStore.currentOrderId?.toString() || '');
 
-// Create reactive objects using ref
+// Reactive state for order statuses and cancellation reasons
 const orderStatuses = ref<OrderStatuses>({
   shortPolling: OrderStatus.PROCESSING,
   sse: OrderStatus.PROCESSING,
@@ -94,17 +101,30 @@ const canceledReasons = ref<CanceledReasons>({
   ws: null
 });
 
-let pollingInterval: ReturnType<typeof setInterval> | null = null;
-let stompClient: any = null;
-let eventSource: EventSource | null = null;
+// Connection management variables
+let pollingInterval: ReturnType<typeof setInterval> | null = null;  // HTTP polling timer
+let stompClient: Client | null = null;                              // WebSocket STOMP client
+let eventSource: EventSource | null = null;                        // SSE connection
 
-const NOTIFICATION_BASE_URL = import.meta.env.VITE_NOTIFICATION_BASE_URL;
+// API base URL from environment variables
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+/**
+ * Updates the order status and cancellation reason for a specific communication method
+ * @param type - The communication method type (shortPolling, sse, ws)
+ * @param status - The new order status
+ * @param reason - The cancellation reason (if applicable)
+ */
 const updateOrderStatus = (type: keyof OrderStatuses, status: OrderStatus, reason: string | null = null): void => {
   orderStatuses.value[type] = status;
   canceledReasons.value[type] = reason;
 };
 
+/**
+ * Starts HTTP polling to check order status every 5 seconds
+ * Automatically stops when order reaches a final state (CONFIRMED or CANCELED)
+ * @param orderId - The order ID to track
+ */
 const startShortPolling = (orderId: string): void => {
   const pollOrder = async (): Promise<void> => {
     try {
@@ -112,7 +132,9 @@ const startShortPolling = (orderId: string): void => {
       if (response.success && response.data) {
         const { status, canceledReason } = response.data;
         updateOrderStatus('shortPolling', status, canceledReason || null);
-        if (status == OrderStatus.CONFIRMED || status == OrderStatus.CANCELED) {
+        
+        // Stop polling when order reaches final state to avoid unnecessary requests
+        if (status === OrderStatus.CONFIRMED || status === OrderStatus.CANCELED) {
           stopShortPolling();
         }
       } else {
@@ -124,13 +146,13 @@ const startShortPolling = (orderId: string): void => {
     }
   };
 
-  // Initial poll
-  pollOrder();
-
-  // Set up interval for polling
-  pollingInterval = setInterval(pollOrder, 5000);
+  pollOrder(); // Execute initial poll immediately
+  pollingInterval = setInterval(pollOrder, 5000); // Poll every 5 seconds
 };
 
+/**
+ * Stops the HTTP polling interval and cleans up resources
+ */
 const stopShortPolling = (): void => {
   if (pollingInterval) {
     clearInterval(pollingInterval);
@@ -138,101 +160,164 @@ const stopShortPolling = (): void => {
   }
 };
 
+/**
+ * Establishes Server-Sent Events (SSE) connection for real-time order updates
+ * SSE provides one-way communication from server to client
+ * @param orderId - The order ID to track
+ */
 const connectSSE = (orderId: string): void => {
+  // Close existing connection if any
   if (eventSource) eventSource.close();
 
-  eventSource = new EventSource(`${NOTIFICATION_BASE_URL}/notification/sse/orders/${orderId}/status`);
+  // Create new SSE connection to order-specific endpoint
+  eventSource = new EventSource(`${API_BASE_URL}/notification/sse/orders/${orderId}/status`);
 
-  eventSource.addEventListener('open', (event: Event) => {
-    console.log('SSE connection established', event);
+  // Handle successful connection
+  eventSource.addEventListener('open', () => {
+    console.log('SSE connection established');
   });
 
-  // Listen specifically for ORDER_STATUS_CHANGED events
+  // Listen for order status change events
   eventSource.addEventListener('ORDER_STATUS_CHANGED', (event: MessageEvent) => {
-    console.log('SSE received ORDER_STATUS_CHANGED event:', event.data);
     try {
       const data = JSON.parse(event.data);
       updateOrderStatus('sse', data.orderStatus, data.canceledReason || null);
     } catch (error: any) {
-      console.error('SSE error parsing message: ' + error.message);
+      console.error('SSE error parsing message:', error.message);
     }
   });
 
-  eventSource.addEventListener('error', (error: Event) => {
-    console.error('SSE connection error:', error);
-    if (eventSource?.readyState === EventSource.CLOSED) {
-      console.log('SSE connection closed');
-    }
+  // Handle connection errors
+  eventSource.addEventListener('error', () => {
+    console.error('SSE connection error');
   });
 };
 
+/**
+ * Establishes WebSocket connection using STOMP protocol for real-time bidirectional communication
+ * Uses SockJS for fallback transport methods (WebSocket -> XHR Streaming -> XHR Polling)
+ * @param orderId - The order ID to track
+ */
 const connectWebSocket = (orderId: string): void => {
-  if (stompClient) stompClient.disconnect();
-
-  // Create a WebSocket factory function for reconnection support
-  const socketFactory = () => {
-    return new SockJS(`${NOTIFICATION_BASE_URL}/notification/ws`);
-  };
-
-  // Use the factory instead of passing the socket directly
-  stompClient = Stomp.over(socketFactory);
-  
-  // Continue with the rest of your code
-  stompClient.debug = (msg: string) => {
-    console.log('STOMP Debug:', msg);
-  };
-
-  // Set reconnect delay (optional)
-  stompClient.reconnectDelay = 30000;
-
-  stompClient.connect({}, () => {
-    console.log('WebSocket connection established');
-    stompClient.subscribe(`/topic/orders/${orderId}/status`, (message: { body: string }) => {
-      console.log('WebSocket received message:', message.body);
-      try {
-        const { orderStatus, canceledReason } = JSON.parse(message.body);
-        updateOrderStatus('ws', orderStatus, canceledReason || null);
-      } catch (error: any) {
-        console.error('WebSocket error parsing message:', error.message);
-      }
-    });
-  }, (error: Error | string) => {
-    console.error('WebSocket connection failed:', error);
-  });
-};
-
-const cleanup = (): void => {
-  stopShortPolling();
+  // Cleanup existing connection
   if (stompClient) {
-    stompClient.disconnect();
+    stompClient.deactivate();
     stompClient = null;
   }
+
+  // Create new STOMP client with SockJS transport
+  stompClient = new Client({
+    // SockJS factory for WebSocket connection with fallback transports
+    webSocketFactory: () => new SockJS(`${API_BASE_URL}/notification/ws`, null, {
+      transports: ['websocket', 'xhr-streaming', 'xhr-polling'], // Fallback order
+      timeout: 10000 // 10 second timeout
+    }),
+    connectHeaders: {},           // Additional headers for STOMP connection
+    reconnectDelay: 5000,        // Auto-reconnect after 5 seconds
+    heartbeatIncoming: 4000,     // Expect heartbeat from server every 4 seconds
+    heartbeatOutgoing: 4000,     // Send heartbeat to server every 4 seconds
+    
+    // Handle successful STOMP connection
+    onConnect: () => {
+      if (!stompClient) return;
+      
+      // Subscribe to order-specific topic for status updates
+      stompClient.subscribe(`/topic/orders/${orderId}/status`, (message: { body: string }) => {
+        try {
+          const { orderStatus, canceledReason } = JSON.parse(message.body);
+          updateOrderStatus('ws', orderStatus, canceledReason || null);
+        } catch (error: any) {
+          console.error('WebSocket error parsing message:', error.message);
+        }
+      });
+    },
+    
+    // Handle STOMP protocol errors
+    onStompError: (frame) => {
+      console.error('STOMP error:', frame.headers['message']);
+      toast.error('WebSocket connection error');
+    },
+    
+    // Handle WebSocket connection errors
+    onWebSocketError: () => {
+      console.error('WebSocket connection failed');
+      toast.error('WebSocket connection failed');
+    },
+    
+    // Handle WebSocket connection closure
+    onWebSocketClose: (event) => {
+      // Code 2000 indicates all SockJS transports failed
+      if (event.code === 2000) {
+        console.error('All WebSocket transports failed');
+        toast.error('WebSocket connection failed: All transports failed');
+      }
+    }
+  });
+
+  // Activate the STOMP client to start connection
+  stompClient.activate();
+};
+
+/**
+ * Cleans up all active connections and intervals
+ * Called when component unmounts or order ID changes
+ */
+const cleanup = (): void => {
+  // Stop HTTP polling
+  stopShortPolling();
+  
+  // Close WebSocket connection
+  if (stompClient) {
+    stompClient.deactivate();
+    stompClient = null;
+  }
+  
+  // Close SSE connection
   if (eventSource) {
     eventSource.close();
     eventSource = null;
   }
 };
 
+/**
+ * Resets all order tracking information to initial state
+ * Called when switching to a new order
+ */
 const resetOrderTrackingInfo = (): void => {
-  (Object.keys(orderStatuses.value) as Array<keyof OrderStatuses>).forEach((key) => {
-    orderStatuses.value[key] = OrderStatus.PROCESSING;
+  // Reset all order statuses to PROCESSING
+  Object.keys(orderStatuses.value).forEach((key) => {
+    orderStatuses.value[key as keyof OrderStatuses] = OrderStatus.PROCESSING;
   });
-  (Object.keys(canceledReasons.value) as Array<keyof CanceledReasons>).forEach((key) => {
-    canceledReasons.value[key] = null;
+  
+  // Clear all cancellation reasons
+  Object.keys(canceledReasons.value).forEach((key) => {
+    canceledReasons.value[key as keyof CanceledReasons] = null;
   });
 };
 
+/**
+ * Watch for order ID changes and manage connections accordingly
+ * - When order ID changes: cleanup old connections, reset state, start new connections
+ * - When order ID becomes empty: cleanup all connections
+ */
 watch(() => currentOrderId.value, (newOrderId) => {
   resetOrderTrackingInfo();
+  
   if (newOrderId) {
+    // Start all three communication methods for the new order
     startShortPolling(newOrderId);
     connectSSE(newOrderId);
     connectWebSocket(newOrderId);
   } else {
+    // No active order, cleanup all connections
     cleanup();
   }
-}, { immediate: true });
+}, { immediate: true }); // Execute immediately on component mount
 
+/**
+ * Cleanup all connections when component is unmounted
+ * Prevents memory leaks and unnecessary network requests
+ */
 onBeforeUnmount(() => {
   cleanup();
 });

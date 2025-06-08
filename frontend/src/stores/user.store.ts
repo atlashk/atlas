@@ -87,23 +87,21 @@ export const useUserStore = defineStore('user', {
       localStorage.setItem('refreshToken', refreshToken)
     },
 
-    logout(): void {
-      // Import authService and call logout before clearing tokens
-      import('@/services/api/auth.service').then(({ authService }) => {
-        authService.logout()
-          .catch(error => {
-            console.error('Logout API error:', error)
-          })
-          .finally(() => {
-            // Clear user data after API call (whether successful or not)
-            this.profile = null
-            this.accessToken = null
-            this.refreshToken = null
-            this.error = null
-            localStorage.removeItem('accessToken')
-            localStorage.removeItem('refreshToken')
-          })
-      })
+    async logout(): Promise<void> {
+      try {
+        const { authService } = await import('@/services/api/auth.service')
+        await authService.logout()
+      } catch (error) {
+        console.error('Logout API error:', error)
+      } finally {
+        // Clear user data after API call (whether successful or not)
+        this.profile = null
+        this.accessToken = null
+        this.refreshToken = null
+        this.error = null
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
+      }
     },
 
     clearError(): void {

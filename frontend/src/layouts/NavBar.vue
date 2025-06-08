@@ -59,7 +59,7 @@ const handleBrandClick = () => {
 }
 
 const handleLogout = async () => {
-  await userStore.logout()
+  await userStore.logout();
   router.push({ name: 'storeFront' })
 }
 </script>

@@ -1,9 +1,5 @@
 spring:
- datasource:
-    # driver-class-name: com.mysql.cj.jdbc.Driver
-    # url: ${MYSQL_URL:jdbc:mysql://localhost:3306/db_name?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false}
-    # username: ${MYSQL_USERNAME:root}
-    # password: ${MYSQL_PASSWORD:root}
+  datasource:
     hikari:
       # The maximum number of connections in the pool (active + idle).
       # Best Practice: Set this based on your database’s capacity and application concurrency needs.

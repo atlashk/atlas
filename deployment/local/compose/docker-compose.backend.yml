@@ -22,14 +22,12 @@ services:
     environment:
       - EUREKA_DEFAULT_ZONE=http://discovery-server:8761/eureka
       - MYSQL_URL=jdbc:mysql://mysql:3306/db_user?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
+      - MYSQL_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - MYSQL_USERNAME=root
       - MYSQL_PASSWORD=root
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      - QUARTZ_DB_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - QUARTZ_DB_USERNAME=root
-      - QUARTZ_DB_PASSWORD=root
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
     mem_limit: 2g
     cpus: 0.5
@@ -48,14 +46,12 @@ services:
     environment:
       - EUREKA_DEFAULT_ZONE=http://discovery-server:8761/eureka
       - MYSQL_URL=jdbc:mysql://mysql:3306/db_product?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
+      - MYSQL_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - MYSQL_USERNAME=root
       - MYSQL_PASSWORD=root
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      - QUARTZ_DB_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - QUARTZ_DB_USERNAME=root
-      - QUARTZ_DB_PASSWORD=root
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
     mem_limit: 1g
     cpus: 0.5
@@ -78,14 +74,12 @@ services:
       - API_CLIENT_REST_USER_SERVICE_BASE_URL=http://user-service:8081
       - API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL=http://product-service:8082
       - MYSQL_URL=jdbc:mysql://mysql:3306/db_order?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
+      - MYSQL_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - MYSQL_USERNAME=root
       - MYSQL_PASSWORD=root
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      - QUARTZ_DB_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - QUARTZ_DB_USERNAME=root
-      - QUARTZ_DB_PASSWORD=root
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
     mem_limit: 1g
     cpus: 0.5
@@ -102,15 +96,14 @@ services:
     ports:
       - "8084:8084"
     environment:
+      - EUREKA_DEFAULT_ZONE=http://discovery-server:8761/eureka
       - MYSQL_URL=jdbc:mysql://mysql:3306/db_notification?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
+      - MYSQL_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - MYSQL_USERNAME=root
       - MYSQL_PASSWORD=root
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      - QUARTZ_DB_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - QUARTZ_DB_USERNAME=root
-      - QUARTZ_DB_PASSWORD=root
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
       - MAIL_SERVER_HOST=smtp4dev
     mem_limit: 1g

@@ -13,7 +13,9 @@ spring:
             key-resolver: "#{@userKeyResolver}"
       httpclient:
         connect-timeout: 30000  # Connection timeout in milliseconds
-        response-timeout: 30s # Response timeout in ISO-8601 format or duration
+        response-timeout: 5m # Response timeout in ISO-8601 format or duration
+        pool:
+          max-idle-time: 45m # Allow connections to stay idle longer for SSE/WebSocket
       routes:
         # User service
         - id: user-service-common
@@ -117,6 +119,19 @@ spring:
             - Path=/api-docs/order-service
           filters:
             - RewritePath=/api-docs/order-service, /api-docs
+        # Notification service
+        - id: notification-service-sse
+          uri: lb://notification-service
+          predicates:
+            - Path=/notification/sse/**
+          filters:
+            - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+        - id: notification-service-websocket
+          uri: lb://notification-service
+          predicates:
+            - Path=/notification/ws/**
+          filters:
+            - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
       discovery:
         locator:
           enabled: true
@@ -157,6 +172,7 @@ app:
         - "/api/front/users/register"
         - "/api/common/products/**"
         - "/api/front/products/**"
+        - "/notification/**"
         - "/api-docs/**"
         - "/swagger-ui/**"
       secured-paths:

@@ -5,7 +5,10 @@ import vue from '@vitejs/plugin-vue';
 export default defineConfig({
   plugins: [vue()],
   define: {
-    global: {}, // polyfill to satisfy some libraries
+    // Fix for SockJS/STOMP WebSocket libraries in browser environment
+    // Maps 'global' to 'globalThis' so libraries can access browser APIs like WebSocket
+    // Without this, SockJS fails with "All transports failed" error
+    global: 'globalThis',
   },
   server: {
     port: 9000, // or any port you prefer

@@ -17,7 +17,7 @@ INFRA_SERVICES=(mysql redis kafka zookeeper rabbitmq keycloak smtp4dev)
 OBSERVABILITY_SERVICES=(loki promtail prometheus zipkin grafana)
 
 # Custom images that should be removed (built locally)
-CUSTOM_IMAGES=(
+BACKEND_IMAGES=(
     discovery-server:latest
     user-service:latest
     product-service:latest
@@ -26,6 +26,8 @@ CUSTOM_IMAGES=(
     auth-server:latest
     api-gateway:latest
 )
+INFRA_IMAGES=()  # Infra services use public images
+OBSERVABILITY_IMAGES=()  # Observability services use public images
 
 # All volumes used across compose files
 ALL_VOLUMES=(
@@ -114,21 +116,25 @@ case "$CATEGORY" in
         COMPOSE_FILES=("-f" "$BACKEND_COMPOSE_FILE")
         SERVICES=("${BACKEND_SERVICES[@]}")
         VOLUMES_TO_REMOVE=(discovery-server-log user-service-log product-service-log order-service-log notification-service-log auth-server-log api-gateway-log)
+        IMAGES_TO_REMOVE=("${BACKEND_IMAGES[@]}")
         ;;
     infra)
         COMPOSE_FILES=("-f" "$INFRA_COMPOSE_FILE")
         SERVICES=("${INFRA_SERVICES[@]}")
         VOLUMES_TO_REMOVE=(mysql-data redis-data zookeeper-data zookeeper-log kafka-data rabbitmq-data keycloak-data smtp4dev-data)
+        IMAGES_TO_REMOVE=("${INFRA_IMAGES[@]}")
         ;;
     observability)
         COMPOSE_FILES=("-f" "$OBSERVABILITY_COMPOSE_FILE")
         SERVICES=("${OBSERVABILITY_SERVICES[@]}")
         VOLUMES_TO_REMOVE=(grafana-data)
+        IMAGES_TO_REMOVE=("${OBSERVABILITY_IMAGES[@]}")
         ;;
     all)
         COMPOSE_FILES=("-f" "$INFRA_COMPOSE_FILE" "-f" "$BACKEND_COMPOSE_FILE" "-f" "$OBSERVABILITY_COMPOSE_FILE")
         SERVICES=("${INFRA_SERVICES[@]}" "${BACKEND_SERVICES[@]}" "${OBSERVABILITY_SERVICES[@]}")
         VOLUMES_TO_REMOVE=("${ALL_VOLUMES[@]}")
+        IMAGES_TO_REMOVE=("${BACKEND_IMAGES[@]}" "${INFRA_IMAGES[@]}" "${OBSERVABILITY_IMAGES[@]}")
         ;;
     *)
         error "Invalid argument: $CATEGORY"
@@ -149,7 +155,7 @@ log "Containers stopped and removed successfully."
 if [ "$REMOVE_IMAGES" = true ]; then
     log "Removing custom Docker images..."
     
-    for image in "${CUSTOM_IMAGES[@]}"; do
+    for image in "${IMAGES_TO_REMOVE[@]}"; do
         if docker image inspect "$image" >/dev/null 2>&1; then
             log "Removing image: $image"
             if ! docker rmi "$image" 2>/dev/null; then

@@ -1,4 +1,4 @@
-package org.atlas.infrastructure.scheduler.quartz.core.listener;
+package org.atlas.infrastructure.scheduler.quartz.core.listener.job;
 
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.util.DateUtil;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class JobLoggingListener implements JobListener {
+public class LoggingJobListener implements JobListener {
 
   @Override
   public String getName() {
@@ -26,7 +26,6 @@ public class JobLoggingListener implements JobListener {
 
   @Override
   public void jobExecutionVetoed(JobExecutionContext context) {
-    log.info("Job {} execution was vetoed", QuartzUtil.getJobName(context));
   }
 
   @Override

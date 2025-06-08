@@ -44,6 +44,18 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${infraStack['datasource']}")
     }
+    switch (infraStack['discovery-client']) {
+        case 'none':
+            break
+        case 'eureka':
+            api project(':infrastructure.spring-boot.discovery-client.eureka')
+            break
+        case 'kubernetes':
+            api project(':infrastructure.spring-boot.discovery-client.kubernetes')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${infraStack['discovery-client']}")
+    }
     switch (infraStack['messaging']) {
         case 'kafka':
             api project(':infrastructure.spring-boot.messaging.kafka.adapter.notification')
@@ -121,6 +133,7 @@ dependencies {
     }
     api project(':infrastructure.spring-boot.use-case.use-case-handler-decorator')
     api project(':infrastructure.spring-boot.notification.websocket')
+    implementation 'org.springframework.boot:spring-boot-starter-web'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

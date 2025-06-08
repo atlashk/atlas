@@ -28,6 +28,9 @@ dependencies {
     // Framework
     api project(':framework')
 
+    // Infrastructure
+    api project(':infrastructure.spring-boot.config.yaml')
+
     // Lib
     api 'org.springframework.boot:spring-boot-starter-quartz'
 

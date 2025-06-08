@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS product
     `available_from` DATETIME      NOT NULL,
     `is_active`      TINYINT(1)    NOT NULL,
     `brand_id`       INT           NOT NULL,
-    `version`        BIGINT        DEFAULT 0,
+    `version`        BIGINT                 DEFAULT 0,
     `created_at`     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`     DATETIME               DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB;
@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS outbox_message
     status          VARCHAR(20)  NOT NULL,
     processed_at    DATETIME,
     error           TEXT,
-    retries         TINYINT               DEFAULT 0,
+    retries         INT                   DEFAULT 0,
     created_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      DATETIME              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB;
