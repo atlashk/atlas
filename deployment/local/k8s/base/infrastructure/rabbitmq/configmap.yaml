@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rabbitmq-config
+  labels:
+    app: rabbitmq
+    tier: infrastructure
+data:
+  # Enable management plugin and delayed message exchange
+  enabled_plugins: |
+    [rabbitmq_management,rabbitmq_delayed_message_exchange].
+  
+  # Setup script for creating exchanges and queues
+  rabbitmq-setup.sh: |
+    #!/bin/bash
+    
+    # Wait for RabbitMQ to be ready
+    until rabbitmqctl status > /dev/null 2>&1; do
+        echo "Waiting for RabbitMQ to start..."
+        sleep 5
+    done
+    
+    ORDER_EXCHANGE="order_events"
+    QUEUES=(
+      "order_events.order"
+      "order_events.product"
+      "order_events.user"
+      "order_events.notification"
+      "order_events.report"
+    )
+    
+    # Declare exchange
+    echo "Declaring exchange: ${ORDER_EXCHANGE}"
+    rabbitmqadmin declare exchange name=${ORDER_EXCHANGE} type=fanout durable=true
+    
+    # Declare queues and bindings
+    for queue in "${QUEUES[@]}"; do
+      echo "Declaring queue $queue and binding it to exchange $ORDER_EXCHANGE"
+      rabbitmqadmin declare queue name="$queue" durable=true
+      rabbitmqadmin declare binding source="$ORDER_EXCHANGE" destination="$queue"
+    done
+    
+    echo "RabbitMQ setup completed successfully!" 

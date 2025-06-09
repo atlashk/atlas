@@ -1,0 +1,51 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: atlas-local
+  labels:
+    environment: local
+
+# Base resources to include
+resources:
+  - ../../base/infrastructure/mysql
+  - ../../base/infrastructure/redis
+  - ../../base/infrastructure/kafka
+  - ../../base/infrastructure/rabbitmq
+  - ../../base/microservices/auth-server
+  - ../../base/microservices/api-gateway
+  - ../../base/microservices/user-service
+  - ../../base/microservices/product-service
+  - ../../base/microservices/order-service
+  - ../../base/microservices/notification-service
+
+# Environment-specific labels
+commonLabels:
+  environment: local
+  deployment: atlas
+
+# Local environment patches (none currently)
+
+# Local environment configuration
+configMapGenerator:
+  - name: local-config
+    literals:
+      - environment=local
+      - log_level=DEBUG
+      - enable_debug=true
+
+# Resource customizations for local development
+images:
+  - name: mysql
+    newTag: "8.0"
+  - name: redis
+    newTag: "7-alpine"
+
+# Namespace for local deployment
+namespace: default
+
+# Local development annotations
+commonAnnotations:
+  deployment.kubernetes.io/revision: "1"
+  atlas.org/environment: "local"
+  atlas.org/managed-by: "kustomize" 
