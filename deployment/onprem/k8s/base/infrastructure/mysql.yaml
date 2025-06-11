@@ -1,0 +1,423 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-secret
+  labels:
+    app: mysql
+    tier: infrastructure
+type: Opaque
+data:
+  # root
+  mysql-username: cm9vdA==
+  # root
+  mysql-password: cm9vdA==
+  mysql-root-password: cm9vdA==
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init
+  labels:
+    app: mysql
+    tier: infrastructure
+data:
+  01-db_user.sql: |
+    CREATE DATABASE IF NOT EXISTS db_user;
+
+    USE db_user;
+
+    CREATE TABLE IF NOT EXISTS users
+    (
+        id           INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        username     VARCHAR(255) NOT NULL,
+        password     VARCHAR(255) NOT NULL,
+        first_name   VARCHAR(255) NOT NULL,
+        last_name    VARCHAR(255) NOT NULL,
+        email        VARCHAR(255) NOT NULL,
+        phone_number VARCHAR(20)  NOT NULL,
+        role         VARCHAR(50)  NOT NULL,
+        created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at   DATETIME              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE INDEX idx_username (username),
+        UNIQUE INDEX idx_email (email),
+        UNIQUE INDEX idx_phone_number (phone_number)
+    ) ENGINE = InnoDB;
+
+    -- Password: Aa@123456
+    INSERT INTO users (id, username, password, role, first_name, last_name, email, phone_number)
+    VALUES
+        (1, 'admin', '$2a$12$JBXIjeVKldJZ0824t5ULHOLeoq330xmpx0Ua/5Ipz4hlGxlSm9nE2', 'ADMIN', 'John', 'Doe', 'admin@atlas.org', '0987654321'),
+        (2, 'customer', '$2a$12$JBXIjeVKldJZ0824t5ULHOLeoq330xmpx0Ua/5Ipz4hlGxlSm9nE2', 'CUSTOMER', 'John', 'Smith', 'customer@atlas.org', '0987321654');
+
+    CREATE TABLE IF NOT EXISTS customer
+    (
+        user_id      INT            NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        credit       DECIMAL(11, 2) NOT NULL DEFAULT 0,
+        created_at   DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at   DATETIME                DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE = InnoDB;
+
+    INSERT INTO customer (user_id, credit)
+    VALUES (2, 1000000);
+
+    CREATE TABLE IF NOT EXISTS outbox_message
+    (
+        id           BIGINT        NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        payload      TEXT          NOT NULL,
+        status       VARCHAR(10)   NOT NULL,
+        processed_at DATETIME,
+        error        TEXT,
+        retries      TINYINT                DEFAULT 0,
+        created_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at   DATETIME               DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE = InnoDB;
+
+  02-db_auth.sql: |
+    CREATE DATABASE IF NOT EXISTS db_auth;
+
+    USE db_auth;
+
+    CREATE TABLE IF NOT EXISTS users
+    (
+        id           INT          NOT NULL PRIMARY KEY,
+        username     VARCHAR(255) NOT NULL,
+        password     VARCHAR(255) NOT NULL,
+        email        VARCHAR(255) NOT NULL,
+        phone_number VARCHAR(20)  NOT NULL,
+        role         VARCHAR(50)  NOT NULL,
+        created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at   DATETIME              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE INDEX idx_username (username),
+        UNIQUE INDEX idx_email (email),
+        UNIQUE INDEX idx_phone_number (phone_number)
+    ) ENGINE = InnoDB;
+
+    -- Password: Aa@123456
+    INSERT INTO users (id, username, password, role, first_name, last_name, email, phone_number)
+    VALUES
+        (1, 'admin', '$2a$12$JBXIjeVKldJZ0824t5ULHOLeoq330xmpx0Ua/5Ipz4hlGxlSm9nE2', 'ADMIN', 'John', 'Doe', 'admin@atlas.org', '0987654321'),
+        (2, 'customer', '$2a$12$JBXIjeVKldJZ0824t5ULHOLeoq330xmpx0Ua/5Ipz4hlGxlSm9nE2', 'CUSTOMER', 'John', 'Smith', 'customer@atlas.org', '0987321654');
+
+  03-db_product.sql: |
+    CREATE DATABASE IF NOT EXISTS db_product;
+
+    USE db_product;
+
+    CREATE TABLE IF NOT EXISTS category
+    (
+        `id`         INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        `name`       VARCHAR(255) NOT NULL,
+        `created_at` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        `updated_at` DATETIME              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=INNODB;
+
+    CREATE TABLE IF NOT EXISTS product
+    (
+        `id`          INT           NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        `name`        VARCHAR(255)  NOT NULL,
+        `description` TEXT,
+        `category_id` INT           NOT NULL,
+        `price`       DECIMAL(9, 2) NOT NULL,
+        `quantity`    INT           NOT NULL,
+        `created_at`  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        `updated_at`  DATETIME               DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE = InnoDB;
+
+    INSERT IGNORE INTO category (`id`, `name`)
+    VALUES (1, 'ELECTRONICS'), (2, 'CLOTHING'), (3, 'FOOD'), (4, 'TOYS');
+
+    INSERT IGNORE INTO product (`id`, `name`, `description`, `category_id`, `price`, `quantity`, `created_at`)
+    VALUES
+    (1, 'Smartphone', 'A modern smartphone with high-speed performance.', 1, 599.99, 100, '2023-01-15 00:00:00'),
+    (2, 'Jeans', 'Comfortable blue jeans.', 2, 49.99, 100, '2023-02-20 01:00:00'),
+    (3, 'Dark Chocolate', 'Rich dark chocolate bar.', 3, 1.99, 100, '2023-03-01 02:05:00'),
+    (4, 'Action Figure', 'A collectible action figure.', 4, 15.99, 0, '2023-04-10 03:10:00'),
+    (5, 'Laptop', 'High-end laptop for work and gaming.', 1, 1200.00, 100, '2023-05-25 04:15:00'),
+    (6, 'T-Shirt', 'Cotton t-shirt in various sizes.', 2, 20.99, 100, '2023-06-15 05:20:00'),
+    (7, 'Milk Chocolate', 'Smooth milk chocolate bar.', 3, 3.49, 100, '2023-07-05 06:25:00'),
+    (8, 'Board Game', 'Family-friendly board game.', 4, 29.99, 100, '2023-08-20 07:30:00'),
+    (9, 'Electric Kettle', 'Fast boiling electric kettle.', 1, 35.99, 0, '2023-09-10 08:35:00'),
+    (10, 'Running Shoes', 'Lightweight running shoes.', 2, 89.99, 100, '2023-10-05 09:40:00');
+
+    CREATE TABLE IF NOT EXISTS outbox_message
+    (
+        id           BIGINT        NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        payload      TEXT          NOT NULL,
+        status       VARCHAR(10)   NOT NULL,
+        processed_at DATETIME,
+        error        TEXT,
+        retries      TINYINT                DEFAULT 0,
+        created_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at   DATETIME               DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE = InnoDB;
+
+  04-db_order.sql: |
+    CREATE DATABASE IF NOT EXISTS db_order;
+
+    USE db_order;
+
+    CREATE TABLE IF NOT EXISTS orders
+    (
+        id              INT            NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        user_id         INT            NOT NULL,
+        amount          DECIMAL(11, 2) NOT NULL,
+        status          VARCHAR(20)    NOT NULL,
+        canceled_reason VARCHAR(255),
+        created_at      DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at      DATETIME                DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_user_id (user_id)
+    ) ENGINE = InnoDB;
+
+    CREATE TABLE IF NOT EXISTS order_item
+    (
+        id            INT           NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        order_id      INT           NOT NULL,
+        product_id    INT           NOT NULL,
+        product_price DECIMAL(9, 2) NOT NULL,
+        quantity      INT           NOT NULL,
+        created_at    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at    DATETIME               DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_order_id (order_id)
+    ) ENGINE = InnoDB;
+
+    CREATE TABLE IF NOT EXISTS outbox_message
+    (
+        id           BIGINT        NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        payload      TEXT          NOT NULL,
+        status       VARCHAR(10)   NOT NULL,
+        processed_at DATETIME,
+        error        TEXT,
+        retries      TINYINT                DEFAULT 0,
+        created_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at   DATETIME               DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE = InnoDB;
+
+  05-db_notification.sql: |
+    CREATE DATABASE IF NOT EXISTS db_notification;
+
+    USE db_notification;
+
+    CREATE TABLE IF NOT EXISTS outbox_message
+    (
+        id           BIGINT        NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        payload      TEXT          NOT NULL,
+        status       VARCHAR(10)   NOT NULL,
+        processed_at DATETIME,
+        error        TEXT,
+        retries      TINYINT                DEFAULT 0,
+        created_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at   DATETIME               DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE = InnoDB;
+
+  06-db_quartz.sql: |
+    CREATE DATABASE IF NOT EXISTS db_quartz;
+
+    USE db_quartz;
+
+    CREATE TABLE IF NOT EXISTS QRTZ_JOB_DETAILS (
+        SCHED_NAME VARCHAR(120) NOT NULL,
+        JOB_NAME VARCHAR(200) NOT NULL,
+        JOB_GROUP VARCHAR(200) NOT NULL,
+        DESCRIPTION VARCHAR(250) NULL,
+        JOB_CLASS_NAME VARCHAR(250) NOT NULL,
+        IS_DURABLE VARCHAR(1) NOT NULL,
+        IS_NONCONCURRENT VARCHAR(1) NOT NULL,
+        IS_UPDATE_DATA VARCHAR(1) NOT NULL,
+        REQUESTS_RECOVERY VARCHAR(1) NOT NULL,
+        JOB_DATA BLOB NULL,
+        PRIMARY KEY (SCHED_NAME,JOB_NAME,JOB_GROUP)
+    ) ENGINE=InnoDB;
+
+    CREATE TABLE IF NOT EXISTS QRTZ_TRIGGERS (
+        SCHED_NAME VARCHAR(120) NOT NULL,
+        TRIGGER_NAME VARCHAR(200) NOT NULL,
+        TRIGGER_GROUP VARCHAR(200) NOT NULL,
+        JOB_NAME VARCHAR(200) NOT NULL,
+        JOB_GROUP VARCHAR(200) NOT NULL,
+        DESCRIPTION VARCHAR(250) NULL,
+        NEXT_FIRE_TIME BIGINT(13) NULL,
+        PREV_FIRE_TIME BIGINT(13) NULL,
+        PRIORITY INTEGER NULL,
+        TRIGGER_STATE VARCHAR(16) NOT NULL,
+        TRIGGER_TYPE VARCHAR(8) NOT NULL,
+        START_TIME BIGINT(13) NOT NULL,
+        END_TIME BIGINT(13) NULL,
+        CALENDAR_NAME VARCHAR(200) NULL,
+        MISFIRE_INSTR SMALLINT(2) NULL,
+        JOB_DATA BLOB NULL,
+        PRIMARY KEY (SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP),
+        FOREIGN KEY (SCHED_NAME,JOB_NAME,JOB_GROUP) REFERENCES QRTZ_JOB_DETAILS(SCHED_NAME,JOB_NAME,JOB_GROUP)
+    ) ENGINE=InnoDB;
+
+  07-db_zipkin.sql: |
+    CREATE DATABASE IF NOT EXISTS db_zipkin;
+
+    USE db_zipkin;
+
+    CREATE TABLE IF NOT EXISTS zipkin_spans (
+      `trace_id_high` BIGINT NOT NULL DEFAULT 0 COMMENT 'If non zero, this means the trace uses 128 bit traceIds instead of 64 bit',
+      `trace_id` BIGINT NOT NULL,
+      `id` BIGINT NOT NULL,
+      `name` VARCHAR(255) NOT NULL,
+      `parent_id` BIGINT,
+      `debug` BIT(1),
+      `start_ts` BIGINT COMMENT 'Span.timestamp(): epoch micros used for endTs query and to implement TTL',
+      `duration` BIGINT COMMENT 'Span.duration(): micros used for minDuration and maxDuration query',
+      PRIMARY KEY (`trace_id_high`, `trace_id`, `id`)
+    ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED CHARACTER SET=utf8 COLLATE utf8_general_ci;
+
+    ALTER TABLE zipkin_spans ADD INDEX(`trace_id_high`, `trace_id`) COMMENT 'for getTracesByIds';
+    ALTER TABLE zipkin_spans ADD INDEX(`name`) COMMENT 'for getTraces and getSpanNames';
+    ALTER TABLE zipkin_spans ADD INDEX(`start_ts`) COMMENT 'for getTraces ordering and range';
+
+    CREATE TABLE IF NOT EXISTS zipkin_annotations (
+      `trace_id_high` BIGINT NOT NULL DEFAULT 0 COMMENT 'If non zero, this means the trace uses 128 bit traceIds instead of 64 bit',
+      `trace_id` BIGINT NOT NULL COMMENT 'coincides with zipkin_spans.trace_id',
+      `span_id` BIGINT NOT NULL COMMENT 'coincides with zipkin_spans.id',
+      `a_key` VARCHAR(255) NOT NULL COMMENT 'BinaryAnnotation.key or Annotation.value if type == -1',
+      `a_value` BLOB COMMENT 'BinaryAnnotation.value(), which must be smaller than 64KB',
+      `a_type` INT NOT NULL COMMENT 'BinaryAnnotation.type() or -1 if Annotation',
+      `a_timestamp` BIGINT COMMENT 'Used to implement TTL; Annotation.timestamp or zipkin_spans.timestamp',
+      `endpoint_ipv4` INT COMMENT 'Null when Binary/Annotation.endpoint is null',
+      `endpoint_ipv6` BINARY(16) COMMENT 'Null when Binary/Annotation.endpoint is null, or no IPv6 address',
+      `endpoint_port` SMALLINT COMMENT 'Null when Binary/Annotation.endpoint is null',
+      `endpoint_service_name` VARCHAR(255) COMMENT 'Null when Binary/Annotation.endpoint is null'
+    ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED CHARACTER SET=utf8 COLLATE utf8_general_ci;
+
+    ALTER TABLE zipkin_annotations ADD UNIQUE KEY(`trace_id_high`, `trace_id`, `span_id`, `a_key`, `a_timestamp`) COMMENT 'Ignore insert on duplicate';
+    ALTER TABLE zipkin_annotations ADD INDEX(`trace_id_high`, `trace_id`, `span_id`) COMMENT 'for joining with zipkin_spans';
+    ALTER TABLE zipkin_annotations ADD INDEX(`trace_id_high`, `trace_id`) COMMENT 'for getTraces/ByIds';
+    ALTER TABLE zipkin_annotations ADD INDEX(`endpoint_service_name`) COMMENT 'for getTraces and getServiceNames';
+    ALTER TABLE zipkin_annotations ADD INDEX(`a_type`) COMMENT 'for getTraces and autocomplete values';
+    ALTER TABLE zipkin_annotations ADD INDEX(`a_key`) COMMENT 'for getTraces and autocomplete values';
+    ALTER TABLE zipkin_annotations ADD INDEX(`trace_id`, `span_id`, `a_key`) COMMENT 'for dependencies job';
+
+    CREATE TABLE IF NOT EXISTS zipkin_dependencies (
+      `day` DATE NOT NULL,
+      `parent` VARCHAR(255) NOT NULL,
+      `child` VARCHAR(255) NOT NULL,
+      `call_count` BIGINT,
+      `error_count` BIGINT,
+      PRIMARY KEY (`day`, `parent`, `child`)
+    ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED CHARACTER SET=utf8 COLLATE utf8_general_ci;
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-data
+  labels:
+    app: mysql
+    tier: infrastructure
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard  # Use default storage class for local development
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  labels:
+    app: mysql
+    tier: infrastructure
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate  # Use Recreate for database to avoid data corruption
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+        tier: infrastructure
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: mysql-root-password
+          args:
+            - --default-authentication-plugin=mysql_native_password
+            - --character-set-server=utf8mb4
+            - --collation-server=utf8mb4_unicode_ci
+            - --innodb-buffer-pool-size=256M
+            - --max-connections=200
+          ports:
+            - containerPort: 3306
+              name: mysql
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+            - name: mysql-init
+              mountPath: /docker-entrypoint-initdb.d
+              readOnly: true
+          # Health checks
+          livenessProbe:
+            exec:
+              command:
+                - mysqladmin
+                - ping
+                - -h
+                - localhost
+                - -u
+                - root
+                - -p$(MYSQL_ROOT_PASSWORD)
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - mysqladmin
+                - ping
+                - -h
+                - localhost
+                - -u
+                - root
+                - -p$(MYSQL_ROOT_PASSWORD)
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3
+          # Resource limits
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: mysql-data
+        - name: mysql-init
+          configMap:
+            name: mysql-init
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  labels:
+    app: mysql
+    tier: infrastructure
+spec:
+  selector:
+    app: mysql
+  ports:
+    - port: 3306
+      targetPort: 3306
+      name: mysql
+  type: ClusterIP 
