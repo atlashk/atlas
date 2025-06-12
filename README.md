@@ -18,55 +18,76 @@
 
 ---
 
-## Quick Start
+## 🚀 Quick Start
 
-This method uses the default infrastructure stack, which is `local-compose-simple`.
+Atlas now uses a unified DevOps approach. Choose your preferred deployment method below.
 
-### Requirements
+### Prerequisites
 
-- Installed OpenJDK 17
-- Installed Docker
+- **Java 17+** - For building the project
+- **Docker & Docker Compose** - For running services
+- **kubectl** (optional) - For Kubernetes deployment
 
-### Build the Project
+### ⚡ Super Quick Start (Recommended)
 
-#### Build JAR files
-
-```bash
-chmod +x ./script/build-jar.sh
-./script/build-jar.sh
-```
-
-#### Build Docker images
+For first-time setup, run our automated setup script:
 
 ```bash
-chmod +x ./script/build-docker-images.sh
-./script/build-docker-images.sh
+# One-command setup: installs, builds, and starts everything
+bash devops/scripts/setup/setup-dev-env.sh
 ```
 
-### Start infrastructure services
+This script will:
+- ✅ Check all prerequisites (Java, Docker, etc.)
+- ✅ Build the project
+- ✅ Set up local environment configuration
+- ✅ Start all services (infrastructure + observability + backend)
+- ✅ Show you all the URLs and connection details
+
+### 🐳 Manual Docker Compose Setup
+
+If you prefer manual control:
 
 ```bash
-chmod +x ./deployment/local/compose/start.sh
-./deployment/local/compose/start.sh infra
+# 1. Build the project
+bash devops/scripts/build/build-all.sh
+
+# 2. Start all services
+cd devops/onprem/compose/scripts
+./deploy.sh local up
+
+# 3. Check status
+./deploy.sh local status
+
+# 4. View logs
+./deploy.sh local logs
+
+# 5. Stop when done
+./deploy.sh local down
 ```
 
-Then wait a few minutes until they start successfully.
+### ☸️ Kubernetes Setup
 
-### (Optional) Start observability services
+For Kubernetes deployment:
 
 ```bash
-./deployment/local/compose/start.sh observability
+# 1. Build the project
+bash devops/scripts/build/build-all.sh
+
+# 2. Start K8s deployment
+cd devops/onprem/k8s/scripts
+./deploy.sh local apply
+
+# 3. Check status
+./deploy.sh local status
+
+# 4. Clean up when done
+./deploy.sh local delete
 ```
 
-### Start backend services
+### 🌐 Start Frontend
 
-```bash
-./deployment/local/compose/start.sh backend
-```
-
-Then wait a few minutes until the start is complete.
-
-### Start frontend
+After backend services are running:
 
 ```bash
 cd frontend
@@ -74,26 +95,72 @@ npm install
 npm run dev
 ```
 
-The web application will then be accessible at http://localhost:9000.
+The web application will be accessible at **http://localhost:9000**
 
-You can use the following two pre-created accounts to log in.
-- Front site: user / Aa@123456
-- Admin site: admin / Aa@123456
+**Login Credentials:**
+- **Front site**: `user` / `Aa@123456`
+- **Admin site**: `admin` / `Aa@123456`
 
-### Stop and clear
+### 📊 Service URLs
+
+Once running, access these services:
+
+| Service | URL | Credentials |
+|---------|-----|-------------|
+| **Frontend** | http://localhost:9000 | user/admin : Aa@123456 |
+| **RabbitMQ Management** | http://localhost:15672 | admin : admin123 |
+| **Prometheus** | http://localhost:9090 | - |
+| **Grafana** | http://localhost:3000 | - |
+| **Zipkin Tracing** | http://localhost:9411 | - |
+
+### 🗃️ Database Connections
+
+| Database | Connection | Credentials |
+|----------|------------|-------------|
+| **MySQL** | localhost:3306 | atlas : atlas123 |
+| **Redis** | localhost:6379 | password: redis123 |
+
+### 🧹 Cleanup & Management
 
 ```bash
-cd deployment/local/compose
+# View service status
+devops/onprem/compose/scripts/deploy.sh local status
 
-# Just stop containers
-./stop.sh all
+# View logs for specific service
+devops/onprem/compose/scripts/deploy.sh local logs mysql
 
-# Stop containers and remove everything
-./stop.sh all --remove-all
+# Restart all services  
+devops/onprem/compose/scripts/deploy.sh local restart
 
-# Stop only backend services and remove custom images
-./stop.sh backend --remove-images
-
-# Stop infrastructure and remove volumes (careful - data loss!)
-./stop.sh infra --remove-volumes
+# Stop all services
+devops/onprem/compose/scripts/deploy.sh local down
 ```
+
+### 🔧 Different Environments
+
+Atlas supports multiple environments:
+
+```bash
+# Local development (default)
+./deploy.sh local up
+
+# Development environment
+./deploy.sh dev up
+
+# Staging environment  
+./deploy.sh stg up
+
+# Production environment
+./deploy.sh prod up
+```
+
+### 🆘 Troubleshooting
+
+If you encounter issues:
+
+1. **Port conflicts**: Check if ports 3306, 6379, 5672, 9090, 3000 are free
+2. **Docker issues**: Ensure Docker is running: `docker ps`
+3. **Build issues**: Try cleaning: `./gradlew clean build`
+4. **Logs**: Check service logs: `./deploy.sh local logs [service-name]`
+
+For detailed documentation, see [devops/README.md](devops/README.md)
