@@ -6,14 +6,6 @@
 
 ---
 
-## Architecture
-
-- **Microservices**: Modular architecture for scalability and flexibility.
-- **Hexagonal Architecture**: Separation of concerns to enhance maintainability.
-- **Cross-Cutting Concerns**: Centralized handling of concerns such as logging, security, and monitoring.
-
----
-
 ## Technical Stack
 
 ---
@@ -34,7 +26,7 @@ For first-time setup, run our automated setup script:
 
 ```bash
 # One-command setup: installs, builds, and starts everything
-bash devops/scripts/setup/setup-dev-env.sh
+bash scripts/start.sh
 ```
 
 This script will:
@@ -108,7 +100,6 @@ Once running, access these services:
 | Service | URL | Credentials |
 |---------|-----|-------------|
 | **Frontend** | http://localhost:9000 | user/admin : Aa@123456 |
-| **RabbitMQ Management** | http://localhost:15672 | admin : admin123 |
 | **Prometheus** | http://localhost:9090 | - |
 | **Grafana** | http://localhost:3000 | - |
 | **Zipkin Tracing** | http://localhost:9411 | - |

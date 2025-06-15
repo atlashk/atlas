@@ -1,0 +1,43 @@
+// Constants
+ext {
+    INFRA_STACK_CONFIG_DIR = "gradle/infra-stack/config"
+    DEFAULT_INFRA_STACK = "onprem-compose-simple"
+    INFRA_STACK_NAME_PATTERN = ~'^[a-zA-Z0-9-_]+$'
+}
+
+// Get infra stack name from project property or use default
+def getInfraStackName() {
+    def infraStackName = project.findProperty('infraStack') ?: ext.DEFAULT_INFRA_STACK
+    if (!infraStackName.matches(ext.INFRA_STACK_NAME_PATTERN)) {
+        throw new GradleException("Invalid infra stack name: '${infraStackName}'. Must match pattern: ${ext.INFRA_STACK_NAME_PATTERN}")
+    }
+    return infraStackName
+}
+
+// Load and parse config file
+def loadInfraStackFromConfigFile(File configFile) {
+    if (!configFile.exists()) {
+        throw new GradleException("Config file not found: ${configFile.absolutePath}")
+    }
+
+    def config = [:]
+    configFile.eachLine('UTF-8') { line ->
+        line = line.trim()
+        if (line && !line.startsWith('#')) {
+            def parts = line.split('=', 2).collect { it.trim() }
+            if (parts.size() == 2 && parts[1]) {
+                config[parts[0]] = parts[1]
+            } else {
+                throw new GradleException("Invalid config line in ${configFile.name}: '${line}'")
+            }
+        }
+    }
+    return config
+}
+
+// Main function to load infra stack configuration
+ext.loadInfraStack = {
+    def infraStackName = getInfraStackName()
+    def configFile = new File(rootDir, "${ext.INFRA_STACK_CONFIG_DIR}/${infraStackName}.cfg")
+    return loadInfraStackFromConfigFile(configFile)
+}

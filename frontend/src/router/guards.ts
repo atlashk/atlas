@@ -11,7 +11,7 @@ export const authGuard = async (
 
   try {
     // If we have a token but no profile, fetch it
-    if (userStore.isAuthenticated && !userStore.user) {
+    if (userStore.isAuthenticated && !userStore.profile) {
       await userStore.fetchProfile()
     }
 

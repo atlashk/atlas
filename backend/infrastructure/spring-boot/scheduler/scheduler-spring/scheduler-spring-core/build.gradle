@@ -1,0 +1,75 @@
+plugins {
+    id 'java-library'
+    id 'org.springframework.boot' version "${springBootPluginVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagementPluginVersion}"
+    id 'idea'
+}
+
+group = 'org.atlas'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Framework
+    api project(':framework')
+
+    // Infrastructure
+    switch (rootProject.ext.infraStack['redis']) {
+        case 'standalone':
+            api project(':infrastructure.spring-boot.redis.standalone')
+            break
+        case 'cluster':
+            api project(':infrastructure.spring-boot.redis.cluster')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['redis']}")
+    }
+
+    // Lib
+    api 'org.springframework.boot:spring-boot-starter-aop'
+    // Distributed lock in case the schedulers run on multi-instance application
+    api 'net.javacrumbs.shedlock:shedlock-spring:6.4.0'
+    api 'net.javacrumbs.shedlock:shedlock-provider-redis-spring:6.4.0'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+}
+
+test {
+    useJUnitPlatform()
+}
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
