@@ -25,7 +25,7 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=root
     volumes:
-      - ./configs/mysql:/docker-entrypoint-initdb.d/
+      - ./config/mysql:/docker-entrypoint-initdb.d/
       - mysql-data:/var/lib/mysql
     command: --default-authentication-plugin=mysql_native_password
     healthcheck:
@@ -177,7 +177,7 @@ services:
   #   volumes:
   #     - keycloak-data:/opt/keycloak/data
   #   healthcheck:
-  #     test: ["CMD-SHELL", "curl -f http://localhost:8080/health/ready || exit 1"]
+  #     test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/health/ready || exit 1"]
   #     interval: 10s
   #     timeout: 5s
   #     retries: 5
@@ -223,7 +223,7 @@ services:
     volumes:
       - eureka-server-log:/var/log/eureka-server
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8761/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8761/actuator/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -251,7 +251,7 @@ services:
     volumes:
       - auth-server-log:/var/log/auth-server
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8091/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8091/actuator/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -285,7 +285,7 @@ services:
     volumes:
       - api-gateway-log:/var/log/api-gateway
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -325,7 +325,7 @@ services:
     volumes:
       - user-service-log:/var/log/user-service
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8081/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8081/actuator/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -367,7 +367,7 @@ services:
     volumes:
       - product-service-log:/var/log/product-service
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8082/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8082/actuator/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -413,7 +413,7 @@ services:
     volumes:
       - order-service-log:/var/log/order-service
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8083/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8083/actuator/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -460,7 +460,7 @@ services:
     volumes:
       - notification-service-log:/var/log/notification-service
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8084/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8084/actuator/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -509,7 +509,7 @@ services:
     image: grafana/promtail:main
     command: -config.file=/etc/promtail/config.yml
     volumes:
-      - ./configs/promtail/promtail-config.yml:/etc/promtail/config.yml
+      - ./config/promtail/promtail-config.yml:/etc/promtail/config.yml
       - user-service-log:/var/log/user-service
       - product-service-log:/var/log/product-service
       - order-service-log:/var/log/order-service
@@ -537,7 +537,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./configs/prometheus/prometheus-config.yml:/etc/prometheus/prometheus-config.yml
+      - ./config/prometheus/prometheus-config.yml:/etc/prometheus/prometheus-config.yml
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9090/-/healthy || exit 1"]
       interval: 10s

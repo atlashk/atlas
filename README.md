@@ -27,35 +27,52 @@ For first-time setup, run our automated setup script:
 ```bash
 # One-command setup: installs, builds, and starts everything
 bash scripts/start.sh
+
+# Quick restart (skip builds if images already exist)
+bash scripts/start.sh --skip-build
+
+# Show help and options
+bash scripts/start.sh --help
 ```
 
 This script will:
 - ✅ Check all prerequisites (Java, Docker, etc.)
-- ✅ Build the project
-- ✅ Set up local environment configuration
+- ✅ Build backend JAR files (unless `--skip-build`)
+- ✅ Build frontend (unless `--skip-build`)
+- ✅ Build Docker images (unless `--skip-build`)
 - ✅ Start all services (infrastructure + observability + backend)
 - ✅ Show you all the URLs and connection details
+
+**Options:**
+- `--skip-build` - Skip all build steps and use existing Docker images (much faster for restarts)
+- `--help` - Show usage information
 
 ### 🐳 Manual Docker Compose Setup
 
 If you prefer manual control:
 
 ```bash
-# 1. Build the project
-bash devops/scripts/build/build-all.sh
+# 1. Build backend JAR files
+bash build/build-backend.sh --infra-stack="onprem-compose-observability" --skip-tests="true"
 
-# 2. Start all services
-cd devops/onprem/compose/scripts
-./deploy.sh local up
+# 2. Build frontend
+bash build/build-frontend.sh
 
-# 3. Check status
-./deploy.sh local status
+# 3. Build Docker images
+bash build/build-docker-images.sh all
 
-# 4. View logs
-./deploy.sh local logs
+# 4. Start all services
+cd deployment/onprem/compose/scripts
+bash compose-start.sh
 
-# 5. Stop when done
-./deploy.sh local down
+# 5. Check status
+docker ps
+
+# 6. View logs
+docker logs <service-name>
+
+# 7. Stop when done
+bash compose-clean.sh
 ```
 
 ### ☸️ Kubernetes Setup
@@ -64,34 +81,38 @@ For Kubernetes deployment:
 
 ```bash
 # 1. Build the project
-bash devops/scripts/build/build-all.sh
+bash scripts/start.sh --skip-build  # Build images first
 
 # 2. Start K8s deployment
-cd devops/onprem/k8s/scripts
-./deploy.sh local apply
+cd deployment/onprem/k8s/scripts
+bash deploy.sh
 
 # 3. Check status
-./deploy.sh local status
+kubectl get pods
 
 # 4. Clean up when done
-./deploy.sh local delete
+kubectl delete -f ../base/
 ```
 
-### 🌐 Start Frontend
+### 🌐 Access Frontend
 
-After backend services are running:
+The frontend is automatically built and deployed as part of the Docker Compose stack.
+
+The web application will be accessible at **http://localhost:80**
+
+**Login Credentials:**
+- **Front site**: `user` / `Aa@123456`
+- **Admin site**: `admin` / `Aa@123456`
+
+**Development Mode (Optional):**
+If you want to run frontend in development mode:
 
 ```bash
 cd frontend
 npm install
 npm run dev
+# Access at http://localhost:5173
 ```
-
-The web application will be accessible at **http://localhost:9000**
-
-**Login Credentials:**
-- **Front site**: `user` / `Aa@123456`
-- **Admin site**: `admin` / `Aa@123456`
 
 ### 📊 Service URLs
 
@@ -99,59 +120,61 @@ Once running, access these services:
 
 | Service | URL | Credentials |
 |---------|-----|-------------|
-| **Frontend** | http://localhost:9000 | user/admin : Aa@123456 |
+| **Frontend** | http://localhost:80 | user/admin : Aa@123456 |
+| **API Gateway** | http://localhost:8080 | - |
 | **Prometheus** | http://localhost:9090 | - |
-| **Grafana** | http://localhost:3000 | - |
+| **Grafana** | http://localhost:3000 | admin : admin |
 | **Zipkin Tracing** | http://localhost:9411 | - |
+| **SMTP4Dev (Email)** | http://localhost:5000 | - |
 
 ### 🗃️ Database Connections
 
 | Database | Connection | Credentials |
 |----------|------------|-------------|
-| **MySQL** | localhost:3306 | atlas : atlas123 |
-| **Redis** | localhost:6379 | password: redis123 |
+| **MySQL** | localhost:3306 | root : root |
+| **Redis** | localhost:6379 | (no password) |
 
 ### 🧹 Cleanup & Management
 
 ```bash
 # View service status
-devops/onprem/compose/scripts/deploy.sh local status
+docker ps
 
 # View logs for specific service
-devops/onprem/compose/scripts/deploy.sh local logs mysql
+docker logs <service-name>
+# Example: docker logs eureka-server
 
-# Restart all services  
-devops/onprem/compose/scripts/deploy.sh local restart
+# Restart specific service
+docker restart <service-name>
 
-# Stop all services
-devops/onprem/compose/scripts/deploy.sh local down
-```
+# Stop and clean up everything
+cd deployment/onprem/compose/scripts
+bash compose-clean.sh
 
-### 🔧 Different Environments
+# Clean up only containers (keep volumes/data)
+bash compose-clean.sh --containers-only
 
-Atlas supports multiple environments:
+# Clean up only volumes
+bash compose-clean.sh --volumes-only
 
-```bash
-# Local development (default)
-./deploy.sh local up
-
-# Development environment
-./deploy.sh dev up
-
-# Staging environment  
-./deploy.sh stg up
-
-# Production environment
-./deploy.sh prod up
+# Clean up only images
+bash compose-clean.sh --images-only
 ```
 
 ### 🆘 Troubleshooting
 
 If you encounter issues:
 
-1. **Port conflicts**: Check if ports 3306, 6379, 5672, 9090, 3000 are free
+1. **Port conflicts**: Check if ports 80, 3000, 3306, 6379, 8080, 8761, 9090, 9411 are free
 2. **Docker issues**: Ensure Docker is running: `docker ps`
-3. **Build issues**: Try cleaning: `./gradlew clean build`
-4. **Logs**: Check service logs: `./deploy.sh local logs [service-name]`
+3. **Build issues**: Try rebuilding: `bash scripts/start.sh` (without --skip-build)
+4. **Health check failures**: Check service logs: `docker logs <service-name>`
+5. **Clean start**: Use `bash deployment/onprem/compose/scripts/compose-clean.sh` then restart
 
-For detailed documentation, see [devops/README.md](devops/README.md)
+**Common Solutions:**
+- **Eureka server unhealthy**: Wait 60-90 seconds for full startup
+- **Database connection errors**: Ensure MySQL container is healthy
+- **Frontend not loading**: Check if API Gateway is running on port 8080
+- **Out of disk space**: Clean up with `docker system prune -f`
+
+For detailed documentation, see [wiki/](wiki/) directory

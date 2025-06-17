@@ -19,7 +19,7 @@ BACKEND_SERVICES=(
     "api-gateway:$PROJECT_ROOT/backend/edge/api-gateway/api-gateway-spring-cloud-gateway"
 )
 INFRASTRUCTURE_SERVICES=(
-    # "rabbitmq:$PROJECT_ROOT/deployment/onprem/compose/configs/rabbitmq"
+    # "rabbitmq:$PROJECT_ROOT/deployment/onprem/compose/config/rabbitmq"
 )
 FRONTEND_SERVICES=(
     "frontend:$PROJECT_ROOT/frontend"

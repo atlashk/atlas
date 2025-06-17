@@ -10,36 +10,3 @@ COMPOSE_FILE="$PROJECT_ROOT/deployment/onprem/compose/docker-compose.yml"
 
 # Single project stack (unified)
 PROJECT_STACK="${PROJECT_NAME}"
-
-# Service arrays
-INFRASTRUCTURE_SERVICES=(
-  "mysql" 
-  "redis" 
-  "kafka"
-  # "zookeeper"
-  # "rabbitmq"
-  # "keycloak"
-  "smtp4dev"
-)
-
-BACKEND_SERVICES=(
-  "discovery-server" 
-  "user-service"
-  "product-service" 
-  "order-service"
-  "notification-service"
-  "auth-server"
-  "api-gateway"
-)
-
-OBSERVABILITY_SERVICES=(
-  "loki"
-  "promtail"
-  "prometheus"
-  "zipkin"
-  "grafana"
-)
-
-FRONTEND_SERVICES=(
-  "frontend"
-)
