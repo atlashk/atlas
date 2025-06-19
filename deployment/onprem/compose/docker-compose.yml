@@ -609,7 +609,7 @@ services:
     build:
       context: ../../../frontend
     ports:
-      - "80:80"
+      - "9000:80"
     mem_limit: 500m
     cpus: 0.5
     environment:

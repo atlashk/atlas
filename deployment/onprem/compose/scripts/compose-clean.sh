@@ -2,9 +2,27 @@
 
 set -euo pipefail
 
-# Source config and helper scripts
-source "$(dirname "${BASH_SOURCE[0]}")/config.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/docker-helper.sh"
+# Project configuration (previously in config.sh)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
+PROJECT_NAME="atlas-onprem-compose"
+COMPOSE_FILE="$PROJECT_ROOT/deployment/onprem/compose/docker-compose.yml"
+
+# Source logger
+source "$PROJECT_ROOT/deployment/utils/logger.sh"
+
+# Check Docker Compose prerequisites (previously in docker-helper.sh)
+check_docker_compose_prerequisites() {
+    if ! docker info > /dev/null 2>&1; then
+        log_error "Docker is not running. Please start Docker and try again."
+        exit 1
+    fi
+    
+    if ! command -v docker-compose &> /dev/null; then
+        log_error "Docker Compose is not installed"
+        exit 1
+    fi
+}
 
 # Print usage
 usage() {
@@ -184,16 +202,16 @@ main() {
 
     case "$mode" in
         containers)
-            docker-compose -f "$COMPOSE_FILE" -p "$PROJECT_STACK" down --remove-orphans 2>/dev/null || true
+            docker-compose -f "$COMPOSE_FILE" -p "$PROJECT_NAME" down --remove-orphans 2>/dev/null || true
             ;;
         volumes)
-            remove_volumes "$COMPOSE_FILE" "$PROJECT_STACK"
+            remove_volumes "$COMPOSE_FILE" "$PROJECT_NAME"
             ;;
         images)
-            remove_images "$COMPOSE_FILE" "$PROJECT_STACK"
+            remove_images "$COMPOSE_FILE" "$PROJECT_NAME"
             ;;
         networks)
-            remove_networks "$COMPOSE_FILE" "$PROJECT_STACK"
+            remove_networks "$COMPOSE_FILE" "$PROJECT_NAME"
             ;;
         all)
             log_info "Removing all resources"
@@ -205,12 +223,12 @@ main() {
             
             # Stop and remove containers
             log_info "Stopping and removing containers..."
-            docker-compose -f "$COMPOSE_FILE" -p "$PROJECT_STACK" down --remove-orphans 2>/dev/null || true
+            docker-compose -f "$COMPOSE_FILE" -p "$PROJECT_NAME" down --remove-orphans 2>/dev/null || true
             
             # Remove volumes, images, and networks
-            remove_volumes "$COMPOSE_FILE" "$PROJECT_STACK"
-            remove_images "$COMPOSE_FILE" "$PROJECT_STACK"
-            remove_networks "$COMPOSE_FILE" "$PROJECT_STACK"
+            remove_volumes "$COMPOSE_FILE" "$PROJECT_NAME"
+            remove_images "$COMPOSE_FILE" "$PROJECT_NAME"
+            remove_networks "$COMPOSE_FILE" "$PROJECT_NAME"
             
             # Clean up dangling resources
             log_info "Cleaning up dangling Docker resources..."

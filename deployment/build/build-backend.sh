@@ -8,11 +8,11 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 GRADLEW="$PROJECT_ROOT/backend/gradlew"
 
 # Load logger.sh first
-source "$PROJECT_ROOT/scripts/logger.sh"
+source "$PROJECT_ROOT/deployment/utils/logger.sh"
 
 # Default values
-INFRA_STACK="onprem-compose-simple"
-SKIP_TESTS="false"
+INFRA_STACK="onprem-compose-observability"
+SKIP_TESTS="true"
 
 # Parse named parameters
 for arg in "$@"; do
