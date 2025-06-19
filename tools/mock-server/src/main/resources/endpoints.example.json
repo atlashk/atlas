@@ -1,0 +1,61 @@
+[
+  {
+    "path": "/hello",
+    "method": "GET",
+    "request": {
+      "type": "none"
+    },
+    "response": {
+      "status": 200,
+      "body": "Hello, World!"
+    }
+  },
+  {
+    "path": "/greet/{name}",
+    "method": "GET",
+    "request": {
+      "type": "path",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "body": "Hello, {name}!"
+    }
+  },
+  {
+    "path": "/search",
+    "method": "GET",
+    "request": {
+      "type": "query",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string"
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "body": "Search results for: {query}"
+    }
+  },
+  {
+    "path": "/echo",
+    "method": "POST",
+    "request": {
+      "type": "body",
+      "schema": {
+        "message": "string"
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": "{message}"
+    }
+  }
+]
