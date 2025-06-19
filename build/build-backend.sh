@@ -30,6 +30,9 @@ for arg in "$@"; do
     esac
 done
 
+# Ensure gradlew is executable
+chmod +x "$GRADLEW"
+
 log_info "Starting Gradle build with infra stack '$INFRA_STACK'..."
 if [ "$SKIP_TESTS" = "true" ]; then
     if (cd "$PROJECT_ROOT/backend" && "$GRADLEW" clean build -PinfraStack="$INFRA_STACK" -x test); then
