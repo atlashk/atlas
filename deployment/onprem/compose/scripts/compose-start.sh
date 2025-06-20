@@ -108,7 +108,7 @@ check_prerequisites() {
 build_backend() {
     log_section "Building backend JAR files..."
     
-    local build_script="$PROJECT_ROOT/build/build-backend.sh"
+    local build_script="$PROJECT_ROOT/deployment/build/build-backend.sh"
     if [ ! -f "$build_script" ]; then
         log_error "Backend build script not found: $build_script"
         exit 1
@@ -127,7 +127,7 @@ build_backend() {
 build_frontend() {
     log_section "Building frontend..."
     
-    local build_script="$PROJECT_ROOT/build/build-frontend.sh"
+    local build_script="$PROJECT_ROOT/deployment/build/build-frontend.sh"
     if [ ! -f "$build_script" ]; then
         log_error "Frontend build script not found: $build_script"
         exit 1
@@ -146,7 +146,7 @@ build_frontend() {
 build_docker_images() {
     log_section "Building Docker images..."
     
-    local build_script="$PROJECT_ROOT/build/build-docker-images.sh"
+    local build_script="$PROJECT_ROOT/deployment/build/build-docker-images.sh"
     if [ ! -f "$build_script" ]; then
         log_error "Docker images build script not found: $build_script"
         exit 1

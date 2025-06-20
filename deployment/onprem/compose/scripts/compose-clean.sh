@@ -37,6 +37,37 @@ usage() {
     exit 1
 }
 
+# Remove containers for services
+remove_containers() {
+    local compose_file=$1
+    local project_prefix=$2
+    
+    log_info "Removing containers for services in $compose_file"
+    
+    # Stop and remove only containers from this specific project
+    docker-compose -f "$compose_file" -p "$project_prefix" down 2>/dev/null || true
+    
+    # Additionally, find any remaining containers with our project prefix
+    local container_ids
+    container_ids=$(docker ps -a --filter "name=${project_prefix}_" --format "{{.ID}}" || true)
+    
+    if [ -n "$container_ids" ]; then
+        log_info "Found additional containers to remove:"
+        for container_id in $container_ids; do
+            local container_name
+            container_name=$(docker inspect --format='{{.Name}}' "$container_id" | sed 's|^/||')
+            log_info "  - $container_name"
+        done
+        echo
+        
+        log_info "Stopping and removing additional containers..."
+        echo "$container_ids" | xargs -r docker stop 2>/dev/null || true
+        echo "$container_ids" | xargs -r docker rm 2>/dev/null || true
+    fi
+
+    log_success "All Atlas containers removed successfully!"
+}
+
 # Remove volumes for services
 remove_volumes() {
     local compose_file=$1
@@ -194,15 +225,14 @@ main() {
         esac
     done
     
-    log_info "Atlas Cleanup Tool"
-    log_info "Using unified compose file: $COMPOSE_FILE"
+    log_info "Starting cleanup of resources using compose file: $COMPOSE_FILE"
     echo
-    
+
     check_docker_compose_prerequisites
 
     case "$mode" in
         containers)
-            docker-compose -f "$COMPOSE_FILE" -p "$PROJECT_NAME" down --remove-orphans 2>/dev/null || true
+            remove_containers "$COMPOSE_FILE" "$PROJECT_NAME"
             ;;
         volumes)
             remove_volumes "$COMPOSE_FILE" "$PROJECT_NAME"
@@ -214,27 +244,24 @@ main() {
             remove_networks "$COMPOSE_FILE" "$PROJECT_NAME"
             ;;
         all)
-            log_info "Removing all resources"
-            log_info "  - All containers (stopped and running)"
-            log_info "  - All volumes and data"
-            log_info "  - All Docker images"
-            log_info "  - All networks"
+            log_info "Removing all Atlas resources"
+            log_info "  - Atlas containers (stopped and running)"
+            log_info "  - Atlas volumes and data"
+            log_info "  - Atlas Docker images"
+            log_info "  - Atlas networks"
             log_info "  - Dangling Docker resources"
             
-            # Stop and remove containers
-            log_info "Stopping and removing containers..."
-            docker-compose -f "$COMPOSE_FILE" -p "$PROJECT_NAME" down --remove-orphans 2>/dev/null || true
-            
-            # Remove volumes, images, and networks
+            # Remove containers, volumes, images, and networks
+            remove_containers "$COMPOSE_FILE" "$PROJECT_NAME"
             remove_volumes "$COMPOSE_FILE" "$PROJECT_NAME"
             remove_images "$COMPOSE_FILE" "$PROJECT_NAME"
             remove_networks "$COMPOSE_FILE" "$PROJECT_NAME"
             
-            # Clean up dangling resources
+            # Clean up dangling resources (only Atlas-related)
             log_info "Cleaning up dangling Docker resources..."
             docker system prune -f >/dev/null 2>&1 || true
             
-            log_success "All resources removed successfully!"
+            log_success "All Atlas resources removed successfully!"
             ;;
     esac
 }

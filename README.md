@@ -49,6 +49,7 @@ Atlas uses a unified DevOps approach with reorganized build scripts. Choose your
 
 ### Prerequisites
 
+- **Mininum memory** - 8GB
 - **Java 17+** - For building the project
 - **Node.js 22+** - For frontend development
 - **Docker & Docker Compose** - For running services

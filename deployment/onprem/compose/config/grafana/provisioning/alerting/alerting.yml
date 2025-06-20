@@ -1,0 +1,73 @@
+apiVersion: 1
+
+groups:
+  - name: atlas-alerts
+    orgId: 1
+    folder: atlas-alerts
+    interval: 1m
+    rules:
+      - uid: service-down
+        title: Service Down
+        condition: A
+        data:
+          - refId: A
+            queryType: ""
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: up{job=~".*-service.*"} == 0
+              refId: A
+        noDataState: NoData
+        execErrState: Alerting
+        for: 1m
+        annotations:
+          summary: "Service is down"
+          description: "Service {{ $labels.job }} has been down for more than 1 minute"
+        labels:
+          severity: critical
+
+      - uid: high-memory
+        title: High Memory Usage
+        condition: A
+        data:
+          - refId: A
+            queryType: ""
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"} * 100 > 85
+              refId: A
+        noDataState: NoData
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is above 85% for service {{ $labels.job }}"
+        labels:
+          severity: warning
+
+      - uid: high-api-latency
+        title: High API Latency
+        condition: A
+        data:
+          - refId: A
+            queryType: ""
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: histogram_quantile(0.95, rate(api_latency_ms_bucket[5m])) > 1000
+              refId: A
+        noDataState: NoData
+        execErrState: Alerting
+        for: 3m
+        annotations:
+          summary: "High API latency detected"
+          description: "95th percentile API latency is {{ $value }}ms for service {{ $labels.service }}"
+        labels:
+          severity: warning 

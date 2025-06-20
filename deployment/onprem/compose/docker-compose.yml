@@ -320,7 +320,7 @@ services:
       - REDIS_PORT=6379
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
-    mem_limit: 2g
+    mem_limit: 1g
     cpus: 0.5
     volumes:
       - user-service-log:/var/log/user-service
@@ -536,8 +536,16 @@ services:
     image: prom/prometheus
     ports:
       - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus-config.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.enable-lifecycle'
     volumes:
       - ./config/prometheus/prometheus-config.yml:/etc/prometheus/prometheus-config.yml
+      - prometheus-data:/prometheus
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9090/-/healthy || exit 1"]
       interval: 10s
@@ -580,8 +588,12 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel,grafana-clock-panel
     volumes:
       - grafana-data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning
+      - ./config/grafana/dashboards:/etc/grafana/dashboards
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1"]
       interval: 10s
@@ -656,6 +668,7 @@ volumes:
   
   # Observability volumes
   grafana-data:
+  prometheus-data:
   
   # Frontend volumes
   frontend-log:

@@ -1,0 +1,6 @@
+apiVersion: 1
+
+folders:
+  - title: Atlas Alerts
+    uid: atlas-alerts
+    orgId: 1

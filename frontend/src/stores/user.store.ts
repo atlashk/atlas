@@ -2,6 +2,7 @@ import type { ApiResponse } from '@/interfaces/api.interface'
 import type { LoginRequest } from '@/interfaces/auth.interface'
 import type { RegisterRequest, User } from '@/interfaces/user.interface'
 import { userService } from '@/services/api/user.service'
+import { performanceMonitor } from '@/utils/performance'
 import { defineStore } from 'pinia'
 
 interface UserState {
@@ -10,7 +11,11 @@ interface UserState {
   refreshToken: string | null
   loading: boolean
   error: string | null
+  profileLoading: boolean // Track profile loading state separately
 }
+
+// Request deduplication for profile fetching
+let profileFetchPromise: Promise<void> | null = null
 
 export const useUserStore = defineStore('user', {
   state: (): UserState => ({
@@ -18,7 +23,8 @@ export const useUserStore = defineStore('user', {
     accessToken: localStorage.getItem('accessToken'),
     refreshToken: localStorage.getItem('refreshToken'),
     loading: false,
-    error: null
+    error: null,
+    profileLoading: false
   }),
 
   getters: {
@@ -26,7 +32,14 @@ export const useUserStore = defineStore('user', {
     isAdmin: (state): boolean => state.profile?.role === 'ADMIN',
     fullName: (state): string =>
       state.profile ? `${state.profile.firstName} ${state.profile.lastName}` : '',
-    hasRole: (state) => (role: string): boolean => state.profile?.role === role
+    hasRole: (state) => (role: string): boolean => state.profile?.role === role,
+    // Performance optimization: compute auth state once
+    authState: (state) => ({
+      isAuthenticated: !!state.accessToken,
+      isAdmin: state.profile?.role === 'ADMIN',
+      hasProfile: !!state.profile,
+      loading: state.loading || state.profileLoading
+    })
   },
 
   actions: {
@@ -70,13 +83,41 @@ export const useUserStore = defineStore('user', {
     async fetchProfile(): Promise<void> {
       if (!this.isAuthenticated) return
 
+      // Deduplicate concurrent profile fetch requests
+      if (profileFetchPromise) {
+        return profileFetchPromise
+      }
+
+      this.profileLoading = true
+
+      profileFetchPromise = this._fetchProfileInternal()
+
+      try {
+        await profileFetchPromise
+      } finally {
+        this.profileLoading = false
+        profileFetchPromise = null
+      }
+    },
+
+    async _fetchProfileInternal(): Promise<void> {
+      performanceMonitor.trackProfileFetch()
+
       try {
         const response = await userService.getProfile()
         if (response.success && response.data) {
           this.profile = response.data
+        } else {
+          // If response is not successful, clear auth state
+          this.clearAuthState()
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to fetch profile:', error)
+        // If it's an authentication error, clear the auth state
+        if (error?.response?.status === 401 || error?.status === 401) {
+          this.clearAuthState()
+        }
+        throw error // Re-throw to let navigation guard handle it
       }
     },
 
@@ -88,6 +129,8 @@ export const useUserStore = defineStore('user', {
     },
 
     async logout(): Promise<void> {
+      this.loading = true
+
       try {
         const { authService } = await import('@/services/api/auth.service')
         await authService.logout()
@@ -95,17 +138,25 @@ export const useUserStore = defineStore('user', {
         console.error('Logout API error:', error)
       } finally {
         // Clear user data after API call (whether successful or not)
-        this.profile = null
-        this.accessToken = null
-        this.refreshToken = null
-        this.error = null
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('refreshToken')
+        this.clearAuthState()
+        this.loading = false
       }
     },
 
     clearError(): void {
       this.error = null
+    },
+
+    clearAuthState(): void {
+      this.profile = null
+      this.accessToken = null
+      this.refreshToken = null
+      this.error = null
+      this.profileLoading = false
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
+      // Clear any pending profile fetch
+      profileFetchPromise = null
     }
   }
 })

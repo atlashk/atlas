@@ -28,7 +28,7 @@ check_docker_compose_prerequisites() {
 stop_services() {
     log_info "Using unified compose file: $COMPOSE_FILE"
     log_info "Stopping all Atlas services..."
-    docker-compose -f "$COMPOSE_FILE" -p "$PROJECT_NAME" down
+    docker-compose -f "$COMPOSE_FILE" -p "$PROJECT_NAME" stop
     log_success "All services stopped successfully!"
 }
 

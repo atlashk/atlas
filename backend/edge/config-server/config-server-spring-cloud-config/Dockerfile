@@ -1,19 +1,20 @@
 # Use multi-stage build for optimization
-FROM eclipse-temurin:17-jre-alpine AS builder
+FROM eclipse-temurin:17-jre AS builder
 WORKDIR /workspace
 COPY ./build/libs/*.jar app.jar
 # Use the new Spring Boot 3.2+ layertools syntax
 RUN java -Djarmode=tools -jar app.jar extract --layers --launcher
 
 # Final runtime image
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre
 
 # Create non-root user for security
-RUN addgroup -g 1001 -S spring && \
-    adduser -u 1001 -S spring -G spring
+RUN groupadd -g 1001 spring && \
+    useradd -u 1001 -g spring -s /bin/bash -m spring
 
 # Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+RUN apt-get update && apt-get install -y --no-install-recommends dumb-init && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app

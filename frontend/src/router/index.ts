@@ -1,7 +1,9 @@
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { useUserStore } from '@/stores/user.store';
+import { performanceMonitor } from '@/utils/performance';
 import { createRouter, createWebHistory } from 'vue-router';
+import { toast } from 'vue3-toastify';
 
 const routes = [
   {
@@ -87,39 +89,61 @@ const router = createRouter({
 
 // Navigation guard
 router.beforeEach(async (to, from, next) => {
+  const startTime = performance.now()
   const userStore = useUserStore()
-  
+
   // Handle authentication/authorization
   try {
-    // If we have a token but no profile, fetch it
+    // Always fetch profile if we have a token but no profile
+    // This ensures profile is loaded even on public route refreshes
     if (userStore.isAuthenticated && !userStore.profile) {
       await userStore.fetchProfile()
     }
 
+    // Early return for public routes that don't need authentication
+    // But only after we've tried to fetch profile if authenticated
+    if (!to.meta.requiresAuth && !to.meta.requiresAdmin && to.path !== '/login') {
+      // Handle admin auto-redirect from home page
+      if (to.path === '/' && userStore.isAuthenticated && userStore.profile?.role === 'ADMIN') {
+        performanceMonitor.trackNavigationGuard(performance.now() - startTime)
+        return next({ name: 'adminDashboard' })
+      }
+
+      performanceMonitor.trackNavigationGuard(performance.now() - startTime)
+      return next()
+    }
+
+    // Check authentication requirements
+    const needsAuth = to.meta.requiresAuth || to.meta.requiresAdmin
+    const isAuthenticated = userStore.isAuthenticated
+
     // Redirect unauthenticated users from protected routes
-    if ((to.meta.requiresAuth || to.meta.requiresAdmin) && !userStore.isAuthenticated) {
+    if (needsAuth && !isAuthenticated) {
+      performanceMonitor.trackNavigationGuard(performance.now() - startTime)
       return next('/login')
     }
-    
+
     // Redirect non-admin users from admin routes
     if (to.meta.requiresAdmin && userStore.profile?.role !== 'ADMIN') {
+      performanceMonitor.trackNavigationGuard(performance.now() - startTime)
       return next('/')
     }
-    
-    // Redirect authenticated users from login
-    if (to.path === '/login' && userStore.isAuthenticated) {
+
+    // Redirect authenticated users from login page
+    if (to.path === '/login' && isAuthenticated) {
+      performanceMonitor.trackNavigationGuard(performance.now() - startTime)
       return next('/')
     }
-    
-    // Auto-redirect admin to dashboard from home
-    if (to.path === '/' && userStore.isAuthenticated && userStore.profile?.role === 'ADMIN') {
-      return next({ name: 'adminDashboard' })
-    }
-    
+
+    performanceMonitor.trackNavigationGuard(performance.now() - startTime)
     return next()
   } catch (error) {
     console.error('Navigation error:', error)
-    return next('/')
+    // Clear authentication state and redirect to login
+    await userStore.logout()
+    toast.error('Authentication failed. Please log in again.')
+    performanceMonitor.trackNavigationGuard(performance.now() - startTime)
+    return next('/login')
   }
 })
 
