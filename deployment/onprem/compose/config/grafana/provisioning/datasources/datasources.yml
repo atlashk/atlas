@@ -6,6 +6,7 @@ datasources:
     type: prometheus
     access: proxy
     url: http://prometheus:9090
+    uid: DS_PROMETHEUS
     isDefault: true
     editable: true
     jsonData:
@@ -19,11 +20,12 @@ datasources:
     type: loki
     access: proxy
     url: http://loki:3100
+    uid: DS_LOKI
     editable: true
     jsonData:
       maxLines: 1000
       derivedFields:
-        - datasourceUid: zipkin
+        - datasourceUid: DS_ZIPKIN
           matcherRegex: "traceID=(\\w+)"
           name: TraceID
           url: "$${__value.raw}"
@@ -34,7 +36,7 @@ datasources:
     type: zipkin
     access: proxy
     url: http://zipkin:9411
-    uid: zipkin
+    uid: DS_ZIPKIN
     editable: true
     jsonData:
       nodeGraph:

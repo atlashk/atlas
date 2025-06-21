@@ -1,7 +1,7 @@
 apiVersion: 1
 
 providers:
-  - name: 'Atlas Microservices Dashboards'
+  - name: 'Atlas Dashboards'
     orgId: 1
     folder: 'Atlas'
     type: file

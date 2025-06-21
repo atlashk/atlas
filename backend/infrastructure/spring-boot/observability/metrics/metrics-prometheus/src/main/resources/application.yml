@@ -1,4 +1,23 @@
 management:
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      instance: ${spring.application.instance-id:${spring.application.name}:${server.port:8080}}
+    enable:
+      # System metrics
+      system.cpu.usage: true
+      system.memory.usage: true
+      disk.free: true
+      disk.total: true
+      # Process metrics  
+      process.uptime: true
+      process.cpu.usage: true
+      # JVM metrics (enabled by default)
+      jvm.memory.used: true
+      jvm.memory.max: true
+      jvm.threads.live: true
+      jvm.gc.pause: true
+      jvm.classes.loaded: true
   prometheus:
     metrics:
       export:

@@ -3,34 +3,34 @@ scrape_configs:
     metrics_path: '/actuator/prometheus'
     scrape_interval: 5s
     static_configs:
-      - targets: ['host.docker.internal:8761']
+      - targets: ['eureka-server:8761']
   - job_name: 'auth-server-metrics'
     metrics_path: '/actuator/prometheus'
     scrape_interval: 5s
     static_configs:
-      - targets: [ 'host.docker.internal:8091' ]
+      - targets: ['auth-server:8091']
   - job_name: 'user-service-metrics'
     metrics_path: '/actuator/prometheus'
     scrape_interval: 5s
     static_configs:
-      - targets: ['host.docker.internal:8081']
+      - targets: ['user-service:8081']
   - job_name: 'product-service-metrics'
     metrics_path: '/actuator/prometheus'
     scrape_interval: 5s
     static_configs:
-      - targets: ['host.docker.internal:8082']
+      - targets: ['product-service:8082']
   - job_name: 'order-service-metrics'
     metrics_path: '/actuator/prometheus'
     scrape_interval: 5s
     static_configs:
-      - targets: ['host.docker.internal:8083']
+      - targets: ['order-service:8083']
   - job_name: 'notification-service-metrics'
     metrics_path: '/actuator/prometheus'
     scrape_interval: 5s
     static_configs:
-      - targets: ['host.docker.internal:8084']
+      - targets: ['notification-service:8084']
   - job_name: 'api-gateway-metrics'
     metrics_path: '/actuator/prometheus'
     scrape_interval: 5s
     static_configs:
-      - targets: ['host.docker.internal:8080']
+      - targets: ['api-gateway:8080']
