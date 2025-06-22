@@ -123,12 +123,12 @@ show_atlas_containers() {
     local container_status
     container_status=$(get_container_status "${project_prefix}_")
     if [ -n "$container_status" ]; then
-        echo "$container_status" | while read -r line; do
+        while read -r line; do
             if [ -n "$line" ]; then
                 log_info "  - $line"
                 found_containers=true
             fi
-        done
+        done <<< "$container_status"
     fi
     
     # Check containers by explicit names
@@ -143,32 +143,29 @@ show_atlas_containers() {
     if [ "$found_containers" = false ]; then
         log_info "  No Atlas containers found"
     fi
-    echo
 }
 
 # Print usage
 usage() {
-    cat << EOF
-Usage: $0 [OPTIONS]
-
-Atlas Docker Compose Cleanup Script - Safely removes ONLY Atlas-related resources
-
-Options:
-  --containers-only    Stop and remove only Atlas containers
-  --volumes-only       Remove only Atlas volumes
-  --images-only        Remove only Atlas Docker images
-  --networks-only      Remove only Atlas networks
-  --all               Remove all Atlas resources (default)
-  -h, --help          Show this help message
-
-Examples:
-  $0                          # Remove all Atlas resources
-  $0 --all                    # Remove all Atlas resources
-  $0 --containers-only        # Remove only containers
-  $0 --images-only           # Remove only custom Atlas images
-
-Note: This script preserves external/infrastructure images and non-Atlas resources.
-EOF
+    log_info "Usage: $0 [OPTIONS]"
+    log_info ""
+    log_info "Atlas Docker Compose Cleanup Script - Safely removes ONLY Atlas-related resources"
+    log_info ""
+    log_info "Options:"
+    log_info "  --containers-only    Stop and remove only Atlas containers"
+    log_info "  --volumes-only       Remove only Atlas volumes"
+    log_info "  --images-only        Remove only Atlas Docker images"
+    log_info "  --networks-only      Remove only Atlas networks" 
+    log_info "  --all               Remove all Atlas resources (default)"
+    log_info "  -h, --help          Show this help message"
+    log_info ""
+    log_info "Examples:"
+    log_info "  $0                          # Remove all Atlas resources"
+    log_info "  $0 --all                    # Remove all Atlas resources"
+    log_info "  $0 --containers-only        # Remove only containers"
+    log_info "  $0 --images-only           # Remove only custom Atlas images"
+    log_info ""
+    log_info "Note: This script preserves external/infrastructure images and non-Atlas resources."
     exit 1
 }
 
@@ -212,7 +209,6 @@ remove_containers() {
                 log_info "  - $container_name ($container_id)"
             fi
         done
-        echo
         
         log_info "Stopping and removing Atlas containers..."
         for container_id in $all_container_ids; do
@@ -242,7 +238,6 @@ remove_volumes() {
         for volume_name in $volume_names; do
             log_info "  - $volume_name"
         done
-        echo
         
         for volume_name in $volume_names; do
             log_info "Removing volume: $volume_name"
@@ -313,7 +308,6 @@ remove_networks() {
         for network_name in $network_names; do
             log_info "  - $network_name"
         done
-        echo
         
         for network_name in $network_names; do
             log_info "Removing network: $network_name"
@@ -367,11 +361,10 @@ main() {
     done
     
     # Header
-    log_info "Atlas Docker Compose Cleanup"
+    log_section "Atlas Docker Compose Cleanup"
     log_info "Compose file: $COMPOSE_FILE"
     log_info "This script will ONLY remove Atlas-related Docker resources."
     log_info "Other Docker resources on your system will be preserved."
-    echo
 
     check_prerequisites
     show_atlas_containers "$PROJECT_NAME"
@@ -396,7 +389,6 @@ main() {
             log_info "  ✓ Volumes and data"
             log_info "  ✓ Custom Docker images (preserving external images)"
             log_info "  ✓ Networks"
-            echo
             
             remove_containers "$COMPOSE_FILE" "$PROJECT_NAME"
             remove_volumes "$COMPOSE_FILE" "$PROJECT_NAME"

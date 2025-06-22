@@ -1,48 +1,56 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: order-service-logs
+  name: user-service-logs
   labels:
-    app: order-service
-    tier: backend
+    app: user-service
+    tier: application
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
-  storageClassName: standard
+  storageClassName: hostpath  # Use Docker Desktop default storage class
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: order-service
+  name: user-service
   labels:
-    app: order-service
-    tier: backend
+    app: user-service
+    tier: application
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: order-service
+      app: user-service
   template:
     metadata:
       labels:
-        app: order-service
-        tier: backend
+        app: user-service
+        tier: application
     spec:
       containers:
-        - name: order-service
-          image: order-service:latest
-          imagePullPolicy: Never
+        - name: user-service
+          image: user-service:latest
+          imagePullPolicy: Never  # For local development
           env:
             - name: SPRING_PROFILES_ACTIVE
-              value: "k8s"
+              valueFrom:
+                configMapKeyRef:
+                  name: atlas-${ENVIRONMENT}-config
+                  key: SPRING_PROFILES_ACTIVE
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: atlas-${ENVIRONMENT}-config
+                  key: LOG_LEVEL
             - name: SERVER_PORT
-              value: "8083"
+              value: "8081"
             # Database configuration
             - name: MYSQL_URL
-              value: "jdbc:mysql://mysql:3306/db_order?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
+              value: "jdbc:mysql://mysql:3306/db_user?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
             - name: MYSQL_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -63,32 +71,22 @@ spec:
             # Kafka configuration
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: "kafka:29092"
-            # Inter-service communication
-            - name: GRPC_CLIENT_USER_ADDRESS
-              value: "static://user-service:50051"
-            - name: GRPC_CLIENT_PRODUCT_ADDRESS
-              value: "static://product-service:50052"
-            - name: API_CLIENT_REST_USER_SERVICE_BASE_URL
-              value: "http://user-service:8081"
-            - name: API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL
-              value: "http://product-service:8082"
+            # Service discovery disabled (using K8s DNS)
+            - name: SPRING_CLOUD_DISCOVERY_ENABLED
+              value: "false"
             # Observability
             - name: ZIPKIN_ENDPOINT
               value: "http://zipkin:9411/api/v2/spans"
-            # Service discovery for K8s (no Eureka)
-            - name: SPRING_CLOUD_DISCOVERY_ENABLED
-              value: "false"
-            # JVM optimization
-            - name: JAVA_TOOL_OPTIONS
-              value: "-XX:MaxRAMPercentage=75.0 -XX:+UseG1GC -XX:+UseContainerSupport"
           ports:
-            - containerPort: 8083
+            - containerPort: 8081
               name: http
+            - containerPort: 50051
+              name: grpc
           # Health checks
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
-              port: 8083
+              port: 8081
             initialDelaySeconds: 120
             periodSeconds: 30
             timeoutSeconds: 10
@@ -96,20 +94,21 @@ spec:
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
-              port: 8083
+              port: 8081
             initialDelaySeconds: 60
             periodSeconds: 10
             timeoutSeconds: 5
             successThreshold: 1
             failureThreshold: 3
+          # Startup probe for slow starting applications
           startupProbe:
             httpGet:
               path: /actuator/health
-              port: 8083
+              port: 8081
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
-            failureThreshold: 12  # Order service may take longer due to dependencies
+            failureThreshold: 10
           # Resource optimization
           resources:
             requests:
@@ -118,27 +117,32 @@ spec:
             limits:
               cpu: "500m"
               memory: "1Gi"
+          # Volume mounts for logs
           volumeMounts:
-            - name: order-service-logs
-              mountPath: /var/log/order-service
+            - name: user-service-logs
+              mountPath: /var/log/user-service
       volumes:
-        - name: order-service-logs
+        - name: user-service-logs
           persistentVolumeClaim:
-            claimName: order-service-logs
+            claimName: user-service-logs
+      # Graceful shutdown
       terminationGracePeriodSeconds: 30
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: order-service
+  name: user-service
   labels:
-    app: order-service
-    tier: backend
+    app: user-service
+    tier: application
 spec:
   selector:
-    app: order-service
+    app: user-service
   ports:
-    - port: 8083
-      targetPort: 8083
+    - port: 8081
+      targetPort: 8081
       name: http
+    - port: 50051
+      targetPort: 50051
+      name: grpc
   type: ClusterIP 

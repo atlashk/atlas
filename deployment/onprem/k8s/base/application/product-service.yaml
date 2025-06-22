@@ -1,48 +1,56 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: auth-server-logs
+  name: product-service-logs
   labels:
-    app: auth-server
-    tier: backend
+    app: product-service
+    tier: application
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
-  storageClassName: standard
+  storageClassName: hostpath  # Use Docker Desktop default storage class
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-server
+  name: product-service
   labels:
-    app: auth-server
-    tier: backend
+    app: product-service
+    tier: application
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: auth-server
+      app: product-service
   template:
     metadata:
       labels:
-        app: auth-server
-        tier: backend
+        app: product-service
+        tier: application
     spec:
       containers:
-        - name: auth-server
-          image: auth-server:latest
+        - name: product-service
+          image: product-service:latest
           imagePullPolicy: Never
           env:
             - name: SPRING_PROFILES_ACTIVE
-              value: "k8s"
+              valueFrom:
+                configMapKeyRef:
+                  name: atlas-${ENVIRONMENT}-config
+                  key: SPRING_PROFILES_ACTIVE
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: atlas-${ENVIRONMENT}-config
+                  key: LOG_LEVEL
             - name: SERVER_PORT
-              value: "8091"
+              value: "8082"
             # Database configuration
             - name: MYSQL_URL
-              value: "jdbc:mysql://mysql:3306/db_auth?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
+              value: "jdbc:mysql://mysql:3306/db_product?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
             - name: MYSQL_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -53,28 +61,32 @@ spec:
                 secretKeyRef:
                   name: mysql-secret
                   key: mysql-password
-            # Redis configuration for session management
+            - name: MYSQL_QUARTZ_URL
+              value: "jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
+            # Redis configuration
             - name: REDIS_HOST
               value: "redis"
             - name: REDIS_PORT
               value: "6379"
+            # Kafka configuration
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka:29092"
+            # Service discovery disabled (using K8s DNS)
+            - name: SPRING_CLOUD_DISCOVERY_ENABLED
+              value: "false"
             # Observability
             - name: ZIPKIN_ENDPOINT
               value: "http://zipkin:9411/api/v2/spans"
-            # Service discovery for K8s (no Eureka)
-            - name: SPRING_CLOUD_DISCOVERY_ENABLED
-              value: "false"
-            # JVM optimization
-            - name: JAVA_TOOL_OPTIONS
-              value: "-XX:MaxRAMPercentage=75.0 -XX:+UseG1GC -XX:+UseContainerSupport"
           ports:
-            - containerPort: 8091
+            - containerPort: 8082
               name: http
+            - containerPort: 50052
+              name: grpc
           # Health checks
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
-              port: 8091
+              port: 8082
             initialDelaySeconds: 120
             periodSeconds: 30
             timeoutSeconds: 10
@@ -82,7 +94,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
-              port: 8091
+              port: 8082
             initialDelaySeconds: 60
             periodSeconds: 10
             timeoutSeconds: 5
@@ -91,39 +103,43 @@ spec:
           startupProbe:
             httpGet:
               path: /actuator/health
-              port: 8091
+              port: 8082
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 10
+          # Resource optimization
           resources:
             requests:
               cpu: "200m"
-              memory: "384Mi"
+              memory: "512Mi"
             limits:
-              cpu: "400m"
-              memory: "768Mi"
+              cpu: "500m"
+              memory: "1Gi"
           volumeMounts:
-            - name: auth-server-logs
-              mountPath: /var/log/auth-server
+            - name: product-service-logs
+              mountPath: /var/log/product-service
       volumes:
-        - name: auth-server-logs
+        - name: product-service-logs
           persistentVolumeClaim:
-            claimName: auth-server-logs
+            claimName: product-service-logs
       terminationGracePeriodSeconds: 30
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: auth-server
+  name: product-service
   labels:
-    app: auth-server
-    tier: backend
+    app: product-service
+    tier: application
 spec:
   selector:
-    app: auth-server
+    app: product-service
   ports:
-    - port: 8091
-      targetPort: 8091
+    - port: 8082
+      targetPort: 8082
       name: http
+    - port: 50052
+      targetPort: 50052
+      name: grpc
   type: ClusterIP 

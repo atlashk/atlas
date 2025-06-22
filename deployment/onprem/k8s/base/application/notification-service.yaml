@@ -1,48 +1,56 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: product-service-logs
+  name: notification-service-logs
   labels:
-    app: product-service
-    tier: backend
+    app: notification-service
+    tier: application
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
-  storageClassName: standard
+  storageClassName: hostpath  # Use Docker Desktop default storage class
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: product-service
+  name: notification-service
   labels:
-    app: product-service
-    tier: backend
+    app: notification-service
+    tier: application
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: product-service
+      app: notification-service
   template:
     metadata:
       labels:
-        app: product-service
-        tier: backend
+        app: notification-service
+        tier: application
     spec:
       containers:
-        - name: product-service
-          image: product-service:latest
+        - name: notification-service
+          image: notification-service:latest
           imagePullPolicy: Never
           env:
             - name: SPRING_PROFILES_ACTIVE
-              value: "k8s"
+              valueFrom:
+                configMapKeyRef:
+                  name: atlas-${ENVIRONMENT}-config
+                  key: SPRING_PROFILES_ACTIVE
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: atlas-${ENVIRONMENT}-config
+                  key: LOG_LEVEL
             - name: SERVER_PORT
-              value: "8082"
+              value: "8084"
             # Database configuration
             - name: MYSQL_URL
-              value: "jdbc:mysql://mysql:3306/db_product?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
+              value: "jdbc:mysql://mysql:3306/db_notification?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
             - name: MYSQL_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -63,25 +71,23 @@ spec:
             # Kafka configuration
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: "kafka:29092"
+            # Service discovery disabled (using K8s DNS)
+            - name: SPRING_CLOUD_DISCOVERY_ENABLED
+              value: "false"
+            # SMTP configuration
+            - name: MAIL_SERVER_HOST
+              value: "smtp4dev"
             # Observability
             - name: ZIPKIN_ENDPOINT
               value: "http://zipkin:9411/api/v2/spans"
-            # Service discovery for K8s (no Eureka)
-            - name: SPRING_CLOUD_DISCOVERY_ENABLED
-              value: "false"
-            # JVM optimization
-            - name: JAVA_TOOL_OPTIONS
-              value: "-XX:MaxRAMPercentage=75.0 -XX:+UseG1GC -XX:+UseContainerSupport"
           ports:
-            - containerPort: 8082
+            - containerPort: 8084
               name: http
-            - containerPort: 50052
-              name: grpc
           # Health checks
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
-              port: 8082
+              port: 8084
             initialDelaySeconds: 120
             periodSeconds: 30
             timeoutSeconds: 10
@@ -89,7 +95,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
-              port: 8082
+              port: 8084
             initialDelaySeconds: 60
             periodSeconds: 10
             timeoutSeconds: 5
@@ -98,7 +104,7 @@ spec:
           startupProbe:
             httpGet:
               path: /actuator/health
-              port: 8082
+              port: 8084
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -112,29 +118,26 @@ spec:
               cpu: "500m"
               memory: "1Gi"
           volumeMounts:
-            - name: product-service-logs
-              mountPath: /var/log/product-service
+            - name: notification-service-logs
+              mountPath: /var/log/notification-service
       volumes:
-        - name: product-service-logs
+        - name: notification-service-logs
           persistentVolumeClaim:
-            claimName: product-service-logs
+            claimName: notification-service-logs
       terminationGracePeriodSeconds: 30
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: product-service
+  name: notification-service
   labels:
-    app: product-service
-    tier: backend
+    app: notification-service
+    tier: application
 spec:
   selector:
-    app: product-service
+    app: notification-service
   ports:
-    - port: 8082
-      targetPort: 8082
+    - port: 8084
+      targetPort: 8084
       name: http
-    - port: 50052
-      targetPort: 50052
-      name: grpc
   type: ClusterIP 

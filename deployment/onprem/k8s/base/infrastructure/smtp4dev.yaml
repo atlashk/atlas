@@ -68,4 +68,4 @@ spec:
     - port: 25
       targetPort: 25
       name: smtp
-  type: ClusterIP 
+  type: ClusterIP

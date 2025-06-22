@@ -314,7 +314,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: standard  # Use default storage class for local development
+  storageClassName: hostpath  # Use Docker Desktop default storage class
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -420,4 +420,4 @@ spec:
     - port: 3306
       targetPort: 3306
       name: mysql
-  type: ClusterIP 
+  type: ClusterIP

@@ -1,43 +1,4 @@
 apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: redis-config
-  labels:
-    app: redis
-    tier: infrastructure
-data:
-  redis.conf: |
-    # Redis configuration for Atlas platform
-    
-    # Memory management
-    maxmemory 256mb
-    maxmemory-policy allkeys-lru
-    
-    # Persistence
-    appendonly yes
-    appendfsync everysec
-    auto-aof-rewrite-percentage 100
-    auto-aof-rewrite-min-size 64mb
-    
-    # Network
-    timeout 0
-    tcp-keepalive 300
-    
-    # Logging
-    loglevel notice
-    
-    # Performance
-    tcp-backlog 511
-    databases 16
-    
-    # Security (for local development)
-    protected-mode no
-    
-    # Disable some potentially dangerous commands in production
-    # rename-command FLUSHDB ""
-    # rename-command FLUSHALL ""
----
-apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: redis-data
@@ -50,7 +11,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: standard
+  storageClassName: hostpath  # Use Docker Desktop default storage class
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -75,14 +36,6 @@ spec:
       containers:
         - name: redis
           image: redis:7-alpine
-          command:
-            - redis-server
-            - --appendonly
-            - "yes"
-            - --maxmemory
-            - "256mb"
-            - --maxmemory-policy
-            - "allkeys-lru"
           ports:
             - containerPort: 6379
               name: redis
@@ -142,4 +95,4 @@ spec:
     - port: 6379
       targetPort: 6379
       name: redis
-  type: ClusterIP 
+  type: ClusterIP

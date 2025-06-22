@@ -4,14 +4,14 @@ metadata:
   name: api-gateway-logs
   labels:
     app: api-gateway
-    tier: backend
+    tier: application
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
-  storageClassName: standard
+  storageClassName: hostpath  # Use Docker Desktop default storage class
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -19,7 +19,7 @@ metadata:
   name: api-gateway
   labels:
     app: api-gateway
-    tier: backend
+    tier: application
 spec:
   replicas: 1
   selector:
@@ -29,7 +29,7 @@ spec:
     metadata:
       labels:
         app: api-gateway
-        tier: backend
+        tier: application
     spec:
       containers:
         - name: api-gateway
@@ -37,10 +37,24 @@ spec:
           imagePullPolicy: Never
           env:
             - name: SPRING_PROFILES_ACTIVE
-              value: "k8s"
+              valueFrom:
+                configMapKeyRef:
+                  name: atlas-${ENVIRONMENT}-config
+                  key: SPRING_PROFILES_ACTIVE
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: atlas-${ENVIRONMENT}-config
+                  key: LOG_LEVEL
             - name: SERVER_PORT
               value: "8080"
-            # Redis configuration for session management
+            # Service discovery disabled (using K8s DNS)
+            - name: SPRING_CLOUD_DISCOVERY_ENABLED
+              value: "false"
+            # JWT configuration
+            - name: JWK_SET_URI
+              value: "http://auth-server:8091/.well-known/jwks.json"
+            # Redis configuration
             - name: REDIS_HOST
               value: "redis"
             - name: REDIS_PORT
@@ -48,12 +62,6 @@ spec:
             # Observability
             - name: ZIPKIN_ENDPOINT
               value: "http://zipkin:9411/api/v2/spans"
-            # Service discovery for K8s (no Eureka)
-            - name: SPRING_CLOUD_DISCOVERY_ENABLED
-              value: "false"
-            # JVM optimization for gateway
-            - name: JAVA_TOOL_OPTIONS
-              value: "-XX:MaxRAMPercentage=75.0 -XX:+UseG1GC -XX:+UseContainerSupport"
           ports:
             - containerPort: 8080
               name: http
@@ -85,11 +93,11 @@ spec:
             failureThreshold: 10
           resources:
             requests:
-              cpu: "250m"
-              memory: "384Mi"
+              cpu: "200m"
+              memory: "512Mi"
             limits:
               cpu: "500m"
-              memory: "768Mi"
+              memory: "1Gi"
           volumeMounts:
             - name: api-gateway-logs
               mountPath: /var/log/api-gateway
@@ -105,7 +113,7 @@ metadata:
   name: api-gateway
   labels:
     app: api-gateway
-    tier: backend
+    tier: application
 spec:
   selector:
     app: api-gateway

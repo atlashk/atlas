@@ -9,6 +9,7 @@
 ## Technical Stack
 
 ### Backend
+
 - **Java 17** - Core programming language
 - **Spring Boot 3.4.0** - Main application framework
 - **Spring Framework 6.2.0** - Core Spring framework
@@ -19,6 +20,7 @@
 - **Gradle** - Build automation tool
 
 ### Frontend
+
 - **Vue.js 3.5.14** - Progressive web framework
 - **TypeScript 5.8.0** - Type-safe JavaScript
 - **Vite 6.3.5** - Build tool and dev server
@@ -26,15 +28,20 @@
 - **Vue Router 4.5.1** - Client-side routing
 - **Axios 1.9.0** - HTTP client
 
-### Infrastructure & DevOps
+### Deployment
+
 - **Docker & Docker Compose** - Containerization
 - **Kubernetes** - Container orchestration (optional)
-- **Eureka** - Service discovery
-- **Spring Cloud Gateway** - API gateway
+
+### Observabilities
+
+- **Promptail** & **Loki** - Log aggregation
+- **Prometheus** - Metrics
 - **Zipkin** - Distributed tracing
-- **Prometheus & Grafana** - Monitoring and metrics
+- **Grafana** - Visualization and monitoring dashboards
 
 ### Architecture Patterns
+
 - **Microservices Architecture** - Service decomposition
 - **Domain-Driven Design (DDD)** - Business logic organization
 - **Event-Driven Architecture** - Asynchronous communication
@@ -47,9 +54,13 @@
 
 Atlas uses a unified DevOps approach with reorganized build scripts. Choose your preferred deployment method below.
 
+**Deployment Options:**
+- **Docker Compose** - Recommended for local development, includes Eureka service discovery
+- **Kubernetes** - Production-ready with native DNS service discovery, no Eureka required
+
 ### Prerequisites
 
-- **Mininum memory** - 8GB
+- **Mininum memory** - 8Gb
 - **Java 17+** - For building the project
 - **Node.js 22+** - For frontend development
 - **Docker & Docker Compose** - For running services
@@ -133,16 +144,83 @@ bash compose-clean.sh --volumes-only     # Remove only volumes
 bash compose-clean.sh --images-only      # Remove only images
 ```
 
-**Note:** When using manual setup, you work directly with the compose scripts in `deployment/onprem/compose/scripts/`:
-- `compose-start.sh` - Start all services
-- `compose-stop.sh` - Stop all services gracefully  
-- `compose-clean.sh` - Clean up containers, volumes, and images
-
 ### ☸️ Kubernetes Setup
 
-### 🌐 Access Frontend
+Atlas provides a simplified, kubectl-based deployment for Kubernetes with full environment support. Each environment runs in a separate namespace.
 
-The frontend is automatically built and deployed as part of the Docker Compose stack.
+**Prerequisites:**
+- Kubernetes cluster (minikube, kind, Docker Desktop, etc.)
+- kubectl configured and connected to your cluster
+
+**Quick Start:**
+```bash
+# Navigate to Kubernetes deployment directory
+cd deployment/onprem/k8s
+
+# Start local development environment (Ingress setup included automatically)
+./scripts/k8s-start.sh
+
+# Start other environments
+./scripts/k8s-start.sh dev     # Development environment
+./scripts/k8s-start.sh stg     # Staging environment
+./scripts/k8s-start.sh prod    # Production environment
+
+# Stop environment
+./scripts/k8s-stop.sh
+
+# Complete cleanup (including volumes)
+./scripts/k8s-clean.sh
+```
+
+**What happens automatically:**
+- ✅ **NGINX Ingress Controller** - Installed automatically if not present
+- ✅ **Local Hostnames** - Added to `/etc/hosts` (you may be prompted for sudo password)
+- ✅ **Direct URL Access** - No port-forwarding needed
+- ✅ **Platform Detection** - Works with minikube, kind, Docker Desktop automatically
+
+**Access Services via Ingress (Recommended):**
+After setting up Ingress, access services using local hostnames:
+- **Frontend**: http://atlas.local
+- **API Gateway**: http://api.atlas.local  
+- **Grafana**: http://grafana.atlas.local (admin/admin)
+- **Prometheus**: http://prometheus.atlas.local
+- **Zipkin**: http://zipkin.atlas.local
+- **SMTP4Dev**: http://mail.atlas.local
+
+**Alternative: Access Services (Port Forwarding):**
+```bash
+# API Gateway
+kubectl port-forward -n atlas-local svc/api-gateway 8080:8080
+
+# Frontend
+kubectl port-forward -n atlas-local svc/frontend 9000:9000
+
+# Grafana
+kubectl port-forward -n atlas-local svc/grafana 3000:3000
+
+# Prometheus
+kubectl port-forward -n atlas-local svc/prometheus 9090:9090
+
+# Zipkin
+kubectl port-forward -n atlas-local svc/zipkin 9411:9411
+```
+
+**Monitoring & Debugging:**
+```bash
+# Check deployment status
+kubectl get all -n atlas-local
+
+# View logs
+kubectl logs -n atlas-local deployment/user-service -f
+
+# Check ConfigMaps
+kubectl get configmaps -n atlas-local
+
+# Describe problematic pods
+kubectl describe pod -n atlas-local <pod-name>
+```
+
+### 🌐 Access Frontend
 
 The web application will be accessible at **http://localhost:9000**
 
@@ -151,6 +229,7 @@ The web application will be accessible at **http://localhost:9000**
 - **Admin Dashboard**: `admin` / `Aa@123456`
 
 **Development Mode (Optional):**
+
 If you want to run frontend in development mode:
 
 ```bash
@@ -159,36 +238,3 @@ npm install
 npm run dev
 # Access at http://localhost:5173
 ```
-
-### 📊 Service URLs
-
-Once running, access these services:
-
-| Service | URL | Credentials |
-|---------|-----|-------------|
-| **Frontend (Customer)** | http://localhost:9000 | user : Aa@123456 |
-| **Frontend (Admin)** | http://localhost:9000/admin | admin : Aa@123456 |
-| **API Gateway** | http://localhost:8080 | - |
-| **Eureka Discovery** | http://localhost:8761 | - |
-| **Prometheus** | http://localhost:9090 | - |
-| **Grafana** | http://localhost:3000 | admin : admin |
-| **Zipkin Tracing** | http://localhost:9411 | - |
-| **SMTP4Dev (Email)** | http://localhost:5000 | - |
-
-### 🗃️ Database Connections
-
-| Database | Connection | Credentials |
-|----------|------------|-------------|
-| **MySQL** | localhost:3306 | root : root |
-| **Redis** | localhost:6379 | (no password) |
-| **Kafka** | localhost:9092 | (no auth) |
-
-### 📚 Documentation
-
-For detailed documentation, see the [wiki/](wiki/) directory which contains:
-- Architecture documentation
-- API design guidelines
-- Deployment strategies
-- Development best practices
-
-### 🏗️ Project Structure

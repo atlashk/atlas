@@ -67,10 +67,10 @@ check_node_prerequisites() {
 SKIP_BUILD=false
 
 usage() {
-    echo "Usage: $0 [OPTIONS]"
-    echo "Options:"
-    echo "  --skip-build    Skip all build steps (backend JAR, frontend, Docker images)"
-    echo "  -h, --help      Show this help message"
+    log_info "Usage: $0 [OPTIONS]"
+    log_info "Options:"
+    log_info "  --skip-build    Skip all build steps (backend JAR, frontend, Docker images)"
+    log_info "  -h, --help      Show this help message"
     exit 1
 }
 
