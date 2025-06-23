@@ -1,8 +1,14 @@
 #!/bin/bash
 
+# =============================================================================
+# Atlas Docker Compose Start Script
+# =============================================================================
+# This script starts the Atlas microservices platform using Docker Compose
+# =============================================================================
+
 set -euo pipefail
 
-# Project configuration (previously in config.sh)
+# Project configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
 PROJECT_NAME="atlas-onprem-compose"
@@ -11,21 +17,49 @@ COMPOSE_FILE="$PROJECT_ROOT/deployment/onprem/compose/docker-compose.yml"
 # Source logger
 source "$PROJECT_ROOT/deployment/utils/logger.sh"
 
-# Check Docker Compose prerequisites (previously in docker-helper.sh)
-check_docker_compose_prerequisites() {
-    if ! docker info > /dev/null 2>&1; then
-        log_error "Docker is not running. Please start Docker and try again."
-        exit 1
-    fi
-    
-    if ! command -v docker-compose &> /dev/null; then
-        log_error "Docker Compose is not installed"
-        exit 1
-    fi
-}
+# Default options
+SKIP_BUILD=false
 
-# Check Java prerequisites
-check_java_prerequisites() {
+# Show usage if help is requested
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+    log_info "Usage: $0 [OPTIONS]"
+    log_info ""
+    log_info "Atlas Docker Compose Start Script - Starts the Atlas microservices platform"
+    log_info ""
+    log_info "Options:"
+    log_info "  --skip-build        Skip all build steps (backend JAR, frontend, Docker images)"
+    log_info "  -h, --help          Show this help message"
+    log_info ""
+    log_info "Examples:"
+    log_info "  $0                  # Start with builds"
+    log_info "  $0 --skip-build     # Start without builds"
+    exit 0
+fi
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --skip-build)
+            SKIP_BUILD=true
+            shift
+            ;;
+        *)
+            log_error "Unknown option: $1"
+            log_info "Use --help for usage information"
+            exit 1
+            ;;
+    esac
+done
+
+# =============================================================================
+# UTILITY FUNCTIONS
+# =============================================================================
+
+# Check prerequisites
+check_prerequisites() {
+    log_info "Checking prerequisites..."
+
+    # Check Java
     if ! command -v java &> /dev/null; then
         log_error "Java is not installed. Please install Java 17 or later."
         exit 1
@@ -44,10 +78,8 @@ check_java_prerequisites() {
         fi
         log_success "Java found: $java_version"
     fi
-}
 
-# Check Node.js prerequisites
-check_node_prerequisites() {
+    # Check Node.js
     if ! command -v node &> /dev/null; then
         log_error "Node.js is not installed. Please install Node.js 22 or later."
         exit 1
@@ -61,48 +93,24 @@ check_node_prerequisites() {
         fi
         log_success "Node.js found: v$node_version"
     fi
-}
-
-# Parse command line arguments
-SKIP_BUILD=false
-
-usage() {
-    log_info "Usage: $0 [OPTIONS]"
-    log_info "Options:"
-    log_info "  --skip-build    Skip all build steps (backend JAR, frontend, Docker images)"
-    log_info "  -h, --help      Show this help message"
-    exit 1
-}
-
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --skip-build)
-            SKIP_BUILD=true
-            shift
-            ;;
-        -h|--help)
-            usage
-            ;;
-        *)
-            echo "Unknown option: $1"
-            usage
-            ;;
-    esac
-done
-
-# Check prerequisites
-check_prerequisites() {
-    log_info "Checking prerequisites..."
-
-    # Check Java
-    check_java_prerequisites
-
-    # Check Node.js for frontend
-    check_node_prerequisites
 
     # Check Docker and Docker Compose
-    check_docker_compose_prerequisites
+    if ! docker info > /dev/null 2>&1; then
+        log_error "Docker is not running. Please start Docker and try again."
+        exit 1
+    fi
+    
+    if ! command -v docker-compose &> /dev/null; then
+        log_error "Docker Compose is not installed"
+        exit 1
+    fi
+    
+    log_success "Prerequisites check passed"
 }
+
+# =============================================================================
+# BUILD FUNCTIONS
+# =============================================================================
 
 # Build backend using existing script
 build_backend() {
@@ -161,11 +169,15 @@ build_docker_images() {
     fi
 }
 
+# =============================================================================
+# START FUNCTIONS
+# =============================================================================
+
 # Start all services
 start_services() {
     log_section "Starting Atlas services..."
     
-    log_info "Using unified compose file: $COMPOSE_FILE"
+    log_info "Using compose file: $COMPOSE_FILE"
     log_info "Starting all Atlas services..."
 
     # Start all services defined in the compose file
@@ -185,9 +197,13 @@ start_services() {
     log_info "  - Frontend: http://localhost:9000"
 }
 
-# Main execution
+# =============================================================================
+# MAIN EXECUTION
+# =============================================================================
+
+# Main function
 main() {
-    log_section "Atlas Development Environment Setup"
+    log_section "Atlas Docker Compose Platform - Starting"
     
     check_prerequisites
     
@@ -201,9 +217,9 @@ main() {
     
     start_services
     
-    log_section "Development Environment Ready!"
-    log_success "Your Atlas development environment is now set up and running!"
+    log_success "Atlas platform started successfully!"
+    log_success "Your Atlas development environment is now ready to use!"
 }
 
 # Run main function
-main "$@"
+main

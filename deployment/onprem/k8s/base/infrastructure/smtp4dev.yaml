@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: smtp4dev
   labels:
@@ -7,6 +7,7 @@ metadata:
     tier: infrastructure
 spec:
   replicas: 1
+  serviceName: smtp4dev
   selector:
     matchLabels:
       app: smtp4dev
@@ -27,6 +28,9 @@ spec:
               name: http
             - containerPort: 25
               name: smtp
+          volumeMounts:
+            - name: smtp4dev-data
+              mountPath: /smtp4dev
           livenessProbe:
             httpGet:
               path: /
@@ -50,6 +54,19 @@ spec:
               cpu: "200m"
               memory: "256Mi"
       terminationGracePeriodSeconds: 30
+  volumeClaimTemplates:
+    - metadata:
+        name: smtp4dev-data
+        labels:
+          app: smtp4dev
+          tier: infrastructure
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: hostpath
 ---
 apiVersion: v1
 kind: Service
@@ -59,6 +76,7 @@ metadata:
     app: smtp4dev
     tier: infrastructure
 spec:
+  clusterIP: None
   selector:
     app: smtp4dev
   ports:

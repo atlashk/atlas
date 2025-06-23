@@ -1,21 +1,12 @@
 #!/bin/bash
 
-set -euo pipefail
-
 # =============================================================================
 # Atlas Docker Compose Cleanup Script
 # =============================================================================
-# This script safely removes ONLY Atlas-related Docker resources:
-# - Containers: Only those defined in the Atlas compose file
-# - Volumes: Only those with the Atlas project prefix
-# - Images: Only custom Atlas images (preserves external/infrastructure images)
-# - Networks: Only Atlas-specific networks
-# - Dangling resources: Only those related to Atlas services
-#
-# IMPORTANT: This script will NOT remove containers, images, or other resources
-# that don't belong to the Atlas project. Other Docker resources on your system
-# will be preserved.
+# This script safely removes ONLY Atlas-related Docker resources
 # =============================================================================
+
+set -euo pipefail
 
 # Project configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -25,6 +16,23 @@ COMPOSE_FILE="$PROJECT_ROOT/deployment/onprem/compose/docker-compose.yml"
 
 # Source logger
 source "$PROJECT_ROOT/deployment/utils/logger.sh"
+
+# Show usage if help is requested
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+    log_info "Usage: $0"
+    log_info ""
+    log_info "Atlas Docker Compose Cleanup Script - Removes all Atlas-related Docker resources"
+    log_info ""
+    log_info "This script removes:"
+    log_info "  - Containers: Only those defined in the Atlas compose file"
+    log_info "  - Volumes: Only those with the Atlas project prefix"
+    log_info "  - Images: Only custom Atlas images (preserves external/infrastructure images)"
+    log_info "  - Networks: Only Atlas-specific networks"
+    log_info ""
+    log_info "⚠️  WARNING: This operation is DESTRUCTIVE and will delete Atlas data!"
+    log_info "Other Docker resources on your system will be preserved."
+    exit 0
+fi
 
 # =============================================================================
 # CONFIGURATION - Centralized resource definitions
@@ -83,8 +91,10 @@ declare -ra ATLAS_IMAGES=(
 # UTILITY FUNCTIONS
 # =============================================================================
 
-# Check Docker Compose prerequisites
+# Check prerequisites
 check_prerequisites() {
+    log_info "Checking prerequisites..."
+    
     if ! docker info > /dev/null 2>&1; then
         log_error "Docker is not running. Please start Docker and try again."
         exit 1
@@ -94,6 +104,8 @@ check_prerequisites() {
         log_error "Docker Compose is not installed"
         exit 1
     fi
+    
+    log_success "Prerequisites check passed"
 }
 
 # Get container IDs by name pattern
@@ -106,67 +118,6 @@ get_container_ids() {
 get_container_status() {
     local pattern=$1
     docker ps -a --filter "name=${pattern}" --format "{{.Names}} ({{.Status}})" 2>/dev/null || true
-}
-
-# =============================================================================
-# DISPLAY FUNCTIONS
-# =============================================================================
-
-# Show current Atlas containers
-show_atlas_containers() {
-    local project_prefix=$1
-    
-    log_info "Current Atlas containers:"
-    local found_containers=false
-    
-    # Check containers by project prefix
-    local container_status
-    container_status=$(get_container_status "${project_prefix}_")
-    if [ -n "$container_status" ]; then
-        while read -r line; do
-            if [ -n "$line" ]; then
-                log_info "  - $line"
-                found_containers=true
-            fi
-        done <<< "$container_status"
-    fi
-    
-    # Check containers by explicit names
-    for container_name in "${ATLAS_CONTAINERS[@]}"; do
-        container_status=$(get_container_status "^${container_name}$")
-        if [ -n "$container_status" ]; then
-            log_info "  - $container_status"
-            found_containers=true
-        fi
-    done
-    
-    if [ "$found_containers" = false ]; then
-        log_info "  No Atlas containers found"
-    fi
-}
-
-# Print usage
-usage() {
-    log_info "Usage: $0 [OPTIONS]"
-    log_info ""
-    log_info "Atlas Docker Compose Cleanup Script - Safely removes ONLY Atlas-related resources"
-    log_info ""
-    log_info "Options:"
-    log_info "  --containers-only    Stop and remove only Atlas containers"
-    log_info "  --volumes-only       Remove only Atlas volumes"
-    log_info "  --images-only        Remove only Atlas Docker images"
-    log_info "  --networks-only      Remove only Atlas networks" 
-    log_info "  --all               Remove all Atlas resources (default)"
-    log_info "  -h, --help          Show this help message"
-    log_info ""
-    log_info "Examples:"
-    log_info "  $0                          # Remove all Atlas resources"
-    log_info "  $0 --all                    # Remove all Atlas resources"
-    log_info "  $0 --containers-only        # Remove only containers"
-    log_info "  $0 --images-only           # Remove only custom Atlas images"
-    log_info ""
-    log_info "Note: This script preserves external/infrastructure images and non-Atlas resources."
-    exit 1
 }
 
 # =============================================================================
@@ -324,81 +275,30 @@ remove_networks() {
 # MAIN EXECUTION
 # =============================================================================
 
+# Main function
 main() {
-    local mode="all"
-    
-    # Parse command line arguments
-    while [[ $# -gt 0 ]]; do
-        case $1 in
-            --containers-only)
-                mode="containers"
-                shift
-                ;;
-            --volumes-only)
-                mode="volumes"
-                shift
-                ;;
-            --images-only)
-                mode="images"
-                shift
-                ;;
-            --networks-only)
-                mode="networks"
-                shift
-                ;;
-            --all)
-                mode="all"
-                shift
-                ;;
-            -h|--help)
-                usage
-                ;;
-            *)
-                log_error "Unknown option: $1"
-                usage
-                ;;
-        esac
-    done
-    
-    # Header
-    log_section "Atlas Docker Compose Cleanup"
+    log_section "Atlas Docker Compose - Complete Cleanup"
     log_info "Compose file: $COMPOSE_FILE"
-    log_info "This script will ONLY remove Atlas-related Docker resources."
+    log_info "This script will remove ALL Atlas-related Docker resources:"
+    log_info "  ✓ Containers (stopped and running)"
+    log_info "  ✓ Volumes and data"
+    log_info "  ✓ Custom Docker images (preserving external images)"
+    log_info "  ✓ Networks"
+    log_info ""
     log_info "Other Docker resources on your system will be preserved."
+    log_info ""
 
     check_prerequisites
-    show_atlas_containers "$PROJECT_NAME"
 
-    # Execute cleanup based on mode
-    case "$mode" in
-        containers)
-            remove_containers "$COMPOSE_FILE" "$PROJECT_NAME"
-            ;;
-        volumes)
-            remove_volumes "$COMPOSE_FILE" "$PROJECT_NAME"
-            ;;
-        images)
-            remove_images "$COMPOSE_FILE" "$PROJECT_NAME"
-            ;;
-        networks)
-            remove_networks "$COMPOSE_FILE" "$PROJECT_NAME"
-            ;;
-        all)
-            log_info "Removing all Atlas resources:"
-            log_info "  ✓ Containers (stopped and running)"
-            log_info "  ✓ Volumes and data"
-            log_info "  ✓ Custom Docker images (preserving external images)"
-            log_info "  ✓ Networks"
-            
-            remove_containers "$COMPOSE_FILE" "$PROJECT_NAME"
-            remove_volumes "$COMPOSE_FILE" "$PROJECT_NAME"
-            remove_images "$COMPOSE_FILE" "$PROJECT_NAME"
-            remove_networks "$COMPOSE_FILE" "$PROJECT_NAME"
-            
-            log_success "All Atlas resources removed successfully!"
-            ;;
-    esac
+    # Execute cleanup for all resources
+    remove_containers "$COMPOSE_FILE" "$PROJECT_NAME"
+    remove_volumes "$COMPOSE_FILE" "$PROJECT_NAME"
+    remove_images "$COMPOSE_FILE" "$PROJECT_NAME"
+    remove_networks "$COMPOSE_FILE" "$PROJECT_NAME"
+    
+    log_success "All Atlas resources removed successfully!"
+    log_success "Atlas platform cleanup completed!"
 }
 
 # Run main function
-main "$@"
+main

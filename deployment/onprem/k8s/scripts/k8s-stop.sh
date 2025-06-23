@@ -17,8 +17,61 @@ BASE_DIR="${SCRIPT_DIR}/../base"
 source "$PROJECT_ROOT/deployment/utils/logger.sh"
 
 # Default environment
-ENVIRONMENT="${1:-local}"
+ENVIRONMENT="local"
+
+# Show usage if help is requested
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+    log_info "Usage: $0 [OPTIONS]"
+    log_info ""
+    log_info "Atlas Kubernetes Stop Script - Stops Atlas services"
+    log_info ""
+    log_info "This script STOPS Atlas services by scaling deployments to 0 replicas."
+    log_info "Resources (ConfigMaps, Services, PVCs) are preserved for easy restart."
+    log_info ""
+    log_info "Options:"
+    log_info "  --env ENVIRONMENT       Target environment (default: local)"
+    log_info "  -h, --help              Show this help message"
+    log_info ""
+    log_info "Environments:"
+    log_info "  local (default)         Local development environment"
+    log_info "  dev                     Development environment"
+    log_info "  stg                     Staging environment"
+    log_info "  prod                    Production environment"
+    log_info ""
+    log_info "Examples:"
+    log_info "  $0                      # Stop local environment"
+    log_info "  $0 --env dev            # Stop dev environment"
+    log_info ""
+    log_info "Note: To completely remove resources, use ./k8s-clean.sh instead"
+    exit 0
+fi
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --env)
+            if [[ -n "${2:-}" && ! "$2" =~ ^-- ]]; then
+                ENVIRONMENT="$2"
+                shift 2
+            else
+                log_error "--env requires an environment value"
+                exit 1
+            fi
+            ;;
+        *)
+            log_error "Unknown option: $1"
+            log_info "Use --help for usage information"
+            exit 1
+            ;;
+    esac
+done
+
+# Set namespace based on environment
 NAMESPACE="atlas-${ENVIRONMENT}"
+
+# =============================================================================
+# UTILITY FUNCTIONS
+# =============================================================================
 
 # Function to check prerequisites
 check_prerequisites() {
@@ -36,6 +89,10 @@ check_prerequisites() {
     
     log_success "Prerequisites check passed"
 }
+
+# =============================================================================
+# STOP FUNCTIONS
+# =============================================================================
 
 # Function to gracefully stop services
 graceful_stop() {
@@ -96,17 +153,28 @@ stop_applications() {
 stop_infrastructure() {
     log_section "Stopping Infrastructure Services"
     
-    local services=("smtp4dev" "kafka" "redis" "mysql")
-    
-    for service in "${services[@]}"; do
-        log_info "Stopping $service..."
-        kubectl scale deployment "$service" --replicas=0 -n "$NAMESPACE" 2>/dev/null || {
+    # Infrastructure services that are StatefulSets
+    local statefulsets=(
+        "mysql"
+        "redis"
+        "kafka"
+        # "rabbitmq"
+        "smtp4dev"
+    )
+
+    for service in "${statefulsets[@]}"; do
+        log_info "Stopping $service (StatefulSet)..."
+        kubectl scale statefulset "$service" --replicas=0 -n "$NAMESPACE" 2>/dev/null || {
             log_warn "Failed to stop $service (may not be running)"
         }
     done
-    
+
     log_success "Infrastructure services stopped"
 }
+
+# =============================================================================
+# MAIN EXECUTION
+# =============================================================================
 
 # Main function
 main() {
@@ -120,27 +188,5 @@ main() {
     log_success "Atlas platform stopped successfully!"
 }
 
-# Show usage if help is requested
-if [[ "$1" == "-h" || "$1" == "--help" ]]; then
-    log_info "Usage: $0 [environment]"
-    log_info ""
-    log_info "This script STOPS Atlas services by scaling deployments to 0 replicas."
-    log_info "Resources (ConfigMaps, Services, PVCs) are preserved for easy restart."
-    log_info ""
-    log_info "Environments:"
-    log_info "  local (default) - Local development environment"
-    log_info "  dev             - Development environment"
-    log_info "  stg             - Staging environment"
-    log_info "  prod            - Production environment"
-    log_info ""
-    log_info "Examples:"
-    log_info "  $0              # Stop local environment"
-    log_info "  $0 dev          # Stop dev environment"
-    log_info ""
-    log_info "Note: To completely remove resources, use ./k8s-clean.sh instead"
-    log_info ""
-    exit 0
-fi
-
 # Run main function
-main "$@"
+main

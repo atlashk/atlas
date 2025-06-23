@@ -16,9 +16,72 @@ BASE_DIR="${SCRIPT_DIR}/../base"
 # Load logger
 source "$PROJECT_ROOT/deployment/utils/logger.sh"
 
-# Default environment
-ENVIRONMENT="${1:-local}"
+# Default options
+ENVIRONMENT="local"
+SKIP_BUILD=false
+
+# Show usage if help is requested
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+    log_info "Usage: $0 [OPTIONS]"
+    log_info ""
+    log_info "Atlas Kubernetes Start Script - Starts the Atlas microservices platform"
+    log_info ""
+    log_info "This script automatically sets up:"
+    log_info "  - NGINX Ingress Controller (if not present)"
+    log_info "  - Local hostnames in /etc/hosts (atlas.local, api.atlas.local, etc.)"
+    log_info "  - All Atlas services with Ingress routing"
+    log_info ""
+    log_info "Options:"
+    log_info "  --env ENVIRONMENT   Target environment (default: local)"
+    log_info "  --skip-build        Skip all build steps (backend JAR, frontend, Docker images)"
+    log_info "  -h, --help          Show this help message"
+    log_info ""
+    log_info "Environments:"
+    log_info "  local (default)     Local development environment"
+    log_info "  dev                 Development environment"
+    log_info "  stg                 Staging environment"
+    log_info "  prod                Production environment"
+    log_info ""
+    log_info "Examples:"
+    log_info "  $0                          # Start with local environment"
+    log_info "  $0 --env dev                # Start with dev environment"
+    log_info "  $0 --skip-build             # Start local env, skip builds"
+    log_info "  $0 --env dev --skip-build   # Start dev env, skip builds"
+    log_info ""
+    log_info "Note: You may be prompted for sudo password to modify /etc/hosts"
+    exit 0
+fi
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --env)
+            if [[ -n "${2:-}" && ! "$2" =~ ^-- ]]; then
+                ENVIRONMENT="$2"
+                shift 2
+            else
+                log_error "--env requires an environment value"
+                exit 1
+            fi
+            ;;
+        --skip-build)
+            SKIP_BUILD=true
+            shift
+            ;;
+        *)
+            log_error "Unknown option: $1"
+            log_info "Use --help for usage information"
+            exit 1
+            ;;
+    esac
+done
+
+# Set namespace based on environment
 NAMESPACE="atlas-${ENVIRONMENT}"
+
+# =============================================================================
+# UTILITY FUNCTIONS
+# =============================================================================
 
 # Function to check prerequisites
 check_prerequisites() {
@@ -35,7 +98,62 @@ check_prerequisites() {
         exit 1
     fi
     
+    # Check build prerequisites only if not skipping build
+    if [[ "$SKIP_BUILD" == false ]]; then
+        check_java_prerequisites
+        check_node_prerequisites
+        check_docker_prerequisites
+    fi
+    
     log_success "Prerequisites check passed"
+}
+
+# Check Java prerequisites
+check_java_prerequisites() {
+    if ! command -v java &> /dev/null; then
+        log_error "Java is not installed. Please install Java 17 or later."
+        exit 1
+    else
+        java_version=$(java -version 2>&1 | head -n 1 | cut -d'"' -f2)
+        # Extract major version number
+        major_version=$(echo $java_version | cut -d'.' -f1)
+        # Handle both old (1.8) and new (17) version formats
+        if [[ $major_version == "1" ]]; then
+            major_version=$(echo $java_version | cut -d'.' -f2)
+        fi
+        
+        if [ "$major_version" -lt 17 ]; then
+            log_error "Java version $java_version is not supported. Please install Java 17 or later."
+            exit 1
+        fi
+        log_success "Java found: $java_version"
+    fi
+}
+
+# Check Node.js prerequisites
+check_node_prerequisites() {
+    if ! command -v node &> /dev/null; then
+        log_error "Node.js is not installed. Please install Node.js 22 or later."
+        exit 1
+    else
+        node_version=$(node --version | cut -d'v' -f2)  # Remove 'v' prefix
+        major_version=$(echo $node_version | cut -d'.' -f1)
+        
+        if [ "$major_version" -lt 22 ]; then
+            log_error "Node.js version $node_version is not supported. Please install Node.js 22 or later."
+            exit 1
+        fi
+        log_success "Node.js found: v$node_version"
+    fi
+}
+
+# Check Docker prerequisites
+check_docker_prerequisites() {
+    if ! docker info > /dev/null 2>&1; then
+        log_error "Docker is not running. Please start Docker and try again."
+        exit 1
+    fi
+    log_success "Docker found and running"
 }
 
 # Function to display cluster info
@@ -46,6 +164,71 @@ show_cluster_info() {
     kubectl get nodes -o wide
     log_info ""
 }
+
+# =============================================================================
+# BUILD FUNCTIONS
+# =============================================================================
+
+# Build backend using existing script
+build_backend() {
+    log_section "Building backend JAR files..."
+    
+    local build_script="$PROJECT_ROOT/deployment/build/build-backend.sh"
+    if [ ! -f "$build_script" ]; then
+        log_error "Backend build script not found: $build_script"
+        exit 1
+    fi
+    
+    log_info "Invoking backend build script..."
+    if "$build_script"; then
+        log_success "Backend build completed successfully."
+    else
+        log_error "Backend build failed."
+        exit 1
+    fi
+}
+
+# Build frontend using existing script
+build_frontend() {
+    log_section "Building frontend..."
+    
+    local build_script="$PROJECT_ROOT/deployment/build/build-frontend.sh"
+    if [ ! -f "$build_script" ]; then
+        log_error "Frontend build script not found: $build_script"
+        exit 1
+    fi
+    
+    log_info "Invoking frontend build script..."
+    if "$build_script"; then
+        log_success "Frontend build completed successfully."
+    else
+        log_error "Frontend build failed."
+        exit 1
+    fi
+}
+
+# Build Docker images using existing script
+build_docker_images() {
+    log_section "Building Docker images..."
+    
+    local build_script="$PROJECT_ROOT/deployment/build/build-docker-images.sh"
+    if [ ! -f "$build_script" ]; then
+        log_error "Docker images build script not found: $build_script"
+        exit 1
+    fi
+    
+    log_info "Invoking Docker images build script..."
+    if "$build_script" all; then
+        log_success "Docker images build completed successfully."
+    else
+        log_error "Docker images build failed."
+        exit 1
+    fi
+}
+
+# =============================================================================
+# DEPLOYMENT FUNCTIONS
+# =============================================================================
 
 # Function to create namespace
 create_namespace() {
@@ -79,7 +262,12 @@ deploy_infrastructure() {
         # Wait for deployment to be ready
         if kubectl get deployment "$service" -n "$NAMESPACE" &>/dev/null; then
             log_info "Waiting for $service to be ready..."
-            kubectl wait --for=condition=available --timeout=120s deployment/"$service" -n "$NAMESPACE" || {
+            # Increase timeout for infrastructure services, especially Kafka and Redis
+            local timeout="120s"
+            if [[ "$service" == "kafka" || "$service" == "redis" ]]; then
+                timeout="300s"
+            fi
+            kubectl wait --for=condition=available --timeout="$timeout" deployment/"$service" -n "$NAMESPACE" || {
                 log_warn "$service deployment timeout, continuing..."
             }
         fi
@@ -297,6 +485,10 @@ apply_environment_config() {
     fi
 }
 
+# =============================================================================
+# MAIN EXECUTION
+# =============================================================================
+
 # Main function
 main() {
     log_section "Atlas OnPrem K8s Platform - Starting"
@@ -307,6 +499,15 @@ main() {
     show_cluster_info
     
     log_info "Starting Atlas platform deployment..."
+    
+    # Build steps (if not skipped)
+    if [[ "$SKIP_BUILD" == false ]]; then
+        build_backend
+        build_frontend
+        build_docker_images
+    else
+        log_info "Skipping all build steps (--skip-build flag provided)"
+    fi
     
     # Deploy in order
     create_namespace
@@ -353,29 +554,5 @@ main() {
     log_success "Atlas platform is ready to use!"
 }
 
-# Show usage if help is requested
-if [[ "$1" == "-h" || "$1" == "--help" ]]; then
-    log_info "Usage: $0 [environment]"
-    log_info ""
-    log_info "This script automatically sets up:"
-    log_info "  - NGINX Ingress Controller (if not present)"
-    log_info "  - Local hostnames in /etc/hosts (atlas.local, api.atlas.local, etc.)"
-    log_info "  - All Atlas services with Ingress routing"
-    log_info ""
-    log_info "Environments:"
-    log_info "  local (default) - Local development environment"
-    log_info "  dev             - Development environment"
-    log_info "  stg             - Staging environment"
-    log_info "  prod            - Production environment"
-    log_info ""
-    log_info "Examples:"
-    log_info "  $0              # Start with local environment"
-    log_info "  $0 dev          # Start with dev environment"
-    log_info ""
-    log_info "Note: You may be prompted for sudo password to modify /etc/hosts"
-    log_info ""
-    exit 0
-fi
-
 # Run main function
-main "$@"
+main

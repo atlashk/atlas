@@ -55,23 +55,8 @@ data:
     
     echo "RabbitMQ setup completed successfully!"
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: rabbitmq-data
-  labels:
-    app: rabbitmq
-    tier: infrastructure
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2Gi
-  storageClassName: hostpath  # Use Docker Desktop default storage class
----
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: rabbitmq
   labels:
@@ -79,8 +64,7 @@ metadata:
     tier: infrastructure
 spec:
   replicas: 1
-  strategy:
-    type: Recreate  # Use Recreate for message broker to avoid conflicts
+  serviceName: rabbitmq
   selector:
     matchLabels:
       app: rabbitmq
@@ -158,13 +142,23 @@ spec:
               cpu: "500m"
               memory: "512Mi"
       volumes:
-        - name: rabbitmq-data
-          persistentVolumeClaim:
-            claimName: rabbitmq-data
         - name: rabbitmq-config
           configMap:
             name: rabbitmq-config
       terminationGracePeriodSeconds: 30
+  volumeClaimTemplates:
+    - metadata:
+        name: rabbitmq-data
+        labels:
+          app: rabbitmq
+          tier: infrastructure
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi
+        storageClassName: hostpath
 ---
 apiVersion: v1
 kind: Service
@@ -174,6 +168,7 @@ metadata:
     app: rabbitmq
     tier: infrastructure
 spec:
+  clusterIP: None  # Headless service for StatefulSet
   selector:
     app: rabbitmq
   ports:

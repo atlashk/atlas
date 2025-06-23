@@ -16,6 +16,24 @@ spec:
         app: zipkin
         tier: infrastructure
     spec:
+      initContainers:
+        - name: wait-for-mysql
+          image: mysql:8.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              until mysqladmin ping -h mysql -P 3306 -u root -p"$MYSQL_ROOT_PASSWORD" --silent; do
+                echo "Waiting for MySQL to be ready..."
+                sleep 5
+              done
+              echo "MySQL is ready!"
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: mysql-root-password
       containers:
         - name: zipkin
           image: openzipkin/zipkin
@@ -24,18 +42,21 @@ spec:
               value: "mysql"
             - name: MYSQL_HOST
               value: "mysql"
+            - name: MYSQL_PORT
+              value: "3306"
             - name: MYSQL_DB
               value: "db_zipkin"
             - name: MYSQL_USER
-              valueFrom:
-                secretKeyRef:
-                  name: mysql-secret
-                  key: mysql-username
+              value: "root"
             - name: MYSQL_PASS
               valueFrom:
                 secretKeyRef:
                   name: mysql-secret
-                  key: mysql-password
+                  key: mysql-root-password
+            - name: MYSQL_TCP_KEEP_ALIVE
+              value: "true"
+            - name: MYSQL_MAX_CONNECTIONS
+              value: "10"
           ports:
             - containerPort: 9411
               name: http
@@ -43,17 +64,18 @@ spec:
             httpGet:
               path: /health
               port: 9411
-            initialDelaySeconds: 60
+            initialDelaySeconds: 90
             periodSeconds: 30
             timeoutSeconds: 10
-            failureThreshold: 3
+            failureThreshold: 5
           readinessProbe:
             httpGet:
               path: /health
               port: 9411
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            timeoutSeconds: 5
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 10
+            failureThreshold: 5
           resources:
             requests:
               cpu: "100m"
