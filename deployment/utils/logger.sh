@@ -1,6 +1,11 @@
 #!/bin/bash
 
-# Logging utility functions
+# =============================================================================
+# Atlas Logging Utility
+# =============================================================================
+# Provides standardized logging functions for all Atlas deployment scripts
+# =============================================================================
+
 # Colors for output - Spring Boot compatible colors
 RED='\033[0;31m'      # ERROR
 YELLOW='\033[1;33m'   # WARN
@@ -17,6 +22,10 @@ LOG_LEVEL_ERROR=3
 
 # Default log level (can be overridden by environment variable)
 CURRENT_LOG_LEVEL=${LOG_LEVEL:-$LOG_LEVEL_INFO}
+
+# =============================================================================
+# TIMESTAMP AND BASIC LOGGING
+# =============================================================================
 
 # Get timestamp
 get_timestamp() {
@@ -56,6 +65,10 @@ log_success() {
     log $LOG_LEVEL_INFO $GREEN "$1" "SUCCESS"
 }
 
+# =============================================================================
+# SPECIALIZED LOGGING FUNCTIONS
+# =============================================================================
+
 # Progress indicator
 log_progress() {
     echo -ne "${MAGENTA}[PROGRESS] $1${NC}\r"
@@ -76,4 +89,18 @@ log_section() {
     log_separator
     log_info "$1"
     log_separator
+}
+
+# Script header with standardized format
+log_script_header() {
+    local script_name="$1"
+    local description="$2"
+    
+    echo
+    log_separator
+    log_info "$script_name"
+    log_separator
+    log_info "$description"
+    log_separator
+    echo
 }
