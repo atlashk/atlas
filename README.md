@@ -65,25 +65,41 @@ Atlas uses a unified DevOps approach with reorganized build scripts. Choose your
 - **Node.js 22+** - For frontend development
 - **Docker & Docker Compose** - For running services
 
-### ⚡ Super Quick Start (Recommended)
+To start frontend, we need to make a `.env` file:
+
+```
+VITE_API_BASE_URL=http://localhost:8080
+```
 
 For this style, we can easily use our simple wrapper scripts from the project root. They will invoke the relevant on-prem Docker compose scripts.
 
 ```bash
 # Start services
-./start.sh
+./startup.sh
 
 # Start services (skip builds)
-./start.sh --skip-build
-
-# Stop all services gracefully
-./stop.sh
-
-# Clean up everything: containers, volumes, images
-./clean.sh
+./startup.sh --skip-build
 ```
 
-### 🐳 Manual Docker Compose Setup
+The web application will be accessible at **http://localhost:9000**.
+
+Login Credentials:
+- **Customer Portal**: `user` / `Aa@123456`
+- **Admin Dashboard**: `admin` / `Aa@123456`
+
+**Development Mode (Optional):**
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+---
+
+## On-Premise deployments
+
+### 🐳 Docker Compose deployment
 
 ```bash
 cd deployment/onprem/compose/scripts
@@ -101,7 +117,7 @@ cd deployment/onprem/compose/scripts
 ./compose-clean.sh
 ```
 
-### ☸️ Kubernetes Setup
+### ☸️ Kubernetes deployment
 
 Atlas provides a simplified, kubectl-based deployment for Kubernetes with full environment support. Each environment runs in a separate namespace.
 
@@ -138,7 +154,6 @@ cd deployment/onprem/k8s/scripts
 **Access Services via Ingress (Recommended):**
 
 After setting up Ingress, access services using local hostnames:
-- **Frontend**: http://atlas.local
 - **API Gateway**: http://api.atlas.local  
 - **Grafana**: http://grafana.atlas.local (admin/admin)
 - **Prometheus**: http://prometheus.atlas.local
@@ -150,9 +165,6 @@ After setting up Ingress, access services using local hostnames:
 ```bash
 # API Gateway
 kubectl port-forward -n atlas-local svc/api-gateway 8080:8080
-
-# Frontend
-kubectl port-forward -n atlas-local svc/frontend 9000:9000
 
 # Grafana
 kubectl port-forward -n atlas-local svc/grafana 3000:3000
@@ -172,22 +184,3 @@ Installation:
 1. Download Lens from [k8slens.dev](https://k8slens.dev/)
 2. Install and launch the application
 3. Connect to your cluster (automatically detects your kubectl context)
-
-### 🌐 Access Frontend
-
-The web application will be accessible at **http://localhost:9000**
-
-**Login Credentials:**
-- **Customer Portal**: `user` / `Aa@123456`
-- **Admin Dashboard**: `admin` / `Aa@123456`
-
-**Development Mode (Optional):**
-
-If you want to run frontend in development mode:
-
-```bash
-cd frontend
-npm install
-npm run dev
-# Access at http://localhost:5173
-```

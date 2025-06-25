@@ -19,7 +19,7 @@ spring:
       routes:
         # User service
         - id: user-service-common
-          uri: lb://user-service
+          uri: ${USER_SERVICE_URI:lb://user-service}
           predicates:
             - Path=/api/common/users/**
           filters:
@@ -27,7 +27,7 @@ spring:
             - SessionValidation
             - TokenRelay
         - id: user-service-admin
-          uri: lb://user-service
+          uri: ${USER_SERVICE_URI:lb://user-service}
           predicates:
             - Path=/api/admin/users/**
           filters:
@@ -35,7 +35,7 @@ spring:
             - SessionValidation
             - TokenRelay
         - id: user-service-front
-          uri: lb://user-service
+          uri: ${USER_SERVICE_URI:lb://user-service}
           predicates:
             - Path=/api/front/users/**
           filters:
@@ -43,14 +43,14 @@ spring:
             - SessionValidation
             - TokenRelay
         - id: user-service-api-docs
-          uri: lb://user-service
+          uri: ${USER_SERVICE_URI:lb://user-service}
           predicates:
             - Path=/api-docs/user-service
           filters:
             - RewritePath=/api-docs/user-service, /api-docs
         # Auth server
         - id: auth-server-authorized
-          uri: lb://auth-server
+          uri: ${AUTH_SERVER_URI:lb://auth-server}
           predicates:
             - Path=/api/auth/logout
           filters:
@@ -58,20 +58,20 @@ spring:
             - SessionValidation
             - TokenRelay
         - id: auth-server-unauthorized
-          uri: lb://auth-server
+          uri: ${AUTH_SERVER_URI:lb://auth-server}
           predicates:
             - Path=/api/auth/**
           filters:
             - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
         - id: auth-server-api-docs
-          uri: lb://auth-server
+          uri: ${AUTH_SERVER_URI:lb://auth-server}
           predicates:
             - Path=/api-docs/auth-server
           filters:
             - RewritePath=/api-docs/auth-server, /api-docs
         # Product service
         - id: product-service-admin
-          uri: lb://product-service
+          uri: ${PRODUCT_SERVICE_URI:lb://product-service}
           predicates:
             - Path=/api/admin/products/**
           filters:
@@ -79,26 +79,26 @@ spring:
             - SessionValidation
             - TokenRelay
         - id: product-service-front
-          uri: lb://product-service
+          uri: ${PRODUCT_SERVICE_URI:lb://product-service}
           predicates:
             - Path=/api/front/products/**
           filters:
             - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
         - id: product-service-common
-          uri: lb://product-service
+          uri: ${PRODUCT_SERVICE_URI:lb://product-service}
           predicates:
             - Path=/api/common/products/**
           filters:
             - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
         - id: product-service-api-docs
-          uri: lb://product-service
+          uri: ${PRODUCT_SERVICE_URI:lb://product-service}
           predicates:
             - Path=/api-docs/product-service
           filters:
             - RewritePath=/api-docs/product-service, /api-docs
         # Order service
         - id: order-service-admin
-          uri: lb://order-service
+          uri: ${ORDER_SERVICE_URI:lb://order-service}
           predicates:
             - Path=/api/admin/orders/**
           filters:
@@ -106,7 +106,7 @@ spring:
             - SessionValidation
             - TokenRelay
         - id: order-service-front
-          uri: lb://order-service
+          uri: ${ORDER_SERVICE_URI:lb://order-service}
           predicates:
             - Path=/api/front/orders/**
           filters:
@@ -114,20 +114,20 @@ spring:
             - SessionValidation
             - TokenRelay
         - id: order-service-api-docs
-          uri: lb://order-service
+          uri: ${ORDER_SERVICE_URI:lb://order-service}
           predicates:
             - Path=/api-docs/order-service
           filters:
             - RewritePath=/api-docs/order-service, /api-docs
         # Notification service
         - id: notification-service-sse
-          uri: lb://notification-service
+          uri: ${NOTIFICATION_SERVICE_URI:lb://notification-service}
           predicates:
             - Path=/notification/sse/**
           filters:
             - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
         - id: notification-service-websocket
-          uri: lb://notification-service
+          uri: ${NOTIFICATION_SERVICE_URI:lb://notification-service}
           predicates:
             - Path=/notification/ws/**
           filters:
@@ -142,7 +142,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: ${JWK_SET_URI:http://localhost:8091/.well-known/jwks.json} # spring-security-jwt adapter
+          jwk-set-uri: ${JWK_SET_URI:http://localhost:8091/.well-known/jwks.json}
 
 springdoc:
   api-docs:
