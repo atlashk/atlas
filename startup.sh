@@ -110,19 +110,22 @@ fi
 npm run dev &
 FRONTEND_PID=$!
 
-# Function to cleanup processes on exit
-cleanup() {
+# Function to stop services on exit
+stop_services() {
     log_info "Shutting down services..."
+
     if [ ! -z "$FRONTEND_PID" ]; then
         kill $FRONTEND_PID 2>/dev/null || true
     fi
+
     # Stop backend services using compose-stop script
     "$(dirname "$0")/backend/deployment/onprem/compose/scripts/compose-stop.sh" 2>/dev/null || true
+
     exit 0
 }
 
 # Set up signal handlers
-trap cleanup SIGINT SIGTERM
+trap stop_services SIGINT SIGTERM
 
 log_info ""
 log_info "==================================="

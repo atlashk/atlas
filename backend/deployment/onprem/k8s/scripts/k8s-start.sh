@@ -144,9 +144,7 @@ check_prerequisites() {
 show_cluster_info() {
     log_section "Cluster Information"
     kubectl cluster-info
-    log_info ""
     kubectl get nodes -o wide
-    log_info ""
 }
 
 # =============================================================================
@@ -229,21 +227,12 @@ deploy_applications() {
     local services=("auth-server" "api-gateway" "user-service" "product-service" "order-service" "notification-service" "frontend")
     
     for service in "${services[@]}"; do
-        log_info "Deploying $service..."
-        
-        # Create temporary file with environment substitution
-        temp_file=$(mktemp)
-        ENVIRONMENT="$ENVIRONMENT" envsubst < "$BASE_DIR/application/$service.yaml" > "$temp_file"
-        kubectl apply -f "$temp_file" -n "$NAMESPACE"
-        rm "$temp_file"
-        
-        # Wait for deployment to be ready
         log_info "Waiting for $service to be ready..."
         kubectl wait --for=condition=available --timeout=120s deployment/"$service" -n "$NAMESPACE" || {
             log_warn "$service deployment timeout, continuing..."
         }
     done
-    
+
     log_success "Application services deployed"
 }
 
@@ -406,6 +395,16 @@ setup_and_deploy_ingress() {
     fi
 }
 
+# Function to apply security configurations (RBAC, ServiceAccounts, etc.)
+apply_security_config() {
+    log_section "Applying Security Configurations"
+    
+    log_info "Applying RBAC and security configurations..."
+    ENVIRONMENT="$ENVIRONMENT" envsubst < "$BASE_DIR/application/security.yaml" | kubectl apply -f - -n "$NAMESPACE"
+    
+    log_success "Security configurations applied"
+}
+
 # Function to apply environment-specific configurations
 apply_environment_config() {
     local env_dir="${SCRIPT_DIR}/../environments/${ENVIRONMENT}"
@@ -451,6 +450,7 @@ main() {
 
     # Deploy in order
     create_namespace
+    apply_security_config
     apply_environment_config
     deploy_infrastructure
     deploy_observability

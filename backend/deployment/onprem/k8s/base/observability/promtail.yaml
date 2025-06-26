@@ -202,4 +202,13 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: promtail
-    namespace: default 
+    namespace: atlas-local
+  - kind: ServiceAccount
+    name: promtail
+    namespace: atlas-dev
+  - kind: ServiceAccount
+    name: promtail
+    namespace: atlas-stg
+  - kind: ServiceAccount
+    name: promtail
+    namespace: atlas-prod 

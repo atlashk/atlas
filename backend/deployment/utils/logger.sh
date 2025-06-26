@@ -91,17 +91,3 @@ log_section() {
     log_info "$1"
     log_separator
 }
-
-# Script header with standardized format
-log_script_header() {
-    local script_name="$1"
-    local description="$2"
-    
-    echo
-    log_separator
-    log_info "$script_name"
-    log_separator
-    log_info "$description"
-    log_separator
-    echo
-}
