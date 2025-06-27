@@ -304,21 +304,15 @@ deploy_infrastructure() {
         wait "$pid"
     done
     
-    # Wait for deployments to be ready (in parallel)
-    local wait_pids=()
+    # Wait for deployments to be ready (sequentially, but fast since kubectl wait is efficient)
     for service in "${services[@]}"; do
-        {
-            if kubectl get deployment "$service" -n "$NAMESPACE" &>/dev/null; then
-                log_info "Waiting for $service to be ready..."
-                kubectl wait --for=condition=available --timeout=120s deployment/"$service" -n "$NAMESPACE" || {
-                    log_warn "$service deployment timeout, continuing..."
-                }
-            fi
-        } &
-        wait_pids+=($!)
-    done
-    for pid in "${wait_pids[@]}"; do
-        wait "$pid"
+        if kubectl get deployment "$service" -n "$NAMESPACE" &>/dev/null; then
+            log_info "Waiting for $service to be ready..."
+            kubectl wait --for=condition=available --timeout=300s deployment/"$service" -n "$NAMESPACE" || {
+                log_error "$service deployment timeout. Deployment failed."
+                exit 1
+            }
+        fi
     done
     
     log_success "Infrastructure services deployed"
@@ -344,27 +338,22 @@ deploy_observability() {
         wait "$pid"
     done
     
-    # Wait for deployments to be ready (in parallel)
-    local wait_pids=()
+    # Wait for deployments to be ready (sequentially, but fast since kubectl wait is efficient)
     for service in "${services[@]}"; do
-        {
-            if kubectl get deployment "$service" -n "$NAMESPACE" &>/dev/null; then
-                log_info "Waiting for $service to be ready..."
-                kubectl wait --for=condition=available --timeout=120s deployment/"$service" -n "$NAMESPACE" || {
-                    log_warn "$service deployment timeout, continuing..."
-                }
-            elif kubectl get daemonset "$service" -n "$NAMESPACE" &>/dev/null; then
-                # Handle DaemonSets (like promtail)
-                log_info "Waiting for $service DaemonSet to be ready..."
-                kubectl wait --for=condition=ready --timeout=60s pod -l app="$service" -n "$NAMESPACE" || {
-                    log_warn "$service DaemonSet timeout, continuing..."
-                }
-            fi
-        } &
-        wait_pids+=($!)
-    done
-    for pid in "${wait_pids[@]}"; do
-        wait "$pid"
+        if kubectl get deployment "$service" -n "$NAMESPACE" &>/dev/null; then
+            log_info "Waiting for $service to be ready..."
+            kubectl wait --for=condition=available --timeout=300s deployment/"$service" -n "$NAMESPACE" || {
+                log_error "$service deployment timeout. Deployment failed."
+                exit 1
+            }
+        elif kubectl get daemonset "$service" -n "$NAMESPACE" &>/dev/null; then
+            # Handle DaemonSets (like promtail)
+            log_info "Waiting for $service DaemonSet to be ready..."
+            kubectl wait --for=condition=ready --timeout=60s pod -l app="$service" -n "$NAMESPACE" || {
+                log_error "$service DaemonSet timeout. Deployment failed."
+                exit 1
+            }
+        fi
     done
     
     log_success "Observability services deployed"
@@ -392,22 +381,16 @@ deploy_applications() {
         wait "$pid"
     done
     
-    # Wait for deployments to be ready (in parallel)
+    # Wait for deployments to be ready (sequentially, but fast since kubectl wait is efficient)
     log_info "Waiting for services to be ready..."
-    local wait_pids=()
     for service in "${backend_services[@]}"; do
-        {
-            if kubectl get deployment "$service" -n "$NAMESPACE" &>/dev/null; then
-                log_info "Waiting for $service to be ready..."
-                kubectl wait --for=condition=available --timeout=300s deployment/"$service" -n "$NAMESPACE" || {
-                    log_warn "$service deployment timeout, continuing..."
-                }
-            fi
-        } &
-        wait_pids+=($!)
-    done
-    for pid in "${wait_pids[@]}"; do
-        wait "$pid"
+        if kubectl get deployment "$service" -n "$NAMESPACE" &>/dev/null; then
+            log_info "Waiting for $service to be ready..."
+            kubectl wait --for=condition=available --timeout=300s deployment/"$service" -n "$NAMESPACE" || {
+                log_error "$service deployment timeout. Deployment failed."
+                exit 1
+            }
+        fi
     done
 
     # Deploy API gateway last
@@ -416,7 +399,8 @@ deploy_applications() {
 
     log_info "Waiting for API gateway to be ready..."
     kubectl wait --for=condition=available --timeout=300s deployment/api-gateway -n "$NAMESPACE" || {
-        log_warn "API gateway deployment timeout, continuing..."
+        log_error "API gateway deployment timeout. Deployment failed."
+        exit 1
     }
 
     log_success "Application services deployed"
@@ -463,7 +447,8 @@ setup_and_deploy_ingress() {
             --for=condition=ready pod \
             --selector=app.kubernetes.io/component=controller \
             --timeout=120s || {
-            log_warn "NGINX Ingress Controller setup timeout, continuing..."
+            log_error "NGINX Ingress Controller setup timeout. Deployment failed."
+            exit 1
         }
         
         log_success "NGINX Ingress Controller installed"
