@@ -13,7 +13,6 @@ import org.atlas.domain.user.shared.enums.Role;
 public class FindUserCriteria {
 
   private Integer id;
-  // username, email, phoneNumber
-  private String keyword;
+  private String username;
   private Role role;
 }

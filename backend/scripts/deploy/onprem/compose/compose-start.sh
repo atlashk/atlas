@@ -15,7 +15,7 @@ PROJECT_NAME="atlas-onprem-compose"
 COMPOSE_FILE="$PROJECT_ROOT/backend/scripts/deploy/onprem/compose/docker-compose.yml"
 
 # Source logger
-source "$PROJECT_ROOT/backend/scripts/utils/logger.sh"
+source "$PROJECT_ROOT/backend/scripts/log/logger.sh"
 
 # Default options
 SKIP_BUILD=false

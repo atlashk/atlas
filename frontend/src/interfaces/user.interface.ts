@@ -10,7 +10,7 @@ export interface User {
 
 export interface ListUserFilters {
   id?: string
-  keyword?: string
+  username?: string
   role?: string
   page: number
   size: number

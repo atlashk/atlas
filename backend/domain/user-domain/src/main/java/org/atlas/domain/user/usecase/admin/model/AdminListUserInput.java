@@ -16,7 +16,7 @@ public class AdminListUserInput {
 
   private Integer id;
 
-  private String keyword;
+  private String username;
 
   private Role role;
 

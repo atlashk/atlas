@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Load logger
-source "$(dirname "$0")/backend/scripts/utils/logger.sh"
+source "$(dirname "$0")/backend/scripts/log/logger.sh"
 
 # Default options
 SKIP_BUILD=false

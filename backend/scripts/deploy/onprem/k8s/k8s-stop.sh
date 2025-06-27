@@ -14,7 +14,7 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
 BASE_DIR="${SCRIPT_DIR}/base"
 
 # Load logger
-source "$PROJECT_ROOT/backend/scripts/utils/logger.sh"
+source "$PROJECT_ROOT/backend/scripts/log/logger.sh"
 
 # Default environment
 ENVIRONMENT="local"

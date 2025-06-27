@@ -19,11 +19,7 @@ public interface JpaUserRepository extends JpaBaseRepository<JpaUserEntity, Inte
     from JpaUserEntity u
     where 1 = 1
       and (:#{#criteria.id} is null or u.id = :#{#criteria.id})
-      and (:#{#criteria.keyword} is null or (
-        lower(u.username) like lower(concat('%', :#{#criteria.keyword}, '%'))
-        or lower(u.email) like lower(concat('%', :#{#criteria.keyword}, '%'))
-        or u.phoneNumber like concat('%', :#{#criteria.keyword}, '%')
-      ))
+      and (:#{#criteria.username} is null or u.username = :#{#criteria.username})
       and (:#{#criteria.role} is null or u.role = :#{#criteria.role})
     """)
   Page<JpaUserEntity> findByCriteria(@Param("criteria") FindUserCriteria criteria, Pageable pageable);

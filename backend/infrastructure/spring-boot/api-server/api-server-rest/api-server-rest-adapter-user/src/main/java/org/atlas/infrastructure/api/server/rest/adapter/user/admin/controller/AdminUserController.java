@@ -34,8 +34,8 @@ public class AdminUserController {
   public ApiResponseWrapper<List<UserResponse>> listUser(
       @Parameter(description = "User ID", example = "1")
       @RequestParam(value = "id", required = false) Integer id,
-      @Parameter(description = "Keyword (username, email, phoneNumber)", example = "john.doe")
-      @RequestParam(value = "keyword", required = false) String keyword,
+      @Parameter(description = "Username", example = "john.doe")
+      @RequestParam(value = "username", required = false) String username,
       @Parameter(description = "User role", example = "USER")
       @RequestParam(value = "role", required = false) Role role,
       @Parameter(description = "The page number", example = "1")
@@ -45,7 +45,7 @@ public class AdminUserController {
   ) throws Exception {
     AdminListUserInput input = AdminListUserInput.builder()
         .id(id)
-        .keyword(keyword)
+        .username(username)
         .role(role)
         .pagingRequest(PagingRequest.of(page - 1, size))
         .build();

@@ -15,7 +15,7 @@ PROJECT_NAME="atlas-onprem-compose"
 COMPOSE_FILE="$PROJECT_ROOT/backend/scripts/deploy/onprem/compose/docker-compose.yml"
 
 # Source logger
-source "$PROJECT_ROOT/backend/scripts/utils/logger.sh"
+source "$PROJECT_ROOT/backend/scripts/log/logger.sh"
 
 # Show usage if help is requested
 if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then

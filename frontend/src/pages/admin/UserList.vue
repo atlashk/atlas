@@ -17,31 +17,17 @@
           <div class="row g-4">
             <div class="col-md-6">
               <label for="userId" class="form-label">User ID</label>
-              <input
-                id="userId"
-                v-model.trim="filters.id"
-                type="text"
-                class="form-control"
-                placeholder="Enter user ID"
-              />
+              <input id="userId" v-model.trim="filters.id" type="text" class="form-control"
+                placeholder="Enter user ID" />
             </div>
             <div class="col-md-6">
-              <label for="keyword" class="form-label">Search</label>
-              <input
-                id="keyword"
-                v-model.trim="filters.keyword"
-                type="text"
-                class="form-control"
-                placeholder="Search by username, name, or email"
-              />
+              <label for="username" class="form-label">Search</label>
+              <input id="username" v-model.trim="filters.username" type="text" class="form-control"
+                placeholder="Enter username" />
             </div>
             <div class="col-md-6">
               <label for="role" class="form-label">Role</label>
-              <select
-                id="role"
-                v-model="filters.role"
-                class="form-select"
-              >
+              <select id="role" v-model="filters.role" class="form-select">
                 <option value="">All Roles</option>
                 <option value="ADMIN">Admin</option>
                 <option value="USER">User</option>
@@ -113,18 +99,12 @@
               <span class="ms-2">({{ metadata.totalRecords }} records)</span>
             </span>
             <div class="btn-group">
-              <button
-                @click="changePage(metadata.currentPage - 1)"
-                :disabled="metadata.currentPage <= 1"
-                class="btn btn-outline-secondary px-3"
-              >
+              <button @click="changePage(metadata.currentPage - 1)" :disabled="metadata.currentPage <= 1"
+                class="btn btn-outline-secondary px-3">
                 Previous
               </button>
-              <button
-                @click="changePage(metadata.currentPage + 1)"
-                :disabled="metadata.currentPage >= metadata.totalPages"
-                class="btn btn-outline-secondary px-3"
-              >
+              <button @click="changePage(metadata.currentPage + 1)"
+                :disabled="metadata.currentPage >= metadata.totalPages" class="btn btn-outline-secondary px-3">
                 Next
               </button>
             </div>
@@ -153,7 +133,7 @@ const metadata = reactive({
 });
 const filters = reactive<ListUserFilters>({
   id: undefined,
-  keyword: undefined,
+  username: undefined,
   role: '',
   page: 1,
   size: 20,
@@ -176,7 +156,7 @@ const applyFilters = async (page: number) => {
 
     console.log('Fetching users with filters:', apiFilters);
     const response = await userService.listUser(apiFilters);
-    
+
     if (response.success) {
       users.value = response.data || [];
       if (response.metadata) {
@@ -206,11 +186,11 @@ const changePage = (newPage: number) => {
 const resetFilters = () => {
   Object.assign(filters, {
     id: undefined,
-    keyword: undefined,
+    username: undefined,
     role: undefined,
     page: 1,
     size: 20,
-  });
+  } as ListUserFilters);
   applyFilters(1);
 };
 
