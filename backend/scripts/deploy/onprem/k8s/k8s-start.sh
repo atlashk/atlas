@@ -241,6 +241,9 @@ build_services() {
         exit 1
     fi
 
+    log_info "Granting execute permission to build script..."
+    chmod +x "$build_script"
+
     log_info "Invoking build script..."
     if "$build_script" --infra-stack=onprem-k8s; then
         log_success "Build completed successfully."
