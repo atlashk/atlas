@@ -1,0 +1,60 @@
+# Atlas Application Security Configuration
+# This file defines RBAC (Role-Based Access Control) for Atlas applications
+# to access Kubernetes resources across all namespaces in the cluster.
+
+---
+# ServiceAccount: Creates an identity for Atlas applications to use
+# This account will be used by Atlas pods to authenticate with Kubernetes API
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: atlas-application
+  labels:
+    app: atlas
+    tier: application
+
+---
+# ClusterRole: Defines permissions that can be applied cluster-wide
+# This role grants read-only access to essential Kubernetes resources
+# needed for service discovery and configuration management
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: namespace-reader
+rules:
+  # Allow read access to core Kubernetes resources across all namespaces
+  - apiGroups: [""] # Core API group (pods, services, etc.)
+    resources: 
+      - "pods"        # Container instances
+      - "services"    # Service endpoints for load balancing
+      - "endpoints"   # Backend pods for services
+      - "configmaps"  # Configuration data
+      - "secrets"     # Sensitive configuration data
+    verbs: 
+      - "get"    # Retrieve individual resources
+      - "list"   # List multiple resources
+      - "watch"  # Watch for resource changes (real-time updates)
+
+---
+# ClusterRoleBinding: Binds the ClusterRole to subjects (users/groups/service accounts)
+# This grants the namespace-reader permissions to ALL ServiceAccounts across ALL namespaces
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: namespace-reader-binding
+subjects:
+  # Grant permissions to ALL ServiceAccounts in ALL namespaces
+  # "system:serviceaccounts" is a built-in group that includes every ServiceAccount
+  # in the cluster, regardless of which namespace they're in
+  - kind: Group
+    name: system:serviceaccounts  # Built-in group for all ServiceAccounts cluster-wide
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  # Reference to the ClusterRole defined above
+  kind: ClusterRole
+  name: namespace-reader
+  apiGroup: rbac.authorization.k8s.io
+
+# Security Note: This configuration grants read access to ALL ServiceAccounts
+# across ALL namespaces. This is broad access suitable for service discovery
+# and configuration management but should be reviewed for production security requirements.

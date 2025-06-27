@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Load logger
-source "$(dirname "$0")/backend/deployment/utils/logger.sh"
+source "$(dirname "$0")/backend/scripts/utils/logger.sh"
 
 # Default options
 SKIP_BUILD=false
@@ -55,12 +55,12 @@ fi
 # Start backend services using Docker Compose
 log_info "Starting backend services..."
 if [[ "$SKIP_BUILD" == true ]]; then
-    if ! "$(dirname "$0")/backend/deployment/onprem/compose/scripts/compose-start.sh" --skip-build; then
+    if ! "$(dirname "$0")/backend/scripts/deploy/onprem/compose/compose-start.sh" --skip-build; then
         log_error "Backend services failed to start. Exiting..."
         exit 1
     fi
 else
-    if ! "$(dirname "$0")/backend/deployment/onprem/compose/scripts/compose-start.sh"; then
+    if ! "$(dirname "$0")/backend/scripts/deploy/onprem/compose/compose-start.sh"; then
         log_error "Backend services failed to start. Exiting..."
         exit 1
     fi
@@ -119,7 +119,7 @@ stop_services() {
     fi
 
     # Stop backend services using compose-stop script
-    "$(dirname "$0")/backend/deployment/onprem/compose/scripts/compose-stop.sh" 2>/dev/null || true
+    "$(dirname "$0")/backend/scripts/deploy/onprem/compose/compose-stop.sh" 2>/dev/null || true
 
     exit 0
 }
