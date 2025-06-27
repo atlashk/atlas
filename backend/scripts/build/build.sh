@@ -8,7 +8,7 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 GRADLEW="$PROJECT_ROOT/backend/gradlew"
 
 # Load logger.sh
-source "$PROJECT_ROOT/backend/scripts/utils/logger.sh"
+source "$PROJECT_ROOT/backend/scripts/log/logger.sh"
 
 # Default values
 INFRA_STACK="onprem-compose-observability"
