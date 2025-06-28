@@ -67,8 +67,18 @@ Atlas uses a unified DevOps approach with reorganized build scripts. Choose your
 
 To start frontend, we need to make a `.env` file:
 
+**For Docker Compose mode:**
+```bash
+# Create .env file in frontend directory
+cd frontend
+echo "VITE_API_BASE_URL=http://localhost:8080" > .env
 ```
-VITE_API_BASE_URL=http://localhost:8080
+
+**For Kubernetes mode:**
+```bash
+# Create .env file in frontend directory
+cd frontend
+echo "VITE_API_BASE_URL=http://api.atlas.local" > .env
 ```
 
 For this style, we can easily use our simple wrapper scripts from the project root. They will invoke the relevant on-prem Docker compose scripts.

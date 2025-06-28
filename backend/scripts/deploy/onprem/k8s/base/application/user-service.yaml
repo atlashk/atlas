@@ -75,32 +75,40 @@ spec:
             - containerPort: 50051
               name: grpc
           # Health checks
+          # Strategy: Product service takes 3-4 minutes to start successfully
+          # Optimized probe configuration for Spring Boot microservice with dependencies (DB, Redis, Kafka)
+          # 1. Startup probe: Fast detection of startup completion with exponential backoff-like behavior
+          # 2. Readiness probe: Frequent checks for traffic routing decisions  
+          # 3. Liveness probe: Conservative monitoring to avoid unnecessary restarts
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
               port: 8081
-            initialDelaySeconds: 120
-            periodSeconds: 30
-            timeoutSeconds: 10
-            failureThreshold: 3
+              scheme: HTTP
+            initialDelaySeconds: 240  # Start 4 minutes after container start (conservative)
+            periodSeconds: 45         # Check every 45 seconds (less aggressive)
+            timeoutSeconds: 15        # Allow 15 seconds for response (network delays)
+            failureThreshold: 10      # Restart only after 10 consecutive failures (7m30s grace)
+            successThreshold: 1       # Back to healthy after 1 success
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: 8081
-            initialDelaySeconds: 60
-            periodSeconds: 10
-            timeoutSeconds: 5
-            successThreshold: 1
-            failureThreshold: 3
-          # Startup probe for slow starting applications
+              scheme: HTTP
+            initialDelaySeconds: 180  # Start 3 minutes after container start
+            periodSeconds: 5          # Check every 5 seconds (responsive traffic routing)
+            timeoutSeconds: 3         # Quick timeout for readiness decisions
+            successThreshold: 1       # Ready after 1 success
+            failureThreshold: 6       # Remove from service after 6 failures (30s grace)
           startupProbe:
             httpGet:
               path: /actuator/health
               port: 8081
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 10
+              scheme: HTTP
+            initialDelaySeconds: 120  # Start checking after 2 minutes
+            periodSeconds: 10         # Check every 10 seconds (more responsive)
+            timeoutSeconds: 5         # Quick timeout for startup checks
+            failureThreshold: 18      # Allow 18 failures = 120s + (10s × 18) = 300s = 5 minutes total
           # Resource optimization
           resources:
             requests:

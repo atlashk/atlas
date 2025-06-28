@@ -53,6 +53,11 @@ spec:
               value: "/tmp/kraft-combined-logs"
             - name: CLUSTER_ID
               value: "MkU3OEVBNTcwNTJENDM2Qk"
+            # Additional configurations for stability
+            - name: KAFKA_HEAP_OPTS
+              value: "-Xmx512M -Xms512M"
+            - name: KAFKA_JVM_PERFORMANCE_OPTS
+              value: "-server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -XX:MaxInlineLevel=15 -Djava.awt.headless=true"
           ports:
             - containerPort: 9092
               name: kafka
@@ -62,39 +67,51 @@ spec:
               name: controller
             - containerPort: 9101
               name: jmx
-          # Health checks using Confluent Kafka commands
+          # Improved health checks with longer timeouts and startup probe
+          startupProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - "kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1"
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 30
+            failureThreshold: 30 # Allow up to 5 minutes for startup
+            successThreshold: 1
           livenessProbe:
             exec:
               command:
-                - kafka-broker-api-versions
-                - --bootstrap-server
-                - localhost:9092
+                - sh
+                - -c
+                - "kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1"
             initialDelaySeconds: 60
             periodSeconds: 30
-            timeoutSeconds: 10
+            timeoutSeconds: 30
             failureThreshold: 3
+            successThreshold: 1
           readinessProbe:
             exec:
               command:
-                - kafka-broker-api-versions
-                - --bootstrap-server
-                - localhost:9092
+                - sh
+                - -c
+                - "kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1"
             initialDelaySeconds: 30
             periodSeconds: 10
-            timeoutSeconds: 10
+            timeoutSeconds: 30
             successThreshold: 1
             failureThreshold: 3
           resources:
             requests:
-              cpu: "200m"
-              memory: "512Mi"
+              cpu: "300m"
+              memory: "768Mi"
             limits:
-              cpu: "500m"
-              memory: "1Gi"
+              cpu: "1000m"
+              memory: "1.5Gi"
           volumeMounts:
             - name: kafka-data
               mountPath: /var/lib/kafka/data
-      terminationGracePeriodSeconds: 30
+      terminationGracePeriodSeconds: 60  # Increased from 30
   volumeClaimTemplates:
     - metadata:
         name: kafka-data

@@ -40,7 +40,7 @@ log() {
     local timestamp=$(get_timestamp)
     
     if [ "$level" -ge "$CURRENT_LOG_LEVEL" ]; then
-        echo -e "${color}[$(printf "%-5s" "$4")] ${timestamp} - ${message}${NC}"
+        echo -e "${color}[$4] ${timestamp} - ${message}${NC}"
     fi
 }
 
@@ -88,6 +88,6 @@ log_separator() {
 log_section() {
     echo
     log_separator
-    log_info "$1"
+    echo "$(get_timestamp) - $1"
     log_separator
 }
