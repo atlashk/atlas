@@ -389,9 +389,9 @@ deploy_applications() {
     done
 
     # Application services deployed - wait for them to initialize
-    log_info "Application services have been deployed. Waiting 5 minutes for initialization..."
+    log_info "Application services have been deployed. Waiting 4 minutes for initialization..."
     log_info "You can check status with: kubectl get pods -n $NAMESPACE"
-    sleep 300
+    sleep 240
 
     log_success "Application services deployed"
 }
@@ -551,6 +551,8 @@ main() {
     log_info "To view logs:"
     log_info "  kubectl logs -n $NAMESPACE deployment/[service-name] -f"
     log_info ""
+
+    # Show frontend configuration
     log_section "Frontend Configuration"
     log_info "To run the frontend with K8s backend:"
     log_info "  cd frontend"
@@ -560,7 +562,16 @@ main() {
     log_info ""
     log_info "Frontend will be available at: http://localhost:9000"
     log_info ""
-    log_success "Atlas platform is ready to use!"
+    
+    # Calculate and display total execution time
+    local end_time=$(date +%s)
+    local total_time=$((end_time - start_time))
+    local minutes=$((total_time / 60))
+    local seconds=$((total_time % 60))
+
+    log_section "Deployment Summary"
+    log_success "Atlas platform deployment completed successfully!"
+    log_info "Total execution time: ${minutes}m ${seconds}s"
 }
 
 # Run main function

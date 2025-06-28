@@ -149,7 +149,7 @@ cd deployment/onprem/k8s/scripts
 ./k8s-clean.sh --env prod               # Specified environment
 ```
 
-The startup process may take around **5 minutes** to complete.
+The startup process may take around **15 minutes** to complete (include building).
 
 **Access Services via Ingress (Recommended):**
 

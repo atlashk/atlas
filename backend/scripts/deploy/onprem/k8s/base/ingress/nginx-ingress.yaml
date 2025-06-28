@@ -9,17 +9,13 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
-    # CORS configuration for nginx ingress
-    nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "http://localhost:9000"
-    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-Device-Id"
-    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    # Preserve original host header
+    nginx.ingress.kubernetes.io/upstream-vhost: $http_host
+    # Forward original headers for CORS and proper routing
+    nginx.ingress.kubernetes.io/proxy-set-headers: "atlas-proxy-headers"
 spec:
   ingressClassName: nginx
   rules:
-
-    # API Gateway - Backend services
     - host: api.atlas.local
       http:
         paths:
@@ -30,8 +26,6 @@ spec:
                 name: api-gateway
                 port:
                   number: 8080
-    
-    # Observability services
     - host: grafana.atlas.local
       http:
         paths:
@@ -42,7 +36,6 @@ spec:
                 name: grafana
                 port:
                   number: 3000
-    
     - host: prometheus.atlas.local
       http:
         paths:
@@ -53,7 +46,6 @@ spec:
                 name: prometheus
                 port:
                   number: 9090
-    
     - host: zipkin.atlas.local
       http:
         paths:
@@ -64,8 +56,6 @@ spec:
                 name: zipkin
                 port:
                   number: 9411
-    
-    # SMTP4Dev for email testing
     - host: mail.atlas.local
       http:
         paths:
@@ -76,3 +66,18 @@ spec:
                 name: smtp4dev
                 port:
                   number: 80
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: atlas-proxy-headers
+  namespace: atlas-local
+  labels:
+    app: atlas-ingress
+    tier: ingress
+data:
+  X-Forwarded-Host: $http_host
+  X-Forwarded-Proto: $scheme
+  X-Real-IP: $remote_addr
+  X-Forwarded-For: $proxy_add_x_forwarded_for
+  Host: $http_host

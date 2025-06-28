@@ -1,6 +1,7 @@
 package org.atlas.edge.gateway.springcloudgateway.security;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.atlas.edge.gateway.springcloudgateway.security.jwt.JwtExtractor;
 import org.atlas.framework.config.Application;
@@ -15,10 +16,13 @@ import org.springframework.security.oauth2.server.resource.authentication.Reacti
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import reactor.core.publisher.Flux;
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebFluxSecurity
 @RequiredArgsConstructor
+@Slf4j
 public class SecurityConfig {
 
   private final ApplicationConfigPort applicationConfigPort;
@@ -31,54 +35,65 @@ public class SecurityConfig {
   public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
     http
         .csrf(ServerHttpSecurity.CsrfSpec::disable)
-        .cors(corsSpec ->
-            corsSpec.configurationSource(exchange -> {
-              CorsConfiguration corsConfig = new CorsConfiguration();
-              corsConfig.setAllowedOrigins(
-                  applicationConfigPort.getConfigAsList(Application.SYSTEM,
-                      "cors.allowed-origins"));
-              corsConfig.setAllowedMethods(
-                  applicationConfigPort.getConfigAsList(Application.SYSTEM,
-                      "cors.allowed-methods"));
-              corsConfig.setAllowedHeaders(
-                  applicationConfigPort.getConfigAsList(Application.SYSTEM,
-                      "cors.allowed-headers"));
-              corsConfig.setAllowCredentials(
-                  applicationConfigPort.getConfigAsBoolean(Application.SYSTEM,
-                      "cors.allow-credentials"));
-              corsConfig.setMaxAge(
-                  applicationConfigPort.getConfigAsLong(Application.SYSTEM, "cors.max-age"));
-              return corsConfig;
+        .cors(corsSpec -> corsSpec.configurationSource(exchange -> {
+          CorsConfiguration corsConfig = new CorsConfiguration();
+
+          // Get CORS configuration with fallback
+          List<String> allowedOrigins = applicationConfigPort.getConfigAsList(Application.SYSTEM,
+              "cors.allowed-origins");
+          if (allowedOrigins.isEmpty()) {
+            log.warn("No CORS allowed origins found in configuration, using fallback");
+            allowedOrigins = Arrays.asList("http://localhost:9000");
+          }
+
+          List<String> allowedMethods = applicationConfigPort.getConfigAsList(Application.SYSTEM,
+              "cors.allowed-methods");
+          if (allowedMethods.isEmpty()) {
+            log.warn("No CORS allowed methods found in configuration, using fallback");
+            allowedMethods = Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS");
+          }
+
+          List<String> allowedHeaders = applicationConfigPort.getConfigAsList(Application.SYSTEM,
+              "cors.allowed-headers");
+          if (allowedHeaders.isEmpty()) {
+            log.warn("No CORS allowed headers found in configuration, using fallback");
+            allowedHeaders = Arrays.asList("*");
+          }
+
+          corsConfig.setAllowedOrigins(allowedOrigins);
+          corsConfig.setAllowedMethods(allowedMethods);
+          corsConfig.setAllowedHeaders(allowedHeaders);
+          corsConfig.setAllowCredentials(
+              applicationConfigPort.getConfigAsBoolean(Application.SYSTEM, "cors.allow-credentials", true));
+          corsConfig.setMaxAge(
+              applicationConfigPort.getConfigAsLong(Application.SYSTEM, "cors.max-age", 0L));
+
+          log.debug("CORS Configuration - Origins: {}, Methods: {}, Headers: {}, AllowCredentials: {}",
+              allowedOrigins, allowedMethods, allowedHeaders, corsConfig.getAllowCredentials());
+
+          return corsConfig;
+        }))
+        .oauth2ResourceServer(oauth2 -> oauth2
+            .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+            // Handle JWT validation errors (e.g., expired token)
+            .authenticationFailureHandler((webFilterExchange, exception) -> {
+              // Delegate to CustomAuthenticationEntryPoint
+              return serverAuthenticationEntryPoint.commence(webFilterExchange.getExchange(),
+                  exception);
             }))
-        .oauth2ResourceServer(oauth2 ->
-            oauth2
-                .jwt(jwt ->
-                    jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                // Handle JWT validation errors (e.g., expired token)
-                .authenticationFailureHandler((webFilterExchange, exception) -> {
-                  // Delegate to CustomAuthenticationEntryPoint
-                  return serverAuthenticationEntryPoint.commence(webFilterExchange.getExchange(),
-                      exception);
-                })
-        )
-        .exceptionHandling(exceptionHandlingSpec ->
-            exceptionHandlingSpec.authenticationEntryPoint(serverAuthenticationEntryPoint)
-                .accessDeniedHandler(accessDeniedHandler)
-        )
+        .exceptionHandling(
+            exceptionHandlingSpec -> exceptionHandlingSpec.authenticationEntryPoint(serverAuthenticationEntryPoint)
+                .accessDeniedHandler(accessDeniedHandler))
         .authorizeExchange(auth -> {
           // Permit preflight requests
           auth.pathMatchers(HttpMethod.OPTIONS).permitAll();
 
           // Non-secured paths
-          authRulesProps.getNonSecuredPaths().forEach(path ->
-              auth.pathMatchers(path).permitAll()
-          );
+          authRulesProps.getNonSecuredPaths().forEach(path -> auth.pathMatchers(path).permitAll());
 
           // Secured paths with role-based authorization
-          authRulesProps.getSecuredPaths().forEach(rule ->
-              auth.pathMatchers(rule.getPath())
-                  .hasAnyAuthority(rule.getRoles().toArray(String[]::new))
-          );
+          authRulesProps.getSecuredPaths().forEach(rule -> auth.pathMatchers(rule.getPath())
+              .hasAnyAuthority(rule.getRoles().toArray(String[]::new)));
 
           // Deny all other requests
           auth.anyExchange().denyAll();
