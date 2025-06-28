@@ -9,9 +9,9 @@
 set -e
 
 # Configuration
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../../.." && pwd)"
-BASE_DIR="${SCRIPT_DIR}/base"
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../../.." && pwd)"
+readonly BASE_DIR="${SCRIPT_DIR}/base"
 
 # Load logger
 source "$PROJECT_ROOT/backend/scripts/log/logger.sh"
@@ -20,8 +20,11 @@ source "$PROJECT_ROOT/backend/scripts/log/logger.sh"
 ENVIRONMENT="local"
 SKIP_BUILD=false
 
-# Show usage if help is requested
-if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+# =============================================================================
+# HELP AND ARGUMENT PARSING
+# =============================================================================
+
+show_help() {
     log_info "Usage: $0 [OPTIONS]"
     log_info ""
     log_info "Atlas Kubernetes Start Script - Starts the Atlas microservices platform"
@@ -45,47 +48,48 @@ if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
     log_info "  $0 --skip-build             # Start local env, skip builds"
     log_info "  $0 --env local --skip-build # Start local env, skip builds"
     log_info ""
-    log_info "Note: You may be prompted for sudo password to modify /etc/hosts"
-    exit 0
-fi
+    log_warn "Note: You may be prompted for sudo password to modify /etc/hosts"
+}
 
-# Parse arguments
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --env)
-            if [[ -n "${2:-}" && ! "$2" =~ ^-- ]]; then
-                ENVIRONMENT="$2"
-                shift 2
-            else
-                log_error "--env requires an environment value"
+parse_arguments() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                show_help
+                exit 0
+                ;;
+            --env)
+                if [[ -n "${2:-}" && ! "$2" =~ ^-- ]]; then
+                    ENVIRONMENT="$2"
+                    shift 2
+                else
+                    log_error "--env requires an environment value"
+                    exit 1
+                fi
+                ;;
+            --skip-build)
+                SKIP_BUILD=true
+                shift
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                log_info "Use --help for usage information"
                 exit 1
-            fi
-            ;;
-        --skip-build)
-            SKIP_BUILD=true
-            shift
-            ;;
-        *)
-            log_error "Unknown option: $1"
-            log_info "Use --help for usage information"
-            exit 1
-            ;;
-    esac
-done
-
-# Set namespace based on environment
-NAMESPACE="atlas-${ENVIRONMENT}"
+                ;;
+        esac
+    done
+    
+    # Set namespace based on environment
+    readonly NAMESPACE="atlas-${ENVIRONMENT}"
+}
 
 # =============================================================================
 # UTILITY FUNCTIONS
 # =============================================================================
 
-# Function to wait for pods to be ready
 wait_for_pods_ready() {
     local services=("$@")
     local timeout="${WAIT_TIMEOUT:-300s}"
-    
-    # Convert timeout to seconds for calculations
     local timeout_seconds=${timeout%s}
     
     for service in "${services[@]}"; do
@@ -107,7 +111,7 @@ wait_for_pods_ready() {
             
             if [[ $elapsed -ge $max_wait ]]; then
                 log_error "No pods were created for $service after ${max_wait} seconds"
-                log_info "Checking deployed resources:"
+                log_debug "Checking deployed resources:"
                 kubectl get all -l app="$service" -n "$NAMESPACE" || true
                 return 1
             fi
@@ -133,7 +137,6 @@ wait_for_pods_ready() {
     return 0
 }
 
-# Generic function to deploy and wait for services
 deploy_service_category() {
     local category="$1"
     local timeout="$2"
@@ -169,7 +172,6 @@ deploy_service_category() {
             local result=$(cat "/tmp/deploy_result_$$_$service")
             if [[ "$result" == FAILED:* ]]; then
                 failed_services+=("$service")
-                # Extract error message after the second colon
                 local error_msg="${result#FAILED:$service:}"
                 error_messages+=("$service: $error_msg")
             fi
@@ -179,8 +181,6 @@ deploy_service_category() {
 
     if [[ ${#failed_services[@]} -gt 0 ]]; then
         log_error "Failed to deploy the following $category services: ${failed_services[*]}"
-        
-        # Show error messages
         for error_msg in "${error_messages[@]}"; do
             log_error "  $error_msg"
         done
@@ -198,18 +198,35 @@ deploy_service_category() {
     log_success "All $category services are ready"
 }
 
-# Function to check prerequisites
+detect_k8s_platform() {
+    local node_name
+    node_name=$(kubectl get nodes -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "unknown")
+    
+    case "$node_name" in
+        *minikube*) echo "minikube" ;;
+        *kind*) echo "kind" ;;
+        *docker-desktop*) echo "docker-desktop" ;;
+        *k3s*) echo "k3s" ;;
+        *) echo "generic" ;;
+    esac
+}
+
+# =============================================================================
+# PREREQUISITE CHECKS
+# =============================================================================
+
 check_prerequisites() {
     log_section "Checking Prerequisites"
-
-    local errors=()
     
     # Check build prerequisites only if not skipping build
     if [[ "$SKIP_BUILD" == false ]]; then
         # Check Java
         if command -v java &> /dev/null; then
+            local java_version
             java_version=$(java -version 2>&1 | head -n 1 | cut -d'"' -f2)
+            local major_version
             major_version=$(echo $java_version | cut -d'.' -f1)
+            
             if [[ $major_version == "1" ]]; then
                 major_version=$(echo $java_version | cut -d'.' -f2)
             fi
@@ -228,54 +245,33 @@ check_prerequisites() {
     if docker info > /dev/null 2>&1; then
         log_success "Docker found and running"
     else
-        errors+=("Docker is not running. Please start Docker and try again.")
+        log_error "Docker is not running. Please start Docker and try again."
+        exit 1
     fi
 
     # Check kubectl
     if command -v kubectl &> /dev/null; then
         log_success "kubectl found"
     else
-        errors+=("kubectl is not installed")
+        log_error "kubectl is not installed"
+        exit 1
     fi
     
     # Check Kubernetes cluster
     if kubectl cluster-info &> /dev/null; then
         log_success "Kubernetes cluster found"
     else
-        errors+=("Cannot connect to Kubernetes cluster. Make sure you have a running Kubernetes cluster (minikube, kind, etc.)")
-    fi
-
-    # Report all errors at once
-    if [[ ${#errors[@]} -gt 0 ]]; then
-        log_error "Prerequisites check failed:"
-        for error in "${errors[@]}"; do
-            log_error "  - $error"
-        done
+        log_error "Cannot connect to Kubernetes cluster. Make sure you have a running Kubernetes cluster (minikube, kind, etc.)"
         exit 1
     fi
 
     log_success "Prerequisites check passed"
 }
 
-# Function to display cluster info
 show_cluster_info() {
     log_section "Cluster Information"
     kubectl cluster-info
     kubectl get nodes -o wide
-}
-
-# K8s platform detection
-detect_k8s_platform() {
-    local node_name
-    node_name=$(kubectl get nodes -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "unknown")
-    
-    case "$node_name" in
-        *minikube*) echo "minikube" ;;
-        *kind*) echo "kind" ;;
-        *docker-desktop*) echo "docker-desktop" ;;
-        *k3s*) echo "k3s" ;;
-        *) echo "generic" ;;
-    esac
 }
 
 # =============================================================================
@@ -283,7 +279,7 @@ detect_k8s_platform() {
 # =============================================================================
 
 build_services() {
-    log_section "Building services"
+    log_section "Building Services"
 
     local build_script="$PROJECT_ROOT/backend/scripts/build/build.sh"
     if [ ! -f "$build_script" ]; then
@@ -296,9 +292,9 @@ build_services() {
 
     log_info "Invoking build script..."
     if "$build_script" --infra-stack=onprem-k8s; then
-        log_success "Build completed successfully."
+        log_success "Build completed successfully"
     else
-        log_error "Build failed."
+        log_error "Build failed"
         exit 1
     fi
 }
@@ -307,7 +303,6 @@ build_services() {
 # DEPLOYMENT FUNCTIONS
 # =============================================================================
 
-# Function to create namespace
 create_namespace() {
     log_info "Creating namespace: $NAMESPACE"
     
@@ -333,17 +328,16 @@ create_namespace() {
     log_success "Namespace $NAMESPACE ready"
 }
 
-# Function to apply security configurations (RBAC, ServiceAccounts, etc.)
 apply_security_config() {
     log_section "Applying Security Configurations"
     kubectl apply -f "$BASE_DIR/application/security.yaml" -n "$NAMESPACE"
     log_success "Security configurations applied"
 }
 
-# Function to apply environment-specific configurations
 apply_environment_config() {
     log_section "Applying Environment Configurations"
     local env_dir="${SCRIPT_DIR}/environments/${ENVIRONMENT}"
+    
     if [[ -d "$env_dir" ]]; then
         log_info "Applying $ENVIRONMENT environment configurations..."
         
@@ -358,7 +352,6 @@ apply_environment_config() {
     fi
 }
 
-# Simplified deployment functions using the generic deployer
 deploy_infrastructure() {
     local services=("mysql" "redis" "kafka" "smtp4dev")
     deploy_service_category "infrastructure" "300s" "${services[@]}"
@@ -374,9 +367,12 @@ deploy_applications() {
     deploy_service_category "application" "600s" "${backend_services[@]}"
 }
 
-# Optimized ingress setup
+# =============================================================================
+# INGRESS SETUP
+# =============================================================================
+
 setup_and_deploy_ingress() {
-    log_section "Setting up Ingress"
+    log_section "Setting Up and Deploying Ingress"
 
     local platform
     platform=$(detect_k8s_platform)
@@ -391,13 +387,12 @@ setup_and_deploy_ingress() {
     # Install NGINX Ingress Controller
     install_ingress_controller "$platform"
 
-    # Deploy Atlas ingress
-    deploy_atlas_ingress
+    # Deploy ingress
+    deploy_ingress
 
     log_success "Ingress setup completed"
 }
 
-# Get ingress IP based on platform
 get_ingress_ip() {
     local platform="$1"
     
@@ -415,43 +410,56 @@ get_ingress_ip() {
     esac
 }
 
-# Hosts file management
 setup_hosts_file() {
     local ingress_ip="$1"
     local hosts=("api.atlas.local" "grafana.atlas.local" "prometheus.atlas.local" "zipkin.atlas.local" "mail.atlas.local")
-    
-    # Check if running on Windows (Git Bash, WSL, etc.)
+
+    # Check if running on Windows
     local is_windows=false
     if [[ "$OS" == "Windows_NT" ]] || [[ "$(uname -s)" == MINGW* ]] || [[ "$(uname -s)" == CYGWIN* ]] || [[ "$(uname -s)" == MSYS* ]]; then
         is_windows=true
     fi
-    
+    if [[ "$is_windows" == true ]]; then
+        show_windows_hosts_instructions "$ingress_ip" "${hosts[@]}"
+        return
+    fi
+
     if grep -q "atlas.local" /etc/hosts 2>/dev/null; then
         log_info "Atlas hostnames already configured in /etc/hosts"
         return
     fi
-    
+
     log_info "Setting up local hostnames with IP: $ingress_ip"
+    setup_unix_hosts_file "$ingress_ip" "${hosts[@]}"
+}
+
+show_windows_hosts_instructions() {
+    local ingress_ip="$1"
+    shift
+    local hosts=("$@")
     
-    if [[ "$is_windows" == true ]]; then
-        log_warn "Windows detected - Manual hosts file configuration required"
-        log_info "Please add these entries to your Windows hosts file:"
-        log_info "  Location: C:\\Windows\\System32\\drivers\\etc\\hosts"
-        log_info ""
-        log_info "Steps to modify hosts file on Windows:"
-        log_info "  1. Open Notepad as Administrator"
-        log_info "  2. Open file: C:\\Windows\\System32\\drivers\\etc\\hosts"
-        log_info "  3. Add these lines at the end:"
-        log_info ""
-        for host in "${hosts[@]}"; do
-            log_info "     $ingress_ip $host"
-        done
-        log_info ""
-        log_info "  4. Save the file"
-        log_info ""
-        log_warn "Note: You must run Notepad as Administrator to edit the hosts file"
-        return
-    fi
+    log_warn "Windows detected - Manual hosts file configuration required"
+    log_info "Please add these entries to your Windows hosts file:"
+    log_info "  Location: C:\\Windows\\System32\\drivers\\etc\\hosts"
+    log_info ""
+    log_info "Steps to modify hosts file on Windows:"
+    log_info "  1. Open Notepad as Administrator"
+    log_info "  2. Open file: C:\\Windows\\System32\\drivers\\etc\\hosts"
+    log_info "  3. Add these lines at the end:"
+    log_info ""
+    for host in "${hosts[@]}"; do
+        log_info "     $ingress_ip $host"
+    done
+    log_info ""
+    log_info "  4. Save the file"
+    log_info ""
+    log_warn "Note: You must run Notepad as Administrator to edit the hosts file"
+}
+
+setup_unix_hosts_file() {
+    local ingress_ip="$1"
+    shift
+    local hosts=("$@")
     
     # Backup hosts file if not already backed up
     if [ ! -f /etc/hosts.backup ] && sudo -n true 2>/dev/null; then
@@ -486,15 +494,14 @@ setup_hosts_file() {
     fi
 }
 
-# Function to install ingress controller
 install_ingress_controller() {
     local platform="$1"
 
     if kubectl get namespace ingress-nginx &>/dev/null; then
-        log_info "NGINX Ingress Controller already installed"
+        log_info "NGINX Ingress Controller already deployed"
         return 0
     fi
-    
+
     log_info "Installing NGINX Ingress Controller..."
 
     local ingress_url
@@ -532,34 +539,93 @@ install_ingress_controller() {
     log_success "NGINX Ingress Controller installed"
 }
 
-deploy_atlas_ingress() {
-    log_info "Deploying Atlas Ingress..."
-    kubectl apply -f "$BASE_DIR/ingress/nginx-ingress.yaml" -n "$NAMESPACE"
-    
-    # Check if ingress was created successfully
-    log_info "Verifying ingress deployment..."
-    if ! kubectl get ingress atlas-ingress -n "$NAMESPACE" &>/dev/null; then
-        log_error "Failed to deploy Atlas ingress - ingress resource not found"
-        log_info "Available ingress resources in namespace $NAMESPACE:"
-        kubectl get ingress -n "$NAMESPACE" 2>/dev/null || log_warn "No ingress resources found"
-        exit 1
+deploy_ingress() {
+    # Check if ingress is already deployed
+    if kubectl get ingress atlas-ingress -n "$NAMESPACE" &>/dev/null; then
+        log_info "Ingress already deployed"
+        return 0
     fi
-    
+
+    log_info "Deploying Ingress..."
+    kubectl apply -f "$BASE_DIR/ingress/nginx-ingress.yaml" -n "$NAMESPACE"
+
     # Wait for ingress to be ready
     log_info "Waiting for ingress to be ready..."
     if ! kubectl wait --for=condition=ready ingress atlas-ingress -n "$NAMESPACE" --timeout=60s 2>/dev/null; then
         log_warn "Ingress readiness check timed out, but this is normal for some platforms"
-        kubectl get ingress -n "$NAMESPACE" 2>/dev/null || true
+    fi
+
+    log_success "Ingress deployed successfully"
+}
+
+# =============================================================================
+# SUMMARY AND REPORTING
+# =============================================================================
+
+show_deployment_summary() {
+    local start_time="$1"
+    local end_time=$(date +%s)
+    local total_time=$((end_time - start_time))
+    local minutes=$((total_time / 60))
+    local seconds=$((total_time % 60))
+
+    show_access_information
+    show_management_commands
+    show_frontend_configuration
+    
+    log_section "Deployment Summary"
+    log_success "Atlas platform deployment completed successfully!"
+    log_info "Total execution time: ${minutes}m ${seconds}s"
+}
+
+show_access_information() {
+    log_section "Access Information"
+    
+    if grep -q "atlas.local" /etc/hosts 2>/dev/null; then
+        log_info "Access via Ingress (recommended):"
+        log_info "  API Gateway:   http://api.atlas.local"
+        log_info "  Grafana:       http://grafana.atlas.local (admin/admin)"
+        log_info "  Prometheus:    http://prometheus.atlas.local"
+        log_info "  Zipkin:        http://zipkin.atlas.local"
+        log_info "  SMTP4Dev:      http://mail.atlas.local"
+        log_info ""
     fi
     
-    log_success "Atlas ingress deployed successfully"
+    log_info "Alternative access via port-forwarding:"
+    local port_forwards=(
+        "API Gateway:   kubectl port-forward -n $NAMESPACE svc/api-gateway 8080:8080"
+        "Grafana:       kubectl port-forward -n $NAMESPACE svc/grafana 3000:3000"
+        "Prometheus:    kubectl port-forward -n $NAMESPACE svc/prometheus 9090:9090"
+        "Zipkin:        kubectl port-forward -n $NAMESPACE svc/zipkin 9411:9411"
+    )
+    
+    for pf in "${port_forwards[@]}"; do
+        log_info "  $pf"
+    done
+}
+
+show_management_commands() {
+    log_info ""
+    log_info "Management commands:"
+    log_info "  Status:        kubectl get pods -n $NAMESPACE"
+    log_info "  Services:      kubectl get services -n $NAMESPACE"
+    log_info "  Logs:          kubectl logs -n $NAMESPACE deployment/[service-name] -f"
+}
+
+show_frontend_configuration() {
+    log_section "Frontend Configuration"
+    log_info "To run the frontend with K8s backend:"
+    log_info "  cd frontend"
+    log_info "  cp env.k8s .env  # or set VITE_API_BASE_URL=http://api.atlas.local"
+    log_info "  npm install && npm run dev"
+    log_info ""
+    log_info "Frontend will be available at: http://localhost:9000"
 }
 
 # =============================================================================
 # MAIN EXECUTION
 # =============================================================================
 
-# Main function
 main() {
     local start_time=$(date +%s)
     
@@ -597,55 +663,6 @@ main() {
     show_deployment_summary "$start_time"
 }
 
-# Function to show deployment summary
-show_deployment_summary() {
-    local start_time="$1"
-    local end_time=$(date +%s)
-    local total_time=$((end_time - start_time))
-    local minutes=$((total_time / 60))
-    local seconds=$((total_time % 60))
-
-    log_section "Access Information"
-    if grep -q "atlas.local" /etc/hosts 2>/dev/null; then
-        log_info "Access via Ingress (recommended):"
-        log_info "  API Gateway:   http://api.atlas.local"
-        log_info "  Grafana:       http://grafana.atlas.local (admin/admin)"
-        log_info "  Prometheus:    http://prometheus.atlas.local"
-        log_info "  Zipkin:        http://zipkin.atlas.local"
-        log_info "  SMTP4Dev:      http://mail.atlas.local"
-        log_info ""
-    fi
-    
-    log_info "Alternative access via port-forwarding:"
-    local port_forwards=(
-        "API Gateway:   kubectl port-forward -n $NAMESPACE svc/api-gateway 8080:8080"
-        "Grafana:       kubectl port-forward -n $NAMESPACE svc/grafana 3000:3000"
-        "Prometheus:    kubectl port-forward -n $NAMESPACE svc/prometheus 9090:9090"
-        "Zipkin:        kubectl port-forward -n $NAMESPACE svc/zipkin 9411:9411"
-    )
-    
-    for pf in "${port_forwards[@]}"; do
-        log_info "  $pf"
-    done
-    
-    log_info ""
-    log_info "Management commands:"
-    log_info "  Status:        kubectl get pods -n $NAMESPACE"
-    log_info "  Services:      kubectl get services -n $NAMESPACE"
-    log_info "  Logs:          kubectl logs -n $NAMESPACE deployment/[service-name] -f"
-
-    log_section "Frontend Configuration"
-    log_info "To run the frontend with K8s backend:"
-    log_info "  cd frontend"
-    log_info "  cp env.k8s .env  # or set VITE_API_BASE_URL=http://api.atlas.local"
-    log_info "  npm install && npm run dev"
-    log_info ""
-    log_info "Frontend will be available at: http://localhost:9000"
-
-    log_section "Deployment Summary"
-    log_success "Atlas platform deployment completed successfully!"
-    log_info "Total execution time: ${minutes}m ${seconds}s"
-}
-
-# Run main function
+# Parse arguments and run main function
+parse_arguments "$@"
 main

@@ -74,6 +74,14 @@ NAMESPACE="atlas-${ENVIRONMENT}"
 check_prerequisites() {
     log_section "Checking Prerequisites"
 
+    # Check Docker
+    if docker info > /dev/null 2>&1; then
+        log_success "Docker found and running"
+    else
+        log_error "Docker is not running. Please start Docker and try again."
+        exit 1
+    fi
+
     # Check kubectl
     if command -v kubectl &> /dev/null; then
         log_success "kubectl found"
@@ -86,8 +94,7 @@ check_prerequisites() {
     if kubectl cluster-info &> /dev/null; then
         log_success "Kubernetes cluster found"
     else
-        log_error "Cannot connect to Kubernetes cluster"
-        log_info "Make sure you have a running Kubernetes cluster (minikube, kind, etc.)"
+        log_error "Cannot connect to Kubernetes cluster. Make sure you have a running Kubernetes cluster (minikube, kind, etc.)"
         exit 1
     fi
 

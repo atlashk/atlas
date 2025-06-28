@@ -108,7 +108,7 @@ check_prerequisites() {
 # =============================================================================
 
 build_services() {
-    log_section "Building services..."
+    log_section "Building Services"
 
     local build_script="$PROJECT_ROOT/backend/scripts/build/build.sh"
     if [ ! -f "$build_script" ]; then
@@ -120,10 +120,10 @@ build_services() {
     chmod +x "$build_script"
 
     log_info "Invoking build script..."
-    if "$build_script"; then
-        log_success "Build completed successfully."
+    if "$build_script" --infra-stack=onprem-k8s; then
+        log_success "Build completed successfully"
     else
-        log_error "Build failed."
+        log_error "Build failed"
         exit 1
     fi
 }

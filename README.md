@@ -149,8 +149,6 @@ cd deployment/onprem/k8s/scripts
 ./k8s-clean.sh --env local              # Specified environment
 ```
 
-The startup process may take around **15 minutes** to complete (include building).
-
 **Access Services via Ingress (Recommended):**
 
 After setting up Ingress, access services using local hostnames:
