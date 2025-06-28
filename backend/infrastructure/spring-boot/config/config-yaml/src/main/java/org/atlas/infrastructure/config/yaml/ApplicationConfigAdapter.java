@@ -1,6 +1,7 @@
 package org.atlas.infrastructure.config.yaml;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ApplicationConfigAdapter implements ApplicationConfigPort, InitializingBean {
 
+  private static final String DEFAULT_PROFILE = "local";
   private static final String CONFIG_NODE_PREFIX = "app.config";
 
   private final Environment environment;
@@ -35,7 +37,10 @@ public class ApplicationConfigAdapter implements ApplicationConfigPort, Initiali
   @Override
   public String getActiveProfile() {
     String[] profiles = environment.getActiveProfiles();
-    return profiles.length > 0 ? profiles[0] : "default";
+    String[] filteredProfiles = Arrays.stream(profiles)
+        .filter(profile -> !"kubernetes".equals(profile))
+        .toArray(String[]::new);
+    return filteredProfiles.length > 0 ? filteredProfiles[0] : DEFAULT_PROFILE;
   }
 
   @Override

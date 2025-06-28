@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: atlas-config
-data:
-  SPRING_PROFILES_ACTIVE: "stg"
-  LOG_LEVEL: "INFO"

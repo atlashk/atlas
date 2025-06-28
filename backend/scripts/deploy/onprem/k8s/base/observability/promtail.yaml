@@ -226,7 +226,8 @@ spec:
       # Grace period for clean shutdown
       terminationGracePeriodSeconds: 10
 ---
-# Service account for Promtail to access Kubernetes API
+# ServiceAccount: Creates an identity for Promtail to use
+# This account will be used by Promtail pods to authenticate with Kubernetes API
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -235,7 +236,9 @@ metadata:
     app: promtail
     tier: observability
 ---
-# Cluster role defining permissions needed by Promtail
+# ClusterRole: Defines permissions that can be applied cluster-wide
+# This role grants read-only access to essential Kubernetes resources
+# needed for service discovery and log collection
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -244,17 +247,21 @@ metadata:
     app: promtail
     tier: observability
 rules:
-  # Permissions to read cluster resources for service discovery
-  - apiGroups: [""]
+  # Allow read access to core Kubernetes resources across all namespaces
+  - apiGroups: [""] # Core API group (pods, services, etc.)
     resources:
-      - nodes        # Read node information
-      - nodes/proxy  # Access node proxy
-      - services     # Read service information
-      - endpoints    # Read endpoint information
-      - pods         # Read pod information (most important for log collection)
-    verbs: ["get", "list", "watch"]  # Read and watch permissions
+      - "nodes"        # Read node information
+      - "nodes/proxy"  # Access node proxy
+      - "services"     # Service endpoints for load balancing
+      - "endpoints"    # Backend pods for services
+      - "pods"         # Container instances (most important for log collection)
+    verbs:
+      - "get"    # Retrieve individual resources
+      - "list"   # List multiple resources
+      - "watch"  # Watch for resource changes (real-time updates)
 ---
-# Bind the cluster role to service accounts across different namespaces
+# ClusterRoleBinding: Binds the ClusterRole to subjects (users/groups/service accounts)
+# This grants the promtail permissions to ServiceAccounts across ALL namespaces
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -262,21 +269,14 @@ metadata:
   labels:
     app: promtail
     tier: observability
+subjects:
+  # Grant permissions to all ServiceAccounts in the atlas namespace
+  # This approach is similar to security.yaml but scoped to a specific namespace
+  - kind: Group
+    name: system:serviceaccounts:atlas-local
+    apiGroup: rbac.authorization.k8s.io
 roleRef:
-  apiGroup: rbac.authorization.k8s.io
+  # Reference to the ClusterRole defined above
   kind: ClusterRole
   name: promtail
-subjects:
-  # Grant permissions to Promtail service accounts in different environments
-  - kind: ServiceAccount
-    name: promtail
-    namespace: atlas-local  # Local development environment
-  - kind: ServiceAccount
-    name: promtail
-    namespace: atlas-dev    # Development environment
-  - kind: ServiceAccount
-    name: promtail
-    namespace: atlas-stg    # Staging environment
-  - kind: ServiceAccount
-    name: promtail
-    namespace: atlas-prod   # Production environment 
+  apiGroup: rbac.authorization.k8s.io

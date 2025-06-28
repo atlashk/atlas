@@ -54,7 +54,3 @@ roleRef:
   kind: ClusterRole
   name: namespace-reader
   apiGroup: rbac.authorization.k8s.io
-
-# Security Note: This configuration grants read access to ALL ServiceAccounts
-# across ALL namespaces. This is broad access suitable for service discovery
-# and configuration management but should be reviewed for production security requirements.

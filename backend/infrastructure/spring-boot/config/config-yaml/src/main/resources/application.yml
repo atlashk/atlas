@@ -1,6 +1,6 @@
 app:
   config:
-    default:
+    local:
       system:
         locale: en-US
         cors:

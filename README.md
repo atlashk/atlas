@@ -134,19 +134,19 @@ cd deployment/onprem/k8s/scripts
 
 # Start services
 ./k8s-start.sh                          # Local environment (default)
-./k8s-start.sh --env dev                # Specified environment (local, dev, stg, prod)
+./k8s-start.sh --env local              # Specified environment
 
 # Start services (skip builds)
 ./k8s-start.sh --skip-build             # Local environment (default)
-./k8s-start.sh --env dev --skip-build   # Specified environment
+./k8s-start.sh --env local --skip-build # Specified environment
 
 # Stop services: scales to 0 replicas, preserves all data
 ./k8s-stop.sh                           # Local environment (default)
-./k8s-stop.sh --env dev                 # Specified environment
+./k8s-stop.sh --env local               # Specified environment
 
 # Clean up resources
 ./k8s-clean.sh                          # Local environment (default)
-./k8s-clean.sh --env prod               # Specified environment
+./k8s-clean.sh --env local              # Specified environment
 ```
 
 The startup process may take around **15 minutes** to complete (include building).
