@@ -52,12 +52,6 @@
 
 ## 🚀 Quick Start
 
-Atlas uses a unified DevOps approach with reorganized build scripts. Choose your preferred deployment method below.
-
-**Deployment Options:**
-- **Docker Compose** - Recommended for local development, includes Eureka service discovery
-- **Kubernetes** - Production-ready with native DNS service discovery, no Eureka required
-
 ### Prerequisites
 
 - **Mininum memory** - 8Gb
@@ -65,21 +59,7 @@ Atlas uses a unified DevOps approach with reorganized build scripts. Choose your
 - **Node.js 22+** - For frontend development
 - **Docker & Docker Compose** - For running services
 
-To start frontend, we need to make a `.env` file:
-
-**For Docker Compose mode:**
-```bash
-# Create .env file in frontend directory
-cd frontend
-echo "VITE_API_BASE_URL=http://localhost:8080" > .env
-```
-
-**For Kubernetes mode:**
-```bash
-# Create .env file in frontend directory
-cd frontend
-echo "VITE_API_BASE_URL=http://api.atlas.local" > .env
-```
+### Backend Startup
 
 For this style, we can easily use our simple wrapper scripts from the project root. They will invoke the relevant on-prem Docker compose scripts.
 
@@ -91,19 +71,27 @@ For this style, we can easily use our simple wrapper scripts from the project ro
 ./startup.sh --skip-build
 ```
 
-The web application will be accessible at **http://localhost:9000**.
+### Frontend Startup
 
-Login Credentials:
-- **Customer Portal**: `user` / `Aa@123456`
-- **Admin Dashboard**: `admin` / `Aa@123456`
+To start frontend, we need to make a `.env` file in `frontend` directory:
 
-**Development Mode (Optional):**
+```
+VITE_API_BASE_URL=http://localhost:8080
+```
+
+Then start Frontend in development mode:
 
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+
+The web application will be accessible at **http://localhost:9000**.
+
+Login Credentials:
+- **Customer Portal**: `user` / `Aa@123456`
+- **Admin Dashboard**: `admin` / `Aa@123456`
 
 ---
 
@@ -161,10 +149,12 @@ cd deployment/onprem/k8s/scripts
 ./k8s-clean.sh --env prod               # Specified environment
 ```
 
+The startup process may take around **5 minutes** to complete.
+
 **Access Services via Ingress (Recommended):**
 
 After setting up Ingress, access services using local hostnames:
-- **API Gateway**: http://api.atlas.local  
+- **API Gateway**: http://api.atlas.local
 - **Grafana**: http://grafana.atlas.local (admin/admin)
 - **Prometheus**: http://prometheus.atlas.local
 - **Zipkin**: http://zipkin.atlas.local
