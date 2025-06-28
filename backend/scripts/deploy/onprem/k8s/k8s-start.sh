@@ -92,9 +92,7 @@ wait_for_pods_ready() {
     local timeout="${WAIT_TIMEOUT:-300s}"
     local timeout_seconds=${timeout%s}
     
-    for service in "${services[@]}"; do
-        log_info "Waiting for $service pods to be ready..."
-        
+    for service in "${services[@]}"; do        
         # Wait for pods to exist with exponential backoff
         local wait_time=1
         local max_wait=60
@@ -647,19 +645,13 @@ main() {
         log_info "Skipping build step (--skip-build flag provided)"
     fi
 
-    # Setup namespace and configs
     create_namespace
-    apply_security_config &
-    apply_environment_config &
-    wait
-    
-    # Deploy services in order (infrastructure -> observability -> applications -> ingress)
+    apply_security_config
+    apply_environment_config
     deploy_infrastructure
     deploy_observability
     deploy_applications
     setup_and_deploy_ingress
-
-    # Show final information
     show_deployment_summary "$start_time"
 }
 

@@ -233,12 +233,12 @@ main() {
 
     check_prerequisites
 
-    log_info "Removing all Atlas resources:"
+    log_section "Removing all Atlas resources"
     log_info "  ✓ All services and applications"
     log_info "  ✓ Namespace and volumes"
-    log_info "  ✓ NGINX Ingress Controller"
+    log_info "  ✓ Ingress Controller"
     log_info "  ✓ /etc/hosts entries"
-    
+
     remove_namespace
     cleanup_ingress_controller
     cleanup_hosts_file
