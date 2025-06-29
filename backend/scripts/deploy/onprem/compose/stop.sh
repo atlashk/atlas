@@ -17,22 +17,46 @@ COMPOSE_FILE="$PROJECT_ROOT/backend/scripts/deploy/onprem/compose/docker-compose
 # Source logger
 source "$PROJECT_ROOT/backend/scripts/log/logger.sh"
 
-# Show usage if help is requested
-if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
-    log_info "Usage: $0"
+# =============================================================================
+# ARGUMENT PARSING & PRE-CHECKS
+# =============================================================================
+
+show_help() {
+    log_info "Usage: $0 [OPTIONS]"
     log_info ""
     log_info "Atlas Docker Compose Stop Script - Stops Atlas services"
     log_info ""
     log_info "This script STOPS Atlas services but preserves containers for easy restart."
-    log_info "To completely remove resources, use ./compose-clean.sh instead"
-    exit 0
-fi
+    log_info ""
+    log_info "Options:"
+    log_info "  -h, --help              Show this help message"
+    log_info ""
+    log_info "Examples:"
+    log_info "  $0                      # Stop all Atlas services"
+    log_info ""
+    log_info "Note: To completely remove resources, use ./cleanup.sh instead"
+}
+
+parse_arguments() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                show_help
+                exit 0
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                log_info "Use --help for usage information"
+                exit 1
+                ;;
+        esac
+    done
+}
 
 # =============================================================================
-# UTILITY FUNCTIONS
+# CHECK PRE-REQUISITES
 # =============================================================================
 
-# Check prerequisites
 check_prerequisites() {
     log_section "Checking prerequisites..."
     
@@ -73,13 +97,15 @@ stop_services() {
 
 # Main function
 main() {
+    parse_arguments "$@"
+    check_prerequisites
+
     log_section "Atlas Docker Compose Platform - Stopping"
     
-    check_prerequisites
     stop_services
     
     log_success "Atlas platform stopped successfully!"
 }
 
-# Run main function
-main
+# Execute main function
+main "$@"

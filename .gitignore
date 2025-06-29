@@ -1,9 +1,18 @@
+# =============================================================================
+# Atlas Microservices Project - Consolidated .gitignore
+# =============================================================================
+
+# =============================================================================
+# Java / Spring Boot / Gradle
+# =============================================================================
 HELP.md
 target/
 .gradle
 !gradle/wrapper/gradle-wrapper.jar
+build/
 !**/src/main/**/build/
 !**/src/test/**/build/
+!scripts/build/
 
 ### STS ###
 .apt_generated
@@ -16,9 +25,64 @@ target/
 bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
+!backend/scripts/deploy/aws/ecs/cdk/bin/
 
+# =============================================================================
+# Node.js / Frontend (Vue.js)
+# =============================================================================
+# Dependencies
+node_modules/
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Build outputs
+frontend/dist/
+frontend/build/
+backend/scripts/deploy/aws/ecs/cdk/cdk.out/
+
+# Environment files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+.nyc_output/
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# =============================================================================
+# AWS CDK
+# =============================================================================
+# Compiled JavaScript and TypeScript declaration files
+backend/scripts/deploy/aws/ecs/cdk/**/*.js
+!backend/scripts/deploy/aws/ecs/cdk/jest.config.js
+backend/scripts/deploy/aws/ecs/cdk/**/*.d.ts
+
+# CDK asset staging directory
+backend/scripts/deploy/aws/ecs/cdk/.cdk.staging/
+
+# =============================================================================
+# IDEs and Editors
+# =============================================================================
 ### IntelliJ IDEA ###
-.idea
+.idea/
 *.iws
 *.iml
 *.ipr
@@ -27,13 +91,52 @@ out/
 !**/src/test/**/out/
 
 ### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
 
 ### VS Code ###
 .vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 
-pids/
+### Eclipse ###
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+
+# =============================================================================
+# Operating System
+# =============================================================================
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# =============================================================================
+# Temporary files
+# =============================================================================
+.temp/
+.tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib

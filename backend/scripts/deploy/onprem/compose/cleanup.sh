@@ -17,23 +17,6 @@ COMPOSE_FILE="$PROJECT_ROOT/backend/scripts/deploy/onprem/compose/docker-compose
 # Source logger
 source "$PROJECT_ROOT/backend/scripts/log/logger.sh"
 
-# Show usage if help is requested
-if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
-    log_info "Usage: $0"
-    log_info ""
-    log_info "Atlas Docker Compose Cleanup Script - Removes all Atlas-related Docker resources"
-    log_info ""
-    log_info "This script removes:"
-    log_info "  - Containers: Only those defined in the Atlas compose file"
-    log_info "  - Volumes: Only those with the Atlas project prefix"
-    log_info "  - Images: Only custom Atlas images (preserves external/infrastructure images)"
-    log_info "  - Networks: Only Atlas-specific networks"
-    log_info ""
-    log_info "⚠️  WARNING: This operation is DESTRUCTIVE and will delete Atlas data!"
-    log_info "Other Docker resources on your system will be preserved."
-    exit 0
-fi
-
 # =============================================================================
 # CONFIGURATION - Centralized resource definitions
 # =============================================================================
@@ -88,10 +71,50 @@ declare -ra ATLAS_IMAGES=(
 )
 
 # =============================================================================
-# UTILITY FUNCTIONS
+# ARGUMENT PARSING
 # =============================================================================
 
-# Check prerequisites
+show_help() {
+    log_info "Usage: $0 [OPTIONS]"
+    log_info ""
+    log_info "Atlas Docker Compose Cleanup Script - Removes all Atlas-related Docker resources"
+    log_info ""
+    log_info "This script removes:"
+    log_info "  - Containers: Only those defined in the Atlas compose file"
+    log_info "  - Volumes: Only those with the Atlas project prefix"
+    log_info "  - Images: Only custom Atlas images (preserves external/infrastructure images)"
+    log_info "  - Networks: Only Atlas-specific networks"
+    log_info ""
+    log_info "Options:"
+    log_info "  -h, --help              Show this help message"
+    log_info ""
+    log_info "Examples:"
+    log_info "  $0                      # Clean all Atlas resources"
+    log_info ""
+    log_warn "⚠️  WARNING: This operation is DESTRUCTIVE and will delete Atlas data!"
+    log_warn "Other Docker resources on your system will be preserved."
+}
+
+parse_arguments() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                show_help
+                exit 0
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                log_info "Use --help for usage information"
+                exit 1
+                ;;
+        esac
+    done
+}
+
+# =============================================================================
+# CHECK PRE-REQUISITES
+# =============================================================================
+
 check_prerequisites() {
     log_section "Checking prerequisites..."
     
@@ -113,6 +136,10 @@ check_prerequisites() {
     
     log_success "Prerequisites check passed"
 }
+
+# =============================================================================
+# UTILITY FUNCTIONS
+# =============================================================================
 
 # Get container IDs by name pattern
 get_container_ids() {
@@ -283,6 +310,9 @@ remove_networks() {
 
 # Main function
 main() {
+    parse_arguments "$@"
+    check_prerequisites
+
     log_section "Atlas Docker Compose - Cleanup"
     log_info "Compose file: $COMPOSE_FILE"
     log_info "This script will remove ALL Atlas-related Docker resources:"
@@ -294,8 +324,6 @@ main() {
     log_info "Other Docker resources on your system will be preserved."
     log_info ""
 
-    check_prerequisites
-
     # Execute cleanup for all resources
     remove_containers "$COMPOSE_FILE" "$PROJECT_NAME"
     remove_volumes "$COMPOSE_FILE" "$PROJECT_NAME"
@@ -306,5 +334,5 @@ main() {
     log_success "Atlas platform cleanup completed!"
 }
 
-# Run main function
-main
+# Execute main function
+main "$@"

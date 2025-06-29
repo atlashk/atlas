@@ -51,11 +51,10 @@ declare -ra OBSERVABILITY_SERVICES=(
 )
 
 # =============================================================================
-# UTILITY FUNCTIONS
+# ARGUMENT PARSING
 # =============================================================================
 
-# Show usage if help is requested
-if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+show_help() {
     log_info "Usage: $0 [OPTIONS]"
     log_info ""
     log_info "Atlas Kubernetes Cleanup Script - Removes all Atlas-related resources"
@@ -71,32 +70,39 @@ if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
     log_info "  $0                      # Clean all resources in local env"
     log_info "  $0 --env local          # Clean all resources in local env"
     log_info ""
-    log_info "⚠️  WARNING: This operation is DESTRUCTIVE and will delete ALL Atlas resources!"
-    log_info "This includes applications, databases, configuration data, ingress, and host entries."
-    exit 0
-fi
+    log_warn "⚠️  WARNING: This operation is DESTRUCTIVE and will delete ALL Atlas resources!"
+    log_warn "This includes applications, databases, configuration data, ingress, and host entries."
+}
 
-# Parse arguments
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --env)
-            if [[ -n "${2:-}" && ! "$2" =~ ^-- ]]; then
-                ENVIRONMENT="$2"
-                shift 2
-            else
-                log_error "--env requires an environment value"
+parse_arguments() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                show_help
+                exit 0
+                ;;
+            --env)
+                if [[ -n "${2:-}" && ! "$2" =~ ^-- ]]; then
+                    ENVIRONMENT="$2"
+                    shift 2
+                else
+                    log_error "--env requires an environment value"
+                    exit 1
+                fi
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                log_info "Use --help for usage information"
                 exit 1
-            fi
-            ;;
-        *)
-            log_error "Unknown option: $1"
-            log_info "Use --help for usage information"
-            exit 1
-            ;;
-    esac
-done
+                ;;
+        esac
+    done
+}
 
-# Function to check prerequisites
+# =============================================================================
+# CHECK PRE-REQUISITES
+# =============================================================================
+
 check_prerequisites() {
     log_section "Checking Prerequisites"
 
@@ -225,13 +231,14 @@ cleanup_hosts_file() {
 
 # Main function
 main() {
+    parse_arguments "$@"
+    check_prerequisites
+
     local namespace="atlas-${ENVIRONMENT}"
-    
+
     log_section "Atlas OnPrem K8s Platform - Cleanup"
     log_info "Environment: $ENVIRONMENT"
     log_info "Namespace: $namespace"
-
-    check_prerequisites
 
     log_section "Removing all Atlas resources"
     log_info "  ✓ All services and applications"
@@ -247,5 +254,5 @@ main() {
     log_success "Atlas platform cleanup completed!"
 }
 
-# Run main function
-main
+# Execute main function
+main "$@"

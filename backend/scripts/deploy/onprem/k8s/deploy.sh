@@ -21,7 +21,7 @@ ENVIRONMENT="local"
 SKIP_BUILD=false
 
 # =============================================================================
-# HELP AND ARGUMENT PARSING
+# ARGUMENT PARSING
 # =============================================================================
 
 show_help() {
@@ -81,6 +81,69 @@ parse_arguments() {
     
     # Set namespace based on environment
     readonly NAMESPACE="atlas-${ENVIRONMENT}"
+}
+
+# =============================================================================
+# CHECK PRE-REQUISITES
+# =============================================================================
+
+check_prerequisites() {
+    log_section "Checking Prerequisites"
+    
+    # Check build prerequisites only if not skipping build
+    if [[ "$SKIP_BUILD" == false ]]; then
+        # Check Java
+        if command -v java &> /dev/null; then
+            local java_version
+            java_version=$(java -version 2>&1 | head -n 1 | cut -d'"' -f2)
+            local major_version
+            major_version=$(echo $java_version | cut -d'.' -f1)
+            
+            if [[ $major_version == "1" ]]; then
+                major_version=$(echo $java_version | cut -d'.' -f2)
+            fi
+
+            if [ "$major_version" -lt 17 ]; then
+                errors+=("Java version $java_version is not supported. Please install Java 17 or later.")
+            else
+                log_success "Java found: $java_version"
+            fi
+        else
+            errors+=("Java is not installed. Please install Java 17 or later.")
+        fi
+    fi
+
+    # Check Docker
+    if docker info > /dev/null 2>&1; then
+        log_success "Docker found and running"
+    else
+        log_error "Docker is not running. Please start Docker and try again."
+        exit 1
+    fi
+
+    # Check kubectl
+    if command -v kubectl &> /dev/null; then
+        log_success "kubectl found"
+    else
+        log_error "kubectl is not installed"
+        exit 1
+    fi
+    
+    # Check Kubernetes cluster
+    if kubectl cluster-info &> /dev/null; then
+        log_success "Kubernetes cluster found"
+    else
+        log_error "Cannot connect to Kubernetes cluster. Make sure you have a running Kubernetes cluster (minikube, kind, etc.)"
+        exit 1
+    fi
+
+    log_success "Prerequisites check passed"
+}
+
+show_cluster_info() {
+    log_section "Cluster Information"
+    kubectl cluster-info
+    kubectl get nodes -o wide
 }
 
 # =============================================================================
@@ -207,69 +270,6 @@ detect_k8s_platform() {
         *k3s*) echo "k3s" ;;
         *) echo "generic" ;;
     esac
-}
-
-# =============================================================================
-# PREREQUISITE CHECKS
-# =============================================================================
-
-check_prerequisites() {
-    log_section "Checking Prerequisites"
-    
-    # Check build prerequisites only if not skipping build
-    if [[ "$SKIP_BUILD" == false ]]; then
-        # Check Java
-        if command -v java &> /dev/null; then
-            local java_version
-            java_version=$(java -version 2>&1 | head -n 1 | cut -d'"' -f2)
-            local major_version
-            major_version=$(echo $java_version | cut -d'.' -f1)
-            
-            if [[ $major_version == "1" ]]; then
-                major_version=$(echo $java_version | cut -d'.' -f2)
-            fi
-
-            if [ "$major_version" -lt 17 ]; then
-                errors+=("Java version $java_version is not supported. Please install Java 17 or later.")
-            else
-                log_success "Java found: $java_version"
-            fi
-        else
-            errors+=("Java is not installed. Please install Java 17 or later.")
-        fi
-    fi
-
-    # Check Docker
-    if docker info > /dev/null 2>&1; then
-        log_success "Docker found and running"
-    else
-        log_error "Docker is not running. Please start Docker and try again."
-        exit 1
-    fi
-
-    # Check kubectl
-    if command -v kubectl &> /dev/null; then
-        log_success "kubectl found"
-    else
-        log_error "kubectl is not installed"
-        exit 1
-    fi
-    
-    # Check Kubernetes cluster
-    if kubectl cluster-info &> /dev/null; then
-        log_success "Kubernetes cluster found"
-    else
-        log_error "Cannot connect to Kubernetes cluster. Make sure you have a running Kubernetes cluster (minikube, kind, etc.)"
-        exit 1
-    fi
-
-    log_success "Prerequisites check passed"
-}
-
-show_cluster_info() {
-    log_section "Cluster Information"
-    kubectl cluster-info
-    kubectl get nodes -o wide
 }
 
 # =============================================================================
@@ -624,16 +624,17 @@ show_frontend_configuration() {
 # MAIN EXECUTION
 # =============================================================================
 
+# Main function
 main() {
+    parse_arguments "$@"
+    check_prerequisites
+    show_cluster_info
+
     local start_time=$(date +%s)
-    
+
     log_section "Atlas OnPrem K8s Platform - Starting"
     log_info "Environment: $ENVIRONMENT"
     log_info "Namespace: $NAMESPACE"
-    
-    # Prerequisites and build
-    check_prerequisites
-    show_cluster_info
 
     # Build step (if not skipped)
     if [[ "$SKIP_BUILD" == false ]]; then
@@ -655,6 +656,5 @@ main() {
     show_deployment_summary "$start_time"
 }
 
-# Parse arguments and run main function
-parse_arguments "$@"
-main
+# Execute main function
+main "$@"

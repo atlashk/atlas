@@ -20,8 +20,11 @@ source "$PROJECT_ROOT/backend/scripts/log/logger.sh"
 # Default options
 SKIP_BUILD=false
 
-# Show usage if help is requested
-if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+# =============================================================================
+# ARGUMENT PARSING
+# =============================================================================
+
+show_help() {
     log_info "Usage: $0 [OPTIONS]"
     log_info ""
     log_info "Atlas Docker Compose Start Script - Starts the Atlas microservices platform"
@@ -33,29 +36,32 @@ if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
     log_info "Examples:"
     log_info "  $0                  # Start with builds"
     log_info "  $0 --skip-build     # Start without builds"
-    exit 0
-fi
+}
 
-# Parse arguments
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --skip-build)
-            SKIP_BUILD=true
-            shift
-            ;;
-        *)
-            log_error "Unknown option: $1"
-            log_info "Use --help for usage information"
-            exit 1
-            ;;
-    esac
-done
+parse_arguments() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                show_help
+                exit 0
+                ;;
+            --skip-build)
+                SKIP_BUILD=true
+                shift
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                log_info "Use --help for usage information"
+                exit 1
+                ;;
+        esac
+    done
+}
 
 # =============================================================================
-# UTILITY FUNCTIONS
+# CHECK PRE-REQUISITES
 # =============================================================================
 
-# Check prerequisites
 check_prerequisites() {
     log_section "Checking prerequisites..."
 
@@ -162,9 +168,10 @@ start_services() {
 
 # Main function
 main() {
-    log_section "Atlas Docker Compose Platform - Starting"
-
+    parse_arguments "$@"
     check_prerequisites
+
+    log_section "Atlas Docker Compose Platform - Starting"
 
     # Build step (if not skipped)
     if [[ "$SKIP_BUILD" == false ]]; then
@@ -174,10 +181,10 @@ main() {
     fi
 
     start_services
-    
+
     log_success "Atlas platform started successfully!"
     log_success "Your Atlas development environment is now ready to use!"
 }
 
-# Run main function
-main
+# Execute main function
+main "$@"
