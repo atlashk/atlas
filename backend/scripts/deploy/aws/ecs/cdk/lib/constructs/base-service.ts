@@ -157,6 +157,16 @@ export class BaseService extends Construct {
         ...config.environment,
       },
       secrets: config.secrets || {},
+      healthCheck: {
+        command: [
+          'CMD-SHELL',
+          `curl -f http://localhost:${config.containerPort}${config.healthCheckPath} || exit 1`
+        ],
+        interval: cdk.Duration.seconds(30),
+        timeout: cdk.Duration.seconds(5),
+        retries: 5,
+        startPeriod: cdk.Duration.seconds(120),
+      },
     });
 
     container.addPortMappings({

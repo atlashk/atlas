@@ -34,7 +34,7 @@ COPY --from=builder --chown=spring:spring /workspace/*/application/ ./
 USER spring:spring
 
 # Expose application port
-EXPOSE 8080
+EXPOSE 8091
 
 # Use dumb-init for proper signal handling and optimized JVM settings
 ENTRYPOINT ["dumb-init", "--", "java", \
