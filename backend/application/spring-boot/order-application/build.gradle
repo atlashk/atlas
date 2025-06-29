@@ -122,6 +122,8 @@ dependencies {
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['observability.metrics']}")
     }
     switch (rootProject.ext.infraStack['observability.tracing']) {
+        case 'none':
+            break;
         case 'simple':
             api project(':infrastructure.spring-boot.observability.tracing.simple')
             break

@@ -6,7 +6,7 @@ This directory contains the AWS CDK (Cloud Development Kit) infrastructure code 
 
 The CDK infrastructure is organized into three main stacks:
 
-1. **Atlas Infrastructure Stack** (`atlas-infrastructure-{env}`)
+1. **Infrastructure Stack** (`infrastructure-{env}`)
    - VPC with public and private subnets
    - RDS MySQL database
    - ElastiCache Redis cluster
@@ -18,12 +18,12 @@ The CDK infrastructure is organized into three main stacks:
    - AWS Secrets Manager secrets
    - AWS Cloud Map service discovery
 
-2. **Atlas API Gateway Stack** (`atlas-api-gateway-{env}`)
+2. **API Gateway Stack** (`api-gateway-{env}`)
    - ECS Fargate service for API Gateway
    - Target group and load balancer rules
    - Container definitions with environment variables
 
-3. **Atlas Auth Server Stack** (`atlas-auth-server-{env}`)
+3. **Auth Server Stack** (`auth-server-{env}`)
    - ECS Fargate service for Auth Server
    - Target group and load balancer rules
    - Container definitions with environment variables
@@ -311,17 +311,78 @@ After the infrastructure is deployed, you need to initialize the MySQL database 
    - `06-db_quartz.sql`
    - `07-db_zipkin.sql`
 
+---
+
 ## Monitoring and Troubleshooting
 
-### CloudWatch Logs
+### Viewing Logs
 
-All application logs are sent to CloudWatch under the log group `/ecs/{environment}-atlas`:
+When deployed to AWS ECS, logs are stored in CloudWatch Logs with the pattern: `/ecs/atlas/{environment}`
+
+#### AWS CLI Commands
 
 ```bash
-# View logs for a specific service
+# List all log streams
+aws logs describe-log-streams --region us-east-1 --log-group-name '/ecs/atlas/dev'
+
+# View auth-server logs (real-time)
+aws logs tail --region us-east-1 '/ecs/atlas/dev' --filter-pattern 'auth-server' --follow
+
+# View api-gateway logs (real-time)
+aws logs tail --region us-east-1 '/ecs/atlas/dev' --filter-pattern 'api-gateway' --follow
+
+# View user-service logs (real-time)
+aws logs tail --region us-east-1 '/ecs/atlas/dev' --filter-pattern 'user-service' --follow
+
+# View product-service logs (real-time)
+aws logs tail --region us-east-1 '/ecs/atlas/dev' --filter-pattern 'product-service' --follow
+
+# View order-service logs (real-time)
+aws logs tail --region us-east-1 '/ecs/atlas/dev' --filter-pattern 'order-service' --follow
+
+# View notification-service logs (real-time)
+aws logs tail --region us-east-1 '/ecs/atlas/dev' --filter-pattern 'notification-service' --follow
+
+# View all logs (real-time)
+aws logs tail --region us-east-1 '/ecs/atlas/dev' --follow
+
+# View logs for specific time range
 aws logs filter-log-events \
-  --log-group-name "/ecs/dev-atlas" \
-  --log-stream-name-prefix "api-gateway"
+  --region us-east-1 \
+  --log-group-name '/ecs/atlas/dev' \
+  --start-time $(date -d '1 hour ago' +%s)000 \
+  --filter-pattern 'ERROR'
+
+# Export logs to file
+aws logs filter-log-events \
+  --region us-east-1 \
+  --log-group-name '/ecs/atlas/dev' \
+  --start-time $(date -d '1 day ago' +%s)000 \
+  --query 'events[*].message' \
+  --output text > atlas-logs.txt
+```
+
+#### AWS Console Access
+
+- **CloudWatch Logs**: `AWS Console → CloudWatch → Logs → Log groups → /ecs/atlas/{env}`
+- **ECS Console**: `AWS Console → ECS → Clusters → {env}-atlas-cluster → Services → {service-name} → Logs tab`
+- **CloudFormation Events**: `AWS Console → CloudFormation → Stacks → atlas-infrastructure-{env} → Events tab`
+
+#### Log Levels and Filtering
+
+```bash
+# Filter by log level
+aws logs tail --region us-east-1 '/ecs/atlas/dev' --filter-pattern 'ERROR' --follow
+aws logs tail --region us-east-1 '/ecs/atlas/dev' --filter-pattern 'WARN' --follow
+aws logs tail --region us-east-1 '/ecs/atlas/dev' --filter-pattern 'INFO' --follow
+
+# Filter by specific keywords
+aws logs tail --region us-east-1 '/ecs/atlas/dev' --filter-pattern 'exception' --follow
+aws logs tail --region us-east-1 '/ecs/atlas/dev' --filter-pattern 'database' --follow
+aws logs tail --region us-east-1 '/ecs/atlas/dev' --filter-pattern 'HTTP' --follow
+
+# Combine filters (service + log level)
+aws logs tail --region us-east-1 '/ecs/atlas/dev' --filter-pattern '[timestamp, requestId, logLevel="ERROR", service="auth-server", ...]' --follow
 ```
 
 ### ECS Service Status

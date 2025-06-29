@@ -129,6 +129,8 @@ dependencies {
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['observability.metrics']}")
     }
     switch (rootProject.ext.infraStack['observability.tracing']) {
+        case 'none':
+            break;
         case 'simple':
             api project(':infrastructure.spring-boot.observability.tracing.simple')
             break
@@ -159,10 +161,7 @@ dependencies {
         case 'filesystem':
             api project(':infrastructure.spring-boot.storage.filesystem')
             break
-        case 'minio':
-            api project(':infrastructure.spring-boot.storage.minio')
-            break
-        case 's3s':
+        case 's3':
             api project(':infrastructure.spring-boot.storage.s3')
             break
         default:

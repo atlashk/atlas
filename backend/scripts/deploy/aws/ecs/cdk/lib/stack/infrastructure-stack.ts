@@ -79,14 +79,10 @@ export class InfrastructureStack extends cdk.Stack {
 
     switch (environmentName.toLowerCase()) {
       case 'dev':
-      case 'development':
         return createDevConfig(region, account);
       case 'stg':
-      case 'staging':
-      case 'stage':
         return createStgConfig(region, account);
       case 'prod':
-      case 'production':
         return createProdConfig(region, account);
       default:
         return createDevConfig(region, account);

@@ -115,10 +115,10 @@ check_prerequisites() {
     fi
 
     # Check CDK
-    if command -v cdk &> /dev/null || npx cdk --version &> /dev/null; then
+    if command -v cdk &> /dev/null; then
         log_success "AWS CDK found"
     else
-        log_error "AWS CDK is not installed"
+        log_error "AWS CDK is not installed. Please install CDK globally: npm install -g aws-cdk"
         exit 1
     fi
 
@@ -148,8 +148,8 @@ destroy_service_stacks() {
     
     # Destroy API Gateway Stack
     log_info "Destroying api-gateway stack..."
-    if aws cloudformation describe-stacks --profile ${PROFILE} --region ${REGION} --stack-name atlas-api-gateway-${ENVIRONMENT} &>/dev/null; then
-        npx cdk destroy atlas-api-gateway-${ENVIRONMENT} \
+    if aws cloudformation describe-stacks --profile ${PROFILE} --region ${REGION} --stack-name api-gateway-${ENVIRONMENT} &>/dev/null; then
+        cdk destroy api-gateway-${ENVIRONMENT} \
             --profile ${PROFILE} \
             --context environment=${ENVIRONMENT} \
             --context region=${REGION} \
@@ -162,8 +162,8 @@ destroy_service_stacks() {
     
     # Destroy Auth Server Stack
     log_info "Destroying auth-server stack..."
-    if aws cloudformation describe-stacks --profile ${PROFILE} --region ${REGION} --stack-name atlas-auth-server-${ENVIRONMENT} &>/dev/null; then
-        npx cdk destroy atlas-auth-server-${ENVIRONMENT} \
+    if aws cloudformation describe-stacks --profile ${PROFILE} --region ${REGION} --stack-name auth-server-${ENVIRONMENT} &>/dev/null; then
+        cdk destroy auth-server-${ENVIRONMENT} \
             --profile ${PROFILE} \
             --context environment=${ENVIRONMENT} \
             --context region=${REGION} \
@@ -185,8 +185,8 @@ destroy_infrastructure_stack() {
     account_id=$(aws sts get-caller-identity --profile ${PROFILE} --query Account --output text)
     
     log_info "Destroying infrastructure stack..."
-    if aws cloudformation describe-stacks --profile ${PROFILE} --region ${REGION} --stack-name atlas-infrastructure-${ENVIRONMENT} &>/dev/null; then
-        npx cdk destroy atlas-infrastructure-${ENVIRONMENT} \
+    if aws cloudformation describe-stacks --profile ${PROFILE} --region ${REGION} --stack-name infrastructure-${ENVIRONMENT} &>/dev/null; then
+        cdk destroy infrastructure-${ENVIRONMENT} \
             --profile ${PROFILE} \
             --context environment=${ENVIRONMENT} \
             --context region=${REGION} \

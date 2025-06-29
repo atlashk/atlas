@@ -40,6 +40,8 @@ show_help() {
     log_info "  - Provides database initialization guidance"
     log_info "  - Deploys auth-server and api-gateway stacks"
     log_info ""
+    log_info "⚠️  First-time setup: Run with --bootstrap flag to initialize CDK in your AWS account"
+    log_info ""
     log_info "Options:"
     log_info "  --env ENVIRONMENT   Target environment (default: dev)"
     log_info "  --region REGION     AWS region (default: us-east-1)"
@@ -150,14 +152,6 @@ check_prerequisites() {
         else
             errors+=("Docker is not running. Please start Docker and try again.")
         fi
-
-        # Check build script exists
-        local build_script="$PROJECT_ROOT/backend/scripts/build/build.sh"
-        if [ ! -f "$build_script" ]; then
-            errors+=("Build script not found: $build_script")
-        else
-            log_success "Build script found"
-        fi
     fi
 
     # Check AWS CLI
@@ -184,7 +178,7 @@ check_prerequisites() {
     if command -v cdk &> /dev/null; then
         log_success "CDK found: $(cdk --version)"
     else
-        log_info "CDK not found globally, will use npx cdk"
+        errors+=("CDK not found. Please install CDK globally: npm install -g aws-cdk")
     fi
 
     # Check if profile exists
@@ -287,16 +281,14 @@ push_docker_images_to_ecr() {
 # =============================================================================
 
 bootstrap_cdk() {
-    if [[ "$BOOTSTRAP" == true ]]; then
-        log_section "Bootstrapping CDK"
-        
-        cd "$SCRIPT_DIR"
-        
-        log_info "Bootstrapping CDK for account/region..."
-        npx cdk bootstrap --profile ${PROFILE} aws://$(aws sts get-caller-identity --profile ${PROFILE} --query Account --output text)/${REGION}
-        
-        log_success "CDK bootstrapped successfully"
-    fi
+    log_section "Bootstrapping CDK"
+    
+    cd "$SCRIPT_DIR"
+    
+    log_info "Bootstrapping CDK for account/region..."
+    cdk bootstrap --profile ${PROFILE} aws://$(aws sts get-caller-identity --profile ${PROFILE} --query Account --output text)/${REGION}
+    
+    log_success "CDK bootstrapped successfully"
 }
 
 deploy_infrastructure() {
@@ -309,7 +301,7 @@ deploy_infrastructure() {
     account_id=$(aws sts get-caller-identity --profile ${PROFILE} --query Account --output text)
     
     log_info "Deploying infrastructure stack..."
-    npx cdk deploy atlas-infrastructure-${ENVIRONMENT} \
+    cdk deploy atlas-infrastructure-${ENVIRONMENT} \
         --profile ${PROFILE} \
         --context environment=${ENVIRONMENT} \
         --context region=${REGION} \
@@ -330,7 +322,7 @@ deploy_services() {
     
     # Deploy Auth Server
     log_info "Deploying auth-server stack..."
-    npx cdk deploy atlas-auth-server-${ENVIRONMENT} \
+    cdk deploy atlas-auth-server-${ENVIRONMENT} \
         --profile ${PROFILE} \
         --context environment=${ENVIRONMENT} \
         --context region=${REGION} \
@@ -340,7 +332,7 @@ deploy_services() {
     
     # Deploy API Gateway
     log_info "Deploying api-gateway stack..."
-    npx cdk deploy atlas-api-gateway-${ENVIRONMENT} \
+    cdk deploy atlas-api-gateway-${ENVIRONMENT} \
         --profile ${PROFILE} \
         --context environment=${ENVIRONMENT} \
         --context region=${REGION} \
@@ -363,7 +355,7 @@ initialize_database() {
     mysql_endpoint=$(aws cloudformation describe-stacks \
         --profile ${PROFILE} \
         --region ${REGION} \
-        --stack-name atlas-infrastructure-${ENVIRONMENT} \
+        --stack-name infrastructure-${ENVIRONMENT} \
         --query "Stacks[0].Outputs[?OutputKey=='MySQLEndpoint'].OutputValue" \
         --output text)
     
@@ -395,21 +387,27 @@ main() {
     log_info "Bootstrap: $BOOTSTRAP"
     log_info ""
 
-    bootstrap_cdk
-    build_services
-    push_docker_images_to_ecr
+    # Only build and push if not skipping build
+    if [[ "$SKIP_BUILD" == false ]]; then
+        build_services
+        push_docker_images_to_ecr
+    else
+        log_info "Skipping build and ECR push steps as requested"
+    fi
+
+    # Only bootstrap if requested
+    if [[ "$BOOTSTRAP" == true ]]; then
+        bootstrap_cdk
+    fi
+
+    # Note: CDK synthesis is automatically performed by 'cdk deploy'
+
     deploy_infrastructure
     initialize_database
     deploy_services
-    
+
     log_section "Deployment Complete"
     log_success "Atlas has been successfully deployed to AWS ECS using CDK!"
-    log_info ""
-    log_info "Next steps:"
-    log_info "1. Initialize the database with the SQL scripts"
-    log_info "2. Verify the services are running in the ECS console"
-    log_info "3. Test the API endpoints"
-    log_info ""
 }
 
 # Execute main function

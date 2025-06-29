@@ -53,7 +53,7 @@ export class ComputeLayer extends Construct {
 
     // Create CloudWatch Log Group
     this.logGroup = new logs.LogGroup(this, 'LogGroup', {
-      logGroupName: `/ecs/${environmentName}-atlas`,
+      logGroupName: `/ecs/atlas/${environmentName}`,
       retention: logs.RetentionDays.ONE_WEEK,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
