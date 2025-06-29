@@ -180,9 +180,9 @@ export class InfrastructureStack extends cdk.Stack {
       exportName: `mysql-endpoint-${environmentName}`,
     });
 
-    new cdk.CfnOutput(this, 'RedisClusterEndpoint', {
+    new cdk.CfnOutput(this, 'RedisEndpoint', {
       value: this.dataLayer.redisCluster.attrConfigurationEndPointAddress,
-      exportName: `redis-cluster-endpoint-${environmentName}`,
+      exportName: `redis-endpoint-${environmentName}`,
     });
 
     // Service Discovery outputs

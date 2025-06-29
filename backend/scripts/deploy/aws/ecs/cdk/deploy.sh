@@ -21,6 +21,7 @@ REGION="us-east-1"
 PROFILE="default"
 SKIP_BUILD=false
 BOOTSTRAP=false
+FORCE_REDEPLOY=false
 
 # =============================================================================
 # ARGUMENT PARSING
@@ -48,6 +49,7 @@ show_help() {
     log_info "  --profile PROFILE   AWS profile (default: default)"
     log_info "  --skip-build        Skip all build steps (JAR files, Docker images, ECR push)"
     log_info "  --bootstrap         Bootstrap CDK for the account/region"
+    log_info "  --force-redeploy    Force redeployment of all stacks even if they already exist"
     log_info "  -h, --help          Show this help message"
     log_info ""
     log_info "Environments:"
@@ -60,6 +62,7 @@ show_help() {
     log_info "  $0 --env stg --region us-west-2      # Deploy to staging"
     log_info "  $0 --skip-build                      # Deploy without building"
     log_info "  $0 --bootstrap                       # Bootstrap CDK first"
+    log_info "  $0 --force-redeploy                  # Force redeploy all stacks"
     log_info ""
 }
 
@@ -103,6 +106,10 @@ parse_arguments() {
                 ;;
             --bootstrap)
                 BOOTSTRAP=true
+                shift
+                ;;
+            --force-redeploy)
+                FORCE_REDEPLOY=true
                 shift
                 ;;
             *)
@@ -280,6 +287,46 @@ push_docker_images_to_ecr() {
 # CDK FUNCTIONS
 # =============================================================================
 
+check_stack_status() {
+    local stack_name="$1"
+    local stack_status
+    
+    stack_status=$(aws cloudformation describe-stacks \
+        --profile ${PROFILE} \
+        --region ${REGION} \
+        --stack-name "${stack_name}" \
+        --query "Stacks[0].StackStatus" \
+        --output text 2>/dev/null || echo "NOT_EXISTS")
+    
+    echo "$stack_status"
+}
+
+should_skip_stack_deployment() {
+    local stack_name="$1"
+    local stack_status
+    
+    # If force redeploy is enabled, never skip
+    if [[ "$FORCE_REDEPLOY" == true ]]; then
+        return 1  # Deploy stack
+    fi
+    
+    stack_status=$(check_stack_status "$stack_name")
+    
+    case "$stack_status" in
+        "CREATE_COMPLETE"|"UPDATE_COMPLETE")
+            return 0  # Skip deployment
+            ;;
+        "NOT_EXISTS"|"ROLLBACK_COMPLETE"|"UPDATE_ROLLBACK_COMPLETE")
+            return 1  # Deploy stack
+            ;;
+        *)
+            log_warn "Stack $stack_name is in state: $stack_status"
+            log_warn "Proceeding with deployment anyway..."
+            return 1  # Deploy stack
+            ;;
+    esac
+}
+
 bootstrap_cdk() {
     log_section "Bootstrapping CDK"
     
@@ -296,11 +343,20 @@ deploy_infrastructure() {
 
     cd "$SCRIPT_DIR"
     
+    local stack_name="atlas-infrastructure-${ENVIRONMENT}"
+    
+    # Check if we should skip deployment
+    if should_skip_stack_deployment "$stack_name"; then
+        log_info "Skipping infrastructure deployment..."
+        return 0
+    fi
+
     # Get AWS account ID
     local account_id
     account_id=$(aws sts get-caller-identity --profile ${PROFILE} --query Account --output text)
 
-    cdk deploy atlas-infrastructure-${ENVIRONMENT} \
+    log_info "Deploying infrastructure stack '$stack_name'..."
+    cdk deploy "$stack_name" \
         --profile ${PROFILE} \
         --context environment=${ENVIRONMENT} \
         --context region=${REGION} \
@@ -312,34 +368,44 @@ deploy_infrastructure() {
 
 deploy_services() {
     log_section "Deploying Service Stacks"
-    
+
     cd "$SCRIPT_DIR"
-    
+
     # Get AWS account ID
     local account_id
     account_id=$(aws sts get-caller-identity --profile ${PROFILE} --query Account --output text)
-    
+
     # Deploy Auth Server
-    log_info "Deploying auth-server stack..."
-    cdk deploy atlas-auth-server-${ENVIRONMENT} \
-        --profile ${PROFILE} \
-        --context environment=${ENVIRONMENT} \
-        --context region=${REGION} \
-        --context account=${account_id} \
-        --context ecrRepository=${account_id}.dkr.ecr.${REGION}.amazonaws.com/atlas-auth-server \
-        --require-approval never
+    local auth_server_stack_name="atlas-auth-server-${ENVIRONMENT}"
+    if should_skip_stack_deployment "$auth_server_stack_name"; then
+        log_info "Skipping auth-server deployment..."
+    else
+        log_info "Deploying auth-server stack..."
+        cdk deploy "$auth_server_stack_name" \
+            --profile ${PROFILE} \
+            --context environment=${ENVIRONMENT} \
+            --context region=${REGION} \
+            --context account=${account_id} \
+            --context ecrRepository=${account_id}.dkr.ecr.${REGION}.amazonaws.com/atlas-auth-server \
+            --require-approval never
+    fi
     
     # Deploy API Gateway
-    log_info "Deploying api-gateway stack..."
-    cdk deploy atlas-api-gateway-${ENVIRONMENT} \
-        --profile ${PROFILE} \
-        --context environment=${ENVIRONMENT} \
-        --context region=${REGION} \
-        --context account=${account_id} \
-        --context ecrRepository=${account_id}.dkr.ecr.${REGION}.amazonaws.com/atlas-api-gateway \
-        --require-approval never
+    local api_gateway_stack_name="atlas-api-gateway-${ENVIRONMENT}"
+    if should_skip_stack_deployment "$api_gateway_stack_name"; then
+        log_info "Skipping api-gateway deployment..."
+    else
+        log_info "Deploying api-gateway stack..."
+        cdk deploy "$api_gateway_stack_name" \
+            --profile ${PROFILE} \
+            --context environment=${ENVIRONMENT} \
+            --context region=${REGION} \
+            --context account=${account_id} \
+            --context ecrRepository=${account_id}.dkr.ecr.${REGION}.amazonaws.com/atlas-api-gateway \
+            --require-approval never
+    fi
     
-    log_success "Service stacks deployed successfully"
+    log_success "Service stacks deployment completed"
 }
 
 # =============================================================================
@@ -384,6 +450,7 @@ main() {
     log_info "Profile: $PROFILE"
     log_info "Skip Build: $SKIP_BUILD"
     log_info "Bootstrap: $BOOTSTRAP"
+    log_info "Force Redeploy: $FORCE_REDEPLOY"
     log_info ""
 
     # Only build and push if not skipping build

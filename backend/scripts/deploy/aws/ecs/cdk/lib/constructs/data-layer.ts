@@ -125,8 +125,11 @@ export class DataLayer extends Construct {
   ) {
     const {
       nodeType = 'cache.t3.micro',
-      numCacheNodes = 3
+      numCacheNodes = 3 // Minimum 3 nodes for Redis cluster mode
     } = config;
+
+    // Ensure minimum nodes for cluster mode
+    const clusterNodes = Math.max(numCacheNodes, 3);
 
     // Redis Subnet Group
     const redisSubnetGroup = new elasticache.CfnSubnetGroup(this, 'RedisSubnetGroup', {
@@ -134,21 +137,27 @@ export class DataLayer extends Construct {
       subnetIds: vpc.privateSubnets.map(subnet => subnet.subnetId),
     });
 
-    // Redis Cluster (using ReplicationGroup for cluster mode)
+    // Redis Cluster (using ReplicationGroup in cluster mode)
     return new elasticache.CfnReplicationGroup(this, 'RedisCluster', {
       replicationGroupId: `atlas-${environmentName}-redis`,
       replicationGroupDescription: `Atlas Redis cluster for ${environmentName} environment`,
       cacheNodeType: nodeType,
       engine: 'redis',
-      numCacheClusters: numCacheNodes,
+      engineVersion: '7.0',
       cacheSubnetGroupName: redisSubnetGroup.ref,
       securityGroupIds: [securityGroup.securityGroupId],
-      // Enable cluster mode
-      cacheParameterGroupName: 'default.redis7.cluster.on',
       port: 6379,
-      // Enable automatic failover
+      // Enable cluster mode
+      clusterMode: 'enabled',
+      numNodeGroups: Math.ceil(clusterNodes / 2), // Number of shards
+      replicasPerNodeGroup: 1, // Number of replicas per shard
+      // Enable automatic failover and multi-AZ
       automaticFailoverEnabled: true,
       multiAzEnabled: true,
+      // Enable auth token (password)
+      authToken: this.redisSecret.secretValue.unsafeUnwrap(),
+      transitEncryptionEnabled: true,
+      atRestEncryptionEnabled: true,
     });
   }
 }

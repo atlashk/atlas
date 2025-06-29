@@ -23,7 +23,7 @@ export class DefaultServiceConfigFactory implements ServiceConfigFactory {
         PRODUCT_SERVICE_URI: `http://product-service.atlas.${environmentName}:8082`,
         ORDER_SERVICE_URI: `http://order-service.atlas.${environmentName}:8083`,
         NOTIFICATION_SERVICE_URI: `http://notification-service.atlas.${environmentName}:8084`,
-        // Redis Cluster Configuration - using infrastructure outputs
+        // Redis Configuration - using infrastructure outputs
         REDIS_CLUSTER_NODES: `${infrastructure.redisCluster.attrConfigurationEndPointAddress}:6379`,
       },
       secrets: {
@@ -43,7 +43,7 @@ export class DefaultServiceConfigFactory implements ServiceConfigFactory {
         // Database Configuration - using infrastructure outputs
         MYSQL_URL: `jdbc:mysql://${infrastructure.mysqlDatabase.instanceEndpoint.hostname}:3306/db_auth?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false`,
         MYSQL_USERNAME: 'root',
-        // Redis Cluster Configuration - using infrastructure outputs
+        // Redis Configuration - using infrastructure outputs
         REDIS_CLUSTER_NODES: `${infrastructure.redisCluster.attrConfigurationEndPointAddress}:6379`,
       },
       secrets: {
