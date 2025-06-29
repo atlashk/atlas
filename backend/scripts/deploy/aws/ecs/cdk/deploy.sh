@@ -293,14 +293,13 @@ bootstrap_cdk() {
 
 deploy_infrastructure() {
     log_section "Deploying Infrastructure Stack"
-    
+
     cd "$SCRIPT_DIR"
     
     # Get AWS account ID
     local account_id
     account_id=$(aws sts get-caller-identity --profile ${PROFILE} --query Account --output text)
-    
-    log_info "Deploying infrastructure stack..."
+
     cdk deploy atlas-infrastructure-${ENVIRONMENT} \
         --profile ${PROFILE} \
         --context environment=${ENVIRONMENT} \
@@ -355,7 +354,7 @@ initialize_database() {
     mysql_endpoint=$(aws cloudformation describe-stacks \
         --profile ${PROFILE} \
         --region ${REGION} \
-        --stack-name infrastructure-${ENVIRONMENT} \
+        --stack-name atlas-infrastructure-${ENVIRONMENT} \
         --query "Stacks[0].Outputs[?OutputKey=='MySQLEndpoint'].OutputValue" \
         --output text)
     

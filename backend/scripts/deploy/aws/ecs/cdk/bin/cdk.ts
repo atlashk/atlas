@@ -14,14 +14,14 @@ const account = app.node.tryGetContext('account') || process.env.CDK_DEFAULT_ACC
 const env = { account, region };
 
 // Infrastructure Stack (VPC, RDS, Redis, ECS Cluster, etc.)
-const infrastructureStack = new InfrastructureStack(app, `infrastructure-${environmentName}`, {
+const infrastructureStack = new InfrastructureStack(app, `atlas-infrastructure-${environmentName}`, {
   env,
   environmentName,
   description: `Atlas Microservices - Base Infrastructure for ECS Deployment (${environmentName})`,
 });
 
 // API Gateway Stack
-const apiGatewayStack = new ApiGatewayStack(app, `api-gateway-${environmentName}`, {
+const apiGatewayStack = new ApiGatewayStack(app, `atlas-api-gateway-${environmentName}`, {
   env,
   environmentName,
   infrastructure: infrastructureStack,
@@ -29,7 +29,7 @@ const apiGatewayStack = new ApiGatewayStack(app, `api-gateway-${environmentName}
 });
 
 // Auth Server Stack
-const authServerStack = new AuthServerStack(app, `auth-server-${environmentName}`, {
+const authServerStack = new AuthServerStack(app, `atlas-auth-server-${environmentName}`, {
   env,
   environmentName,
   infrastructure: infrastructureStack,

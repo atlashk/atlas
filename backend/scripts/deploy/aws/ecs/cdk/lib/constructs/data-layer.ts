@@ -28,7 +28,7 @@ export class DataLayer extends Construct {
   public readonly mysqlSecret: secretsmanager.Secret;
   public readonly redisSecret: secretsmanager.Secret;
   public readonly mysqlDatabase: rds.DatabaseInstance;
-  public readonly redisCluster: elasticache.CfnCacheCluster;
+  public readonly redisCluster: elasticache.CfnReplicationGroup;
 
   constructor(scope: Construct, id: string, props: DataLayerProps) {
     super(scope, id);
@@ -106,12 +106,12 @@ export class DataLayer extends Construct {
       databaseName,
       vpc,
       vpcSubnets: {
-        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+        subnetType: ec2.SubnetType.PUBLIC,
       },
       securityGroups: [securityGroup],
       backupRetention,
       multiAz,
-      publiclyAccessible: false,
+      publiclyAccessible: true,
       deletionProtection: false,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
@@ -125,7 +125,7 @@ export class DataLayer extends Construct {
   ) {
     const {
       nodeType = 'cache.t3.micro',
-      numCacheNodes = 1
+      numCacheNodes = 3
     } = config;
 
     // Redis Subnet Group
@@ -134,14 +134,21 @@ export class DataLayer extends Construct {
       subnetIds: vpc.privateSubnets.map(subnet => subnet.subnetId),
     });
 
-    // Redis Cluster
-    return new elasticache.CfnCacheCluster(this, 'RedisCluster', {
-      clusterName: `atlas-${environmentName}-redis`,
+    // Redis Cluster (using ReplicationGroup for cluster mode)
+    return new elasticache.CfnReplicationGroup(this, 'RedisCluster', {
+      replicationGroupId: `atlas-${environmentName}-redis`,
+      replicationGroupDescription: `Atlas Redis cluster for ${environmentName} environment`,
       cacheNodeType: nodeType,
       engine: 'redis',
-      numCacheNodes,
-      vpcSecurityGroupIds: [securityGroup.securityGroupId],
+      numCacheClusters: numCacheNodes,
       cacheSubnetGroupName: redisSubnetGroup.ref,
+      securityGroupIds: [securityGroup.securityGroupId],
+      // Enable cluster mode
+      cacheParameterGroupName: 'default.redis7.cluster.on',
+      port: 6379,
+      // Enable automatic failover
+      automaticFailoverEnabled: true,
+      multiAzEnabled: true,
     });
   }
 }

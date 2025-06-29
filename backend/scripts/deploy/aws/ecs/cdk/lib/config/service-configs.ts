@@ -23,9 +23,8 @@ export class DefaultServiceConfigFactory implements ServiceConfigFactory {
         PRODUCT_SERVICE_URI: `http://product-service.atlas.${environmentName}:8082`,
         ORDER_SERVICE_URI: `http://order-service.atlas.${environmentName}:8083`,
         NOTIFICATION_SERVICE_URI: `http://notification-service.atlas.${environmentName}:8084`,
-        // Redis Configuration - using infrastructure outputs
-        REDIS_HOST: infrastructure.redisCluster.attrRedisEndpointAddress,
-        REDIS_PORT: '6379',
+        // Redis Cluster Configuration - using infrastructure outputs
+        REDIS_CLUSTER_NODES: `${infrastructure.redisCluster.attrConfigurationEndPointAddress}:6379`,
       },
       secrets: {
         REDIS_PASSWORD: ecs.Secret.fromSecretsManager(infrastructure.redisSecret),
@@ -44,9 +43,8 @@ export class DefaultServiceConfigFactory implements ServiceConfigFactory {
         // Database Configuration - using infrastructure outputs
         MYSQL_URL: `jdbc:mysql://${infrastructure.mysqlDatabase.instanceEndpoint.hostname}:3306/db_auth?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false`,
         MYSQL_USERNAME: 'root',
-        // Redis Configuration - using infrastructure outputs
-        REDIS_HOST: infrastructure.redisCluster.attrRedisEndpointAddress,
-        REDIS_PORT: '6379',
+        // Redis Cluster Configuration - using infrastructure outputs
+        REDIS_CLUSTER_NODES: `${infrastructure.redisCluster.attrConfigurationEndPointAddress}:6379`,
       },
       secrets: {
         MYSQL_PASSWORD: ecs.Secret.fromSecretsManager(infrastructure.mysqlSecret, 'password'),
@@ -81,8 +79,7 @@ export class ApiGatewayConfigBuilder {
   withRedisConfig(infrastructure: InfrastructureStack): ApiGatewayConfigBuilder {
     this.config.environment = {
       ...this.config.environment,
-      REDIS_HOST: infrastructure.redisCluster.attrRedisEndpointAddress,
-      REDIS_PORT: '6379',
+      REDIS_CLUSTER_NODES: `${infrastructure.redisCluster.attrConfigurationEndPointAddress}:6379`,
     };
     this.config.secrets = {
       ...this.config.secrets,
@@ -139,8 +136,7 @@ export class AuthServerConfigBuilder {
   withRedisConfig(infrastructure: InfrastructureStack): AuthServerConfigBuilder {
     this.config.environment = {
       ...this.config.environment,
-      REDIS_HOST: infrastructure.redisCluster.attrRedisEndpointAddress,
-      REDIS_PORT: '6379',
+      REDIS_CLUSTER_NODES: `${infrastructure.redisCluster.attrConfigurationEndPointAddress}:6379`,
     };
     this.config.secrets = {
       ...this.config.secrets,

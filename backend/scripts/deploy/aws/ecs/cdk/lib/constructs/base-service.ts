@@ -80,6 +80,9 @@ export class BaseService extends Construct {
 
     // Attach target group to service
     this.service.attachToApplicationTargetGroup(this.targetGroup);
+
+    // Associate with existing CloudMap service
+    this.associateWithCloudMapService(infrastructure, serviceConfig);
   }
 
   private createTargetGroup(
@@ -178,12 +181,6 @@ export class BaseService extends Construct {
       },
       securityGroups: [infrastructure.ecsSecurityGroup],
       assignPublicIp: true,
-      cloudMapOptions: {
-        cloudMapNamespace: infrastructure.serviceDiscoveryNamespace,
-        name: config.serviceName,
-        dnsRecordType: cdk.aws_servicediscovery.DnsRecordType.A,
-        dnsTtl: cdk.Duration.seconds(60),
-      },
       maxHealthyPercent: 200,
       minHealthyPercent: 50,
       enableExecuteCommand: true,
@@ -207,6 +204,41 @@ export class BaseService extends Construct {
       value: `http://${infrastructure.loadBalancer.loadBalancerDnsName}`,
       exportName: `${serviceName}-url-${environmentName}`,
     });
+  }
+
+  private associateWithCloudMapService(
+    infrastructure: InfrastructureStack,
+    config: ServiceConfig
+  ): void {
+    // Get the existing CloudMap service from infrastructure
+    const cloudMapService = this.getCloudMapService(infrastructure, config.serviceName);
+
+    // Associate the ECS service with the existing CloudMap service
+    this.service.associateCloudMapService({
+      service: cloudMapService,
+    });
+  }
+
+  private getCloudMapService(
+    infrastructure: InfrastructureStack,
+    serviceName: string
+  ): cdk.aws_servicediscovery.Service {
+    switch (serviceName) {
+      case 'auth-server':
+        return infrastructure.authServerDiscoveryService;
+      case 'api-gateway':
+        return infrastructure.apiGatewayDiscoveryService;
+      case 'user-service':
+        return infrastructure.userServiceDiscoveryService;
+      case 'product-service':
+        return infrastructure.productServiceDiscoveryService;
+      case 'order-service':
+        return infrastructure.orderServiceDiscoveryService;
+      case 'notification-service':
+        return infrastructure.notificationServiceDiscoveryService;
+      default:
+        throw new Error(`Unknown service name: ${serviceName}`);
+    }
   }
 
   private toPascalCase(str: string): string {
