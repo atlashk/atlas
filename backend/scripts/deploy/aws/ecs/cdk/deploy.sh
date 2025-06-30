@@ -251,7 +251,7 @@ push_docker_images_to_ecr() {
     aws ecr get-login-password --profile ${PROFILE} --region ${REGION} | docker login --username AWS --password-stdin ${account_id}.dkr.ecr.${REGION}.amazonaws.com
 
     # Services that need to be pushed to ECR (these should already be built by build.sh)
-    local services=("api-gateway" "auth-server")
+    local services=("api-gateway" "auth-server" "user-service" "product-service" "order-service" "notification-service")
 
     # Create ECR repositories and push images
     for service_name in "${services[@]}"; do
@@ -390,7 +390,64 @@ deploy_services() {
             --require-approval never
     fi
     
-    # Deploy API Gateway
+    # Deploy Downstream Services (Internal Services - No ALB exposure)
+    local user_service_stack_name="atlas-user-service-${ENVIRONMENT}"
+    if should_skip_stack_deployment "$user_service_stack_name"; then
+        log_info "Skipping user-service deployment..."
+    else
+        log_info "Deploying user-service stack..."
+        cdk deploy "$user_service_stack_name" \
+            --profile ${PROFILE} \
+            --context environment=${ENVIRONMENT} \
+            --context region=${REGION} \
+            --context account=${account_id} \
+            --context ecrRepository=${account_id}.dkr.ecr.${REGION}.amazonaws.com/atlas-user-service \
+            --require-approval never
+    fi
+    
+    local product_service_stack_name="atlas-product-service-${ENVIRONMENT}"
+    if should_skip_stack_deployment "$product_service_stack_name"; then
+        log_info "Skipping product-service deployment..."
+    else
+        log_info "Deploying product-service stack..."
+        cdk deploy "$product_service_stack_name" \
+            --profile ${PROFILE} \
+            --context environment=${ENVIRONMENT} \
+            --context region=${REGION} \
+            --context account=${account_id} \
+            --context ecrRepository=${account_id}.dkr.ecr.${REGION}.amazonaws.com/atlas-product-service \
+            --require-approval never
+    fi
+    
+    local order_service_stack_name="atlas-order-service-${ENVIRONMENT}"
+    if should_skip_stack_deployment "$order_service_stack_name"; then
+        log_info "Skipping order-service deployment..."
+    else
+        log_info "Deploying order-service stack..."
+        cdk deploy "$order_service_stack_name" \
+            --profile ${PROFILE} \
+            --context environment=${ENVIRONMENT} \
+            --context region=${REGION} \
+            --context account=${account_id} \
+            --context ecrRepository=${account_id}.dkr.ecr.${REGION}.amazonaws.com/atlas-order-service \
+            --require-approval never
+    fi
+    
+    local notification_service_stack_name="atlas-notification-service-${ENVIRONMENT}"
+    if should_skip_stack_deployment "$notification_service_stack_name"; then
+        log_info "Skipping notification-service deployment..."
+    else
+        log_info "Deploying notification-service stack..."
+        cdk deploy "$notification_service_stack_name" \
+            --profile ${PROFILE} \
+            --context environment=${ENVIRONMENT} \
+            --context region=${REGION} \
+            --context account=${account_id} \
+            --context ecrRepository=${account_id}.dkr.ecr.${REGION}.amazonaws.com/atlas-notification-service \
+            --require-approval never
+    fi
+    
+    # Deploy API Gateway (After downstream services for proper service discovery)
     local api_gateway_stack_name="atlas-api-gateway-${ENVIRONMENT}"
     if should_skip_stack_deployment "$api_gateway_stack_name"; then
         log_info "Skipping api-gateway deployment..."

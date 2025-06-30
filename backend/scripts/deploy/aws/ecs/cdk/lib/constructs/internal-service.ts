@@ -1,15 +1,12 @@
 import * as cdk from 'aws-cdk-lib';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
-import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Construct } from 'constructs';
 import { InfrastructureStack } from '../stack/infrastructure-stack';
 
-export interface ServiceConfig {
+export interface InternalServiceConfig {
   serviceName: string;
   containerPort: number;
   healthCheckPath: string;
-  listenerPriority: number;
-  pathPatterns: string[];
   environment: Record<string, string>;
   secrets?: Record<string, ecs.Secret>;
 
@@ -21,18 +18,17 @@ export interface ServiceConfig {
   ecrRepository?: string;
 }
 
-export interface BaseServiceProps {
+export interface InternalServiceProps {
   environmentName: string;
   infrastructure: InfrastructureStack;
-  serviceConfig: ServiceConfig;
+  serviceConfig: InternalServiceConfig;
 }
 
-export class BaseService extends Construct {
+export class InternalService extends Construct {
   public readonly service: ecs.FargateService;
-  public readonly targetGroup: elbv2.ApplicationTargetGroup;
   public readonly taskDefinition: ecs.FargateTaskDefinition;
 
-  constructor(scope: Construct, id: string, props: BaseServiceProps) {
+  constructor(scope: Construct, id: string, props: InternalServiceProps) {
     super(scope, id);
 
     const { environmentName, infrastructure, serviceConfig } = props;
@@ -45,12 +41,6 @@ export class BaseService extends Construct {
     const desiredCount = parseInt(this.node.tryGetContext('desiredCount') || serviceConfig.desiredCount?.toString() || '1');
     const taskCpu = parseInt(this.node.tryGetContext('taskCpu') || serviceConfig.taskCpu?.toString() || '512');
     const taskMemory = parseInt(this.node.tryGetContext('taskMemory') || serviceConfig.taskMemory?.toString() || '1024');
-
-    // Create target group
-    this.targetGroup = this.createTargetGroup(environmentName, infrastructure, serviceConfig);
-
-    // Create listener rule
-    this.createListenerRule(infrastructure, serviceConfig);
 
     // Create task definition
     this.taskDefinition = this.createTaskDefinition(
@@ -70,7 +60,7 @@ export class BaseService extends Construct {
       environmentName
     );
 
-    // Create ECS service
+    // Create ECS service (internal-only, no ALB attachment)
     this.service = this.createECSService(
       environmentName,
       infrastructure,
@@ -78,53 +68,14 @@ export class BaseService extends Construct {
       desiredCount
     );
 
-    // Attach target group to service
-    this.service.attachToApplicationTargetGroup(this.targetGroup);
-
-    // Associate with existing CloudMap service
+    // Associate with existing CloudMap service for service discovery
     this.associateWithCloudMapService(infrastructure, serviceConfig);
-  }
-
-  private createTargetGroup(
-    environmentName: string,
-    infrastructure: InfrastructureStack,
-    config: ServiceConfig
-  ): elbv2.ApplicationTargetGroup {
-    return new elbv2.ApplicationTargetGroup(this, 'TargetGroup', {
-      targetGroupName: `${config.serviceName}-tg-${environmentName}`,
-      port: config.containerPort,
-      protocol: elbv2.ApplicationProtocol.HTTP,
-      vpc: infrastructure.vpc,
-      targetType: elbv2.TargetType.IP,
-      healthCheck: {
-        path: config.healthCheckPath,
-        protocol: elbv2.Protocol.HTTP,
-        interval: cdk.Duration.seconds(30),
-        timeout: cdk.Duration.seconds(5),
-        healthyThresholdCount: 2,
-        unhealthyThresholdCount: 3,
-      },
-    });
-  }
-
-  private createListenerRule(
-    infrastructure: InfrastructureStack,
-    config: ServiceConfig
-  ): void {
-    new elbv2.ApplicationListenerRule(this, 'ListenerRule', {
-      listener: infrastructure.listener,
-      priority: config.listenerPriority,
-      conditions: [
-        elbv2.ListenerCondition.pathPatterns(config.pathPatterns),
-      ],
-      action: elbv2.ListenerAction.forward([this.targetGroup]),
-    });
   }
 
   private createTaskDefinition(
     environmentName: string,
     infrastructure: InfrastructureStack,
-    config: ServiceConfig,
+    config: InternalServiceConfig,
     taskCpu: number,
     taskMemory: number
   ): ecs.FargateTaskDefinition {
@@ -139,7 +90,7 @@ export class BaseService extends Construct {
 
   private addContainer(
     infrastructure: InfrastructureStack,
-    config: ServiceConfig,
+    config: InternalServiceConfig,
     ecrRepository: string,
     imageTag: string,
     environmentName: string
@@ -178,7 +129,7 @@ export class BaseService extends Construct {
   private createECSService(
     environmentName: string,
     infrastructure: InfrastructureStack,
-    config: ServiceConfig,
+    config: InternalServiceConfig,
     desiredCount: number
   ): ecs.FargateService {
     return new ecs.FargateService(this, 'Service', {
@@ -187,38 +138,19 @@ export class BaseService extends Construct {
       taskDefinition: this.taskDefinition,
       desiredCount,
       vpcSubnets: {
-        subnetType: cdk.aws_ec2.SubnetType.PUBLIC,
+        subnetType: cdk.aws_ec2.SubnetType.PRIVATE_WITH_EGRESS, // Deploy to private subnets
       },
       securityGroups: [infrastructure.ecsSecurityGroup],
-      assignPublicIp: true,
+      assignPublicIp: false, // No public IP for internal services
       maxHealthyPercent: 200,
       minHealthyPercent: 50,
       enableExecuteCommand: true,
     });
   }
 
-  public createOutputs(environmentName: string, infrastructure: InfrastructureStack, serviceName: string): void {
-    const pascalCaseServiceName = this.toPascalCase(serviceName);
-
-    new cdk.CfnOutput(this, `${pascalCaseServiceName}ServiceName`, {
-      value: this.service.serviceName,
-      exportName: `${serviceName}-service-name-${environmentName}`,
-    });
-
-    new cdk.CfnOutput(this, `${pascalCaseServiceName}TargetGroupArn`, {
-      value: this.targetGroup.targetGroupArn,
-      exportName: `${serviceName}-target-group-${environmentName}`,
-    });
-
-    new cdk.CfnOutput(this, `${pascalCaseServiceName}URL`, {
-      value: `http://${infrastructure.loadBalancer.loadBalancerDnsName}`,
-      exportName: `${serviceName}-url-${environmentName}`,
-    });
-  }
-
   private associateWithCloudMapService(
     infrastructure: InfrastructureStack,
-    config: ServiceConfig
+    config: InternalServiceConfig
   ): void {
     // Get the existing CloudMap service from infrastructure
     const cloudMapService = this.getCloudMapService(infrastructure, config.serviceName);
@@ -236,8 +168,6 @@ export class BaseService extends Construct {
     switch (serviceName) {
       case 'auth-server':
         return infrastructure.authServerDiscoveryService;
-      case 'api-gateway':
-        return infrastructure.apiGatewayDiscoveryService;
       case 'user-service':
         return infrastructure.userServiceDiscoveryService;
       case 'product-service':
@@ -247,8 +177,22 @@ export class BaseService extends Construct {
       case 'notification-service':
         return infrastructure.notificationServiceDiscoveryService;
       default:
-        throw new Error(`Unknown service name: ${serviceName}`);
+        throw new Error(`Unknown internal service name: ${serviceName}`);
     }
+  }
+
+  public createOutputs(environmentName: string, serviceName: string): void {
+    const pascalCaseServiceName = this.toPascalCase(serviceName);
+
+    new cdk.CfnOutput(this, `${pascalCaseServiceName}ServiceName`, {
+      value: this.service.serviceName,
+      exportName: `${serviceName}-service-name-${environmentName}`,
+    });
+
+    new cdk.CfnOutput(this, `${pascalCaseServiceName}ServiceDiscoveryName`, {
+      value: `${serviceName}.atlas.${environmentName}`,
+      exportName: `${serviceName}-discovery-name-${environmentName}`,
+    });
   }
 
   private toPascalCase(str: string): string {

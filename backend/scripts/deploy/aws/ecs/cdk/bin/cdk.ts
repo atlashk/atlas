@@ -3,6 +3,10 @@ import * as cdk from 'aws-cdk-lib';
 import { InfrastructureStack } from '../lib/stack/infrastructure-stack';
 import { ApiGatewayStack } from '../lib/stack/api-gateway-stack';
 import { AuthServerStack } from '../lib/stack/auth-server-stack';
+import { UserServiceStack } from '../lib/stack/user-service-stack';
+import { ProductServiceStack } from '../lib/stack/product-service-stack';
+import { OrderServiceStack } from '../lib/stack/order-service-stack';
+import { NotificationServiceStack } from '../lib/stack/notification-service-stack';
 
 const app = new cdk.App();
 
@@ -36,9 +40,48 @@ const authServerStack = new AuthServerStack(app, `atlas-auth-server-${environmen
   description: `Atlas Auth Server - ECS Deployment (${environmentName})`,
 });
 
+// Downstream Service Stacks (Internal Services - No ALB Listener Rules)
+const userServiceStack = new UserServiceStack(app, `atlas-user-service-${environmentName}`, {
+  env,
+  environmentName,
+  infrastructure: infrastructureStack,
+  description: `Atlas User Service - ECS Deployment (${environmentName})`,
+});
+
+const productServiceStack = new ProductServiceStack(app, `atlas-product-service-${environmentName}`, {
+  env,
+  environmentName,
+  infrastructure: infrastructureStack,
+  description: `Atlas Product Service - ECS Deployment (${environmentName})`,
+});
+
+const orderServiceStack = new OrderServiceStack(app, `atlas-order-service-${environmentName}`, {
+  env,
+  environmentName,
+  infrastructure: infrastructureStack,
+  description: `Atlas Order Service - ECS Deployment (${environmentName})`,
+});
+
+const notificationServiceStack = new NotificationServiceStack(app, `atlas-notification-service-${environmentName}`, {
+  env,
+  environmentName,
+  infrastructure: infrastructureStack,
+  description: `Atlas Notification Service - ECS Deployment (${environmentName})`,
+});
+
 // Add dependencies
 apiGatewayStack.addDependency(infrastructureStack);
 authServerStack.addDependency(infrastructureStack);
+userServiceStack.addDependency(infrastructureStack);
+productServiceStack.addDependency(infrastructureStack);
+orderServiceStack.addDependency(infrastructureStack);
+notificationServiceStack.addDependency(infrastructureStack);
+
+// API Gateway should be deployed after downstream services for proper service discovery
+apiGatewayStack.addDependency(userServiceStack);
+apiGatewayStack.addDependency(productServiceStack);
+apiGatewayStack.addDependency(orderServiceStack);
+apiGatewayStack.addDependency(notificationServiceStack);
 
 // Add tags to all stacks
 cdk.Tags.of(app).add('Environment', environmentName);

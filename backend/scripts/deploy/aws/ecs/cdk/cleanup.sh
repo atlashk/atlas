@@ -148,8 +148,8 @@ destroy_service_stacks() {
     
     # Destroy API Gateway Stack
     log_info "Destroying api-gateway stack..."
-    if aws cloudformation describe-stacks --profile ${PROFILE} --region ${REGION} --stack-name api-gateway-${ENVIRONMENT} &>/dev/null; then
-        cdk destroy api-gateway-${ENVIRONMENT} \
+    if aws cloudformation describe-stacks --profile ${PROFILE} --region ${REGION} --stack-name atlas-api-gateway-${ENVIRONMENT} &>/dev/null; then
+        cdk destroy atlas-api-gateway-${ENVIRONMENT} \
             --profile ${PROFILE} \
             --context environment=${ENVIRONMENT} \
             --context region=${REGION} \
@@ -159,11 +159,11 @@ destroy_service_stacks() {
     else
         log_info "API Gateway stack does not exist"
     fi
-    
+
     # Destroy Auth Server Stack
     log_info "Destroying auth-server stack..."
-    if aws cloudformation describe-stacks --profile ${PROFILE} --region ${REGION} --stack-name auth-server-${ENVIRONMENT} &>/dev/null; then
-        cdk destroy auth-server-${ENVIRONMENT} \
+    if aws cloudformation describe-stacks --profile ${PROFILE} --region ${REGION} --stack-name atlas-auth-server-${ENVIRONMENT} &>/dev/null; then
+        cdk destroy atlas-auth-server-${ENVIRONMENT} \
             --profile ${PROFILE} \
             --context environment=${ENVIRONMENT} \
             --context region=${REGION} \
@@ -185,8 +185,8 @@ destroy_infrastructure_stack() {
     account_id=$(aws sts get-caller-identity --profile ${PROFILE} --query Account --output text)
     
     log_info "Destroying infrastructure stack..."
-    if aws cloudformation describe-stacks --profile ${PROFILE} --region ${REGION} --stack-name infrastructure-${ENVIRONMENT} &>/dev/null; then
-        cdk destroy infrastructure-${ENVIRONMENT} \
+    if aws cloudformation describe-stacks --profile ${PROFILE} --region ${REGION} --stack-name atlas-infrastructure-${ENVIRONMENT} &>/dev/null; then
+        cdk destroy atlas-infrastructure-${ENVIRONMENT} \
             --profile ${PROFILE} \
             --context environment=${ENVIRONMENT} \
             --context region=${REGION} \

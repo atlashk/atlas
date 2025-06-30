@@ -3,7 +3,7 @@ import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Construct } from 'constructs';
 import { InfrastructureStack } from './infrastructure-stack';
-import { BaseService } from '../constructs/base-service';
+import { ApiGatewayService } from '../constructs/api-gateway-service';
 import { createApiGatewayConfig } from '../config/service-configs';
 
 export interface ApiGatewayStackProps extends cdk.StackProps {
@@ -14,7 +14,7 @@ export interface ApiGatewayStackProps extends cdk.StackProps {
 export class ApiGatewayStack extends cdk.Stack {
   public readonly service: ecs.FargateService;
   public readonly targetGroup: elbv2.ApplicationTargetGroup;
-  private readonly baseService: BaseService;
+  private readonly apiGatewayService: ApiGatewayService;
 
   constructor(scope: Construct, id: string, props: ApiGatewayStackProps) {
     super(scope, id, props);
@@ -24,19 +24,19 @@ export class ApiGatewayStack extends cdk.Stack {
     // Create service configuration using the existing config system
     const serviceConfig = createApiGatewayConfig(environmentName, infrastructure);
 
-    // Create the base service
-    this.baseService = new BaseService(this, 'api-gateway', {
+    // Create the API Gateway service
+    this.apiGatewayService = new ApiGatewayService(this, 'api-gateway', {
       environmentName,
       infrastructure,
       serviceConfig,
     });
 
     // Expose service and target group for backward compatibility
-    this.service = this.baseService.service;
-    this.targetGroup = this.baseService.targetGroup;
+    this.service = this.apiGatewayService.service;
+    this.targetGroup = this.apiGatewayService.targetGroup;
 
-    // Create outputs using the base service
-    this.baseService.createOutputs(environmentName, infrastructure, 'api-gateway');
+    // Create outputs using the API Gateway service
+    this.apiGatewayService.createOutputs(environmentName, infrastructure, 'api-gateway');
 
     // Add API Gateway specific outputs
     this.createAdditionalOutputs(environmentName, infrastructure);

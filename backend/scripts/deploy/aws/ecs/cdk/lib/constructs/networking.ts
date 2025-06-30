@@ -72,6 +72,12 @@ export class Networking extends Construct {
       ec2.Port.tcpRange(8080, 8091),
       'Allow traffic from load balancer'
     );
+    // Allow internal communication between ECS services
+    ecsSecurityGroup.addIngressRule(
+      ecsSecurityGroup,
+      ec2.Port.tcpRange(8080, 8091),
+      'Allow internal communication between ECS services'
+    );
 
     // Database Security Group
     const databaseSecurityGroup = new ec2.SecurityGroup(this, 'DatabaseSecurityGroup', {
