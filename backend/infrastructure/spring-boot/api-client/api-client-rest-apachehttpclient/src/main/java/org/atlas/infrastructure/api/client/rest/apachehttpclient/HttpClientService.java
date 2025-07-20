@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
@@ -23,6 +22,7 @@ import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.atlas.framework.json.JsonUtil;
+import org.atlas.framework.util.MapUtil;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Service;
 
@@ -95,10 +95,13 @@ public class HttpClientService implements DisposableBean {
 
   private String buildUrl(String url, Map<String, String> paramsMap) {
     StringBuilder builder = new StringBuilder(url);
-    if (MapUtils.isNotEmpty(paramsMap)) {
+    if (MapUtil.isNotEmpty(paramsMap)) {
       builder.append("?");
       paramsMap.forEach((paramName, paramValue) ->
-          builder.append(paramName).append("=").append(paramValue).append("&"));
+          builder.append(paramName)
+              .append("=")
+              .append(paramValue)
+              .append("&"));
       // Remove last '&'
       builder.deleteCharAt(builder.length() - 1);
     }
@@ -106,7 +109,7 @@ public class HttpClientService implements DisposableBean {
   }
 
   private void setHeaders(HttpUriRequestBase httpRequest, Map<String, String> headersMap) {
-    if (MapUtils.isNotEmpty(headersMap)) {
+    if (MapUtil.isNotEmpty(headersMap)) {
       headersMap.forEach(httpRequest::addHeader);
     }
   }
@@ -123,7 +126,7 @@ public class HttpClientService implements DisposableBean {
 
   private void setRequestBodyAsUrlEncoded(HttpUriRequestBase httpRequest,
       Map<String, String> data) {
-    if (MapUtils.isEmpty(data)) {
+    if (MapUtil.isEmpty(data)) {
       return;
     }
     List<NameValuePair> formData = new ArrayList<>();

@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.atlas.framework.util.StopWatch;
+import org.atlas.framework.util.StopWatchUtil;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,14 +19,14 @@ public class SchedulerLoggingAspect {
     Class<?> targetClass = joinPoint.getTarget().getClass();
     String taskName = targetClass.getSimpleName();
 
-    StopWatch stopWatch = new StopWatch();
-    stopWatch.start();
+    StopWatchUtil stopWatchUtil = new StopWatchUtil();
+    stopWatchUtil.start();
     log.info("Started executing task {}", taskName);
 
     Object result = joinPoint.proceed();
 
-    stopWatch.stop();
-    long elapsedTimeMs = stopWatch.getElapsedTimeMs();
+    stopWatchUtil.stop();
+    long elapsedTimeMs = stopWatchUtil.getElapsedTimeMs();
     log.info("Finished executing task {}. Elapsed time: {} ms", taskName, elapsedTimeMs);
 
     return result;

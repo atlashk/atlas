@@ -4,10 +4,10 @@ import io.grpc.stub.StreamObserver;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.server.service.GrpcService;
-import org.apache.commons.collections4.CollectionUtils;
 import org.atlas.domain.user.entity.UserEntity;
 import org.atlas.domain.user.usecase.internal.handler.InternalListUserUseCaseHandler;
 import org.atlas.domain.user.usecase.internal.model.InternalListUserInput;
+import org.atlas.framework.util.CollectionUtil;
 import org.atlas.infrastructure.api.server.grpc.protobuf.user.ListUserRequestProto;
 import org.atlas.infrastructure.api.server.grpc.protobuf.user.ListUserResponseProto;
 import org.atlas.infrastructure.api.server.grpc.protobuf.user.UserProto;
@@ -38,7 +38,7 @@ public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
   }
 
   private ListUserResponseProto map(List<UserEntity> userEntities) {
-    if (CollectionUtils.isEmpty(userEntities)) {
+    if (CollectionUtil.isEmpty(userEntities)) {
       return ListUserResponseProto.getDefaultInstance();
     }
     ListUserResponseProto.Builder builder = ListUserResponseProto.newBuilder();

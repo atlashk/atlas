@@ -12,11 +12,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.atlas.framework.notification.email.Attachment;
 import org.atlas.framework.notification.email.EmailNotification;
 import org.atlas.framework.notification.email.EmailPort;
 import org.atlas.framework.notification.email.SendEmailException;
+import org.atlas.framework.util.CollectionUtil;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.sesv2.SesV2Client;
@@ -38,7 +38,7 @@ public class SseEmailAdapter implements EmailPort {
   public void notify(EmailNotification notification) {
     try {
       SendEmailResponse response;
-      if (CollectionUtils.isNotEmpty(notification.getAttachments())) {
+      if (CollectionUtil.isNotEmpty(notification.getAttachments())) {
         response = sendEmailWithAttachments(notification);
       } else {
         response = sendSimpleEmail(notification);

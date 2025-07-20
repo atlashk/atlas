@@ -3,8 +3,8 @@ package org.atlas.infrastructure.messaging.kafka.core;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.atlas.framework.messaging.MessagePublisher;
+import org.atlas.framework.util.StringUtil;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +18,7 @@ public class KafkaMessagePublisher implements MessagePublisher {
 
   @Override
   public void publish(Object messagePayload, String messageKey, String topic) {
-    if (StringUtils.isBlank(topic)) {
+    if (StringUtil.isBlank(topic)) {
       throw new IllegalArgumentException("Topic must be specified");
     }
 

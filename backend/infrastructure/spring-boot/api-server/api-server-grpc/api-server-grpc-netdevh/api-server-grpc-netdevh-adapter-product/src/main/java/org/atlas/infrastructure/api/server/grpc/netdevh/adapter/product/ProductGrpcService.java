@@ -4,10 +4,10 @@ import io.grpc.stub.StreamObserver;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.server.service.GrpcService;
-import org.apache.commons.collections4.CollectionUtils;
 import org.atlas.domain.product.entity.ProductEntity;
 import org.atlas.domain.product.usecase.internal.handler.InternalListProductUseCaseHandler;
 import org.atlas.domain.product.usecase.internal.model.InternalListProductInput;
+import org.atlas.framework.util.CollectionUtil;
 import org.atlas.infrastructure.api.server.grpc.protobuf.product.ListProductRequestProto;
 import org.atlas.infrastructure.api.server.grpc.protobuf.product.ListProductResponseProto;
 import org.atlas.infrastructure.api.server.grpc.protobuf.product.ProductProto;
@@ -38,7 +38,7 @@ public class ProductGrpcService extends ProductServiceGrpc.ProductServiceImplBas
   }
 
   private ListProductResponseProto map(List<ProductEntity> productEntities) {
-    if (CollectionUtils.isEmpty(productEntities)) {
+    if (CollectionUtil.isEmpty(productEntities)) {
       return ListProductResponseProto.getDefaultInstance();
     }
     ListProductResponseProto.Builder builder = ListProductResponseProto.newBuilder();

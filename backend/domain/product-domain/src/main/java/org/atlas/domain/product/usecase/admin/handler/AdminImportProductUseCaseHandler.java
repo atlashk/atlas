@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.atlas.domain.product.entity.BrandEntity;
 import org.atlas.domain.product.entity.CategoryEntity;
@@ -23,6 +22,7 @@ import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.error.AppError;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.CollectionUtil;
 
 @UseCaseHandler
 @RequiredArgsConstructor
@@ -44,7 +44,7 @@ public class AdminImportProductUseCaseHandler {
       default -> throw new UnsupportedOperationException(
           "Unsupported file type: " + input.getFileType());
     }
-    if (CollectionUtils.isEmpty(rows)) {
+    if (CollectionUtil.isEmpty(rows)) {
       throw new DomainException(AppError.NO_IMPORTED_PRODUCT);
     }
 

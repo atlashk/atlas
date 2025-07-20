@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.atlas.edge.gateway.springcloudgateway.security.jwt.JwtExtractor;
 import org.atlas.framework.config.Application;
 import org.atlas.framework.config.ApplicationConfigPort;
+import org.atlas.framework.util.StringUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,8 +17,6 @@ import org.springframework.security.oauth2.server.resource.authentication.Reacti
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import reactor.core.publisher.Flux;
-import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 @EnableWebFluxSecurity
@@ -89,7 +88,7 @@ public class SecurityConfig {
     ReactiveJwtAuthenticationConverter converter = new ReactiveJwtAuthenticationConverter();
     converter.setJwtGrantedAuthoritiesConverter(jwt -> {
       String roles = jwtExtractor.extractUserRoles(jwt);
-      if (StringUtils.isNotBlank(roles)) {
+      if (StringUtil.isNotBlank(roles)) {
         return Flux.fromArray(roles.split(","))
             .filter(StringUtils::isNotBlank)
             .map(SimpleGrantedAuthority::new);

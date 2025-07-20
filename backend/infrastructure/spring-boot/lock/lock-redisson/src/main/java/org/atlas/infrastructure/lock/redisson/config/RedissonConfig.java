@@ -1,7 +1,7 @@
 package org.atlas.infrastructure.lock.redisson.config;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
+import org.atlas.framework.util.StringUtil;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.ClusterServersConfig;
@@ -27,7 +27,7 @@ public class RedissonConfig {
 
     final boolean isSslEnabled = redisProperties.getSsl() != null && redisProperties.getSsl().isEnabled();
     final String protocol = isSslEnabled ? "rediss://" : "redis://";
-    final String password = StringUtils.isNotBlank(redisProperties.getPassword())
+    final String password = StringUtil.isNotBlank(redisProperties.getPassword())
         ? redisProperties.getPassword()
         : null;
 
@@ -39,7 +39,7 @@ public class RedissonConfig {
           .toArray(String[]::new);
       ClusterServersConfig clusterConfig = config.useClusterServers()
           .addNodeAddress(nodeAddresses);
-      if (StringUtils.isNotBlank(password)) {
+      if (StringUtil.isNotBlank(password)) {
         clusterConfig.setPassword(password);
       }
       if (isSslEnabled) {
@@ -48,13 +48,13 @@ public class RedissonConfig {
 
     } else {
       // Standalone mode
-      if (StringUtils.isBlank(redisProperties.getHost())) {
+      if (StringUtil.isBlank(redisProperties.getHost())) {
         throw new IllegalArgumentException("Redis host must be specified for standalone mode");
       }
       String address = protocol + redisProperties.getHost().trim() + ":" + redisProperties.getPort();
       SingleServerConfig singleConfig = config.useSingleServer()
           .setAddress(address);
-      if (StringUtils.isNotBlank(password)) {
+      if (StringUtil.isNotBlank(password)) {
         singleConfig.setPassword(password);
       }
       if (isSslEnabled) {

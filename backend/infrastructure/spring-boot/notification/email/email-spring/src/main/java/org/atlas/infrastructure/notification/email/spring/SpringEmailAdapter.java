@@ -5,11 +5,11 @@ import jakarta.mail.internet.MimeMessage;
 import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.atlas.framework.notification.email.Attachment;
 import org.atlas.framework.notification.email.EmailNotification;
 import org.atlas.framework.notification.email.EmailPort;
 import org.atlas.framework.notification.email.SendEmailException;
+import org.atlas.framework.util.CollectionUtil;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -41,7 +41,7 @@ public class SpringEmailAdapter implements EmailPort {
     helper.setTo(request.getRecipients().toArray(new String[0]));
     helper.setSubject(request.getSubject());
     helper.setText(request.getBody(), request.isHtml());
-    if (CollectionUtils.isNotEmpty(request.getAttachments())) {
+    if (CollectionUtil.isNotEmpty(request.getAttachments())) {
       for (Attachment attachment : request.getAttachments()) {
         helper.addAttachment(attachment.name(), attachment.file());
       }

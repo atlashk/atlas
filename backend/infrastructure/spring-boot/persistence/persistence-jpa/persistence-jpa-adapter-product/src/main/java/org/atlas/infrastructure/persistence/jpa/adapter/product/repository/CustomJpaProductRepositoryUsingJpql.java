@@ -6,10 +6,10 @@ import jakarta.persistence.TypedQuery;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.atlas.domain.product.repository.FindProductCriteria;
 import org.atlas.framework.paging.PagingRequest;
+import org.atlas.framework.util.CollectionUtil;
+import org.atlas.framework.util.StringUtil;
 import org.atlas.infrastructure.persistence.jpa.adapter.product.entity.JpaProductEntity;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
@@ -82,7 +82,7 @@ public class CustomJpaProductRepositoryUsingJpql implements CustomJpaProductRepo
       whereClauseBuilder.append(" and p.id = :id ");
       params.put("id", criteria.getId());
     }
-    if (StringUtils.isNotBlank(criteria.getKeyword())) {
+    if (StringUtil.isNotBlank(criteria.getKeyword())) {
       whereClauseBuilder.append("""
           and (
             lower(p.name) like :keyword
@@ -116,7 +116,7 @@ public class CustomJpaProductRepositoryUsingJpql implements CustomJpaProductRepo
       whereClauseBuilder.append(" and b.id = :brandId ");
       params.put("brandId", criteria.getBrandId());
     }
-    if (CollectionUtils.isNotEmpty(criteria.getCategoryIds())) {
+    if (CollectionUtil.isNotEmpty(criteria.getCategoryIds())) {
       whereClauseBuilder.append(" and c.id IN (:categoryIds) ");
       params.put("categoryIds", criteria.getCategoryIds());
     }

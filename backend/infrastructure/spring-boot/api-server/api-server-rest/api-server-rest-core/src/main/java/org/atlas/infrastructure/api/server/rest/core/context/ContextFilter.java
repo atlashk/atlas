@@ -7,11 +7,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Date;
 import java.util.regex.Pattern;
-import org.apache.commons.lang3.StringUtils;
-import org.atlas.framework.util.RoleUtil;
+import org.atlas.framework.auth.enums.CustomClaim;
 import org.atlas.framework.context.ContextInfo;
 import org.atlas.framework.context.Contexts;
-import org.atlas.framework.auth.enums.CustomClaim;
+import org.atlas.framework.util.RoleUtil;
+import org.atlas.framework.util.StringUtil;
 import org.atlas.infrastructure.api.server.rest.core.util.HttpUtil;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -36,10 +36,10 @@ public class ContextFilter extends OncePerRequestFilter {
     final String userIdHeader = HttpUtil.getHeader(request, CustomClaim.USER_ID.getHeader());
     final String userRolesHeader = HttpUtil.getHeader(request, CustomClaim.USER_ROLES.getHeader());
     final String expiresAtHeader = HttpUtil.getHeader(request, CustomClaim.EXPIRES_AT.getHeader());
-    if (StringUtils.isNotBlank(sessionIdHeader) &&
-        StringUtils.isNotBlank(userIdHeader) &&
-        StringUtils.isNotBlank(userRolesHeader) &&
-        StringUtils.isNotBlank(expiresAtHeader)) {
+    if (StringUtil.isNotBlank(sessionIdHeader) &&
+        StringUtil.isNotBlank(userIdHeader) &&
+        StringUtil.isNotBlank(userRolesHeader) &&
+        StringUtil.isNotBlank(expiresAtHeader)) {
       contextInfo.setSessionId(sessionIdHeader);
       contextInfo.setUserId(Integer.parseInt(userIdHeader));
       contextInfo.setUserRoles(RoleUtil.toRolesSet(userRolesHeader));

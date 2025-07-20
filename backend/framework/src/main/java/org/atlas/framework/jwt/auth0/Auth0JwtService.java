@@ -5,16 +5,15 @@ import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.atlas.domain.user.shared.enums.Role;
 import org.atlas.framework.auth.enums.CustomClaim;
 import org.atlas.framework.jwt.DecodeJwtInput;
 import org.atlas.framework.jwt.EncodeJwtInput;
 import org.atlas.framework.jwt.InvalidJwtException;
 import org.atlas.framework.jwt.Jwt;
 import org.atlas.framework.jwt.JwtService;
+import org.atlas.framework.util.CollectionUtil;
 import org.atlas.framework.util.RoleUtil;
+import org.atlas.framework.util.StringUtil;
 import org.atlas.framework.util.UUIDGenerator;
 
 public class Auth0JwtService implements JwtService {
@@ -30,10 +29,10 @@ public class Auth0JwtService implements JwtService {
         .withExpiresAt(input.getJwt().getExpiresAt());
 
     // Custom claims
-    if (StringUtils.isNotBlank(input.getJwt().getSessionId())) {
+    if (StringUtil.isNotBlank(input.getJwt().getSessionId())) {
       builder.withClaim(CustomClaim.SESSION_ID.getClaim(), input.getJwt().getSessionId());
     }
-    if (CollectionUtils.isNotEmpty(input.getJwt().getUserRoles())) {
+    if (CollectionUtil.isNotEmpty(input.getJwt().getUserRoles())) {
       builder.withClaim(CustomClaim.USER_ROLES.getClaim(),
           RoleUtil.toRolesString(input.getJwt().getUserRoles()));
     }
@@ -70,11 +69,11 @@ public class Auth0JwtService implements JwtService {
 
     // Custom claims
     String sessionId = decodedJWT.getClaim(CustomClaim.SESSION_ID.getClaim()).asString();
-    if (StringUtils.isNotBlank(sessionId)) {
+    if (StringUtil.isNotBlank(sessionId)) {
       builder.sessionId(sessionId);
     }
     String userRoles = decodedJWT.getClaim(CustomClaim.USER_ROLES.getClaim()).asString();
-    if (StringUtils.isNotBlank(userRoles)) {
+    if (StringUtil.isNotBlank(userRoles)) {
       builder.userRoles(RoleUtil.toRolesSet(userRoles));
     }
 

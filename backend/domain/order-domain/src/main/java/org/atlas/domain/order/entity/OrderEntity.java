@@ -6,9 +6,9 @@ import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.collections4.CollectionUtils;
 import org.atlas.domain.order.shared.enums.OrderStatus;
 import org.atlas.framework.domain.entity.DomainEntity;
+import org.atlas.framework.util.CollectionUtil;
 
 @Getter
 @Setter
@@ -33,7 +33,7 @@ public class OrderEntity extends DomainEntity {
 
   public void calculateOrderAmount() {
     this.amount = BigDecimal.ZERO;
-    if (CollectionUtils.isEmpty(orderItems)) {
+    if (CollectionUtil.isEmpty(orderItems)) {
       return;
     }
     for (OrderItemEntity orderItem : orderItems) {

@@ -4,8 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
+import lombok.RequiredArgsConstructor;
 import org.atlas.domain.order.entity.OrderEntity;
 import org.atlas.domain.order.entity.ProductEntity;
 import org.atlas.domain.order.entity.UserEntity;
@@ -19,8 +18,7 @@ import org.atlas.framework.internalapi.user.UserApiPort;
 import org.atlas.framework.internalapi.user.model.ListUserRequest;
 import org.atlas.framework.internalapi.user.model.UserResponse;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
-
-import lombok.RequiredArgsConstructor;
+import org.atlas.framework.util.CollectionUtil;
 
 @DomainService
 @RequiredArgsConstructor
@@ -30,7 +28,7 @@ public class OrderAggregator {
   private final ProductApiPort productApiPort;
 
   public void aggregate(List<OrderEntity> orderEntities, boolean ignoreNotFound) {
-    if (CollectionUtils.isEmpty(orderEntities)) {
+    if (CollectionUtil.isEmpty(orderEntities)) {
       return;
     }
     loadUsers(orderEntities, ignoreNotFound);
@@ -43,14 +41,14 @@ public class OrderAggregator {
         .map(orderEntity -> orderEntity.getUser().getId())
         .distinct()
         .toList();
-    if (CollectionUtils.isEmpty(userIds)) {
+    if (CollectionUtil.isEmpty(userIds)) {
       return;
     }
 
     // Call user-service to fetch user info
     ListUserRequest request = new ListUserRequest(userIds);
     List<UserResponse> userResponses = userApiPort.call(request);
-    if (CollectionUtils.isEmpty(userResponses)) {
+    if (CollectionUtil.isEmpty(userResponses)) {
       if (ignoreNotFound) {
         return;
       } else {
@@ -84,7 +82,7 @@ public class OrderAggregator {
             .map(orderItemEntity -> orderItemEntity.getProduct().getId()))
         .distinct()
         .toList();
-    if (CollectionUtils.isEmpty(productIds)) {
+    if (CollectionUtil.isEmpty(productIds)) {
       if (ignoreNotFound) {
         return;
       } else {
@@ -95,7 +93,7 @@ public class OrderAggregator {
     // Call product-service to fetch product info
     ListProductRequest request = new ListProductRequest(productIds);
     List<ProductResponse> productResponses = productApiPort.call(request);
-    if (CollectionUtils.isEmpty(productResponses)) {
+    if (CollectionUtil.isEmpty(productResponses)) {
       return;
     }
 

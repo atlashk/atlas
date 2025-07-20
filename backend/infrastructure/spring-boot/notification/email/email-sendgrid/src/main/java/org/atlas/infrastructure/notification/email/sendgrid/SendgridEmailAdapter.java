@@ -13,12 +13,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
+import org.atlas.framework.cryptography.Base64Util;
 import org.atlas.framework.notification.email.Attachment;
 import org.atlas.framework.notification.email.EmailNotification;
 import org.atlas.framework.notification.email.EmailPort;
 import org.atlas.framework.notification.email.SendEmailException;
-import org.atlas.framework.cryptography.Base64Util;
+import org.atlas.framework.util.CollectionUtil;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -66,7 +66,7 @@ public class SendgridEmailAdapter implements EmailPort {
     mail.addPersonalization(personalization);
     mail.addContent(content);
 
-    if (CollectionUtils.isNotEmpty(notification.getAttachments())) {
+    if (CollectionUtil.isNotEmpty(notification.getAttachments())) {
       for (Attachment attachment : notification.getAttachments()) {
         Attachments sendGridAttachment = new Attachments();
         sendGridAttachment.setFilename(attachment.name());

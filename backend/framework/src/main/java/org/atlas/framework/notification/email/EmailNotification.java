@@ -5,8 +5,8 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.atlas.framework.util.CollectionUtil;
+import org.atlas.framework.util.StringUtil;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -91,10 +91,10 @@ public class EmailNotification {
     }
 
     private boolean validateRequired() {
-      return StringUtils.isNotBlank(this.sender) &&
-          CollectionUtils.isNotEmpty(recipients) &&
-          StringUtils.isNotBlank(subject) &&
-          StringUtils.isNotBlank(body);
+      return StringUtil.isNotBlank(this.sender) &&
+          CollectionUtil.isNotEmpty(recipients) &&
+          StringUtil.isNotBlank(subject) &&
+          StringUtil.isNotBlank(body);
     }
   }
 }

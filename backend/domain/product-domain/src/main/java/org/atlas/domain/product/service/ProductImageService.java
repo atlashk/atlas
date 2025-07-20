@@ -1,8 +1,8 @@
 package org.atlas.domain.product.service;
 
 import java.io.IOException;
-
-import org.apache.commons.lang3.StringUtils;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.config.Application;
 import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.domain.service.DomainService;
@@ -12,9 +12,6 @@ import org.atlas.framework.storage.model.GetFileRequest;
 import org.atlas.framework.storage.model.UploadFileRequest;
 import org.atlas.framework.util.ImageUtil;
 import org.atlas.framework.util.StringUtil;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @DomainService
 @RequiredArgsConstructor
@@ -62,7 +59,7 @@ public class ProductImageService {
   private String getBucket() {
     String bucket = applicationConfigPort.getConfig(Application.PRODUCT_SERVICE,
         "product-images-bucket");
-    if (StringUtils.isBlank(bucket)) {
+    if (StringUtil.isBlank(bucket)) {
       throw new IllegalArgumentException("No bucket configured");
     }
     return bucket;

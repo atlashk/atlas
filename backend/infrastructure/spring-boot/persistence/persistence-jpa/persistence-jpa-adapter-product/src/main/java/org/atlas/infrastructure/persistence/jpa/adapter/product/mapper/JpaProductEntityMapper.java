@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.experimental.UtilityClass;
-import org.apache.commons.collections4.CollectionUtils;
 import org.atlas.domain.product.entity.BrandEntity;
 import org.atlas.domain.product.entity.CategoryEntity;
 import org.atlas.domain.product.entity.ProductAttributeEntity;
 import org.atlas.domain.product.entity.ProductDetailsEntity;
 import org.atlas.domain.product.entity.ProductEntity;
+import org.atlas.framework.util.CollectionUtil;
 import org.atlas.infrastructure.persistence.jpa.adapter.product.entity.JpaBrandEntity;
 import org.atlas.infrastructure.persistence.jpa.adapter.product.entity.JpaCategoryEntity;
 import org.atlas.infrastructure.persistence.jpa.adapter.product.entity.JpaProductAttributeEntity;
@@ -49,7 +49,7 @@ public class JpaProductEntityMapper {
     }
 
     // Set attributes (with back-reference)
-    if (CollectionUtils.isNotEmpty(productEntity.getAttributes())) {
+    if (CollectionUtil.isNotEmpty(productEntity.getAttributes())) {
       for (ProductAttributeEntity productAttributeEntity : productEntity.getAttributes()) {
         JpaProductAttributeEntity jpaProductAttributeEntity = new JpaProductAttributeEntity();
         jpaProductAttributeEntity.setId(productAttributeEntity.getId());
@@ -60,7 +60,7 @@ public class JpaProductEntityMapper {
     }
 
     // Set category references by ID only
-    if (CollectionUtils.isNotEmpty(productEntity.getCategories())) {
+    if (CollectionUtil.isNotEmpty(productEntity.getCategories())) {
       for (CategoryEntity categoryEntity : productEntity.getCategories()) {
         if (categoryEntity.getId() != null) {
           JpaCategoryEntity jpaCategoryEntity = new JpaCategoryEntity();
@@ -112,7 +112,7 @@ public class JpaProductEntityMapper {
     // Clear the attributes list to rebuild it
     jpaProductEntity.getAttributes().clear();
     // Process attributes from productEntity
-    if (CollectionUtils.isNotEmpty(productEntity.getAttributes())) {
+    if (CollectionUtil.isNotEmpty(productEntity.getAttributes())) {
       for (ProductAttributeEntity attributeEntity : productEntity.getAttributes()) {
         // Find existing attribute by name
         Optional<JpaProductAttributeEntity> existingJpaAttributeEntityOpt = existingJpaAttributeEntities.stream()
@@ -136,7 +136,7 @@ public class JpaProductEntityMapper {
 
     // Update categories
     jpaProductEntity.getCategories().clear();
-    if (CollectionUtils.isNotEmpty(productEntity.getCategories())) {
+    if (CollectionUtil.isNotEmpty(productEntity.getCategories())) {
       for (CategoryEntity categoryEntity : productEntity.getCategories()) {
         if (categoryEntity.getId() != null) {
           JpaCategoryEntity jpaCategoryEntity = new JpaCategoryEntity();
@@ -174,7 +174,7 @@ public class JpaProductEntityMapper {
     }
 
     // Attributes
-    if (CollectionUtils.isNotEmpty(jpaProductEntity.getAttributes())) {
+    if (CollectionUtil.isNotEmpty(jpaProductEntity.getAttributes())) {
       for (JpaProductAttributeEntity jpaProductAttributeEntity : jpaProductEntity.getAttributes()) {
         ProductAttributeEntity productAttributeEntity = new ProductAttributeEntity();
         productAttributeEntity.setId(jpaProductAttributeEntity.getId());
@@ -185,7 +185,7 @@ public class JpaProductEntityMapper {
     }
 
     // Categories
-    if (CollectionUtils.isNotEmpty(jpaProductEntity.getCategories())) {
+    if (CollectionUtil.isNotEmpty(jpaProductEntity.getCategories())) {
       for (JpaCategoryEntity jpaCategoryEntity : jpaProductEntity.getCategories()) {
         CategoryEntity categoryEntity = new CategoryEntity();
         categoryEntity.setId(jpaCategoryEntity.getId());

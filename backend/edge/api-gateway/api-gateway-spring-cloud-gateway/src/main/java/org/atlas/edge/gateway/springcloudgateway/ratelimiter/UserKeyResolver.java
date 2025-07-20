@@ -2,9 +2,9 @@ package org.atlas.edge.gateway.springcloudgateway.ratelimiter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.atlas.edge.gateway.springcloudgateway.security.jwt.JwtExtractor;
-import org.atlas.edge.gateway.springcloudgateway.util.IpAddressUtil;
+import org.atlas.edge.gateway.springcloudgateway.util.HttpUtil;
+import org.atlas.framework.util.StringUtil;
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
@@ -24,7 +24,7 @@ public class UserKeyResolver implements KeyResolver {
 
   @Override
   public Mono<String> resolve(ServerWebExchange exchange) {
-    String ipAddress = IpAddressUtil.getIpAddress(exchange.getRequest());
+    String ipAddress = HttpUtil.getIpAddress(exchange.getRequest());
     return ReactiveSecurityContextHolder.getContext()
         .map(SecurityContext::getAuthentication)
         .filter(auth ->
@@ -33,7 +33,7 @@ public class UserKeyResolver implements KeyResolver {
             (Jwt) auth.getCredentials())
         .map(jwt -> {
           String userId = jwtExtractor.extractUserId(jwt);
-          if (StringUtils.isNotBlank(userId)) {
+          if (StringUtil.isNotBlank(userId)) {
             return userId + ":" + ipAddress;
           }
           return ANONYMOUS_KEY + ":" + ipAddress;

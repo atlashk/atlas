@@ -1,6 +1,6 @@
 package org.atlas.domain.product.usecase.admin.handler;
 
-import org.apache.commons.lang3.StringUtils;
+import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.ProductEntity;
 import org.atlas.domain.product.port.messaging.ProductMessagePublisherPort;
 import org.atlas.domain.product.repository.ProductRepository;
@@ -11,8 +11,7 @@ import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.error.AppError;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
-
-import lombok.RequiredArgsConstructor;
+import org.atlas.framework.util.StringUtil;
 
 @UseCaseHandler
 @RequiredArgsConstructor
@@ -33,7 +32,7 @@ public class AdminUpdateProductUseCaseHandler {
     productRepository.update(productEntity);
 
     // Upload image
-    if (StringUtils.isNotBlank(productEntity.getImage())) {
+    if (StringUtil.isBlank(productEntity.getImage())) {
       productImageService.uploadImage(productEntity.getId(), productEntity.getImage());
     }
 

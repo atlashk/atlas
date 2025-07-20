@@ -12,7 +12,6 @@ import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import lombok.experimental.UtilityClass;
-import org.apache.commons.lang3.StringUtils;
 
 @UtilityClass
 public class DateUtil {
@@ -20,7 +19,7 @@ public class DateUtil {
   private static final ConcurrentMap<String, SimpleDateFormat> simpleDateFormatCache = new ConcurrentHashMap<>();
 
   public static Date parse(String source, String pattern) {
-    if (StringUtils.isBlank(source)) {
+    if (StringUtil.isBlank(source)) {
       return null;
     }
     SimpleDateFormat simpleDateFormat = simpleDateFormatCache.computeIfAbsent(pattern,

@@ -1,67 +1,90 @@
 package org.atlas.framework.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import lombok.experimental.UtilityClass;
-import org.apache.commons.lang3.StringUtils;
 
 @UtilityClass
 public class StringUtil {
 
   public static final String EMPTY = "";
 
-  public static String nvl(String value, String defaultValue) {
-    return value == null ? defaultValue : value;
+  /**
+   * Checks if a string is blank (null, empty, or containing only whitespace).
+   * Using Java 11+ isBlank built-in method directly
+   */
+  public static boolean isBlank(String str) {
+    return str == null || str.isBlank();
   }
 
-  public static String limit(String input, int maxLength) {
-    if (input == null) {
+  /**
+   * Checks if a string is not blank (not null, not empty, and contains non-whitespace characters).
+   *
+   * @param str the string to check
+   * @return true if the string is not null, not empty, and contains non-whitespace characters; false otherwise
+   */
+  public static boolean isNotBlank(String str) {
+    return !isBlank(str);
+  }
+
+  /**
+   * Returns the input string if it is not null; otherwise, returns the specified default value.
+   */
+  public static String nvl(String str, String defaultValue) {
+    return str == null ? defaultValue : str;
+  }
+
+  /**
+   * Limits the length of a string to the specified maximum length.
+   * If the string exceeds the maximum length, it is truncated.
+   *
+   */
+  public static String limitLength(String str, int maxLength) {
+    if (str == null) {
+      return null;
+    }
+    return str.length() > maxLength ? str.substring(0, maxLength) : str;
+  }
+
+  /**
+   * Masks a string by keeping a specified number of characters at the start and replacing the rest with a mask character.
+   */
+  public static String mask(String str, int firstChars, char maskChar) {
+    if (str == null) {
       return null;
     }
 
-    return input.length() > maxLength ? input.substring(0, maxLength) : input;
-  }
-
-  public static String mask(String input, int firstChars, char maskChar) {
-    if (input == null) {
-      return null;
-    }
-
-    int strLength = input.length();
+    int strLength = str.length();
     if (firstChars <= 0) {
-      char[] maskedArray = new char[strLength];
-      Arrays.fill(maskedArray, maskChar);
-      return new String(maskedArray);
+      return String.valueOf(maskChar).repeat(strLength);
     }
 
     if (strLength <= firstChars) {
-      return input;
+      return str;
     }
 
-    return input.substring(0, firstChars) + String.valueOf(maskChar).repeat(strLength - firstChars);
+    return str.substring(0, firstChars) + String.valueOf(maskChar).repeat(strLength - firstChars);
   }
 
-  public static String shuffle(String input) {
+  /**
+   * Randomly shuffles the characters of a string.
+   */
+  public static String shuffle(String str) {
+    if (str == null) {
+      return EMPTY;
+    }
+
     List<Character> characters = new ArrayList<>();
-    for (char character : input.toCharArray()) {
+    for (char character : str.toCharArray()) {
       characters.add(character);
     }
     Collections.shuffle(characters);
 
-    StringBuilder shuffledString = new StringBuilder();
+    StringBuilder shuffled = new StringBuilder();
     for (char character : characters) {
-      shuffledString.append(character);
+      shuffled.append(character);
     }
-    return shuffledString.toString();
-  }
-
-  // Don't remove it
-  public static String[] split(String input, String delimiter) {
-    return Arrays.stream(input.split(delimiter))
-        .map(String::strip)
-        .filter(StringUtils::isNotBlank)
-        .toArray(String[]::new);
+    return shuffled.toString();
   }
 }

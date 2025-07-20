@@ -6,11 +6,11 @@ import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.interceptor.GrpcGlobalServerInterceptor;
-import org.apache.commons.lang3.StringUtils;
 import org.atlas.framework.auth.enums.CustomClaim;
 import org.atlas.framework.context.ContextInfo;
 import org.atlas.framework.context.Contexts;
 import org.atlas.framework.util.RoleUtil;
+import org.atlas.framework.util.StringUtil;
 
 @GrpcGlobalServerInterceptor
 @Slf4j
@@ -30,9 +30,9 @@ public class UserContextInterceptor implements ServerInterceptor {
     final String sessionIdHeader = metadata.get(SESSION_ID_HEADER);
     final String userIdHeader = metadata.get(USER_ID_HEADER);
     final String userRolesHeader = metadata.get(USER_ROLES_HEADER);
-    if (StringUtils.isNotBlank(sessionIdHeader) &&
-        StringUtils.isNotBlank(userIdHeader) &&
-        StringUtils.isNotBlank(userRolesHeader)) {
+    if (StringUtil.isNotBlank(sessionIdHeader) &&
+        StringUtil.isNotBlank(userIdHeader) &&
+        StringUtil.isNotBlank(userRolesHeader)) {
       ContextInfo contextInfo = new ContextInfo();
       contextInfo.setSessionId(sessionIdHeader);
       contextInfo.setUserId(Integer.parseInt(userIdHeader));

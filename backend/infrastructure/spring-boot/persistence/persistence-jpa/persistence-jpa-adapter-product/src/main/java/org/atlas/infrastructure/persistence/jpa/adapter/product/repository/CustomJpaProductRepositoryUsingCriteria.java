@@ -10,9 +10,10 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.atlas.domain.product.repository.FindProductCriteria;
 import org.atlas.framework.paging.PagingRequest;
+import org.atlas.framework.util.CollectionUtil;
+import org.atlas.framework.util.StringUtil;
 import org.atlas.infrastructure.persistence.jpa.adapter.product.entity.JpaProductEntity;
 import org.atlas.infrastructure.persistence.jpa.core.specification.QueryFilter;
 import org.atlas.infrastructure.persistence.jpa.core.specification.QueryOperator;
@@ -86,7 +87,7 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
     if (criteria.getId() != null) {
       spec.addFilter(QueryFilter.of("id", criteria.getId(), QueryOperator.EQUAL));
     }
-    if (StringUtils.isNotBlank(criteria.getKeyword())) {
+    if (StringUtil.isNotBlank(criteria.getKeyword())) {
       spec.addFilter(QueryFilter.or(
           QueryFilter.Condition.of("name", criteria.getKeyword(), QueryOperator.LIKE),
           QueryFilter.Condition.of("detail.description", criteria.getKeyword(), QueryOperator.LIKE),
@@ -110,7 +111,7 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
     if (criteria.getBrandId() != null) {
       spec.addFilter(QueryFilter.of("brand.id", criteria.getBrandId(), QueryOperator.EQUAL));
     }
-    if (CollectionUtils.isNotEmpty(criteria.getCategoryIds())) {
+    if (CollectionUtil.isNotEmpty(criteria.getCategoryIds())) {
       spec.addFilter(QueryFilter.of("categories.id", criteria.getCategoryIds(), QueryOperator.IN));
     }
 

@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
-import org.apache.commons.lang3.StringUtils;
 import org.atlas.domain.user.shared.enums.Role;
 
 @UtilityClass
@@ -19,7 +18,7 @@ public class RoleUtil {
   }
 
   public static Set<Role> toRolesSet(String rolesString) {
-    if (StringUtils.isBlank(rolesString)) {
+    if (StringUtil.isBlank(rolesString)) {
       return Sets.newHashSet();
     }
     return Arrays.stream(rolesString.split(","))

@@ -7,8 +7,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.atlas.framework.json.JsonUtil;
+import org.atlas.framework.util.CollectionUtil;
 import org.atlas.framework.util.ConcurrentUtil;
 import org.springframework.beans.factory.DisposableBean;
 import software.amazon.awssdk.services.sqs.SqsClient;
@@ -53,7 +53,7 @@ public abstract class SnsMessageConsumer implements DisposableBean {
           while (isRunning.get()) {
             try {
               List<Message> messages = sqsClient.receiveMessage(receiveRequest).messages();
-              if (CollectionUtils.isNotEmpty(messages)) {
+              if (CollectionUtil.isNotEmpty(messages)) {
                 messages.forEach(message -> {
                   log.debug("Handling message: {}", message.messageId());
                   try {

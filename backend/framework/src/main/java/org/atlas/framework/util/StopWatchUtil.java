@@ -5,7 +5,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Thread-safe StopWatch
  */
-public class StopWatch {
+public class StopWatchUtil {
 
   private long startTime = 0;
   private long endTime = 0;

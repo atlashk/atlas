@@ -4,8 +4,8 @@ import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.atlas.framework.constant.CommonConstant;
+import org.atlas.framework.util.StringUtil;
 import org.checkerframework.checker.index.qual.Positive;
 
 @Data
@@ -53,7 +53,7 @@ public class PagingRequest {
   }
 
   public boolean hasSort() {
-    return StringUtils.isNotBlank(sortBy);
+    return StringUtil.isNotBlank(sortBy);
   }
 
   public boolean isSortAscending() {

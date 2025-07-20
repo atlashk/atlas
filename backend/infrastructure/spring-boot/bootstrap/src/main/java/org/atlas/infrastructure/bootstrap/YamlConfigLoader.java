@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Properties;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
+import org.atlas.framework.util.MapUtil;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
@@ -69,7 +70,7 @@ public class YamlConfigLoader implements
     try (InputStream inputStream = resource.getInputStream()) {
       Yaml yaml = new Yaml();
       Map<String, Object> yamlMap = yaml.load(inputStream);
-      if (MapUtils.isEmpty(yamlMap)) {
+      if (MapUtil.isEmpty(yamlMap)) {
         return Optional.empty();
       }
 

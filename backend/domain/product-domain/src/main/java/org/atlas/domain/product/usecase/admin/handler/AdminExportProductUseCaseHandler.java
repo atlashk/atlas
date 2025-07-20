@@ -2,11 +2,10 @@ package org.atlas.domain.product.usecase.admin.handler;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
+import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.CategoryEntity;
-import org.atlas.domain.product.entity.ProductEntity;
 import org.atlas.domain.product.entity.ProductAttributeEntity;
+import org.atlas.domain.product.entity.ProductEntity;
 import org.atlas.domain.product.port.file.csv.ProductCsvWriterPort;
 import org.atlas.domain.product.port.file.excel.ProductExcelWriterPort;
 import org.atlas.domain.product.port.file.model.write.ProductRow;
@@ -17,8 +16,7 @@ import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
-
-import lombok.RequiredArgsConstructor;
+import org.atlas.framework.util.CollectionUtil;
 
 @UseCaseHandler
 @RequiredArgsConstructor
@@ -80,7 +78,7 @@ public class AdminExportProductUseCaseHandler {
     }
 
     // Attributes - map up to 3 attributes to specific columns
-    if (CollectionUtils.isNotEmpty(entity.getAttributes())) {
+    if (CollectionUtil.isNotEmpty(entity.getAttributes())) {
       List<ProductAttributeEntity> attributes = entity.getAttributes()
           .stream()
           .limit(3)

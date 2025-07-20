@@ -3,7 +3,7 @@ package org.atlas.infrastructure.scheduler.quartz.core.listener;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
+import org.atlas.framework.util.CollectionUtil;
 import org.quartz.JobListener;
 import org.quartz.ListenerManager;
 import org.quartz.TriggerListener;
@@ -25,14 +25,14 @@ public class QuartzListenerRegistrar implements InitializingBean {
     ListenerManager listenerManager = schedulerFactoryBean.getScheduler()
         .getListenerManager();
 
-    if (CollectionUtils.isNotEmpty(jobListeners)) {
+    if (CollectionUtil.isNotEmpty(jobListeners)) {
       for (JobListener jobListener : jobListeners) {
         listenerManager.addJobListener(jobListener);
         log.info("Registered job listener: {}", jobListener.getName());
       }
     }
 
-    if (CollectionUtils.isNotEmpty(triggerListeners)) {
+    if (CollectionUtil.isNotEmpty(triggerListeners)) {
       for (TriggerListener triggerListener : triggerListeners) {
         listenerManager.addTriggerListener(triggerListener);
         log.info("Registered trigger listener: {}", triggerListener.getName());
