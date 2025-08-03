@@ -30,6 +30,8 @@ dependencies {
 
     // Lib
     api 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    api 'io.github.openfeign:feign-hc5'
+    api 'org.apache.httpcomponents.client5:httpclient5:5.4.1'
     api 'io.github.openfeign:feign-micrometer'
 
     // Lombok

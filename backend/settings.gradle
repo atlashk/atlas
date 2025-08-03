@@ -252,8 +252,6 @@ include(':infrastructure.spring-boot.observability.metrics.prometheus')
 project(':infrastructure.spring-boot.observability.metrics.prometheus').projectDir = file('infrastructure/spring-boot/observability/metrics/metrics-prometheus')
 
 // Observability::Tracing
-include(':infrastructure.spring-boot.observability.tracing.simple')
-project(':infrastructure.spring-boot.observability.tracing.simple').projectDir = file('infrastructure/spring-boot/observability/tracing/tracing-simple')
 include(':infrastructure.spring-boot.observability.tracing.zipkin')
 project(':infrastructure.spring-boot.observability.tracing.zipkin').projectDir = file('infrastructure/spring-boot/observability/tracing/tracing-zipkin')
 

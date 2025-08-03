@@ -1,7 +1,7 @@
 // Constants
 ext {
     INFRA_STACK_CONFIG_DIR = "gradle/infra-stack/config"
-    DEFAULT_INFRA_STACK = "onprem-compose-simple"
+    DEFAULT_INFRA_STACK = "onprem-compose"
     INFRA_STACK_NAME_PATTERN = ~'^[a-zA-Z0-9-_]+$'
 }
 

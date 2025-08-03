@@ -126,7 +126,7 @@ build_services() {
     chmod +x "$build_script"
 
     log_info "Invoking build script..."
-    if "$build_script" --infra-stack=onprem-k8s; then
+    if "$build_script" --infra-stack=onprem-compose; then
         log_success "Build completed successfully"
     else
         log_error "Build failed"

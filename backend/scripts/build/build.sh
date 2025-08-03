@@ -11,7 +11,7 @@ GRADLEW="$PROJECT_ROOT/backend/gradlew"
 source "$PROJECT_ROOT/backend/scripts/log/logger.sh"
 
 # Default values
-INFRA_STACK="onprem-compose-observability"
+INFRA_STACK="onprem-compose"
 SKIP_TESTS="true"
 BUILD_DOCKER="true"
 
@@ -21,7 +21,7 @@ SERVICES=(
     "product-service:$PROJECT_ROOT/backend/application/spring-boot/product-application"
     "order-service:$PROJECT_ROOT/backend/application/spring-boot/order-application"
     "notification-service:$PROJECT_ROOT/backend/application/spring-boot/notification-application"
-    "discovery-server:$PROJECT_ROOT/backend/edge/discovery-server/discovery-server-eureka"
+    "eureka-server:$PROJECT_ROOT/backend/edge/discovery-server/discovery-server-eureka"
     "auth-server:$PROJECT_ROOT/backend/edge/auth-server/auth-server-spring-security-jwt"
     "api-gateway:$PROJECT_ROOT/backend/edge/api-gateway/api-gateway-spring-cloud-gateway"
 )
@@ -30,7 +30,7 @@ SERVICES=(
 usage() {
     echo "Usage: $0 [OPTIONS]"
     echo "Options:"
-    echo "  --infra-stack=STACK     Infrastructure stack to use (default: onprem-compose-observability)"
+    echo "  --infra-stack=STACK     Infrastructure stack to use (default: onprem-compose)"
     echo "  --skip-tests=BOOL       Skip tests during build (default: true)"
     echo "  --build-docker=BOOL     Build Docker images after Gradle build (default: false)"
     echo "  -h, --help              Show this help message"

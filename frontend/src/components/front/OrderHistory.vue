@@ -1,5 +1,5 @@
 <template>
-  <div class="container mt-4">
+  <div>
     <h3 class="my-4">Order History</h3>
 
     <!-- Filters Section -->
@@ -53,7 +53,7 @@
         <div class="d-flex justify-content-between align-items-center">
           <div>
             <p><strong>Order #{{ order.code }}</strong> - {{ formatDate(order.createdAt) }}</p>
-            <p><strong>Amount:</strong> ${{ formatCurrency(order.amount) }}</p>
+            <p><strong>Total:</strong> {{ formatCurrency(order.amount) }}</p>
             <p>
               <strong class="me-1">Status:</strong>
               <span :class="getOrderStatusBadgeClasses(order.status)">
@@ -85,9 +85,9 @@
               <tr v-for="item in order.orderItems" :key="item.product.id">
                 <td>{{ item.product.id }}</td>
                 <td>{{ item.product.name }}</td>
-                <td>${{ formatCurrency(item.product.price) }}</td>
+                <td>{{ formatCurrency(item.product.price) }}</td>
                 <td>{{ item.quantity }}</td>
-                <td>${{ formatCurrency(item.product.price * item.quantity) }}</td>
+                <td>{{ formatCurrency(item.product.price * item.quantity) }}</td>
               </tr>
             </tbody>
           </table>

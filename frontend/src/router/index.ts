@@ -16,12 +16,6 @@ const routes = [
         component: () => import('@/pages/front/StoreFront.vue'),
       },
       {
-        path: '/order-history',
-        name: 'orderHistory',
-        component: () => import('@/pages/front/OrderHistory.vue'),
-        meta: { requiresAuth: true }
-      },
-      {
         path: '/admin/dashboard',
         name: 'adminDashboard',
         component: () => import('@/pages/admin/Dashboard.vue'),

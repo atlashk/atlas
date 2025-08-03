@@ -52,16 +52,16 @@ else
     log_success "Node.js found: v$node_version"
 fi
 
-# Start backend services using Docker Compose
+# Deploy backend services using Docker Compose
 log_info "Starting backend services..."
 if [[ "$SKIP_BUILD" == true ]]; then
-    if ! "$(dirname "$0")/backend/scripts/deploy/onprem/compose/start.sh" --skip-build; then
-        log_error "Backend services failed to start. Exiting..."
+    if ! "$(dirname "$0")/backend/scripts/deploy/onprem/compose/deploy.sh" --skip-build; then
+        log_error "Backend services failed to deploy. Exiting..."
         exit 1
     fi
 else
-    if ! "$(dirname "$0")/backend/scripts/deploy/onprem/compose/start.sh"; then
-        log_error "Backend services failed to start. Exiting..."
+    if ! "$(dirname "$0")/backend/scripts/deploy/onprem/compose/deploy.sh"; then
+        log_error "Backend services failed to deploy. Exiting..."
         exit 1
     fi
 fi
@@ -106,7 +106,6 @@ if [ ! -d "node_modules" ]; then
     npm install
 fi
 
-# Start the frontend development server
 npm run dev &
 FRONTEND_PID=$!
 
@@ -118,8 +117,8 @@ stop_services() {
         kill $FRONTEND_PID 2>/dev/null || true
     fi
 
-    # Stop backend services using compose-stop script
-    "$(dirname "$0")/backend/scripts/deploy/onprem/compose/compose-stop.sh" 2>/dev/null || true
+    # Stop backend services
+    "$(dirname "$0")/backend/scripts/deploy/onprem/compose/stop.sh" 2>/dev/null || true
 
     exit 0
 }

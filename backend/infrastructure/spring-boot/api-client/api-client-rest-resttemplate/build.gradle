@@ -30,6 +30,7 @@ dependencies {
 
     // Lib
     api 'org.springframework.boot:spring-boot-starter-web'
+    api 'org.apache.httpcomponents.client5:httpclient5:5.4.1'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

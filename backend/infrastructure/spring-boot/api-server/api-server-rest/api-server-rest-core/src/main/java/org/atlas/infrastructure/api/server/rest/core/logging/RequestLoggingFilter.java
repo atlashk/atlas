@@ -97,7 +97,7 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
   private String getBody(HttpServletRequest request, int maxPayloadLength) {
     try {
       String body = IOUtils.toString(request.getInputStream(), StandardCharsets.UTF_8);
-      return StringUtil.limit(body, maxPayloadLength);
+      return StringUtil.limitLength(body, maxPayloadLength);
     } catch (IOException e) {
       log.error("Failed to cache request body", e);
       return StringUtil.EMPTY;

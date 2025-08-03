@@ -6,11 +6,6 @@
 
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav me-auto">
-          <!-- Order History for non-admin users -->
-          <li v-if="authState.isAuthenticated && !authState.isAdmin" class="nav-item">
-            <router-link to="/order-history" class="nav-link">Order History</router-link>
-          </li>
-
           <!-- Admin menu items -->
           <li v-if="authState.isAuthenticated && authState.isAdmin" class="nav-item">
             <router-link to="/admin/user" class="nav-link">User Management</router-link>

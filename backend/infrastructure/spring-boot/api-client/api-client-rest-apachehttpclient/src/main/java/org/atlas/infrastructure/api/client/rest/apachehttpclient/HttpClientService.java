@@ -32,8 +32,8 @@ public class HttpClientService implements DisposableBean {
 
   private final CloseableHttpClient httpClient;
 
-  public HttpClientService() {
-    this.httpClient = HttpClientFactory.custom();
+  public HttpClientService(HttpClientFactory httpClientFactory) {
+    this.httpClient = httpClientFactory.custom();
   }
 
   @Override
