@@ -142,7 +142,7 @@ public class AuthService {
     // Require deviceId
     String deviceId = Contexts.getDeviceId();
     if (deviceId == null) {
-      throw new DomainException(AppError.BAD_REQUEST, "Device ID is required");
+      throw new DomainException(AppError.BAD_REQUEST, "X-Device-Id is required");
     }
 
     Authentication authentication = authenticationManager.authenticate(authenticationRequest);

@@ -9,10 +9,10 @@ import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
     "org.atlas"
 })
 @EnableEurekaServer
-public class DiscoveryServerApplication {
+public class EurekaServerApplication {
 
   public static void main(String[] args) {
-    new SpringApplicationBuilder(DiscoveryServerApplication.class)
+    new SpringApplicationBuilder(EurekaServerApplication.class)
         .initializers(new YamlConfigLoader()).run(args);
   }
 }

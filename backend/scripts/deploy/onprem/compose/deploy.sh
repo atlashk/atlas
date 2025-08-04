@@ -155,11 +155,19 @@ start_services() {
 
     # Display service URLs
     log_section "Service URLs:"
+    log_info "Direct Access:"
     log_info "  - API Gateway: http://localhost:8080"
     log_info "  - Prometheus: http://localhost:9090"
     log_info "  - Grafana: http://localhost:3000"
     log_info "  - Zipkin: http://localhost:9411"
     log_info "  - Frontend: http://localhost:9000"
+    log_info ""
+    log_info "Via Nginx (requires hosts file configuration):"
+    log_info "  - API Gateway: http://api.atlas.local"
+    log_info "  - Grafana: http://grafana.atlas.local"
+    log_info "  - Prometheus: http://prometheus.atlas.local"
+    log_info "  - Zipkin: http://zipkin.atlas.local"
+    log_info "  - SMTP4Dev: http://smtp4dev.atlas.local"
 }
 
 # =============================================================================
@@ -180,6 +188,7 @@ main() {
         log_info "Skipping build step (--skip-build flag provided)"
     fi
 
+    # Start services
     start_services
 
     log_success "Atlas platform started successfully!"

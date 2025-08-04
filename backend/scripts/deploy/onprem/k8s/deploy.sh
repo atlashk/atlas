@@ -379,9 +379,6 @@ setup_and_deploy_ingress() {
     local ingress_ip
     ingress_ip=$(get_ingress_ip "$platform")
 
-    # Setup hosts file first
-    setup_hosts_file "$ingress_ip"
-
     # Install NGINX Ingress Controller
     install_ingress_controller "$platform"
 
@@ -406,90 +403,6 @@ get_ingress_ip() {
             echo "127.0.0.1"
             ;;
     esac
-}
-
-setup_hosts_file() {
-    local ingress_ip="$1"
-    local hosts=("api.atlas.local" "grafana.atlas.local" "prometheus.atlas.local" "zipkin.atlas.local" "mail.atlas.local")
-
-    # Check if running on Windows
-    local is_windows=false
-    if [[ "$OS" == "Windows_NT" ]] || [[ "$(uname -s)" == MINGW* ]] || [[ "$(uname -s)" == CYGWIN* ]] || [[ "$(uname -s)" == MSYS* ]]; then
-        is_windows=true
-    fi
-    if [[ "$is_windows" == true ]]; then
-        show_windows_hosts_instructions "$ingress_ip" "${hosts[@]}"
-        return
-    fi
-
-    if grep -q "atlas.local" /etc/hosts 2>/dev/null; then
-        log_info "Atlas hostnames already configured in /etc/hosts"
-        return
-    fi
-
-    log_info "Setting up local hostnames with IP: $ingress_ip"
-    setup_unix_hosts_file "$ingress_ip" "${hosts[@]}"
-}
-
-show_windows_hosts_instructions() {
-    local ingress_ip="$1"
-    shift
-    local hosts=("$@")
-    
-    log_warn "Windows detected - Manual hosts file configuration required"
-    log_info "Please add these entries to your Windows hosts file:"
-    log_info "  Location: C:\\Windows\\System32\\drivers\\etc\\hosts"
-    log_info ""
-    log_info "Steps to modify hosts file on Windows:"
-    log_info "  1. Open Notepad as Administrator"
-    log_info "  2. Open file: C:\\Windows\\System32\\drivers\\etc\\hosts"
-    log_info "  3. Add these lines at the end:"
-    log_info ""
-    for host in "${hosts[@]}"; do
-        log_info "     $ingress_ip $host"
-    done
-    log_info ""
-    log_info "  4. Save the file"
-    log_info ""
-    log_warn "Note: You must run Notepad as Administrator to edit the hosts file"
-}
-
-setup_unix_hosts_file() {
-    local ingress_ip="$1"
-    shift
-    local hosts=("$@")
-    
-    # Backup hosts file if not already backed up
-    if [ ! -f /etc/hosts.backup ] && sudo -n true 2>/dev/null; then
-        log_info "Creating backup of /etc/hosts..."
-        sudo cp /etc/hosts /etc/hosts.backup 2>/dev/null || {
-            log_warn "Cannot backup /etc/hosts"
-        }
-    fi
-    
-    # Add hostnames
-    if sudo -n true 2>/dev/null; then
-        # Remove existing Atlas entries first
-        for host in "${hosts[@]}"; do
-            sudo sed -i.bak "/$host/d" /etc/hosts 2>/dev/null || true
-        done
-        
-        # Add new entries in one operation
-        {
-            echo ""
-            echo "# Atlas Kubernetes Ingress - Added by k8s-start.sh"
-            printf "%s %s\n" $(for host in "${hosts[@]}"; do echo "$ingress_ip $host"; done)
-            echo "# End Atlas entries"
-        } | sudo tee -a /etc/hosts > /dev/null 2>&1
-        
-        log_success "Hostnames configured successfully"
-    else
-        log_warn "Cannot modify /etc/hosts without sudo access"
-        log_info "Please add these entries to your /etc/hosts file manually:"
-        for host in "${hosts[@]}"; do
-            log_info "  $ingress_ip $host"
-        done
-    fi
 }
 
 install_ingress_controller() {
@@ -578,25 +491,23 @@ show_deployment_summary() {
 
 show_access_information() {
     log_section "Access Information"
-    
-    if grep -q "atlas.local" /etc/hosts 2>/dev/null; then
-        log_info "Access via Ingress (recommended):"
-        log_info "  API Gateway:   http://api.atlas.local"
-        log_info "  Grafana:       http://grafana.atlas.local (admin/admin)"
-        log_info "  Prometheus:    http://prometheus.atlas.local"
-        log_info "  Zipkin:        http://zipkin.atlas.local"
-        log_info "  SMTP4Dev:      http://mail.atlas.local"
-        log_info ""
-    fi
-    
+
+    log_info "Access via Ingress (recommended):"
+    log_info "  API Gateway:   http://api.atlas.local"
+    log_info "  Grafana:       http://grafana.atlas.local (admin/admin)"
+    log_info "  Prometheus:    http://prometheus.atlas.local"
+    log_info "  Zipkin:        http://zipkin.atlas.local"
+    log_info "  SMTP4Dev:      http://smtp4dev.atlas.local"
+    log_info ""
+
     log_info "Alternative access via port-forwarding:"
     local port_forwards=(
         "API Gateway:   kubectl port-forward -n $NAMESPACE svc/api-gateway 8080:8080"
         "Grafana:       kubectl port-forward -n $NAMESPACE svc/grafana 3000:3000"
         "Prometheus:    kubectl port-forward -n $NAMESPACE svc/prometheus 9090:9090"
         "Zipkin:        kubectl port-forward -n $NAMESPACE svc/zipkin 9411:9411"
+        "SMTP4Dev:      kubectl port-forward -n $NAMESPACE svc/smtp4dev 80:80"
     )
-    
     for pf in "${port_forwards[@]}"; do
         log_info "  $pf"
     done

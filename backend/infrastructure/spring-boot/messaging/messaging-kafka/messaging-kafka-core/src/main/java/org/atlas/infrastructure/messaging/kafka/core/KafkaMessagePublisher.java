@@ -1,7 +1,5 @@
 package org.atlas.infrastructure.messaging.kafka.core;
 
-import io.micrometer.context.ContextSnapshot;
-import io.micrometer.context.ContextSnapshotFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.messaging.MessagePublisher;
@@ -15,7 +13,6 @@ import org.springframework.stereotype.Component;
 public class KafkaMessagePublisher implements MessagePublisher {
 
   private final KafkaTemplate<String, Object> kafkaTemplate;
-  private final ContextSnapshotFactory contextSnapshotFactory;
 
   @Override
   public void publish(Object messagePayload, String messageKey, String topic) {
@@ -23,19 +20,10 @@ public class KafkaMessagePublisher implements MessagePublisher {
       throw new IllegalArgumentException("Topic must be specified");
     }
 
-    // Use reflection to capture context without compile-time dependency
-    ContextSnapshot contextSnapshot = contextSnapshotFactory.captureAll();
-
     // Asynchronous send with context restoration
     kafkaTemplate.send(topic, messageKey, messagePayload)
-        .whenCompleteAsync((result, throwable) -> {
-          try (var scope = contextSnapshot.setThreadLocals()) {
-            logResult(messagePayload, topic, result, throwable);
-          } catch (Exception e) {
-            log.warn("Failed to restore context, logging without context", e);
-            logResult(messagePayload, topic, result, throwable);
-          }
-        });
+        .whenCompleteAsync((result, throwable) ->
+                logResult(messagePayload, topic, result, throwable));
   }
 
   private void logResult(Object messagePayload, String topic,

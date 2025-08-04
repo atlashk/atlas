@@ -71,7 +71,7 @@ show_help() {
     log_info "  $0 --env local          # Clean all resources in local env"
     log_info ""
     log_warn "⚠️  WARNING: This operation is DESTRUCTIVE and will delete ALL Atlas resources!"
-    log_warn "This includes applications, databases, configuration data, ingress, and host entries."
+    log_warn "This includes applications, databases, configuration data, and ingress."
 }
 
 parse_arguments() {
@@ -194,37 +194,6 @@ cleanup_ingress_controller() {
     fi
 }
 
-# Function to cleanup /etc/hosts entries
-cleanup_hosts_file() {
-    log_info "Cleaning up /etc/hosts entries..."
-    
-    if grep -q "atlas.local" /etc/hosts 2>/dev/null; then
-        log_info "Removing Atlas entries from /etc/hosts..."
-
-        # Atlas local hostnames
-        local atlas_hosts=("api.atlas.local" "grafana.atlas.local" "prometheus.atlas.local" "zipkin.atlas.local" "mail.atlas.local")
-        
-        if sudo -n true 2>/dev/null; then
-            # Remove Atlas entries
-            for host in "${atlas_hosts[@]}"; do
-                sudo sed -i.bak "/$host/d" /etc/hosts 2>/dev/null || true
-            done
-            sudo sed -i.bak "/# Atlas Kubernetes Ingress/d" /etc/hosts 2>/dev/null || true
-            sudo sed -i.bak "/# End Atlas entries/d" /etc/hosts 2>/dev/null || true
-            
-            log_success "/etc/hosts entries cleaned up"
-        else
-            log_warn "Cannot modify /etc/hosts without sudo access"
-            log_info "Please remove these entries from /etc/hosts manually:"
-            for host in "${atlas_hosts[@]}"; do
-                log_info "  Remove lines containing: $host"
-            done
-        fi
-    else
-        log_info "No Atlas entries found in /etc/hosts"
-    fi
-}
-
 # =============================================================================
 # MAIN EXECUTION
 # =============================================================================
@@ -244,11 +213,9 @@ main() {
     log_info "  ✓ All services and applications"
     log_info "  ✓ Namespace and volumes"
     log_info "  ✓ Ingress Controller"
-    log_info "  ✓ /etc/hosts entries"
 
     remove_namespace
     cleanup_ingress_controller
-    cleanup_hosts_file
     
     log_success "All Atlas resources removed successfully!"
     log_success "Atlas platform cleanup completed!"

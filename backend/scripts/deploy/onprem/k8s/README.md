@@ -68,7 +68,7 @@ After setting up Ingress, access services using local hostnames:
 - **Grafana**: http://grafana.atlas.local (admin/admin)
 - **Prometheus**: http://prometheus.atlas.local
 - **Zipkin**: http://zipkin.atlas.local
-- **SMTP4Dev**: http://mail.atlas.local
+- **SMTP4Dev**: http://smtp4dev.atlas.local
 
 ### Option 2: Access Services via Port Forwarding
 
@@ -84,6 +84,9 @@ kubectl port-forward -n atlas-local svc/prometheus 9090:9090
 
 # Zipkin
 kubectl port-forward -n atlas-local svc/zipkin 9411:9411
+
+# Smtp4dev
+kubectl port-forward -n atlas-local svc/smtp4dev 80:80
 ```
 
 ---

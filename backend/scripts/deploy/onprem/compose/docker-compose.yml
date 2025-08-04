@@ -198,6 +198,34 @@ services:
       test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
       interval: 10s
       timeout: 5s
+    networks:
+      - atlas-network
+
+  # Nginx Reverse Proxy
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./config/nginx/conf.d:/etc/nginx/conf.d:ro
+      - nginx-logs:/var/log/nginx
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+      grafana:
+        condition: service_healthy
+      prometheus:
+        condition: service_healthy
+      zipkin:
+        condition: service_healthy
+      smtp4dev:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 10s
+      timeout: 5s
       retries: 5
       start_period: 30s
     networks:
@@ -255,7 +283,7 @@ services:
   # Metrics Collection (Prometheus)
   prometheus:
     container_name: prometheus
-    image: prom/prometheus
+    image: prom/prometheus:main
     ports:
       - "9090:9090"
     command:
@@ -304,7 +332,7 @@ services:
   # Visualization and Dashboards (Grafana)
   grafana:
     container_name: grafana
-    image: grafana/grafana-oss
+    image: grafana/grafana-oss:main
     ports:
       - "3000:3000"
     environment:
@@ -640,6 +668,9 @@ volumes:
   
   # Frontend volumes
   frontend-log:
+  
+  # Nginx volumes
+  nginx-logs:
 
 # =============================================================================
 # NETWORKS

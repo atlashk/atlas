@@ -56,7 +56,7 @@ spec:
                 name: zipkin
                 port:
                   number: 9411
-    - host: mail.atlas.local
+    - host: smtp4dev.atlas.local
       http:
         paths:
           - path: /

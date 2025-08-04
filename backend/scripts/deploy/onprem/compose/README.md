@@ -42,21 +42,42 @@ cd backend/scripts/deploy/onprem/compose
 
 ---
 
-## Access Points
+## Access Methods
 
-After deployment, services will be available at:
-
+### Option 1: Direct Access (No Nginx)
 - **API Gateway**: http://localhost:8080
 - **Grafana**: http://localhost:3000 (admin/admin)
 - **Prometheus**: http://localhost:9090
 - **Zipkin**: http://localhost:9411
 - **SMTP4Dev**: http://localhost:5000
 
----
+### Option 2: Access via Nginx
 
-## Troubleshooting
+This option requires hosts file configuration:
 
-- Ensure Docker has sufficient memory allocated (minimum 8GB)
-- Check that required ports are not in use by other applications
-- Use `docker-compose logs <service-name>` to debug specific service issues
-- Use `./cleanup.sh` to completely reset the environment if needed
+**For Windows:**
+Edit `C:\Windows\System32\drivers\etc\hosts` as Administrator and add:
+```
+127.0.0.1 api.atlas.local
+127.0.0.1 grafana.atlas.local
+127.0.0.1 prometheus.atlas.local
+127.0.0.1 zipkin.atlas.local
+127.0.0.1 smtp4dev.atlas.local
+```
+
+**For macOS/Linux:**
+Edit `/etc/hosts` with sudo and add:
+```
+127.0.0.1 api.atlas.local
+127.0.0.1 grafana.atlas.local
+127.0.0.1 prometheus.atlas.local
+127.0.0.1 zipkin.atlas.local
+127.0.0.1 smtp4dev.atlas.local
+```
+
+Then, we will be able to access services using local hostnames:
+- **API Gateway**: http://api.atlas.local
+- **Grafana**: http://grafana.atlas.local (admin/admin)
+- **Prometheus**: http://prometheus.atlas.local
+- **Zipkin**: http://zipkin.atlas.local
+- **SMTP4Dev**: http://smtp4dev.atlas.local
