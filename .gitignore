@@ -12,7 +12,6 @@ target/
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
-!scripts/build/
 
 ### STS ###
 .apt_generated

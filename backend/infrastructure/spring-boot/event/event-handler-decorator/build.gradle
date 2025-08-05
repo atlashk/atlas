@@ -29,14 +29,14 @@ dependencies {
     api 'org.springframework.boot:spring-boot-starter-aop'
 
     // Infrastructure
-    switch (rootProject.ext.infraStack['config']) {
+    switch (rootProject.ext.appStack['config']) {
         case 'yaml':
             api project(':infrastructure.spring-boot.config.yaml')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['config']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['config']}")
     }
-    switch (rootProject.ext.infraStack['redis']) {
+    switch (rootProject.ext.appStack['redis']) {
         case 'standalone':
             api project(':infrastructure.spring-boot.redis.standalone')
             break
@@ -44,7 +44,7 @@ dependencies {
             api project(':infrastructure.spring-boot.redis.cluster')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['redis']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['redis']}")
     }
     api project(':infrastructure.spring-boot.transaction')
 

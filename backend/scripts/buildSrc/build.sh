@@ -11,7 +11,6 @@ GRADLEW="$PROJECT_ROOT/backend/gradlew"
 source "$PROJECT_ROOT/backend/scripts/log/logger.sh"
 
 # Default values
-INFRA_STACK="onprem-compose"
 SKIP_TESTS="true"
 BUILD_DOCKER="true"
 
@@ -30,7 +29,6 @@ SERVICES=(
 usage() {
     echo "Usage: $0 [OPTIONS]"
     echo "Options:"
-    echo "  --infra-stack=STACK     Infrastructure stack to use (default: onprem-compose)"
     echo "  --skip-tests=BOOL       Skip tests during build (default: true)"
     echo "  --build-docker=BOOL     Build Docker images after Gradle build (default: false)"
     echo "  -h, --help              Show this help message"
@@ -38,15 +36,12 @@ usage() {
     echo "Examples:"
     echo "  $0                                           # Build with defaults"
     echo "  $0 --build-docker=true                      # Build and create Docker images"
-    echo "  $0 --infra-stack=aws-ecs --skip-tests=false # Use AWS ECS stack with tests"
+    echo "  $0 --skip-tests=false                       # Build with tests enabled"
 }
 
 # Parse named parameters
 for arg in "$@"; do
     case $arg in
-        --infra-stack=*)
-            INFRA_STACK="${arg#*=}"
-            ;;
         --skip-tests=*)
             SKIP_TESTS="${arg#*=}"
             ;;
@@ -69,16 +64,16 @@ done
 chmod +x "$GRADLEW"
 
 # Build with Gradle
-log_info "Starting Gradle build with infra stack '$INFRA_STACK'..."
+log_info "Starting Gradle build..."
 if [ "$SKIP_TESTS" = "true" ]; then
-    if (cd "$PROJECT_ROOT/backend" && "$GRADLEW" clean build -PinfraStack="$INFRA_STACK" -x test); then
+    if (cd "$PROJECT_ROOT/backend" && "$GRADLEW" clean build -x test); then
         log_success "Gradle build completed successfully."
     else
         log_error "Gradle build failed."
         exit 1
     fi
 else
-    if (cd "$PROJECT_ROOT/backend" && "$GRADLEW" clean build -PinfraStack="$INFRA_STACK"); then
+    if (cd "$PROJECT_ROOT/backend" && "$GRADLEW" clean build); then
         log_success "Gradle build completed successfully."
     else
         log_error "Gradle build failed."

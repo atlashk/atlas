@@ -34,12 +34,12 @@ dependencies {
     api 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
 
     // Infrastructure
-    switch (rootProject.ext.infraStack['config']) {
+    switch (rootProject.ext.appStack['config']) {
         case 'yaml':
             api project(':infrastructure.spring-boot.config.yaml')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['config']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['config']}")
     }
     api project(':infrastructure.spring-boot.i18n')
 

@@ -33,14 +33,14 @@ dependencies {
 
     // Infrastructure
     api project(':infrastructure.spring-boot.bootstrap')
-    switch (rootProject.ext.infraStack['config']) {
+    switch (rootProject.ext.appStack['config']) {
         case 'yaml':
             api project(':infrastructure.spring-boot.config.yaml')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['config']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['config']}")
     }
-    switch (rootProject.ext.infraStack['discovery-client']) {
+    switch (rootProject.ext.appStack['discovery-client']) {
         case 'none':
             break
         case 'eureka':
@@ -50,17 +50,17 @@ dependencies {
             api project(':infrastructure.spring-boot.discovery-client.kubernetes')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['discovery-client']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['discovery-client']}")
     }
     api project(':infrastructure.spring-boot.observability.actuator')
-    switch (rootProject.ext.infraStack['observability.logging']) {
+    switch (rootProject.ext.appStack['observability.logging']) {
         case 'logback':
             api project(':infrastructure.spring-boot.observability.logging.logback')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['observability.logging']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.logging']}")
     }
-    switch (rootProject.ext.infraStack['observability.metrics']) {
+    switch (rootProject.ext.appStack['observability.metrics']) {
         case 'prometheus':
             api project(':infrastructure.spring-boot.observability.metrics.prometheus')
             break
@@ -68,16 +68,16 @@ dependencies {
             api project(':infrastructure.spring-boot.observability.metrics.cloudwatch')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['observability.metrics']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.metrics']}")
     }
-    switch (rootProject.ext.infraStack['observability.tracing']) {
+    switch (rootProject.ext.appStack['observability.tracing']) {
         case 'zipkin':
             api project(':infrastructure.spring-boot.observability.tracing.zipkin')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['observability.tracing']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.tracing']}")
     }
-    switch (rootProject.ext.infraStack['redis']) {
+    switch (rootProject.ext.appStack['redis']) {
         case 'standalone':
             api project(':infrastructure.spring-boot.redis.standalone')
             break
@@ -85,7 +85,7 @@ dependencies {
             api project(':infrastructure.spring-boot.redis.cluster')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['redis']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['redis']}")
     }
 
     // Lombok

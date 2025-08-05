@@ -29,7 +29,7 @@ dependencies {
     api project(':domain.product')
 
     // Infrastructure
-    switch (rootProject.ext.infraStack['api-server']) {
+    switch (rootProject.ext.appStack['api-server']) {
         case 'rest':
             api project(':infrastructure.spring-boot.api-server.rest.adapter.product')
             break
@@ -37,31 +37,31 @@ dependencies {
             api project(':infrastructure.spring-boot.api-server.grpc.netdevh.adapter.product')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['api-server']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
     }
-    switch (rootProject.ext.infraStack['cache']) {
+    switch (rootProject.ext.appStack['cache']) {
         case 'redis':
             api project(':infrastructure.spring-boot.cache.redis')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['cache']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['cache']}")
     }
     api project(':infrastructure.spring-boot.bootstrap')
-    switch (rootProject.ext.infraStack['config']) {
+    switch (rootProject.ext.appStack['config']) {
         case 'yaml':
             api project(':infrastructure.spring-boot.config.yaml')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['config']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['config']}")
     }
-    switch (rootProject.ext.infraStack['datasource']) {
+    switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
             api project(':infrastructure.spring-boot.datasource.mysql.adapter.product')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['datasource']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
     }
-    switch (rootProject.ext.infraStack['discovery-client']) {
+    switch (rootProject.ext.appStack['discovery-client']) {
         case 'none':
             break
         case 'eureka':
@@ -71,16 +71,16 @@ dependencies {
             api project(':infrastructure.spring-boot.discovery-client.kubernetes')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['discovery-client']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['discovery-client']}")
     }
-    switch (rootProject.ext.infraStack['file.csv']) {
+    switch (rootProject.ext.appStack['file.csv']) {
         case 'opencsv':
             api project(':infrastructure.spring-boot.csv.opencsv.adapter.product')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['file.csv']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['file.csv']}")
     }
-    switch (rootProject.ext.infraStack['file.excel']) {
+    switch (rootProject.ext.appStack['file.excel']) {
         case 'easyexcel':
             api project(':infrastructure.spring-boot.excel.easyexcel.adapter.product')
             break
@@ -88,16 +88,16 @@ dependencies {
             api project(':infrastructure.spring-boot.excel.poi.adapter.product')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['file.excel']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['file.excel']}")
     }
-    switch (rootProject.ext.infraStack['lock']) {
+    switch (rootProject.ext.appStack['lock']) {
         case 'redisson':
             api project(':infrastructure.spring-boot.lock.redisson')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['lock']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['lock']}")
     }
-    switch (rootProject.ext.infraStack['messaging']) {
+    switch (rootProject.ext.appStack['messaging']) {
         case 'kafka':
             api project(':infrastructure.spring-boot.messaging.kafka.adapter.product')
             break
@@ -105,18 +105,18 @@ dependencies {
             api project(':infrastructure.spring-boot.messaging.sns.adapter.product')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['messaging']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['messaging']}")
     }
     api project(':infrastructure.spring-boot.event.event-handler-decorator')
     api project(':infrastructure.spring-boot.observability.actuator')
-    switch (rootProject.ext.infraStack['observability.logging']) {
+    switch (rootProject.ext.appStack['observability.logging']) {
         case 'logback':
             api project(':infrastructure.spring-boot.observability.logging.logback')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['observability.logging']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.logging']}")
     }
-    switch (rootProject.ext.infraStack['observability.metrics']) {
+    switch (rootProject.ext.appStack['observability.metrics']) {
         case 'prometheus':
             api project(':infrastructure.spring-boot.observability.metrics.prometheus')
             break
@@ -124,23 +124,23 @@ dependencies {
             api project(':infrastructure.spring-boot.observability.metrics.cloudwatch')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['observability.metrics']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.metrics']}")
     }
-    switch (rootProject.ext.infraStack['observability.tracing']) {
+    switch (rootProject.ext.appStack['observability.tracing']) {
         case 'zipkin':
             api project(':infrastructure.spring-boot.observability.tracing.zipkin')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['observability.tracing']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.tracing']}")
     }
-    switch (rootProject.ext.infraStack['persistence']) {
+    switch (rootProject.ext.appStack['persistence']) {
         case 'jpa':
             api project(':infrastructure.spring-boot.persistence.jpa.adapter.product')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['persistence']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['persistence']}")
     }
-    switch (rootProject.ext.infraStack['scheduler']) {
+    switch (rootProject.ext.appStack['scheduler']) {
         case 'spring':
             api project(':infrastructure.spring-boot.scheduler.spring.adapter.product')
             break
@@ -148,9 +148,9 @@ dependencies {
             api project(':infrastructure.spring-boot.scheduler.quartz.adapter.product')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['scheduler']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['scheduler']}")
     }
-    switch (rootProject.ext.infraStack['storage']) {
+    switch (rootProject.ext.appStack['storage']) {
         case 'filesystem':
             api project(':infrastructure.spring-boot.storage.filesystem')
             break
@@ -158,7 +158,7 @@ dependencies {
             api project(':infrastructure.spring-boot.storage.s3')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['storage']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['storage']}")
     }
     api project(':infrastructure.spring-boot.use-case.use-case-handler-decorator')
 

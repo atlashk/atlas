@@ -29,19 +29,19 @@ dependencies {
     api 'org.springframework.kafka:spring-kafka'
 
     // Infrastructure
-    switch (rootProject.ext.infraStack['persistence']) {
+    switch (rootProject.ext.appStack['persistence']) {
         case 'jpa':
             api project(':infrastructure.spring-boot.persistence.jpa.adapter.outbox')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['persistence']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['persistence']}")
     }
-    switch (rootProject.ext.infraStack['observability.tracing']) {
+    switch (rootProject.ext.appStack['observability.tracing']) {
         case 'zipkin':
             api project(':infrastructure.spring-boot.observability.tracing.zipkin')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['observability.tracing']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.tracing']}")
     }
 
     // Lombok

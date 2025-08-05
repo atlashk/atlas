@@ -32,12 +32,12 @@ dependencies {
     api 'org.apache.httpcomponents:httpclient:4.5.14'
 
     // Infrastructure
-    switch (rootProject.ext.infraStack['persistence']) {
+    switch (rootProject.ext.appStack['persistence']) {
         case 'jpa':
             api project(':infrastructure.spring-boot.persistence.jpa.adapter.outbox')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['persistence']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['persistence']}")
     }
 
     // Lombok

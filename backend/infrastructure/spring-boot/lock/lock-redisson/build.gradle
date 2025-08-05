@@ -29,7 +29,7 @@ dependencies {
     api project(':framework')
 
     // Infrastructure
-    switch (rootProject.ext.infraStack['redis']) {
+    switch (rootProject.ext.appStack['redis']) {
         case 'standalone':
             api project(':infrastructure.spring-boot.redis.standalone')
             break
@@ -37,7 +37,7 @@ dependencies {
             api project(':infrastructure.spring-boot.redis.cluster')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['redis']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['redis']}")
     }
 
     // Lib

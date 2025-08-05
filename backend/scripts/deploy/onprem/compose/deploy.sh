@@ -116,7 +116,7 @@ check_prerequisites() {
 build_services() {
     log_section "Building Services"
 
-    local build_script="$PROJECT_ROOT/backend/scripts/build/build.sh"
+    local build_script="$PROJECT_ROOT/backend/scripts/buildSrc/build.sh"
     if [ ! -f "$build_script" ]; then
         log_error "Build script not found: $build_script"
         exit 1

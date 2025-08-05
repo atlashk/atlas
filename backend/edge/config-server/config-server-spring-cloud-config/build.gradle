@@ -31,14 +31,14 @@ dependencies {
     // Infrastructure
     api project(':infrastructure.spring-boot.bootstrap')
     api project(':infrastructure.spring-boot.observability.actuator')
-    switch (rootProject.ext.infraStack['observability.logging']) {
+    switch (rootProject.ext.appStack['observability.logging']) {
         case 'logback':
             api project(':infrastructure.spring-boot.observability.logging.logback')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['observability.logging']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.logging']}")
     }
-    switch (rootProject.ext.infraStack['observability.metrics']) {
+    switch (rootProject.ext.appStack['observability.metrics']) {
         case 'none':
             break;
         case 'prometheus':
@@ -48,7 +48,7 @@ dependencies {
             api project(':infrastructure.spring-boot.observability.metrics.cloudwatch')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.infraStack['observability.metrics']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.metrics']}")
     }
 
     // Lombok

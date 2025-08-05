@@ -1,4 +1,24 @@
-apply from: "$rootDir/gradle/infra-stack/infra-stack-loader.gradle"
+// Load app stack configuration from app-stack.cfg
+def loadAppStack() {
+	def configFile = new File(rootDir, "app-stack.cfg")
+	if (!configFile.exists()) {
+		throw new GradleException("Config file not found: ${configFile.absolutePath}")
+	}
+
+	def config = [:]
+	configFile.eachLine('UTF-8') { line ->
+		line = line.trim()
+		if (line && !line.startsWith('#')) {
+			def parts = line.split('=', 2).collect { it.trim() }
+			if (parts.size() == 2 && parts[1]) {
+				config[parts[0]] = parts[1]
+			} else {
+				throw new GradleException("Invalid config line in ${configFile.name}: '${line}'")
+			}
+		}
+	}
+	return config
+}
 
 ext {
 	// Plugins
@@ -11,5 +31,5 @@ ext {
 	set('lombokVersion', '1.18.38')
 	set('junitPlatformVersion', '1.11.3')
 
-	infraStack = loadInfraStack()
+	appStack = loadAppStack()
 }
