@@ -2,11 +2,11 @@ apply from: "$rootDir/gradle/infra-stack/infra-stack-loader.gradle"
 
 ext {
 	// Plugins
-	set('springBootPluginVersion', '3.4.0')
+	set('springBootPluginVersion', '3.5.4')
 	set('springDependencyManagementPluginVersion', '1.1.7')
 
-	set('springFrameworkVersion', '6.2.0')
-	set('springCloudVersion', '2024.0.0')
+	set('springFrameworkVersion', '6.2.9')
+	set('springCloudVersion', '2025.0.0')
 	set('awsSdkVersion', '2.29.33')
 	set('lombokVersion', '1.18.38')
 	set('junitPlatformVersion', '1.11.3')

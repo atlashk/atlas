@@ -1,28 +1,16 @@
+# Base configurations
 management:
   endpoints:
     web:
       exposure:
-        # Spring Cloud Gateway: gateway,refresh,routes
-        # curl -X GET http://<gateway-host>:<port>/actuator/gateway/routes
-        # curl -X POST http://<gateway-host>:<port>/actuator/gateway/refresh
-        include: health,info,prometheus,gateway,refresh,routes
+        include: health,info,prometheus
   endpoint:
     health:
       probes:
         enabled: true
       show-details: always
-    gateway:
-      enabled: true
   health:
     livenessstate:
       enabled: true
     readinessstate:
-      enabled: true
-    mail:
-      enabled: false
-    redis:
-      enabled: true
-    circuitbreakers:
-      enabled: true
-    ratelimiters:
       enabled: true

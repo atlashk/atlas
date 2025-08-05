@@ -20,7 +20,7 @@ public class KafkaMessagePublisher implements MessagePublisher {
       throw new IllegalArgumentException("Topic must be specified");
     }
 
-    // Asynchronous send with context restoration
+    // Asynchronous send with context propagation
     kafkaTemplate.send(topic, messageKey, messagePayload)
         .whenCompleteAsync((result, throwable) ->
                 logResult(messagePayload, topic, result, throwable));

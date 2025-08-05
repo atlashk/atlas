@@ -5,11 +5,13 @@
     <springProperty scope="context" name="SERVICE_NAME" source="spring.application.name"/>
     <property name="LOG_DIR" value="/var/log/${SERVICE_NAME}"/>
 
-    <!-- Console Appender using default pattern -->
+    <!-- Console Appender using encoder instead of layout -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <layout class="org.atlas.infrastructure.observability.logging.logback.MaskingPatternLayout">
-            <Pattern>${CONSOLE_LOG_PATTERN}</Pattern>
-        </layout>
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="org.atlas.infrastructure.observability.logging.logback.MaskingPatternLayout">
+                <Pattern>${CONSOLE_LOG_PATTERN}</Pattern>
+            </layout>
+        </encoder>
     </appender>
 
     <!-- File Appender with Rolling Policy -->
@@ -81,12 +83,6 @@
 
     <!-- Spring Security -->
     <logger name="org.springframework.security" level="DEBUG" additivity="false">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </logger>
-
-    <!-- Spring Web -->
-    <logger name="org.springframework.web" level="DEBUG" additivity="false">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
     </logger>
