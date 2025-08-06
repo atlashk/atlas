@@ -1,6 +1,21 @@
 #!/bin/bash
 
-# Atlas Application Stack Configuration Setup
+# Fix for Windows line endings
+# If we're on a Unix-like system and detect CR characters, convert CRLF to LF
+if [ "$(uname)" != "Windows_NT" ] && grep -q $'\r' "$0"; then
+    echo "Converting Windows line endings to Unix format..."
+    # Create a temporary file with Unix line endings
+    TMP_FILE=$(mktemp)
+    tr -d '\r' < "$0" > "$TMP_FILE"
+    # Execute the converted script
+    exec bash "$TMP_FILE"
+fi
+
+# Check if running on Windows (Git Bash, Cygwin, WSL)
+IS_WINDOWS=false
+if [[ "$(uname -s)" == *MINGW* ]] || [[ "$(uname -s)" == *CYGWIN* ]] || [[ "$(uname -s)" == *MSYS* ]]; then
+    IS_WINDOWS=true
+fi
 
 # Colors
 RED='\033[0;31m'
@@ -13,8 +28,134 @@ WHITE='\033[1;37m'
 NC='\033[0m' # No Color
 BOLD='\033[1m'
 
-# Clear screen
-clear
+# Function to select option using arrow keys or numeric input
+select_option() {
+    local options=("$@")
+    local max_index=${#options[@]}
+    local selected=1
+    
+    # Use different selection methods based on environment
+    if [ "$IS_WINDOWS" = true ]; then
+        # Windows environment - use simple numeric selection
+        # Print all options with numbers
+        for ((i=0; i<${#options[@]}; i++)); do
+            echo -e "    ${GREEN}$((i+1))${NC}) ${options[$i]}"
+        done
+        
+        # Prompt for selection
+        echo -e "${CYAN}>${NC} Enter your choice [1-$max_index] or use arrow keys (↑/↓) and Enter: "
+        read user_choice
+        
+        # Default to 1 if empty
+        if [ -z "$user_choice" ]; then
+            user_choice=1
+        fi
+        
+        # Validate input
+        if [[ $user_choice =~ ^[0-9]+$ ]] && [ $user_choice -ge 1 ] && [ $user_choice -le $max_index ]; then
+            selected=$user_choice
+        else
+            echo -e "${YELLOW}Invalid selection, using default.${NC}"
+        fi
+    else
+        # Unix/Linux environment - use arrow keys
+        local key
+        
+        # Try to hide cursor, but don't fail if tput is not available
+        tput civis 2>/dev/null || true
+        
+        # Display options
+        for ((i=0; i<${#options[@]}; i++)); do
+            if [ $((i+1)) -eq $selected ]; then
+                echo -e "  ${CYAN}>${NC} ${GREEN}$((i+1))${NC}) ${options[$i]}"
+            else
+                echo -e "    ${GREEN}$((i+1))${NC}) ${options[$i]}"
+            fi
+        done
+        
+        # Move cursor up to the first option
+        for ((i=0; i<${#options[@]}; i++)); do
+            tput cuu1 2>/dev/null || echo -en "\033[1A"
+        done
+        
+        # Handle key presses
+        while true; do
+            # Read a single key press
+            read -s -n 1 key
+            
+            # Handle arrow keys (they send escape sequences)
+            if [[ $key = "\e" ]]; then
+                read -s -n 2 key
+                
+                # Handle up/down arrow keys
+                if [[ $key = "[A" ]]; then  # Up arrow
+                    if [ $selected -gt 1 ]; then
+                        # Clear current selection
+                        tput cuf 2 2>/dev/null || echo -en "\033[2C"
+                        echo -n "  "
+                        tput cub 4 2>/dev/null || echo -en "\033[4D"
+                        
+                        # Move up and update selection
+                        selected=$((selected-1))
+                        tput cuu1 2>/dev/null || echo -en "\033[1A"
+                        echo -n "${CYAN}>${NC}"
+                        tput cub 2 2>/dev/null || echo -en "\033[2D"
+                    fi
+                elif [[ $key = "[B" ]]; then  # Down arrow
+                    if [ $selected -lt $max_index ]; then
+                        # Clear current selection
+                        tput cuf 2 2>/dev/null || echo -en "\033[2C"
+                        echo -n "  "
+                        tput cub 4 2>/dev/null || echo -en "\033[4D"
+                        
+                        # Move down and update selection
+                        selected=$((selected+1))
+                        tput cud1 2>/dev/null || echo -en "\033[1B"
+                        echo -n "${CYAN}>${NC}"
+                        tput cub 2 2>/dev/null || echo -en "\033[2D"
+                    fi
+                fi
+            elif [[ $key = "" ]]; then  # Enter key
+                break
+            # Handle numeric input
+            elif [[ $key =~ ^[0-9]$ ]]; then
+                # Read more digits if available
+                local num_input=$key
+                read -t 1 -s -n 9 more_digits
+                num_input="$num_input$more_digits"
+                
+                # Validate and use numeric input
+                if [[ $num_input =~ ^[0-9]+$ ]] && [ $num_input -ge 1 ] && [ $num_input -le $max_index ]; then
+                    selected=$num_input
+                    break
+                fi
+            fi
+        done
+        
+        # Show cursor again
+        tput cnorm 2>/dev/null || true
+        
+        # Clear the options display
+        for ((i=0; i<${#options[@]}; i++)); do
+            tput cub 100 2>/dev/null || echo -en "\033[100D"  # Move cursor to beginning of line
+            tput el 2>/dev/null || echo -en "\033[K"       # Clear to end of line
+            if [ $i -lt $((${#options[@]}-1)) ]; then
+                tput cud1 2>/dev/null || echo -en "\033[1B"  # Move cursor down
+            fi
+        done
+        
+        # Move cursor back to beginning
+        for ((i=1; i<${#options[@]}; i++)); do
+            tput cuu1 2>/dev/null || echo -en "\033[1A"
+        done
+        
+        # Display the selected option
+        echo -e "${GREEN}Selected: ${options[$((selected-1))]}${NC}"
+    fi
+    
+    # Return the selected option
+    echo $selected
+}
 
 # Header
 echo -e "${CYAN}${BOLD}Atlas Stack Configuration${NC}"
@@ -24,17 +165,7 @@ echo
 # PLATFORM CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Platform Configuration${NC}"
-echo -e "  ${GREEN}1)${NC} On-Premise (Docker Compose) ${YELLOW}(default)${NC}"
-echo -e "  ${GREEN}2)${NC} On-Premise (Kubernetes)"
-echo -e "  ${GREEN}3)${NC} AWS (ECS)"
-echo -e "  ${GREEN}4)${NC} AWS (Lambda)"
-read -p "$(echo -e "${CYAN}>${NC} Enter your choice [1-4]: ")" platform_choice
-
-# Handle empty input as default
-if [ -z "$platform_choice" ]; then
-    platform_choice=1
-fi
-
+platform_choice=$(select_option "On-Premise (Docker Compose) ${YELLOW}(default)${NC}" "On-Premise (Kubernetes)" "AWS (ECS)" "AWS (Lambda)")
 case $platform_choice in
     2)
         platform="onprem-k8s"
@@ -49,7 +180,6 @@ case $platform_choice in
         platform="onprem-compose"
         ;;
 esac
-
 echo -e "${GREEN}✅ Selected Platform: ${platform}${NC}"
 echo
 
@@ -57,15 +187,7 @@ echo
 # API SERVER CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}API Server Configuration${NC}"
-echo -e "  ${GREEN}1)${NC} REST ${YELLOW}(default)${NC}"
-echo -e "  ${GREEN}2)${NC} gRPC"
-read -p "$(echo -e "${CYAN}>${NC} Enter your choice [1-2]: ")" api_server_choice
-
-# Handle empty input as default
-if [ -z "$api_server_choice" ]; then
-    api_server_choice=1
-fi
-
+api_server_choice=$(select_option "REST ${YELLOW}(default)${NC}" "gRPC")
 case $api_server_choice in
     2)
         api_server="grpc"
@@ -74,7 +196,6 @@ case $api_server_choice in
         api_server="rest"
         ;;
 esac
-
 echo -e "${GREEN}✅ Selected API Server: ${api_server}${NC}"
 echo
 
@@ -82,23 +203,11 @@ echo
 # API CLIENT CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}API Client Configuration${NC}"
-
 if [ "$api_server" = "grpc" ]; then
-    echo -e "  ${GREEN}1)${NC} gRPC Netty ${YELLOW}(default)${NC}"
-    read -p "$(echo -e "${CYAN}>${NC} Enter your choice [1] (default: 1): ")" api_client_choice
-    
+    api_client_choice=$(select_option "gRPC netdevh ${YELLOW}(default)${NC}")
     api_client="grpc-netdevh"
 else
-    echo -e "  ${GREEN}1)${NC} Apache HttpClient ${YELLOW}(default)${NC}"
-    echo -e "  ${GREEN}2)${NC} Feign"
-    echo -e "  ${GREEN}3)${NC} RestClient"
-    echo -e "  ${GREEN}4)${NC} RestTemplate"
-    read -p "$(echo -e "${CYAN}>${NC} Enter your choice [1-4]: ")" api_client_choice
-    
-    # Handle empty input as default
-    if [ -z "$api_client_choice" ]; then
-        api_client_choice=1
-    fi
+    api_client_choice=$(select_option "Apache HttpClient ${YELLOW}(default)${NC}" "Feign" "RestClient" "RestTemplate")
     
     case $api_client_choice in
         2)
@@ -115,7 +224,6 @@ else
             ;;
     esac
 fi
-
 echo -e "${GREEN}✅ Selected API Client: ${api_client}${NC}"
 echo
 
@@ -123,14 +231,7 @@ echo
 # CACHE CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Cache Configuration${NC}"
-echo -e "  ${GREEN}1)${NC} Redis ${YELLOW}(default)${NC}"
-echo -e "  ${GREEN}2)${NC} Simple (In-Memory)"
-read -p "$(echo -e "${CYAN}>${NC} Enter your choice [1-2]: ")" cache_choice
-
-if [ -z "$cache_choice" ]; then
-    cache_choice=1
-fi
-
+cache_choice=$(select_option "Redis ${YELLOW}(default)${NC}" "Simple")
 case $cache_choice in
     2)
         cache="simple"
@@ -139,7 +240,6 @@ case $cache_choice in
         cache="redis"
         ;;
 esac
-
 echo -e "${GREEN}✅ Selected Cache: ${cache}${NC}"
 echo
 
@@ -147,14 +247,7 @@ echo
 # DATASOURCE CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Datasource Configuration${NC}"
-echo -e "  ${GREEN}1)${NC} MySQL ${YELLOW}(default)${NC}"
-echo -e "  ${GREEN}2)${NC} PostgreSQL"
-read -p "$(echo -e "${CYAN}>${NC} Enter your choice [1-2]: ")" datasource_choice
-
-if [ -z "$datasource_choice" ]; then
-    datasource_choice=1
-fi
-
+datasource_choice=$(select_option "MySQL ${YELLOW}(default)${NC}" "PostgreSQL")
 case $datasource_choice in
     2)
         datasource="postgresql"
@@ -163,7 +256,6 @@ case $datasource_choice in
         datasource="mysql"
         ;;
 esac
-
 echo -e "${GREEN}✅ Selected Datasource: ${datasource}${NC}"
 echo
 
@@ -171,23 +263,26 @@ echo
 # DISCOVERY CLIENT CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Discovery Client Configuration${NC}"
-echo -e "  ${GREEN}1)${NC} Eureka ${YELLOW}(default)${NC}"
-echo -e "  ${GREEN}2)${NC} Kubernetes"
-read -p "$(echo -e "${CYAN}>${NC} Enter your choice [1-2]: ")" discovery_choice
-
-if [ -z "$discovery_choice" ]; then
-    discovery_choice=1
+if [[ "$platform" == "aws-"* ]]; then
+    discovery_client="none"
+    echo -e "${YELLOW}⚠️  Discovery Client is not applicable for AWS platforms - set to none${NC}"
+elif [[ "$platform" == "onprem-k8s" ]]; then
+    discovery_client="kubernetes"
+    echo -e "${YELLOW}Using Kubernetes as Discovery Client for Kubernetes platform${NC}"
+elif [[ "$platform" == "onprem-compose" ]]; then
+    discovery_client="eureka"
+    echo -e "${YELLOW}Using Eureka as Discovery Client for Docker Compose platform${NC}"
+else
+    discovery_client_choice=$(select_option "Eureka ${YELLOW}(default)${NC}" "Kubernetes")
+    case $discovery_client_choice in
+        2)
+            discovery_client="kubernetes"
+            ;;
+        *)
+            discovery_client="eureka"
+            ;;
+    esac
 fi
-
-case $discovery_choice in
-    2)
-        discovery_client="kubernetes"
-        ;;
-    *)
-        discovery_client="eureka"
-        ;;
-esac
-
 echo -e "${GREEN}✅ Selected Discovery Client: ${discovery_client}${NC}"
 echo
 
@@ -195,9 +290,7 @@ echo
 # FILE CSV CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}File CSV Configuration${NC}"
-echo -e "  ${GREEN}1)${NC} OpenCSV ${YELLOW}(default)${NC}"
-read -p "$(echo -e "${CYAN}>${NC} Enter your choice [1]: ")" csv_choice
-
+csv_choice=$(select_option "OpenCSV ${YELLOW}(default)${NC}")
 file_csv="opencsv"
 echo -e "${GREEN}✅ Selected CSV: ${file_csv}${NC}"
 echo
@@ -206,14 +299,7 @@ echo
 # FILE EXCEL CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}File Excel Configuration${NC}"
-echo -e "  ${GREEN}1)${NC} POI ${YELLOW}(default)${NC}"
-echo -e "  ${GREEN}2)${NC} EasyExcel"
-read -p "$(echo -e "${CYAN}>${NC} Enter your choice [1-2]: ")" excel_choice
-
-if [ -z "$excel_choice" ]; then
-    excel_choice=1
-fi
-
+excel_choice=$(select_option "POI ${YELLOW}(default)${NC}" "EasyExcel")
 case $excel_choice in
     2)
         file_excel="easyexcel"
@@ -222,7 +308,6 @@ case $excel_choice in
         file_excel="poi"
         ;;
 esac
-
 echo -e "${GREEN}✅ Selected Excel: ${file_excel}${NC}"
 echo
 
@@ -230,9 +315,7 @@ echo
 # DISTRIBUTED LOCK CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Distributed Lock Configuration${NC}"
-echo -e "  ${GREEN}1)${NC} Redisson ${YELLOW}(default)${NC}"
-read -p "$(echo -e "${CYAN}>${NC} Enter your choice [1]: ")" lock_choice
-
+lock_choice=$(select_option "Redisson ${YELLOW}(default)${NC}")
 lock="redisson"
 echo -e "${GREEN}✅ Selected Lock: ${lock}${NC}"
 echo
@@ -241,23 +324,16 @@ echo
 # MESSAGING CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Messaging Configuration${NC}"
-echo -e "  ${GREEN}1)${NC} Kafka ${YELLOW}(default)${NC}"
-echo -e "  ${GREEN}2)${NC} SNS"
-read -p "$(echo -e "${CYAN}>${NC} Enter your choice [1-2]: ")" messaging_choice
-
-if [ -z "$messaging_choice" ]; then
-    messaging_choice=1
+# Use SNS for AWS platforms, Kafka for onprem platforms
+if [[ "$platform" == aws-* ]]; then
+    # For AWS platforms, only show SNS
+    echo -e "${CYAN}> Using SNS for AWS platform${NC}"
+    messaging="sns"
+else
+    # For onprem platforms, only show Kafka
+    echo -e "${CYAN}> Using Kafka for on-premise platform${NC}"
+    messaging="kafka"
 fi
-
-case $messaging_choice in
-    2)
-        messaging="sns"
-        ;;
-    *)
-        messaging="kafka"
-        ;;
-esac
-
 echo -e "${GREEN}✅ Selected Messaging: ${messaging}${NC}"
 echo
 
@@ -265,27 +341,33 @@ echo
 # EMAIL NOTIFICATION CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Email Notification Configuration${NC}"
-echo -e "  ${GREEN}1)${NC} Spring ${YELLOW}(default)${NC}"
-echo -e "  ${GREEN}2)${NC} SendGrid"
-echo -e "  ${GREEN}3)${NC} SES"
-read -p "$(echo -e "${CYAN}>${NC} Enter your choice [1-3]: ")" email_choice
+if [[ "$platform" == aws-* ]]; then
+    # For AWS platforms, show SendGrid and SES options
+    echo -e "${CYAN}> Use arrow keys or enter number to select:${NC}"
+    email_choice=$(select_option "SendGrid" "SES ${YELLOW}(recommended for AWS)${NC}")
 
-if [ -z "$email_choice" ]; then
-    email_choice=1
+    case $email_choice in
+        2)
+            notification_email="ses"
+            ;;
+        *)
+            notification_email="sendgrid"
+            ;;
+    esac
+else
+    # For onprem platforms, show Spring and SendGrid options
+    echo -e "${CYAN}> Use arrow keys or enter number to select:${NC}"
+    email_choice=$(select_option "Spring ${YELLOW}(default)${NC}" "SendGrid")
+
+    case $email_choice in
+        2)
+            notification_email="sendgrid"
+            ;;
+        *)
+            notification_email="spring"
+            ;;
+    esac
 fi
-
-case $email_choice in
-    2)
-        notification_email="sendgrid"
-        ;;
-    3)
-        notification_email="ses"
-        ;;
-    *)
-        notification_email="spring"
-        ;;
-esac
-
 echo -e "${GREEN}✅ Selected Email: ${notification_email}${NC}"
 echo
 
@@ -293,9 +375,8 @@ echo
 # OBSERVABILITY LOGGING CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Observability Logging Configuration${NC}"
-echo -e "  ${GREEN}1)${NC} Logback ${YELLOW}(default)${NC}"
-read -p "$(echo -e "${CYAN}>${NC} Enter your choice [1]: ")" logging_choice
-
+echo -e "${CYAN}> Use arrow keys or enter number to select:${NC}"
+logging_choice=$(select_option "Logback ${YELLOW}(default)${NC}")
 logging="logback"
 echo -e "${GREEN}✅ Selected Logging: ${logging}${NC}"
 echo
@@ -304,23 +385,15 @@ echo
 # OBSERVABILITY METRICS CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Observability Metrics Configuration${NC}"
-echo -e "  ${GREEN}1)${NC} Prometheus ${YELLOW}(default)${NC}"
-echo -e "  ${GREEN}2)${NC} CloudWatch"
-read -p "$(echo -e "${CYAN}>${NC} Enter your choice [1-2]: ")" metrics_choice
-
-if [ -z "$metrics_choice" ]; then
-    metrics_choice=1
+if [[ "$platform" == aws-* ]]; then
+    # For AWS platforms, only show CloudWatch
+    echo -e "${CYAN}> Using CloudWatch for AWS platform${NC}"
+    metrics="cloudwatch"
+else
+    # For onprem platforms, only show Prometheus
+    echo -e "${CYAN}> Using Prometheus for on-premise platform${NC}"
+    metrics="prometheus"
 fi
-
-case $metrics_choice in
-    2)
-        metrics="cloudwatch"
-        ;;
-    *)
-        metrics="prometheus"
-        ;;
-esac
-
 echo -e "${GREEN}✅ Selected Metrics: ${metrics}${NC}"
 echo
 
@@ -328,8 +401,8 @@ echo
 # OBSERVABILITY TRACING CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Observability Tracing Configuration${NC}"
-echo -e "  ${GREEN}1)${NC} Zipkin ${YELLOW}(default)${NC}"
-read -p "$(echo -e "${CYAN}>${NC} Enter your choice [1]: ")" tracing_choice
+echo -e "${CYAN}> Use arrow keys or enter number to select:${NC}"
+tracing_choice=$(select_option "Zipkin ${YELLOW}(default)${NC}")
 
 tracing="zipkin"
 echo -e "${GREEN}✅ Selected Tracing: ${tracing}${NC}"
@@ -338,43 +411,26 @@ echo
 # =============================================================================
 # REDIS CONFIGURATION (conditional)
 # =============================================================================
-if [ "$cache" = "redis" ]; then
-    echo -e "${BLUE}${BOLD}Redis Configuration${NC}"
-    echo -e "  ${GREEN}1)${NC} Standalone ${YELLOW}(default)${NC}"
-    echo -e "  ${GREEN}2)${NC} Cluster"
-    read -p "$(echo -e "${CYAN}>${NC} Enter your choice [1-2]: ")" redis_choice
-    
-    if [ -z "$redis_choice" ]; then
-        redis_choice=1
-    fi
-    
-    case $redis_choice in
-        2)
-            redis="cluster"
-            ;;
-        *)
-            redis="standalone"
-            ;;
-    esac
-    
-    echo -e "${GREEN}✅ Selected Redis: ${redis}${NC}"
-    echo
-else
-    redis="standalone"
-fi
+echo -e "${BLUE}${BOLD}Redis Configuration${NC}"
+echo -e "${CYAN}> Use arrow keys or enter number to select:${NC}"
+redis_choice=$(select_option "Standalone ${YELLOW}(default)${NC}" "Cluster")
+case $redis_choice in
+    2)
+        redis="cluster"
+        ;;
+    *)
+        redis="standalone"
+        ;;
+esac
+echo -e "${GREEN}✅ Selected Redis: ${redis}${NC}"
+echo
 
 # =============================================================================
 # SCHEDULER CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Scheduler Configuration${NC}"
-echo -e "  ${GREEN}1)${NC} Quartz ${YELLOW}(default)${NC}"
-echo -e "  ${GREEN}2)${NC} Spring"
-read -p "$(echo -e "${CYAN}>${NC} Enter your choice [1-2]: ")" scheduler_choice
-
-if [ -z "$scheduler_choice" ]; then
-    scheduler_choice=1
-fi
-
+echo -e "${CYAN}> Use arrow keys or enter number to select:${NC}"
+scheduler_choice=$(select_option "Quartz ${YELLOW}(default)${NC}" "Spring")
 case $scheduler_choice in
     2)
         scheduler="spring"
@@ -383,7 +439,6 @@ case $scheduler_choice in
         scheduler="quartz"
         ;;
 esac
-
 echo -e "${GREEN}✅ Selected Scheduler: ${scheduler}${NC}"
 echo
 
@@ -391,23 +446,23 @@ echo
 # STORAGE CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Storage Configuration${NC}"
-echo -e "  ${GREEN}1)${NC} Filesystem ${YELLOW}(default)${NC}"
-echo -e "  ${GREEN}2)${NC} S3"
-read -p "$(echo -e "${CYAN}>${NC} Enter your choice [1-2]: ")" storage_choice
-
-if [ -z "$storage_choice" ]; then
-    storage_choice=1
+if [[ "$platform" == aws-* ]]; then
+    # For AWS platforms, only show S3
+    echo -e "${CYAN}> Using S3 for AWS platform${NC}"
+    storage="s3"
+else
+    # For onprem platforms, show Filesystem and MinIO options
+    echo -e "${CYAN}> Use arrow keys or enter number to select:${NC}"
+    storage_choice=$(select_option "Filesystem ${YELLOW}(default)${NC}" "MinIO")
+    case $storage_choice in
+        2)
+            storage="minio"
+            ;;
+        *)
+            storage="filesystem"
+            ;;
+    esac
 fi
-
-case $storage_choice in
-    2)
-        storage="s3"
-        ;;
-    *)
-        storage="filesystem"
-        ;;
-esac
-
 echo -e "${GREEN}✅ Selected Storage: ${storage}${NC}"
 echo
 
@@ -415,14 +470,8 @@ echo
 # TEMPLATE ENGINE CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Template Engine Configuration${NC}"
-echo -e "  ${GREEN}1)${NC} Freemarker ${YELLOW}(default)${NC}"
-echo -e "  ${GREEN}2)${NC} Thymeleaf"
-read -p "$(echo -e "${CYAN}>${NC} Enter your choice [1-2]: ")" template_choice
-
-if [ -z "$template_choice" ]; then
-    template_choice=1
-fi
-
+echo -e "${CYAN}> Use arrow keys or enter number to select:${NC}"
+template_choice=$(select_option "Freemarker ${YELLOW}(default)${NC}" "Thymeleaf")
 case $template_choice in
     2)
         template="thymeleaf"
@@ -431,7 +480,6 @@ case $template_choice in
         template="freemarker"
         ;;
 esac
-
 echo -e "${GREEN}✅ Selected Template: ${template}${NC}"
 echo
 
