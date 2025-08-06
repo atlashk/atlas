@@ -1,16 +1,5 @@
 #!/bin/bash
 
-# Fix for Windows line endings
-# If we're on a Unix-like system and detect CR characters, convert CRLF to LF
-if [ "$(uname)" != "Windows_NT" ] && grep -q $'\r' "$0"; then
-    echo "Converting Windows line endings to Unix format..."
-    # Create a temporary file with Unix line endings
-    TMP_FILE=$(mktemp)
-    tr -d '\r' < "$0" > "$TMP_FILE"
-    # Execute the converted script
-    exec bash "$TMP_FILE"
-fi
-
 # Check if running on Windows (Git Bash, Cygwin, WSL)
 IS_WINDOWS=false
 if [[ "$(uname -s)" == *MINGW* ]] || [[ "$(uname -s)" == *CYGWIN* ]] || [[ "$(uname -s)" == *MSYS* ]]; then
@@ -34,124 +23,99 @@ select_option() {
     local max_index=${#options[@]}
     local selected=1
     
-    # Use different selection methods based on environment
-    if [ "$IS_WINDOWS" = true ]; then
-        # Windows environment - use simple numeric selection
-        # Print all options with numbers
-        for ((i=0; i<${#options[@]}; i++)); do
-            echo -e "    ${GREEN}$((i+1))${NC}) ${options[$i]}"
-        done
-        
-        # Prompt for selection
-        echo -e "${CYAN}>${NC} Enter your choice [1-$max_index] or use arrow keys (↑/↓) and Enter: "
-        read user_choice
-        
-        # Default to 1 if empty
-        if [ -z "$user_choice" ]; then
-            user_choice=1
-        fi
-        
-        # Validate input
-        if [[ $user_choice =~ ^[0-9]+$ ]] && [ $user_choice -ge 1 ] && [ $user_choice -le $max_index ]; then
-            selected=$user_choice
+    # Unix/Linux environment - use arrow keys
+    local key
+
+    # Try to hide cursor, but don't fail if tput is not available
+    tput civis 2>/dev/null || true
+    
+    # Display options
+    for ((i=0; i<${#options[@]}; i++)); do
+        if [ $((i+1)) -eq $selected ]; then
+            echo -e "  ${CYAN}>${NC} ${GREEN}$((i+1))${NC}) ${options[$i]}"
         else
-            echo -e "${YELLOW}Invalid selection, using default.${NC}"
+            echo -e "    ${GREEN}$((i+1))${NC}) ${options[$i]}"
         fi
-    else
-        # Unix/Linux environment - use arrow keys
-        local key
+    done
+    
+    # Move cursor up to the first option
+    for ((i=0; i<${#options[@]}; i++)); do
+        tput cuu1 2>/dev/null || echo -en "\033[1A"
+    done
+    
+    # Handle key presses
+    while true; do
+        # Read a single key press
+        read -s -n 1 key
         
-        # Try to hide cursor, but don't fail if tput is not available
-        tput civis 2>/dev/null || true
-        
-        # Display options
-        for ((i=0; i<${#options[@]}; i++)); do
-            if [ $((i+1)) -eq $selected ]; then
-                echo -e "  ${CYAN}>${NC} ${GREEN}$((i+1))${NC}) ${options[$i]}"
-            else
-                echo -e "    ${GREEN}$((i+1))${NC}) ${options[$i]}"
-            fi
-        done
-        
-        # Move cursor up to the first option
-        for ((i=0; i<${#options[@]}; i++)); do
-            tput cuu1 2>/dev/null || echo -en "\033[1A"
-        done
-        
-        # Handle key presses
-        while true; do
-            # Read a single key press
-            read -s -n 1 key
+        # Handle arrow keys (they send escape sequences)
+        if [[ $key = "\e" ]]; then
+            read -s -n 2 key
             
-            # Handle arrow keys (they send escape sequences)
-            if [[ $key = "\e" ]]; then
-                read -s -n 2 key
-                
-                # Handle up/down arrow keys
-                if [[ $key = "[A" ]]; then  # Up arrow
-                    if [ $selected -gt 1 ]; then
-                        # Clear current selection
-                        tput cuf 2 2>/dev/null || echo -en "\033[2C"
-                        echo -n "  "
-                        tput cub 4 2>/dev/null || echo -en "\033[4D"
-                        
-                        # Move up and update selection
-                        selected=$((selected-1))
-                        tput cuu1 2>/dev/null || echo -en "\033[1A"
-                        echo -n "${CYAN}>${NC}"
-                        tput cub 2 2>/dev/null || echo -en "\033[2D"
-                    fi
-                elif [[ $key = "[B" ]]; then  # Down arrow
-                    if [ $selected -lt $max_index ]; then
-                        # Clear current selection
-                        tput cuf 2 2>/dev/null || echo -en "\033[2C"
-                        echo -n "  "
-                        tput cub 4 2>/dev/null || echo -en "\033[4D"
-                        
-                        # Move down and update selection
-                        selected=$((selected+1))
-                        tput cud1 2>/dev/null || echo -en "\033[1B"
-                        echo -n "${CYAN}>${NC}"
-                        tput cub 2 2>/dev/null || echo -en "\033[2D"
-                    fi
+            # Handle up/down arrow keys
+            if [[ $key = "[A" ]]; then  # Up arrow
+                if [ $selected -gt 1 ]; then
+                    # Clear current selection
+                    tput cuf 2 2>/dev/null || echo -en "\033[2C"
+                    echo -n "  "
+                    tput cub 4 2>/dev/null || echo -en "\033[4D"
+                    
+                    # Move up and update selection
+                    selected=$((selected-1))
+                    tput cuu1 2>/dev/null || echo -en "\033[1A"
+                    echo -n "${CYAN}>${NC}"
+                    tput cub 2 2>/dev/null || echo -en "\033[2D"
                 fi
-            elif [[ $key = "" ]]; then  # Enter key
+            elif [[ $key = "[B" ]]; then  # Down arrow
+                if [ $selected -lt $max_index ]; then
+                    # Clear current selection
+                    tput cuf 2 2>/dev/null || echo -en "\033[2C"
+                    echo -n "  "
+                    tput cub 4 2>/dev/null || echo -en "\033[4D"
+                    
+                    # Move down and update selection
+                    selected=$((selected+1))
+                    tput cud1 2>/dev/null || echo -en "\033[1B"
+                    echo -n "${CYAN}>${NC}"
+                    tput cub 2 2>/dev/null || echo -en "\033[2D"
+                fi
+            fi
+        elif [[ $key = "" ]]; then  # Enter key
+            break
+        # Handle numeric input
+        elif [[ $key =~ ^[0-9]$ ]]; then
+            # Read more digits if available
+            local num_input=$key
+            read -t 1 -s -n 9 more_digits
+            num_input="$num_input$more_digits"
+            
+            # Validate and use numeric input
+            if [[ $num_input =~ ^[0-9]+$ ]] && [ $num_input -ge 1 ] && [ $num_input -le $max_index ]; then
+                selected=$num_input
                 break
-            # Handle numeric input
-            elif [[ $key =~ ^[0-9]$ ]]; then
-                # Read more digits if available
-                local num_input=$key
-                read -t 1 -s -n 9 more_digits
-                num_input="$num_input$more_digits"
-                
-                # Validate and use numeric input
-                if [[ $num_input =~ ^[0-9]+$ ]] && [ $num_input -ge 1 ] && [ $num_input -le $max_index ]; then
-                    selected=$num_input
-                    break
-                fi
             fi
-        done
-        
-        # Show cursor again
-        tput cnorm 2>/dev/null || true
-        
-        # Clear the options display
-        for ((i=0; i<${#options[@]}; i++)); do
-            tput cub 100 2>/dev/null || echo -en "\033[100D"  # Move cursor to beginning of line
-            tput el 2>/dev/null || echo -en "\033[K"       # Clear to end of line
-            if [ $i -lt $((${#options[@]}-1)) ]; then
-                tput cud1 2>/dev/null || echo -en "\033[1B"  # Move cursor down
-            fi
-        done
-        
-        # Move cursor back to beginning
-        for ((i=1; i<${#options[@]}; i++)); do
-            tput cuu1 2>/dev/null || echo -en "\033[1A"
-        done
-        
-        # Display the selected option
-        echo -e "${GREEN}Selected: ${options[$((selected-1))]}${NC}"
-    fi
+        fi
+    done
+    
+    # Show cursor again
+    tput cnorm 2>/dev/null || true
+    
+    # Clear the options display
+    for ((i=0; i<${#options[@]}; i++)); do
+        tput cub 100 2>/dev/null || echo -en "\033[100D"  # Move cursor to beginning of line
+        tput el 2>/dev/null || echo -en "\033[K"       # Clear to end of line
+        if [ $i -lt $((${#options[@]}-1)) ]; then
+            tput cud1 2>/dev/null || echo -en "\033[1B"  # Move cursor down
+        fi
+    done
+    
+    # Move cursor back to beginning
+    for ((i=1; i<${#options[@]}; i++)); do
+        tput cuu1 2>/dev/null || echo -en "\033[1A"
+    done
+    
+    # Display the selected option
+    echo -e "${GREEN}Selected: ${options[$((selected-1))]}${NC}"
     
     # Return the selected option
     echo $selected
