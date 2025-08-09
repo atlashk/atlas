@@ -29,7 +29,7 @@
         <button 
           class="dropdown-item" 
           type="button"
-          @click="handleExport('xlsx', close)" 
+          @click="handleExport('excel', close)" 
           :disabled="isExporting"
         >
           <i class="bi bi-filetype-xlsx me-2"></i>Export as Excel
@@ -56,7 +56,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  export: [fileType: 'csv' | 'xlsx']
+  export: [fileType: 'csv' | 'excel']
   open: []
   close: []
 }>();
@@ -67,7 +67,7 @@ const buttonClass = computed(() => {
   return `${baseClass} ${variantClass}`;
 });
 
-const handleExport = (fileType: 'csv' | 'xlsx', closeDropdown: () => void) => {
+const handleExport = (fileType: 'csv' | 'excel', closeDropdown: () => void) => {
   closeDropdown();
   emit('export', fileType);
 };

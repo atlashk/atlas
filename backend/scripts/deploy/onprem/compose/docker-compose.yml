@@ -5,7 +5,6 @@
 # - Infrastructure Services (databases, message queues, etc.)
 # - Backend Services (microservices and edge services)
 # - Observability Services (monitoring, logging, tracing)
-# - Frontend Services (web applications)
 # =============================================================================
 
 services:
@@ -267,7 +266,6 @@ services:
       - eureka-server-log:/var/log/eureka-server
       - auth-server-log:/var/log/auth-server
       - api-gateway-log:/var/log/api-gateway
-      - frontend-log:/var/log/frontend
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9080/ready || exit 1"]
       interval: 10s
@@ -665,9 +663,6 @@ volumes:
   # Observability volumes
   grafana-data:
   prometheus-data:
-  
-  # Frontend volumes
-  frontend-log:
   
   # Nginx volumes
   nginx-logs:

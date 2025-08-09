@@ -69,7 +69,7 @@ public class RestTemplateService {
     if (paramsMap == null || paramsMap.isEmpty()) {
       return url;
     }
-    UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url);
+    UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url);
     paramsMap.forEach(builder::queryParam);
     return builder.toUriString();
   }

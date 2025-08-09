@@ -168,7 +168,7 @@ public class AdminProductController {
   }
 
   @Operation(summary = "Export products based on optional filters.")
-  @GetMapping(value = "/export", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   public ResponseEntity<byte[]> export(
       @Parameter(description = "The unique identifier of the product to export.", example = "1")
       @RequestParam(name = "id", required = false) Integer id,
@@ -205,16 +205,14 @@ public class AdminProductController {
         .build();
     byte[] fileContent = adminExportProductUseCaseHandler.handle(input);
 
-    // Exported ile info
-    HttpHeaders headers = new HttpHeaders();
+    // Exported file info
     String fileName = "export-product-" +
         DateUtil.now("yyyyMMddHHmmss") +
         "." +
         fileType.getExtension();
-    headers.add("Content-Disposition", "attachment; filename=" + fileName);
 
     return ResponseEntity.ok()
-        .headers(headers)
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
         .body(fileContent);
   }

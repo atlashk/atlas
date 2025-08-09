@@ -13,9 +13,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../../.." && pwd)"
 PROJECT_NAME="atlas-onprem-compose"
 COMPOSE_FILE="$PROJECT_ROOT/backend/scripts/deploy/onprem/compose/docker-compose.yml"
+APP_STACK_CONFIG="$PROJECT_ROOT/backend/app-stack.cfg"
 
-# Source logger
-source "$PROJECT_ROOT/backend/scripts/log/logger.sh"
+# Source logger and common utilities
+source "$PROJECT_ROOT/backend/scripts/logger.sh"
+source "$PROJECT_ROOT/backend/scripts/common.sh"
 
 # Default options
 SKIP_BUILD=false
@@ -110,6 +112,87 @@ check_prerequisites() {
 }
 
 # =============================================================================
+# CONFIGURATION FUNCTIONS
+# =============================================================================
+
+# Read configuration from app-stack.cfg
+read_app_stack_config() {
+    # Use common function to read platform config
+    read_platform_config "$APP_STACK_CONFIG"
+    
+    # Read additional configuration values specific to this deployment
+    DATASOURCE=$(grep "^datasource=" "$APP_STACK_CONFIG" | cut -d'=' -f2)
+    MESSAGING=$(grep "^messaging=" "$APP_STACK_CONFIG" | cut -d'=' -f2)
+    NOTIFICATION_EMAIL=$(grep "^notification.email=" "$APP_STACK_CONFIG" | cut -d'=' -f2)
+    OBSERVABILITY_LOGGING_STACK=$(grep "^observability.logging.stack=" "$APP_STACK_CONFIG" | cut -d'=' -f2)
+    OBSERVABILITY_METRICS=$(grep "^observability.metrics=" "$APP_STACK_CONFIG" | cut -d'=' -f2)
+    OBSERVABILITY_TRACING=$(grep "^observability.tracing=" "$APP_STACK_CONFIG" | cut -d'=' -f2)
+}
+
+# List services based on configuration
+list_services() {
+    local services=(
+        "eureka-server"
+        "user-service"
+        "product-service"
+        "order-service"
+        "notification-service"
+        "auth-server"
+        "api-gateway"
+        "nginx"
+    )
+    
+    case "$DATASOURCE" in
+        mysql)
+            services+=("mysql")
+            ;;
+        postgres)
+            services+=("postgres")
+            ;;
+        *)
+            log_warning "  ? Unknown datasource: $DATASOURCE"
+            ;;
+    esac
+
+    services+=("redis")
+    
+    case "$MESSAGING" in
+        kafka)
+            services+=("kafka")
+            ;;
+        rabbitmq)
+            services+=("rabbitmq")
+            ;;
+        *)
+            log_warning "  ? Unknown messaging: $MESSAGING"
+            ;;
+    esac
+    
+    if [[ "$NOTIFICATION_EMAIL" == "spring" ]]; then
+        services+=("smtp4dev")
+    fi
+    
+    if [[ "$OBSERVABILITY_LOGGING_STACK" == "loki" ]]; then
+        services+=("loki")
+        services+=("promtail")
+    fi
+
+    if [[ "$OBSERVABILITY_METRICS" == "prometheus" ]]; then
+        services+=("prometheus")
+    fi
+    
+    if [[ "$OBSERVABILITY_TRACING" == "zipkin" ]]; then
+        services+=("zipkin")
+    fi
+
+    services+=("grafana")
+
+    # Store services list for later use
+    SERVICES=("${services[@]}")
+    log_info "Services based on configuration: ${SERVICES[*]}"
+}
+
+# =============================================================================
 # BUILD FUNCTIONS
 # =============================================================================
 
@@ -126,7 +209,7 @@ build_services() {
     chmod +x "$build_script"
 
     log_info "Invoking build script..."
-    if "$build_script" --infra-stack=onprem-compose; then
+    if "$build_script"; then
         log_success "Build completed successfully"
     else
         log_error "Build failed"
@@ -138,36 +221,72 @@ build_services() {
 # START FUNCTIONS
 # =============================================================================
 
-# Start all services
 start_services() {
     log_section "Starting Atlas services..."
-    
-    log_info "Using compose file: $COMPOSE_FILE"
-    log_info "Starting all Atlas services..."
 
-    # Start all services defined in the compose file
-    if docker-compose -f "$COMPOSE_FILE" -p "$PROJECT_NAME" up -d; then
-        log_success "All services started successfully!"
+    log_info "Using compose file: $COMPOSE_FILE"
+
+    if docker-compose -f "$COMPOSE_FILE" -p "$PROJECT_NAME" up -d "${SERVICES[@]}"; then
+        log_success "Services started successfully!"
     else
         log_error "Failed to start services."
         exit 1
     fi
+}
 
-    # Display service URLs
-    log_section "Service URLs:"
-    log_info "Direct Access:"
-    log_info "  - API Gateway: http://localhost:8080"
-    log_info "  - Prometheus: http://localhost:9090"
-    log_info "  - Grafana: http://localhost:3000"
-    log_info "  - Zipkin: http://localhost:9411"
-    log_info "  - Frontend: http://localhost:9000"
-    log_info ""
-    log_info "Via Nginx (requires hosts file configuration):"
-    log_info "  - API Gateway: http://api.atlas.local"
-    log_info "  - Grafana: http://grafana.atlas.local"
-    log_info "  - Prometheus: http://prometheus.atlas.local"
-    log_info "  - Zipkin: http://zipkin.atlas.local"
-    log_info "  - SMTP4Dev: http://smtp4dev.atlas.local"
+# Wait for all services to be healthy
+wait_for_services_healthy() {
+    log_section "Waiting for services to be healthy..."
+    
+    local max_wait_time=900  # 15 minutes
+    local check_interval=10  # 10 seconds
+    local elapsed_time=0
+    local all_healthy=false
+
+    while [[ $elapsed_time -lt $max_wait_time ]] && [[ $all_healthy == false ]]; do
+        all_healthy=true
+        local unhealthy_services=()
+        
+        log_info "Checking service health status... (${elapsed_time}s/${max_wait_time}s)"
+        
+        for service in "${SERVICES[@]}"; do
+            # Get container status
+            local container_status=$(docker-compose -f "$COMPOSE_FILE" -p "$PROJECT_NAME" ps -q "$service" 2>/dev/null | xargs docker inspect --format='{{.State.Status}}' 2>/dev/null || echo "not_found")
+            
+            # Check if container is running
+            if [[ "$container_status" != "running" ]]; then
+                all_healthy=false
+                unhealthy_services+=("$service (status: $container_status)")
+                continue
+            fi
+            
+            # For services with health checks, verify they are healthy
+            local health_status=$(docker-compose -f "$COMPOSE_FILE" -p "$PROJECT_NAME" ps -q "$service" 2>/dev/null | xargs docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}no_healthcheck{{end}}' 2>/dev/null || echo "unknown")
+            
+            if [[ "$health_status" == "unhealthy" ]]; then
+                all_healthy=false
+                unhealthy_services+=("$service (health: unhealthy)")
+            elif [[ "$health_status" == "starting" ]]; then
+                all_healthy=false
+                unhealthy_services+=("$service (health: starting)")
+            fi
+        done
+        
+        if [[ $all_healthy == true ]]; then
+            log_success "All services are healthy!"
+            break
+        else
+            log_info "Waiting for services: ${unhealthy_services[*]}"
+            sleep $check_interval
+            elapsed_time=$((elapsed_time + check_interval))
+        fi
+    done
+    
+    if [[ $all_healthy == false ]]; then
+        log_error "Timeout waiting for services to be healthy after ${max_wait_time} seconds"
+        log_info "You can check service logs with: docker-compose -f $COMPOSE_FILE -p $PROJECT_NAME logs [service_name]"
+        exit 1
+    fi
 }
 
 # =============================================================================
@@ -179,7 +298,9 @@ main() {
     parse_arguments "$@"
     check_prerequisites
 
-    log_section "Atlas Docker Compose Platform - Starting"
+    # Read configuration and list services
+    read_app_stack_config
+    list_services
 
     # Build step (if not skipped)
     if [[ "$SKIP_BUILD" == false ]]; then
@@ -191,8 +312,23 @@ main() {
     # Start services
     start_services
 
-    log_success "Atlas platform started successfully!"
-    log_success "Your Atlas development environment is now ready to use!"
+    # Wait for services to be healthy
+    wait_for_services_healthy
+
+    # Display service URLs
+    log_section "Service URLs:"
+    log_info "Direct Access:"
+    log_info "  - API Gateway: http://localhost:8080"
+    log_info "  - Prometheus: http://localhost:9090"
+    log_info "  - Grafana: http://localhost:3000"
+    log_info "  - Zipkin: http://localhost:9411"
+    log_info ""
+    log_info "Via Nginx (requires hosts file configuration):"
+    log_info "  - API Gateway: http://api.atlas.local"
+    log_info "  - Grafana: http://grafana.atlas.local"
+    log_info "  - Prometheus: http://prometheus.atlas.local"
+    log_info "  - Zipkin: http://zipkin.atlas.local"
+    log_info "  - SMTP4Dev: http://smtp4dev.atlas.local"
 }
 
 # Execute main function

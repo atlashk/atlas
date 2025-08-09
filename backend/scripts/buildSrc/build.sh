@@ -8,7 +8,7 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 GRADLEW="$PROJECT_ROOT/backend/gradlew"
 
 # Load logger.sh
-source "$PROJECT_ROOT/backend/scripts/log/logger.sh"
+source "$PROJECT_ROOT/backend/scripts/logger.sh"
 
 # Default values
 SKIP_TESTS="true"

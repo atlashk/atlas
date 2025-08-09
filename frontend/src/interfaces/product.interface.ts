@@ -94,7 +94,7 @@ export interface UpdateProductRequest {
 
 export enum FileType {
   CSV = 'csv',
-  EXCEL = 'xlsx'
+  EXCEL = 'excel'
 }
 
 export interface ImportProductRequest {

@@ -136,11 +136,13 @@ public class HttpClientService implements DisposableBean {
   }
 
   private <Res> Res call(ClassicHttpRequest httpRequest, Class<Res> responseClass) {
-    try (CloseableHttpResponse httpResponse = httpClient.execute(httpRequest)) {
-      HttpEntity httpEntity = httpResponse.getEntity();
-      String response = EntityUtils.toString(httpEntity);
-      return JsonUtil.getInstance().toObject(response, responseClass);
-    } catch (IOException | ParseException e) {
+    try {
+      return httpClient.execute(httpRequest, response -> {
+        HttpEntity httpEntity = response.getEntity();
+        String responseBody = EntityUtils.toString(httpEntity);
+        return JsonUtil.getInstance().toObject(responseBody, responseClass);
+      });
+    } catch (IOException e) {
       log.error("Failed to make request: {}", httpRequest.getRequestUri(), e);
       throw new RuntimeException(e);
     }

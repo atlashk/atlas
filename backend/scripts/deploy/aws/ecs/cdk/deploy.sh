@@ -13,7 +13,7 @@ readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../../../.." && pwd)"
 
 # Source logger
-source "$PROJECT_ROOT/backend/scripts/log/logger.sh"
+source "$PROJECT_ROOT/backend/scripts/logger.sh"
 
 # Default options
 ENVIRONMENT="dev"
@@ -231,7 +231,7 @@ build_services() {
     chmod +x "$build_script"
 
     log_info "Invoking build script..."
-    if "$build_script" --infra-stack=aws-ecs; then
+    if "$build_script"; then
         log_success "Build completed successfully"
     else
         log_error "Build failed"

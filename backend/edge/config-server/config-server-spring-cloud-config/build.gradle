@@ -31,12 +31,12 @@ dependencies {
     // Infrastructure
     api project(':infrastructure.spring-boot.bootstrap')
     api project(':infrastructure.spring-boot.observability.actuator')
-    switch (rootProject.ext.appStack['observability.logging']) {
+    switch (rootProject.ext.appStack['observability.logging.framework']) {
         case 'logback':
             api project(':infrastructure.spring-boot.observability.logging.logback')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.logging']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.logging.framework']}")
     }
     switch (rootProject.ext.appStack['observability.metrics']) {
         case 'none':

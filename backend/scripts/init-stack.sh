@@ -11,6 +11,10 @@ WHITE='\033[1;37m'
 NC='\033[0m' # No Color
 BOLD='\033[1m'
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+APP_STACK_CONFIG="$PROJECT_ROOT/backend/app-stack.cfg"
+
 # Function to select option using arrow keys
 select_option() {
     local options=("$@")
@@ -139,21 +143,21 @@ if [ "$api_server" = "grpc" ]; then
     api_client_choice=$((1 + $?))
     api_client="grpc-netdevh"
 else
-    select_option "Apache HttpClient ${YELLOW}(default)${NC}" "Feign" "RestClient" "RestTemplate"
+    select_option "RestClient ${YELLOW}(default)${NC}" "Apache HttpClient" "Feign" "RestTemplate"
     api_client_choice=$((1 + $?))
     
     case $api_client_choice in
         2)
-            api_client="rest-feign"
+            api_client="rest-apachehttpclient"
             ;;
         3)
-            api_client="rest-restclient"
+            api_client="rest-feign"
             ;;
         4)
             api_client="rest-resttemplate"
             ;;
         *)
-            api_client="rest-apachehttpclient"
+            api_client="rest-restclient"
             ;;
     esac
 fi
@@ -295,11 +299,19 @@ fi
 echo
 
 # =============================================================================
-# OBSERVABILITY LOGGING CONFIGURATION
+# OBSERVABILITY LOGGING STACK CONFIGURATION
 # =============================================================================
-echo -e "${BLUE}${BOLD}Observability Logging Configuration${NC}"
+echo -e "${BLUE}${BOLD}Observability Logging Stack Configuration${NC}"
+echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Loki ${YELLOW}(default)${NC}"
+logging_stack="loki"
+echo
+
+# =============================================================================
+# OBSERVABILITY LOGGING FRAMEWORK CONFIGURATION
+# =============================================================================
+echo -e "${BLUE}${BOLD}Observability Logging Framework Configuration${NC}"
 echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Logback ${YELLOW}(default)${NC}"
-logging="logback"
+logging_framework="logback"
 echo
 
 # =============================================================================
@@ -394,13 +406,11 @@ case $template_choice in
 esac
 echo
 
-# Generate app-stack.cfg file
-config_file="backend/app-stack.cfg"
-
-echo -e "${PURPLE}${BOLD}Generating ${config_file} file...${NC}"
+echo -e "${PURPLE}${BOLD}Generating ${APP_STACK_CONFIG} file...${NC}"
 sleep 2
 
-cat > "$config_file" << EOF
+# Create the configuration file
+cat > "$APP_STACK_CONFIG" << EOF
 api-server=$api_server
 api-client=$api_client
 cache=$cache
@@ -412,7 +422,8 @@ file.excel=$file_excel
 lock=$lock
 messaging=$messaging
 notification.email=$notification_email
-observability.logging=$logging
+observability.logging.stack=$logging_stack
+observability.logging.framework=$logging_framework
 observability.metrics=$metrics
 observability.tracing=$tracing
 persistence=jpa
@@ -422,6 +433,13 @@ scheduler=$scheduler
 storage=$storage
 template=$template
 EOF
+
+# Check if file creation was successful
+if [ $? -ne 0 ] || [ ! -f "$APP_STACK_CONFIG" ]; then
+    echo -e "${RED}${BOLD}Error: Failed to create configuration file at ${APP_STACK_CONFIG}${NC}"
+    echo -e "${RED}Please check if the directory exists and you have write permissions.${NC}"
+    exit 1
+fi
 
 echo -e "${GREEN}${BOLD}Configuration file created successfully!${NC}"
 echo
@@ -437,7 +455,8 @@ echo -e "  ${BLUE}Email:${NC} ${notification_email}"
 echo -e "  ${BLUE}Excel:${NC} ${file_excel}"
 echo -e "  ${BLUE}Lock:${NC} ${lock}"
 echo -e "  ${BLUE}Messaging:${NC} ${messaging}"
-echo -e "  ${BLUE}Observability - Logging:${NC} ${logging}"
+echo -e "  ${BLUE}Observability - Logging Stack:${NC} ${logging_stack}"
+echo -e "  ${BLUE}Observability - Logging Framework:${NC} ${logging_framework}"
 echo -e "  ${BLUE}Observability - Metrics:${NC} ${metrics}"
 echo -e "  ${BLUE}Observability - Tracing:${NC} ${tracing}"
 echo -e "  ${BLUE}Redis:${NC} ${redis}"

@@ -13,7 +13,7 @@ readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../../../.." && pwd)"
 
 # Source logger
-source "$PROJECT_ROOT/backend/scripts/log/logger.sh"
+source "$PROJECT_ROOT/backend/scripts/logger.sh"
 
 # Default options
 ENVIRONMENT="dev"

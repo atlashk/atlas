@@ -426,13 +426,11 @@ const handleDelete = async (productId: number) => {
   }
 };
 
-const handleExport = async (fileType: 'csv' | 'xlsx') => {
+const handleExport = async (fileType: 'csv' | 'excel') => {
   if (isExporting.value) return;
 
   isExporting.value = true;
-  try {
-    console.log('Starting export with fileType:', fileType);
-    
+  try {    
     const exportFilters: ExportProductFilters = {
       id: filters.id,
       keyword: filters.keyword,
@@ -445,9 +443,6 @@ const handleExport = async (fileType: 'csv' | 'xlsx') => {
       categoryIds: filters.categoryIds,
       fileType: fileType === 'csv' ? FileType.CSV : FileType.EXCEL
     };
-
-    console.log('Export filters:', exportFilters);
-
     await productService.exportProduct(exportFilters);
     toast.success(`Products exported successfully as ${fileType.toUpperCase()}`);
   } catch (error) {

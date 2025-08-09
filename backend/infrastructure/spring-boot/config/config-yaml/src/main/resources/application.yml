@@ -15,6 +15,8 @@ app:
             - "OPTIONS"
           allowed-headers:
             - "*"
+          exposed-headers:
+            - "Content-Disposition"
           allow-credentials: true
           max-age: 0 # always fetch the latest data
       product-service:

@@ -1,7 +1,5 @@
 <template>
   <div class="search-product p-4 border bg-light shadow-sm rounded mb-3">
-    <h5 class="mb-4 text-center">Store Products</h5>
-
     <!-- Filters Form -->
     <form @submit.prevent="applyFilters(1)" class="bg-white p-4 rounded-3 mb-4 border">
       <div class="row g-3">

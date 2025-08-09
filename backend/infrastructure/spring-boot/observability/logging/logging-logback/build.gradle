@@ -27,7 +27,7 @@ repositories {
 dependencies {
     // Lib
     api 'org.springframework.boot:spring-boot-starter-logging'
-    api 'ch.qos.logback:logback-classic:1.5.12'
+    api 'ch.qos.logback:logback-classic:1.5.13'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

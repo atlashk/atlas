@@ -1,14 +1,14 @@
 import type { ApiResponse } from '@/interfaces/api.interface'
-import type {
-  Brand,
-  Category,
-  CreateProductRequest,
-  ExportProductFilters,
+import {
   FileType,
-  ListProductFilters,
-  Product,
-  SearchProductFilters,
-  UpdateProductRequest
+  type Brand,
+  type Category,
+  type CreateProductRequest,
+  type ExportProductFilters,
+  type ListProductFilters,
+  type Product,
+  type SearchProductFilters,
+  type UpdateProductRequest,
 } from '@/interfaces/product.interface'
 import apiClient from './apiClient'
 import { BaseService } from './base.service'
@@ -24,17 +24,20 @@ export class ProductService extends BaseService {
   }
 
   async listCategory(): Promise<ApiResponse<Category[]>> {
-    return this.get<Category[]>('/common/products/categories');
+    return this.get<Category[]>('/common/products/categories')
   }
 
   // Front operations
-  async searchProduct(filters: Partial<SearchProductFilters> = {}): Promise<ApiResponse<Product[]>> {
+  async searchProduct(
+    filters: Partial<SearchProductFilters> = {},
+  ): Promise<ApiResponse<Product[]>> {
     const queryParams = new URLSearchParams()
     if (filters.keyword) queryParams.append('keyword', filters.keyword)
     if (filters.minPrice) queryParams.append('min_price', filters.minPrice.toString())
     if (filters.maxPrice) queryParams.append('max_price', filters.maxPrice.toString())
     if (filters.brandId) queryParams.append('brand_id', filters.brandId.toString())
-    if (filters.categoryIds?.length) queryParams.append('category_ids', filters.categoryIds.join(','))
+    if (filters.categoryIds?.length)
+      queryParams.append('category_ids', filters.categoryIds.join(','))
     queryParams.append('page', (filters.page || 1).toString())
     queryParams.append('size', (filters.size || 20).toString())
 
@@ -56,7 +59,8 @@ export class ProductService extends BaseService {
     if (filters.availableFrom) queryParams.append('available_from', filters.availableFrom)
     if (filters.isActive != null) queryParams.append('is_active', filters.isActive.toString())
     if (filters.brandId) queryParams.append('brand_id', filters.brandId.toString())
-    if (filters.categoryIds?.length) queryParams.append('category_ids', filters.categoryIds.join(','))
+    if (filters.categoryIds?.length)
+      queryParams.append('category_ids', filters.categoryIds.join(','))
     queryParams.append('page', filters.page.toString())
     queryParams.append('size', filters.size.toString())
 
@@ -80,34 +84,34 @@ export class ProductService extends BaseService {
   }
 
   async importProduct(file: File, fileType: FileType): Promise<ApiResponse<void>> {
-    console.log('=== DETAILED FILE DEBUG ===');
-    console.log('File object:', file);
-    console.log('File name:', file.name);
-    console.log('File size:', file.size);
-    console.log('File type:', file.type);
-    console.log('File lastModified:', file.lastModified);
-    
+    console.log('=== DETAILED FILE DEBUG ===')
+    console.log('File object:', file)
+    console.log('File name:', file.name)
+    console.log('File size:', file.size)
+    console.log('File type:', file.type)
+    console.log('File lastModified:', file.lastModified)
+
     // Check if file is actually readable
     try {
-      const text = await file.text();
-      console.log('File content preview (first 200 chars):', text.substring(0, 200));
-      console.log('File content length:', text.length);
+      const text = await file.text()
+      console.log('File content preview (first 200 chars):', text.substring(0, 200))
+      console.log('File content length:', text.length)
     } catch (error) {
-      console.error('Error reading file content:', error);
+      console.error('Error reading file content:', error)
     }
 
     const formData = new FormData()
     formData.append('file', file)
     formData.append('fileType', fileType)
 
-    console.log('FormData entries:');
+    console.log('FormData entries:')
     for (const pair of formData.entries()) {
-      console.log(`- ${pair[0]}:`, pair[1]);
+      console.log(`- ${pair[0]}:`, pair[1])
       if (pair[1] instanceof File) {
-        console.log(`  File details - name: ${pair[1].name}, size: ${pair[1].size}`);
+        console.log(`  File details - name: ${pair[1].name}, size: ${pair[1].size}`)
       }
     }
-    console.log('=== END DEBUG ===');
+    console.log('=== END DEBUG ===')
 
     try {
       const response = await apiClient.post(`${this.baseUrl}/admin/products/import`, formData)
@@ -128,27 +132,62 @@ export class ProductService extends BaseService {
     if (filters.availableFrom) queryParams.append('available_from', filters.availableFrom)
     if (filters.isActive != null) queryParams.append('is_active', filters.isActive.toString())
     if (filters.brandId) queryParams.append('brand_id', filters.brandId.toString())
-    if (filters.categoryIds?.length) queryParams.append('category_ids', filters.categoryIds.join(','))
+    if (filters.categoryIds?.length) {
+      queryParams.append('category_ids', filters.categoryIds.join(','))
+    }
     queryParams.append('file_type', filters.fileType)
 
-    const response = await apiClient.get(`${this.baseUrl}/admin/products/export?${queryParams.toString()}`, {
-      responseType: 'blob'
-    })
+    const response = await apiClient.get(
+      `${this.baseUrl}/admin/products/export?${queryParams.toString()}`,
+      {
+        responseType: 'blob',
+      },
+    )
 
     // Create blob and download
     const blob = new Blob([response.data], {
-      type: response.headers['content-type'] || 'application/octet-stream'
+      type: response.headers['content-type'] || 'application/octet-stream',
     })
 
-    // Extract filename from Content-Disposition header or create default
+    // Always prioritize filename from Content-Disposition header
+    // Note: Axios normalizes header names to lowercase
     const contentDisposition = response.headers['content-disposition']
-    let filename = `export-product-${new Date().toISOString().slice(0, 19).replace(/[:-]/g, '')}.${filters.fileType}`
+    
+    // Map frontend FileType to actual file extensions for fallback
+    const extensionMap: Record<FileType, string> = {
+      [FileType.CSV]: 'csv',
+      [FileType.EXCEL]: 'xlsx',
+    }
+
+    let filename: string
 
     if (contentDisposition) {
-      const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)
+      console.log('Content-Disposition:', contentDisposition)
+      // Handle both filename= and filename*= formats (RFC 6266)
+      // First try filename*= (encoded format)
+      let filenameMatch = contentDisposition.match(/filename\*=([^;\n]+)/i)
       if (filenameMatch && filenameMatch[1]) {
-        filename = filenameMatch[1].replace(/['"]/g, '')
+        try {
+          // Handle UTF-8''filename format
+          const encodedFilename = filenameMatch[1].replace(/^UTF-8''/, '')
+          filename = decodeURIComponent(encodedFilename)
+        } catch {
+          filename = filenameMatch[1]
+        }
+      } else {
+        // Try regular filename= format
+        filenameMatch = contentDisposition.match(/filename=([^;\n]+)/i)
+        if (filenameMatch && filenameMatch[1]) {
+          // Remove quotes if present
+          filename = filenameMatch[1].replace(/^["']|["']$/g, '')
+        } else {
+          // Fallback to default filename if Content-Disposition exists but no filename found
+          filename = `export-product-${new Date().toISOString().slice(0, 19).replace(/[:-]/g, '')}.${extensionMap[filters.fileType]}`
+        }
       }
+    } else {
+      // Only use default filename when Content-Disposition header is completely missing
+      filename = `export-product-${new Date().toISOString().slice(0, 19).replace(/[:-]/g, '')}.${extensionMap[filters.fileType]}`
     }
 
     // Create download link

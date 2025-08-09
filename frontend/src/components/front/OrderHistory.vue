@@ -1,7 +1,5 @@
 <template>
-  <div>
-    <h3 class="my-4">Order History</h3>
-
+  <div class="p-4 border bg-light shadow-sm rounded mb-3">
     <!-- Filters Section -->
     <div class="card mb-4">
       <div class="card-body">
