@@ -247,6 +247,14 @@ esac
 echo
 
 # =============================================================================
+# FILE PDF CONFIGURATION
+# =============================================================================
+echo -e "${BLUE}${BOLD}File - PDF Configuration${NC}"
+echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Apache PDFBox ${YELLOW}(default)${NC}"
+file_csv="pdfbox"
+echo
+
+# =============================================================================
 # DISTRIBUTED LOCK CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Distributed Lock Configuration${NC}"

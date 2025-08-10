@@ -84,34 +84,9 @@ export class ProductService extends BaseService {
   }
 
   async importProduct(file: File, fileType: FileType): Promise<ApiResponse<void>> {
-    console.log('=== DETAILED FILE DEBUG ===')
-    console.log('File object:', file)
-    console.log('File name:', file.name)
-    console.log('File size:', file.size)
-    console.log('File type:', file.type)
-    console.log('File lastModified:', file.lastModified)
-
-    // Check if file is actually readable
-    try {
-      const text = await file.text()
-      console.log('File content preview (first 200 chars):', text.substring(0, 200))
-      console.log('File content length:', text.length)
-    } catch (error) {
-      console.error('Error reading file content:', error)
-    }
-
     const formData = new FormData()
     formData.append('file', file)
-    formData.append('fileType', fileType)
-
-    console.log('FormData entries:')
-    for (const pair of formData.entries()) {
-      console.log(`- ${pair[0]}:`, pair[1])
-      if (pair[1] instanceof File) {
-        console.log(`  File details - name: ${pair[1].name}, size: ${pair[1].size}`)
-      }
-    }
-    console.log('=== END DEBUG ===')
+    formData.append('file_type', fileType)
 
     try {
       const response = await apiClient.post(`${this.baseUrl}/admin/products/import`, formData)
@@ -157,12 +132,12 @@ export class ProductService extends BaseService {
     const extensionMap: Record<FileType, string> = {
       [FileType.CSV]: 'csv',
       [FileType.EXCEL]: 'xlsx',
+      [FileType.PDF]: 'pdf'
     }
 
     let filename: string
 
     if (contentDisposition) {
-      console.log('Content-Disposition:', contentDisposition)
       // Handle both filename= and filename*= formats (RFC 6266)
       // First try filename*= (encoded format)
       let filenameMatch = contentDisposition.match(/filename\*=([^;\n]+)/i)

@@ -75,20 +75,27 @@ dependencies {
     }
     switch (rootProject.ext.appStack['file.csv']) {
         case 'opencsv':
-            api project(':infrastructure.spring-boot.csv.opencsv.adapter.product')
+            api project(':infrastructure.spring-boot.file.csv.opencsv.adapter.product')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['file.csv']}")
     }
     switch (rootProject.ext.appStack['file.excel']) {
         case 'easyexcel':
-            api project(':infrastructure.spring-boot.excel.easyexcel.adapter.product')
+            api project(':infrastructure.spring-boot.file.excel.easyexcel.adapter.product')
             break
         case 'poi':
-            api project(':infrastructure.spring-boot.excel.poi.adapter.product')
+            api project(':infrastructure.spring-boot.file.excel.poi.adapter.product')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['file.excel']}")
+    }
+    switch (rootProject.ext.appStack['file.pdf']) {
+        case 'pdfbox':
+            api project(':infrastructure.spring-boot.file.pdf.pdfbox.adapter.product')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['file.pdf']}")
     }
     switch (rootProject.ext.appStack['lock']) {
         case 'redisson':

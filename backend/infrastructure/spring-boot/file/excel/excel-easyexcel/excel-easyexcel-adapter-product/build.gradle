@@ -29,7 +29,7 @@ dependencies {
     api project(':domain.product')
 
     // Infrastructure
-    api project(':infrastructure.spring-boot.excel.easyexcel.core')
+    api project(':infrastructure.spring-boot.file.excel.easyexcel.core')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

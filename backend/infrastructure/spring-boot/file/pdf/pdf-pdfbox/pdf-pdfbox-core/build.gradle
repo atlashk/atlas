@@ -25,11 +25,14 @@ repositories {
 }
 
 dependencies {
-    // Domain
-    api project(':domain.product')
+    // Framework
+    api project(':framework')
 
-    // Infrastructure
-    api project(':infrastructure.spring-boot.file.csv.opencsv.core')
+    // Lib
+    api 'org.springframework.boot:spring-boot-starter'
+
+    // Lib
+    api 'org.apache.pdfbox:pdfbox:3.0.5'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

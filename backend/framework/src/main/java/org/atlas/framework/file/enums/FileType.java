@@ -1,5 +1,6 @@
 package org.atlas.framework.file.enums;
 
+import java.util.Arrays;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,36 +11,15 @@ public enum FileType {
 
   CSV("csv"),
   EXCEL("xlsx"),
+  PDF("pdf")
   ;
 
   private final String extension;
 
   public static FileType of(String name) {
-    for (FileType fileType : FileType.values()) {
-      if (fileType.name().equalsIgnoreCase(name)) {
-        return fileType;
-      }
-    }
-    throw new IllegalArgumentException("Unknown file type: " + name);
-  }
-
-  public static FileType fromFileName(String fileName) {
-    if (fileName == null || fileName.isEmpty()) {
-      throw new IllegalArgumentException("File name cannot be null or empty");
-    }
-
-    // Extract file extension
-    int dotIndex = fileName.lastIndexOf('.');
-    if (dotIndex == -1 || dotIndex == fileName.length() - 1) {
-      throw new IllegalArgumentException("File name does not have a valid extension");
-    }
-    String fileExtension = fileName.substring(dotIndex + 1).toLowerCase();
-
-    for (FileType fileType : FileType.values()) {
-      if (fileType.getExtension().equals(fileExtension)) {
-        return fileType;
-      }
-    }
-    throw new IllegalArgumentException("Unsupported file extension: " + fileExtension);
+    return Arrays.stream(FileType.values())
+        .filter(fileType -> fileType.name().equalsIgnoreCase(name))
+        .findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("Unknown file type: " + name));
   }
 }

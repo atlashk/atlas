@@ -54,40 +54,12 @@ public class ProductCsvWriterAdapter implements ProductCsvWriterPort {
     @CsvBindByPosition(position = 6)
     private Boolean isActive;
 
-    @CsvBindByName(column = "Description")
-    @CsvBindByPosition(position = 7)
-    private String description;
-
-    @CsvBindByName(column = "Attribute Name 1")
-    @CsvBindByPosition(position = 8)
-    private String attributeName1;
-
-    @CsvBindByName(column = "Attribute Value 1")
-    @CsvBindByPosition(position = 9)
-    private String attributeValue1;
-
-    @CsvBindByName(column = "Attribute Name 1")
-    @CsvBindByPosition(position = 10)
-    private String attributeName2;
-
-    @CsvBindByName(column = "Attribute Value 2")
-    @CsvBindByPosition(position = 11)
-    private String attributeValue2;
-
-    @CsvBindByName(column = "Attribute Name 3")
-    @CsvBindByPosition(position = 12)
-    private String attributeName3;
-
-    @CsvBindByName(column = "Attribute Value 3")
-    @CsvBindByPosition(position = 13)
-    private String attributeValue3;
-
     @CsvBindByName(column = "Branch ID")
-    @CsvBindByPosition(position = 14)
+    @CsvBindByPosition(position = 7)
     private Integer brandId;
 
     @CsvBindByName(column = "Category IDs")
-    @CsvBindByPosition(position = 15)
+    @CsvBindByPosition(position = 8)
     private String categoryIds;
   }
 }

@@ -72,27 +72,6 @@ public class AdminImportProductUseCaseHandler {
     // Product
     ProductEntity productEntity = ObjectMapperUtil.getInstance().map(row, ProductEntity.class);
 
-    // Product detail
-    ProductDetailsEntity productDetailsEntity = new ProductDetailsEntity();
-    productDetailsEntity.setDescription(row.getDescription());
-    productEntity.setDetails(productDetailsEntity);
-
-    // Product attributes
-    ProductAttributeEntity productAttributeEntity1 = new ProductAttributeEntity();
-    productAttributeEntity1.setName(row.getAttributeName1());
-    productAttributeEntity1.setValue(row.getAttributeValue1());
-    productEntity.addAttribute(productAttributeEntity1);
-
-    ProductAttributeEntity productAttributeEntity2 = new ProductAttributeEntity();
-    productAttributeEntity2.setName(row.getAttributeName2());
-    productAttributeEntity2.setValue(row.getAttributeValue2());
-    productEntity.addAttribute(productAttributeEntity2);
-
-    ProductAttributeEntity productAttributeEntity3 = new ProductAttributeEntity();
-    productAttributeEntity3.setName(row.getAttributeName3());
-    productAttributeEntity3.setValue(row.getAttributeValue3());
-    productEntity.addAttribute(productAttributeEntity3);
-
     // Brand
     BrandEntity brandEntity = new BrandEntity();
     brandEntity.setId(row.getBrandId());

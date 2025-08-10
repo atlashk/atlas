@@ -54,15 +54,8 @@ public class ProductExcelReaderAdapter implements ProductExcelReaderPort {
     productRow.setAvailableFrom(DateUtil.parse(row.getCell(4).getStringCellValue(),
         CommonConstant.DATE_TIME_FORMAT));
     productRow.setIsActive(row.getCell(5).getBooleanCellValue());
-    productRow.setDescription(row.getCell(6).getStringCellValue());
-    productRow.setAttributeName1(row.getCell(7).getStringCellValue());
-    productRow.setAttributeValue1(row.getCell(8).getStringCellValue());
-    productRow.setAttributeName2(row.getCell(9).getStringCellValue());
-    productRow.setAttributeValue2(row.getCell(10).getStringCellValue());
-    productRow.setAttributeName3(row.getCell(11).getStringCellValue());
-    productRow.setAttributeValue3(row.getCell(12).getStringCellValue());
-    productRow.setBrandId((int) row.getCell(13).getNumericCellValue());
-    productRow.setCategoryIds(row.getCell(14).getStringCellValue());
+    productRow.setBrandId((int) row.getCell(6).getNumericCellValue());
+    productRow.setCategoryIds(row.getCell(7).getStringCellValue());
     return productRow;
   }
 }

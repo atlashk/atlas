@@ -46,27 +46,6 @@ public class ProductExcelWriterAdapter implements ProductExcelWriterPort {
     @ExcelProperty(value = "Active")
     private Boolean isActive;
 
-    @ExcelProperty(value = "Description")
-    private String description;
-
-    @ExcelProperty(value = "Attribute Name 1")
-    private String attributeName1;
-
-    @ExcelProperty(value = "Attribute Value 1")
-    private String attributeValue1;
-
-    @ExcelProperty(value = "Attribute Name 2")
-    private String attributeName2;
-
-    @ExcelProperty(value = "Attribute Value 2")
-    private String attributeValue2;
-
-    @ExcelProperty(value = "Attribute Name 3")
-    private String attributeName3;
-
-    @ExcelProperty(value = "Attribute Value 3")
-    private String attributeValue3;
-
     @ExcelProperty(value = "Branch ID")
     private Integer brandId;
 

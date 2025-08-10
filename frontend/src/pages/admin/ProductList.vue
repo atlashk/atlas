@@ -6,11 +6,7 @@
         <p class="text-muted mb-0">Manage your product catalog</p>
       </div>
       <div class="d-flex gap-2">
-        <button 
-          class="btn btn-outline-primary" 
-          @click="handleImportClick"
-          :disabled="isImporting"
-        >
+        <button class="btn btn-outline-primary" @click="handleImportClick" :disabled="isImporting">
           <i class="bi bi-upload me-1"></i>
           <span v-if="isImporting">
             <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
@@ -18,10 +14,7 @@
           </span>
           <span v-else>Import</span>
         </button>
-        <ExportDropdown 
-          :is-exporting="isExporting"
-          @export="handleExport"
-        />
+        <ExportDropdown :is-exporting="isExporting" @export="handleExport" />
         <button class="btn btn-success" @click="router.push({ name: 'adminProductAdd' })">
           <i class="bi bi-plus-lg"></i> Add New Product
         </button>
@@ -38,44 +31,24 @@
           <div class="row g-4">
             <div class="col-md-6">
               <label for="productId" class="form-label">Product ID</label>
-              <input
-                id="productId"
-                v-model.trim="filters.id"
-                type="text"
-                placeholder="Enter product ID..."
-                class="form-control"
-              />
+              <input id="productId" v-model.trim="filters.id" type="text" placeholder="Enter product ID..."
+                class="form-control" />
             </div>
 
             <div class="col-md-6">
               <label for="keyword" class="form-label">Search</label>
-              <input
-                id="keyword"
-                v-model.trim="filters.keyword"
-                type="text"
-                placeholder="Search by product name or description..."
-                class="form-control"
-              />
+              <input id="keyword" v-model.trim="filters.keyword" type="text"
+                placeholder="Search by product name or description..." class="form-control" />
             </div>
 
             <div class="col-md-6">
               <label class="form-label">Price Range</label>
               <div class="input-group">
-                <input
-                  v-model.number="filters.minPrice"
-                  type="number"
-                  step="0.01"
-                  placeholder="Min price"
-                  class="form-control"
-                />
+                <input v-model.number="filters.minPrice" type="number" step="0.01" placeholder="Min price"
+                  class="form-control" />
                 <span class="input-group-text bg-light">to</span>
-                <input
-                  v-model.number="filters.maxPrice"
-                  type="number"
-                  step="0.01"
-                  placeholder="Max price"
-                  class="form-control"
-                />
+                <input v-model.number="filters.maxPrice" type="number" step="0.01" placeholder="Max price"
+                  class="form-control" />
               </div>
             </div>
 
@@ -91,12 +64,7 @@
 
             <div class="col-md-6">
               <label for="availableFrom" class="form-label">Available From</label>
-              <input
-                id="availableFrom"
-                v-model="filters.availableFrom"
-                type="date"
-                class="form-control"
-              />
+              <input id="availableFrom" v-model="filters.availableFrom" type="date" class="form-control" />
             </div>
 
             <div class="col-md-6">
@@ -104,23 +72,13 @@
               <div class="border rounded p-3">
                 <div class="d-flex gap-4">
                   <div class="form-check">
-                    <input
-                      type="checkbox"
-                      class="form-check-input"
-                      id="activeCheck"
-                      v-model="activeStates.active"
-                      @change="handleActiveStateChange"
-                    />
+                    <input type="checkbox" class="form-check-input" id="activeCheck" v-model="activeStates.active"
+                      @change="handleActiveStateChange" />
                     <label class="form-check-label" for="activeCheck">Active</label>
                   </div>
                   <div class="form-check">
-                    <input
-                      type="checkbox"
-                      class="form-check-input"
-                      id="inactiveCheck"
-                      v-model="activeStates.inactive"
-                      @change="handleActiveStateChange"
-                    />
+                    <input type="checkbox" class="form-check-input" id="inactiveCheck" v-model="activeStates.inactive"
+                      @change="handleActiveStateChange" />
                     <label class="form-check-label" for="inactiveCheck">Inactive</label>
                   </div>
                 </div>
@@ -134,13 +92,7 @@
                   <span class="visually-hidden">Loading...</span>
                 </div>
               </div>
-              <select
-                v-else
-                id="brandId"
-                v-model="filters.brandId"
-                class="form-select"
-                :disabled="!brands.length"
-              >
+              <select v-else id="brandId" v-model="filters.brandId" class="form-select" :disabled="!brands.length">
                 <option value="">All brands</option>
                 <option v-for="brand in brands" :key="brand.id" :value="brand.id">
                   {{ brand.name }}
@@ -155,15 +107,8 @@
                   <span class="visually-hidden">Loading...</span>
                 </div>
               </div>
-              <select
-                v-else
-                id="categoryIds"
-                v-model="filters.categoryIds"
-                multiple
-                class="form-select"
-                :disabled="!categories.length"
-                size="3"
-              >
+              <select v-else id="categoryIds" v-model="filters.categoryIds" multiple class="form-select"
+                :disabled="!categories.length" size="3">
                 <option v-for="category in categories" :key="category.id" :value="category.id">
                   {{ category.name }}
                 </option>
@@ -213,12 +158,8 @@
                 <td class="px-4">{{ product.id }}</td>
                 <td class="px-4">{{ product.name }}</td>
                 <td class="px-4">
-                  <img
-                    :src="getProductImageUrl(product.image)"
-                    :alt="product.name"
-                    class="rounded"
-                    style="width: 48px; height: 48px; object-fit: cover;"
-                  />
+                  <img :src="getProductImageUrl(product.image)" :alt="product.name" class="rounded"
+                    style="width: 48px; height: 48px; object-fit: cover;" />
                 </td>
                 <td class="px-4">${{ formatCurrency(product.price) }}</td>
                 <td class="px-4">{{ product.quantity }}</td>
@@ -229,22 +170,15 @@
                 </td>
                 <td class="px-4">
                   <div class="d-flex gap-2">
-                    <button
-                      class="btn btn-sm btn-outline-secondary"
-                      @click="router.push({ name: 'adminProductInfo', params: { id: product.id } })"
-                    >
+                    <button class="btn btn-sm btn-outline-secondary"
+                      @click="router.push({ name: 'adminProductInfo', params: { id: product.id } })">
                       <i class="bi bi-eye me-1"></i> View
                     </button>
-                    <button
-                      class="btn btn-sm btn-outline-primary"
-                      @click="router.push({ name: 'adminProductEdit', params: { id: product.id } })"
-                    >
+                    <button class="btn btn-sm btn-outline-primary"
+                      @click="router.push({ name: 'adminProductEdit', params: { id: product.id } })">
                       <i class="bi bi-pencil me-1"></i> Edit
                     </button>
-                    <button
-                      class="btn btn-sm btn-outline-danger"
-                      @click="handleDelete(product.id)"
-                    >
+                    <button class="btn btn-sm btn-outline-danger" @click="handleDelete(product.id)">
                       <i class="bi bi-trash me-1"></i> Delete
                     </button>
                   </div>
@@ -262,18 +196,12 @@
               <span class="ms-2">({{ metadata.totalRecords }} records)</span>
             </span>
             <div class="btn-group">
-              <button
-                @click="changePage(metadata.currentPage - 1)"
-                :disabled="metadata.currentPage <= 1"
-                class="btn btn-outline-secondary px-3"
-              >
+              <button @click="changePage(metadata.currentPage - 1)" :disabled="metadata.currentPage <= 1"
+                class="btn btn-outline-secondary px-3">
                 <i class="bi bi-chevron-left me-1"></i> Previous
               </button>
-              <button
-                @click="changePage(metadata.currentPage + 1)"
-                :disabled="metadata.currentPage >= metadata.totalPages"
-                class="btn btn-outline-secondary px-3"
-              >
+              <button @click="changePage(metadata.currentPage + 1)"
+                :disabled="metadata.currentPage >= metadata.totalPages" class="btn btn-outline-secondary px-3">
                 Next <i class="bi bi-chevron-right ms-1"></i>
               </button>
             </div>
@@ -426,11 +354,11 @@ const handleDelete = async (productId: number) => {
   }
 };
 
-const handleExport = async (fileType: 'csv' | 'excel') => {
+const handleExport = async (fileType: 'csv' | 'excel' | 'pdf') => {
   if (isExporting.value) return;
 
   isExporting.value = true;
-  try {    
+  try {
     const exportFilters: ExportProductFilters = {
       id: filters.id,
       keyword: filters.keyword,
@@ -441,7 +369,7 @@ const handleExport = async (fileType: 'csv' | 'excel') => {
       isActive: filters.isActive,
       brandId: filters.brandId,
       categoryIds: filters.categoryIds,
-      fileType: fileType === 'csv' ? FileType.CSV : FileType.EXCEL
+      fileType: FileType[fileType.toUpperCase() as keyof typeof FileType]
     };
     await productService.exportProduct(exportFilters);
     toast.success(`Products exported successfully as ${fileType.toUpperCase()}`);
@@ -460,13 +388,13 @@ const handleImportClick = () => {
     modalElement.style.display = 'block';
     modalElement.setAttribute('aria-modal', 'true');
     modalElement.setAttribute('role', 'dialog');
-    
+
     // Add backdrop
     const backdrop = document.createElement('div');
     backdrop.className = 'modal-backdrop fade show';
     backdrop.id = 'modal-backdrop';
     document.body.appendChild(backdrop);
-    
+
     // Add body class
     document.body.classList.add('modal-open');
   }

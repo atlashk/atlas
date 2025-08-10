@@ -160,9 +160,9 @@ public class AdminProductController {
       @Parameter(description = "The file containing products to import.")
       @RequestPart("file") MultipartFile file,
       @Parameter(description = "The type of the file (e.g., csv, xlsx).", example = "csv")
-      @RequestPart("fileType") String fileType) throws Exception {
+      @RequestPart("file_type") FileType fileType) throws Exception {
     byte[] fileContent = file.getBytes();
-    AdminImportProductInput input = new AdminImportProductInput(FileType.of(fileType), fileContent);
+    AdminImportProductInput input = new AdminImportProductInput(fileType, fileContent);
     adminImportProductUseCaseHandler.handle(input);
     return ApiResponseWrapper.success();
   }

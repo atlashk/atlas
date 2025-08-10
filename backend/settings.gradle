@@ -136,24 +136,32 @@ project(':infrastructure.spring-boot.event.event-handler-decorator').projectDir 
 // File::CSV
 
 // File::CSV::OpenCSV
-include(':infrastructure.spring-boot.csv.opencsv.core')
-project(':infrastructure.spring-boot.csv.opencsv.core').projectDir = file('infrastructure/spring-boot/file/csv/csv-opencsv/csv-opencsv-core')
-include(':infrastructure.spring-boot.csv.opencsv.adapter.product')
-project(':infrastructure.spring-boot.csv.opencsv.adapter.product').projectDir = file('infrastructure/spring-boot/file/csv/csv-opencsv/csv-opencsv-adapter-product')
+include(':infrastructure.spring-boot.file.csv.opencsv.core')
+project(':infrastructure.spring-boot.file.csv.opencsv.core').projectDir = file('infrastructure/spring-boot/file/csv/csv-opencsv/csv-opencsv-core')
+include(':infrastructure.spring-boot.file.csv.opencsv.adapter.product')
+project(':infrastructure.spring-boot.file.csv.opencsv.adapter.product').projectDir = file('infrastructure/spring-boot/file/csv/csv-opencsv/csv-opencsv-adapter-product')
 
 // File::Excel
 
 // File::Excel::Easyexcel
-include(':infrastructure.spring-boot.excel.easyexcel.core')
-project(':infrastructure.spring-boot.excel.easyexcel.core').projectDir = file('infrastructure/spring-boot/file/excel/excel-easyexcel/excel-easyexcel-core')
-include(':infrastructure.spring-boot.excel.easyexcel.adapter.product')
-project(':infrastructure.spring-boot.excel.easyexcel.adapter.product').projectDir = file('infrastructure/spring-boot/file/excel/excel-easyexcel/excel-easyexcel-adapter-product')
+include(':infrastructure.spring-boot.file.excel.easyexcel.core')
+project(':infrastructure.spring-boot.file.excel.easyexcel.core').projectDir = file('infrastructure/spring-boot/file/excel/excel-easyexcel/excel-easyexcel-core')
+include(':infrastructure.spring-boot.file.excel.easyexcel.adapter.product')
+project(':infrastructure.spring-boot.file.excel.easyexcel.adapter.product').projectDir = file('infrastructure/spring-boot/file/excel/excel-easyexcel/excel-easyexcel-adapter-product')
 
 // File::Excel::Poi
-include(':infrastructure.spring-boot.excel.poi.core')
-project(':infrastructure.spring-boot.excel.poi.core').projectDir = file('infrastructure/spring-boot/file/excel/excel-poi/excel-poi-core')
-include(':infrastructure.spring-boot.excel.poi.adapter.product')
-project(':infrastructure.spring-boot.excel.poi.adapter.product').projectDir = file('infrastructure/spring-boot/file/excel/excel-poi/excel-poi-adapter-product')
+include(':infrastructure.spring-boot.file.excel.poi.core')
+project(':infrastructure.spring-boot.file.excel.poi.core').projectDir = file('infrastructure/spring-boot/file/excel/excel-poi/excel-poi-core')
+include(':infrastructure.spring-boot.file.excel.poi.adapter.product')
+project(':infrastructure.spring-boot.file.excel.poi.adapter.product').projectDir = file('infrastructure/spring-boot/file/excel/excel-poi/excel-poi-adapter-product')
+
+// File::PDF
+
+// File::PDF::PDFBox
+include(':infrastructure.spring-boot.file.pdf.pdfbox.core')
+project(':infrastructure.spring-boot.file.pdf.pdfbox.core').projectDir = file('infrastructure/spring-boot/file/pdf/pdf-pdfbox/pdf-pdfbox-core')
+include(':infrastructure.spring-boot.file.pdf.pdfbox.adapter.product')
+project(':infrastructure.spring-boot.file.pdf.pdfbox.adapter.product').projectDir = file('infrastructure/spring-boot/file/pdf/pdf-pdfbox/pdf-pdfbox-adapter-product')
 
 // i18n
 include(':infrastructure.spring-boot.i18n')
