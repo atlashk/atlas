@@ -12,140 +12,188 @@ import org.atlas.domain.product.port.file.model.write.ProductRow;
 import org.atlas.domain.product.port.file.pdf.ProductPdfWriterPort;
 import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.util.DateUtil;
+import org.atlas.infrastructure.file.pdf.pdfbox.core.PdfboxUtil;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ProductPdfWriterAdapter implements ProductPdfWriterPort {
 
+  private static final float MARGIN = 25;
+  private static final float TOP_Y = 720;
+  private static final float CELL_HEIGHT = 20;
+  private static final float FONT_SIZE = 8;
+  private static final float TEXT_PADDING_Y = 13;
+  private static final float BOTTOM_MARGIN = 25;
+
+  private static final String[] HEADERS = {
+      "ID", "Name", "Price", "Quantity", "Status",
+      "Available From", "Active", "Brand ID", "Category IDs"
+  };
+
+  private static final float[] CELL_WIDTHS = {
+      30, 100, 50, 50, 50, 80, 40, 50, 60
+  };
+
   @Override
   public byte[] write(List<ProductRow> productRows) throws IOException {
     try (PDDocument document = new PDDocument()) {
-      PDPage page = new PDPage();
-      document.addPage(page);
+      PDPage page = createPage(document);
       PDPageContentStream contentStream = new PDPageContentStream(document, page);
 
-      // Fonts
       PDType1Font headerFont = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);
       PDType1Font dataFont = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
 
-      // Title on first page
-      contentStream.setFont(headerFont, 12);
-      contentStream.beginText();
-      contentStream.newLineAtOffset(25, 750);
-      contentStream.showText("Product List");
-      contentStream.endText();
+      writeTitle(contentStream, headerFont, "Product List");
 
-      // Table setup
-      float margin = 25;
-      float topY = 720;
-      float cellHeight = 20;
-      float fontSize = 8;
-      float textPaddingY = 13; // Padding from top of cell for text baseline
-      float tableWidth = page.getMediaBox().getWidth() - 2 * margin;
-      int numCols = 9;
-      float[] cellWidths = {30, 100, 50, 50, 50, 80, 40, 50, 60}; // Custom widths for better fit
-      float totalCellWidth = 0;
-      for (float w : cellWidths) {
-        totalCellWidth += w;
-      }
-      if (totalCellWidth > tableWidth) {
-        float scale = tableWidth / totalCellWidth;
-        for (int i = 0; i < cellWidths.length; i++) {
-          cellWidths[i] *= scale; // Adjust to fit page
-        }
-        totalCellWidth = tableWidth; // Update totalCellWidth to reflect the scaled sum
-      }
-
-      String[] headers = new String[]{
-          "ID", "Name", "Price", "Quantity", "Status", "Available From", "Active", "Brand ID",
-          "Category IDs"
-      };
+      float[] adjustedCellWidths = adjustCellWidths(page, CELL_WIDTHS);
+      int maxRowsPerPage = calculateMaxRowsPerPage();
 
       int rowIndex = 0;
-      float bottomMargin = 25;
-      int maxRowsPerPage =
-          (int) ((topY - bottomMargin) / cellHeight) - 1; // Subtract 1 for header row
-
       while (rowIndex < productRows.size()) {
-        float y = topY;
+        float y = TOP_Y;
 
-        // Draw headers
-        contentStream.setFont(headerFont, fontSize);
-        float xOffset = margin;
-        for (int j = 0; j < numCols; j++) {
-          contentStream.beginText();
-          contentStream.newLineAtOffset(xOffset + 2, y - textPaddingY);
-          contentStream.showText(truncateText(headers[j], cellWidths[j], fontSize, headerFont));
-          contentStream.endText();
-          xOffset += cellWidths[j];
-        }
+        drawHeaderRow(contentStream, headerFont, adjustedCellWidths, y);
 
-        // Draw data rows on this page
-        contentStream.setFont(dataFont, fontSize);
         int rowsOnPage = 0;
-        for (; rowIndex < productRows.size() && rowsOnPage < maxRowsPerPage;
-            rowIndex++, rowsOnPage++) {
-          ProductRow row = productRows.get(rowIndex);
-          String[] data = new String[]{
-              row.getId() != null ? String.valueOf(row.getId()) : "",
-              row.getName() != null ? row.getName() : "",
-              row.getPrice() != null ? String.format("%.2f", row.getPrice()) : "",
-              row.getQuantity() != null ? String.valueOf(row.getQuantity()) : "",
-              row.getStatus() != null ? row.getStatus().name() : "",
-              row.getAvailableFrom() != null ? DateUtil.format(row.getAvailableFrom(),
-                  CommonConstant.DATE_TIME_FORMAT) : "",
-              String.valueOf(row.getIsActive()),
-              row.getBrandId() != null ? String.valueOf(row.getBrandId()) : "",
-              row.getCategoryIds() != null ? row.getCategoryIds() : ""
-          };
+        rowIndex = drawDataRows(contentStream, dataFont, adjustedCellWidths,
+            productRows, rowIndex, maxRowsPerPage, rowsOnPage, y);
 
-          xOffset = margin;
-          for (int j = 0; j < numCols; j++) {
-            contentStream.beginText();
-            contentStream.newLineAtOffset(xOffset + 2,
-                y - (rowsOnPage + 1) * cellHeight - textPaddingY);
-            contentStream.showText(truncateText(data[j], cellWidths[j], fontSize, dataFont));
-            contentStream.endText();
-            xOffset += cellWidths[j];
-          }
-        }
+        drawGrid(contentStream, adjustedCellWidths, y, rowsOnPage);
 
-        // Draw grid lines for this page
-        int totalRowsOnPage = 1 + rowsOnPage; // Header + data rows
-        contentStream.setLineWidth(1f);
-        for (int i = 0; i <= totalRowsOnPage; i++) {
-          contentStream.moveTo(margin, y - i * cellHeight);
-          contentStream.lineTo(margin + totalCellWidth, y - i * cellHeight);
-          contentStream.stroke();
-        }
-        xOffset = margin;
-        for (int j = 0; j <= numCols; j++) {
-          contentStream.moveTo(xOffset, y);
-          contentStream.lineTo(xOffset, y - totalRowsOnPage * cellHeight);
-          contentStream.stroke();
-          if (j < numCols) {
-            xOffset += cellWidths[j];
-          }
-        }
-
-        // Add new page if needed
         if (rowIndex < productRows.size()) {
           contentStream.close();
-          page = new PDPage();
-          document.addPage(page);
+          page = createPage(document);
           contentStream = new PDPageContentStream(document, page);
         }
       }
 
       contentStream.close();
 
-      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-      document.save(byteArrayOutputStream);
-      return byteArrayOutputStream.toByteArray();
+      return PdfboxUtil.saveDocumentToBytes(document);
     }
   }
 
-  // Helper method to truncate text to fit within cell width
+  private PDPage createPage(PDDocument document) {
+    PDPage page = new PDPage();
+    document.addPage(page);
+    return page;
+  }
+
+  private void writeTitle(PDPageContentStream contentStream, PDType1Font font, String title)
+      throws IOException {
+    contentStream.setFont(font, 12);
+    contentStream.beginText();
+    contentStream.newLineAtOffset(MARGIN, 750);
+    contentStream.showText(title);
+    contentStream.endText();
+  }
+
+  private float[] adjustCellWidths(PDPage page, float[] originalWidths) {
+    float tableWidth = page.getMediaBox().getWidth() - 2 * MARGIN;
+    float totalCellWidth = 0;
+    for (float w : originalWidths) {
+      totalCellWidth += w;
+    }
+    if (totalCellWidth > tableWidth) {
+      float scale = tableWidth / totalCellWidth;
+      float[] scaled = new float[originalWidths.length];
+      for (int i = 0; i < originalWidths.length; i++) {
+        scaled[i] = originalWidths[i] * scale;
+      }
+      return scaled;
+    }
+    return originalWidths.clone();
+  }
+
+  private int calculateMaxRowsPerPage() {
+    return (int) ((TOP_Y - BOTTOM_MARGIN) / CELL_HEIGHT) - 1;
+  }
+
+  private void drawHeaderRow(PDPageContentStream contentStream, PDType1Font font,
+      float[] cellWidths, float y) throws IOException {
+    contentStream.setFont(font, FONT_SIZE);
+    float xOffset = MARGIN;
+    for (int j = 0; j < HEADERS.length; j++) {
+      writeCellText(contentStream, font, HEADERS[j], xOffset, y - TEXT_PADDING_Y,
+          cellWidths[j]);
+      xOffset += cellWidths[j];
+    }
+  }
+
+  private int drawDataRows(PDPageContentStream contentStream, PDType1Font font,
+      float[] cellWidths, List<ProductRow> productRows,
+      int startIndex, int maxRowsPerPage, int rowsOnPage, float y) throws IOException {
+    contentStream.setFont(font, FONT_SIZE);
+
+    for (; startIndex < productRows.size() && rowsOnPage < maxRowsPerPage;
+        startIndex++, rowsOnPage++) {
+      ProductRow row = productRows.get(startIndex);
+      String[] data = mapRowToData(row);
+
+      float xOffset = MARGIN;
+      for (int j = 0; j < data.length; j++) {
+        writeCellText(contentStream, font, data[j], xOffset,
+            y - (rowsOnPage + 1) * CELL_HEIGHT - TEXT_PADDING_Y,
+            cellWidths[j]);
+        xOffset += cellWidths[j];
+      }
+    }
+    return startIndex;
+  }
+
+  private void drawGrid(PDPageContentStream contentStream, float[] cellWidths,
+      float y, int rowsOnPage) throws IOException {
+    int totalRowsOnPage = 1 + rowsOnPage;
+    contentStream.setLineWidth(1f);
+
+    // Horizontal lines
+    for (int i = 0; i <= totalRowsOnPage; i++) {
+      contentStream.moveTo(MARGIN, y - i * CELL_HEIGHT);
+      contentStream.lineTo(MARGIN + sum(cellWidths), y - i * CELL_HEIGHT);
+      contentStream.stroke();
+    }
+
+    // Vertical lines
+    float xOffset = MARGIN;
+    for (float cellWidth : cellWidths) {
+      contentStream.moveTo(xOffset, y);
+      contentStream.lineTo(xOffset, y - totalRowsOnPage * CELL_HEIGHT);
+      contentStream.stroke();
+      xOffset += cellWidth;
+    }
+    // Last vertical line
+    contentStream.moveTo(xOffset, y);
+    contentStream.lineTo(xOffset, y - totalRowsOnPage * CELL_HEIGHT);
+    contentStream.stroke();
+  }
+
+  private String[] mapRowToData(ProductRow row) {
+    return new String[]{
+        safeString(row.getId()),
+        safeString(row.getName()),
+        row.getPrice() != null ? String.format("%.2f", row.getPrice()) : "",
+        safeString(row.getQuantity()),
+        row.getStatus() != null ? row.getStatus().name() : "",
+        row.getAvailableFrom() != null ? DateUtil.format(row.getAvailableFrom(),
+            CommonConstant.DATE_TIME_FORMAT) : "",
+        String.valueOf(row.getIsActive()),
+        safeString(row.getBrandId()),
+        row.getCategoryIds() != null ? row.getCategoryIds() : ""
+    };
+  }
+
+  private String safeString(Object obj) {
+    return obj != null ? String.valueOf(obj) : "";
+  }
+
+  private void writeCellText(PDPageContentStream contentStream, PDType1Font font,
+      String text, float x, float y, float cellWidth) throws IOException {
+    contentStream.beginText();
+    contentStream.newLineAtOffset(x + 2, y);
+    contentStream.showText(truncateText(text, cellWidth, FONT_SIZE, font));
+    contentStream.endText();
+  }
+
   private String truncateText(String text, float cellWidth, float fontSize, PDType1Font font)
       throws IOException {
     if (text == null) {
@@ -153,12 +201,20 @@ public class ProductPdfWriterAdapter implements ProductPdfWriterPort {
     }
     float stringWidth = font.getStringWidth(text) / 1000 * fontSize;
     if (stringWidth <= cellWidth - 4) {
-      return text; // 4 for padding
+      return text;
     }
     int endIndex = (int) (text.length() * (cellWidth - 4) / stringWidth);
     if (endIndex < 3) {
       return "";
     }
     return text.substring(0, Math.max(3, endIndex - 3)) + "...";
+  }
+
+  private float sum(float[] arr) {
+    float total = 0;
+    for (float v : arr) {
+      total += v;
+    }
+    return total;
   }
 }
