@@ -59,13 +59,13 @@ public class DateUtil {
     return format(now(), pattern);
   }
 
-  public static Date today() {
+  public static Date getTodayMidnight() {
     Calendar calendar = Calendar.getInstance();
     resetToMidnight(calendar);
     return calendar.getTime();
   }
 
-  public static Date tomorrow() {
+  public static Date getTomorrowMidnight() {
     Calendar calendar = Calendar.getInstance();
     calendar.setTime(new Date());
     resetToMidnight(calendar);
@@ -73,7 +73,7 @@ public class DateUtil {
     return calendar.getTime();
   }
 
-  public static Date yesterday() {
+  public static Date getYesterdayMidnight() {
     Calendar calendar = Calendar.getInstance();
     calendar.setTime(new Date());
     resetToMidnight(calendar);
