@@ -2,6 +2,7 @@ app:
   config:
     local:
       system:
+        encryption-key: 123456
         locale: en-US
         cors:
           allowed-origins:
