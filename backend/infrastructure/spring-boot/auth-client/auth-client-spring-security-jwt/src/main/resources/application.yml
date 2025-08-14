@@ -1,4 +1,0 @@
-app:
-  auth-client:
-    spring-security-jwt:
-      base-url: ${AUTH_CLIENT_SPRING_SECURITY_JWT_BASE_URL:http://localhost:8091}

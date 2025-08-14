@@ -10,7 +10,6 @@ public enum CustomClaim {
 
   USER_ID("user_id", "X-User-Id"),
   USER_ROLES("user_roles", "X-User-Roles"),
-  SESSION_ID("session_id", "X-Session-Id"),
   EXPIRES_AT("expires_at", "X-Expires-At"),
   ;
 

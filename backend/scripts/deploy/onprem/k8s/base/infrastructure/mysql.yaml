@@ -26,6 +26,7 @@ data:
     (
         id           INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
         username     VARCHAR(255) NOT NULL,
+        password     VARCHAR(255) NOT NULL,
         first_name   VARCHAR(255) NOT NULL,
         last_name    VARCHAR(255) NOT NULL,
         email        VARCHAR(255) NOT NULL,
@@ -54,48 +55,11 @@ data:
     ) ENGINE = InnoDB;
 
     -- Password: Aa@123456
-    INSERT INTO users (id, username, first_name, last_name, email, phone_number, role)
-    VALUES (1, 'admin', 'Atlas', 'Admin', 'admin@atlas.org', '0987654321', 'ADMIN'),
-           (2, 'user', 'John', 'Doe', 'user@atlas.org', '0987321654', 'USER');
+    INSERT INTO users (id, username, password, first_name, last_name, email, phone_number, role)
+    VALUES (1, 'admin', '$2a$12$JBXIjeVKldJZ0824t5ULHOLeoq330xmpx0Ua/5Ipz4hlGxlSm9nE2', 'Atlas', 'Admin', 'admin@atlas.org', '0987654321', 'ADMIN'),
+           (2, 'user', '$2a$12$JBXIjeVKldJZ0824t5ULHOLeoq330xmpx0Ua/5Ipz4hlGxlSm9nE2', 'John', 'Doe', 'user@atlas.org', '0987321654', 'USER');
 
-  02-db_auth.sql: |
-    CREATE DATABASE IF NOT EXISTS db_auth;
-
-    USE db_auth;
-
-    CREATE TABLE IF NOT EXISTS users
-    (
-        id      INT          NOT NULL PRIMARY KEY,
-        username     VARCHAR(255) NOT NULL,
-        password     VARCHAR(255) NOT NULL,
-        email        VARCHAR(255) NOT NULL,
-        phone_number VARCHAR(20)  NOT NULL,
-        role         VARCHAR(50)  NOT NULL,
-        created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_at   DATETIME              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        UNIQUE INDEX idx_username (username),
-        UNIQUE INDEX idx_email (email),
-        UNIQUE INDEX idx_phone_number (phone_number)
-    ) ENGINE = InnoDB;
-
-    -- Password: Aa@123456
-    INSERT INTO users (id, username, password, email, phone_number, role)
-    VALUES (1, 'admin', '$2a$12$JBXIjeVKldJZ0824t5ULHOLeoq330xmpx0Ua/5Ipz4hlGxlSm9nE2',
-            'admin@atlas.org', '0987654321', 'ADMIN'),
-           (2, 'user', '$2a$12$JBXIjeVKldJZ0824t5ULHOLeoq330xmpx0Ua/5Ipz4hlGxlSm9nE2', 'user@atlas.org',
-            '0987321654', 'USER');
-
-    CREATE TABLE session
-    (
-        id            VARCHAR(255) PRIMARY KEY,
-        user_id       INT          NOT NULL,
-        device_id     VARCHAR(255) NOT NULL,
-        refresh_token VARCHAR(1000) NOT NULL,
-        created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_at    DATETIME              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    );
-
-  03-db_product.sql: |
+  02-db_product.sql: |
     CREATE DATABASE IF NOT EXISTS db_product;
 
     USE db_product;
@@ -375,7 +339,7 @@ data:
     (19, 5), -- LG Soundbar → Accessories (Audio Equipment)
     (20, 5); -- Alienware m15 → Accessories (Gaming Laptop Add-ons)
 
-  04-db_order.sql: |
+  03-db_order.sql: |
     CREATE DATABASE IF NOT EXISTS db_order;
 
     USE db_order;
@@ -428,7 +392,7 @@ data:
         updated_at      DATETIME              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE = InnoDB;
 
-  05-db_notification.sql: |
+  04-db_notification.sql: |
     CREATE DATABASE IF NOT EXISTS db_notification;
 
     USE db_notification;
@@ -448,7 +412,7 @@ data:
         updated_at      DATETIME              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE = InnoDB;
 
-  06-db_quartz.sql: |
+  05-db_quartz.sql: |
     -- https://github.com/quartznet/quartznet/blob/main/database/tables/tables_mysql_innodb.sql
 
     CREATE DATABASE IF NOT EXISTS db_quartz;
@@ -626,7 +590,7 @@ data:
     CREATE INDEX IDX_QRTZ_FT_T_G ON QRTZ_FIRED_TRIGGERS (SCHED_NAME, TRIGGER_NAME, TRIGGER_GROUP);
     CREATE INDEX IDX_QRTZ_FT_TG ON QRTZ_FIRED_TRIGGERS (SCHED_NAME, TRIGGER_GROUP);
 
-  07-db_zipkin.sql: |
+  06-db_zipkin.sql: |
     -- https://github.com/openzipkin/zipkin/blob/master/zipkin-storage/mysql-v1/src/main/resources/mysql.sql
 
     CREATE DATABASE IF NOT EXISTS db_zipkin;

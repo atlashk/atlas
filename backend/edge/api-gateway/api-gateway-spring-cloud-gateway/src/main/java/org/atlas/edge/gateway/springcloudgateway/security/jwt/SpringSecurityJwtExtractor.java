@@ -10,11 +10,6 @@ import org.springframework.stereotype.Service;
 public class SpringSecurityJwtExtractor implements JwtExtractor {
 
   @Override
-  public String extractSessionId(Jwt jwt) {
-    return jwt.getClaimAsString(CustomClaim.SESSION_ID.getClaim());
-  }
-
-  @Override
   public String extractUserId(Jwt jwt) {
     return jwt.getSubject();
   }

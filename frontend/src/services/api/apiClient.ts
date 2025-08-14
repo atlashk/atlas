@@ -1,10 +1,8 @@
 import type { ApiResponse } from '@/interfaces/api.interface';
-import { generateDeviceId } from '@/utils/deviceIdGenerator.ts';
 import { performanceMonitor } from '@/utils/performance';
 import axios, { AxiosError } from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const DEVICE_ID_HEADER = 'X-Device-Id';
 
 // Token refresh state management
 let isRefreshing = false;
@@ -31,23 +29,6 @@ const apiClient = axios.create({
   withCredentials: true, // Add withCredentials to handle CORS
 });
 
-// Cache for device ID to avoid repeated localStorage access
-let cachedDeviceId: string | null = null;
-
-function getOrCreateDeviceId(): string {
-  if (cachedDeviceId) {
-    return cachedDeviceId;
-  }
-
-  let deviceId = localStorage.getItem(DEVICE_ID_HEADER);
-  if (!deviceId) {
-    deviceId = generateDeviceId();
-    localStorage.setItem(DEVICE_ID_HEADER, deviceId);
-  }
-
-  cachedDeviceId = deviceId;
-  return deviceId;
-}
 
 // Request interceptor
 apiClient.interceptors.request.use(
@@ -59,9 +40,6 @@ apiClient.interceptors.request.use(
     if (!(config.data instanceof FormData)) {
       config.headers['Content-Type'] = 'application/json';
     }
-
-    // Add deviceId header (cached)
-    config.headers[DEVICE_ID_HEADER] = getOrCreateDeviceId();
 
     // Add access token
     const accessToken = localStorage.getItem('accessToken');
@@ -113,10 +91,6 @@ apiClient.interceptors.response.use(
 
         const refreshTokenResponse = await axios.post(`${API_BASE_URL}/api/auth/refresh-token`, {
           refreshToken
-        }, {
-          headers: {
-            [DEVICE_ID_HEADER]: getOrCreateDeviceId()
-          }
         });
 
         if (refreshTokenResponse.data.success) {

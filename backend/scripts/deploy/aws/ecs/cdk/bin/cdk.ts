@@ -2,7 +2,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { InfrastructureStack } from '../lib/stack/infrastructure-stack';
 import { ApiGatewayStack } from '../lib/stack/api-gateway-stack';
-import { AuthServerStack } from '../lib/stack/auth-server-stack';
 import { UserServiceStack } from '../lib/stack/user-service-stack';
 import { ProductServiceStack } from '../lib/stack/product-service-stack';
 import { OrderServiceStack } from '../lib/stack/order-service-stack';
@@ -30,14 +29,6 @@ const apiGatewayStack = new ApiGatewayStack(app, `atlas-api-gateway-${environmen
   environmentName,
   infrastructure: infrastructureStack,
   description: `Atlas API Gateway - ECS Deployment (${environmentName})`,
-});
-
-// Auth Server Stack
-const authServerStack = new AuthServerStack(app, `atlas-auth-server-${environmentName}`, {
-  env,
-  environmentName,
-  infrastructure: infrastructureStack,
-  description: `Atlas Auth Server - ECS Deployment (${environmentName})`,
 });
 
 // Downstream Service Stacks (Internal Services - No ALB Listener Rules)

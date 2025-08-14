@@ -28,7 +28,6 @@ Internet → ALB → API Gateway → AWS Cloud Map → Internal Services
 
 ### 2. AWS Cloud Map Service Discovery (No Eureka)
 All internal services use AWS Cloud Map for service discovery:
-- `auth-server.atlas.{environment}:8091`
 - `user-service.atlas.{environment}:8081`
 - `product-service.atlas.{environment}:8082`
 - `order-service.atlas.{environment}:8083`
@@ -86,7 +85,6 @@ this.service.associateCloudMapService({
 
 | Service | Cloud Map URL | Port |
 |---------|---------------|------|
-| Auth Server | `auth-server.atlas.{env}` | 8091 |
 | User Service | `user-service.atlas.{env}` | 8081 |
 | Product Service | `product-service.atlas.{env}` | 8082 |
 | Order Service | `order-service.atlas.{env}` | 8083 |

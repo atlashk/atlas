@@ -29,9 +29,6 @@ public class Auth0JwtService implements JwtService {
         .withExpiresAt(input.getJwt().getExpiresAt());
 
     // Custom claims
-    if (StringUtil.isNotBlank(input.getJwt().getSessionId())) {
-      builder.withClaim(CustomClaim.SESSION_ID.getClaim(), input.getJwt().getSessionId());
-    }
     if (CollectionUtil.isNotEmpty(input.getJwt().getUserRoles())) {
       builder.withClaim(CustomClaim.USER_ROLES.getClaim(),
           RoleUtil.toRolesString(input.getJwt().getUserRoles()));
@@ -68,10 +65,6 @@ public class Auth0JwtService implements JwtService {
         .expiresAt(decodedJWT.getExpiresAt());
 
     // Custom claims
-    String sessionId = decodedJWT.getClaim(CustomClaim.SESSION_ID.getClaim()).asString();
-    if (StringUtil.isNotBlank(sessionId)) {
-      builder.sessionId(sessionId);
-    }
     String userRoles = decodedJWT.getClaim(CustomClaim.USER_ROLES.getClaim()).asString();
     if (StringUtil.isNotBlank(userRoles)) {
       builder.userRoles(RoleUtil.toRolesSet(userRoles));

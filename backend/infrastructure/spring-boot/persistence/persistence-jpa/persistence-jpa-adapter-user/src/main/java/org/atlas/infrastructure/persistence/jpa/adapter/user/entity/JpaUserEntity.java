@@ -24,6 +24,8 @@ public class JpaUserEntity extends JpaBaseEntity {
 
   private String username;
 
+  private String password;
+
   @Column(name = "first_name")
   private String firstName;
 

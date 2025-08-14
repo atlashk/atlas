@@ -32,23 +32,16 @@ public class ContextFilter extends OncePerRequestFilter {
     ContextInfo contextInfo = new ContextInfo();
 
     // For authorized requests
-    final String sessionIdHeader = HttpUtil.getHeader(request, CustomClaim.SESSION_ID.getHeader());
     final String userIdHeader = HttpUtil.getHeader(request, CustomClaim.USER_ID.getHeader());
     final String userRolesHeader = HttpUtil.getHeader(request, CustomClaim.USER_ROLES.getHeader());
     final String expiresAtHeader = HttpUtil.getHeader(request, CustomClaim.EXPIRES_AT.getHeader());
-    if (StringUtil.isNotBlank(sessionIdHeader) &&
-        StringUtil.isNotBlank(userIdHeader) &&
+    if (StringUtil.isNotBlank(userIdHeader) &&
         StringUtil.isNotBlank(userRolesHeader) &&
         StringUtil.isNotBlank(expiresAtHeader)) {
-      contextInfo.setSessionId(sessionIdHeader);
       contextInfo.setUserId(Integer.parseInt(userIdHeader));
       contextInfo.setUserRoles(RoleUtil.toRolesSet(userRolesHeader));
       contextInfo.setExpiresAt(new Date(Long.parseLong(expiresAtHeader)));
     }
-
-    // Device ID
-    final String deviceIdHeader = HttpUtil.getHeader(request, "X-Device-Id");
-    contextInfo.setDeviceId(deviceIdHeader);
 
     try {
       Contexts.set(contextInfo);

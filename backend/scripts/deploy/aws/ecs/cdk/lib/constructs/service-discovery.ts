@@ -19,7 +19,7 @@ export class ServiceDiscovery extends Construct {
     const {
       environmentName,
       vpc,
-      services = ['auth-server', 'api-gateway', 'user-service', 'product-service', 'order-service', 'notification-service']
+      services = ['api-gateway', 'user-service', 'product-service', 'order-service', 'notification-service']
     } = props;
 
     // Create service discovery namespace

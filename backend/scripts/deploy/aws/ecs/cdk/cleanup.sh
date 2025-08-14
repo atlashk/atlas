@@ -32,7 +32,7 @@ show_help() {
     log_info "Atlas CDK Cleanup Script - Destroys all Atlas CDK stacks and cleans up resources"
     log_info ""
     log_info "This script will:"
-    log_info "  - Destroy service stacks (auth-server, api-gateway)"
+    log_info "  - Destroy service stacks (api-gateway)"
     log_info "  - Destroy infrastructure stack (VPC, RDS, ElastiCache, ECS, etc.)"
     log_info "  - Clean up ECR repositories (optional)"
     log_info ""
@@ -159,20 +159,6 @@ destroy_service_stacks() {
     else
         log_info "API Gateway stack does not exist"
     fi
-
-    # Destroy Auth Server Stack
-    log_info "Destroying auth-server stack..."
-    if aws cloudformation describe-stacks --profile ${PROFILE} --region ${REGION} --stack-name atlas-auth-server-${ENVIRONMENT} &>/dev/null; then
-        cdk destroy atlas-auth-server-${ENVIRONMENT} \
-            --profile ${PROFILE} \
-            --context environment=${ENVIRONMENT} \
-            --context region=${REGION} \
-            --context account=${account_id} \
-            --force
-        log_success "Auth Server stack destroyed"
-    else
-        log_info "Auth Server stack does not exist"
-    fi
 }
 
 destroy_infrastructure_stack() {
@@ -201,7 +187,7 @@ destroy_infrastructure_stack() {
 cleanup_ecr_repositories() {
     log_section "Cleaning up ECR Repositories"
     
-    local services=("api-gateway" "auth-server")
+    local services=("api-gateway")
     
     for service in "${services[@]}"; do
         local repo_name="atlas-${service}"

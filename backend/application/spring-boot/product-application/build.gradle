@@ -40,6 +40,9 @@ dependencies {
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
     }
     switch (rootProject.ext.appStack['cache']) {
+        case 'simple':
+            api project(':infrastructure.spring-boot.cache.simple')
+            break
         case 'redis':
             api project(':infrastructure.spring-boot.cache.redis')
             break

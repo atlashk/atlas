@@ -154,7 +154,7 @@ stop_applications() {
     log_section "Stopping Application Services"
     
     # Stop in reverse dependency order
-    local services=("user-service" "order-service" "product-service" "notification-service" "auth-server" "api-gateway")
+    local services=("user-service" "order-service" "product-service" "notification-service" "api-gateway")
     
     for service in "${services[@]}"; do
         log_info "Stopping $service..."

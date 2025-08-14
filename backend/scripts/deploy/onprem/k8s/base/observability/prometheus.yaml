@@ -134,11 +134,6 @@ data:
           - targets: ['notification-service:8084']
         metrics_path: '/actuator/prometheus'
 
-      - job_name: 'auth-server'
-        static_configs:
-          - targets: ['auth-server:8091']
-        metrics_path: '/actuator/prometheus'
-
       - job_name: 'api-gateway'
         static_configs:
           - targets: ['api-gateway:8080']

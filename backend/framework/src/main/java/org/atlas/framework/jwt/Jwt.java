@@ -25,4 +25,8 @@ public class Jwt {
   // Custom claims
   private Set<Role> userRoles;
   private String sessionId;
+
+  public Integer getUserId() {
+    return Integer.valueOf(subject);
+  }
 }

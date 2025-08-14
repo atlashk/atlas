@@ -48,7 +48,7 @@ spec:
                   key: LOG_LEVEL
             # JWT configuration
             - name: JWK_SET_URI
-              value: "http://auth-server:8091/.well-known/jwks.json"
+              value: "http://user-service:8081/.well-known/jwks.json"
             # Redis configuration
             - name: REDIS_HOST
               value: "redis"

@@ -166,8 +166,6 @@ export class InternalService extends Construct {
     serviceName: string
   ): cdk.aws_servicediscovery.Service {
     switch (serviceName) {
-      case 'auth-server':
-        return infrastructure.authServerDiscoveryService;
       case 'user-service':
         return infrastructure.userServiceDiscoveryService;
       case 'product-service':

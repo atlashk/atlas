@@ -45,13 +45,6 @@ scrape_configs:
         labels:
           service_name: notification-service
           __path__: /var/log/notification-service/*.log
-  - job_name: auth-server
-    static_configs:
-      - targets:
-          - localhost
-        labels:
-          service_name: auth-server
-          __path__: /var/log/auth-server/*.log
   - job_name: api-gateway
     static_configs:
       - targets:

@@ -8,10 +8,8 @@ import org.atlas.domain.user.shared.enums.Role;
 @Data
 public class ContextInfo {
 
-  private String sessionId;
   private Integer userId;
   private Set<Role> userRoles;
-  private String deviceId;
   private Date expiresAt;
 
   public boolean isAdmin() {

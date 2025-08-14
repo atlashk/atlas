@@ -39,7 +39,7 @@ show_help() {
     log_info "  - Pushes Docker images to ECR"
     log_info "  - Deploys infrastructure stack (VPC, RDS, ElastiCache, ECS, etc.)"
     log_info "  - Provides database initialization guidance"
-    log_info "  - Deploys auth-server and api-gateway stacks"
+    log_info "  - Deploys api-gateway stacks"
     log_info ""
     log_info "⚠️  First-time setup: Run with --bootstrap flag to initialize CDK in your AWS account"
     log_info ""
@@ -251,7 +251,7 @@ push_docker_images_to_ecr() {
     aws ecr get-login-password --profile ${PROFILE} --region ${REGION} | docker login --username AWS --password-stdin ${account_id}.dkr.ecr.${REGION}.amazonaws.com
 
     # Services that need to be pushed to ECR (these should already be built by build.sh)
-    local services=("api-gateway" "auth-server" "user-service" "product-service" "order-service" "notification-service")
+    local services=("api-gateway" "user-service" "product-service" "order-service" "notification-service")
 
     # Create ECR repositories and push images
     for service_name in "${services[@]}"; do
@@ -375,21 +375,6 @@ deploy_services() {
     local account_id
     account_id=$(aws sts get-caller-identity --profile ${PROFILE} --query Account --output text)
 
-    # Deploy Auth Server
-    local auth_server_stack_name="atlas-auth-server-${ENVIRONMENT}"
-    if should_skip_stack_deployment "$auth_server_stack_name"; then
-        log_info "Skipping auth-server deployment..."
-    else
-        log_info "Deploying auth-server stack..."
-        cdk deploy "$auth_server_stack_name" \
-            --profile ${PROFILE} \
-            --context environment=${ENVIRONMENT} \
-            --context region=${REGION} \
-            --context account=${account_id} \
-            --context ecrRepository=${account_id}.dkr.ecr.${REGION}.amazonaws.com/atlas-auth-server \
-            --require-approval never
-    fi
-    
     # Deploy Downstream Services (Internal Services - No ALB exposure)
     local user_service_stack_name="atlas-user-service-${ENVIRONMENT}"
     if should_skip_stack_deployment "$user_service_stack_name"; then

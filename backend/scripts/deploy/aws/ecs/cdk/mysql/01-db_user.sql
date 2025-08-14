@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS users
 (
     id           INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
     username     VARCHAR(255) NOT NULL,
+    password     VARCHAR(255) NOT NULL,
     first_name   VARCHAR(255) NOT NULL,
     last_name    VARCHAR(255) NOT NULL,
     email        VARCHAR(255) NOT NULL,
@@ -34,6 +35,6 @@ CREATE TABLE IF NOT EXISTS outbox_message
 ) ENGINE = InnoDB;
 
 -- Password: Aa@123456
-INSERT INTO users (id, username, first_name, last_name, email, phone_number, role)
-VALUES (1, 'admin', 'Atlas', 'Admin', 'admin@atlas.org', '0987654321', 'ADMIN'),
-       (2, 'user', 'John', 'Doe', 'user@atlas.org', '0987321654', 'USER');
+INSERT INTO users (id, username, password, first_name, last_name, email, phone_number, role)
+VALUES (1, 'admin', '$2a$12$JBXIjeVKldJZ0824t5ULHOLeoq330xmpx0Ua/5Ipz4hlGxlSm9nE2', 'Atlas', 'Admin', 'admin@atlas.org', '0987654321', 'ADMIN'),
+       (2, 'user', '$2a$12$JBXIjeVKldJZ0824t5ULHOLeoq330xmpx0Ua/5Ipz4hlGxlSm9nE2', 'John', 'Doe', 'user@atlas.org', '0987321654', 'USER');

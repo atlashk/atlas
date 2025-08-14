@@ -154,7 +154,6 @@ export class InfrastructureConfigBuilder {
   private getDefaultServiceDiscovery(): InfrastructureConfig['serviceDiscovery'] {
     return {
       services: [
-        'auth-server',
         'api-gateway',
         'user-service',
         'product-service',

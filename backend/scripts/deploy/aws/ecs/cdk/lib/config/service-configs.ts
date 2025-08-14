@@ -1,11 +1,10 @@
 import * as ecs from 'aws-cdk-lib/aws-ecs';
-import { ServiceConfig } from '../constructs/api-gateway-service';
-import { InternalServiceConfig } from '../constructs/internal-service';
-import { InfrastructureStack } from '../stack/infrastructure-stack';
+import {ServiceConfig} from '../constructs/api-gateway-service';
+import {InternalServiceConfig} from '../constructs/internal-service';
+import {InfrastructureStack} from '../stack/infrastructure-stack';
 
 export interface ServiceConfigFactory {
   createApiGatewayConfig(environmentName: string, infrastructure: InfrastructureStack): ServiceConfig;
-  createAuthServerConfig(environmentName: string, infrastructure: InfrastructureStack): ServiceConfig;
 }
 
 export class DefaultServiceConfigFactory implements ServiceConfigFactory {
@@ -19,7 +18,6 @@ export class DefaultServiceConfigFactory implements ServiceConfigFactory {
       pathPatterns: ['/*'],
       environment: {
         // Service URIs for routing - using Cloud Map service discovery
-        AUTH_SERVER_URI: `http://auth-server.atlas.${environmentName}:8091`,
         USER_SERVICE_URI: `http://user-service.atlas.${environmentName}:8081`,
         PRODUCT_SERVICE_URI: `http://product-service.atlas.${environmentName}:8082`,
         ORDER_SERVICE_URI: `http://order-service.atlas.${environmentName}:8083`,
@@ -28,27 +26,6 @@ export class DefaultServiceConfigFactory implements ServiceConfigFactory {
         REDIS_CLUSTER_NODES: `${infrastructure.redisCluster.attrConfigurationEndPointAddress}:6379`,
       },
       secrets: {
-        REDIS_PASSWORD: ecs.Secret.fromSecretsManager(infrastructure.redisSecret),
-      },
-    };
-  }
-
-  createAuthServerConfig(environmentName: string, infrastructure: InfrastructureStack): ServiceConfig {
-    return {
-      serviceName: 'auth-server',
-      containerPort: 8091,
-      healthCheckPath: '/actuator/health',
-      listenerPriority: 101,
-      pathPatterns: ['/auth/*'],
-      environment: {
-        // Database Configuration - using infrastructure outputs
-        MYSQL_URL: `jdbc:mysql://${infrastructure.mysqlDatabase.instanceEndpoint.hostname}:3306/db_auth?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false`,
-        MYSQL_USERNAME: 'root',
-        // Redis Configuration - using infrastructure outputs
-        REDIS_CLUSTER_NODES: `${infrastructure.redisCluster.attrConfigurationEndPointAddress}:6379`,
-      },
-      secrets: {
-        MYSQL_PASSWORD: ecs.Secret.fromSecretsManager(infrastructure.mysqlSecret, 'password'),
         REDIS_PASSWORD: ecs.Secret.fromSecretsManager(infrastructure.redisSecret),
       },
     };
@@ -68,7 +45,6 @@ export class ApiGatewayConfigBuilder {
   withServiceUris(environmentName: string): ApiGatewayConfigBuilder {
     this.config.environment = {
       ...this.config.environment,
-      AUTH_SERVER_URI: `http://auth-server.atlas.${environmentName}:8091`,
       USER_SERVICE_URI: `http://user-service.atlas.${environmentName}:8081`,
       PRODUCT_SERVICE_URI: `http://product-service.atlas.${environmentName}:8082`,
       ORDER_SERVICE_URI: `http://order-service.atlas.${environmentName}:8083`,
@@ -118,23 +94,6 @@ export const createApiGatewayConfig = (environmentName: string, infrastructure: 
     .withServiceUris(environmentName)
     .withRedisConfig(infrastructure)
     .build();
-};
-
-export const createAuthServerConfig = (environmentName: string, infrastructure: InfrastructureStack): InternalServiceConfig => {
-  return {
-    serviceName: 'auth-server',
-    containerPort: 8091,
-    healthCheckPath: '/actuator/health',
-    environment: {
-      MYSQL_URL: `jdbc:mysql://${infrastructure.mysqlDatabase.instanceEndpoint.hostname}:3306/db_auth?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false`,
-      MYSQL_USERNAME: 'root',
-      REDIS_CLUSTER_NODES: `${infrastructure.redisCluster.attrConfigurationEndPointAddress}:6379`,
-    },
-    secrets: {
-      MYSQL_PASSWORD: ecs.Secret.fromSecretsManager(infrastructure.mysqlSecret, 'password'),
-      REDIS_PASSWORD: ecs.Secret.fromSecretsManager(infrastructure.redisSecret),
-    },
-  };
 };
 
 // Internal service configurations (no ALB listener rules)

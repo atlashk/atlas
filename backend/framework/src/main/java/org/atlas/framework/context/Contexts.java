@@ -4,8 +4,8 @@ import java.util.Date;
 import java.util.Set;
 import javax.annotation.Nullable;
 import org.atlas.domain.user.shared.enums.Role;
-import org.atlas.framework.error.AppError;
 import org.atlas.framework.domain.exception.DomainException;
+import org.atlas.framework.error.AppError;
 
 /**
  * Manages session info context for the current thread.
@@ -19,20 +19,12 @@ public class Contexts {
     return contextInfoThreadLocal.get();
   }
 
-  public static String getSessionId() {
-    return require().getSessionId();
-  }
-
   public static Integer getUserId() {
     return require().getUserId();
   }
 
   public static Set<Role> getUserRoles() {
     return require().getUserRoles();
-  }
-
-  public static String getDeviceId() {
-    return require().getDeviceId();
   }
 
   public static Date getExpiresAt() {

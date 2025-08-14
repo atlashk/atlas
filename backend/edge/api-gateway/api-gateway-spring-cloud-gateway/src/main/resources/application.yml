@@ -56,33 +56,26 @@ spring:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
                 - SessionValidation
                 - TokenRelay
-            - id: user-service-api-docs
+            - id: user-service-authorized-auth
               uri: ${USER_SERVICE_URI:lb://user-service}
-              predicates:
-                - Path=/api-docs/user-service
-              filters:
-                - RewritePath=/api-docs/user-service, /api-docs
-            # Auth server
-            - id: auth-server-authorized
-              uri: ${AUTH_SERVER_URI:lb://auth-server}
               predicates:
                 - Path=/api/auth/logout
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
                 - SessionValidation
                 - TokenRelay
-            - id: auth-server-unauthorized
-              uri: ${AUTH_SERVER_URI:lb://auth-server}
+            - id: user-service-unauthorized-auth
+              uri: ${USER_SERVICE_URI:lb://user-service}
               predicates:
                 - Path=/api/auth/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-            - id: auth-server-api-docs
-              uri: ${AUTH_SERVER_URI:lb://auth-server}
+            - id: user-service-api-docs
+              uri: ${USER_SERVICE_URI:lb://user-service}
               predicates:
-                - Path=/api-docs/auth-server
+                - Path=/api-docs/user-service
               filters:
-                - RewritePath=/api-docs/auth-server, /api-docs
+                - RewritePath=/api-docs/user-service, /api-docs
             # Product service
             - id: product-service-admin
               uri: ${PRODUCT_SERVICE_URI:lb://product-service}
@@ -170,8 +163,6 @@ springdoc:
         url: /api-docs/product-service
       - name: Order Service
         url: /api-docs/order-service
-      - name: Auth Server
-        url: /api-docs/auth-server
     default-models-expand-depth: -1 # Hide Schemas section
 
 app:

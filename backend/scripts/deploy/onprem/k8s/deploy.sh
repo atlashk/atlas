@@ -361,7 +361,7 @@ deploy_observability() {
 }
 
 deploy_applications() {
-    local backend_services=("auth-server" "user-service" "product-service" "order-service" "notification-service" "api-gateway")
+    local backend_services=("user-service" "product-service" "order-service" "notification-service" "api-gateway")
     deploy_service_category "application" "600s" "${backend_services[@]}"
 }
 

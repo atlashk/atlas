@@ -29,7 +29,6 @@ declare -ra ATLAS_APPLICATIONS=(
     "product-service"
     "order-service"
     "notification-service"
-    "auth-server"
     "api-gateway"
 )
 

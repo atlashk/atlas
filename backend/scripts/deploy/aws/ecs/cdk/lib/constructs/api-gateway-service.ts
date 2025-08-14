@@ -234,8 +234,6 @@ export class ApiGatewayService extends Construct {
     serviceName: string
   ): cdk.aws_servicediscovery.Service {
     switch (serviceName) {
-      case 'auth-server':
-        return infrastructure.authServerDiscoveryService;
       case 'api-gateway':
         return infrastructure.apiGatewayDiscoveryService;
       case 'user-service':

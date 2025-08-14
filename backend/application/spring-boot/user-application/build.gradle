@@ -39,7 +39,7 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
     }
-    api project(':infrastructure.spring-boot.auth-client.spring-security-jwt')
+    api project(':infrastructure.spring-boot.auth-server')
     api project(':infrastructure.spring-boot.bootstrap')
     switch (rootProject.ext.appStack['config']) {
         case 'yaml':

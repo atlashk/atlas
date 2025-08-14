@@ -4,11 +4,6 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
       - targets: ['eureka-server:8761']
-  - job_name: 'auth-server-metrics'
-    metrics_path: '/actuator/prometheus'
-    scrape_interval: 5s
-    static_configs:
-      - targets: ['auth-server:8091']
   - job_name: 'user-service-metrics'
     metrics_path: '/actuator/prometheus'
     scrape_interval: 5s

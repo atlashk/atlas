@@ -28,7 +28,6 @@ declare -ra ATLAS_CONTAINERS=(
     "kafka"
     "smtp4dev"
     "eureka-server"
-    "auth-server"
     "api-gateway"
     "user-service"
     "product-service"
@@ -61,7 +60,6 @@ declare -ra EXTERNAL_IMAGES=(
 # Custom Atlas images (built by this project)
 declare -ra ATLAS_IMAGES=(
     "eureka-server:latest"
-    "auth-server:latest"
     "api-gateway:latest"
     "user-service:latest"
     "product-service:latest"

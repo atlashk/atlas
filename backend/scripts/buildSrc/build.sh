@@ -21,7 +21,6 @@ SERVICES=(
     "order-service:$PROJECT_ROOT/backend/application/spring-boot/order-application"
     "notification-service:$PROJECT_ROOT/backend/application/spring-boot/notification-application"
     "eureka-server:$PROJECT_ROOT/backend/edge/discovery-server/discovery-server-eureka"
-    "auth-server:$PROJECT_ROOT/backend/edge/auth-server/auth-server-spring-security-jwt"
     "api-gateway:$PROJECT_ROOT/backend/edge/api-gateway/api-gateway-spring-cloud-gateway"
 )
 

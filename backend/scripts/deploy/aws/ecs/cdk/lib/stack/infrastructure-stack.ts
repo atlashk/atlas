@@ -258,14 +258,6 @@ export class InfrastructureStack extends cdk.Stack {
   }
 
   // Service discovery service getters
-  public get authServerDiscoveryService() {
-    return this.serviceDiscovery.getService('auth-server');
-  }
-
-  public get apiGatewayDiscoveryService() {
-    return this.serviceDiscovery.getService('api-gateway');
-  }
-
   public get userServiceDiscoveryService() {
     return this.serviceDiscovery.getService('user-service');
   }
@@ -280,5 +272,9 @@ export class InfrastructureStack extends cdk.Stack {
 
   public get notificationServiceDiscoveryService() {
     return this.serviceDiscovery.getService('notification-service');
+  }
+
+  public get apiGatewayDiscoveryService() {
+    return this.serviceDiscovery.getService('api-gateway');
   }
 }

@@ -23,11 +23,6 @@ The CDK infrastructure is organized into three main stacks:
    - Target group and load balancer rules
    - Container definitions with environment variables
 
-3. **Auth Server Stack** (`auth-server-{env}`)
-   - ECS Fargate service for Auth Server
-   - Target group and load balancer rules
-   - Container definitions with environment variables
-
 ---
 
 ## Prerequisites
@@ -272,9 +267,6 @@ npx cdk deploy atlas-infrastructure-dev --context environment=dev
 
 # Deploy API Gateway stack
 npx cdk deploy atlas-api-gateway-dev --context environment=dev
-
-# Deploy Auth Server stack
-npx cdk deploy atlas-auth-server-dev --context environment=dev
 ```
 
 ### Destroy Stacks
@@ -304,12 +296,10 @@ After the infrastructure is deployed, you need to initialize the MySQL database 
 2. Execute the SQL scripts located in `./mysql/`
 3. The scripts should be executed in the following order:
    - `01-db_user.sql`
-   - `02-db_auth.sql`
-   - `03-db_product.sql`
-   - `04-db_order.sql`
-   - `05-db_notification.sql`
-   - `06-db_quartz.sql`
-   - `07-db_zipkin.sql`
+   - `02-db_product.sql`
+   - `03-db_order.sql`
+   - `04-db_notification.sql`
+   - `05-db_quartz.sql`
 
 ---
 
@@ -324,9 +314,6 @@ When deployed to AWS ECS, logs are stored in CloudWatch Logs with the pattern: `
 ```bash
 # List all log streams
 aws logs describe-log-streams --region us-east-1 --log-group-name '/ecs/atlas/dev'
-
-# View auth-server logs (real-time)
-aws logs tail --region us-east-1 '/ecs/atlas/dev' --filter-pattern 'auth-server' --follow
 
 # View api-gateway logs (real-time)
 aws logs tail --region us-east-1 '/ecs/atlas/dev' --filter-pattern 'api-gateway' --follow
@@ -382,7 +369,7 @@ aws logs tail --region us-east-1 '/ecs/atlas/dev' --filter-pattern 'database' --
 aws logs tail --region us-east-1 '/ecs/atlas/dev' --filter-pattern 'HTTP' --follow
 
 # Combine filters (service + log level)
-aws logs tail --region us-east-1 '/ecs/atlas/dev' --filter-pattern '[timestamp, requestId, logLevel="ERROR", service="auth-server", ...]' --follow
+aws logs tail --region us-east-1 '/ecs/atlas/dev' --filter-pattern '[timestamp, requestId, logLevel="ERROR", service="api-gateway", ...]' --follow
 ```
 
 ### ECS Service Status

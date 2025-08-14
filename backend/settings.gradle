@@ -14,9 +14,6 @@ project(':domain.user').projectDir = file('domain/user-domain')
 include(':domain.user.shared')
 project(':domain.user.shared').projectDir = file('domain/user-domain-shared')
 
-include(':domain.auth')
-project(':domain.auth').projectDir = file('domain/auth-domain')
-
 include(':domain.product')
 project(':domain.product').projectDir = file('domain/product-domain')
 include(':domain.product.shared')
@@ -74,8 +71,6 @@ project(':infrastructure.spring-boot.api-server.grpc.netdevh.adapter.user').proj
 // API server::REST
 include(':infrastructure.spring-boot.api-server.rest.core')
 project(':infrastructure.spring-boot.api-server.rest.core').projectDir = file('infrastructure/spring-boot/api-server/api-server-rest/api-server-rest-core')
-include(':infrastructure.spring-boot.api-server.rest.adapter.auth')
-project(':infrastructure.spring-boot.api-server.rest.adapter.auth').projectDir = file('infrastructure/spring-boot/api-server/api-server-rest/api-server-rest-adapter-auth')
 include(':infrastructure.spring-boot.api-server.rest.adapter.order')
 project(':infrastructure.spring-boot.api-server.rest.adapter.order').projectDir = file('infrastructure/spring-boot/api-server/api-server-rest/api-server-rest-adapter-order')
 include(':infrastructure.spring-boot.api-server.rest.adapter.product')
@@ -84,12 +79,13 @@ include(':infrastructure.spring-boot.api-server.rest.adapter.user')
 project(':infrastructure.spring-boot.api-server.rest.adapter.user').projectDir = file('infrastructure/spring-boot/api-server/api-server-rest/api-server-rest-adapter-user')
 
 // Auth client
-// Auth client::Spring Security JWT
-include(':infrastructure.spring-boot.auth-client.spring-security-jwt')
-project(':infrastructure.spring-boot.auth-client.spring-security-jwt').projectDir = file('infrastructure/spring-boot/auth-client/auth-client-spring-security-jwt')
 // Auth client::Keycloak
 include(':infrastructure.spring-boot.auth-client.keycloak')
 project(':infrastructure.spring-boot.auth-client.keycloak').projectDir = file('infrastructure/spring-boot/auth-client/auth-client-keycloak')
+
+// Auth server
+include(':infrastructure.spring-boot.auth-server')
+project(':infrastructure.spring-boot.auth-server').projectDir = file('infrastructure/spring-boot/auth-server')
 
 // Bootstrap
 include(':infrastructure.spring-boot.bootstrap')
@@ -110,8 +106,6 @@ project(':infrastructure.spring-boot.config.yaml').projectDir = file('infrastruc
 // Datasource::MySQL
 include(':infrastructure.spring-boot.datasource.mysql.core')
 project(':infrastructure.spring-boot.datasource.mysql.core').projectDir = file('infrastructure/spring-boot/datasource/datasource-mysql/datasource-mysql-core')
-include(':infrastructure.spring-boot.datasource.mysql.adapter.auth')
-project(':infrastructure.spring-boot.datasource.mysql.adapter.auth').projectDir = file('infrastructure/spring-boot/datasource/datasource-mysql/datasource-mysql-adapter-auth')
 include(':infrastructure.spring-boot.datasource.mysql.adapter.notification')
 project(':infrastructure.spring-boot.datasource.mysql.adapter.notification').projectDir = file('infrastructure/spring-boot/datasource/datasource-mysql/datasource-mysql-adapter-notification')
 include(':infrastructure.spring-boot.datasource.mysql.adapter.order')
@@ -268,8 +262,6 @@ project(':infrastructure.spring-boot.observability.tracing.zipkin').projectDir =
 // Persistence::JPA
 include(':infrastructure.spring-boot.persistence.jpa.core')
 project(':infrastructure.spring-boot.persistence.jpa.core').projectDir = file('infrastructure/spring-boot/persistence/persistence-jpa/persistence-jpa-core')
-include(':infrastructure.spring-boot.persistence.jpa.adapter.auth')
-project(':infrastructure.spring-boot.persistence.jpa.adapter.auth').projectDir = file('infrastructure/spring-boot/persistence/persistence-jpa/persistence-jpa-adapter-auth')
 include(':infrastructure.spring-boot.persistence.jpa.adapter.order')
 project(':infrastructure.spring-boot.persistence.jpa.adapter.order').projectDir = file('infrastructure/spring-boot/persistence/persistence-jpa/persistence-jpa-adapter-order')
 include(':infrastructure.spring-boot.persistence.jpa.adapter.outbox')
@@ -372,10 +364,6 @@ project(':application.spring-boot.notification').projectDir = file('application/
 // API gateway
 include(':edge.api-gateway.spring-cloud-gateway')
 project(':edge.api-gateway.spring-cloud-gateway').projectDir = file('edge/api-gateway/api-gateway-spring-cloud-gateway')
-
-// Auth server
-include(':edge.auth-server.spring-security-jwt')
-project(':edge.auth-server.spring-security-jwt').projectDir = file('edge/auth-server/auth-server-spring-security-jwt')
 
 // Config server
 include(':edge.config-server.spring-cloud-config')

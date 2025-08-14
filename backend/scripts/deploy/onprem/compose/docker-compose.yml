@@ -264,7 +264,6 @@ services:
       - order-service-log:/var/log/order-service
       - notification-service-log:/var/log/notification-service
       - eureka-server-log:/var/log/eureka-server
-      - auth-server-log:/var/log/auth-server
       - api-gateway-log:/var/log/api-gateway
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9080/ready || exit 1"]
@@ -360,7 +359,7 @@ services:
   # BACKEND SERVICES
   # =============================================================================
   # Core business logic services including microservices and edge services
-  # (API Gateway, Service Discovery, Authentication, etc.)
+  # (API Gateway, Service Discovery, etc.)
   # =============================================================================
 
   # Service Discovery Server (Eureka)
@@ -384,41 +383,6 @@ services:
     networks:
       - atlas-network
 
-  # Authentication and Authorization Server
-  auth-server:
-    container_name: auth-server
-    image: auth-server:latest
-    build:
-      context: ../../../../edge/auth-server/auth-server-spring-security-jwt
-    ports:
-      - "8091:8091"
-    environment:
-      - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
-      - MYSQL_URL=jdbc:mysql://mysql:3306/db_auth?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - MYSQL_USERNAME=root
-      - MYSQL_PASSWORD=root
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-    mem_limit: 1g
-    cpus: 0.5
-    volumes:
-      - auth-server-log:/var/log/auth-server
-    healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8091/actuator/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 90s
-    depends_on:
-      eureka-server:
-        condition: service_healthy
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - atlas-network
-
   # API Gateway (Spring Cloud Gateway)
   api-gateway:
     container_name: api-gateway
@@ -429,7 +393,7 @@ services:
       - "8080:8080"
     environment:
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
-      - JWK_SET_URI=http://auth-server:8091/.well-known/jwks.json
+      - JWK_SET_URI=http://user-service:8081/.well-known/jwks.json
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
@@ -445,8 +409,6 @@ services:
       start_period: 90s
     depends_on:
       eureka-server:
-        condition: service_healthy
-      auth-server:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -657,7 +619,6 @@ volumes:
   product-service-log:
   order-service-log:
   notification-service-log:
-  auth-server-log:
   api-gateway-log:
   
   # Observability volumes
