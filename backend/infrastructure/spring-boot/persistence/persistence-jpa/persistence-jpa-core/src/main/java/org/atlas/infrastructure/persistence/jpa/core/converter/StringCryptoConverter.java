@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.framework.config.Application;
 import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.cryptography.EncryptionUtil;
+import org.atlas.framework.util.StringUtil;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
@@ -59,5 +60,8 @@ public class StringCryptoConverter implements AttributeConverter<String, String>
   @Override
   public void afterPropertiesSet() throws Exception {
     encryptionKey = applicationConfigPort.getConfig(Application.SYSTEM, "encryptionKey");
+    if (StringUtil.isBlank(encryptionKey)) {
+        throw new RuntimeException("encryptionKey not found");
+    }
   }
 }

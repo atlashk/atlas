@@ -9,7 +9,7 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class EncryptionUtil {
 
-  private static final String ALGORITHM = "AES/ECB/PKCS5Padding";
+  private static final String ALGORITHM = "AES/GCM/NoPadding";
 
   public static String encrypt(String data, String secretKey) throws Exception {
     if (data == null) {

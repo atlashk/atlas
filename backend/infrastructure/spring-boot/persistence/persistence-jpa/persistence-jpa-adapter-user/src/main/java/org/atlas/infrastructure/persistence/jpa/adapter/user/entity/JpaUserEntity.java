@@ -1,18 +1,13 @@
 package org.atlas.infrastructure.persistence.jpa.adapter.user.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import java.io.Serializable;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.atlas.domain.user.shared.enums.Role;
+import org.atlas.infrastructure.persistence.jpa.core.converter.StringCryptoConverter;
 import org.atlas.infrastructure.persistence.jpa.core.entity.JpaBaseEntity;
 
 @Entity
@@ -35,9 +30,11 @@ public class JpaUserEntity extends JpaBaseEntity {
   @Column(name = "last_name")
   private String lastName;
 
+  @Convert(converter = StringCryptoConverter.class)
   private String email;
 
   @Column(name = "phone_number")
+  @Convert(converter = StringCryptoConverter.class)
   private String phoneNumber;
 
   @Enumerated(EnumType.STRING)
