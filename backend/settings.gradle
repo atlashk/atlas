@@ -115,6 +115,18 @@ project(':infrastructure.spring-boot.datasource.mysql.adapter.product').projectD
 include(':infrastructure.spring-boot.datasource.mysql.adapter.user')
 project(':infrastructure.spring-boot.datasource.mysql.adapter.user').projectDir = file('infrastructure/spring-boot/datasource/datasource-mysql/datasource-mysql-adapter-user')
 
+// Datasource::Postgres
+include(':infrastructure.spring-boot.datasource.postgres.core')
+project(':infrastructure.spring-boot.datasource.postgres.core').projectDir = file('infrastructure/spring-boot/datasource/datasource-postgres/datasource-postgres-core')
+include(':infrastructure.spring-boot.datasource.postgres.adapter.notification')
+project(':infrastructure.spring-boot.datasource.postgres.adapter.notification').projectDir = file('infrastructure/spring-boot/datasource/datasource-postgres/datasource-postgres-adapter-notification')
+include(':infrastructure.spring-boot.datasource.postgres.adapter.order')
+project(':infrastructure.spring-boot.datasource.postgres.adapter.order').projectDir = file('infrastructure/spring-boot/datasource/datasource-postgres/datasource-postgres-adapter-order')
+include(':infrastructure.spring-boot.datasource.postgres.adapter.product')
+project(':infrastructure.spring-boot.datasource.postgres.adapter.product').projectDir = file('infrastructure/spring-boot/datasource/datasource-postgres/datasource-postgres-adapter-product')
+include(':infrastructure.spring-boot.datasource.postgres.adapter.user')
+project(':infrastructure.spring-boot.datasource.postgres.adapter.user').projectDir = file('infrastructure/spring-boot/datasource/datasource-postgres/datasource-postgres-adapter-user')
+
 // Discovery client
 include(':infrastructure.spring-boot.discovery-client.eureka')
 project(':infrastructure.spring-boot.discovery-client.eureka').projectDir = file('infrastructure/spring-boot/discovery-client/discovery-client-eureka')

@@ -75,6 +75,9 @@ dependencies {
         case 'mysql':
             api project(':infrastructure.spring-boot.datasource.mysql.adapter.order')
             break
+        case 'postgres':
+            api project(':infrastructure.spring-boot.datasource.postgres.adapter.order')
+            break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
     }

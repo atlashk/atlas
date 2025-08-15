@@ -41,6 +41,9 @@ dependencies {
         case 'mysql':
             api project(':infrastructure.spring-boot.datasource.mysql.adapter.notification')
             break
+        case 'postgres':
+            api project(':infrastructure.spring-boot.datasource.postgres.adapter.notification')
+            break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
     }

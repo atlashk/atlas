@@ -12,7 +12,7 @@ class EncryptionUtilTest {
   void testEncrypt() throws Exception {
     String originalData = "admin@atlas.org";
     String encryptedData = EncryptionUtil.encrypt(originalData, SECRET_KEY);
-
+    System.out.println(encryptedData);
     assertNotNull(encryptedData);
     assertNotEquals(originalData, encryptedData);
     assertTrue(encryptedData.length() > 0);
