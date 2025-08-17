@@ -69,13 +69,13 @@ export class Networking extends Construct {
     });
     ecsSecurityGroup.addIngressRule(
       loadBalancerSecurityGroup,
-      ec2.Port.tcpRange(8080, 8091),
+      ec2.Port.tcpRange(8080),
       'Allow traffic from load balancer'
     );
     // Allow internal communication between ECS services
     ecsSecurityGroup.addIngressRule(
       ecsSecurityGroup,
-      ec2.Port.tcpRange(8080, 8091),
+      ec2.Port.tcpRange(8080),
       'Allow internal communication between ECS services'
     );
 

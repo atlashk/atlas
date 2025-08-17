@@ -61,5 +61,3 @@ cleanup_platform() {
 # Main execution
 read_platform_config "$APP_STACK_CONFIG"
 cleanup_platform
-
-log_success "Atlas platform cleanup completed successfully with $PLATFORM!"

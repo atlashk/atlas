@@ -13,18 +13,17 @@ Internet → ALB → API Gateway → AWS Cloud Map → Internal Services
 - **API Gateway** - Single entry point for all external traffic
 
 ### Internal Services (AWS Cloud Map Discovery Only)
-- **Auth Server** - Authentication and authorization (accessed via `/api/auth/**`)
-- **User Service** - User management (accessed via `/api/*/users/**`)
+- **User Service** - User management (accessed via `/api/*/users/**`, `/api/*/auth/**`)
 - **Product Service** - Product catalog (accessed via `/api/*/products/**`)
 - **Order Service** - Order processing (accessed via `/api/*/orders/**`)
 - **Notification Service** - Notifications (accessed via `/notification/**`)
 
 ## Key Architectural Corrections
 
-### 1. Auth Server is Now Internal
-- **Before**: Auth server had ALB listener rules (external access)
-- **After**: Auth server is internal-only, accessed through API Gateway
-- **Access Pattern**: `Internet → ALB → API Gateway → auth-server.atlas.{env}:8091`
+### 1. User Service is Now Internal
+- **Before**: User Service had ALB listener rules (external access)
+- **After**: User Service is internal-only, accessed through API Gateway
+- **Access Pattern**: `Internet → ALB → API Gateway → user-service.atlas.{env}:8081`
 
 ### 2. AWS Cloud Map Service Discovery (No Eureka)
 All internal services use AWS Cloud Map for service discovery:
@@ -34,7 +33,7 @@ All internal services use AWS Cloud Map for service discovery:
 - `notification-service.atlas.{environment}:8084`
 
 ### 3. API Gateway Routes
-Auth server is accessible through these routes:
+User Service is accessible through these routes:
 - `/api/auth/login` (public)
 - `/api/auth/logout` (authenticated)
 - `/api/auth/**` (various auth endpoints)
@@ -119,9 +118,7 @@ this.service.associateCloudMapService({
 
 ```
 1. Client → ALB → API Gateway
-2. API Gateway → AWS Cloud Map → Auth Server (for authentication)
-3. API Gateway → AWS Cloud Map → Business Services (for business logic)
-4. Business Services operate independently (no direct auth server communication)
+2. API Gateway → AWS Cloud Map → Business Services
 ```
 
 ## API Gateway Configuration
@@ -143,7 +140,7 @@ For AWS deployment, Spring Cloud Discovery is not needed:
 ```typescript
 // CDK configuration - no Eureka environment variables
 environment: {
-  MYSQL_URL: `jdbc:mysql://...`,
+  DB_URL: `jdbc:mysql://...`,
   REDIS_CLUSTER_NODES: `...`,
   // No EUREKA_DEFAULT_ZONE needed
 }
@@ -161,8 +158,6 @@ private String userServiceUrl;
 // Example: Order service calling Product service
 @Value("${PRODUCT_SERVICE_URL:http://product-service.atlas.dev:8082}")
 private String productServiceUrl;
-
-// Auth server operates independently - no direct calls to/from business services
 ```
 
 ## DNS Resolution Flow

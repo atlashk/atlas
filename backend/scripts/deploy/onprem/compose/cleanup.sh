@@ -17,6 +17,9 @@ COMPOSE_FILE="$PROJECT_ROOT/backend/scripts/deploy/onprem/compose/docker-compose
 # Source logger
 source "$PROJECT_ROOT/backend/scripts/logger.sh"
 
+# Docker Compose command (will be set by check_docker_compose)
+DOCKER_COMPOSE_CMD=""
+
 # =============================================================================
 # CONFIGURATION - Centralized resource definitions
 # =============================================================================
@@ -113,24 +116,37 @@ parse_arguments() {
 # CHECK PRE-REQUISITES
 # =============================================================================
 
+check_docker() {
+    if ! docker info > /dev/null 2>&1; then
+        log_error "Docker is not running. Please start Docker and try again."
+        return 1
+    fi
+    log_success "Docker found and running"
+    return 0
+}
+
+check_docker_compose() {
+    # Check for both docker-compose and docker compose (newer version)
+    if command -v docker-compose &> /dev/null; then
+        DOCKER_COMPOSE_CMD="docker-compose"
+        log_success "Docker Compose (standalone) found"
+        return 0
+    elif docker compose version &> /dev/null; then
+        DOCKER_COMPOSE_CMD="docker compose"
+        log_success "Docker Compose (plugin) found"
+        return 0
+    else
+        log_error "Docker Compose is not installed or not available"
+        log_info "Please install Docker Compose or ensure Docker Desktop is running"
+        return 1
+    fi
+}
+
 check_prerequisites() {
     log_section "Checking prerequisites..."
     
-    # Check Docker
-    if docker info > /dev/null 2>&1; then
-        log_success "Docker found and running"
-    else
-        log_error "Docker is not running. Please start Docker and try again."
-        exit 1
-    fi
-
-    # Check Docker Compose
-    if command -v docker-compose &> /dev/null; then
-        log_success "Docker Compose found"
-    else
-        log_error "Docker Compose is not installed"
-        exit 1
-    fi
+    check_docker || exit 1
+    check_docker_compose || exit 1
     
     log_success "Prerequisites check passed"
 }
@@ -162,8 +178,8 @@ remove_containers() {
     
     log_info "Removing Atlas containers..."
     
-    # Stop and remove containers using docker-compose
-    docker-compose -f "$compose_file" -p "$project_prefix" down 2>/dev/null || true
+    # Stop and remove containers using docker compose
+    $DOCKER_COMPOSE_CMD -f "$compose_file" -p "$project_prefix" down 2>/dev/null || true
     
     # Collect container IDs from both project prefix and explicit names
     local container_ids_by_prefix

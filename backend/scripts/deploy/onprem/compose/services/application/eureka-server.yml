@@ -1,0 +1,25 @@
+# =============================================================================
+# Eureka Service Discovery Server
+# =============================================================================
+
+services:
+  eureka-server:
+    container_name: eureka-server
+    image: atlas-eureka-server
+    ports:
+      - "8761:8761"
+    volumes:
+      - eureka-server-log:/var/log/eureka-server
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8761/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - atlas-network
+
+volumes:
+  eureka-server-log:
+
+# Network is defined globally in main docker-compose.yml

@@ -1,0 +1,25 @@
+# =============================================================================
+# SMTP4Dev Email Testing Service
+# =============================================================================
+
+services:
+  smtp4dev:
+    container_name: smtp4dev
+    image: rnwood/smtp4dev
+    ports:
+      - "5000:80" # Web interface
+      - "25:25"   # SMTP server
+      - "143:143" # IMAP server
+    volumes:
+      - smtp4dev-data:/smtp4dev
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
+      interval: 10s
+      timeout: 5s
+    networks:
+      - atlas-network
+
+volumes:
+  smtp4dev-data:
+
+# Network is defined globally in main docker-compose.yml

@@ -32,10 +32,10 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.6'
 
     // Infrastructure
-    api project(':infrastructure.spring-boot.bootstrap')
+    api project(':infrastructure.bootstrap')
     switch (rootProject.ext.appStack['config']) {
         case 'yaml':
-            api project(':infrastructure.spring-boot.config.yaml')
+            api project(':infrastructure.config.yaml')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['config']}")
@@ -44,45 +44,45 @@ dependencies {
         case 'none':
             break
         case 'eureka':
-            api project(':infrastructure.spring-boot.discovery-client.eureka')
+            api project(':infrastructure.discovery-client.eureka')
             break
         case 'kubernetes':
-            api project(':infrastructure.spring-boot.discovery-client.kubernetes')
+            api project(':infrastructure.discovery-client.kubernetes')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['discovery-client']}")
     }
-    api project(':infrastructure.spring-boot.observability.actuator')
+    api project(':infrastructure.observability.actuator')
     switch (rootProject.ext.appStack['observability.logging.framework']) {
         case 'logback':
-            api project(':infrastructure.spring-boot.observability.logging.logback')
+            api project(':infrastructure.observability.logging.logback')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.logging.framework']}")
     }
     switch (rootProject.ext.appStack['observability.metrics']) {
         case 'prometheus':
-            api project(':infrastructure.spring-boot.observability.metrics.prometheus')
+            api project(':infrastructure.observability.metrics.prometheus')
             break
         case 'cloudwatch':
-            api project(':infrastructure.spring-boot.observability.metrics.cloudwatch')
+            api project(':infrastructure.observability.metrics.cloudwatch')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.metrics']}")
     }
     switch (rootProject.ext.appStack['observability.tracing']) {
         case 'zipkin':
-            api project(':infrastructure.spring-boot.observability.tracing.zipkin')
+            api project(':infrastructure.observability.tracing.zipkin')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.tracing']}")
     }
     switch (rootProject.ext.appStack['redis']) {
         case 'standalone':
-            api project(':infrastructure.spring-boot.redis.standalone')
+            api project(':infrastructure.redis.standalone')
             break
         case 'cluster':
-            api project(':infrastructure.spring-boot.redis.cluster')
+            api project(':infrastructure.redis.cluster')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['redis']}")

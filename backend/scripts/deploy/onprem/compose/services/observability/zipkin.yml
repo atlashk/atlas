@@ -1,0 +1,22 @@
+# =============================================================================
+# Zipkin Distributed Tracing Service
+# =============================================================================
+
+services:
+  zipkin:
+    container_name: zipkin
+    image: openzipkin/zipkin
+    ports:
+      - "9411:9411"
+    environment:
+      - STORAGE_TYPE=mem
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9411/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - atlas-network
+
+# Network is defined globally in main docker-compose.yml

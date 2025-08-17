@@ -34,23 +34,23 @@ public class SessionValidationGatewayFilterFactory extends
 
   @Override
   public GatewayFilter apply(Config config) {
-    return (exchange, chain) -> {
-      return ReactiveSecurityContextHolder.getContext()
-          .map(SecurityContext::getAuthentication)
-          .filter(auth -> auth != null && auth.isAuthenticated() && auth.getCredentials() instanceof Jwt)
-          .map(auth -> (Jwt) auth.getCredentials())
-          .flatMap(jwt -> validateSession(jwt, exchange, chain));
-    };
+    return (exchange, chain) ->
+        ReactiveSecurityContextHolder.getContext()
+            .map(SecurityContext::getAuthentication)
+            .filter(auth -> auth != null && auth.isAuthenticated()
+                && auth.getCredentials() instanceof Jwt)
+            .map(auth -> (Jwt) auth.getCredentials())
+            .flatMap(jwt -> validateSession(jwt, exchange, chain));
   }
 
-  private Mono<Void> validateSession(Jwt jwt, ServerWebExchange exchange, GatewayFilterChain chain) {
-    // Extract userId and sessionId from JWT claims
-    String sessionId = jwtExtractor.extractSessionId(jwt);
+  private Mono<Void> validateSession(Jwt jwt, ServerWebExchange exchange,
+      GatewayFilterChain chain) {
+    // Extract userId from JWT claims
     String userId = jwtExtractor.extractUserId(jwt);
 
-    // Build Redis keys for last logout timestamp and session blacklist
-    String lastLogoutTsRedisKey = String.format(SecurityConstant.LAST_LOGOUT_TS_REDIS_KEY_FORMAT, userId);
-    String sessionBlacklistedRedisKey = String.format(SecurityConstant.SESSION_BLACKLISTED_REDIS_KEY_FORMAT, sessionId);
+    // Build Redis key for last logout timestamp
+    String lastLogoutTsRedisKey = String.format(SecurityConstant.LAST_LOGOUT_TS_REDIS_KEY_FORMAT,
+        userId);
 
     // Check if the JWT's issuedAt is before the user's last logout timestamp
     Mono<Boolean> invalidIssuedAt = reactiveRedisTemplate.opsForValue()
@@ -58,8 +58,8 @@ public class SessionValidationGatewayFilterFactory extends
         .map(lastLogoutTsStr -> {
           try {
             long lastLogoutTs = Long.parseLong(lastLogoutTsStr);
-            // If the token was issued before last logout, session is invalid
             assert jwt.getIssuedAt() != null;
+            // If the token was issued before last logout, session is invalid
             return jwt.getIssuedAt().isBefore(Instant.ofEpochMilli(lastLogoutTs));
           } catch (NumberFormatException e) {
             // If parsing fails, treat session as valid
@@ -68,26 +68,14 @@ public class SessionValidationGatewayFilterFactory extends
         })
         .defaultIfEmpty(false); // If no logout timestamp found, treat session as valid
 
-    // Check if the session ID is explicitly blacklisted
-    Mono<Boolean> sessionBlacklisted = reactiveRedisTemplate.hasKey(sessionBlacklistedRedisKey)
-        .defaultIfEmpty(false); // If key doesn't exist, treat session as not blacklisted
-
-    // Evaluate both conditions (logout timestamp and blacklist status)
-    return Mono.zip(invalidIssuedAt, sessionBlacklisted)
-        .flatMap(result -> {
-          boolean isInvalidIssuedAt = result.getT1();
-          boolean isSessionBlacklisted = result.getT2();
-
-          // If either condition is true, reject the request
-          if (isInvalidIssuedAt || isSessionBlacklisted) {
-            ApiResponseWrapper<Void> response = ApiResponseWrapper.error(
-                AppError.UNAUTHORIZED.getErrorCode(), "Session has been inactivated");
-            return HttpUtil.respond(exchange, response, HttpStatus.UNAUTHORIZED);
-          }
-
-          // Otherwise, continue the request chain
-          return chain.filter(exchange);
-        });
+    return invalidIssuedAt.flatMap(isInvalidIssuedAt -> {
+      if (isInvalidIssuedAt) {
+        ApiResponseWrapper<Void> response = ApiResponseWrapper.error(
+            AppError.UNAUTHORIZED.getErrorCode(), "Session has been inactivated");
+        return HttpUtil.respond(exchange, response, HttpStatus.UNAUTHORIZED);
+      }
+      return chain.filter(exchange);
+    });
   }
 
   public static class Config {

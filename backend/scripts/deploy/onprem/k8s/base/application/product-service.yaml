@@ -47,16 +47,16 @@ spec:
                   name: atlas-config
                   key: LOG_LEVEL
             # Database configuration
-            - name: MYSQL_URL
+            - name: DB_URL
               value: "jdbc:mysql://mysql:3306/db_product?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
-            - name: MYSQL_USERNAME
+            - name: DB_USERNAME
               value: "root"
-            - name: MYSQL_PASSWORD
+            - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: mysql-secret
                   key: mysql-root-password
-            - name: MYSQL_QUARTZ_URL
+            - name: DB_QUARTZ_URL
               value: "jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
             # Redis configuration
             - name: REDIS_HOST

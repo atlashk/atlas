@@ -30,18 +30,18 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     // Infrastructure
-    api project(':infrastructure.spring-boot.bootstrap')
+    api project(':infrastructure.bootstrap')
     switch (rootProject.ext.appStack['config']) {
         case 'yaml':
-            api project(':infrastructure.spring-boot.config.yaml')
+            api project(':infrastructure.config.yaml')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['config']}")
     }
-    api project(':infrastructure.spring-boot.observability.actuator')
+    api project(':infrastructure.observability.actuator')
     switch (rootProject.ext.appStack['observability.logging.framework']) {
         case 'logback':
-            api project(':infrastructure.spring-boot.observability.logging.logback')
+            api project(':infrastructure.observability.logging.logback')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.logging.framework']}")
@@ -50,10 +50,10 @@ dependencies {
         case 'none':
             break;
         case 'prometheus':
-            api project(':infrastructure.spring-boot.observability.metrics.prometheus')
+            api project(':infrastructure.observability.metrics.prometheus')
             break
         case 'cloudwatch':
-            api project(':infrastructure.spring-boot.observability.metrics.cloudwatch')
+            api project(':infrastructure.observability.metrics.cloudwatch')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.metrics']}")

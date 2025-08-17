@@ -1,12 +1,15 @@
 package org.atlas.domain.user.usecase.front.handler;
 
+import javax.annotation.Nullable;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.user.entity.UserEntity;
 import org.atlas.domain.user.port.messaging.UserMessagePublisherPort;
 import org.atlas.domain.user.repository.UserRepository;
 import org.atlas.domain.user.shared.enums.Role;
 import org.atlas.domain.user.usecase.front.model.RegisterInput;
 import org.atlas.framework.auth.client.AuthClientPort;
-import org.atlas.framework.auth.client.model.CreateUserRequest;
+import org.atlas.framework.auth.client.model.CreateAuthUserRequest;
 import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.domain.event.contract.user.UserRegisteredEvent;
 import org.atlas.framework.domain.exception.DomainException;
@@ -14,23 +17,20 @@ import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.error.AppError;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 @UseCaseHandler
 @RequiredArgsConstructor
 @Slf4j
 public class FrontRegisterUseCaseHandler {
 
   private final UserRepository userRepository;
-  private final AuthClientPort authClientPort;
+  private final @Nullable AuthClientPort authClientPort;
   private final ApplicationConfigPort applicationConfigPort;
   private final UserMessagePublisherPort userMessagePublisherPort;
 
   public Void handle(RegisterInput input) throws Exception {
     checkValidity(input);
     UserEntity userEntity = createUser(input);
-    createAuthUser(userEntity);
+    syncUser(userEntity);
     publishEvent(userEntity);
     return null;
   }
@@ -55,12 +55,14 @@ public class FrontRegisterUseCaseHandler {
     return userEntity;
   }
 
-  private void createAuthUser(UserEntity userEntity) {
-    CreateUserRequest request = ObjectMapperUtil.getInstance()
-        .map(userEntity, CreateUserRequest.class);
-    authClientPort.createUser(request);
-    log.info("Created auth user: userId={}, username={}",
-        userEntity.getId(), userEntity.getUsername());
+  private void syncUser(UserEntity userEntity) {
+    if (authClientPort != null) {
+      CreateAuthUserRequest request = ObjectMapperUtil.getInstance()
+          .map(userEntity, CreateAuthUserRequest.class);
+      authClientPort.createAuthUser(request);
+      log.info("Created auth user: userId={}, username={}",
+          userEntity.getId(), userEntity.getUsername());
+    }
   }
 
   private void publishEvent(UserEntity userEntity) {

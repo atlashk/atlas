@@ -1,0 +1,26 @@
+# =============================================================================
+# Product Service
+# =============================================================================
+
+services:
+  product-service:
+    container_name: product-service
+    image: atlas-product-service
+    ports:
+      - "8082:8082"
+    env_file: "../../env/product-service.env"
+    volumes:
+      - product-service-log:/var/log/product-service
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8082/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - atlas-network
+
+volumes:
+  product-service-log:
+
+# Network is defined globally in main docker-compose.yml

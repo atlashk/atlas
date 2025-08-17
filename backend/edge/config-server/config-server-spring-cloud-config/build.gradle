@@ -29,11 +29,11 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-config-server'
 
     // Infrastructure
-    api project(':infrastructure.spring-boot.bootstrap')
-    api project(':infrastructure.spring-boot.observability.actuator')
+    api project(':infrastructure.bootstrap')
+    api project(':infrastructure.observability.actuator')
     switch (rootProject.ext.appStack['observability.logging.framework']) {
         case 'logback':
-            api project(':infrastructure.spring-boot.observability.logging.logback')
+            api project(':infrastructure.observability.logging.logback')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.logging.framework']}")
@@ -42,10 +42,10 @@ dependencies {
         case 'none':
             break;
         case 'prometheus':
-            api project(':infrastructure.spring-boot.observability.metrics.prometheus')
+            api project(':infrastructure.observability.metrics.prometheus')
             break
         case 'cloudwatch':
-            api project(':infrastructure.spring-boot.observability.metrics.cloudwatch')
+            api project(':infrastructure.observability.metrics.cloudwatch')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.metrics']}")

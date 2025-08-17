@@ -1,0 +1,29 @@
+# =============================================================================
+# PostgreSQL Database Service
+# =============================================================================
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:14
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+    volumes:
+      - ./scripts:/docker-entrypoint-initdb.d/
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "root"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - atlas-network
+
+volumes:
+  postgres-data:
+
+# Network is defined globally in main docker-compose.yml

@@ -45,5 +45,3 @@ stop_platform() {
 # Main execution
 read_platform_config "$APP_STACK_CONFIG"
 stop_platform "$@"
-
-log_success "Atlas platform stopped successfully with $PLATFORM!"

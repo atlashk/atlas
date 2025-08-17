@@ -1,0 +1,28 @@
+# =============================================================================
+# RabbitMQ Message Broker Service
+# =============================================================================
+
+services:
+  rabbitmq:
+    container_name: rabbitmq
+    build:
+      context: rabbitmq
+      dockerfile: config/rabbitmq/Dockerfile
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - atlas-network
+
+volumes:
+  rabbitmq-data:
+
+# Network is defined globally in main docker-compose.yml

@@ -36,8 +36,6 @@ public class TokenRelayGatewayFilterFactory extends
               .mutate()
               .headers(httpHeaders -> {
                 httpHeaders.remove(HttpHeaders.AUTHORIZATION);
-                httpHeaders.set(CustomClaim.SESSION_ID.getHeader(),
-                    jwtExtractor.extractSessionId(jwt));
                 httpHeaders.set(CustomClaim.USER_ID.getHeader(),
                     jwtExtractor.extractUserId(jwt));
                 httpHeaders.set(CustomClaim.USER_ROLES.getHeader(),

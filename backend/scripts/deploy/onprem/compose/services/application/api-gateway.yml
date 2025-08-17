@@ -1,0 +1,26 @@
+# =============================================================================
+# API Gateway Service
+# =============================================================================
+
+services:
+  api-gateway:
+    container_name: api-gateway
+    image: atlas-api-gateway
+    ports:
+      - "8080:8080"
+    env_file: "../../env/api-gateway.env"
+    volumes:
+      - api-gateway-log:/var/log/api-gateway
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - atlas-network
+
+volumes:
+  api-gateway-log:
+
+# Network is defined globally in main docker-compose.yml
