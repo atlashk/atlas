@@ -21,8 +21,8 @@ public interface JpaOrderRepository extends JpaBaseRepository<JpaOrderEntity, In
         and (:#{#criteria.id} is null or o.id = :#{#criteria.id})
         and (:#{#criteria.userId} is null or o.userId = :#{#criteria.userId})
         and (:#{#criteria.status} is null or o.status = :#{#criteria.status})
-        and (:#{#criteria.startDate} is null or date(o.createdAt) >= :#{#criteria.startDate})
-        and (:#{#criteria.endDate} is null or date(o.createdAt) >= :#{#criteria.endDate})
+        and (:#{#criteria.startDate} is null or o.createdAt >= :#{#criteria.startDate})
+        and (:#{#criteria.endDate} is null or o.createdAt <= :#{#criteria.endDate})
       """)
   Page<JpaOrderEntity> findByCriteria(@Param("criteria") FindOrderCriteria criteria, Pageable pageable);
 
