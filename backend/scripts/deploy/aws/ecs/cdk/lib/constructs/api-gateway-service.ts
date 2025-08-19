@@ -1,8 +1,8 @@
 import * as cdk from 'aws-cdk-lib';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
-import { Construct } from 'constructs';
-import { InfrastructureStack } from '../stack/infrastructure-stack';
+import {Construct} from 'constructs';
+import {InfrastructureStack} from '../stack/infrastructure-stack';
 
 export interface ServiceConfig {
   serviceName: string;

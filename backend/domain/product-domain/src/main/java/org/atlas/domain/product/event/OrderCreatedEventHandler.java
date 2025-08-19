@@ -1,7 +1,8 @@
 package org.atlas.domain.product.event;
 
 import java.time.Duration;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.product.entity.ProductEntity;
 import org.atlas.domain.product.port.messaging.ProductMessagePublisherPort;
 import org.atlas.domain.product.repository.ProductRepository;
@@ -15,9 +16,6 @@ import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.error.AppError;
 import org.atlas.framework.lock.LockPort;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @DomainEventHandler
 @RequiredArgsConstructor

@@ -3,7 +3,6 @@ package org.atlas.infrastructure.persistence.jpa.adapter.order;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.order.entity.OrderEntity;
-import org.atlas.domain.order.repository.FindOrderCriteria;
 import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
@@ -22,10 +21,19 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
   private final JpaOrderRepository jpaOrderRepository;
 
   @Override
-  public PagingResult<OrderEntity> findByCriteria(FindOrderCriteria criteria, PagingRequest pagingRequest) {
+  public PagingResult<OrderEntity> findAll(PagingRequest pagingRequest) {
     Pageable pageable = PagingConverter.convert(pagingRequest);
     PagingResult<JpaOrderEntity> jpaOrderEntityPage = PagingConverter.convert(
-        jpaOrderRepository.findByCriteria(criteria, pageable));
+        jpaOrderRepository.findAllAndFetch(pageable));
+    return ObjectMapperUtil.getInstance()
+        .mapPage(jpaOrderEntityPage, JpaOrderEntityMapper::toOrderEntity);
+  }
+
+  @Override
+  public PagingResult<OrderEntity> findByUserId(Integer userId, PagingRequest pagingRequest) {
+    Pageable pageable = PagingConverter.convert(pagingRequest);
+    PagingResult<JpaOrderEntity> jpaOrderEntityPage = PagingConverter.convert(
+        jpaOrderRepository.findByUserIdAndFetch(userId, pageable));
     return ObjectMapperUtil.getInstance()
         .mapPage(jpaOrderEntityPage, JpaOrderEntityMapper::toOrderEntity);
   }

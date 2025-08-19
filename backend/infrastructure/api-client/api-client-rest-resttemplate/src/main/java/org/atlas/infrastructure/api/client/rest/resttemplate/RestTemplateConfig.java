@@ -1,7 +1,6 @@
 package org.atlas.infrastructure.api.client.rest.resttemplate;
 
 import java.security.KeyManagementException;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import javax.net.ssl.SSLContext;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;

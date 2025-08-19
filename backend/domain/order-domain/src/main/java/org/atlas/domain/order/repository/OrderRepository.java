@@ -7,7 +7,9 @@ import org.atlas.framework.paging.PagingResult;
 
 public interface OrderRepository {
 
-  PagingResult<OrderEntity> findByCriteria(FindOrderCriteria criteria, PagingRequest pagingRequest);
+  PagingResult<OrderEntity> findAll(PagingRequest pagingRequest);
+
+  PagingResult<OrderEntity> findByUserId(Integer userId, PagingRequest pagingRequest);
 
   Optional<OrderEntity> findById(Integer id);
 

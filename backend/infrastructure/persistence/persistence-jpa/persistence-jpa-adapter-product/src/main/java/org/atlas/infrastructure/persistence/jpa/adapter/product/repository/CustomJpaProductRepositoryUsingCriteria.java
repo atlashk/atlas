@@ -9,7 +9,6 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.List;
-import org.apache.commons.collections4.CollectionUtils;
 import org.atlas.domain.product.repository.FindProductCriteria;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.util.CollectionUtil;

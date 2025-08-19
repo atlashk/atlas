@@ -8,7 +8,7 @@ import org.atlas.framework.paging.PagingResult;
 
 public interface UserRepository {
 
-  PagingResult<UserEntity> findByCriteria(FindUserCriteria criteria, PagingRequest pagingRequest);
+  PagingResult<UserEntity> findAll(PagingRequest pagingRequest);
 
   List<UserEntity> findByIdIn(List<Integer> ids);
 

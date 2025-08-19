@@ -1,5 +1,6 @@
 package org.atlas.domain.product.usecase.admin.handler;
 
+import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.ProductEntity;
 import org.atlas.domain.product.port.messaging.ProductMessagePublisherPort;
 import org.atlas.domain.product.repository.ProductRepository;
@@ -8,8 +9,6 @@ import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.domain.event.contract.product.ProductCreatedEvent;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
-
-import lombok.RequiredArgsConstructor;
 
 @UseCaseHandler
 @RequiredArgsConstructor

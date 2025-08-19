@@ -1,7 +1,8 @@
 package org.atlas.infrastructure.scheduler.quartz.core;
 
 import java.util.Date;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.scheduler.SchedulerPort;
 import org.atlas.framework.util.UUIDGenerator;
 import org.quartz.CronScheduleBuilder;
@@ -17,9 +18,6 @@ import org.quartz.TriggerKey;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 
 /**

@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
-import { Construct } from 'constructs';
-import { InfrastructureStack } from '../stack/infrastructure-stack';
+import {Construct} from 'constructs';
+import {InfrastructureStack} from '../stack/infrastructure-stack';
 
 export interface InternalServiceConfig {
   serviceName: string;

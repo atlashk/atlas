@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as servicediscovery from 'aws-cdk-lib/aws-servicediscovery';
-import { Construct } from 'constructs';
+import {Construct} from 'constructs';
 
 export interface ServiceDiscoveryProps {
   environmentName: string;

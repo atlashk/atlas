@@ -6,7 +6,6 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.atlas.domain.product.shared.enums.ProductStatus;
 import org.atlas.framework.file.enums.FileType;

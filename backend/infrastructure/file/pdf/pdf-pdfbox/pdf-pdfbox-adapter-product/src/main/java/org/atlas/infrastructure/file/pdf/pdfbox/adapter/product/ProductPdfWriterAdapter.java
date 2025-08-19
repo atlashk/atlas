@@ -1,6 +1,5 @@
 package org.atlas.infrastructure.file.pdf.pdfbox.adapter.product;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import org.apache.pdfbox.pdmodel.PDDocument;

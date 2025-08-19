@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.user.entity.UserEntity;
-import org.atlas.domain.user.repository.FindUserCriteria;
 import org.atlas.domain.user.repository.UserRepository;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
@@ -22,10 +21,10 @@ public class JpaUserRepositoryAdapter implements UserRepository {
   private final JpaUserRepository jpaUserRepository;
 
   @Override
-  public PagingResult<UserEntity> findByCriteria(FindUserCriteria criteria, PagingRequest pagingRequest) {
+  public PagingResult<UserEntity> findAll(PagingRequest pagingRequest) {
     Pageable pageable = PagingConverter.convert(pagingRequest);
     PagingResult<JpaUserEntity> jpaUserPage = PagingConverter.convert(
-        jpaUserRepository.findByCriteria(criteria, pageable));
+        jpaUserRepository.findAll(pageable));
     return ObjectMapperUtil.getInstance()
         .mapPage(jpaUserPage, UserEntity.class);
   }

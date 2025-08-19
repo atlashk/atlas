@@ -3,7 +3,7 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as rds from 'aws-cdk-lib/aws-rds';
 import * as elasticache from 'aws-cdk-lib/aws-elasticache';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
-import { Construct } from 'constructs';
+import {Construct} from 'constructs';
 
 export interface DataLayerProps {
   environmentName: string;

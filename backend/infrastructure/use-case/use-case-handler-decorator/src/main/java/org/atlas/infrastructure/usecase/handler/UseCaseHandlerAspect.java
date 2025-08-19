@@ -1,16 +1,14 @@
 package org.atlas.infrastructure.usecase.handler;
 
 import java.util.List;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.atlas.framework.transaction.TransactionPort;
 import org.atlas.infrastructure.usecase.handler.interceptor.UseCaseInterceptor;
 import org.springframework.stereotype.Component;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Aspect

@@ -1,13 +1,12 @@
 package org.atlas.infrastructure.persistence.jpa.adapter.order.mapper;
 
+import lombok.experimental.UtilityClass;
 import org.atlas.domain.order.entity.OrderEntity;
 import org.atlas.domain.order.entity.OrderItemEntity;
 import org.atlas.domain.order.entity.ProductEntity;
 import org.atlas.domain.order.entity.UserEntity;
 import org.atlas.infrastructure.persistence.jpa.adapter.order.entity.JpaOrderEntity;
 import org.atlas.infrastructure.persistence.jpa.adapter.order.entity.JpaOrderItemEntity;
-
-import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class JpaOrderEntityMapper {

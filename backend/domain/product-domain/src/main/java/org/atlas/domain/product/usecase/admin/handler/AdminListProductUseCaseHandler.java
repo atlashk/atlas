@@ -1,5 +1,6 @@
 package org.atlas.domain.product.usecase.admin.handler;
 
+import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.ProductEntity;
 import org.atlas.domain.product.repository.FindProductCriteria;
 import org.atlas.domain.product.repository.ProductRepository;
@@ -8,8 +9,6 @@ import org.atlas.domain.product.usecase.admin.model.AdminListProductInput;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingResult;
-
-import lombok.RequiredArgsConstructor;
 
 @UseCaseHandler
 @RequiredArgsConstructor

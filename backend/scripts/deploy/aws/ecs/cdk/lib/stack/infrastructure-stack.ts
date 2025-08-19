@@ -1,14 +1,19 @@
 import * as cdk from 'aws-cdk-lib';
-import { Construct } from 'constructs';
+import {Construct} from 'constructs';
 
 // Import constructs
-import { Networking } from '../constructs/networking';
-import { DataLayer } from '../constructs/data-layer';
-import { ComputeLayer } from '../constructs/compute-layer';
-import { ServiceDiscovery } from '../constructs/service-discovery';
+import {Networking} from '../constructs/networking';
+import {DataLayer} from '../constructs/data-layer';
+import {ComputeLayer} from '../constructs/compute-layer';
+import {ServiceDiscovery} from '../constructs/service-discovery';
 
 // Import configuration
-import { InfrastructureConfig, createDevConfig, createStgConfig, createProdConfig } from '../config/infrastructure-config';
+import {
+  createDevConfig,
+  createProdConfig,
+  createStgConfig,
+  InfrastructureConfig
+} from '../config/infrastructure-config';
 
 export interface InfrastructureStackProps extends cdk.StackProps {
   environmentName: string;

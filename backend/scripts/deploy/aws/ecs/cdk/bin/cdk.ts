@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib';
-import { InfrastructureStack } from '../lib/stack/infrastructure-stack';
-import { ApiGatewayStack } from '../lib/stack/api-gateway-stack';
-import { UserServiceStack } from '../lib/stack/user-service-stack';
-import { ProductServiceStack } from '../lib/stack/product-service-stack';
-import { OrderServiceStack } from '../lib/stack/order-service-stack';
-import { NotificationServiceStack } from '../lib/stack/notification-service-stack';
+import {InfrastructureStack} from '../lib/stack/infrastructure-stack';
+import {ApiGatewayStack} from '../lib/stack/api-gateway-stack';
+import {UserServiceStack} from '../lib/stack/user-service-stack';
+import {ProductServiceStack} from '../lib/stack/product-service-stack';
+import {OrderServiceStack} from '../lib/stack/order-service-stack';
+import {NotificationServiceStack} from '../lib/stack/notification-service-stack';
 
 const app = new cdk.App();
 

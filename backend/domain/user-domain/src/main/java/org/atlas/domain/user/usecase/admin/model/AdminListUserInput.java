@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.atlas.domain.user.shared.enums.Role;
 import org.atlas.framework.paging.PagingRequest;
 
 @Data
@@ -13,12 +12,6 @@ import org.atlas.framework.paging.PagingRequest;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminListUserInput {
-
-  private Integer id;
-
-  private String username;
-
-  private Role role;
 
   @Valid
   private PagingRequest pagingRequest;

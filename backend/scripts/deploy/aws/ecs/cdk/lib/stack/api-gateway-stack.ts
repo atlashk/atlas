@@ -1,10 +1,10 @@
 import * as cdk from 'aws-cdk-lib';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
-import { Construct } from 'constructs';
-import { InfrastructureStack } from './infrastructure-stack';
-import { ApiGatewayService } from '../constructs/api-gateway-service';
-import { createApiGatewayConfig } from '../config/service-configs';
+import {Construct} from 'constructs';
+import {InfrastructureStack} from './infrastructure-stack';
+import {ApiGatewayService} from '../constructs/api-gateway-service';
+import {createApiGatewayConfig} from '../config/service-configs';
 
 export interface ApiGatewayStackProps extends cdk.StackProps {
   environmentName: string;

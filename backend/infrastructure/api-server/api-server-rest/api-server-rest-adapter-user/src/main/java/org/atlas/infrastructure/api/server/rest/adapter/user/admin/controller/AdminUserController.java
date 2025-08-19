@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.user.entity.UserEntity;
-import org.atlas.domain.user.shared.enums.Role;
 import org.atlas.domain.user.usecase.admin.handler.AdminListUserUseCaseHandler;
 import org.atlas.domain.user.usecase.admin.model.AdminListUserInput;
 import org.atlas.framework.api.server.rest.response.ApiResponseWrapper;
@@ -32,21 +31,12 @@ public class AdminUserController {
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "List users", description = "Retrieves a paginated list of users.")
   public ApiResponseWrapper<List<UserResponse>> listUser(
-      @Parameter(description = "User ID", example = "1")
-      @RequestParam(value = "id", required = false) Integer id,
-      @Parameter(description = "Username", example = "john.doe")
-      @RequestParam(value = "username", required = false) String username,
-      @Parameter(description = "User role", example = "USER")
-      @RequestParam(value = "role", required = false) Role role,
       @Parameter(description = "The page number", example = "1")
       @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
       @Parameter(description = "The number of users per page", example = "20")
       @RequestParam(value = "size", required = false, defaultValue = CommonConstant.DEFAULT_PAGE_SIZE_STR) Integer size
   ) throws Exception {
     AdminListUserInput input = AdminListUserInput.builder()
-        .id(id)
-        .username(username)
-        .role(role)
         .pagingRequest(PagingRequest.of(page - 1, size))
         .build();
     PagingResult<UserEntity> userEntityPage = adminListUserUseCaseHandler.handle(input);

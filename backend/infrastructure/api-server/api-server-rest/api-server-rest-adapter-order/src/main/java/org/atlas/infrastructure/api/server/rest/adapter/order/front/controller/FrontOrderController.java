@@ -1,10 +1,11 @@
 package org.atlas.infrastructure.api.server.rest.adapter.order.front.controller;
 
-import java.util.Date;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import java.util.List;
-
+import lombok.RequiredArgsConstructor;
 import org.atlas.domain.order.entity.OrderEntity;
-import org.atlas.domain.order.shared.enums.OrderStatus;
 import org.atlas.domain.order.usecase.front.handler.FrontGetOrderStatusUseCaseHandler;
 import org.atlas.domain.order.usecase.front.handler.FrontListOrderUseCaseHandler;
 import org.atlas.domain.order.usecase.front.handler.FrontPlaceOrderUseCaseHandler;
@@ -19,8 +20,7 @@ import org.atlas.framework.paging.PagingRequest.SortOrder;
 import org.atlas.framework.paging.PagingResult;
 import org.atlas.infrastructure.api.server.rest.adapter.order.front.model.FrontOrderStatusResponse;
 import org.atlas.infrastructure.api.server.rest.adapter.order.front.model.FrontPlaceOrderRequest;
-import org.atlas.infrastructure.api.server.rest.adapter.order.shared.OrderResponse;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.atlas.infrastructure.api.server.rest.adapter.order.shared.model.OrderResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -32,11 +32,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("api/front/orders")
@@ -51,23 +46,12 @@ public class FrontOrderController {
   @Operation(summary = "List Orders", description = "Retrieves a paginated list of orders for the front-end.")
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   public ApiResponseWrapper<List<OrderResponse>> listOrder(
-      @Parameter(name = "status", description = "Order status")
-      @RequestParam(name = "status", required = false) OrderStatus status,
-      @Parameter(name = "startDate", description = "Start date")
-      @RequestParam(name = "startDate", required = false) 
-      @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
-      @Parameter(name = "endDate", description = "End date")
-      @RequestParam(name = "endDate", required = false) 
-      @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
       @Parameter(name = "page", description = "The page number to retrieve (default is 1).", example = "1")
       @RequestParam(name = "page", required = false, defaultValue = "1") Integer page,
       @Parameter(name = "size", description = "The number of orders per page (default is defined by the constant).", example = "10")
       @RequestParam(name = "size", required = false, defaultValue = CommonConstant.DEFAULT_PAGE_SIZE_STR) Integer size
   ) throws Exception {
     FrontListOrderInput input = FrontListOrderInput.builder()
-        .startDate(startDate)
-        .endDate(endDate)
-        .status(status)
         .pagingRequest(PagingRequest.of(page - 1, size, "createdAt", SortOrder.DESC))
         .build();
 

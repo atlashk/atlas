@@ -7,8 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.atlas.domain.product.entity.BrandEntity;
 import org.atlas.domain.product.entity.CategoryEntity;
-import org.atlas.domain.product.entity.ProductAttributeEntity;
-import org.atlas.domain.product.entity.ProductDetailsEntity;
 import org.atlas.domain.product.entity.ProductEntity;
 import org.atlas.domain.product.port.file.csv.ProductCsvReaderPort;
 import org.atlas.domain.product.port.file.excel.ProductExcelReaderPort;

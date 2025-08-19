@@ -1,9 +1,9 @@
 import * as cdk from 'aws-cdk-lib';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
-import { Construct } from 'constructs';
-import { InfrastructureStack } from './infrastructure-stack';
-import { InternalService } from '../constructs/internal-service';
-import { createProductServiceConfig } from '../config/service-configs';
+import {Construct} from 'constructs';
+import {InfrastructureStack} from './infrastructure-stack';
+import {InternalService} from '../constructs/internal-service';
+import {createProductServiceConfig} from '../config/service-configs';
 
 export interface ProductServiceStackProps extends cdk.StackProps {
   environmentName: string;

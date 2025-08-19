@@ -1,5 +1,6 @@
 package org.atlas.domain.order.event;
 
+import lombok.RequiredArgsConstructor;
 import org.atlas.domain.order.entity.OrderEntity;
 import org.atlas.domain.order.port.messaging.OrderMessagePublisherPort;
 import org.atlas.domain.order.repository.OrderRepository;
@@ -10,8 +11,6 @@ import org.atlas.framework.domain.event.contract.product.ReserveQuantitySucceede
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.error.AppError;
-
-import lombok.RequiredArgsConstructor;
 
 @DomainEventHandler
 @RequiredArgsConstructor
