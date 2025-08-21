@@ -1,26 +1,26 @@
-'use client'
+"use client";
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useUserStore } from '@/stores/user.store'
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useUserStore } from "@/stores/user.store";
 
 export default function AdminProductAddPage() {
-  const router = useRouter()
-  const { isAuthenticated, isAdmin, logout } = useUserStore()
-  
+  const router = useRouter();
+  const { isAuthenticated, isAdmin, logout } = useUserStore();
+
   useEffect(() => {
     // Redirect if not authenticated or not admin
     if (!isAuthenticated() || !isAdmin()) {
-      router.push('/login')
-      return
+      router.push("/login");
+      return;
     }
-  }, [isAuthenticated, isAdmin, router])
-  
+  }, [isAuthenticated, isAdmin, router]);
+
   const handleLogout = () => {
-    logout()
-    router.push('/login')
-  }
-  
+    logout();
+    router.push("/login");
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -29,7 +29,7 @@ export default function AdminProductAddPage() {
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center space-x-4">
               <button
-                onClick={() => router.push('/admin/product')}
+                onClick={() => router.push("/admin/product")}
                 className="text-indigo-600 hover:text-indigo-500"
               >
                 ← Back to Products
@@ -49,7 +49,9 @@ export default function AdminProductAddPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Create New Product</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Create New Product
+          </h2>
           <p className="text-gray-600">
             Product creation form will be implemented here.
           </p>
@@ -69,5 +71,5 @@ export default function AdminProductAddPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { RegisterRequest } from '../../interfaces/user.interface';
-import { userService } from '../../services';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { RegisterRequest } from "../../interfaces/user.interface";
+import { userService } from "../../services";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Form,
   FormControl,
@@ -16,42 +16,44 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { User, Mail, Phone, Lock, Loader2, UserPlus } from 'lucide-react';
-import { toast } from 'sonner';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+} from "@/components/ui/form";
+import { User, Mail, Phone, Lock, Loader2, UserPlus } from "lucide-react";
+import { toast } from "sonner";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
-const formSchema = z.object({
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
-  firstName: z.string().min(1, {
-    message: "First name is required.",
-  }),
-  lastName: z.string().min(1, {
-    message: "Last name is required.",
-  }),
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
-  phoneNumber: z.string().min(1, {
-    message: "Phone number is required.",
-  }),
-  password: z.string().min(6, {
-    message: "Password must be at least 6 characters.",
-  }),
-  confirmPassword: z.string().min(6, {
-    message: "Password must be at least 6 characters.",
-  }),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const formSchema = z
+  .object({
+    username: z.string().min(2, {
+      message: "Username must be at least 2 characters.",
+    }),
+    firstName: z.string().min(1, {
+      message: "First name is required.",
+    }),
+    lastName: z.string().min(1, {
+      message: "Last name is required.",
+    }),
+    email: z.string().email({
+      message: "Please enter a valid email address.",
+    }),
+    phoneNumber: z.string().min(1, {
+      message: "Phone number is required.",
+    }),
+    password: z.string().min(6, {
+      message: "Password must be at least 6 characters.",
+    }),
+    confirmPassword: z.string().min(6, {
+      message: "Password must be at least 6 characters.",
+    }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 const Register: React.FC = () => {
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
   const router = useRouter();
 
@@ -69,11 +71,11 @@ const Register: React.FC = () => {
   });
 
   const goToLogin = () => {
-    router.push('/login');
+    router.push("/login");
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    setErrorMessage('');
+    setErrorMessage("");
 
     const request: RegisterRequest = {
       username: values.username,
@@ -87,11 +89,11 @@ const Register: React.FC = () => {
     try {
       setIsRegistering(true);
       await userService.register(request);
-      toast.success('Registration successful!');
+      toast.success("Registration successful!");
       form.reset();
       setTimeout(goToLogin, 1000);
     } catch (error) {
-      setErrorMessage('Registration request failed: ' + error);
+      setErrorMessage("Registration request failed: " + error);
     } finally {
       setIsRegistering(false);
     }
@@ -102,8 +104,12 @@ const Register: React.FC = () => {
       <Card className="w-full max-w-2xl">
         <CardHeader className="text-center space-y-2 pb-4">
           <div>
-            <CardTitle className="text-2xl font-bold text-primary">Create Account</CardTitle>
-            <p className="text-muted-foreground mt-2">Join our community today</p>
+            <CardTitle className="text-2xl font-bold text-primary">
+              Create Account
+            </CardTitle>
+            <p className="text-muted-foreground mt-2">
+              Join our community today
+            </p>
           </div>
         </CardHeader>
 
@@ -113,7 +119,7 @@ const Register: React.FC = () => {
               <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
           )}
-        
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -138,7 +144,7 @@ const Register: React.FC = () => {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="lastName"
@@ -161,7 +167,7 @@ const Register: React.FC = () => {
                   )}
                 />
               </div>
-            
+
               <FormField
                 control={form.control}
                 name="username"
@@ -183,7 +189,7 @@ const Register: React.FC = () => {
                   </FormItem>
                 )}
               />
-            
+
               <FormField
                 control={form.control}
                 name="email"
@@ -205,7 +211,7 @@ const Register: React.FC = () => {
                   </FormItem>
                 )}
               />
-            
+
               <FormField
                 control={form.control}
                 name="phoneNumber"
@@ -227,7 +233,7 @@ const Register: React.FC = () => {
                   </FormItem>
                 )}
               />
-            
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -250,7 +256,7 @@ const Register: React.FC = () => {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="confirmPassword"
@@ -273,34 +279,37 @@ const Register: React.FC = () => {
                   )}
                 />
               </div>
-            
-            <Button 
-              type="submit" 
-              className="w-full" 
-              size="lg" 
-              disabled={isRegistering}
-            >
-              {isRegistering ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating Account...
-                </>
-              ) : (
-                <>
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Register
-                </>
-              )}
-            </Button>
-            
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">
-                Already have an account?{' '}
-                <Link href="/login" className="text-primary hover:underline font-medium">
-                  Sign in
-                </Link>
-              </p>
-            </div>
+
+              <Button
+                type="submit"
+                className="w-full"
+                size="lg"
+                disabled={isRegistering}
+              >
+                {isRegistering ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating Account...
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Register
+                  </>
+                )}
+              </Button>
+
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">
+                  Already have an account?{" "}
+                  <Link
+                    href="/login"
+                    className="text-primary hover:underline font-medium"
+                  >
+                    Sign in
+                  </Link>
+                </p>
+              </div>
             </form>
           </Form>
         </CardContent>

@@ -3,9 +3,11 @@ package org.atlas.infrastructure.api.server.rest.adapter.order.front.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
+import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.order.entity.OrderEntity;
+import org.atlas.domain.order.shared.enums.OrderStatus;
 import org.atlas.domain.order.usecase.front.handler.FrontGetOrderStatusUseCaseHandler;
 import org.atlas.domain.order.usecase.front.handler.FrontListOrderUseCaseHandler;
 import org.atlas.domain.order.usecase.front.handler.FrontPlaceOrderUseCaseHandler;
@@ -20,7 +22,9 @@ import org.atlas.framework.paging.PagingRequest.SortOrder;
 import org.atlas.framework.paging.PagingResult;
 import org.atlas.infrastructure.api.server.rest.adapter.order.front.model.FrontOrderStatusResponse;
 import org.atlas.infrastructure.api.server.rest.adapter.order.front.model.FrontPlaceOrderRequest;
+import org.atlas.infrastructure.api.server.rest.adapter.order.front.model.FrontPlaceOrderResponse;
 import org.atlas.infrastructure.api.server.rest.adapter.order.shared.model.OrderResponse;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -46,12 +50,23 @@ public class FrontOrderController {
   @Operation(summary = "List Orders", description = "Retrieves a paginated list of orders for the front-end.")
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   public ApiResponseWrapper<List<OrderResponse>> listOrder(
+      @Parameter(name = "status", description = "Order status")
+      @RequestParam(name = "status", required = false) OrderStatus status,
+      @Parameter(name = "startDate", description = "Start date")
+      @RequestParam(name = "startDate", required = false)
+      @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+      @Parameter(name = "endDate", description = "End date")
+      @RequestParam(name = "endDate", required = false)
+      @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
       @Parameter(name = "page", description = "The page number to retrieve (default is 1).", example = "1")
       @RequestParam(name = "page", required = false, defaultValue = "1") Integer page,
       @Parameter(name = "size", description = "The number of orders per page (default is defined by the constant).", example = "10")
       @RequestParam(name = "size", required = false, defaultValue = CommonConstant.DEFAULT_PAGE_SIZE_STR) Integer size
   ) throws Exception {
     FrontListOrderInput input = FrontListOrderInput.builder()
+        .status(status)
+        .startDate(startDate)
+        .endDate(endDate)
         .pagingRequest(PagingRequest.of(page - 1, size, "createdAt", SortOrder.DESC))
         .build();
 
@@ -68,6 +83,7 @@ public class FrontOrderController {
       @Parameter(name = "orderId", description = "ID of the order to retrieve the status for.", example = "123")
       @PathVariable("orderId") Integer orderId) throws Exception {
     FrontGetOrderStatusOutput output = frontGetOrderStatusUseCaseHandler.handle(orderId);
+
     FrontOrderStatusResponse response = ObjectMapperUtil.getInstance()
         .map(output, FrontOrderStatusResponse.class);
     return ApiResponseWrapper.success(response);
@@ -76,12 +92,18 @@ public class FrontOrderController {
   @Operation(summary = "Place Order", description = "Places a new order based on the provided order details.")
   @PostMapping(value = "/place", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.CREATED)
-  public ApiResponseWrapper<Integer> placeOrder(
+  public ApiResponseWrapper<FrontPlaceOrderResponse> placeOrder(
       @Parameter(description = "Order details to create a new order.", required = true)
       @Valid @RequestBody FrontPlaceOrderRequest request) throws Exception {
     FrontPlaceOrderInput input = ObjectMapperUtil.getInstance()
         .map(request, FrontPlaceOrderInput.class);
-    Integer orderId = frontPlaceOrderUseCaseHandler.handle(input);
-    return ApiResponseWrapper.success(orderId);
+
+    OrderEntity order = frontPlaceOrderUseCaseHandler.handle(input);
+
+    FrontPlaceOrderResponse response = FrontPlaceOrderResponse.builder()
+        .orderId(order.getId())
+        .orderCode(order.getCode())
+        .build();
+    return ApiResponseWrapper.success(response);
   }
 }

@@ -37,7 +37,7 @@ public class FrontPlaceOrderUseCaseHandler {
   private final OrderMessagePublisherPort orderMessagePublisherPort;
   private final SequenceGenerator sequenceGenerator;
 
-  public Integer handle(FrontPlaceOrderInput input) {
+  public OrderEntity handle(FrontPlaceOrderInput input) {
     try {
       OrderEntity orderEntity = newOrder(input);
       orderEntity.setCode(sequenceGenerator.generate(SequenceType.ORDER));
@@ -54,8 +54,8 @@ public class FrontPlaceOrderUseCaseHandler {
       // Publish event
       publishEvent(orderEntity);
 
-      // Return the inserted order ID
-      return orderEntity.getId();
+      // Return the inserted order
+      return orderEntity;
     } catch (Exception e) {
       log.error("Failed to place order", e);
       throw new DomainException(AppError.FAILED_TO_PLACE_ORDER);

@@ -1,18 +1,47 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { userService } from '@/services';
-import { getRoleBadgeClasses } from '@/utils/formatter.util';
-import { toast } from 'sonner';
-import type { ListUserFilters, User } from '@/interfaces/user.interface';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import type { ListUserFilters, User } from "@/interfaces/user.interface";
+import { userService } from "@/services";
+import { Loader2, RotateCcw, Search } from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const UserList: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+  const [hasInitialLoad, setHasInitialLoad] = useState(false);
   const [filters, setFilters] = useState<ListUserFilters>({
     id: undefined,
     username: undefined,
-    role: '',
+    role: "",
     page: 1,
     size: 20,
   });
@@ -24,46 +53,53 @@ const UserList: React.FC = () => {
   });
 
   // Available roles for dropdown
-  const availableRoles: string[] = ['ADMIN', 'USER'];
+  const availableRoles: string[] = ["ADMIN", "USER"];
 
-  const applyFilters = useCallback(async (page: number) => {
-    setIsLoadingUsers(true);
-    try {
-      const updatedFilters = { ...filters, page };
-      setFilters(updatedFilters);
-      setMetadata(prev => ({ ...prev, currentPage: page }));
+  const applyFilters = useCallback(
+    async (page: number, currentFilters?: ListUserFilters) => {
+      setIsLoadingUsers(true);
+      try {
+        const filtersToUse = currentFilters || filters;
+        const updatedFilters = { ...filtersToUse, page };
+        setFilters(updatedFilters);
+        setMetadata((prev) => ({ ...prev, currentPage: page }));
 
-      // Clean up empty or undefined filters
-      const apiFilters: ListUserFilters = { ...updatedFilters };
-      Object.keys(apiFilters).forEach((key) => {
-        const typedKey = key as keyof ListUserFilters;
-        if (apiFilters[typedKey] === '' || apiFilters[typedKey] === undefined) {
-          delete apiFilters[typedKey];
+        // Clean up empty or undefined filters
+        const apiFilters: ListUserFilters = { ...updatedFilters };
+        Object.keys(apiFilters).forEach((key) => {
+          const typedKey = key as keyof ListUserFilters;
+          if (
+            apiFilters[typedKey] === "" ||
+            apiFilters[typedKey] === undefined
+          ) {
+            delete apiFilters[typedKey];
+          }
+        });
+
+        const response = await userService.listUser(apiFilters);
+
+        if (response.success) {
+          setUsers(response.data || []);
+          if (response.metadata) {
+            setMetadata(response.metadata);
+          }
+          setHasInitialLoad(true);
+        } else {
+          toast.error(response.errorMessage || "Failed to load users");
+          console.error("Failed to load users:", response.errorMessage);
         }
-      });
-
-      console.log('Fetching users with filters:', apiFilters);
-      const response = await userService.listUser(apiFilters);
-
-      if (response.success) {
-        setUsers(response.data || []);
-        if (response.metadata) {
-          setMetadata(response.metadata);
-        }
-        console.log('Users loaded:', response.data?.length || 0);
-      } else {
-        toast.error(response.errorMessage || 'Failed to load users');
-        console.error('Failed to load users:', response.errorMessage);
+      } catch (error: unknown) {
+        console.error("Error loading users:", error);
+        const errorMessage =
+          error instanceof Error ? error.message : "Failed to load users";
+        toast.error(errorMessage);
+        setUsers([]);
+      } finally {
+        setIsLoadingUsers(false);
       }
-    } catch (error: unknown) {
-      console.error('Error loading users:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to load users';
-      toast.error(errorMessage);
-      setUsers([]);
-    } finally {
-      setIsLoadingUsers(false);
-    }
-  }, [filters]);
+    },
+    [filters]
+  );
 
   const changePage = (newPage: number) => {
     if (newPage >= 1 && newPage <= metadata.totalPages) {
@@ -72,19 +108,22 @@ const UserList: React.FC = () => {
   };
 
   const resetFilters = () => {
-    const resetFilters: ListUserFilters = {
+    const resetFiltersData: ListUserFilters = {
       id: undefined,
       username: undefined,
-      role: '',
+      role: "",
       page: 1,
       size: 20,
     };
-    setFilters(resetFilters);
-    applyFilters(1);
+    setFilters(resetFiltersData);
+    applyFilters(1, resetFiltersData);
   };
 
-  const handleFilterChange = (field: keyof ListUserFilters, value: string | number | boolean | undefined) => {
-    setFilters(prev => ({ ...prev, [field]: value }));
+  const handleFilterChange = (
+    field: keyof ListUserFilters,
+    value: string | number | boolean | undefined
+  ) => {
+    setFilters((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSearch = () => {
@@ -93,170 +132,228 @@ const UserList: React.FC = () => {
 
   // Initial load
   useEffect(() => {
-    console.log('UserList component mounted, fetching users...');
-    applyFilters(1);
-  }, [applyFilters]);
+    if (!hasInitialLoad) {
+      applyFilters(1);
+    }
+  }, []);
 
   return (
-    <div className="container-fluid py-4">
-      <div className="row">
-        <div className="col-12">
-          <div className="card">
-            <div className="card-header">
-              <h5 className="card-title mb-0">
-                <i className="bi bi-people me-2"></i>
-                User Management
-              </h5>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>User Filters</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="userId">User ID</Label>
+              <Input
+                type="number"
+                id="userId"
+                placeholder="Enter user ID"
+                value={filters.id || ""}
+                onChange={(e) =>
+                  handleFilterChange(
+                    "id",
+                    e.target.value ? parseInt(e.target.value) : undefined
+                  )
+                }
+              />
             </div>
-
-            {/* Filters */}
-            <div className="card-body border-bottom">
-              <div className="row g-3">
-                <div className="col-md-3">
-                  <label htmlFor="userId" className="form-label">User ID</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    id="userId"
-                    placeholder="Enter user ID"
-                    value={filters.id || ''}
-                    onChange={(e) => handleFilterChange('id', e.target.value ? parseInt(e.target.value) : undefined)}
-                  />
-                </div>
-                <div className="col-md-3">
-                  <label htmlFor="username" className="form-label">Username</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="username"
-                    placeholder="Enter username"
-                    value={filters.username || ''}
-                    onChange={(e) => handleFilterChange('username', e.target.value || undefined)}
-                  />
-                </div>
-                <div className="col-md-3">
-                  <label htmlFor="role" className="form-label">Role</label>
-                  <select
-                    className="form-select"
-                    id="role"
-                    value={filters.role}
-                    onChange={(e) => handleFilterChange('role', e.target.value)}
-                  >
-                    <option value="">All Roles</option>
-                    {availableRoles.map(role => (
-                      <option key={role} value={role}>
-                        {role}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="col-md-3 d-flex align-items-end">
-                  <div className="btn-group w-100">
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={handleSearch}
-                      disabled={isLoadingUsers}
-                    >
-                      <i className="bi bi-search me-1"></i>
-                      Search
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={resetFilters}
-                      disabled={isLoadingUsers}
-                    >
-                      <i className="bi bi-arrow-clockwise me-1"></i>
-                      Reset
-                    </button>
-                  </div>
-                </div>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                type="text"
+                id="username"
+                placeholder="Enter username"
+                value={filters.username || ""}
+                onChange={(e) =>
+                  handleFilterChange("username", e.target.value || undefined)
+                }
+              />
             </div>
-
-            {/* Users Table */}
-            <div className="table-responsive">
-              {isLoadingUsers ? (
-                <div className="text-center py-5">
-                  <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                  <p className="mt-2 text-muted">Loading users...</p>
-                </div>
-              ) : (
-                <table className="table table-hover mb-0">
-                  <thead className="table-light">
-                    <tr>
-                      <th scope="col" className="px-4">ID</th>
-                      <th scope="col" className="px-4">Username</th>
-                      <th scope="col" className="px-4">Name</th>
-                      <th scope="col" className="px-4">Email</th>
-                      <th scope="col" className="px-4">Phone</th>
-                      <th scope="col" className="px-4">Role</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {users.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="text-center py-4 text-muted">
-                          No users found
-                        </td>
-                      </tr>
-                    ) : (
-                      users.map(user => (
-                        <tr key={user.id}>
-                          <td className="px-4">{user.id}</td>
-                          <td className="px-4">{user.username}</td>
-                          <td className="px-4">
-                            {user.firstName && user.lastName 
-                              ? `${user.firstName} ${user.lastName}` 
-                              : 'N/A'
-                            }
-                          </td>
-                          <td className="px-4">{user.email || 'N/A'}</td>
-                          <td className="px-4">{user.phoneNumber || 'N/A'}</td>
-                          <td className="px-4">
-                            <span className={getRoleBadgeClasses(user.role)}>
-                              {user.role}
-                            </span>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              )}
-            </div>
-
-            {/* Pagination */}
-            <div className="card-footer bg-light py-3">
-              <div className="d-flex justify-content-between align-items-center">
-                <span className="text-muted">
-                  Page {metadata.currentPage} of {metadata.totalPages}
-                  <span className="ms-2">({metadata.totalRecords} records)</span>
-                </span>
-                <div className="btn-group">
-                  <button
-                    onClick={() => changePage(metadata.currentPage - 1)}
-                    disabled={metadata.currentPage <= 1}
-                    className="btn btn-outline-secondary px-3"
-                  >
-                    Previous
-                  </button>
-                  <button
-                    onClick={() => changePage(metadata.currentPage + 1)}
-                    disabled={metadata.currentPage >= metadata.totalPages}
-                    className="btn btn-outline-secondary px-3"
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="role">Role</Label>
+              <Select
+                value={filters.role}
+                onValueChange={(value) => handleFilterChange("role", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Roles" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableRoles.map((role) => (
+                    <SelectItem key={role} value={role}>
+                      {role}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
+          <div className="flex justify-start space-x-2 mt-4">
+            <Button
+              onClick={handleSearch}
+              disabled={isLoadingUsers}
+            >
+              <Search className="h-4 w-4 mr-2" />
+              Search
+            </Button>
+            <Button
+              variant="outline"
+              onClick={resetFilters}
+              disabled={isLoadingUsers}
+            >
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Reset
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>User Results</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoadingUsers ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="mt-2 text-muted-foreground">Loading users...</p>
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Username</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Role</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={6}
+                        className="text-center py-8 text-muted-foreground"
+                      >
+                        No users found
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    users.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell>{user.id}</TableCell>
+                        <TableCell>{user.username}</TableCell>
+                        <TableCell>
+                          {user.firstName && user.lastName
+                            ? `${user.firstName} ${user.lastName}`
+                            : "N/A"}
+                        </TableCell>
+                        <TableCell>{user.email || "N/A"}</TableCell>
+                        <TableCell>{user.phoneNumber || "N/A"}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              user.role === "ADMIN" ? "default" : "secondary"
+                            }
+                          >
+                            {user.role}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Pagination */}
+      {metadata.totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Page {metadata.currentPage} of {metadata.totalPages} (
+            {metadata.totalRecords} records)
+          </div>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (metadata.currentPage > 1) {
+                      changePage(metadata.currentPage - 1);
+                    }
+                  }}
+                  className={
+                    metadata.currentPage <= 1
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }
+                />
+              </PaginationItem>
+
+              {/* Page numbers */}
+              {Array.from(
+                { length: Math.min(5, metadata.totalPages) },
+                (_, i) => {
+                  const pageNumber =
+                    Math.max(
+                      1,
+                      Math.min(
+                        metadata.totalPages - 4,
+                        metadata.currentPage - 2
+                      )
+                    ) + i;
+
+                  if (pageNumber <= metadata.totalPages) {
+                    return (
+                      <PaginationItem key={pageNumber}>
+                        <PaginationLink
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            changePage(pageNumber);
+                          }}
+                          isActive={pageNumber === metadata.currentPage}
+                        >
+                          {pageNumber}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  }
+                  return null;
+                }
+              )}
+
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (metadata.currentPage < metadata.totalPages) {
+                      changePage(metadata.currentPage + 1);
+                    }
+                  }}
+                  className={
+                    metadata.currentPage >= metadata.totalPages
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         </div>
-      </div>
+      )}
     </div>
   );
 };

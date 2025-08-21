@@ -1,10 +1,18 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { orderService } from '@/services';
-import { formatCurrency, formatDate, formatOrderStatusLabel, getOrderStatusBadgeClasses } from '@/utils/formatter.util';
-import { toast } from 'sonner';
-import { OrderStatus, type ListOrderFilters, type Order } from '@/interfaces/order.interface';
+import React, { useState, useEffect, useCallback } from "react";
+import { orderService } from "@/services";
+import {
+  formatCurrency,
+  formatDate,
+  getOrderStatusBadge,
+} from "@/utils/formatter.util";
+import { toast } from "sonner";
+import {
+  OrderStatus,
+  type ListOrderFilters,
+  type Order,
+} from "@/interfaces/order.interface";
 
 const OrderList: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -13,7 +21,7 @@ const OrderList: React.FC = () => {
   const [filters, setFilters] = useState<ListOrderFilters>({
     orderId: undefined,
     userId: undefined,
-    status: '' as const,
+    status: "" as const,
     startDate: undefined,
     endDate: undefined,
     page: 1,
@@ -33,27 +41,30 @@ const OrderList: React.FC = () => {
     setSelectedOrderId(selectedOrderId === orderId ? null : orderId);
   };
 
-  const applyFilters = useCallback(async (page: number) => {
-    setIsLoadingOrders(true);
-    try {
-      const updatedFilters = { ...filters, page };
-      setFilters(updatedFilters);
-      setMetadata(prev => ({ ...prev, currentPage: page }));
-      
-      const response = await orderService.listOrder(updatedFilters);
-      
-      setOrders(response.data);
-      if (response.metadata) {
-        setMetadata(response.metadata);
+  const applyFilters = useCallback(
+    async (page: number) => {
+      setIsLoadingOrders(true);
+      try {
+        const updatedFilters = { ...filters, page };
+        setFilters(updatedFilters);
+        setMetadata((prev) => ({ ...prev, currentPage: page }));
+
+        const response = await orderService.listOrder(updatedFilters);
+
+        setOrders(response.data);
+        if (response.metadata) {
+          setMetadata(response.metadata);
+        }
+        setSelectedOrderId(null);
+      } catch {
+        toast.error("Failed to load orders");
+        setOrders([]);
+      } finally {
+        setIsLoadingOrders(false);
       }
-      setSelectedOrderId(null);
-    } catch {
-      toast.error('Failed to load orders');
-      setOrders([]);
-    } finally {
-      setIsLoadingOrders(false);
-    }
-  }, [filters]);
+    },
+    [filters]
+  );
 
   const changePage = (newPage: number) => {
     if (newPage >= 1 && newPage <= metadata.totalPages) {
@@ -65,7 +76,7 @@ const OrderList: React.FC = () => {
     const resetFilters: ListOrderFilters = {
       orderId: undefined,
       userId: undefined,
-      status: '' as const,
+      status: "" as const,
       startDate: undefined,
       endDate: undefined,
       page: 1,
@@ -75,8 +86,11 @@ const OrderList: React.FC = () => {
     applyFilters(1);
   };
 
-  const handleFilterChange = (field: keyof ListOrderFilters, value: string | number | boolean | OrderStatus | undefined) => {
-    setFilters(prev => ({ ...prev, [field]: value }));
+  const handleFilterChange = (
+    field: keyof ListOrderFilters,
+    value: string | number | boolean | OrderStatus | undefined
+  ) => {
+    setFilters((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSearch = () => {
@@ -104,61 +118,90 @@ const OrderList: React.FC = () => {
             <div className="card-body border-bottom">
               <div className="row g-3">
                 <div className="col-md-2">
-                  <label htmlFor="orderId" className="form-label">Order ID</label>
+                  <label htmlFor="orderId" className="form-label">
+                    Order ID
+                  </label>
                   <input
                     type="number"
                     className="form-control"
                     id="orderId"
                     placeholder="Enter order ID"
-                    value={filters.orderId || ''}
-                    onChange={(e) => handleFilterChange('orderId', e.target.value ? parseInt(e.target.value) : undefined)}
+                    value={filters.orderId || ""}
+                    onChange={(e) =>
+                      handleFilterChange(
+                        "orderId",
+                        e.target.value ? parseInt(e.target.value) : undefined
+                      )
+                    }
                   />
                 </div>
                 <div className="col-md-2">
-                  <label htmlFor="userId" className="form-label">User ID</label>
+                  <label htmlFor="userId" className="form-label">
+                    User ID
+                  </label>
                   <input
                     type="number"
                     className="form-control"
                     id="userId"
                     placeholder="Enter user ID"
-                    value={filters.userId || ''}
-                    onChange={(e) => handleFilterChange('userId', e.target.value ? parseInt(e.target.value) : undefined)}
+                    value={filters.userId || ""}
+                    onChange={(e) =>
+                      handleFilterChange(
+                        "userId",
+                        e.target.value ? parseInt(e.target.value) : undefined
+                      )
+                    }
                   />
                 </div>
                 <div className="col-md-2">
-                  <label htmlFor="status" className="form-label">Status</label>
+                  <label htmlFor="status" className="form-label">
+                    Status
+                  </label>
                   <select
                     className="form-select"
                     id="status"
                     value={filters.status}
-                    onChange={(e) => handleFilterChange('status', e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange("status", e.target.value)
+                    }
                   >
                     <option value="">All Statuses</option>
-                    {orderStatuses.map(status => (
+                    {orderStatuses.map((status) => (
                       <option key={status} value={status}>
-                        {formatOrderStatusLabel(status)}
+                        {status}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div className="col-md-2">
-                  <label htmlFor="startDate" className="form-label">Start Date</label>
+                  <label htmlFor="startDate" className="form-label">
+                    Start Date
+                  </label>
                   <input
                     type="date"
                     className="form-control"
                     id="startDate"
-                    value={filters.startDate || ''}
-                    onChange={(e) => handleFilterChange('startDate', e.target.value || undefined)}
+                    value={filters.startDate || ""}
+                    onChange={(e) =>
+                      handleFilterChange(
+                        "startDate",
+                        e.target.value || undefined
+                      )
+                    }
                   />
                 </div>
                 <div className="col-md-2">
-                  <label htmlFor="endDate" className="form-label">End Date</label>
+                  <label htmlFor="endDate" className="form-label">
+                    End Date
+                  </label>
                   <input
                     type="date"
                     className="form-control"
                     id="endDate"
-                    value={filters.endDate || ''}
-                    onChange={(e) => handleFilterChange('endDate', e.target.value || undefined)}
+                    value={filters.endDate || ""}
+                    onChange={(e) =>
+                      handleFilterChange("endDate", e.target.value || undefined)
+                    }
                   />
                 </div>
                 <div className="col-md-2 d-flex align-items-end">
@@ -199,13 +242,27 @@ const OrderList: React.FC = () => {
                 <table className="table table-hover mb-0">
                   <thead className="table-light">
                     <tr>
-                      <th scope="col" className="px-4">ID</th>
-                      <th scope="col" className="px-4">Code</th>
-                      <th scope="col" className="px-4">User</th>
-                      <th scope="col" className="px-4">Amount</th>
-                      <th scope="col" className="px-4">Status</th>
-                      <th scope="col" className="px-4">Created At</th>
-                      <th scope="col" className="px-4">Actions</th>
+                      <th scope="col" className="px-4">
+                        ID
+                      </th>
+                      <th scope="col" className="px-4">
+                        Code
+                      </th>
+                      <th scope="col" className="px-4">
+                        User
+                      </th>
+                      <th scope="col" className="px-4">
+                        Amount
+                      </th>
+                      <th scope="col" className="px-4">
+                        Status
+                      </th>
+                      <th scope="col" className="px-4">
+                        Created At
+                      </th>
+                      <th scope="col" className="px-4">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -216,31 +273,37 @@ const OrderList: React.FC = () => {
                         </td>
                       </tr>
                     ) : (
-                      orders.map(order => (
+                      orders.map((order) => (
                         <React.Fragment key={order.id}>
                           <tr>
                             <td className="px-4">{order.id}</td>
                             <td className="px-4">{order.code}</td>
                             <td className="px-4">
-                              {order.user ? `${order.user.firstName} ${order.user.lastName}` : 'N/A'}
+                              {order.user
+                                ? `${order.user.firstName} ${order.user.lastName}`
+                                : "N/A"}
                             </td>
-                            <td className="px-4">${formatCurrency(order.amount)}</td>
                             <td className="px-4">
-                              <span className={getOrderStatusBadgeClasses(order.status)}>
-                                {formatOrderStatusLabel(order.status)}
-                              </span>
+                              ${formatCurrency(order.amount)}
                             </td>
-                            <td className="px-4">{formatDate(order.createdAt)}</td>
+                            <td className="px-4">
+                              {getOrderStatusBadge(order.status)}
+                            </td>
+                            <td className="px-4">
+                              {formatDate(order.createdAt)}
+                            </td>
                             <td className="px-4">
                               <button
                                 className="btn btn-sm btn-outline-secondary"
                                 onClick={() => toggleDetails(order.id)}
                               >
-                                {selectedOrderId === order.id ? 'Hide Details' : 'View Details'}
+                                {selectedOrderId === order.id
+                                  ? "Hide Details"
+                                  : "View Details"}
                               </button>
                             </td>
                           </tr>
-                          
+
                           {/* Order Details */}
                           {selectedOrderId === order.id && (
                             <tr>
@@ -249,16 +312,23 @@ const OrderList: React.FC = () => {
                                   <h6 className="mb-3">User Information</h6>
                                   <dl className="row mb-3">
                                     <dt className="col-sm-3">User ID</dt>
-                                    <dd className="col-sm-9">{order.user?.id ?? 'N/A'}</dd>
+                                    <dd className="col-sm-9">
+                                      {order.user?.id ?? "N/A"}
+                                    </dd>
                                     <dt className="col-sm-3">First Name</dt>
-                                    <dd className="col-sm-9">{order.user?.firstName ?? 'N/A'}</dd>
+                                    <dd className="col-sm-9">
+                                      {order.user?.firstName ?? "N/A"}
+                                    </dd>
                                     <dt className="col-sm-3">Last Name</dt>
-                                    <dd className="col-sm-9">{order.user?.lastName ?? 'N/A'}</dd>
+                                    <dd className="col-sm-9">
+                                      {order.user?.lastName ?? "N/A"}
+                                    </dd>
                                   </dl>
 
                                   {order.cancelReason && (
                                     <div className="alert alert-danger mb-3">
-                                      <strong>Cancellation Reason:</strong> {order.cancelReason}
+                                      <strong>Cancellation Reason:</strong>{" "}
+                                      {order.cancelReason}
                                     </div>
                                   )}
 
@@ -275,13 +345,24 @@ const OrderList: React.FC = () => {
                                         </tr>
                                       </thead>
                                       <tbody>
-                                        {order.orderItems?.map(item => (
+                                        {order.orderItems?.map((item) => (
                                           <tr key={item.product.id}>
                                             <td>{item.product.id}</td>
                                             <td>{item.product.name}</td>
-                                            <td>${formatCurrency(item.product.price)}</td>
+                                            <td>
+                                              $
+                                              {formatCurrency(
+                                                item.product.price
+                                              )}
+                                            </td>
                                             <td>{item.quantity}</td>
-                                            <td>${formatCurrency(item.product.price * item.quantity)}</td>
+                                            <td>
+                                              $
+                                              {formatCurrency(
+                                                item.product.price *
+                                                  item.quantity
+                                              )}
+                                            </td>
                                           </tr>
                                         ))}
                                       </tbody>
@@ -304,7 +385,9 @@ const OrderList: React.FC = () => {
               <div className="d-flex justify-content-between align-items-center">
                 <span className="text-muted">
                   Page {metadata.currentPage} of {metadata.totalPages}
-                  <span className="ms-2">({metadata.totalRecords} records)</span>
+                  <span className="ms-2">
+                    ({metadata.totalRecords} records)
+                  </span>
                 </span>
                 <div className="btn-group">
                   <button

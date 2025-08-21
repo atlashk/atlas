@@ -1,14 +1,19 @@
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
-import { Product } from '@/interfaces';
-import { useCartStore } from '@/stores';
-import { getProductImageUrl } from '@/utils/productImage.util';
-import { Loader2 } from 'lucide-react';
-import Image from 'next/image';
-import React from 'react';
-import { toast } from 'sonner';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { Product } from "@/interfaces";
+import { useCartStore } from "@/stores";
+import { getProductImageUrl } from "@/utils/productImage.util";
+import { Loader2 } from "lucide-react";
+import Image from "next/image";
+import React from "react";
+import { toast } from "sonner";
 
 interface ProductDetailsModalProps {
   isOpen: boolean;
@@ -21,7 +26,7 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
   isOpen,
   product,
   isLoading = false,
-  onClose
+  onClose,
 }) => {
   const { addToCart } = useCartStore();
 
@@ -29,15 +34,15 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
     if (product) {
       try {
         addToCart({
-          productId: String(product.id),
+          productId: product.id,
           name: product.name,
           price: product.price,
-          imageUrl: getProductImageUrl(product.image)
+          imageUrl: getProductImageUrl(product.image),
         });
         toast.success(`${product.name} added to cart`);
         onClose();
       } catch (error) {
-        toast.error('Failed to add product to cart');
+        toast.error("Failed to add product to cart");
         console.error(error);
       }
     }
@@ -67,12 +72,15 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
               </div>
               <div className="space-y-4">
                 <h3 className="text-2xl font-bold">{product.name}</h3>
-                <p className="text-3xl font-semibold text-primary">${product.price.toFixed(2)}</p>
+                <p className="text-3xl font-semibold text-primary">
+                  ${product.price.toFixed(2)}
+                </p>
 
                 <div>
                   <h4 className="text-lg font-semibold mb-2">Description</h4>
                   <p className="text-muted-foreground">
-                    {product.details?.description || 'No description available.'}
+                    {product.details?.description ||
+                      "No description available."}
                   </p>
                 </div>
 
@@ -93,12 +101,16 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                     </Table>
                   </div>
                 ) : (
-                  <p className="text-muted-foreground">No attributes available.</p>
+                  <p className="text-muted-foreground">
+                    No attributes available.
+                  </p>
                 )}
 
                 <div>
                   <h4 className="text-lg font-semibold mb-2">Brand</h4>
-                  <p className="text-muted-foreground">{product.brand?.name || 'N/A'}</p>
+                  <p className="text-muted-foreground">
+                    {product.brand?.name || "N/A"}
+                  </p>
                 </div>
 
                 <div>

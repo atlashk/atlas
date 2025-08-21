@@ -8,13 +8,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ShoppingBag, Clock } from 'lucide-react';
 
 const StoreFront: React.FC = () => {
-  const { loadCart, currentOrderId } = useCartStore();
+  const { loadCart, currentOrderId, setCurrentOrderId } = useCartStore();
   const { isAuthenticated } = useUserStore();
   const [activeTab, setActiveTab] = useState('products');
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     loadCart();
-  }, [loadCart]);
+    // Clear order tracking on page reload
+    setCurrentOrderId(null);
+  }, [loadCart, setCurrentOrderId]);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-4">
@@ -22,12 +29,12 @@ const StoreFront: React.FC = () => {
         {/* Left side: Product Search and Order History */}
         <div className="lg:col-span-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className={`grid w-full ${isHydrated && isAuthenticated() ? 'grid-cols-2' : 'grid-cols-1'}`}>
               <TabsTrigger value="products" className="flex items-center gap-2">
                 <ShoppingBag className="h-4 w-4" />
                 Products
               </TabsTrigger>
-              {isAuthenticated() && (
+              {isHydrated && isAuthenticated() && (
                 <TabsTrigger value="order-history" className="flex items-center gap-2">
                   <Clock className="h-4 w-4" />
                   Order History
@@ -37,7 +44,7 @@ const StoreFront: React.FC = () => {
             <TabsContent value="products" className="mt-6">
               <ProductSearch />
             </TabsContent>
-            {isAuthenticated() && (
+            {isHydrated && isAuthenticated() && (
               <TabsContent value="order-history" className="mt-6">
                 <OrderHistory />
               </TabsContent>

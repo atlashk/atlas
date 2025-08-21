@@ -1,14 +1,14 @@
-export interface PaginationMetadata {
-  currentPage: number
-  pageSize: number
-  totalPages: number
-  totalRecords: number
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  metadata?: Metadata;
+  errorCode?: string;
+  errorMessage?: string;
 }
 
-export interface ApiResponse<T> {
-  success: boolean
-  data: T
-  metadata?: PaginationMetadata
-  errorCode?: string
-  errorMessage?: string
+interface Metadata {
+  currentPage: number;
+  pageSize: number;
+  totalPages: number;
+  totalRecords: number;
 }

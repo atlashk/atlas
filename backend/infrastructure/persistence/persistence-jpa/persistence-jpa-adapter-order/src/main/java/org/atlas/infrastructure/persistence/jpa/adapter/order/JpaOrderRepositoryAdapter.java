@@ -39,15 +39,6 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
   }
 
   @Override
-  public PagingResult<OrderEntity> findByUserId(Integer userId, PagingRequest pagingRequest) {
-    Pageable pageable = PagingConverter.convert(pagingRequest);
-    PagingResult<JpaOrderEntity> jpaOrderEntityPage = PagingConverter.convert(
-        jpaOrderRepository.findByUserIdAndFetch(userId, pageable));
-    return ObjectMapperUtil.getInstance()
-        .mapPage(jpaOrderEntityPage, JpaOrderEntityMapper::toOrderEntity);
-  }
-
-  @Override
   public Optional<OrderEntity> findById(Integer id) {
     return jpaOrderRepository.findByIdAndFetch(id)
         .map(JpaOrderEntityMapper::toOrderEntity);

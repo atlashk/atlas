@@ -14,19 +14,19 @@ export interface Product {
 }
 
 export enum ProductStatus {
-  IN_STOCK = 'IN_STOCK',
-  OUT_STOCK = 'OUT_STOCK',
-  DISCONTINUED = 'DISCONTINUED'
+  IN_STOCK = "IN_STOCK",
+  OUT_STOCK = "OUT_STOCK",
+  DISCONTINUED = "DISCONTINUED",
 }
 
 export interface Brand {
-  id: number
-  name: string
+  id: number;
+  name: string;
 }
 
 export interface ProductDetails {
   description: string;
-};
+}
 
 export interface ProductAttribute {
   id: number;
@@ -50,17 +50,17 @@ export interface SearchProductFilters {
 }
 
 export interface ListProductFilters {
-  id?: number
-  keyword?: string
-  minPrice?: number | null
-  maxPrice?: number | null
-  status?: ProductStatus | ''
-  availableFrom?: string
-  isActive?: boolean | null
-  brandId?: string | null
-  categoryIds?: number[]
-  page: number
-  size: number
+  id?: number;
+  keyword?: string;
+  minPrice?: number | null;
+  maxPrice?: number | null;
+  status?: ProductStatus | "";
+  availableFrom?: string;
+  isActive?: boolean | null;
+  brandId?: string | null;
+  categoryIds?: number[];
+  page: number;
+  size: number;
 }
 
 export interface CreateProductRequest {
@@ -73,7 +73,7 @@ export interface CreateProductRequest {
   isActive: boolean;
   brandId: number;
   details: ProductDetails;
-  attributes: Omit<ProductAttribute, 'id'>[];
+  attributes: Omit<ProductAttribute, "id">[];
   categoryIds: number[];
 }
 
@@ -93,25 +93,25 @@ export interface UpdateProductRequest {
 }
 
 export enum FileType {
-  CSV = 'csv',
-  EXCEL = 'excel',
-  PDF = 'pdf'
+  CSV = "csv",
+  EXCEL = "excel",
+  PDF = "pdf",
 }
 
 export interface ImportProductRequest {
-  file: File
-  fileType: FileType
+  file: File;
+  fileType: FileType;
 }
 
 export interface ExportProductFilters {
-  id?: number
-  keyword?: string
-  minPrice?: number | null
-  maxPrice?: number | null
-  status?: ProductStatus | ''
-  availableFrom?: string
-  isActive?: boolean | null
-  brandId?: string | null
-  categoryIds?: number[]
-  fileType: FileType
+  id?: number;
+  keyword?: string;
+  minPrice?: number | null;
+  maxPrice?: number | null;
+  status?: ProductStatus | "";
+  availableFrom?: string;
+  isActive?: boolean | null;
+  brandId?: string | null;
+  categoryIds?: number[];
+  fileType: FileType;
 }

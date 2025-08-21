@@ -1,85 +1,125 @@
-'use client'
+"use client";
 
-import { useRouter } from 'next/navigation'
-import { useUserStore } from '@/stores/user.store'
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Menu } from 'lucide-react'
+import { Button } from "@/components/ui/button";
+import { useUserStore } from "@/stores/user.store";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function NavBar() {
-  const router = useRouter()
-  const { isAuthenticated, isAdmin, fullName, logout, loading } = useUserStore()
-  
-  const handleBrandClick = () => {
-    if (!isAuthenticated()) {
-      router.push('/')
-    } else if (isAdmin()) {
-      router.push('/admin/dashboard')
-    } else {
-      router.push('/')
+  const router = useRouter();
+  const { isAuthenticated, isAdmin, fullName, logout, loading } =
+    useUserStore();
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  const getBrandHref = () => {
+    // During hydration, check if we have admin tokens to determine initial route
+    if (!isHydrated) {
+      // Check localStorage directly during hydration to prevent mismatch
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('accessToken');
+        const storedProfile = localStorage.getItem('user-store');
+        if (token && storedProfile) {
+          try {
+            const parsed = JSON.parse(storedProfile);
+            if (parsed.state?.profile?.role === 'ADMIN') {
+              return "/admin/dashboard";
+            }
+          } catch (e) {
+            // Fallback if parsing fails
+          }
+        }
+      }
+      return "/";
     }
-  }
-  
+
+    if (!isAuthenticated()) {
+      return "/";
+    } else if (isAdmin()) {
+      return "/admin/dashboard";
+    } else {
+      return "/";
+    }
+  };
+
+  const getBrandName = () => {
+    // During hydration, check if we have tokens to determine initial state
+    if (!isHydrated) {
+      // Check localStorage directly during hydration to prevent mismatch
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('accessToken');
+        const storedProfile = localStorage.getItem('user-store');
+        if (token && storedProfile) {
+          try {
+            const parsed = JSON.parse(storedProfile);
+            if (parsed.state?.profile?.role === 'ADMIN') {
+              return "Atlas Admin";
+            }
+          } catch (e) {
+            // Fallback if parsing fails
+          }
+        }
+      }
+      return "Admin Store";
+    }
+
+    if (isAuthenticated() && isAdmin()) {
+      return "Atlas Admin";
+    }
+    return "Admin Store";
+  };
+
   const handleLogout = async () => {
-    logout()
-    router.push('/')
-  }
-  
+    logout();
+    router.push("/");
+  };
+
   return (
     <nav className="bg-primary border-b fixed top-0 left-0 right-0 z-50 mb-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand */}
           <div className="flex items-center">
-            <Button
-              variant="ghost"
-              onClick={handleBrandClick}
-              className="text-xl font-bold text-white hover:text-gray-300"
+            <Link
+              href={getBrandHref()}
+              className="text-xl text-white hover:text-gray-300 transition-colors duration-200"
             >
-              Atlas
-            </Button>
-          </div>
-
-          {/* Navigation Links */}
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-2">
-              {isAuthenticated() && isAdmin() && (
-                <>
-                  <Button
-                    variant="ghost"
-                    onClick={() => router.push('/admin/user')}
-                    className="text-gray-300 hover:bg-gray-700 hover:text-white"
-                  >
-                    User Management
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    onClick={() => router.push('/admin/product')}
-                    className="text-gray-300 hover:bg-gray-700 hover:text-white"
-                  >
-                    Product Management
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    onClick={() => router.push('/admin/order')}
-                    className="text-gray-300 hover:bg-gray-700 hover:text-white"
-                  >
-                    Order Management
-                  </Button>
-                </>
-              )}
-            </div>
+              {getBrandName()}
+            </Link>
           </div>
 
           {/* Right side - User info & auth buttons */}
           <div className="flex items-center space-x-4">
-            {isAuthenticated() ? (
+            {!isHydrated ? (
+              // Show loading state during hydration to prevent mismatch
+              <div className="flex items-center space-x-4">
+                <Button
+                  onClick={() => router.push("/login")}
+                  size="sm"
+                  className="bg-white text-gray-900 hover:bg-gray-100"
+                >
+                  Login
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => router.push("/register")}
+                  size="sm"
+                  className="bg-blue-600 text-white hover:bg-blue-700"
+                >
+                  Register
+                </Button>
+              </div>
+            ) : isAuthenticated() ? (
               <>
                 <span className="text-gray-300 text-sm">
                   Welcome, {fullName()}
                 </span>
                 <Button
-                  variant="destructive"
+                  variant="secondary"
                   onClick={handleLogout}
                   disabled={loading}
                   size="sm"
@@ -90,14 +130,14 @@ export default function NavBar() {
                       Logging out...
                     </div>
                   ) : (
-                    'Logout'
+                    "Logout"
                   )}
                 </Button>
               </>
             ) : (
               <>
                 <Button
-                  onClick={() => router.push('/login')}
+                  onClick={() => router.push("/login")}
                   size="sm"
                   className="bg-white text-gray-900 hover:bg-gray-100"
                 >
@@ -105,7 +145,7 @@ export default function NavBar() {
                 </Button>
                 <Button
                   variant="secondary"
-                  onClick={() => router.push('/register')}
+                  onClick={() => router.push("/register")}
                   size="sm"
                   className="bg-blue-600 text-white hover:bg-blue-700"
                 >
@@ -116,33 +156,6 @@ export default function NavBar() {
           </div>
         </div>
       </div>
-
-      {/* Mobile menu */}
-      {isAuthenticated() && isAdmin() && (
-        <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-700">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="text-gray-300">
-                  <Menu className="h-4 w-4" />
-                  Menu
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => router.push('/admin/user')}>
-                  User Management
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/admin/product')}>
-                  Product Management
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/admin/order')}>
-                  Order Management
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      )}
     </nav>
-  )
+  );
 }

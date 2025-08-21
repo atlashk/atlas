@@ -1,26 +1,34 @@
-import { PlaceOrderItemRequest } from '@/interfaces';
-import { orderService } from '@/services';
-import { CartItem, useCartStore, useUserStore } from '@/stores';
-import { formatCurrency } from '@/utils/formatter.util';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
-import { toast } from 'sonner';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { X, Minus, Plus } from 'lucide-react';
+import { PlaceOrderItemRequest } from "@/interfaces";
+import { orderService } from "@/services";
+import { CartItem, useCartStore, useUserStore } from "@/stores";
+import { formatCurrency } from "@/utils/formatter.util";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { X, Minus, Plus } from "lucide-react";
 
 const Cart: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const { cart, getTotal, getItemTotal, removeFromCart, updateQuantity, clearCart, setCurrentOrderId } = useCartStore();
+  const {
+    cart,
+    getTotal,
+    getItemTotal,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    setCurrentOrderId,
+  } = useCartStore();
   const { isAuthenticated } = useUserStore();
   const router = useRouter();
 
   const total = getTotal();
 
   const handleRemoveFromCart = (productId: number) => {
-    removeFromCart(String(productId));
+    removeFromCart(productId);
   };
 
   const handleIncreaseQuantity = (item: CartItem) => {
@@ -39,32 +47,32 @@ const Cart: React.FC = () => {
     if (!cart.length || isProcessing) return;
 
     if (!isAuthenticated) {
-      router.push('/login');
+      router.push("/login");
       return;
     }
 
     try {
       setIsProcessing(true);
 
-      const orderItems: PlaceOrderItemRequest[] = cart.map((cartItem: CartItem) => ({
-        productId: parseInt(cartItem.productId),
-        quantity: cartItem.quantity,
-      }));
+      const orderItems: PlaceOrderItemRequest[] = cart.map(
+        (cartItem: CartItem) => ({
+          productId: cartItem.productId,
+          quantity: cartItem.quantity,
+        })
+      );
 
       const response = await orderService.placeOrder({ orderItems });
-      
+
       if (response.success && response.data) {
-        setCurrentOrderId(String(response.data));
+        setCurrentOrderId(response.data.orderId);
         clearCart();
-        toast.success('Order placed successfully!');
+        toast.success("Order placed successfully!");
       } else {
-        console.error('Failed to place order:', response.errorMessage);
-        toast.error(response.errorMessage || 'Failed to place order');
+        toast.error(response.errorMessage || "Failed to place order");
       }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      console.error('Failed to place order:', errorMessage);
-      toast.error('Failed to place order: ' + errorMessage);
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      toast.error("Failed to place order: " + errorMessage);
     } finally {
       setIsProcessing(false);
     }
@@ -78,76 +86,83 @@ const Cart: React.FC = () => {
       <CardContent>
         {cart.length > 0 ? (
           <div className="space-y-3 mb-6">
-          {cart.map((item: CartItem) => (
-            <div
-              key={item.productId}
-              className="border-b border-gray-200 last:border-b-0 py-3"
-            >
-              <div className="flex items-center gap-3">
-                {/* Remove button */}
-                <Button
-                  onClick={() => handleRemoveFromCart(parseInt(item.productId))}
-                  variant="ghost"
-                  size="sm"
-                  className="text-red-500 hover:text-red-700 p-1 h-auto"
-                  disabled={isProcessing}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-
-                {/* Product image */}
-                <Image
-                  src={item.imageUrl || '/placeholder-image.jpg'}
-                  alt={item.name}
-                  className="cart-item-image"
-                  width={60}
-                  height={60}
-                  style={{
-                    objectFit: 'cover',
-                    borderRadius: '4px'
-                  }}
-                />
-
-                {/* Product name */}
-                <div className="flex-1">
-                  <span className="font-semibold">{item.name}</span>
-                </div>
-
-                {/* Quantity controls */}
-                <div className="flex items-center gap-2">
+            {cart.map((item: CartItem) => (
+              <div
+                key={item.productId}
+                className="border-b border-gray-200 last:border-b-0 py-3"
+              >
+                <div className="flex items-center gap-3">
+                  {/* Remove button */}
                   <Button
-                    onClick={() => handleDecreaseQuantity(item)}
-                    variant="outline"
+                    onClick={() => handleRemoveFromCart(item.productId)}
+                    variant="ghost"
                     size="sm"
-                    className="h-8 w-8 p-0"
+                    className="text-red-500 hover:text-red-700 p-1 h-auto"
                     disabled={isProcessing}
                   >
-                    <Minus className="h-3 w-3" />
+                    <X className="h-4 w-4" />
                   </Button>
-                  <Input
-                    type="number"
-                    value={item.quantity}
-                    onChange={(e) => updateQuantity(item.productId, parseInt(e.target.value) || 1)}
-                    className="w-12 h-8 text-center text-sm"
-                    min="1"
-                    disabled={isProcessing}
+
+                  {/* Product image */}
+                  <Image
+                    src={item.imageUrl || "/placeholder-image.jpg"}
+                    alt={item.name}
+                    className="cart-item-image"
+                    width={60}
+                    height={60}
+                    style={{
+                      objectFit: "cover",
+                      borderRadius: "4px",
+                    }}
                   />
-                  <Button
-                    onClick={() => handleIncreaseQuantity(item)}
-                    variant="outline"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                    disabled={isProcessing}
-                  >
-                    <Plus className="h-3 w-3" />
-                  </Button>
-                </div>
 
-                {/* Price */}
-                <span className="font-bold">${formatCurrency(getItemTotal(item.productId))}</span>
+                  {/* Product name */}
+                  <div className="flex-1">
+                    <span className="font-semibold">{item.name}</span>
+                  </div>
+
+                  {/* Quantity controls */}
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={() => handleDecreaseQuantity(item)}
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      disabled={isProcessing}
+                    >
+                      <Minus className="h-3 w-3" />
+                    </Button>
+                    <Input
+                      type="number"
+                      value={item.quantity}
+                      onChange={(e) =>
+                        updateQuantity(
+                          item.productId,
+                          parseInt(e.target.value) || 1
+                        )
+                      }
+                      className="w-12 h-8 text-center text-sm"
+                      min="1"
+                      disabled={isProcessing}
+                    />
+                    <Button
+                      onClick={() => handleIncreaseQuantity(item)}
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      disabled={isProcessing}
+                    >
+                      <Plus className="h-3 w-3" />
+                    </Button>
+                  </div>
+
+                  {/* Price */}
+                  <span className="font-bold">
+                    ${formatCurrency(getItemTotal(item.productId))}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
           </div>
         ) : (
           <p className="text-center text-gray-500 py-8">Your cart is empty.</p>

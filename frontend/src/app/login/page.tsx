@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -14,26 +14,26 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Loader2, Lock, User } from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
-import { toast } from 'sonner';
-import { LoginRequest } from '../../interfaces/auth.interface';
-import { useUserStore } from '../../stores/user.store';
+} from "@/components/ui/form";
+import { Loader2, Lock, User } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { toast } from "sonner";
+import { LoginRequest } from "../../interfaces/auth.interface";
+import { useUserStore } from "../../stores/user.store";
 
 const formSchema = z.object({
   username: z.string().min(1, {
-    message: 'Username is required.',
+    message: "Username is required.",
   }),
   password: z.string().min(1, {
-    message: 'Password is required.',
+    message: "Password is required.",
   }),
 });
 
 const Login: React.FC = () => {
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { login } = useUserStore();
   const router = useRouter();
@@ -41,30 +41,39 @@ const Login: React.FC = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: '',
-      password: '',
+      username: "",
+      password: "",
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsLoggingIn(true);
-      setErrorMessage('');
-      
+      setErrorMessage("");
+
       const credentials: LoginRequest = {
         username: values.username,
-        password: values.password
+        password: values.password,
       };
-      
+
       const response = await login(credentials);
       if (response.success) {
-        toast.success('Login successful!');
-        router.push('/');
+        toast.success("Login successful!");
+        
+        // Redirect based on user role
+        if (response.isAdmin) {
+          router.push("/admin/dashboard");
+        } else {
+          router.push("/");
+        }
       } else {
-        setErrorMessage(response.errorMessage || 'Login failed. Please check your credentials.');
+        setErrorMessage(
+          response.errorMessage ||
+            "Login failed. Please check your credentials."
+        );
       }
     } catch {
-      setErrorMessage('An unexpected error occurred. Please try again.');
+      setErrorMessage("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoggingIn(false);
     }
@@ -75,8 +84,12 @@ const Login: React.FC = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2 pb-4">
           <div>
-            <CardTitle className="text-2xl font-bold text-primary">Welcome Back</CardTitle>
-            <p className="text-muted-foreground mt-2">Sign in to your account</p>
+            <CardTitle className="text-2xl font-bold text-primary">
+              Welcome Back
+            </CardTitle>
+            <p className="text-muted-foreground mt-2">
+              Sign in to your account
+            </p>
           </div>
         </CardHeader>
 
@@ -118,7 +131,10 @@ const Login: React.FC = () => {
                   <FormItem>
                     <div className="flex justify-between items-center">
                       <FormLabel>Password</FormLabel>
-                      <Link href="#" className="text-sm text-primary hover:underline">
+                      <Link
+                        href="#"
+                        className="text-sm text-primary hover:underline"
+                      >
                         Forgot password?
                       </Link>
                     </div>
@@ -137,11 +153,11 @@ const Login: React.FC = () => {
                   </FormItem>
                 )}
               />
-              
-              <Button 
-                type="submit" 
-                className="w-full" 
-                size="lg" 
+
+              <Button
+                type="submit"
+                className="w-full"
+                size="lg"
                 disabled={isLoggingIn}
               >
                 {isLoggingIn ? (
@@ -150,14 +166,17 @@ const Login: React.FC = () => {
                     Signing In...
                   </>
                 ) : (
-                  'Sign In'
+                  "Sign In"
                 )}
               </Button>
-              
+
               <div className="text-center">
                 <p className="text-sm text-muted-foreground">
-                  Don&apos;t have an account?{' '}
-                  <Link href="/register" className="text-primary hover:underline font-medium">
+                  Don&apos;t have an account?{" "}
+                  <Link
+                    href="/register"
+                    className="text-primary hover:underline font-medium"
+                  >
                     Sign up
                   </Link>
                 </p>

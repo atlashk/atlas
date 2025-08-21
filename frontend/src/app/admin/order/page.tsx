@@ -1,53 +1,37 @@
-'use client'
+"use client";
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useUserStore } from '@/stores/user.store'
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useUserStore } from "@/stores/user.store";
+import AdminLayout from "@/components/admin/AdminLayout";
 
 export default function AdminOrderListPage() {
-  const router = useRouter()
-  const { isAuthenticated, isAdmin, logout } = useUserStore()
-  
+  const router = useRouter();
+  const { isAuthenticated, isAdmin, logout } = useUserStore();
+
   useEffect(() => {
     // Redirect if not authenticated or not admin
     if (!isAuthenticated() || !isAdmin()) {
-      router.push('/login')
-      return
+      router.push("/login");
+      return;
     }
-  }, [isAuthenticated, isAdmin, router])
-  
-  const handleLogout = () => {
-    logout()
-    router.push('/login')
-  }
-  
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => router.push('/admin/dashboard')}
-                className="text-indigo-600 hover:text-indigo-500"
-              >
-                ← Back to Dashboard
-              </button>
-              <h1 className="text-3xl font-bold text-gray-900">Order Management</h1>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
+  }, [isAuthenticated, isAdmin, router]);
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+  const handleLogout = () => {
+    logout();
+    router.push("/login");
+  };
+
+  return (
+    <AdminLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Order Management</h1>
+          <p className="text-muted-foreground">
+            Manage customer orders and fulfillment.
+          </p>
+        </div>
+        
         <div className="bg-white shadow rounded-lg p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Orders</h2>
           <p className="text-gray-600">
@@ -60,14 +44,14 @@ export default function AdminOrderListPage() {
                 <li>View all orders</li>
                 <li>Search and filter orders</li>
                 <li>Update order status</li>
-                <li>View order details</li>
                 <li>Process refunds</li>
                 <li>Generate order reports</li>
+                <li>Manage shipping information</li>
               </ul>
             </div>
           </div>
         </div>
-      </main>
-    </div>
-  )
+      </div>
+    </AdminLayout>
+  );
 }

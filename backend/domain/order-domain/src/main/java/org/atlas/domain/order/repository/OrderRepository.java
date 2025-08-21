@@ -10,8 +10,6 @@ public interface OrderRepository {
 
   PagingResult<OrderEntity> findByCriteria(FindOrderCriteria criteria, PagingRequest pagingRequest);
 
-  PagingResult<OrderEntity> findByUserId(Integer userId, PagingRequest pagingRequest);
-
   Optional<OrderEntity> findById(Integer id);
 
   void insert(OrderEntity orderEntity);

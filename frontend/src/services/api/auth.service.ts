@@ -1,23 +1,25 @@
-import type { ApiResponse } from '@/interfaces/api.interface'
-import type { LoginRequest, LoginResponse } from '@/interfaces/auth.interface'
-import { BaseService } from './base.service'
+import type { ApiResponse } from "@/interfaces/api.interface";
+import type { LoginRequest, LoginResponse } from "@/interfaces/auth.interface";
+import { BaseService } from "./base.service";
 
 export class AuthService extends BaseService {
   constructor() {
-    super('/api/auth')
+    super("/api/auth");
   }
 
   async login(request: LoginRequest): Promise<ApiResponse<LoginResponse>> {
-    return this.post<LoginResponse>('/login', request)
+    return this.post<LoginResponse>("/login", request);
   }
 
-  async refreshToken(refreshToken: string): Promise<ApiResponse<LoginResponse>> {
-    return this.post<LoginResponse>('/refresh-token', { refreshToken })
+  async refreshToken(
+    refreshToken: string
+  ): Promise<ApiResponse<LoginResponse>> {
+    return this.post<LoginResponse>("/refresh-token", { refreshToken });
   }
 
   async logout(): Promise<ApiResponse<void>> {
-    return this.post<void>('/logout')
+    return this.post<void>("/logout");
   }
 }
 
-export const authService = new AuthService()
+export const authService = new AuthService();

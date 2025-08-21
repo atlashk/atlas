@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState, useRef } from 'react';
-import { toast } from 'sonner';
+import React, { useState, useRef } from "react";
+import { toast } from "sonner";
 
 interface ImportProductModalProps {
   isVisible: boolean;
@@ -12,7 +12,7 @@ interface ImportProductModalProps {
 const ImportProductModal: React.FC<ImportProductModalProps> = ({
   isVisible,
   onClose,
-  onImportSuccess
+  onImportSuccess,
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isImporting, setIsImporting] = useState(false);
@@ -20,15 +20,15 @@ const ImportProductModal: React.FC<ImportProductModalProps> = ({
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const acceptedTypes = '.csv,.xlsx,.xls';
+  const acceptedTypes = ".csv,.xlsx,.xls";
   const maxFileSize = 10 * 1024 * 1024; // 10MB
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') {
+    if (e.type === "dragenter" || e.type === "dragover") {
       setDragActive(true);
-    } else if (e.type === 'dragleave') {
+    } else if (e.type === "dragleave") {
       setDragActive(false);
     }
   };
@@ -37,7 +37,7 @@ const ImportProductModal: React.FC<ImportProductModalProps> = ({
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
+
     const files = e.dataTransfer.files;
     if (files && files[0]) {
       handleFileSelection(files[0]);
@@ -46,15 +46,22 @@ const ImportProductModal: React.FC<ImportProductModalProps> = ({
 
   const handleFileSelection = (file: File) => {
     // Validate file type
-    const validTypes = ['text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
-    if (!validTypes.includes(file.type) && !file.name.match(/\.(csv|xlsx|xls)$/i)) {
-      toast.error('Please select a valid CSV or Excel file.');
+    const validTypes = [
+      "text/csv",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ];
+    if (
+      !validTypes.includes(file.type) &&
+      !file.name.match(/\.(csv|xlsx|xls)$/i)
+    ) {
+      toast.error("Please select a valid CSV or Excel file.");
       return;
     }
 
     // Validate file size
     if (file.size > maxFileSize) {
-      toast.error('File size must be less than 10MB.');
+      toast.error("File size must be less than 10MB.");
       return;
     }
 
@@ -70,7 +77,7 @@ const ImportProductModal: React.FC<ImportProductModalProps> = ({
 
   const handleImport = async () => {
     if (!selectedFile) {
-      toast.error('Please select a file to import.');
+      toast.error("Please select a file to import.");
       return;
     }
 
@@ -79,11 +86,11 @@ const ImportProductModal: React.FC<ImportProductModalProps> = ({
 
     try {
       const formData = new FormData();
-      formData.append('file', selectedFile);
+      formData.append("file", selectedFile);
 
       // Simulate progress
       const progressInterval = setInterval(() => {
-        setImportProgress(prev => {
+        setImportProgress((prev) => {
           if (prev >= 90) {
             clearInterval(progressInterval);
             return prev;
@@ -94,19 +101,19 @@ const ImportProductModal: React.FC<ImportProductModalProps> = ({
 
       // TODO: Replace with actual API call
       // const response = await productService.importProducts(formData);
-      
+
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       clearInterval(progressInterval);
       setImportProgress(100);
-      
-      toast.success('Products imported successfully!');
+
+      toast.success("Products imported successfully!");
       onImportSuccess();
       handleClose();
     } catch (error) {
-      console.error('Import error:', error);
-      toast.error('Failed to import products. Please try again.');
+      console.error("Import error:", error);
+      toast.error("Failed to import products. Please try again.");
     } finally {
       setIsImporting(false);
       setImportProgress(0);
@@ -119,20 +126,24 @@ const ImportProductModal: React.FC<ImportProductModalProps> = ({
     setImportProgress(0);
     setDragActive(false);
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
     onClose();
   };
 
   const downloadTemplate = () => {
     // TODO: Implement template download
-    toast.info('Template download feature will be implemented soon.');
+    toast.info("Template download feature will be implemented soon.");
   };
 
   if (!isVisible) return null;
 
   return (
-    <div className="modal show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+    <div
+      className="modal show d-block"
+      tabIndex={-1}
+      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+    >
       <div className="modal-dialog modal-lg">
         <div className="modal-content">
           <div className="modal-header">
@@ -147,13 +158,14 @@ const ImportProductModal: React.FC<ImportProductModalProps> = ({
               disabled={isImporting}
             ></button>
           </div>
-          
+
           <div className="modal-body">
             {!isImporting ? (
               <>
                 <div className="mb-3">
                   <p className="text-muted">
-                    Upload a CSV or Excel file to import products. Make sure your file follows the correct format.
+                    Upload a CSV or Excel file to import products. Make sure
+                    your file follows the correct format.
                   </p>
                   <button
                     type="button"
@@ -167,7 +179,7 @@ const ImportProductModal: React.FC<ImportProductModalProps> = ({
 
                 <div
                   className={`border-2 border-dashed rounded p-4 text-center ${
-                    dragActive ? 'border-primary bg-light' : 'border-secondary'
+                    dragActive ? "border-primary bg-light" : "border-secondary"
                   }`}
                   onDragEnter={handleDrag}
                   onDragLeave={handleDrag}
@@ -204,7 +216,8 @@ const ImportProductModal: React.FC<ImportProductModalProps> = ({
                         Choose File
                       </button>
                       <p className="text-muted small mt-2">
-                        Supported formats: CSV, Excel (.xlsx, .xls)<br />
+                        Supported formats: CSV, Excel (.xlsx, .xls)
+                        <br />
                         Maximum file size: 10MB
                       </p>
                     </div>
@@ -243,7 +256,7 @@ const ImportProductModal: React.FC<ImportProductModalProps> = ({
               </div>
             )}
           </div>
-          
+
           <div className="modal-footer">
             <button
               type="button"
@@ -261,7 +274,11 @@ const ImportProductModal: React.FC<ImportProductModalProps> = ({
             >
               {isImporting ? (
                 <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
                   Importing...
                 </>
               ) : (

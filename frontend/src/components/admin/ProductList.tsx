@@ -1,24 +1,61 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { useUserStore } from '@/stores/user.store';
-import { toast } from 'sonner';
-import { productService } from '@/services';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  ProductStatus,
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   FileType,
+  ProductStatus,
   type Brand,
   type Category,
+  type ExportProductFilters,
   type ListProductFilters,
   type Product,
-  type ExportProductFilters
-} from '@/interfaces/product.interface';
-import ExportDropdown from './ExportDropdown';
-import { formatCurrency, formatProductStatusLabel, getProductStatusBadgeClasses } from '@/utils/formatter.util';
-import { getProductImageUrl } from '@/utils/productImage.util';
-import ImportProductModal from './ImportProductModal';
+} from "@/interfaces/product.interface";
+import { productService } from "@/services";
+import { useUserStore } from "@/stores/user.store";
+import { formatCurrency, getProductStatusBadge } from "@/utils/formatter.util";
+import { getProductImageUrl } from "@/utils/productImage.util";
+import {
+  Edit,
+  Loader2,
+  Plus,
+  RotateCcw,
+  Search,
+  Trash2,
+  Upload,
+} from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import React, { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
+import ExportDropdown from "./ExportDropdown";
+import ImportProductModal from "./ImportProductModal";
 
 interface ProductListProps {
   className?: string;
@@ -36,7 +73,7 @@ interface ActiveStates {
   inactive: boolean;
 }
 
-const ProductList: React.FC<ProductListProps> = ({ className = '' }) => {
+const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
   const router = useRouter();
   const { profile } = useUserStore();
 
@@ -54,6 +91,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = '' }) => {
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [hasInitialLoad, setHasInitialLoad] = useState(false);
   const [metadata, setMetadata] = useState<Metadata>({
     currentPage: 1,
     pageSize: 20,
@@ -65,10 +103,10 @@ const ProductList: React.FC<ProductListProps> = ({ className = '' }) => {
     keyword: undefined,
     minPrice: undefined,
     maxPrice: undefined,
-    status: '' as const,
+    status: "" as const,
     availableFrom: undefined,
     isActive: undefined,
-    brandId: '',
+    brandId: "",
     categoryIds: [],
     page: 1,
     size: 20,
@@ -76,8 +114,8 @@ const ProductList: React.FC<ProductListProps> = ({ className = '' }) => {
 
   // Redirect if not admin
   useEffect(() => {
-    if (!profile || profile.role !== 'ADMIN') {
-      router.push('/login');
+    if (!profile || profile.role !== "ADMIN") {
+      router.push("/login");
     }
   }, [profile, router]);
 
@@ -89,7 +127,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = '' }) => {
       const { data } = await productService.listBrand();
       setBrands(data);
     } catch {
-      toast.error('Failed to load brands');
+      toast.error("Failed to load brands");
     } finally {
       setIsLoadingBrands(false);
     }
@@ -101,11 +139,11 @@ const ProductList: React.FC<ProductListProps> = ({ className = '' }) => {
       const { data } = await productService.listCategory();
       setCategories(data);
     } catch {
-      toast.error('Failed to load categories');
+      toast.error("Failed to load categories");
     } finally {
       setIsLoadingCategories(false);
     }
-  }, []); 
+  }, []);
 
   const handleActiveStateChange = useCallback(() => {
     let isActive: boolean | undefined;
@@ -118,93 +156,133 @@ const ProductList: React.FC<ProductListProps> = ({ className = '' }) => {
     } else {
       isActive = undefined;
     }
-    setFilters(prev => ({ ...prev, isActive }));
+    setFilters((prev) => ({ ...prev, isActive }));
   }, [activeStates]);
 
   useEffect(() => {
     handleActiveStateChange();
   }, [handleActiveStateChange]);
 
-  const applyFilters = useCallback(async (page: number) => {
-    if (isLoadingProducts) return;
+  const applyFilters = useCallback(
+    async (page: number, currentFilters?: ListProductFilters) => {
+      if (isLoadingProducts) return;
 
-    setIsLoadingProducts(true);
-    try {
-      const updatedFilters = { ...filters, page };
-      setFilters(updatedFilters);
-      setMetadata(prev => ({ ...prev, currentPage: page }));
-      const response = await productService.listProduct(updatedFilters);
-      setProducts(response.data);
-      setMetadata(prev => ({ ...prev, ...response.metadata }));
-    } catch {
-      toast.error('Failed to load products');
-    } finally {
-      setIsLoadingProducts(false);
-    }
-  }, [filters, isLoadingProducts]);
+      setIsLoadingProducts(true);
+      try {
+        const filtersToUse = currentFilters || filters;
+        const updatedFilters = { ...filtersToUse, page };
+        setFilters(updatedFilters);
+        setMetadata((prev) => ({ ...prev, currentPage: page }));
 
-  const changePage = useCallback((newPage: number) => {
-    if (newPage >= 1 && newPage <= metadata.totalPages) {
-      applyFilters(newPage);
-    }
-  }, [metadata.totalPages, applyFilters]);
+        // Clean up empty or undefined filters
+        const apiFilters: ListProductFilters = { ...updatedFilters };
+        Object.keys(apiFilters).forEach((key) => {
+          const typedKey = key as keyof ListProductFilters;
+          if (
+            apiFilters[typedKey] === "" ||
+            apiFilters[typedKey] === undefined
+          ) {
+            delete apiFilters[typedKey];
+          }
+        });
+
+        const response = await productService.listProduct(apiFilters);
+        setProducts(response.data);
+        setMetadata((prev) => ({ ...prev, ...response.metadata }));
+      } catch {
+        toast.error("Failed to load products");
+      } finally {
+        setIsLoadingProducts(false);
+      }
+    },
+    [filters, isLoadingProducts]
+  );
+
+  const changePage = useCallback(
+    (newPage: number) => {
+      if (newPage >= 1 && newPage <= metadata.totalPages) {
+        applyFilters(newPage);
+      }
+    },
+    [metadata.totalPages, applyFilters]
+  );
 
   const resetFilters = useCallback(() => {
-    setActiveStates({ active: true, inactive: true });
-    setFilters({
+    const resetFiltersData: ListProductFilters = {
       id: undefined,
       keyword: undefined,
       minPrice: undefined,
       maxPrice: undefined,
-      status: '' as const,
+      status: "" as const,
       availableFrom: undefined,
       isActive: undefined,
-      brandId: '',
+      brandId: "",
       categoryIds: [],
       page: 1,
       size: 20,
-    });
-    applyFilters(1);
+    };
+    setActiveStates({ active: true, inactive: true });
+    setFilters(resetFiltersData);
+    applyFilters(1, resetFiltersData);
   }, [applyFilters]);
 
-  const handleDelete = useCallback(async (productId: number) => {
-    if (!confirm('Are you sure you want to delete this product?')) return;
+  const handleFilterChange = (
+    field: keyof ListProductFilters,
+    value: string | number | boolean | undefined | number[]
+  ) => {
+    setFilters((prev) => ({ ...prev, [field]: value }));
+  };
 
-    try {
-      await productService.deleteProduct(productId);
-      toast.success('Product deleted successfully');
-      applyFilters(metadata.currentPage);
-    } catch {
-          toast.error('Failed to delete product');
-        }
-  }, [metadata.currentPage, applyFilters]);
+  const handleSearch = () => {
+    applyFilters(1);
+  };
 
-  const handleExport = useCallback(async (fileType: 'csv' | 'excel' | 'pdf') => {
-    if (isExporting) return;
+  const handleDelete = useCallback(
+    async (productId: number) => {
+      if (!confirm("Are you sure you want to delete this product?")) return;
 
-    setIsExporting(true);
-    try {
-      const exportFilters: ExportProductFilters = {
-        id: filters.id,
-        keyword: filters.keyword,
-        minPrice: filters.minPrice,
-        maxPrice: filters.maxPrice,
-        status: filters.status,
-        availableFrom: filters.availableFrom,
-        isActive: filters.isActive,
-        brandId: filters.brandId,
-        categoryIds: filters.categoryIds,
-        fileType: FileType[fileType.toUpperCase() as keyof typeof FileType]
-      };
-      await productService.exportProduct(exportFilters);
-      toast.success(`Products exported successfully as ${fileType.toUpperCase()}`);
-    } catch (error) {
-      console.error('Export failed:', error);
-      toast.error('Failed to export products');
-    } finally {
-      setIsExporting(false);
-    }
-  }, [isExporting, filters]);
+      try {
+        await productService.deleteProduct(productId);
+        toast.success("Product deleted successfully");
+        applyFilters(metadata.currentPage);
+      } catch {
+        toast.error("Failed to delete product");
+      }
+    },
+    [metadata.currentPage, applyFilters]
+  );
+
+  const handleExport = useCallback(
+    async (fileType: "csv" | "excel" | "pdf") => {
+      if (isExporting) return;
+
+      setIsExporting(true);
+      try {
+        const exportFilters: ExportProductFilters = {
+          id: filters.id,
+          keyword: filters.keyword,
+          minPrice: filters.minPrice,
+          maxPrice: filters.maxPrice,
+          status: filters.status,
+          availableFrom: filters.availableFrom,
+          isActive: filters.isActive,
+          brandId: filters.brandId,
+          categoryIds: filters.categoryIds,
+          fileType: FileType[fileType.toUpperCase() as keyof typeof FileType],
+        };
+        await productService.exportProduct(exportFilters);
+        toast.success(
+          `Products exported successfully as ${fileType.toUpperCase()}`
+        );
+      } catch (error) {
+        console.error("Export failed:", error);
+        toast.error("Failed to export products");
+      } finally {
+        setIsExporting(false);
+      }
+    },
+    [isExporting, filters]
+  );
 
   const handleImportClick = useCallback(() => {
     setShowImportModal(true);
@@ -215,353 +293,457 @@ const ProductList: React.FC<ProductListProps> = ({ className = '' }) => {
     applyFilters(1);
   }, [applyFilters]);
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    applyFilters(1);
-  }, [applyFilters]);
-
   // Load initial data
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        await Promise.all([
-          loadBrands(),
-          loadCategories(),
-          applyFilters(1),
-        ]);
+        await Promise.all([loadBrands(), loadCategories(), applyFilters(1)]);
       } finally {
         setIsLoadingProducts(false);
       }
     };
 
-    if (profile && profile.role === 'ADMIN') {
+    if (profile && profile.role === "ADMIN" && !hasInitialLoad) {
       loadInitialData();
+      setHasInitialLoad(true);
     }
-  }, [profile, loadBrands, loadCategories, applyFilters]);
+  }, [profile, hasInitialLoad]);
 
-  if (!profile || profile.role !== 'ADMIN') {
+  if (!profile || profile.role !== "ADMIN") {
     return null;
   }
 
   return (
-    <div className={`container-fluid px-5 py-4 ${className}`}>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h3 className="mb-1">Product Management</h3>
-          <p className="text-muted mb-0">Manage your product catalog</p>
-        </div>
-        <div className="d-flex gap-2">
-          <button 
-            className="btn btn-outline-primary" 
-            onClick={handleImportClick} 
+    <div className={`space-y-6 ${className}`}>
+      {/* Header */}
+      <div className="flex items-center justify-start">
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={handleImportClick}
             disabled={isImporting}
           >
-            <i className="bi bi-upload me-1"></i>
+            <Upload className="h-4 w-4 mr-2" />
             {isImporting ? (
               <>
-                <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 Importing...
               </>
             ) : (
-              'Import'
+              "Import"
             )}
-          </button>
+          </Button>
           <ExportDropdown isExporting={isExporting} onExport={handleExport} />
-          <button 
-            className="btn btn-success" 
-            onClick={() => router.push('/admin/product/add')}
-          >
-            <i className="bi bi-plus-lg"></i> Add New Product
-          </button>
+          <Button onClick={() => router.push("/admin/product/add")}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add New Product
+          </Button>
         </div>
       </div>
 
       {/* Filters Card */}
-      <div className="card mb-4 shadow-sm">
-        <div className="card-header bg-light py-3">
-          <h5 className="mb-0">Search Filters</h5>
-        </div>
-        <div className="card-body p-4">
-          <form onSubmit={handleSubmit}>
-            <div className="row g-4">
-              <div className="col-md-6">
-                <label htmlFor="productId" className="form-label">Product ID</label>
-                <input 
-                  id="productId" 
-                  value={filters.id || ''} 
-                  onChange={(e) => setFilters(prev => ({ ...prev, id: e.target.value ? Number(e.target.value) : undefined }))}
-                  type="text" 
-                  placeholder="Enter product ID..." 
-                  className="form-control" 
-                />
-              </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Product Filters</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {/* Row 1: Product ID, Product Keyword, Min Price, Max Price */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="productId">Product ID</Label>
+              <Input
+                type="number"
+                id="productId"
+                placeholder="Enter product ID"
+                value={filters.id || ""}
+                onChange={(e) =>
+                  handleFilterChange(
+                    "id",
+                    e.target.value ? Number(e.target.value) : undefined
+                  )
+                }
+              />
+            </div>
 
-              <div className="col-md-6">
-                <label htmlFor="keyword" className="form-label">Search</label>
-                <input 
-                  id="keyword" 
-                  value={filters.keyword || ''} 
-                  onChange={(e) => setFilters(prev => ({ ...prev, keyword: e.target.value || undefined }))}
-                  type="text" 
-                  placeholder="Search by product name or description..." 
-                  className="form-control" 
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="keyword">Product Keyword</Label>
+              <Input
+                type="text"
+                id="keyword"
+                placeholder="Search by product name, description, or an attribute"
+                value={filters.keyword || ""}
+                onChange={(e) =>
+                  handleFilterChange("keyword", e.target.value || undefined)
+                }
+              />
+            </div>
 
-              <div className="col-md-6">
-                <label className="form-label">Price Range</label>
-                <div className="input-group">
-                  <input 
-                    value={filters.minPrice || ''} 
-                    onChange={(e) => setFilters(prev => ({ ...prev, minPrice: e.target.value ? Number(e.target.value) : undefined }))}
-                    type="number" 
-                    step="0.01" 
-                    placeholder="Min price" 
-                    className="form-control" 
-                  />
-                  <span className="input-group-text bg-light">to</span>
-                  <input 
-                    value={filters.maxPrice || ''} 
-                    onChange={(e) => setFilters(prev => ({ ...prev, maxPrice: e.target.value ? Number(e.target.value) : undefined }))}
-                    type="number" 
-                    step="0.01" 
-                    placeholder="Max price" 
-                    className="form-control" 
-                  />
-                </div>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="minPrice">Min Price</Label>
+              <Input
+                type="number"
+                step="0.01"
+                id="minPrice"
+                placeholder="Min price"
+                value={filters.minPrice || ""}
+                onChange={(e) =>
+                  handleFilterChange(
+                    "minPrice",
+                    e.target.value ? Number(e.target.value) : undefined
+                  )
+                }
+              />
+            </div>
 
-              <div className="col-md-6">
-                <label htmlFor="status" className="form-label">Status</label>
-                <select 
-                  id="status" 
-                  value={filters.status} 
-                  onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value as ProductStatus | '' }))}
-                  className="form-select"
-                >
-                  <option value="">All statuses</option>
-                  {productStatuses.map(status => (
-                    <option key={status} value={status}>
-                      {formatProductStatusLabel(status)}
-                    </option>
+            <div className="space-y-2">
+              <Label htmlFor="maxPrice">Max Price</Label>
+              <Input
+                type="number"
+                step="0.01"
+                id="maxPrice"
+                placeholder="Max price"
+                value={filters.maxPrice || ""}
+                onChange={(e) =>
+                  handleFilterChange(
+                    "maxPrice",
+                    e.target.value ? Number(e.target.value) : undefined
+                  )
+                }
+              />
+            </div>
+          </div>
+
+          {/* Row 2: Product Status, Available From, Activity */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
+            <div className="space-y-2">
+              <Label htmlFor="status">Product Status</Label>
+              <Select
+                value={filters.status}
+                onValueChange={(value) => handleFilterChange("status", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  {productStatuses.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {status}
+                    </SelectItem>
                   ))}
-                </select>
-              </div>
+                </SelectContent>
+              </Select>
+            </div>
 
-              <div className="col-md-6">
-                <label htmlFor="availableFrom" className="form-label">Available From</label>
-                <input 
-                  id="availableFrom" 
-                  value={filters.availableFrom || ''} 
-                  onChange={(e) => setFilters(prev => ({ ...prev, availableFrom: e.target.value || undefined }))}
-                  type="date" 
-                  className="form-control" 
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="availableFrom">Available From</Label>
+              <Input
+                type="date"
+                id="availableFrom"
+                value={filters.availableFrom || ""}
+                onChange={(e) =>
+                  handleFilterChange(
+                    "availableFrom",
+                    e.target.value || undefined
+                  )
+                }
+              />
+            </div>
 
-              <div className="col-md-6">
-                <label className="form-label">Activity</label>
-                <div className="border rounded p-3">
-                  <div className="d-flex gap-4">
-                    <div className="form-check">
-                      <input 
-                        type="checkbox" 
-                        className="form-check-input" 
-                        id="activeCheck" 
-                        checked={activeStates.active}
-                        onChange={(e) => setActiveStates(prev => ({ ...prev, active: e.target.checked }))}
-                      />
-                      <label className="form-check-label" htmlFor="activeCheck">Active</label>
-                    </div>
-                    <div className="form-check">
-                      <input 
-                        type="checkbox" 
-                        className="form-check-input" 
-                        id="inactiveCheck" 
-                        checked={activeStates.inactive}
-                        onChange={(e) => setActiveStates(prev => ({ ...prev, inactive: e.target.checked }))}
-                      />
-                      <label className="form-check-label" htmlFor="inactiveCheck">Inactive</label>
-                    </div>
-                  </div>
+            <div className="space-y-2">
+              <Label>Activity</Label>
+              <div className="border rounded p-3 flex items-center space-x-6">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="activeCheck"
+                    checked={activeStates.active}
+                    onCheckedChange={(checked) =>
+                      setActiveStates((prev) => ({
+                        ...prev,
+                        active: checked as boolean,
+                      }))
+                    }
+                  />
+                  <Label htmlFor="activeCheck">Active</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="inactiveCheck"
+                    checked={activeStates.inactive}
+                    onCheckedChange={(checked) =>
+                      setActiveStates((prev) => ({
+                        ...prev,
+                        inactive: checked as boolean,
+                      }))
+                    }
+                  />
+                  <Label htmlFor="inactiveCheck">Inactive</Label>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div className="col-md-6">
-                <label htmlFor="brandId" className="form-label">Brand</label>
-                {isLoadingBrands ? (
-                  <div className="text-center py-2" aria-live="polite">
-                    <div className="spinner-border spinner-border-sm" role="status" aria-label="Loading brands">
-                      <span className="visually-hidden">Loading...</span>
-                    </div>
-                  </div>
-                ) : (
-                  <select 
-                    id="brandId" 
-                    value={filters.brandId || ''} 
-                    onChange={(e) => setFilters(prev => ({ ...prev, brandId: e.target.value || null }))}
-                    className="form-select" 
-                    disabled={!brands.length}
-                  >
-                    <option value="">All brands</option>
-                    {brands.map(brand => (
-                      <option key={brand.id} value={brand.id}>
+          {/* Row 3: Brand, Categories */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="brandId">Brand</Label>
+              {isLoadingBrands ? (
+                <div className="flex items-center justify-center py-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
+              ) : (
+                <Select
+                  value={filters.brandId || ""}
+                  onValueChange={(value) =>
+                    handleFilterChange("brandId", value)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Brands" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {brands.map((brand) => (
+                      <SelectItem key={brand.id} value={brand.id.toString()}>
                         {brand.name}
-                      </option>
+                      </SelectItem>
                     ))}
-                  </select>
-                )}
-              </div>
-
-              <div className="col-md-6">
-                <label htmlFor="categoryIds" className="form-label">Categories</label>
-                {isLoadingCategories ? (
-                  <div className="text-center py-2" aria-live="polite">
-                    <div className="spinner-border spinner-border-sm" role="status" aria-label="Loading categories">
-                      <span className="visually-hidden">Loading...</span>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <select 
-                      id="categoryIds" 
-                      value={filters.categoryIds?.map(String) || []} 
-                      onChange={(e) => {
-                        const selectedOptions = Array.from(e.target.selectedOptions, option => Number(option.value));
-                        setFilters(prev => ({ ...prev, categoryIds: selectedOptions }));
-                      }}
-                      multiple 
-                      className="form-select" 
-                      disabled={!categories.length} 
-                      size={3}
-                    >
-                      {categories.map(category => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
-                        </option>
-                      ))}
-                    </select>
-                    <small className="text-muted">Hold Ctrl/Cmd to select multiple</small>
-                  </>
-                )}
-              </div>
+                  </SelectContent>
+                </Select>
+              )}
             </div>
 
-            <div className="d-flex gap-2 mt-4 pt-3 border-top">
-              <button type="submit" className="btn btn-primary">
-                <i className="bi bi-search"></i> Search
-              </button>
-              <button type="button" onClick={resetFilters} className="btn btn-outline-secondary">
-                <i className="bi bi-arrow-counterclockwise"></i> Reset
-              </button>
+            <div className="space-y-2">
+              <Label>Categories</Label>
+              {isLoadingCategories ? (
+                <div className="flex items-center justify-center py-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
+              ) : (
+                <Select value="placeholder" onValueChange={() => {}}>
+                  <SelectTrigger>
+                    <SelectValue>
+                      {filters.categoryIds && filters.categoryIds.length > 0
+                        ? `${filters.categoryIds.length} categories selected`
+                        : "All Categories"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <label
+                        key={category.id}
+                        className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded"
+                      >
+                        <input
+                          type="checkbox"
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          checked={
+                            filters.categoryIds?.includes(category.id) || false
+                          }
+                          onChange={(e) => {
+                            const currentCategories = filters.categoryIds || [];
+                            if (e.target.checked) {
+                              handleFilterChange("categoryIds", [
+                                ...currentCategories,
+                                category.id,
+                              ]);
+                            } else {
+                              handleFilterChange(
+                                "categoryIds",
+                                currentCategories.filter(
+                                  (id) => id !== category.id
+                                )
+                              );
+                            }
+                          }}
+                        />
+                        <span className="text-sm">{category.name}</span>
+                      </label>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
-          </form>
-        </div>
-      </div>
+          </div>
+
+          <div className="flex justify-start space-x-2 mt-4">
+            <Button onClick={handleSearch} disabled={isLoadingProducts}>
+              <Search className="h-4 w-4 mr-2" />
+              Search
+            </Button>
+            <Button
+              variant="outline"
+              onClick={resetFilters}
+              disabled={isLoadingProducts}
+            >
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Reset
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Products Table */}
-      <div className="card shadow-sm">
-        <div className="card-header bg-light py-3">
-          <h5 className="mb-0">Product List</h5>
-        </div>
-        {isLoadingProducts ? (
-          <div className="text-center py-5" aria-live="polite">
-            <div className="spinner-border text-primary" role="status" aria-label="Loading products">
-              <span className="visually-hidden">Loading...</span>
+      <Card>
+        <CardHeader>
+          <CardTitle>Product Results</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoadingProducts ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="mt-2 text-muted-foreground">Loading products...</p>
             </div>
-          </div>
-        ) : (
-          <div className="card-body p-0">
-            <div className="table-responsive">
-              <table className="table table-hover table-bordered mb-0">
-                <thead className="table-light">
-                  <tr>
-                    <th scope="col" className="px-4">ID</th>
-                    <th scope="col" className="px-4">Name</th>
-                    <th scope="col" className="px-4">Image</th>
-                    <th scope="col" className="px-4">Price</th>
-                    <th scope="col" className="px-4">Quantity</th>
-                    <th scope="col" className="px-4">Status</th>
-                    <th scope="col" className="px-4">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {products.map(product => (
-                    <tr key={product.id}>
-                      <td className="px-4">{product.id}</td>
-                      <td className="px-4">{product.name}</td>
-                      <td className="px-4">
-                        <Image 
-                          src={getProductImageUrl(product.image)} 
-                          alt={product.name} 
-                          width={48}
-                          height={48}
-                          className="rounded object-cover" 
-                        />
-                      </td>
-                      <td className="px-4">${formatCurrency(product.price)}</td>
-                      <td className="px-4">{product.quantity}</td>
-                      <td className="px-4">
-                        <span className={getProductStatusBadgeClasses(product.status)}>
-                          {formatProductStatusLabel(product.status)}
-                        </span>
-                      </td>
-                      <td className="px-4">
-                        <div className="d-flex gap-2">
-                          <button 
-                            className="btn btn-sm btn-outline-secondary"
-                            onClick={() => router.push(`/admin/product/${product.id}`)}
-                          >
-                            <i className="bi bi-eye me-1"></i> View
-                          </button>
-                          <button 
-                            className="btn btn-sm btn-outline-primary"
-                            onClick={() => router.push(`/admin/product/${product.id}/edit`)}
-                          >
-                            <i className="bi bi-pencil me-1"></i> Edit
-                          </button>
-                          <button 
-                            className="btn btn-sm btn-outline-danger" 
-                            onClick={() => handleDelete(product.id)}
-                          >
-                            <i className="bi bi-trash me-1"></i> Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Image</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead>Quantity</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {products.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={7}
+                        className="text-center py-8 text-muted-foreground"
+                      >
+                        No products found
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    products.map((product) => (
+                      <TableRow key={product.id}>
+                        <TableCell>{product.id}</TableCell>
+                        <TableCell>{product.name}</TableCell>
+                        <TableCell>
+                          <Image
+                            src={getProductImageUrl(product.image)}
+                            alt={product.name}
+                            width={48}
+                            height={48}
+                            className="rounded object-cover"
+                          />
+                        </TableCell>
+                        <TableCell>${formatCurrency(product.price)}</TableCell>
+                        <TableCell>{product.quantity}</TableCell>
+                        <TableCell>
+                          {getProductStatusBadge(product.status)}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                router.push(`/admin/product/edit/${product.id}`)
+                              }
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDelete(product.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
             </div>
+          )}
+        </CardContent>
+      </Card>
 
-            {/* Pagination */}
-            <div className="card-footer bg-light py-3">
-              <div className="d-flex justify-content-between align-items-center">
-                <span className="text-muted">
-                  Page {metadata.currentPage} of {metadata.totalPages}
-                  <span className="ms-2">({metadata.totalRecords} records)</span>
-                </span>
-                <div className="btn-group">
-                  <button 
-                    onClick={() => changePage(metadata.currentPage - 1)} 
-                    disabled={metadata.currentPage <= 1}
-                    className="btn btn-outline-secondary px-3"
-                  >
-                    <i className="bi bi-chevron-left me-1"></i> Previous
-                  </button>
-                  <button 
-                    onClick={() => changePage(metadata.currentPage + 1)}
-                    disabled={metadata.currentPage >= metadata.totalPages} 
-                    className="btn btn-outline-secondary px-3"
-                  >
-                    Next <i className="bi bi-chevron-right ms-1"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
+      {/* Pagination */}
+      {metadata.totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Page {metadata.currentPage} of {metadata.totalPages} (
+            {metadata.totalRecords} records)
           </div>
-        )}
-      </div>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (metadata.currentPage > 1) {
+                      changePage(metadata.currentPage - 1);
+                    }
+                  }}
+                  className={
+                    metadata.currentPage <= 1
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }
+                />
+              </PaginationItem>
+
+              {/* Page numbers */}
+              {Array.from(
+                { length: Math.min(5, metadata.totalPages) },
+                (_, i) => {
+                  const pageNumber =
+                    Math.max(
+                      1,
+                      Math.min(
+                        metadata.totalPages - 4,
+                        metadata.currentPage - 2
+                      )
+                    ) + i;
+
+                  if (pageNumber <= metadata.totalPages) {
+                    return (
+                      <PaginationItem key={pageNumber}>
+                        <PaginationLink
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            changePage(pageNumber);
+                          }}
+                          isActive={pageNumber === metadata.currentPage}
+                        >
+                          {pageNumber}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  }
+                  return null;
+                }
+              )}
+
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (metadata.currentPage < metadata.totalPages) {
+                      changePage(metadata.currentPage + 1);
+                    }
+                  }}
+                  className={
+                    metadata.currentPage >= metadata.totalPages
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
 
       {/* Import Modal */}
       {showImportModal && (

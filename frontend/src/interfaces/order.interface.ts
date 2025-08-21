@@ -27,6 +27,11 @@ export interface PlaceOrderRequest {
   orderItems: PlaceOrderItemRequest[];
 }
 
+export interface PlaceOrderResponse {
+  orderId: number;
+  orderCode: string;
+}
+
 export interface PlaceOrderItemRequest {
   productId: number;
   quantity: number;
