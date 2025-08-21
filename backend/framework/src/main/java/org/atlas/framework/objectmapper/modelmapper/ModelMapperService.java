@@ -1,8 +1,5 @@
 package org.atlas.framework.objectmapper.modelmapper;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import org.atlas.framework.objectmapper.ObjectMapperService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -26,20 +23,6 @@ public class ModelMapperService implements ObjectMapperService {
       return null;
     }
     return MAPPER.map(source, destinationType);
-  }
-
-  /**
-   * Maps a list of objects to a list of objects of the specified destination type.
-   */
-  @Override
-  public <D> List<D> mapList(List<?> source, Class<D> destinationType) {
-    if (source == null || source.isEmpty()) {
-      return List.of();
-    }
-    return source.stream()
-        .filter(Objects::nonNull)
-        .map(it -> MAPPER.map(it, destinationType))
-        .collect(Collectors.toList());
   }
 
   /**

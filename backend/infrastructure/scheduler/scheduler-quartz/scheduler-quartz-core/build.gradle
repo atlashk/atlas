@@ -29,7 +29,16 @@ dependencies {
     api project(':framework')
 
     // Infrastructure
-    api project(':infrastructure.config.yaml')
+    switch (rootProject.ext.appStack['datasource']) {
+        case 'mysql':
+            api project(':infrastructure.scheduler.quartz.jobstore.mysql')
+            break
+        case 'postgres':
+            api project(':infrastructure.scheduler.quartz.jobstore.postgres')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
+    }
 
     // Lib
     api 'org.springframework.boot:spring-boot-starter-quartz'

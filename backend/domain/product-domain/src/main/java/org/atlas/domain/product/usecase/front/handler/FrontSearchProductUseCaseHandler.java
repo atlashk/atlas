@@ -3,7 +3,7 @@ package org.atlas.domain.product.usecase.front.handler;
 import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.ProductEntity;
-import org.atlas.domain.product.repository.FindProductCriteria;
+import org.atlas.domain.product.repository.criteria.FindProductCriteria;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.service.ProductImageService;
 import org.atlas.domain.product.shared.enums.ProductStatus;

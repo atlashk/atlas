@@ -3,6 +3,7 @@ package org.atlas.domain.product.repository;
 import java.util.List;
 import java.util.Optional;
 import org.atlas.domain.product.entity.ProductEntity;
+import org.atlas.domain.product.repository.criteria.FindProductCriteria;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
 

@@ -1,0 +1,23 @@
+spring:
+  quartz:
+    jdbc:
+      initialize-schema: never
+    properties:
+      org:
+        quartz:
+          jobStore:
+            class: org.quartz.impl.jdbcjobstore.JobStoreTX
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+            dataSource: quartz
+            tablePrefix: QRTZ_
+            isClustered: true
+          dataSource:
+            quartz:
+              driver: org.postgresql.Driver
+              URL: ${DB_QUARTZ_URL:jdbc:postgresql://localhost:5432/db_quartz}
+              user: ${DB_QUARTZ_USERNAME:root}
+              password: ${DB_QUARTZ_PASSWORD:root}
+              provider: hikaricp
+          threadPool:
+            class: org.quartz.simpl.SimpleThreadPool
+            threadCount: 10

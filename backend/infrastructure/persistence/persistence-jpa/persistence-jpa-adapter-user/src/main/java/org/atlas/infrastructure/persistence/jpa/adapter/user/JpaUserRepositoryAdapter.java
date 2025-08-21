@@ -5,13 +5,13 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.user.entity.UserEntity;
 import org.atlas.domain.user.repository.UserRepository;
+import org.atlas.domain.user.repository.criteria.FindUserCriteria;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
 import org.atlas.infrastructure.persistence.jpa.adapter.user.entity.JpaUserEntity;
+import org.atlas.infrastructure.persistence.jpa.adapter.user.repository.CustomJpaUserRepository;
 import org.atlas.infrastructure.persistence.jpa.adapter.user.repository.JpaUserRepository;
-import org.atlas.infrastructure.persistence.jpa.core.paging.PagingConverter;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,51 +19,55 @@ import org.springframework.stereotype.Component;
 public class JpaUserRepositoryAdapter implements UserRepository {
 
   private final JpaUserRepository jpaUserRepository;
+  private final CustomJpaUserRepository customJpaUserRepository;
 
   @Override
-  public PagingResult<UserEntity> findAll(PagingRequest pagingRequest) {
-    Pageable pageable = PagingConverter.convert(pagingRequest);
-    PagingResult<JpaUserEntity> jpaUserPage = PagingConverter.convert(
-        jpaUserRepository.findAll(pageable));
-    return ObjectMapperUtil.getInstance()
-        .mapPage(jpaUserPage, UserEntity.class);
+  public PagingResult<UserEntity> findByCriteria(FindUserCriteria criteria,
+      PagingRequest pagingRequest) {
+    long totalCount = customJpaUserRepository.countByCriteria(criteria);
+    if (totalCount == 0L) {
+      return PagingResult.empty();
+    }
+    List<JpaUserEntity> jpaUserEntities = customJpaUserRepository.findByCriteria(criteria,
+        pagingRequest);
+    List<UserEntity> userEntities = ObjectMapperUtil.getInstance()
+        .mapList(jpaUserEntities, UserEntity.class);
+    return PagingResult.of(userEntities, totalCount, pagingRequest);
   }
 
   @Override
   public List<UserEntity> findByIdIn(List<Integer> ids) {
-    return jpaUserRepository.findAllById(ids)
-        .stream()
-        .map(jpaUserEntity ->
-            ObjectMapperUtil.getInstance().map(jpaUserEntity, UserEntity.class))
-        .toList();
+    List<JpaUserEntity> jpaUserEntities = jpaUserRepository.findAllById(ids);
+    return ObjectMapperUtil.getInstance()
+        .mapList(jpaUserEntities, UserEntity.class);
   }
 
   @Override
   public Optional<UserEntity> findById(Integer id) {
     return jpaUserRepository.findById(id)
-        .map(jpaUserEntity ->
-            ObjectMapperUtil.getInstance().map(jpaUserEntity, UserEntity.class));
+        .map(jpaUserEntity -> ObjectMapperUtil.getInstance()
+            .map(jpaUserEntity, UserEntity.class));
   }
 
   @Override
   public Optional<UserEntity> findByUsername(String username) {
     return jpaUserRepository.findByUsername(username)
-        .map(jpaUserEntity ->
-            ObjectMapperUtil.getInstance().map(jpaUserEntity, UserEntity.class));
+        .map(jpaUserEntity -> ObjectMapperUtil.getInstance()
+            .map(jpaUserEntity, UserEntity.class));
   }
 
   @Override
   public Optional<UserEntity> findByEmail(String email) {
     return jpaUserRepository.findByEmail(email)
-        .map(jpaUserEntity ->
-            ObjectMapperUtil.getInstance().map(jpaUserEntity, UserEntity.class));
+        .map(jpaUserEntity -> ObjectMapperUtil.getInstance()
+            .map(jpaUserEntity, UserEntity.class));
   }
 
   @Override
   public Optional<UserEntity> findByPhoneNumber(String phoneNumber) {
     return jpaUserRepository.findByPhoneNumber(phoneNumber)
-        .map(jpaUserEntity ->
-            ObjectMapperUtil.getInstance().map(jpaUserEntity, UserEntity.class));
+        .map(jpaUserEntity -> ObjectMapperUtil.getInstance()
+            .map(jpaUserEntity, UserEntity.class));
   }
 
   @Override

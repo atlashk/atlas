@@ -90,27 +90,23 @@ generate_database_config() {
         mysql)
             cat << EOF
 # Database Configuration (MySQL) for $service_name
-DB_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
 DB_URL=jdbc:mysql://mysql:3306/$database_name?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
 DB_USERNAME=root
 DB_PASSWORD=root
 DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
 DB_QUARTZ_USERNAME=root
 DB_QUARTZ_PASSWORD=root
-DB_QUARTZ_DRIVER_DELEGATE_CLASS=org.quartz.impl.jdbcjobstore.StdJDBCDelegate
 EOF
             ;;
         postgres)
             cat << EOF
 # Database Configuration (PostgreSQL) for $service_name
-DB_DRIVER_CLASS_NAME=org.postgresql.Driver
 DB_URL=jdbc:postgresql://postgres:5432/$database_name
 DB_USERNAME=root
 DB_PASSWORD=root
 DB_QUARTZ_URL=jdbc:postgresql://postgres:5432/db_quartz
 DB_QUARTZ_USERNAME=root
 DB_QUARTZ_PASSWORD=root
-DB_QUARTZ_DRIVER_DELEGATE_CLASS=org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
 EOF
             ;;
     esac

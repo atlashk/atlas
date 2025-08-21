@@ -6,7 +6,7 @@ import jakarta.persistence.TypedQuery;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.atlas.domain.product.repository.FindProductCriteria;
+import org.atlas.domain.product.repository.criteria.FindProductCriteria;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.util.CollectionUtil;
 import org.atlas.framework.util.StringUtil;

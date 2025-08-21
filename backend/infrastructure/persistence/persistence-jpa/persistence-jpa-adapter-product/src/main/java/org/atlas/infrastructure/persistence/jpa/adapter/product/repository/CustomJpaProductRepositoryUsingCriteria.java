@@ -9,7 +9,7 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.List;
-import org.atlas.domain.product.repository.FindProductCriteria;
+import org.atlas.domain.product.repository.criteria.FindProductCriteria;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.util.CollectionUtil;
 import org.atlas.framework.util.StringUtil;
@@ -27,9 +27,11 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
   private EntityManager entityManager;
 
   @Override
-  public List<JpaProductEntity> findByCriteria(FindProductCriteria criteria, PagingRequest pagingRequest) {
+  public List<JpaProductEntity> findByCriteria(FindProductCriteria criteria,
+      PagingRequest pagingRequest) {
     CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-    CriteriaQuery<JpaProductEntity> criteriaQuery = criteriaBuilder.createQuery(JpaProductEntity.class);
+    CriteriaQuery<JpaProductEntity> criteriaQuery = criteriaBuilder.createQuery(
+        JpaProductEntity.class);
     Root<JpaProductEntity> root = criteriaQuery.from(JpaProductEntity.class);
 
     root.join("details", JoinType.LEFT);
@@ -87,22 +89,28 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
       spec.addFilter(QueryFilter.of("id", criteria.getId(), QueryOperator.EQUAL));
     }
     if (StringUtil.isNotBlank(criteria.getKeyword())) {
+      String lowercaseKeyword = "%" + criteria.getKeyword().toLowerCase() + "%";
       spec.addFilter(QueryFilter.or(
-          QueryFilter.Condition.of("name", criteria.getKeyword(), QueryOperator.LIKE),
-          QueryFilter.Condition.of("detail.description", criteria.getKeyword(), QueryOperator.LIKE),
-          QueryFilter.Condition.of("attributes.value", criteria.getKeyword(), QueryOperator.LIKE)));
+          QueryFilter.Condition.of("lower(name)", lowercaseKeyword, QueryOperator.LIKE),
+          QueryFilter.Condition.of("lower(detail.description)", lowercaseKeyword,
+              QueryOperator.LIKE),
+          QueryFilter.Condition.of("lower(attributes.value)", lowercaseKeyword,
+              QueryOperator.LIKE)));
     }
     if (criteria.getMinPrice() != null) {
-      spec.addFilter(QueryFilter.of("price", criteria.getMinPrice(), QueryOperator.GREATER_THAN_EQUAL));
+      spec.addFilter(
+          QueryFilter.of("price", criteria.getMinPrice(), QueryOperator.GREATER_THAN_EQUAL));
     }
     if (criteria.getMaxPrice() != null) {
-      spec.addFilter(QueryFilter.of("price", criteria.getMaxPrice(), QueryOperator.LESS_THAN_EQUAL));
+      spec.addFilter(
+          QueryFilter.of("price", criteria.getMaxPrice(), QueryOperator.LESS_THAN_EQUAL));
     }
     if (criteria.getStatus() != null) {
       spec.addFilter(QueryFilter.of("status", criteria.getStatus(), QueryOperator.EQUAL));
     }
     if (criteria.getAvailableFrom() != null) {
-      spec.addFilter(QueryFilter.of("availableFrom", criteria.getAvailableFrom(), QueryOperator.GREATER_THAN_EQUAL));
+      spec.addFilter(QueryFilter.of("availableFrom", criteria.getAvailableFrom(),
+          QueryOperator.GREATER_THAN_EQUAL));
     }
     if (criteria.getIsActive() != null) {
       spec.addFilter(QueryFilter.of("isActive", criteria.getIsActive(), QueryOperator.EQUAL));

@@ -1,0 +1,23 @@
+spring:
+  quartz:
+    jdbc:
+      initialize-schema: never
+    properties:
+      org:
+        quartz:
+          jobStore:
+            class: org.quartz.impl.jdbcjobstore.JobStoreTX
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+            dataSource: quartz
+            tablePrefix: QRTZ_
+            isClustered: true
+          dataSource:
+            quartz:
+              driver: com.mysql.cj.jdbc.Driver
+              URL: ${DB_QUARTZ_URL:jdbc:mysql://localhost:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false}
+              user: ${DB_QUARTZ_USERNAME:root}
+              password: ${DB_QUARTZ_PASSWORD:root}
+              provider: hikaricp
+          threadPool:
+            class: org.quartz.simpl.SimpleThreadPool
+            threadCount: 10

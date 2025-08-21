@@ -1,8 +1,6 @@
 spring:
   quartz:
     job-store-type: jdbc
-    jdbc:
-      initialize-schema: never
     overwrite-existing-jobs: true
     properties:
       org:
@@ -10,19 +8,3 @@ spring:
           scheduler:
             instanceId: AUTO
             instanceName: ${spring.application.name}
-          jobStore:
-            class: org.quartz.impl.jdbcjobstore.JobStoreTX
-            driverDelegateClass: ${DB_QUARTZ_DRIVER_DELEGATE_CLASS:org.quartz.impl.jdbcjobstore.StdJDBCDelegate}
-            dataSource: quartz
-            tablePrefix: QRTZ_
-            isClustered: true
-          dataSource:
-            quartz:
-              driver: ${DB_DRIVER_CLASS_NAME:com.mysql.cj.jdbc.Driver}
-              URL: ${DB_QUARTZ_URL:jdbc:mysql://localhost:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false}
-              user: ${DB_QUARTZ_USERNAME:root}
-              password: ${DB_QUARTZ_PASSWORD:root}
-              provider: hikaricp
-          threadPool:
-            class: org.quartz.simpl.SimpleThreadPool
-            threadCount: 10

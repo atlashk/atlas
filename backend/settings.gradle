@@ -314,6 +314,10 @@ project(':infrastructure.scheduler.spring.adapter.user').projectDir = file('infr
 // Scheduler::Quartz
 include(':infrastructure.scheduler.quartz.core')
 project(':infrastructure.scheduler.quartz.core').projectDir = file('infrastructure/scheduler/scheduler-quartz/scheduler-quartz-core')
+include(':infrastructure.scheduler.quartz.jobstore.mysql')
+project(':infrastructure.scheduler.quartz.jobstore.mysql').projectDir = file('infrastructure/scheduler/scheduler-quartz/scheduler-quartz-jobstore-mysql')
+include(':infrastructure.scheduler.quartz.jobstore.postgres')
+project(':infrastructure.scheduler.quartz.jobstore.postgres').projectDir = file('infrastructure/scheduler/scheduler-quartz/scheduler-quartz-jobstore-postgres')
 include(':infrastructure.scheduler.quartz.adapter.notification')
 project(':infrastructure.scheduler.quartz.adapter.notification').projectDir = file('infrastructure/scheduler/scheduler-quartz/scheduler-quartz-adapter-notification')
 include(':infrastructure.scheduler.quartz.adapter.order')

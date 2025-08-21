@@ -1,4 +1,4 @@
-package org.atlas.domain.product.repository;
+package org.atlas.domain.product.repository.criteria;
 
 import java.math.BigDecimal;
 import java.util.Date;
