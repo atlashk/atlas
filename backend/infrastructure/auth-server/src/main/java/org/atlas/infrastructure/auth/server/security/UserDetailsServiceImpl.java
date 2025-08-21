@@ -16,14 +16,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
   private final UserRepository userRepository;
 
   @Override
-  public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
-    Optional<UserEntity> userEntityOpt = userRepository.findByUsername(identifier);
+  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    Optional<UserEntity> userEntityOpt = userRepository.findByUsername(username);
     if (userEntityOpt.isEmpty()) {
-      userEntityOpt = userRepository.findByEmail(identifier);
+      userEntityOpt = userRepository.findByEmail(username);
       if (userEntityOpt.isEmpty()) {
-        userEntityOpt = userRepository.findByPhoneNumber(identifier);
+        userEntityOpt = userRepository.findByPhoneNumber(username);
         if (userEntityOpt.isEmpty()) {
-          throw new UsernameNotFoundException(identifier);
+          throw new UsernameNotFoundException(username);
         }
       }
     }

@@ -34,8 +34,8 @@ public class OneTimeTokenServiceImpl implements OneTimeTokenService {
   @Override
   public OneTimeToken consume(OneTimeTokenAuthenticationToken authenticationToken) {
     // Obtain token from Redis
-    String identifier = (String) authenticationToken.getPrincipal();
-    LinkedHashMap<?, ?> redisValue = (LinkedHashMap<?, ?>) redisTemplate.opsForValue().get(redisKey(identifier));
+    String username = (String) authenticationToken.getPrincipal();
+    LinkedHashMap<?, ?> redisValue = (LinkedHashMap<?, ?>) redisTemplate.opsForValue().get(redisKey(username));
     OneTimeToken token = new DefaultOneTimeToken(
         (String) redisValue.get("tokenValue"),
         (String) redisValue.get("username"),
@@ -48,7 +48,7 @@ public class OneTimeTokenServiceImpl implements OneTimeTokenService {
     }
 
     // Mark token as consumed by deleting it from Redis
-    redisTemplate.delete(redisKey(identifier));
+    redisTemplate.delete(redisKey(username));
 
     return token;
   }

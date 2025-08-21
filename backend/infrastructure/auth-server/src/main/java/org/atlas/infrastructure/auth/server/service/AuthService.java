@@ -43,7 +43,7 @@ public class AuthService {
   @Transactional
   public LoginResponse login(LoginRequest request) throws IOException, InvalidKeySpecException {
     UsernamePasswordAuthenticationToken authentication =
-        new UsernamePasswordAuthenticationToken(request.getIdentifier(), request.getPassword());
+        new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword());
     return doLogin(authentication);
   }
 
@@ -51,14 +51,14 @@ public class AuthService {
   public LoginResponse oneTimeTokenLogin(OneTimeTokenLoginRequest request)
       throws IOException, InvalidKeySpecException {
     OneTimeTokenAuthenticationToken authentication =
-        new OneTimeTokenAuthenticationToken(request.getIdentifier(), request.getToken());
+        new OneTimeTokenAuthenticationToken(request.getUsername(), request.getToken());
     return doLogin(authentication);
   }
 
   public GenerateOneTimeTokenResponse generateOneTimeToken(GenerateOneTimeTokenRequest request) {
     OneTimeToken token = oneTimeTokenService.generate(
         new org.springframework.security.authentication.ott.GenerateOneTimeTokenRequest(
-            request.getIdentifier()));
+            request.getUsername()));
     return new GenerateOneTimeTokenResponse(token.getTokenValue());
   }
 

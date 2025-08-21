@@ -10,5 +10,5 @@ public class GenerateOneTimeTokenRequest {
 
   @NotBlank
   @Schema(description = "Username, email, of phone number of the user attempting to log in.", example = "john_doe")
-  private String identifier;
+  private String username;
 }
