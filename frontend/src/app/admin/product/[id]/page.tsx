@@ -1,0 +1,267 @@
+"use client";
+
+import AdminLayout from "@/components/admin/AdminLayout";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Product } from "@/interfaces/product.interface";
+import { productService } from "@/services";
+import { useUserStore } from "@/stores/user.store";
+import { getProductStatusBadge } from "@/utils/formatter.util";
+import { ArrowLeft, Edit, Trash2 } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+
+export default function AdminProductDetailsPage() {
+  const router = useRouter();
+  const params = useParams();
+  const { profile } = useUserStore();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const hasAuthChecked = useRef(false);
+  const hasLoadedData = useRef(false);
+
+  const productId = parseInt(params.id as string, 10);
+
+  useEffect(() => {
+    const initializeComponent = async () => {
+      // Check authentication only once
+      if (!hasAuthChecked.current) {
+        if (!profile || profile.role !== "ADMIN") {
+          router.push("/login");
+          return;
+        }
+        hasAuthChecked.current = true;
+      }
+
+      // Load product data only once
+      if (
+        productId &&
+        profile &&
+        profile.role === "ADMIN" &&
+        !hasLoadedData.current
+      ) {
+        hasLoadedData.current = true;
+        try {
+          const response = await productService.adminGetProduct(productId);
+          if (response.success) {
+            setProduct(response.data);
+          } else {
+            toast.error(response.errorMessage || "Failed to load product");
+            router.push("/admin/product");
+          }
+        } catch (error) {
+          toast.error("Failed to load product");
+          router.push("/admin/product");
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    initializeComponent();
+  }, [productId, router, profile]);
+
+  const handleEdit = () => {
+    router.push(`/admin/product/${productId}/edit`);
+  };
+
+  const handleDelete = async () => {
+    if (!product) return;
+
+    if (confirm("Are you sure you want to delete this product?")) {
+      setIsDeleting(true);
+      try {
+        const response = await productService.adminDeleteProduct(product.id);
+        if (response.success) {
+          toast.success("Product deleted successfully!");
+          router.push("/admin/product");
+        } else {
+          toast.error(response.errorMessage || "Failed to delete product");
+        }
+      } catch (error) {
+        toast.error("Failed to delete product");
+      } finally {
+        setIsDeleting(false);
+      }
+    }
+  };
+
+  const handleBack = () => {
+    router.back();
+  };
+
+  if (isLoading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  if (!product) {
+    return (
+      <AdminLayout>
+        <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+          <h2 className="text-2xl font-semibold">Product not found</h2>
+          <Button onClick={handleBack} variant="outline">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Go Back
+          </Button>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  return (
+    <AdminLayout>
+      <div className="container mx-auto px-2">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-2">
+            <Button onClick={handleEdit} variant="outline">
+              <Edit className="mr-2 h-4 w-4" />
+              Edit
+            </Button>
+            <Button
+              onClick={handleDelete}
+              variant="outline"
+              className="text-destructive hover:text-destructive"
+              disabled={isDeleting}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              {isDeleting ? "Deleting..." : "Delete"}
+            </Button>
+            <Button onClick={handleBack} variant="outline">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Product Image and Basic Info */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardContent className="p-6 pt-0">
+                <div className="h-70 w-70 mx-auto mb-4 bg-muted rounded-lg overflow-hidden">
+                  {product.image ? (
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                      No Image
+                    </div>
+                  )}
+                </div>
+
+                <h2 className="text-2xl font-bold mb-3">{product.name}</h2>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Price:</span>
+                    <span className="font-bold text-primary">
+                      ${product.price.toFixed(2)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Status:</span>
+                    {getProductStatusBadge(product.status)}
+                  </div>
+
+                  {product.status === "IN_STOCK" && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Stock:</span>
+                      <Badge variant="outline">{product.quantity}</Badge>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Active:</span>
+                    <Badge variant={product.isActive ? "default" : "secondary"}>
+                      {product.isActive ? "Yes" : "No"}
+                    </Badge>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Available From:</span>
+                    <span className="text-sm">
+                      {new Date(product.availableFrom).toLocaleDateString()}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Brand:</span>
+                    <span className="text-sm">{product.brand.name}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Categories:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {product.categories.map((category) => (
+                        <Badge key={category.id} variant="secondary">
+                          {category.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Product Details and Attributes */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Description */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Description</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm leading-relaxed">
+                  {product.details.description || "No description available."}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Specifications */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Specifications</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {product.attributes && product.attributes.length > 0 ? (
+                  <div className="space-y-3">
+                    {product.attributes.map((attr) => (
+                      <div
+                        key={attr.id}
+                        className="flex items-center justify-between py-2 border-b border-border last:border-b-0"
+                      >
+                        <span className="font-medium text-sm">{attr.name}</span>
+                        <span className="text-sm text-muted-foreground">
+                          {attr.value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    No specifications available.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </AdminLayout>
+  );
+}

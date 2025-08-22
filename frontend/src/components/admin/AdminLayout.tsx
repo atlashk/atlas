@@ -85,6 +85,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       case '/admin/order':
         return 'Order Management';
       default:
+        // Handle dynamic product routes
+        if (pathname.startsWith('/admin/product/')) {
+          if (pathname.includes('/edit')) {
+            return 'Edit Product';
+          } else if (pathname.endsWith('/add')) {
+            return 'Add Product';
+          } else {
+            // Product details page (e.g., /admin/product/123)
+            return 'Product Details';
+          }
+        }
         return 'Admin Dashboard';
     }
   };

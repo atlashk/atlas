@@ -42,6 +42,7 @@ public class AdminUpdateProductRequest {
   @Schema(description = "Date and time the product becomes available in ISO 8601 format.", example = "2023-10-01T10:00:00Z")
   private Date availableFrom;
 
+  @NotNull
   @Schema(description = "Indicates if the product is active.", example = "true")
   private Boolean isActive;
 

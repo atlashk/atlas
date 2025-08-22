@@ -113,7 +113,7 @@ public class AdminProductController {
   @Operation(summary = "Retrieve details of a specific product by ID.")
   @GetMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
   public ApiResponseWrapper<ProductResponse> getProduct(
-      @Parameter(description = "The unique identifier of the product.", example = "1")
+      @Parameter(name = "productId", description = "The unique identifier of the product.", example = "1")
       @PathVariable("productId") Integer productId) throws Exception {
     ProductEntity productEntity = adminGetProductUseCaseHandler.handle(productId);
     ProductResponse productResponse = ObjectMapperUtil.getInstance()
@@ -135,7 +135,7 @@ public class AdminProductController {
   @Operation(summary = "Update an existing product by ID.")
   @PutMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
   public ApiResponseWrapper<Void> updateProduct(
-      @Parameter(description = "The unique identifier of the product to update.", example = "1")
+      @Parameter(name = "productId", description = "The unique identifier of the product to update.", example = "1")
       @PathVariable("productId") Integer productId,
       @Parameter(description = "Request object containing the new details for the product.", required = true)
       @Valid @RequestBody AdminUpdateProductRequest request) throws Exception {
@@ -148,7 +148,7 @@ public class AdminProductController {
   @Operation(summary = "Delete a product by ID.")
   @DeleteMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
   public ApiResponseWrapper<Void> deleteProduct(
-      @Parameter(description = "The unique identifier of the product to delete.", example = "1")
+      @Parameter(name = "productId", description = "The unique identifier of the product to delete.", example = "1")
       @PathVariable("productId") Integer productId) throws Exception {
     adminDeleteProductUseCaseHandler.handle(productId);
     return ApiResponseWrapper.success();
@@ -157,9 +157,9 @@ public class AdminProductController {
   @Operation(summary = "Import products from a file.")
   @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   public ApiResponseWrapper<Void> importProduct(
-      @Parameter(description = "The file containing products to import.")
+      @Parameter(name = "file", description = "The file containing products to import.")
       @RequestPart("file") MultipartFile file,
-      @Parameter(description = "The type of the file (e.g., csv, xlsx).", example = "csv")
+      @Parameter(name = "file_type", description = "The type of the file (e.g., csv, xlsx).", example = "csv")
       @RequestPart("file_type") FileType fileType) throws Exception {
     byte[] fileContent = file.getBytes();
     AdminImportProductInput input = new AdminImportProductInput(fileType, fileContent);
@@ -170,25 +170,25 @@ public class AdminProductController {
   @Operation(summary = "Export products based on optional filters.")
   @GetMapping(value = "/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   public ResponseEntity<byte[]> export(
-      @Parameter(description = "The unique identifier of the product to export.", example = "1")
+      @Parameter(name = "id", description = "The unique identifier of the product to export.", example = "1")
       @RequestParam(name = "id", required = false) Integer id,
-      @Parameter(description = "Keyword for searching products.", example = "T-Shirt")
+      @Parameter(name = "keyword", description = "Keyword for searching products.", example = "T-Shirt")
       @RequestParam(name = "keyword", required = false) String keyword,
-      @Parameter(description = "Minimum price for filtering products.", example = "10.00")
+      @Parameter(name = "minPrice", description = "Minimum price for filtering products.", example = "10.00")
       @RequestParam(name = "minPrice", required = false) BigDecimal minPrice,
-      @Parameter(description = "Maximum price for filtering products.", example = "100.00")
+      @Parameter(name = "maxPrice", description = "Maximum price for filtering products.", example = "100.00")
       @RequestParam(name = "maxPrice", required = false) BigDecimal maxPrice,
-      @Parameter(description = "Status of the product.", example = "IN_STOCK")
+      @Parameter(name = "status", description = "Status of the product.", example = "IN_STOCK")
       @RequestParam(name = "status", required = false) ProductStatus status,
-      @Parameter(description = "Date from which the product is available (ISO 8601 format).", example = "2023-01-01T00:00:00Z")
+      @Parameter(name = "availableFrom", description = "Date from which the product is available (ISO 8601 format).", example = "2023-01-01T00:00:00Z")
       @RequestParam(name = "availableFrom", required = false) Date availableFrom,
-      @Parameter(description = "Indicates if the product is active.", example = "true")
+      @Parameter(name = "isActive", description = "Indicates if the product is active.", example = "true")
       @RequestParam(name = "isActive", required = false) Boolean isActive,
-      @Parameter(description = "Brand ID for filtering products.", example = "1")
+      @Parameter(name = "brandId", description = "Brand ID for filtering products.", example = "1")
       @RequestParam(name = "brandId", required = false) Integer brandId,
-      @Parameter(description = "List of category IDs for filtering products.", example = "[1, 2, 3]")
+      @Parameter(name = "categoryIds", description = "List of category IDs for filtering products.", example = "[1, 2, 3]")
       @RequestParam(name = "categoryIds", required = false) List<Integer> categoryIds,
-      @Parameter(description = "The type of the file to export to (e.g., csv, xlsx).", example = "csv")
+      @Parameter(name = "file_type", description = "The type of the file to export to (e.g., csv, xlsx).", example = "csv")
       @RequestParam(name = "file_type") FileType fileType
   ) throws Exception {
     AdminExportProductInput input = AdminExportProductInput.builder()

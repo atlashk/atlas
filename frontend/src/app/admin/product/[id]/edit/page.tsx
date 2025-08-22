@@ -24,20 +24,22 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Brand,
   Category,
-  CreateProductRequest,
   PRODUCT_STATUSES,
+  Product,
+  UpdateProductRequest,
 } from "@/interfaces/product.interface";
 import { productService } from "@/services";
 import { useUserStore } from "@/stores/user.store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState, useRef } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
 const productSchema = z.object({
+  id: z.number().min(1, "Product ID is required"),
   name: z.string().min(1, "Product name is required"),
   price: z.number().min(0, "Price must be greater than or equal to 0"),
   quantity: z.number().min(0, "Quantity must be greater than or equal to 0"),
@@ -54,6 +56,7 @@ const productSchema = z.object({
   }),
   attributes: z.array(
     z.object({
+      id: z.number().optional(),
       name: z.string().min(1, "Attribute name is required"),
       value: z.string().min(1, "Attribute value is required"),
     })
@@ -62,16 +65,20 @@ const productSchema = z.object({
 
 type ProductFormData = z.infer<typeof productSchema>;
 
-export default function AdminProductAddPage() {
+export default function AdminProductEditPage() {
   const router = useRouter();
-  const { accessToken, profile } = useUserStore();
+  const params = useParams();
+  const productId = parseInt(params.id as string, 10);
+  const { profile } = useUserStore();
   const [brands, setBrands] = useState<Brand[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingBrands, setIsLoadingBrands] = useState(true);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [isLoadingProduct, setIsLoadingProduct] = useState(true);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [hasLoadedData, setHasLoadedData] = useState(false);
-  const hasLoadedDataRef = useRef(false);
+  const [product, setProduct] = useState<Product | null>(null);
+  const hasAuthChecked = useRef(false);
+  const hasLoadedData = useRef(false);
 
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -92,30 +99,36 @@ export default function AdminProductAddPage() {
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control: form.control,
     name: "attributes",
   });
 
-  // Single effect to handle both authentication and data loading
   useEffect(() => {
-    // Check authentication
-    if (!accessToken || profile?.role !== "ADMIN") {
-      router.push("/login");
-      return;
-    }
+    const initializeComponent = async () => {
+      // Check authentication only once
+      if (!hasAuthChecked.current) {
+        if (!profile || profile.role !== "ADMIN") {
+          router.push("/login");
+          return;
+        }
+        hasAuthChecked.current = true;
+      }
 
-    // Load data only once
-    if (hasLoadedDataRef.current) return;
-    hasLoadedDataRef.current = true;
-    setHasLoadedData(true);
+      // Load data only once
+      if (hasLoadedData.current || !productId || !profile || profile.role !== "ADMIN") {
+        return;
+      }
+      
+      hasLoadedData.current = true;
 
-    const loadData = async () => {
       try {
-        const [brandsResponse, categoriesResponse] = await Promise.all([
-          productService.listBrand(),
-          productService.listCategory(),
-        ]);
+        const [brandsResponse, categoriesResponse, productResponse] =
+          await Promise.all([
+            productService.listBrand(),
+            productService.listCategory(),
+            productService.adminGetProduct(productId),
+          ]);
 
         if (brandsResponse.success) {
           setBrands(brandsResponse.data);
@@ -123,16 +136,55 @@ export default function AdminProductAddPage() {
         if (categoriesResponse.success) {
           setCategories(categoriesResponse.data);
         }
+        if (productResponse.success) {
+          const productData = productResponse.data;
+          setProduct(productData);
+
+          // Format the date for datetime-local input
+          const availableFromDate = new Date(productData.availableFrom);
+          const formattedDate = availableFromDate.toISOString().slice(0, 16);
+
+          // Set form values
+          form.reset({
+            id: productData.id,
+            name: productData.name,
+            price: productData.price,
+            quantity: productData.quantity,
+            status: productData.status,
+            availableFrom: formattedDate,
+            isActive: productData.isActive,
+            brandId: productData.brand?.id || 0,
+            categoryIds: productData.categories?.map((cat) => cat.id) || [],
+            image: productData.image || "",
+            details: {
+              description: productData.details?.description || "",
+            },
+            attributes: productData.attributes || [],
+          });
+
+          // Set image preview
+          if (productData.image) {
+            setImagePreview(productData.image);
+          }
+
+          // Replace attributes array
+          replace(productData.attributes || []);
+        } else {
+          toast.error("Product not found");
+          router.push("/admin/product");
+        }
       } catch (error) {
-        toast.error("Failed to load form data");
+        toast.error("Failed to load product data");
+        router.push("/admin/product");
       } finally {
         setIsLoadingBrands(false);
         setIsLoadingCategories(false);
+        setIsLoadingProduct(false);
       }
     };
 
-    loadData();
-  }, [accessToken, profile?.role, router]);
+    initializeComponent();
+  }, [productId, form, replace, router, profile]);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -148,7 +200,7 @@ export default function AdminProductAddPage() {
   };
 
   const addAttribute = () => {
-    append({ name: "", value: "" });
+    append({ id: undefined, name: "", value: "" });
   };
 
   const removeAttribute = (index: number) => {
@@ -158,28 +210,72 @@ export default function AdminProductAddPage() {
   const onSubmit = async (data: ProductFormData) => {
     try {
       // Filter out empty attributes
-      const filteredAttributes = data.attributes.filter(
-        (attr) => attr.name.trim() && attr.value.trim()
-      );
+      const filteredAttributes = data.attributes
+        .filter((attr) => attr.name.trim() && attr.value.trim())
+        .map((attr, index) => ({
+          id: attr.id || 0, // Use existing ID or 0 for new attributes
+          name: attr.name,
+          value: attr.value,
+        }));
 
-      const formData: CreateProductRequest = {
+      const formData: UpdateProductRequest = {
         ...data,
         attributes: filteredAttributes,
         availableFrom: new Date(data.availableFrom).toISOString(),
       };
 
-      const response = await productService.adminCreateProduct(formData);
+      const response = await productService.adminUpdateProduct(formData);
 
       if (response.success) {
-        toast.success("Product created successfully!");
-        router.push("/admin/product");
+        toast.success("Product updated successfully!");
+        router.push(`/admin/product/${productId}`);
       } else {
-        toast.error(response.errorMessage || "Failed to create product");
+        toast.error(response.errorMessage || "Failed to update product");
       }
     } catch (error) {
-      toast.error("Failed to create product");
+      toast.error("Failed to update product");
     }
   };
+
+  const formatStatusLabel = (status: string): string => {
+    return status
+      .split("_")
+      .map((word) => word.charAt(0) + word.slice(1).toLowerCase())
+      .join(" ");
+  };
+
+  if (isLoadingProduct) {
+    return (
+      <AdminLayout>
+        <div className="container mx-auto px-6 py-8">
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <span className="ml-2">Loading product...</span>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  if (!product) {
+    return (
+      <AdminLayout>
+        <div className="container mx-auto px-6 py-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">
+              Product Not Found
+            </h1>
+            <p className="text-gray-600 mb-4">
+              The product you're looking for doesn't exist.
+            </p>
+            <Button onClick={() => router.push("/admin/product")}>
+              Back to Products
+            </Button>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
@@ -272,7 +368,7 @@ export default function AdminProductAddPage() {
                         <FormLabel>Status *</FormLabel>
                         <Select
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
+                          value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -282,7 +378,7 @@ export default function AdminProductAddPage() {
                           <SelectContent>
                             {PRODUCT_STATUSES.map((status) => (
                               <SelectItem key={status} value={status}>
-                                {status}
+                                {formatStatusLabel(status)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -334,6 +430,7 @@ export default function AdminProductAddPage() {
                           onValueChange={(value) =>
                             field.onChange(parseInt(value))
                           }
+                          value={field.value.toString()}
                           disabled={isLoadingBrands || brands.length === 0}
                         >
                           <FormControl>
@@ -373,8 +470,8 @@ export default function AdminProductAddPage() {
                           <div className="flex items-center justify-center py-2">
                             <Loader2 className="h-4 w-4 animate-spin" />
                             <span className="ml-2 text-sm text-muted-foreground">
-                              Loading categories...
-                            </span>
+              Loading categories...
+            </span>
                           </div>
                         ) : (
                           <Select value="placeholder" onValueChange={() => {}}>
@@ -414,10 +511,10 @@ export default function AdminProductAddPage() {
                                   />
                                   <span className="text-sm">{category.name}</span>
                                 </label>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
+                               ))}
+                             </SelectContent>
+                           </Select>
+                         )}
                         <FormMessage />
                       </FormItem>
                     )}
@@ -553,7 +650,7 @@ export default function AdminProductAddPage() {
                 {form.formState.isSubmitting && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                Create Product
+                Update Product
               </Button>
             </div>
           </form>

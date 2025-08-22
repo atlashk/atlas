@@ -82,7 +82,6 @@ const OrderHistory: React.FC = () => {
           toast.error(response.errorMessage || "Failed to load orders");
         }
       } catch (error) {
-        console.error("Error loading orders:", error);
         toast.error("Failed to load orders");
       } finally {
         setIsLoading(false);

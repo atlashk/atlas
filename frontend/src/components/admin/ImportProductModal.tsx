@@ -1,6 +1,17 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
+import { Download, FileCheck, Loader2, Upload, X } from "lucide-react";
+import React, { useRef, useState } from "react";
 import { toast } from "sonner";
 
 interface ImportProductModalProps {
@@ -112,7 +123,6 @@ const ImportProductModal: React.FC<ImportProductModalProps> = ({
       onImportSuccess();
       handleClose();
     } catch (error) {
-      console.error("Import error:", error);
       toast.error("Failed to import products. Please try again.");
     } finally {
       setIsImporting(false);
@@ -136,162 +146,136 @@ const ImportProductModal: React.FC<ImportProductModalProps> = ({
     toast.info("Template download feature will be implemented soon.");
   };
 
-  if (!isVisible) return null;
-
   return (
-    <div
-      className="modal show d-block"
-      tabIndex={-1}
-      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-    >
-      <div className="modal-dialog modal-lg">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">
-              <i className="bi bi-upload me-2"></i>
-              Import Products
-            </h5>
-            <button
-              type="button"
-              className="btn-close"
-              onClick={handleClose}
-              disabled={isImporting}
-            ></button>
-          </div>
+    <Dialog open={isVisible} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Upload className="h-5 w-5" />
+            Import Products
+          </DialogTitle>
+          <DialogDescription>
+            Upload a CSV or Excel file to import products. Make sure your file
+            follows the correct format.
+          </DialogDescription>
+        </DialogHeader>
 
-          <div className="modal-body">
-            {!isImporting ? (
-              <>
-                <div className="mb-3">
-                  <p className="text-muted">
-                    Upload a CSV or Excel file to import products. Make sure
-                    your file follows the correct format.
-                  </p>
-                  <button
-                    type="button"
-                    className="btn btn-outline-info btn-sm"
-                    onClick={downloadTemplate}
-                  >
-                    <i className="bi bi-download me-1"></i>
-                    Download Template
-                  </button>
-                </div>
-
-                <div
-                  className={`border-2 border-dashed rounded p-4 text-center ${
-                    dragActive ? "border-primary bg-light" : "border-secondary"
-                  }`}
-                  onDragEnter={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDragOver={handleDrag}
-                  onDrop={handleDrop}
+        <div className="space-y-4">
+          {!isImporting ? (
+            <>
+              <div className="space-y-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={downloadTemplate}
+                  className="flex items-center gap-2"
                 >
-                  {selectedFile ? (
+                  <Download className="h-4 w-4" />
+                  Download Template
+                </Button>
+              </div>
+
+              <div
+                className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                  dragActive ? "border-primary bg-primary/5" : "border-gray-300"
+                }`}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+              >
+                {selectedFile ? (
+                  <div className="space-y-3">
+                    <FileCheck className="h-16 w-16 text-green-500 mx-auto" />
                     <div>
-                      <i className="bi bi-file-earmark-check text-success fs-1"></i>
-                      <p className="mt-2 mb-1">
-                        <strong>{selectedFile.name}</strong>
-                      </p>
-                      <p className="text-muted small">
+                      <p className="font-medium text-lg">{selectedFile.name}</p>
+                      <p className="text-muted-foreground text-sm">
                         {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                       </p>
-                      <button
-                        type="button"
-                        className="btn btn-outline-danger btn-sm"
-                        onClick={() => setSelectedFile(null)}
-                      >
-                        Remove
-                      </button>
                     </div>
-                  ) : (
-                    <div>
-                      <i className="bi bi-cloud-upload fs-1 text-muted"></i>
-                      <p className="mt-2 mb-1">Drag and drop your file here</p>
-                      <p className="text-muted small mb-3">or</p>
-                      <button
-                        type="button"
-                        className="btn btn-outline-primary"
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        Choose File
-                      </button>
-                      <p className="text-muted small mt-2">
-                        Supported formats: CSV, Excel (.xlsx, .xls)
-                        <br />
-                        Maximum file size: 10MB
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  className="d-none"
-                  accept={acceptedTypes}
-                  onChange={handleFileInputChange}
-                />
-              </>
-            ) : (
-              <div className="text-center">
-                <div className="spinner-border text-primary mb-3" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </div>
-                <h6>Importing Products...</h6>
-                <div className="progress mt-3">
-                  <div
-                    className="progress-bar progress-bar-striped progress-bar-animated"
-                    role="progressbar"
-                    style={{ width: `${importProgress}%` }}
-                    aria-valuenow={importProgress}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                  >
-                    {importProgress}%
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedFile(null)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Remove
+                    </Button>
                   </div>
-                </div>
-                <p className="text-muted mt-2 small">
-                  Please wait while we process your file...
+                ) : (
+                  <div className="space-y-4">
+                    <Upload className="h-16 w-16 text-muted-foreground mx-auto" />
+                    <div>
+                      <p className="text-lg font-medium">
+                        Drag and drop your file here
+                      </p>
+                      <p className="text-muted-foreground text-sm">or</p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      Choose File
+                    </Button>
+                    <p className="text-muted-foreground text-sm mt-4">
+                      Supported formats: CSV, Excel (.xlsx, .xls)
+                      <br />
+                      Maximum file size: 10MB
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="hidden"
+                accept={acceptedTypes}
+                onChange={handleFileInputChange}
+              />
+            </>
+          ) : (
+            <div className="text-center space-y-4">
+              <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+              <h3 className="text-lg font-semibold">Importing Products...</h3>
+              <div className="space-y-2">
+                <Progress value={importProgress} className="w-full" />
+                <p className="text-sm text-muted-foreground">
+                  {importProgress}% - Please wait while we process your file...
                 </p>
               </div>
-            )}
-          </div>
-
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={handleClose}
-              disabled={isImporting}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handleImport}
-              disabled={!selectedFile || isImporting}
-            >
-              {isImporting ? (
-                <>
-                  <span
-                    className="spinner-border spinner-border-sm me-2"
-                    role="status"
-                    aria-hidden="true"
-                  ></span>
-                  Importing...
-                </>
-              ) : (
-                <>
-                  <i className="bi bi-upload me-2"></i>
-                  Import Products
-                </>
-              )}
-            </button>
-          </div>
+            </div>
+          )}
         </div>
-      </div>
-    </div>
+
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            disabled={isImporting}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleImport}
+            disabled={!selectedFile || isImporting}
+          >
+            {isImporting ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Importing...
+              </>
+            ) : (
+              <>
+                <Upload className="h-4 w-4 mr-2" />
+                Import Products
+              </>
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

@@ -52,7 +52,7 @@ export class ProductService extends BaseService {
   }
 
   // Admin operations
-  async listProduct(
+  async adminListProduct(
     filters: ListProductFilters
   ): Promise<ApiResponse<Product[]>> {
     const queryParams = new URLSearchParams();
@@ -77,27 +77,27 @@ export class ProductService extends BaseService {
     return this.get<Product[]>(`/admin/products?${queryParams.toString()}`);
   }
 
-  async getProductAdmin(productId: number): Promise<ApiResponse<Product>> {
+  async adminGetProduct(productId: number): Promise<ApiResponse<Product>> {
     return this.get<Product>(`/admin/products/${productId}`);
   }
 
-  async createProduct(
+  async adminCreateProduct(
     data: CreateProductRequest
   ): Promise<ApiResponse<Product>> {
     return this.post<Product>("/admin/products", data);
   }
 
-  async updateProduct(
+  async adminUpdateProduct(
     data: UpdateProductRequest
   ): Promise<ApiResponse<Product>> {
     return this.put<Product>(`/admin/products/${data.id}`, data);
   }
 
-  async deleteProduct(productId: number): Promise<ApiResponse<void>> {
+  async adminDeleteProduct(productId: number): Promise<ApiResponse<void>> {
     return this.delete<void>(`/admin/products/${productId}`);
   }
 
-  async importProduct(
+  async adminImportProduct(
     file: File,
     fileType: FileType
   ): Promise<ApiResponse<void>> {
@@ -112,12 +112,11 @@ export class ProductService extends BaseService {
       );
       return response.data;
     } catch (error) {
-      console.error("Import error:", error);
       throw error;
     }
   }
 
-  async exportProduct(filters: ExportProductFilters): Promise<void> {
+  async adminExportProduct(filters: ExportProductFilters): Promise<void> {
     const queryParams = new URLSearchParams();
     if (filters.id) queryParams.append("id", filters.id.toString());
     if (filters.keyword) queryParams.append("keyword", filters.keyword);

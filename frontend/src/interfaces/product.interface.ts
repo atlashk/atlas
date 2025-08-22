@@ -1,10 +1,18 @@
+export const PRODUCT_STATUSES = [
+  "IN_STOCK",
+  "OUT_STOCK",
+  "DISCONTINUED"
+] as const;
+
+export type ProductStatus = typeof PRODUCT_STATUSES[number];
+
 export interface Product {
   id: number;
   name: string;
   image: string;
   price: number;
   quantity: number;
-  status: string;
+  status: ProductStatus;
   availableFrom: string;
   isActive: boolean;
   brand: Brand;
@@ -12,12 +20,6 @@ export interface Product {
   attributes: ProductAttribute[];
   categories: Category[];
 }
-
-export const PRODUCT_STATUSES = [
-  "IN_STOCK",
-  "OUT_STOCK",
-  "DISCONTINUED"
-] as const;
 
 export interface Brand {
   id: number;
@@ -54,7 +56,7 @@ export interface ListProductFilters {
   keyword?: string;
   minPrice?: number;
   maxPrice?: number;
-  status?: "";
+  status?: ProductStatus;
   availableFrom?: string;
   isActive?: boolean;
   brandId?: string;
@@ -66,9 +68,9 @@ export interface ListProductFilters {
 export interface CreateProductRequest {
   name: string;
   price: number;
-  image: string;
+  image?: string;
   quantity: number;
-  status: "";
+  status: ProductStatus;
   availableFrom: string;
   isActive: boolean;
   brandId: number;
@@ -81,9 +83,9 @@ export interface UpdateProductRequest {
   id: number;
   name: string;
   price: number;
-  image: string;
+  image?: string;
   quantity: number;
-  status: "";
+  status: ProductStatus;
   availableFrom: string;
   isActive: boolean;
   brandId: number;

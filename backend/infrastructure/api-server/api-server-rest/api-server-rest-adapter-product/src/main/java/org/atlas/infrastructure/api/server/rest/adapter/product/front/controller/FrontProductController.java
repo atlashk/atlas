@@ -80,7 +80,7 @@ public class FrontProductController {
   @Operation(summary = "Retrieve details of a specific product by ID.")
   @GetMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
   public ApiResponseWrapper<ProductResponse> getProduct(
-      @Parameter(description = "The unique identifier of the product.", example = "1", required = true)
+      @Parameter(name = "productId", description = "The unique identifier of the product.", example = "1", required = true)
       @PathVariable("productId") Integer productId) throws Exception {
     ProductEntity productEntity = frontGetProductUseCaseHandler.handle(productId);
     ProductResponse response = ObjectMapperUtil.getInstance()

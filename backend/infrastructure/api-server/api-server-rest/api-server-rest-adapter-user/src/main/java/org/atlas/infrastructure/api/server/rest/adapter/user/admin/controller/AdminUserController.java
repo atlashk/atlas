@@ -32,16 +32,16 @@ public class AdminUserController {
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "List users", description = "Retrieves a paginated list of users.")
   public ApiResponseWrapper<List<UserResponse>> listUser(
-      @Parameter(description = "User ID", example = "1")
-      @RequestParam(value = "id", required = false) Integer id,
-      @Parameter(description = "Username, first name, last name, email, phone number", example = "john.doe")
-      @RequestParam(value = "keyword", required = false) String keyword,
-      @Parameter(description = "User role", example = "USER")
-      @RequestParam(value = "role", required = false) Role role,
-      @Parameter(description = "The page number", example = "1")
-      @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
-      @Parameter(description = "The number of users per page", example = "20")
-      @RequestParam(value = "size", required = false, defaultValue = CommonConstant.DEFAULT_PAGE_SIZE_STR) Integer size
+      @Parameter(name = "id", description = "User ID", example = "1")
+      @RequestParam(name = "id", required = false) Integer id,
+      @Parameter(name = "keyword", description = "Username, first name, last name, email, phone number", example = "john.doe")
+      @RequestParam(name = "keyword", required = false) String keyword,
+      @Parameter(name = "role", description = "User role", example = "USER")
+      @RequestParam(name = "role", required = false) Role role,
+      @Parameter(name = "page", description = "The page number", example = "1")
+      @RequestParam(name = "page", required = false, defaultValue = "1") Integer page,
+      @Parameter(name = "size", description = "The number of users per page", example = "20")
+      @RequestParam(name = "size", required = false, defaultValue = CommonConstant.DEFAULT_PAGE_SIZE_STR) Integer size
   ) throws Exception {
     AdminListUserInput input = AdminListUserInput.builder()
         .id(id)

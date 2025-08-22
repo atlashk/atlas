@@ -90,7 +90,6 @@ const ProductSearch: React.FC = () => {
         setCategories(response.data || []);
       }
     } catch (error) {
-      console.error("Error loading categories:", error);
       toast.error("Failed to load categories");
     } finally {
       setIsLoadingCategories(false);
@@ -119,7 +118,6 @@ const ProductSearch: React.FC = () => {
           toast.error(response.errorMessage || "Failed to load products");
         }
       } catch (error) {
-        console.error("Error loading products:", error);
         toast.error("Failed to load products");
       } finally {
         setIsLoadingProducts(false);
@@ -159,7 +157,6 @@ const ProductSearch: React.FC = () => {
         toast.error(response.errorMessage || "Failed to load product details");
       }
     } catch (error) {
-      console.error("Error loading product details:", error);
       toast.error("Failed to load product details");
     } finally {
       setIsLoadingProduct(false);

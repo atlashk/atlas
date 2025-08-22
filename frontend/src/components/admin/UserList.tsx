@@ -87,10 +87,8 @@ const UserList: React.FC = () => {
           setHasInitialLoad(true);
         } else {
           toast.error(response.errorMessage || "Failed to load users");
-          console.error("Failed to load users:", response.errorMessage);
         }
       } catch (error: unknown) {
-        console.error("Error loading users:", error);
         const errorMessage =
           error instanceof Error ? error.message : "Failed to load users";
         toast.error(errorMessage);

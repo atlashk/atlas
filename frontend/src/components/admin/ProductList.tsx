@@ -44,6 +44,7 @@ import { formatCurrency, getProductStatusBadge } from "@/utils/formatter.util";
 import { getProductImageUrl } from "@/utils/productImage.util";
 import {
   Edit,
+  Eye,
   Loader2,
   Plus,
   RotateCcw,
@@ -53,7 +54,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import ExportDropdown from "./ExportDropdown";
 import ImportProductModal from "./ImportProductModal";
@@ -85,7 +86,8 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
-  const [hasInitialLoad, setHasInitialLoad] = useState(false);
+  const hasInitialLoad = useRef(false);
+  const isInitializing = useRef(false);
   const [metadata, setMetadata] = useState<Metadata>({
     currentPage: 1,
     pageSize: 20,
@@ -100,8 +102,8 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     status: undefined,
     availableFrom: undefined,
     isActive: undefined,
-    brandId: "",
-    categoryIds: [],
+    brandId: undefined,
+    categoryIds: undefined,
     page: 1,
     size: 20,
   });
@@ -113,29 +115,38 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     }
   }, [profile, router]);
 
+  const brandsLoaded = useRef(false);
+  const categoriesLoaded = useRef(false);
+  
   const loadBrands = useCallback(async () => {
+    if (brandsLoaded.current || isLoadingBrands) return;
+    
     setIsLoadingBrands(true);
     try {
       const { data } = await productService.listBrand();
       setBrands(data);
+      brandsLoaded.current = true;
     } catch {
       toast.error("Failed to load brands");
     } finally {
       setIsLoadingBrands(false);
     }
-  }, []);
+  }, [isLoadingBrands]);
 
   const loadCategories = useCallback(async () => {
+    if (categoriesLoaded.current || isLoadingCategories) return;
+    
     setIsLoadingCategories(true);
     try {
       const { data } = await productService.listCategory();
       setCategories(data);
+      categoriesLoaded.current = true;
     } catch {
       toast.error("Failed to load categories");
     } finally {
       setIsLoadingCategories(false);
     }
-  }, []);
+  }, [isLoadingCategories]);
 
   const handleActiveStateChange = useCallback(() => {
     let isActive: boolean | undefined;
@@ -149,19 +160,28 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
       isActive = undefined;
     }
     setFilters((prev) => ({ ...prev, isActive }));
-  }, [activeStates]);
+  }, [activeStates.active, activeStates.inactive]);
 
   useEffect(() => {
     handleActiveStateChange();
   }, [handleActiveStateChange]);
 
+  const filtersRef = useRef(filters);
+  const isApplyingFilters = useRef(false);
+  
+  // Update ref when filters change
+  useEffect(() => {
+    filtersRef.current = filters;
+  }, [filters]);
+  
   const applyFilters = useCallback(
     async (page: number, currentFilters?: ListProductFilters) => {
-      if (isLoadingProducts) return;
+      if (isLoadingProducts || isApplyingFilters.current) return;
 
+      isApplyingFilters.current = true;
       setIsLoadingProducts(true);
       try {
-        const filtersToUse = currentFilters || filters;
+        const filtersToUse = currentFilters || filtersRef.current;
         const updatedFilters = { ...filtersToUse, page };
         setFilters(updatedFilters);
         setMetadata((prev) => ({ ...prev, currentPage: page }));
@@ -178,16 +198,17 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
           }
         });
 
-        const response = await productService.listProduct(apiFilters);
+        const response = await productService.adminListProduct(apiFilters);
         setProducts(response.data);
         setMetadata((prev) => ({ ...prev, ...response.metadata }));
       } catch {
         toast.error("Failed to load products");
       } finally {
         setIsLoadingProducts(false);
+        isApplyingFilters.current = false;
       }
     },
-    [filters, isLoadingProducts]
+    [isLoadingProducts]
   );
 
   const changePage = useCallback(
@@ -205,11 +226,11 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
       keyword: undefined,
       minPrice: undefined,
       maxPrice: undefined,
-      status: "",
+      status: undefined,
       availableFrom: undefined,
       isActive: undefined,
-      brandId: "",
-      categoryIds: [],
+      brandId: undefined,
+      categoryIds: undefined,
       page: 1,
       size: 20,
     };
@@ -234,7 +255,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
       if (!confirm("Are you sure you want to delete this product?")) return;
 
       try {
-        await productService.deleteProduct(productId);
+        await productService.adminDeleteProduct(productId);
         toast.success("Product deleted successfully");
         applyFilters(metadata.currentPage);
       } catch {
@@ -262,12 +283,11 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
           categoryIds: filters.categoryIds,
           fileType: FileType[fileType.toUpperCase() as keyof typeof FileType],
         };
-        await productService.exportProduct(exportFilters);
+        await productService.adminExportProduct(exportFilters);
         toast.success(
           `Products exported successfully as ${fileType.toUpperCase()}`
         );
       } catch (error) {
-        console.error("Export failed:", error);
         toast.error("Failed to export products");
       } finally {
         setIsExporting(false);
@@ -286,20 +306,25 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
   }, [applyFilters]);
 
   // Load initial data
-  useEffect(() => {
+  useEffect(() => {    
     const loadInitialData = async () => {
+      if (hasInitialLoad.current || isInitializing.current || !profile || profile.role !== "ADMIN") {
+        return;
+      }
+
+      isInitializing.current = true;
+
       try {
         await Promise.all([loadBrands(), loadCategories(), applyFilters(1)]);
+        hasInitialLoad.current = true;
       } finally {
         setIsLoadingProducts(false);
+        isInitializing.current = false;
       }
     };
 
-    if (profile && profile.role === "ADMIN" && !hasInitialLoad) {
-      loadInitialData();
-      setHasInitialLoad(true);
-    }
-  }, [profile, hasInitialLoad]);
+    loadInitialData();
+  }, []); // Empty dependency array to run only once
 
   if (!profile || profile.role !== "ADMIN") {
     return null;
@@ -312,13 +337,20 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
         <div className="flex gap-2">
           <Button
             variant="outline"
+            onClick={() => router.push("/admin/product/add")}
+          >
+            <Plus className="h-4 w-4" />
+            New Product
+          </Button>
+          <Button
+            variant="outline"
             onClick={handleImportClick}
             disabled={isImporting}
           >
-            <Upload className="h-4 w-4 mr-2" />
+            <Upload className="h-4 w-4" />
             {isImporting ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
                 Importing...
               </>
             ) : (
@@ -326,10 +358,6 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
             )}
           </Button>
           <ExportDropdown isExporting={isExporting} onExport={handleExport} />
-          <Button onClick={() => router.push("/admin/product/add")}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add New Product
-          </Button>
         </div>
       </div>
 
@@ -410,7 +438,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
             <div className="space-y-2">
               <Label htmlFor="status">Product Status</Label>
               <Select
-                value={filters.status}
+                value={filters.status || ""}
                 onValueChange={(value) => handleFilterChange("status", value)}
               >
                 <SelectTrigger>
@@ -633,8 +661,19 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                               variant="outline"
                               size="sm"
                               onClick={() =>
-                                router.push(`/admin/product/edit/${product.id}`)
+                                router.push(`/admin/product/${product.id}`)
                               }
+                              title="View Product"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                router.push(`/admin/product/${product.id}/edit`)
+                              }
+                              title="Edit Product"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -642,6 +681,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                               variant="outline"
                               size="sm"
                               onClick={() => handleDelete(product.id)}
+                              title="Delete Product"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
