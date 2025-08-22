@@ -71,6 +71,14 @@ export class OrderService extends BaseService {
 
     return this.get<Order[]>(`/admin/orders?${queryParams.toString()}`);
   }
+
+  async countOrders(): Promise<ApiResponse<number>> {
+    return this.get<number>("/admin/orders/statistics/count");
+  }
+
+  async sumConfirmedOrderAmount(): Promise<ApiResponse<number>> {
+    return this.get<number>("/admin/orders/statistics/total-revenue");
+  }
 }
 
 export const orderService = new OrderService();

@@ -12,6 +12,8 @@ public interface ProductRepository {
   PagingResult<ProductEntity> findByCriteria(FindProductCriteria criteria,
       PagingRequest pagingRequest);
 
+  Long countAll();
+
   List<ProductEntity> findByIdIn(List<Integer> ids);
 
   Optional<ProductEntity> findById(Integer id);

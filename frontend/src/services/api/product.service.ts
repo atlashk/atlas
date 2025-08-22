@@ -207,6 +207,10 @@ export class ProductService extends BaseService {
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
   }
+
+  async countProducts(): Promise<ApiResponse<number>> {
+    return this.get<number>("/admin/products/statistics/count");
+  }
 }
 
 export const productService = new ProductService();

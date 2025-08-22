@@ -3,6 +3,7 @@ package org.atlas.infrastructure.usecase.handler;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -28,7 +29,9 @@ public class UseCaseHandlerAspect {
     Object[] args = joinPoint.getArgs();
 
     // Execute pre-handle interceptors
-    interceptors.forEach(interceptor -> interceptor.preHandle(useCaseHandlerClass, args[0]));
+    if (ArrayUtils.isNotEmpty(args)) {
+      interceptors.forEach(interceptor -> interceptor.preHandle(useCaseHandlerClass, args[0]));
+    }
 
     // Execute UseCaseHandler in a transaction manner
     transactionPort.begin();
@@ -41,7 +44,9 @@ public class UseCaseHandlerAspect {
       throw e;
     } finally {
       // Execute post-handle interceptors
-      interceptors.forEach(interceptor -> interceptor.postHandle(useCaseHandlerClass, args[0]));
+      if (ArrayUtils.isNotEmpty(args)) {
+        interceptors.forEach(interceptor -> interceptor.postHandle(useCaseHandlerClass, args[0]));
+      }
     }
   }
 }

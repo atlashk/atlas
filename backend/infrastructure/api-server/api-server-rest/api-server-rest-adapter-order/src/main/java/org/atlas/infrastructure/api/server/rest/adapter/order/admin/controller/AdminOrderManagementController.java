@@ -2,6 +2,8 @@ package org.atlas.infrastructure.api.server.rest.adapter.order.admin.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +29,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("api/admin/orders")
 @Validated
+@Tag(name = "Admin order management", description = "Admin order management")
 @RequiredArgsConstructor
-public class AdminOrderController {
+public class AdminOrderManagementController {
 
   private final AdminListOrderUseCaseHandler adminListOrderUseCaseHandler;
 

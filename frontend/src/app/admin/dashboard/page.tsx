@@ -9,12 +9,7 @@ import Dashboard from "@/components/admin/Dashboard";
 export default function AdminDashboardPage() {
   const router = useRouter();
   const { isAuthenticated, isAdmin, profile, logout, accessToken } = useUserStore();
-  const [stats, setStats] = useState({
-    totalUsers: 0,
-    totalProducts: 0,
-    totalOrders: 0,
-    revenue: 0,
-  });
+
   const [isHydrated, setIsHydrated] = useState(false);
   const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
 
@@ -44,15 +39,6 @@ export default function AdminDashboardPage() {
 
       console.log('User is authenticated admin, loading dashboard');
       setHasCheckedAuth(true);
-      
-      // TODO: Fetch dashboard stats from API
-      // For now, using mock data
-      setStats({
-        totalUsers: 150,
-        totalProducts: 45,
-        totalOrders: 89,
-        revenue: 12450,
-      });
     }, 100);
     
     return () => clearTimeout(timeoutId);

@@ -61,6 +61,11 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
   }
 
   @Override
+  public Long countAll() {
+    return jpaProductRepository.count();
+  }
+
+  @Override
   public void insert(ProductEntity productEntity) {
     JpaProductEntity jpaProductEntity = JpaProductEntityMapper.toJpaProductEntity(productEntity);
     jpaProductRepository.save(jpaProductEntity);
@@ -68,9 +73,16 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
   }
 
   @Override
+  public void insertBatch(List<ProductEntity> productEntities) {
+    List<JpaProductEntity> jpaProductEntities = ObjectMapperUtil.getInstance()
+        .mapList(productEntities, JpaProductEntityMapper::toJpaProductEntity);
+    jpaProductRepository.saveAll(jpaProductEntities);
+  }
+
+  @Override
   public void update(ProductEntity productEntity) {
     JpaProductEntity jpaProductEntity = jpaProductRepository.findByIdWithAssociations(productEntity.getId())
-            .orElseThrow(() -> new DomainException(AppError.PRODUCT_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(AppError.PRODUCT_NOT_FOUND));
     JpaProductEntityMapper.merge(productEntity, jpaProductEntity);
     jpaProductRepository.save(jpaProductEntity);
   }
@@ -107,13 +119,6 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
       jpaOptimisticProductEntity.setQuantity(jpaOptimisticProductEntity.getQuantity() - decrement);
       jpaOptimisticProductRepository.save(jpaOptimisticProductEntity);
     }, OptimisticLockingFailureException.class);
-  }
-
-  @Override
-  public void insertBatch(List<ProductEntity> productEntities) {
-    List<JpaProductEntity> jpaProductEntities = ObjectMapperUtil.getInstance()
-        .mapList(productEntities, JpaProductEntityMapper::toJpaProductEntity);
-    jpaProductRepository.saveAll(jpaProductEntities);
   }
 
   @Override

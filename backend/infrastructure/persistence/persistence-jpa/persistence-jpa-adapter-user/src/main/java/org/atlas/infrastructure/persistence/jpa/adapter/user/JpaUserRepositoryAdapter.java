@@ -71,6 +71,11 @@ public class JpaUserRepositoryAdapter implements UserRepository {
   }
 
   @Override
+  public Long countAll() {
+    return jpaUserRepository.count();
+  }
+
+  @Override
   public void insert(UserEntity userEntity) {
     JpaUserEntity jpaUserEntity = ObjectMapperUtil.getInstance()
         .map(userEntity, JpaUserEntity.class);

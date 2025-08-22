@@ -2,6 +2,7 @@ package org.atlas.infrastructure.api.server.rest.adapter.product.admin.controlle
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -52,8 +53,9 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("api/admin/products")
 @Validated
+@Tag(name = "Admin product management", description = "Admin product management")
 @RequiredArgsConstructor
-public class AdminProductController {
+public class AdminProductManagementController {
 
   private final AdminListProductUseCaseHandler adminListProductUseCaseHandler;
   private final AdminGetProductUseCaseHandler adminGetProductUseCaseHandler;

@@ -21,5 +21,7 @@ public interface UserRepository {
 
   Optional<UserEntity> findByPhoneNumber(String phoneNumber);
 
+  Long countAll();
+
   void insert(UserEntity userEntity);
 }

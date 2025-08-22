@@ -38,6 +38,10 @@ export class UserService extends BaseService {
 
     return this.get<User[]>(`/admin/users?${queryParams.toString()}`);
   }
+
+  async countUsers(): Promise<ApiResponse<number>> {
+    return this.get<number>("/admin/users/statistics/count");
+  }
 }
 
 export const userService = new UserService();

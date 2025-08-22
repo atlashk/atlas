@@ -10,6 +10,7 @@ import org.atlas.framework.storage.StoragePort;
 import org.atlas.framework.storage.model.DeleteFileRequest;
 import org.atlas.framework.storage.model.GetFileRequest;
 import org.atlas.framework.storage.model.UploadFileRequest;
+import org.atlas.framework.util.ArrayUtil;
 import org.atlas.framework.util.ImageUtil;
 import org.atlas.framework.util.StringUtil;
 
@@ -39,6 +40,9 @@ public class ProductImageService {
     GetFileRequest storageRequest = new GetFileRequest(bucket, objectKey);
     try {
       byte[] fileContent = storagePort.getFile(storageRequest);
+      if (ArrayUtil.isEmpty(fileContent)) {
+        return StringUtil.EMPTY;
+      }
       return ImageUtil.toBase64(fileContent);
     } catch (IOException e) {
       return StringUtil.EMPTY;

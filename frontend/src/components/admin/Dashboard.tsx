@@ -1,75 +1,151 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  DollarSign,
-  Users,
-  ShoppingCart,
-  Activity,
-} from "lucide-react";
+import { DollarSign, Users, ShoppingCart, Activity } from "lucide-react";
+import { userService } from "@/services/api/user.service";
+import { productService } from "@/services/api/product.service";
+import { orderService } from "@/services/api/order.service";
+
+interface StatisticsData {
+  totalUsers: number;
+  totalProducts: number;
+  totalOrders: number;
+  totalRevenue: number;
+}
 
 const Dashboard: React.FC = () => {
+  const [statistics, setStatistics] = useState<StatisticsData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const isLoadingRef = useRef(false);
+
+  useEffect(() => {
+    const loadStatistics = async () => {
+      // Prevent duplicate calls
+      if (isLoadingRef.current) {
+        return;
+      }
+      
+      try {
+        isLoadingRef.current = true;
+        setLoading(true);
+        
+        const [
+          usersResponse,
+          productsResponse,
+          ordersResponse,
+          revenueResponse,
+        ] = await Promise.all([
+          userService.countUsers(),
+          productService.countProducts(),
+          orderService.countOrders(),
+          orderService.sumConfirmedOrderAmount(),
+        ]);
+
+        setStatistics({
+          totalUsers: usersResponse.data || 0,
+          totalProducts: productsResponse.data || 0,
+          totalOrders: ordersResponse.data || 0,
+          totalRevenue: revenueResponse.data || 0,
+        });
+        setError(null);
+      } catch (err) {
+        setError("Failed to load statistics");
+      } finally {
+        setLoading(false);
+        isLoadingRef.current = false;
+      }
+    };
+
+    loadStatistics();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Loading...
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">--</div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="text-red-500">Error: {error}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Revenue
-            </CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$45,231.89</div>
-            <p className="text-xs text-muted-foreground">
-              +20.1% from last month
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Subscriptions
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+2350</div>
-            <p className="text-xs text-muted-foreground">
-              +180.1% from last month
-            </p>
+            <div className="text-2xl font-bold">
+              {statistics?.totalUsers?.toLocaleString() || "0"}
+            </div>
+            <p className="text-xs text-muted-foreground">Registered users</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Sales
+              Total Products
             </CardTitle>
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+12,234</div>
-            <p className="text-xs text-muted-foreground">
-              +19% from last month
-            </p>
+            <div className="text-2xl font-bold">
+              {statistics?.totalProducts?.toLocaleString() || "0"}
+            </div>
+            <p className="text-xs text-muted-foreground">Available products</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Active Now
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+573</div>
+            <div className="text-2xl font-bold">
+              {statistics?.totalOrders?.toLocaleString() || "0"}
+            </div>
+            <p className="text-xs text-muted-foreground">All orders placed</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              ${statistics?.totalRevenue?.toLocaleString() || "0"}
+            </div>
             <p className="text-xs text-muted-foreground">
-              +201 since last hour
+              From confirmed orders
             </p>
           </CardContent>
         </Card>

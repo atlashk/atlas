@@ -2,6 +2,8 @@ package org.atlas.infrastructure.api.server.rest.adapter.user.admin.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.user.entity.UserEntity;
@@ -24,8 +26,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("api/admin/users")
 @Validated
+@Tag(name = "Admin user management", description = "Admin user management")
 @RequiredArgsConstructor
-public class AdminUserController {
+public class AdminUserManagementController {
 
   private final AdminListUserUseCaseHandler adminListUserUseCaseHandler;
 

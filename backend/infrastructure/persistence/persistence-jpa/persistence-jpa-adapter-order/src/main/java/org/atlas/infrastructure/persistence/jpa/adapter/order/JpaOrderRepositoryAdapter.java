@@ -1,11 +1,13 @@
 package org.atlas.infrastructure.persistence.jpa.adapter.order;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.order.entity.OrderEntity;
 import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.repository.criteria.FindOrderCriteria;
+import org.atlas.domain.order.shared.enums.OrderStatus;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
@@ -42,6 +44,16 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
   public Optional<OrderEntity> findById(Integer id) {
     return jpaOrderRepository.findByIdAndFetch(id)
         .map(JpaOrderEntityMapper::toOrderEntity);
+  }
+
+  @Override
+  public Long countAll() {
+    return jpaOrderRepository.count();
+  }
+
+  @Override
+  public BigDecimal sumAmountByStatus(OrderStatus status) {
+    return jpaOrderRepository.sumAmountByStatus(status);
   }
 
   @Override
