@@ -39,7 +39,6 @@ import {
   type Product,
 } from "@/interfaces/product.interface";
 import { productService } from "@/services";
-import { useUserStore } from "@/stores/user.store";
 import { formatCurrency, getProductStatusBadge } from "@/utils/formatter.util";
 import { getProductImageUrl } from "@/utils/productImage.util";
 import {
@@ -70,7 +69,6 @@ interface ActiveStates {
 
 const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
   const router = useRouter();
-  const { profile } = useUserStore();
 
   // State
   const [activeStates, setActiveStates] = useState<ActiveStates>({
@@ -107,13 +105,6 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     page: 1,
     size: 20,
   });
-
-  // Redirect if not admin
-  useEffect(() => {
-    if (!profile || profile.role !== "ADMIN") {
-      router.push("/login");
-    }
-  }, [profile, router]);
 
   const brandsLoaded = useRef(false);
   const categoriesLoaded = useRef(false);
@@ -287,7 +278,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
         toast.success(
           `Products exported successfully as ${fileType.toUpperCase()}`
         );
-      } catch (error) {
+      } catch {
         toast.error("Failed to export products");
       } finally {
         setIsExporting(false);
@@ -308,7 +299,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
   // Load initial data
   useEffect(() => {    
     const loadInitialData = async () => {
-      if (hasInitialLoad.current || isInitializing.current || !profile || profile.role !== "ADMIN") {
+      if (hasInitialLoad.current || isInitializing.current) {
         return;
       }
 
@@ -324,11 +315,8 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     };
 
     loadInitialData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array to run only once
-
-  if (!profile || profile.role !== "ADMIN") {
-    return null;
-  }
 
   return (
     <div className={`space-y-6 ${className}`}>

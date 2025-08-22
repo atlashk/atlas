@@ -122,7 +122,7 @@ const ImportProductModal: React.FC<ImportProductModalProps> = ({
       toast.success("Products imported successfully!");
       onImportSuccess();
       handleClose();
-    } catch (error) {
+    } catch {
       toast.error("Failed to import products. Please try again.");
     } finally {
       setIsImporting(false);

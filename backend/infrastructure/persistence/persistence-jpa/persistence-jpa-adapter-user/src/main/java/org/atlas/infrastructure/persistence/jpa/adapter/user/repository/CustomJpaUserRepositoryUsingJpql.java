@@ -67,6 +67,16 @@ public class CustomJpaUserRepositoryUsingJpql implements CustomJpaUserRepository
     return countQuery.getSingleResult();
   }
 
+  private String buildWhereClause(FindUserCriteria criteria, Map<String, Object> params) {
+    StringBuilder whereClauseBuilder = new StringBuilder("where 1=1 ");
+
+    if (criteria.getId() != null) {
+      whereClauseBuilder.append(" and u.id = :id ");
+      params.put("id", criteria.getId());
+    }
+
+    if (StringUtil.isNotBlank(criteria.getKeyword())) {
+      whereClauseBuilder.append("""
           and (
             lower(u.username) like :keyword
             or lower(u.firstName) like :keyword

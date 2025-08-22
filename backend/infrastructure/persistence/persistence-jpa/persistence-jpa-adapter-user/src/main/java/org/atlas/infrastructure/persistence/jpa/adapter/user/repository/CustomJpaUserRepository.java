@@ -10,3 +10,4 @@ public interface CustomJpaUserRepository {
   List<JpaUserEntity> findByCriteria(FindUserCriteria criteria, PagingRequest pagingRequest);
 
   long countByCriteria(FindUserCriteria criteria);
+}

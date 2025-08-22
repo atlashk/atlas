@@ -29,7 +29,7 @@ import {
   UpdateProductRequest,
 } from "@/interfaces/product.interface";
 import { productService } from "@/services";
-import { useUserStore } from "@/stores/user.store";
+import { withRequireAdmin } from "@/hoc/withAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -65,11 +65,10 @@ const productSchema = z.object({
 
 type ProductFormData = z.infer<typeof productSchema>;
 
-export default function AdminProductEditPage() {
+function AdminProductEditPage() {
   const router = useRouter();
   const params = useParams();
   const productId = parseInt(params.id as string, 10);
-  const { profile } = useUserStore();
   const [brands, setBrands] = useState<Brand[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingBrands, setIsLoadingBrands] = useState(true);
@@ -77,7 +76,6 @@ export default function AdminProductEditPage() {
   const [isLoadingProduct, setIsLoadingProduct] = useState(true);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
-  const hasAuthChecked = useRef(false);
   const hasLoadedData = useRef(false);
 
   const form = useForm<ProductFormData>({
@@ -105,18 +103,9 @@ export default function AdminProductEditPage() {
   });
 
   useEffect(() => {
-    const initializeComponent = async () => {
-      // Check authentication only once
-      if (!hasAuthChecked.current) {
-        if (!profile || profile.role !== "ADMIN") {
-          router.push("/login");
-          return;
-        }
-        hasAuthChecked.current = true;
-      }
-
+    const loadData = async () => {
       // Load data only once
-      if (hasLoadedData.current || !productId || !profile || profile.role !== "ADMIN") {
+      if (hasLoadedData.current || !productId) {
         return;
       }
       
@@ -173,7 +162,7 @@ export default function AdminProductEditPage() {
           toast.error("Product not found");
           router.push("/admin/product");
         }
-      } catch (error) {
+      } catch {
         toast.error("Failed to load product data");
         router.push("/admin/product");
       } finally {
@@ -183,8 +172,8 @@ export default function AdminProductEditPage() {
       }
     };
 
-    initializeComponent();
-  }, [productId, form, replace, router, profile]);
+    loadData();
+  }, [productId, form, replace, router]);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -212,8 +201,8 @@ export default function AdminProductEditPage() {
       // Filter out empty attributes
       const filteredAttributes = data.attributes
         .filter((attr) => attr.name.trim() && attr.value.trim())
-        .map((attr, index) => ({
-          id: attr.id || 0, // Use existing ID or 0 for new attributes
+        .map((attr) => ({
+          id: attr.id || undefined, // Use existing ID or 0 for new attributes
           name: attr.name,
           value: attr.value,
         }));
@@ -232,7 +221,7 @@ export default function AdminProductEditPage() {
       } else {
         toast.error(response.errorMessage || "Failed to update product");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to update product");
     }
   };
@@ -266,7 +255,7 @@ export default function AdminProductEditPage() {
               Product Not Found
             </h1>
             <p className="text-gray-600 mb-4">
-              The product you're looking for doesn't exist.
+              The product you&apos;re looking for doesn&apos;t exist.
             </p>
             <Button onClick={() => router.push("/admin/product")}>
               Back to Products
@@ -659,3 +648,5 @@ export default function AdminProductEditPage() {
     </AdminLayout>
   );
 }
+
+export default withRequireAdmin(AdminProductEditPage);

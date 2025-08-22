@@ -75,7 +75,7 @@ const ProductSearch: React.FC = () => {
       if (response.success) {
         setBrands(response.data || []);
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to load brands");
     } finally {
       setIsLoadingBrands(false);
@@ -89,7 +89,7 @@ const ProductSearch: React.FC = () => {
       if (response.success) {
         setCategories(response.data || []);
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to load categories");
     } finally {
       setIsLoadingCategories(false);
@@ -117,7 +117,7 @@ const ProductSearch: React.FC = () => {
         } else {
           toast.error(response.errorMessage || "Failed to load products");
         }
-      } catch (error) {
+      } catch {
         toast.error("Failed to load products");
       } finally {
         setIsLoadingProducts(false);
@@ -156,7 +156,7 @@ const ProductSearch: React.FC = () => {
       } else {
         toast.error(response.errorMessage || "Failed to load product details");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to load product details");
     } finally {
       setIsLoadingProduct(false);
@@ -194,6 +194,7 @@ const ProductSearch: React.FC = () => {
       await Promise.all([loadBrands(), loadCategories(), applyFilters(1)]);
     };
     initializeData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array - only run once on mount
 
   return (

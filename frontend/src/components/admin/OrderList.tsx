@@ -110,6 +110,7 @@ const OrderList: React.FC = () => {
         setIsLoadingOrders(false);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [] // Remove filters dependency to prevent infinite loop
   );
 

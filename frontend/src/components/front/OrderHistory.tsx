@@ -81,13 +81,13 @@ const OrderHistory: React.FC = () => {
         } else {
           toast.error(response.errorMessage || "Failed to load orders");
         }
-      } catch (error) {
+      } catch {
         toast.error("Failed to load orders");
       } finally {
         setIsLoading(false);
       }
     },
-    [isLoading]
+    [isLoading, filters]
   );
 
   const changePage = (newPage: number) => {

@@ -28,7 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Metadata } from "@/interfaces";
+import { Metadata, ROLES } from "@/interfaces";
 import type { ListUserFilters, User } from "@/interfaces/user.interface";
 import { userService } from "@/services";
 import { Loader2, RotateCcw, Search } from "lucide-react";
@@ -42,7 +42,7 @@ const UserList: React.FC = () => {
   const [filters, setFilters] = useState<ListUserFilters>({
     id: undefined,
     keyword: undefined,
-    role: "",
+    role: undefined,
     page: 1,
     size: 20,
   });
@@ -52,9 +52,6 @@ const UserList: React.FC = () => {
     totalPages: 1,
     totalRecords: 0,
   });
-
-  // Available roles for dropdown
-  const availableRoles: string[] = ["ADMIN", "USER"];
 
   const applyFilters = useCallback(
     async (page: number, currentFilters?: ListUserFilters) => {
@@ -110,7 +107,7 @@ const UserList: React.FC = () => {
     const resetFiltersData: ListUserFilters = {
       id: undefined,
       keyword: undefined,
-      role: "",
+      role: undefined,
       page: 1,
       size: 20,
     };
@@ -134,6 +131,7 @@ const UserList: React.FC = () => {
     if (!hasInitialLoad) {
       applyFilters(1);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -181,7 +179,7 @@ const UserList: React.FC = () => {
                   <SelectValue placeholder="All Roles" />
                 </SelectTrigger>
                 <SelectContent>
-                  {availableRoles.map((role) => (
+                  {ROLES.map((role) => (
                     <SelectItem key={role} value={role}>
                       {role}
                     </SelectItem>

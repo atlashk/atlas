@@ -28,7 +28,7 @@ import {
   PRODUCT_STATUSES,
 } from "@/interfaces/product.interface";
 import { productService } from "@/services";
-import { useUserStore } from "@/stores/user.store";
+import { withRequireAdmin } from "@/hoc/withAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -62,15 +62,13 @@ const productSchema = z.object({
 
 type ProductFormData = z.infer<typeof productSchema>;
 
-export default function AdminProductAddPage() {
+function AdminProductAddPage() {
   const router = useRouter();
-  const { accessToken, profile } = useUserStore();
   const [brands, setBrands] = useState<Brand[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingBrands, setIsLoadingBrands] = useState(true);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [hasLoadedData, setHasLoadedData] = useState(false);
   const hasLoadedDataRef = useRef(false);
 
   const form = useForm<ProductFormData>({
@@ -97,18 +95,10 @@ export default function AdminProductAddPage() {
     name: "attributes",
   });
 
-  // Single effect to handle both authentication and data loading
+  // Load data only once
   useEffect(() => {
-    // Check authentication
-    if (!accessToken || profile?.role !== "ADMIN") {
-      router.push("/login");
-      return;
-    }
-
-    // Load data only once
     if (hasLoadedDataRef.current) return;
     hasLoadedDataRef.current = true;
-    setHasLoadedData(true);
 
     const loadData = async () => {
       try {
@@ -123,7 +113,7 @@ export default function AdminProductAddPage() {
         if (categoriesResponse.success) {
           setCategories(categoriesResponse.data);
         }
-      } catch (error) {
+      } catch {
         toast.error("Failed to load form data");
       } finally {
         setIsLoadingBrands(false);
@@ -132,7 +122,7 @@ export default function AdminProductAddPage() {
     };
 
     loadData();
-  }, [accessToken, profile?.role, router]);
+  }, []);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -176,7 +166,7 @@ export default function AdminProductAddPage() {
       } else {
         toast.error(response.errorMessage || "Failed to create product");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to create product");
     }
   };
@@ -427,7 +417,7 @@ export default function AdminProductAddPage() {
                 <FormField
                   control={form.control}
                   name="image"
-                  render={({ field }) => (
+                  render={() => (
                     <FormItem>
                       <FormLabel>Product Image</FormLabel>
                       <FormControl>
@@ -558,7 +548,9 @@ export default function AdminProductAddPage() {
             </div>
           </form>
         </Form>
-      </div>
-    </AdminLayout>
-  );
-}
+  </div>
+      </AdminLayout>
+    );
+  }
+
+export default withRequireAdmin(AdminProductAddPage);

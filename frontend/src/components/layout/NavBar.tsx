@@ -17,23 +17,8 @@ export default function NavBar() {
   }, []);
 
   const getBrandHref = () => {
-    // During hydration, check if we have admin tokens to determine initial route
+    // Always return default during hydration to prevent mismatch
     if (!isHydrated) {
-      // Check localStorage directly during hydration to prevent mismatch
-      if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('accessToken');
-        const storedProfile = localStorage.getItem('user-store');
-        if (token && storedProfile) {
-          try {
-            const parsed = JSON.parse(storedProfile);
-            if (parsed.state?.profile?.role === 'ADMIN') {
-              return "/admin/dashboard";
-            }
-          } catch (e) {
-            // Fallback if parsing fails
-          }
-        }
-      }
       return "/";
     }
 
@@ -47,23 +32,8 @@ export default function NavBar() {
   };
 
   const getBrandName = () => {
-    // During hydration, check if we have tokens to determine initial state
+    // Always return default during hydration to prevent mismatch
     if (!isHydrated) {
-      // Check localStorage directly during hydration to prevent mismatch
-      if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('accessToken');
-        const storedProfile = localStorage.getItem('user-store');
-        if (token && storedProfile) {
-          try {
-            const parsed = JSON.parse(storedProfile);
-            if (parsed.state?.profile?.role === 'ADMIN') {
-              return "Atlas Admin";
-            }
-          } catch (e) {
-            // Fallback if parsing fails
-          }
-        }
-      }
       return "Admin Store";
     }
 

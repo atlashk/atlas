@@ -6,43 +6,27 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Product } from "@/interfaces/product.interface";
 import { productService } from "@/services";
-import { useUserStore } from "@/stores/user.store";
+import { withRequireAdmin } from "@/hoc/withAuth";
 import { getProductStatusBadge } from "@/utils/formatter.util";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-export default function AdminProductDetailsPage() {
+function AdminProductDetailsPage() {
   const router = useRouter();
   const params = useParams();
-  const { profile } = useUserStore();
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
-  const hasAuthChecked = useRef(false);
   const hasLoadedData = useRef(false);
 
   const productId = parseInt(params.id as string, 10);
 
   useEffect(() => {
-    const initializeComponent = async () => {
-      // Check authentication only once
-      if (!hasAuthChecked.current) {
-        if (!profile || profile.role !== "ADMIN") {
-          router.push("/login");
-          return;
-        }
-        hasAuthChecked.current = true;
-      }
-
+    const loadProductData = async () => {
       // Load product data only once
-      if (
-        productId &&
-        profile &&
-        profile.role === "ADMIN" &&
-        !hasLoadedData.current
-      ) {
+      if (productId && !hasLoadedData.current) {
         hasLoadedData.current = true;
         try {
           const response = await productService.adminGetProduct(productId);
@@ -52,7 +36,7 @@ export default function AdminProductDetailsPage() {
             toast.error(response.errorMessage || "Failed to load product");
             router.push("/admin/product");
           }
-        } catch (error) {
+        } catch {
           toast.error("Failed to load product");
           router.push("/admin/product");
         } finally {
@@ -61,8 +45,8 @@ export default function AdminProductDetailsPage() {
       }
     };
 
-    initializeComponent();
-  }, [productId, router, profile]);
+    loadProductData();
+  }, [productId, router]);
 
   const handleEdit = () => {
     router.push(`/admin/product/${productId}/edit`);
@@ -81,7 +65,7 @@ export default function AdminProductDetailsPage() {
         } else {
           toast.error(response.errorMessage || "Failed to delete product");
         }
-      } catch (error) {
+      } catch {
         toast.error("Failed to delete product");
       } finally {
         setIsDeleting(false);
@@ -265,3 +249,5 @@ export default function AdminProductDetailsPage() {
     </AdminLayout>
   );
 }
+
+export default withRequireAdmin(AdminProductDetailsPage);

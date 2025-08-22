@@ -50,7 +50,7 @@ const Dashboard: React.FC = () => {
           totalRevenue: revenueResponse.data || 0,
         });
         setError(null);
-      } catch (err) {
+      } catch {
         setError("Failed to load statistics");
       } finally {
         setLoading(false);

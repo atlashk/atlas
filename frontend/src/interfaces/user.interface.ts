@@ -1,3 +1,10 @@
+export const ROLES = [
+  "ADMIN",
+  "USER"
+] as const;
+
+export type Role = typeof ROLES[number];
+
 export interface User {
   id: number;
   username: string;
@@ -5,13 +12,13 @@ export interface User {
   lastName: string;
   email: string;
   phoneNumber: string;
-  role: string;
+  role: Role;
 }
 
 export interface ListUserFilters {
   id?: string;
   keyword?: string;
-  role?: string;
+  role?: Role;
   page: number;
   size: number;
 }

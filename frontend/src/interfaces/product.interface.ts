@@ -31,7 +31,7 @@ export interface ProductDetails {
 }
 
 export interface ProductAttribute {
-  id: number;
+  id?: number;
   name: string;
   value: string;
 }
