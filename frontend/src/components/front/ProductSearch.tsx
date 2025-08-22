@@ -4,7 +4,7 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
-  CardTitle
+  CardTitle,
 } from "@/components/ui/card";
 import {
   Pagination,
@@ -21,7 +21,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Brand, Category, Product, SearchProductFilters } from "@/interfaces";
+import {
+  Brand,
+  Category,
+  Metadata,
+  Product,
+  SearchProductFilters,
+} from "@/interfaces";
 import { productService } from "@/services";
 import { useCartStore } from "@/stores";
 import { formatCurrency } from "@/utils/formatter.util";
@@ -31,13 +37,6 @@ import Image from "next/image";
 import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import ProductDetailsModal from "./ProductDetailsModal";
-
-interface Metadata {
-  currentPage: number;
-  pageSize: number;
-  totalPages: number;
-  totalRecords: number;
-}
 
 const ProductSearch: React.FC = () => {
   const { addToCart } = useCartStore();
@@ -209,206 +208,237 @@ const ProductSearch: React.FC = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
-        <div className="space-y-6">
-          {/* Search Input */}
-          <div>
-            <label
-              htmlFor="keyword"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Product Keyword
-            </label>
-            <input
-              id="keyword"
-              type="text"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Product name, description, attributes, etc."
-              value={filters.keyword || ""}
-              onChange={(e) =>
-                handleFilterChange(
-                  "keyword",
-                  e.target.value.trim() || undefined
-                )
-              }
-            />
-          </div>
-
-          {/* Price Range */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Price Range
-            </label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <input
-                  type="number"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Min Price"
-                  min="0"
-                  step="0.01"
-                  value={filters.minPrice || ""}
-                  onChange={(e) =>
-                    handleFilterChange(
-                      "minPrice",
-                      e.target.value ? parseFloat(e.target.value) : undefined
-                    )
-                  }
-                />
-              </div>
-              <div>
-                <input
-                  type="number"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Max Price"
-                  min="0"
-                  step="0.01"
-                  value={filters.maxPrice || ""}
-                  onChange={(e) =>
-                    handleFilterChange(
-                      "maxPrice",
-                      e.target.value ? parseFloat(e.target.value) : undefined
-                    )
-                  }
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Brand and Category Filters */}
-          <div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-6">
+              {/* Search Input */}
               <div>
                 <label
-                  htmlFor="brandId"
+                  htmlFor="keyword"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Brand
+                  Product Keyword
                 </label>
-                {isLoadingBrands ? (
-                  <div className="flex justify-center py-3" aria-live="polite">
-                    <div
-                      className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"
-                      role="status"
-                      aria-label="Loading brands"
-                    >
-                      <span className="sr-only">Loading...</span>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <Select
-                      disabled={!brands.length}
-                      value={filters.brandId ? filters.brandId.toString() : "all"}
-                      onValueChange={(value) =>
+                <input
+                  id="keyword"
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Product name, description, attributes, etc."
+                  value={filters.keyword || ""}
+                  onChange={(e) =>
+                    handleFilterChange(
+                      "keyword",
+                      e.target.value.trim() || undefined
+                    )
+                  }
+                />
+              </div>
+
+              {/* Price Range */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Price Range
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <input
+                      type="number"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Min Price"
+                      min="0"
+                      step="0.01"
+                      value={filters.minPrice || ""}
+                      onChange={(e) =>
                         handleFilterChange(
-                          "brandId",
-                          value || undefined
+                          "minPrice",
+                          e.target.value
+                            ? parseFloat(e.target.value)
+                            : undefined
                         )
                       }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="All Brands" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Brands</SelectItem>
-                        {brands.map((brand) => (
-                          <SelectItem key={brand.id} value={brand.id.toString()}>
-                            {brand.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {!brands.length && (
-                      <div className="text-gray-500 text-sm mt-1">
-                        No brands available
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-              <div>
-                <label
-                  htmlFor="categoryIds"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Categories
-                </label>
-                {isLoadingCategories ? (
-                  <div className="flex justify-center py-3" aria-live="polite">
-                    <div
-                      className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"
-                      role="status"
-                      aria-label="Loading categories"
-                    >
-                      <span className="sr-only">Loading...</span>
-                    </div>
+                    />
                   </div>
-                ) : (
-                  <>
-                    <Select
-                      disabled={!categories.length}
-                      value="placeholder"
-                      onValueChange={() => {}}
+                  <div>
+                    <input
+                      type="number"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Max Price"
+                      min="0"
+                      step="0.01"
+                      value={filters.maxPrice || ""}
+                      onChange={(e) =>
+                        handleFilterChange(
+                          "maxPrice",
+                          e.target.value
+                            ? parseFloat(e.target.value)
+                            : undefined
+                        )
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Brand and Category Filters */}
+              <div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label
+                      htmlFor="brandId"
+                      className="block text-sm font-medium text-gray-700 mb-2"
                     >
-                      <SelectTrigger>
-                        <SelectValue>
-                          {filters.categoryIds && filters.categoryIds.length > 0
-                            ? `${filters.categoryIds.length} categories selected`
-                            : "All Categories"}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <div className="p-2 space-y-2">
-                          {categories.map((category) => (
-                            <label key={category.id} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
-                              <input
-                                type="checkbox"
-                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                checked={filters.categoryIds?.includes(category.id) || false}
-                                onChange={(e) => {
-                                  const currentCategories = filters.categoryIds || [];
-                                  if (e.target.checked) {
-                                    handleFilterChange("categoryIds", [...currentCategories, category.id]);
-                                  } else {
-                                    handleFilterChange("categoryIds", currentCategories.filter(id => id !== category.id));
-                                  }
-                                }}
-                              />
-                              <span className="text-sm">{category.name}</span>
-                            </label>
-                          ))}
+                      Brand
+                    </label>
+                    {isLoadingBrands ? (
+                      <div
+                        className="flex justify-center py-3"
+                        aria-live="polite"
+                      >
+                        <div
+                          className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"
+                          role="status"
+                          aria-label="Loading brands"
+                        >
+                          <span className="sr-only">Loading...</span>
                         </div>
-                      </SelectContent>
-                    </Select>
-                    {!categories.length && (
-                      <div className="text-gray-500 text-sm mt-1">
-                        No categories available
                       </div>
+                    ) : (
+                      <>
+                        <Select
+                          disabled={!brands.length}
+                          value={
+                            filters.brandId ? filters.brandId.toString() : "all"
+                          }
+                          onValueChange={(value) =>
+                            handleFilterChange("brandId", value || undefined)
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="All Brands" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Brands</SelectItem>
+                            {brands.map((brand) => (
+                              <SelectItem
+                                key={brand.id}
+                                value={brand.id.toString()}
+                              >
+                                {brand.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {!brands.length && (
+                          <div className="text-gray-500 text-sm mt-1">
+                            No brands available
+                          </div>
+                        )}
+                      </>
                     )}
-                  </>
-                )}
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="categoryIds"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
+                      Categories
+                    </label>
+                    {isLoadingCategories ? (
+                      <div
+                        className="flex justify-center py-3"
+                        aria-live="polite"
+                      >
+                        <div
+                          className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"
+                          role="status"
+                          aria-label="Loading categories"
+                        >
+                          <span className="sr-only">Loading...</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <Select
+                          disabled={!categories.length}
+                          value="placeholder"
+                          onValueChange={() => {}}
+                        >
+                          <SelectTrigger>
+                            <SelectValue>
+                              {filters.categoryIds &&
+                              filters.categoryIds.length > 0
+                                ? `${filters.categoryIds.length} categories selected`
+                                : "All Categories"}
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            <div className="p-2 space-y-2">
+                              {categories.map((category) => (
+                                <label
+                                  key={category.id}
+                                  className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    checked={
+                                      filters.categoryIds?.includes(
+                                        category.id
+                                      ) || false
+                                    }
+                                    onChange={(e) => {
+                                      const currentCategories =
+                                        filters.categoryIds || [];
+                                      if (e.target.checked) {
+                                        handleFilterChange("categoryIds", [
+                                          ...currentCategories,
+                                          category.id,
+                                        ]);
+                                      } else {
+                                        handleFilterChange(
+                                          "categoryIds",
+                                          currentCategories.filter(
+                                            (id) => id !== category.id
+                                          )
+                                        );
+                                      }
+                                    }}
+                                  />
+                                  <span className="text-sm">
+                                    {category.name}
+                                  </span>
+                                </label>
+                              ))}
+                            </div>
+                          </SelectContent>
+                        </Select>
+                        {!categories.length && (
+                          <div className="text-gray-500 text-sm mt-1">
+                            No categories available
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div className="flex gap-3">
+                <Button type="submit" className="px-4 flex items-center gap-2">
+                  <Search className="h-4 w-4" />
+                  Search
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={resetFilters}
+                  className="px-4 flex items-center gap-2"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  Reset
+                </Button>
               </div>
             </div>
-          </div>
-
-          {/* Submit Button */}
-          <div className="flex gap-3">
-            <Button type="submit" className="px-4 flex items-center gap-2">
-              <Search className="h-4 w-4" />
-              Search
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={resetFilters}
-              className="px-4 flex items-center gap-2"
-            >
-              <RotateCcw className="h-4 w-4" />
-              Reset
-            </Button>
-          </div>
-        </div>
-      </form>
+          </form>
         </CardContent>
       </Card>
 

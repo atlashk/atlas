@@ -35,19 +35,19 @@ public class FrontProductController {
   @Operation(summary = "Search for products based on various filters.")
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   public ApiResponseWrapper<List<ProductResponse>> searchProduct(
-      @Parameter(description = "Keyword for searching products.", example = "T-Shirt")
+      @Parameter(name = "keyword", description = "Keyword for searching products.", example = "T-Shirt")
       @RequestParam(name = "keyword", required = false) String keyword,
-      @Parameter(description = "Minimum price for filtering products.", example = "10.00")
-      @RequestParam(name = "min_price", required = false) BigDecimal minPrice,
-      @Parameter(description = "Maximum price for filtering products.", example = "100.00")
-      @RequestParam(name = "max_price", required = false) BigDecimal maxPrice,
-      @Parameter(description = "Brand ID for filtering products.", example = "1")
-      @RequestParam(name = "brand_id", required = false) Integer brandId,
-      @Parameter(description = "List of category IDs for filtering products.", example = "[1, 2, 3]")
-      @RequestParam(name = "category_ids", required = false) List<Integer> categoryIds,
-      @Parameter(description = "Page number for pagination.", example = "1")
+      @Parameter(name = "minPrice", description = "Minimum price for filtering products.", example = "10.00")
+      @RequestParam(name = "minPrice", required = false) BigDecimal minPrice,
+      @Parameter(name = "maxPrice", description = "Maximum price for filtering products.", example = "100.00")
+      @RequestParam(name = "maxPrice", required = false) BigDecimal maxPrice,
+      @Parameter(name = "brandId", description = "Brand ID for filtering products.", example = "1")
+      @RequestParam(name = "brandId", required = false) Integer brandId,
+      @Parameter(name = "categoryIds", description = "List of category IDs for filtering products.", example = "[1, 2, 3]")
+      @RequestParam(name = "categoryIds", required = false) List<Integer> categoryIds,
+      @Parameter(name = "page", description = "Page number for pagination.", example = "1")
       @RequestParam(name = "page", required = false, defaultValue = "1") Integer page,
-      @Parameter(description = "Number of items per page.", example = "20")
+      @Parameter(name = "size", description = "Number of items per page.", example = "20")
       @RequestParam(name = "size", required = false, defaultValue = CommonConstant.DEFAULT_PAGE_SIZE_STR) Integer size
   ) throws Exception {
     FrontSearchProductInput input = FrontSearchProductInput.builder()

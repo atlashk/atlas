@@ -6,7 +6,7 @@ export interface ApiResponse<T> {
   errorMessage?: string;
 }
 
-interface Metadata {
+export interface Metadata {
   currentPage: number;
   pageSize: number;
   totalPages: number;

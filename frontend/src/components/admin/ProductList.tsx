@@ -28,9 +28,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Metadata } from "@/interfaces";
 import {
   FileType,
-  ProductStatus,
+  PRODUCT_STATUSES,
   type Brand,
   type Category,
   type ExportProductFilters,
@@ -59,13 +60,6 @@ import ImportProductModal from "./ImportProductModal";
 
 interface ProductListProps {
   className?: string;
-}
-
-interface Metadata {
-  currentPage: number;
-  pageSize: number;
-  totalPages: number;
-  totalRecords: number;
 }
 
 interface ActiveStates {
@@ -103,7 +97,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     keyword: undefined,
     minPrice: undefined,
     maxPrice: undefined,
-    status: "" as const,
+    status: undefined,
     availableFrom: undefined,
     isActive: undefined,
     brandId: "",
@@ -118,8 +112,6 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
       router.push("/login");
     }
   }, [profile, router]);
-
-  const productStatuses = Object.values(ProductStatus);
 
   const loadBrands = useCallback(async () => {
     setIsLoadingBrands(true);
@@ -207,13 +199,13 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     [metadata.totalPages, applyFilters]
   );
 
-  const resetFilters = useCallback(() => {
+  const resetFilters = () => {
     const resetFiltersData: ListProductFilters = {
       id: undefined,
       keyword: undefined,
       minPrice: undefined,
       maxPrice: undefined,
-      status: "" as const,
+      status: "",
       availableFrom: undefined,
       isActive: undefined,
       brandId: "",
@@ -224,7 +216,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     setActiveStates({ active: true, inactive: true });
     setFilters(resetFiltersData);
     applyFilters(1, resetFiltersData);
-  }, [applyFilters]);
+  };
 
   const handleFilterChange = (
     field: keyof ListProductFilters,
@@ -425,7 +417,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                   <SelectValue placeholder="All Statuses" />
                 </SelectTrigger>
                 <SelectContent>
-                  {productStatuses.map((status) => (
+                  {PRODUCT_STATUSES.map((status) => (
                     <SelectItem key={status} value={status}>
                       {status}
                     </SelectItem>

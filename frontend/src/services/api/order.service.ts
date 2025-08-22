@@ -16,13 +16,20 @@ export class OrderService extends BaseService {
   // Front operations
   async listOrder(filters: ListOrderFilters): Promise<ApiResponse<Order[]>> {
     const queryParams = new URLSearchParams();
-    if (filters.orderId)
+    if (filters.orderId) {
       queryParams.append("orderId", filters.orderId.toString());
-    if (filters.status) queryParams.append("status", filters.status);
-    if (filters.startDate) queryParams.append("startDate", filters.startDate);
-    if (filters.endDate) queryParams.append("endDate", filters.endDate);
-    queryParams.append("page", filters.page.toString());
-    queryParams.append("size", filters.size.toString());
+    }
+    if (filters.status) {
+      queryParams.append("status", filters.status);
+    }
+    if (filters.startDate) {
+      queryParams.append("startDate", filters.startDate);
+    }
+    if (filters.endDate) {
+      queryParams.append("endDate", filters.endDate);
+    }
+    queryParams.append("page", (filters.page || 1).toString());
+    queryParams.append("size", (filters.size || 20).toString());
 
     return this.get<Order[]>(`/front/orders?${queryParams.toString()}`);
   }
@@ -40,15 +47,25 @@ export class OrderService extends BaseService {
   }
 
   // Admin operations - keeping these as they might be different from front service
-  async listOrdersAdmin(
+  async adminListOrders(
     filters: ListOrderFilters
   ): Promise<ApiResponse<Order[]>> {
     const queryParams = new URLSearchParams();
-    if (filters.status) queryParams.append("status", filters.status);
-    if (filters.userId)
-      queryParams.append("user_id", filters.userId.toString());
-    if (filters.startDate) queryParams.append("start_date", filters.startDate);
-    if (filters.endDate) queryParams.append("end_date", filters.endDate);
+    if (filters.status) {
+      queryParams.append("status", filters.status);
+    }
+    if (filters.userId) {
+      queryParams.append("userId", filters.userId.toString());
+    }
+    if (filters.productId) {
+      queryParams.append("productId", filters.productId.toString());
+    }
+    if (filters.startDate) {
+      queryParams.append("startDate", filters.startDate);
+    }
+    if (filters.endDate) {
+      queryParams.append("endDate", filters.endDate);
+    }
     queryParams.append("page", (filters.page || 1).toString());
     queryParams.append("size", (filters.size || 20).toString());
 

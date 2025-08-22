@@ -47,14 +47,14 @@ public class JpaProductEntity extends JpaBaseEntity {
   @Enumerated(EnumType.STRING)
   private ProductStatus status;
 
-  @Column(name = "available_from")
+  @Column(name = "availableFrom")
   private Date availableFrom;
 
-  @Column(name = "is_active")
+  @Column(name = "isActive")
   private Boolean isActive;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "brand_id")
+  @JoinColumn(name = "brandId")
   private JpaBrandEntity brand;
 
   @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)

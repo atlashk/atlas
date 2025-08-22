@@ -1,18 +1,54 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Metadata } from "@/interfaces";
+import {
+  ORDER_STATUSES,
+  type ListOrderFilters,
+  type Order,
+} from "@/interfaces/order.interface";
 import { orderService } from "@/services";
 import {
   formatCurrency,
   formatDate,
   getOrderStatusBadge,
 } from "@/utils/formatter.util";
-import { toast } from "sonner";
 import {
-  OrderStatus,
-  type ListOrderFilters,
-  type Order,
-} from "@/interfaces/order.interface";
+  ChevronDown,
+  ChevronUp,
+  Loader2,
+  RotateCcw,
+  Search,
+} from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const OrderList: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -21,35 +57,46 @@ const OrderList: React.FC = () => {
   const [filters, setFilters] = useState<ListOrderFilters>({
     orderId: undefined,
     userId: undefined,
-    status: "" as const,
+    productId: undefined,
+    status: undefined,
     startDate: undefined,
     endDate: undefined,
     page: 1,
     size: 20,
   });
-  const [metadata, setMetadata] = useState({
+  const [metadata, setMetadata] = useState<Metadata>({
     currentPage: 1,
     pageSize: 20,
     totalPages: 1,
     totalRecords: 0,
   });
 
-  // Order statuses for dropdown
-  const orderStatuses = Object.values(OrderStatus);
-
   const toggleDetails = (orderId: number) => {
     setSelectedOrderId(selectedOrderId === orderId ? null : orderId);
   };
 
   const applyFilters = useCallback(
-    async (page: number) => {
+    async (page: number, currentFilters?: ListOrderFilters) => {
       setIsLoadingOrders(true);
       try {
-        const updatedFilters = { ...filters, page };
+        const filtersToUse = currentFilters || filters;
+        const updatedFilters = { ...filtersToUse, page };
         setFilters(updatedFilters);
         setMetadata((prev) => ({ ...prev, currentPage: page }));
 
-        const response = await orderService.listOrder(updatedFilters);
+        // Clean filters for API call - remove empty or undefined values
+        const apiFilters: ListOrderFilters = { ...updatedFilters };
+        Object.keys(apiFilters).forEach((key) => {
+          const typedKey = key as keyof ListOrderFilters;
+          if (
+            apiFilters[typedKey] === "" ||
+            apiFilters[typedKey] === undefined
+          ) {
+            delete apiFilters[typedKey];
+          }
+        });
+
+        const response = await orderService.adminListOrders(apiFilters);
 
         setOrders(response.data);
         if (response.metadata) {
@@ -63,7 +110,7 @@ const OrderList: React.FC = () => {
         setIsLoadingOrders(false);
       }
     },
-    [filters]
+    [] // Remove filters dependency to prevent infinite loop
   );
 
   const changePage = (newPage: number) => {
@@ -76,25 +123,26 @@ const OrderList: React.FC = () => {
     const resetFilters: ListOrderFilters = {
       orderId: undefined,
       userId: undefined,
-      status: "" as const,
+      productId: undefined,
+      status: "",
       startDate: undefined,
       endDate: undefined,
       page: 1,
       size: 20,
     };
     setFilters(resetFilters);
-    applyFilters(1);
+    applyFilters(1, resetFilters);
   };
 
   const handleFilterChange = (
     field: keyof ListOrderFilters,
-    value: string | number | boolean | OrderStatus | undefined
+    value: string | number | boolean | undefined
   ) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSearch = () => {
-    applyFilters(1);
+    applyFilters(1, filters);
   };
 
   // Initial load
@@ -103,313 +151,382 @@ const OrderList: React.FC = () => {
   }, [applyFilters]);
 
   return (
-    <div className="container-fluid py-4">
-      <div className="row">
-        <div className="col-12">
-          <div className="card">
-            <div className="card-header">
-              <h5 className="card-title mb-0">
-                <i className="bi bi-cart-check me-2"></i>
-                Order Management
-              </h5>
+    <div className="space-y-6">
+      {/* Filters Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Order Filters</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {/* Row 1: Order ID, User ID, Product ID */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="orderId">Order ID</Label>
+              <Input
+                type="number"
+                id="orderId"
+                placeholder="Enter order ID"
+                value={filters.orderId || ""}
+                onChange={(e) =>
+                  handleFilterChange(
+                    "orderId",
+                    e.target.value ? parseInt(e.target.value) : undefined
+                  )
+                }
+              />
             </div>
-
-            {/* Filters */}
-            <div className="card-body border-bottom">
-              <div className="row g-3">
-                <div className="col-md-2">
-                  <label htmlFor="orderId" className="form-label">
-                    Order ID
-                  </label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    id="orderId"
-                    placeholder="Enter order ID"
-                    value={filters.orderId || ""}
-                    onChange={(e) =>
-                      handleFilterChange(
-                        "orderId",
-                        e.target.value ? parseInt(e.target.value) : undefined
-                      )
-                    }
-                  />
-                </div>
-                <div className="col-md-2">
-                  <label htmlFor="userId" className="form-label">
-                    User ID
-                  </label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    id="userId"
-                    placeholder="Enter user ID"
-                    value={filters.userId || ""}
-                    onChange={(e) =>
-                      handleFilterChange(
-                        "userId",
-                        e.target.value ? parseInt(e.target.value) : undefined
-                      )
-                    }
-                  />
-                </div>
-                <div className="col-md-2">
-                  <label htmlFor="status" className="form-label">
-                    Status
-                  </label>
-                  <select
-                    className="form-select"
-                    id="status"
-                    value={filters.status}
-                    onChange={(e) =>
-                      handleFilterChange("status", e.target.value)
-                    }
-                  >
-                    <option value="">All Statuses</option>
-                    {orderStatuses.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="col-md-2">
-                  <label htmlFor="startDate" className="form-label">
-                    Start Date
-                  </label>
-                  <input
-                    type="date"
-                    className="form-control"
-                    id="startDate"
-                    value={filters.startDate || ""}
-                    onChange={(e) =>
-                      handleFilterChange(
-                        "startDate",
-                        e.target.value || undefined
-                      )
-                    }
-                  />
-                </div>
-                <div className="col-md-2">
-                  <label htmlFor="endDate" className="form-label">
-                    End Date
-                  </label>
-                  <input
-                    type="date"
-                    className="form-control"
-                    id="endDate"
-                    value={filters.endDate || ""}
-                    onChange={(e) =>
-                      handleFilterChange("endDate", e.target.value || undefined)
-                    }
-                  />
-                </div>
-                <div className="col-md-2 d-flex align-items-end">
-                  <div className="btn-group w-100">
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={handleSearch}
-                      disabled={isLoadingOrders}
-                    >
-                      <i className="bi bi-search me-1"></i>
-                      Search
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={resetFilters}
-                      disabled={isLoadingOrders}
-                    >
-                      <i className="bi bi-arrow-clockwise me-1"></i>
-                      Reset
-                    </button>
-                  </div>
-                </div>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="userId">User ID</Label>
+              <Input
+                type="number"
+                id="userId"
+                placeholder="Enter user ID"
+                value={filters.userId || ""}
+                onChange={(e) =>
+                  handleFilterChange(
+                    "userId",
+                    e.target.value ? parseInt(e.target.value) : undefined
+                  )
+                }
+              />
             </div>
-
-            {/* Orders Table */}
-            <div className="table-responsive">
-              {isLoadingOrders ? (
-                <div className="text-center py-5">
-                  <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                  <p className="mt-2 text-muted">Loading orders...</p>
-                </div>
-              ) : (
-                <table className="table table-hover mb-0">
-                  <thead className="table-light">
-                    <tr>
-                      <th scope="col" className="px-4">
-                        ID
-                      </th>
-                      <th scope="col" className="px-4">
-                        Code
-                      </th>
-                      <th scope="col" className="px-4">
-                        User
-                      </th>
-                      <th scope="col" className="px-4">
-                        Amount
-                      </th>
-                      <th scope="col" className="px-4">
-                        Status
-                      </th>
-                      <th scope="col" className="px-4">
-                        Created At
-                      </th>
-                      <th scope="col" className="px-4">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {orders.length === 0 ? (
-                      <tr>
-                        <td colSpan={7} className="text-center py-4 text-muted">
-                          No orders found
-                        </td>
-                      </tr>
-                    ) : (
-                      orders.map((order) => (
-                        <React.Fragment key={order.id}>
-                          <tr>
-                            <td className="px-4">{order.id}</td>
-                            <td className="px-4">{order.code}</td>
-                            <td className="px-4">
-                              {order.user
-                                ? `${order.user.firstName} ${order.user.lastName}`
-                                : "N/A"}
-                            </td>
-                            <td className="px-4">
-                              ${formatCurrency(order.amount)}
-                            </td>
-                            <td className="px-4">
-                              {getOrderStatusBadge(order.status)}
-                            </td>
-                            <td className="px-4">
-                              {formatDate(order.createdAt)}
-                            </td>
-                            <td className="px-4">
-                              <button
-                                className="btn btn-sm btn-outline-secondary"
-                                onClick={() => toggleDetails(order.id)}
-                              >
-                                {selectedOrderId === order.id
-                                  ? "Hide Details"
-                                  : "View Details"}
-                              </button>
-                            </td>
-                          </tr>
-
-                          {/* Order Details */}
-                          {selectedOrderId === order.id && (
-                            <tr>
-                              <td colSpan={7} className="p-0">
-                                <div className="p-4 border-top">
-                                  <h6 className="mb-3">User Information</h6>
-                                  <dl className="row mb-3">
-                                    <dt className="col-sm-3">User ID</dt>
-                                    <dd className="col-sm-9">
-                                      {order.user?.id ?? "N/A"}
-                                    </dd>
-                                    <dt className="col-sm-3">First Name</dt>
-                                    <dd className="col-sm-9">
-                                      {order.user?.firstName ?? "N/A"}
-                                    </dd>
-                                    <dt className="col-sm-3">Last Name</dt>
-                                    <dd className="col-sm-9">
-                                      {order.user?.lastName ?? "N/A"}
-                                    </dd>
-                                  </dl>
-
-                                  {order.cancelReason && (
-                                    <div className="alert alert-danger mb-3">
-                                      <strong>Cancellation Reason:</strong>{" "}
-                                      {order.cancelReason}
-                                    </div>
-                                  )}
-
-                                  <h6 className="mb-3">Order Items</h6>
-                                  <div className="table-responsive">
-                                    <table className="table table-bordered">
-                                      <thead className="table-light">
-                                        <tr>
-                                          <th scope="col">Product ID</th>
-                                          <th scope="col">Product Name</th>
-                                          <th scope="col">Price</th>
-                                          <th scope="col">Quantity</th>
-                                          <th scope="col">Subtotal</th>
-                                        </tr>
-                                      </thead>
-                                      <tbody>
-                                        {order.orderItems?.map((item) => (
-                                          <tr key={item.product.id}>
-                                            <td>{item.product.id}</td>
-                                            <td>{item.product.name}</td>
-                                            <td>
-                                              $
-                                              {formatCurrency(
-                                                item.product.price
-                                              )}
-                                            </td>
-                                            <td>{item.quantity}</td>
-                                            <td>
-                                              $
-                                              {formatCurrency(
-                                                item.product.price *
-                                                  item.quantity
-                                              )}
-                                            </td>
-                                          </tr>
-                                        ))}
-                                      </tbody>
-                                    </table>
-                                  </div>
-                                </div>
-                              </td>
-                            </tr>
-                          )}
-                        </React.Fragment>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              )}
-            </div>
-
-            {/* Pagination */}
-            <div className="card-footer bg-light py-3">
-              <div className="d-flex justify-content-between align-items-center">
-                <span className="text-muted">
-                  Page {metadata.currentPage} of {metadata.totalPages}
-                  <span className="ms-2">
-                    ({metadata.totalRecords} records)
-                  </span>
-                </span>
-                <div className="btn-group">
-                  <button
-                    onClick={() => changePage(metadata.currentPage - 1)}
-                    disabled={metadata.currentPage <= 1}
-                    className="btn btn-outline-secondary px-3"
-                  >
-                    Previous
-                  </button>
-                  <button
-                    onClick={() => changePage(metadata.currentPage + 1)}
-                    disabled={metadata.currentPage >= metadata.totalPages}
-                    className="btn btn-outline-secondary px-3"
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="productId">Product ID</Label>
+              <Input
+                type="number"
+                id="productId"
+                placeholder="Enter product ID"
+                value={filters.productId || ""}
+                onChange={(e) =>
+                  handleFilterChange(
+                    "productId",
+                    e.target.value ? parseInt(e.target.value) : undefined
+                  )
+                }
+              />
             </div>
           </div>
+
+          {/* Row 2: Start Date, End Date, Status */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="startDate">Start Date</Label>
+              <Input
+                type="date"
+                id="startDate"
+                value={filters.startDate || ""}
+                onChange={(e) =>
+                  handleFilterChange("startDate", e.target.value || undefined)
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="endDate">End Date</Label>
+              <Input
+                type="date"
+                id="endDate"
+                value={filters.endDate || ""}
+                onChange={(e) =>
+                  handleFilterChange("endDate", e.target.value || undefined)
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="status">Order Status</Label>
+              <Select
+                value={filters.status || ""}
+                onValueChange={(value) => handleFilterChange("status", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ORDER_STATUSES.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {status}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="flex justify-start space-x-2 mt-4">
+            <Button onClick={handleSearch} disabled={isLoadingOrders}>
+              <Search className="h-4 w-4 mr-2" />
+              Search
+            </Button>
+            <Button
+              variant="outline"
+              onClick={resetFilters}
+              disabled={isLoadingOrders}
+            >
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Reset
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Orders Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Order Results</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoadingOrders ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="mt-2 text-muted-foreground">Loading orders...</p>
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Code</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Created At</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {orders.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={7}
+                        className="text-center py-8 text-muted-foreground"
+                      >
+                        No orders found
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    orders.map((order) => (
+                      <React.Fragment key={order.id}>
+                        <TableRow className="hover:bg-muted/50">
+                          <TableCell>{order.id}</TableCell>
+                          <TableCell>{order.code}</TableCell>
+                          <TableCell>
+                            {order.user
+                              ? `${order.user.firstName} ${order.user.lastName}`
+                              : "N/A"}
+                          </TableCell>
+                          <TableCell>${formatCurrency(order.amount)}</TableCell>
+                          <TableCell>
+                            {getOrderStatusBadge(order.status)}
+                          </TableCell>
+                          <TableCell>{formatDate(order.createdAt)}</TableCell>
+                          <TableCell>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => toggleDetails(order.id)}
+                            >
+                              {selectedOrderId === order.id ? (
+                                <>
+                                  <ChevronUp className="h-4 w-4 mr-2" />
+                                  Hide Details
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronDown className="h-4 w-4 mr-2" />
+                                  View Details
+                                </>
+                              )}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+
+                        {/* Order Details */}
+                        {selectedOrderId === order.id && (
+                          <TableRow>
+                            <TableCell colSpan={7} className="p-0">
+                              <div className="p-6 bg-muted/30 border-t">
+                                <div className="space-y-6">
+                                  <div>
+                                    <h6 className="text-lg font-semibold mb-4">
+                                      User Information
+                                    </h6>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                      <div>
+                                        <span className="text-sm font-medium text-muted-foreground">
+                                          User ID
+                                        </span>
+                                        <p className="text-sm">
+                                          {order.user?.id ?? "N/A"}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <span className="text-sm font-medium text-muted-foreground">
+                                          First Name
+                                        </span>
+                                        <p className="text-sm">
+                                          {order.user?.firstName ?? "N/A"}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <span className="text-sm font-medium text-muted-foreground">
+                                          Last Name
+                                        </span>
+                                        <p className="text-sm">
+                                          {order.user?.lastName ?? "N/A"}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {order.cancelReason && (
+                                    <Alert className="border-destructive bg-destructive/10">
+                                      <AlertDescription>
+                                        <strong>Cancellation Reason:</strong>{" "}
+                                        {order.cancelReason}
+                                      </AlertDescription>
+                                    </Alert>
+                                  )}
+
+                                  <div>
+                                    <h6 className="text-lg font-semibold mb-4">
+                                      Order Items
+                                    </h6>
+                                    <div className="rounded-md border">
+                                      <Table>
+                                        <TableHeader>
+                                          <TableRow>
+                                            <TableHead>Product ID</TableHead>
+                                            <TableHead>Product Name</TableHead>
+                                            <TableHead>Price</TableHead>
+                                            <TableHead>Quantity</TableHead>
+                                            <TableHead>Subtotal</TableHead>
+                                          </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                          {order.orderItems?.map((item) => (
+                                            <TableRow key={item.product.id}>
+                                              <TableCell>
+                                                {item.product.id}
+                                              </TableCell>
+                                              <TableCell>
+                                                {item.product.name}
+                                              </TableCell>
+                                              <TableCell>
+                                                $
+                                                {formatCurrency(
+                                                  item.product.price
+                                                )}
+                                              </TableCell>
+                                              <TableCell>
+                                                {item.quantity}
+                                              </TableCell>
+                                              <TableCell>
+                                                $
+                                                {formatCurrency(
+                                                  item.product.price *
+                                                    item.quantity
+                                                )}
+                                              </TableCell>
+                                            </TableRow>
+                                          ))}
+                                        </TableBody>
+                                      </Table>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </React.Fragment>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Pagination */}
+      {metadata.totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Page {metadata.currentPage} of {metadata.totalPages} (
+            {metadata.totalRecords} records)
+          </div>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (metadata.currentPage > 1) {
+                      changePage(metadata.currentPage - 1);
+                    }
+                  }}
+                  className={
+                    metadata.currentPage <= 1
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }
+                />
+              </PaginationItem>
+
+              {/* Page numbers */}
+              {Array.from(
+                { length: Math.min(5, metadata.totalPages) },
+                (_, i) => {
+                  const pageNumber =
+                    Math.max(
+                      1,
+                      Math.min(
+                        metadata.totalPages - 4,
+                        metadata.currentPage - 2
+                      )
+                    ) + i;
+
+                  if (pageNumber <= metadata.totalPages) {
+                    return (
+                      <PaginationItem key={pageNumber}>
+                        <PaginationLink
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            changePage(pageNumber);
+                          }}
+                          isActive={pageNumber === metadata.currentPage}
+                        >
+                          {pageNumber}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  }
+                  return null;
+                }
+              )}
+
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (metadata.currentPage < metadata.totalPages) {
+                      changePage(metadata.currentPage + 1);
+                    }
+                  }}
+                  className={
+                    metadata.currentPage >= metadata.totalPages
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         </div>
-      </div>
+      )}
     </div>
   );
 };

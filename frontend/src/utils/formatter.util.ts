@@ -1,7 +1,5 @@
 import { Badge } from "@/components/ui/badge";
 import React from "react";
-import { OrderStatus } from "../interfaces/order.interface";
-import { ProductStatus } from "../interfaces/product.interface";
 
 export const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleString(undefined, {
@@ -32,22 +30,20 @@ export const getRoleBadgeClasses = (role: string | null): string => {
   }
 };
 
-export const getProductStatusBadge = (
-  status: ProductStatus
-): React.ReactElement => {
+export const getProductStatusBadge = (status: string): React.ReactElement => {
   if (!status) {
     return React.createElement(Badge, { variant: "outline" }, "Unknown");
   }
   switch (status) {
-    case ProductStatus.IN_STOCK:
+    case "IN_STOCK":
       return React.createElement(Badge, { variant: "default" }, "In Stock");
-    case ProductStatus.OUT_STOCK:
+    case "OUT_STOCK":
       return React.createElement(
         Badge,
         { variant: "destructive" },
         "Out of Stock"
       );
-    case ProductStatus.DISCONTINUED:
+    case "DISCONTINUED":
       return React.createElement(
         Badge,
         { variant: "outline", className: "bg-yellow-500 text-black" },
@@ -58,9 +54,7 @@ export const getProductStatusBadge = (
   }
 };
 
-export const getOrderStatusBadge = (
-  status: OrderStatus
-): React.ReactElement => {
+export const getOrderStatusBadge = (status: string): React.ReactElement => {
   if (!status) {
     return React.createElement(Badge, { variant: "outline" }, "Unknown");
   }

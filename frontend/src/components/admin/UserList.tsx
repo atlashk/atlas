@@ -28,6 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Metadata } from "@/interfaces";
 import type { ListUserFilters, User } from "@/interfaces/user.interface";
 import { userService } from "@/services";
 import { Loader2, RotateCcw, Search } from "lucide-react";
@@ -40,12 +41,12 @@ const UserList: React.FC = () => {
   const [hasInitialLoad, setHasInitialLoad] = useState(false);
   const [filters, setFilters] = useState<ListUserFilters>({
     id: undefined,
-    username: undefined,
+    keyword: undefined,
     role: "",
     page: 1,
     size: 20,
   });
-  const [metadata, setMetadata] = useState({
+  const [metadata, setMetadata] = useState<Metadata>({
     currentPage: 1,
     pageSize: 20,
     totalPages: 1,
@@ -110,7 +111,7 @@ const UserList: React.FC = () => {
   const resetFilters = () => {
     const resetFiltersData: ListUserFilters = {
       id: undefined,
-      username: undefined,
+      keyword: undefined,
       role: "",
       page: 1,
       size: 20,
@@ -161,14 +162,14 @@ const UserList: React.FC = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="keyword">Keyword</Label>
               <Input
                 type="text"
-                id="username"
-                placeholder="Enter username"
-                value={filters.username || ""}
+                id="keyword"
+                placeholder="Enter username, first name, last name, email, or phone number"
+                value={filters.keyword || ""}
                 onChange={(e) =>
-                  handleFilterChange("username", e.target.value || undefined)
+                  handleFilterChange("keyword", e.target.value || undefined)
                 }
               />
             </div>
@@ -192,10 +193,7 @@ const UserList: React.FC = () => {
             </div>
           </div>
           <div className="flex justify-start space-x-2 mt-4">
-            <Button
-              onClick={handleSearch}
-              disabled={isLoadingUsers}
-            >
+            <Button onClick={handleSearch} disabled={isLoadingUsers}>
               <Search className="h-4 w-4 mr-2" />
               Search
             </Button>

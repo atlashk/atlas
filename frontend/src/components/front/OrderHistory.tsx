@@ -16,7 +16,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ListOrderFilters, Order, OrderStatus } from "@/interfaces";
+import {
+  ListOrderFilters,
+  Metadata,
+  Order,
+  ORDER_STATUSES,
+} from "@/interfaces";
 import { orderService } from "@/services";
 import {
   formatCurrency,
@@ -27,19 +32,12 @@ import { ChevronDown, ChevronUp, RotateCcw, Search } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
-interface Metadata {
-  currentPage: number;
-  pageSize: number;
-  totalPages: number;
-  totalRecords: number;
-}
-
 const OrderHistory: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [filters, setFilters] = useState<ListOrderFilters>({
-    status: "",
+    status: undefined,
     startDate: undefined,
     endDate: undefined,
     page: 1,
@@ -51,9 +49,6 @@ const OrderHistory: React.FC = () => {
     totalPages: 1,
     totalRecords: 0,
   });
-
-  // Get all order statuses for the dropdown
-  const orderStatuses = Object.values(OrderStatus);
 
   const applyFilters = useCallback(
     async (page: number, currentFilters?: ListOrderFilters) => {
@@ -104,7 +99,7 @@ const OrderHistory: React.FC = () => {
 
   const resetFilters = () => {
     const resetFilters: ListOrderFilters = {
-      status: "" as const,
+      status: undefined,
       startDate: undefined,
       endDate: undefined,
       page: 1,
@@ -120,7 +115,7 @@ const OrderHistory: React.FC = () => {
 
   const handleFilterChange = (
     field: keyof ListOrderFilters,
-    value: string | number | boolean | OrderStatus | undefined
+    value: string | number | boolean | undefined
   ) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
   };
@@ -196,7 +191,7 @@ const OrderHistory: React.FC = () => {
                   onChange={(e) => handleFilterChange("status", e.target.value)}
                 >
                   <option value="">All Statuses</option>
-                  {orderStatuses.map((status) => (
+                  {ORDER_STATUSES.map((status) => (
                     <option key={status} value={status}>
                       {status}
                     </option>
@@ -265,19 +260,18 @@ const OrderHistory: React.FC = () => {
                           <span className="font-medium">Status:</span>
                           {getOrderStatusBadge(order.status)}
                         </p>
-                        {order.status === OrderStatus.CANCELED &&
-                          order.cancelReason && (
-                            <div className="mt-2">
-                              <p>
-                                <span className="font-medium">
-                                  Cancellation Reason:
-                                </span>{" "}
-                                <span className="text-red-600">
-                                  {order.cancelReason}
-                                </span>
-                              </p>
-                            </div>
-                          )}
+                        {order.status === "CANCELED" && order.cancelReason && (
+                          <div className="mt-2">
+                            <p>
+                              <span className="font-medium">
+                                Cancellation Reason:
+                              </span>{" "}
+                              <span className="text-red-600">
+                                {order.cancelReason}
+                              </span>
+                            </p>
+                          </div>
+                        )}
                       </div>
                       <Button
                         variant="outline"
@@ -315,7 +309,9 @@ const OrderHistory: React.FC = () => {
                               <TableRow key={item.product.id}>
                                 <TableCell>{item.product.id}</TableCell>
                                 <TableCell>{item.product.name}</TableCell>
-                                <TableCell>{formatCurrency(item.product.price)}</TableCell>
+                                <TableCell>
+                                  {formatCurrency(item.product.price)}
+                                </TableCell>
                                 <TableCell>{item.quantity}</TableCell>
                                 <TableCell>
                                   {formatCurrency(

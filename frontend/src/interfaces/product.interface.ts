@@ -4,7 +4,7 @@ export interface Product {
   image: string;
   price: number;
   quantity: number;
-  status: ProductStatus;
+  status: string;
   availableFrom: string;
   isActive: boolean;
   brand: Brand;
@@ -13,11 +13,11 @@ export interface Product {
   categories: Category[];
 }
 
-export enum ProductStatus {
-  IN_STOCK = "IN_STOCK",
-  OUT_STOCK = "OUT_STOCK",
-  DISCONTINUED = "DISCONTINUED",
-}
+export const PRODUCT_STATUSES = [
+  "IN_STOCK",
+  "OUT_STOCK",
+  "DISCONTINUED"
+] as const;
 
 export interface Brand {
   id: number;
@@ -52,12 +52,12 @@ export interface SearchProductFilters {
 export interface ListProductFilters {
   id?: number;
   keyword?: string;
-  minPrice?: number | null;
-  maxPrice?: number | null;
-  status?: ProductStatus | "";
+  minPrice?: number;
+  maxPrice?: number;
+  status?: "";
   availableFrom?: string;
-  isActive?: boolean | null;
-  brandId?: string | null;
+  isActive?: boolean;
+  brandId?: string;
   categoryIds?: number[];
   page: number;
   size: number;
@@ -68,7 +68,7 @@ export interface CreateProductRequest {
   price: number;
   image: string;
   quantity: number;
-  status: ProductStatus;
+  status: "";
   availableFrom: string;
   isActive: boolean;
   brandId: number;
@@ -83,7 +83,7 @@ export interface UpdateProductRequest {
   price: number;
   image: string;
   quantity: number;
-  status: ProductStatus;
+  status: "";
   availableFrom: string;
   isActive: boolean;
   brandId: number;
@@ -106,12 +106,12 @@ export interface ImportProductRequest {
 export interface ExportProductFilters {
   id?: number;
   keyword?: string;
-  minPrice?: number | null;
-  maxPrice?: number | null;
-  status?: ProductStatus | "";
+  minPrice?: number;
+  maxPrice?: number;
+  status?: string;
   availableFrom?: string;
-  isActive?: boolean | null;
-  brandId?: string | null;
+  isActive?: boolean;
+  brandId?: string;
   categoryIds?: number[];
   fileType: FileType;
 }

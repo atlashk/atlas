@@ -7,7 +7,7 @@ export interface Order {
   user?: User;
   orderItems: OrderItem[];
   amount: number;
-  status: OrderStatus;
+  status: string;
   cancelReason?: string;
   createdAt: string; // Date usually handled as ISO string
 }
@@ -17,11 +17,11 @@ export interface OrderItem {
   quantity: number;
 }
 
-export enum OrderStatus {
-  PROCESSING = 'PROCESSING',
-  CONFIRMED = 'CONFIRMED',
-  CANCELED = 'CANCELED',
-}
+export const ORDER_STATUSES = [
+  "PROCESSING",
+  "CONFIRMED",
+  "CANCELED"
+] as const;
 
 export interface PlaceOrderRequest {
   orderItems: PlaceOrderItemRequest[];
@@ -40,7 +40,8 @@ export interface PlaceOrderItemRequest {
 export interface ListOrderFilters {
   orderId?: number;
   userId?: number;
-  status: OrderStatus | '';
+  productId?: number;
+  status?: string;
   startDate?: string;
   endDate?: string;
   page: number
@@ -48,6 +49,6 @@ export interface ListOrderFilters {
 }
 
 export interface GetOrderStatusResponse {
-  status: OrderStatus;
+  status: string;
   canceledReason: string;
 }

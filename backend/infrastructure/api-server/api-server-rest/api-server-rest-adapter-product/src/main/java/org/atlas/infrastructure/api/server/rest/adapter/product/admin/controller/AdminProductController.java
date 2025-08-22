@@ -66,28 +66,28 @@ public class AdminProductController {
   @Operation(summary = "List products with optional filters and pagination.")
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   public ApiResponseWrapper<List<ProductResponse>> listProduct(
-      @Parameter(description = "The unique identifier of the product.", example = "1")
+      @Parameter(name = "id", description = "The unique identifier of the product.", example = "1")
       @RequestParam(name = "id", required = false) Integer id,
-      @Parameter(description = "Keyword for searching products.", example = "T-Shirt")
+      @Parameter(name = "keyword", description = "Keyword for searching products.", example = "T-Shirt")
       @RequestParam(name = "keyword", required = false) String keyword,
-      @Parameter(description = "Minimum price for filtering products.", example = "10.00")
-      @RequestParam(name = "min_price", required = false) BigDecimal minPrice,
-      @Parameter(description = "Maximum price for filtering products.", example = "100.00")
-      @RequestParam(name = "max_price", required = false) BigDecimal maxPrice,
-      @Parameter(description = "Status of the product.", example = "IN_STOCK")
+      @Parameter(name = "minPrice", description = "Minimum price for filtering products.", example = "10.00")
+      @RequestParam(name = "minPrice", required = false) BigDecimal minPrice,
+      @Parameter(name = "maxPrice", description = "Maximum price for filtering products.", example = "100.00")
+      @RequestParam(name = "maxPrice", required = false) BigDecimal maxPrice,
+      @Parameter(name = "status", description = "Status of the product.", example = "IN_STOCK")
       @RequestParam(name = "status", required = false) ProductStatus status,
-      @Parameter(description = "Date from which the product is available (ISO 8601 format).", example = "2023-01-01T00:00:00Z")
-      @RequestParam(name = "available_from", required = false)
+      @Parameter(name = "availableFrom", description = "Date from which the product is available (ISO 8601 format).", example = "2023-01-01T00:00:00Z")
+      @RequestParam(name = "availableFrom", required = false)
       @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date availableFrom,
-      @Parameter(description = "Indicates if the product is active.", example = "true")
-      @RequestParam(name = "is_active", required = false) Boolean isActive,
-      @Parameter(description = "Brand ID for filtering products.", example = "1")
-      @RequestParam(name = "brand_id", required = false) Integer brandId,
-      @Parameter(description = "List of category IDs for filtering products.", example = "[1, 2, 3]")
-      @RequestParam(name = "category_ids", required = false) List<Integer> categoryIds,
-      @Parameter(description = "Page number for pagination.", example = "1")
+      @Parameter(name = "isActive", description = "Indicates if the product is active.", example = "true")
+      @RequestParam(name = "isActive", required = false) Boolean isActive,
+      @Parameter(name = "brandId", description = "Brand ID for filtering products.", example = "1")
+      @RequestParam(name = "brandId", required = false) Integer brandId,
+      @Parameter(name = "categoryIds", description = "List of category IDs for filtering products.", example = "[1, 2, 3]")
+      @RequestParam(name = "categoryIds", required = false) List<Integer> categoryIds,
+      @Parameter(name = "page", description = "Page number for pagination.", example = "1")
       @RequestParam(name = "page", required = false, defaultValue = "1") Integer page,
-      @Parameter(description = "Number of items per page.", example = "20")
+      @Parameter(name = "size", description = "Number of items per page.", example = "20")
       @RequestParam(name = "size", required = false, defaultValue = CommonConstant.DEFAULT_PAGE_SIZE_STR) Integer size
   ) throws Exception {
     AdminListProductInput input = AdminListProductInput.builder()
@@ -175,19 +175,19 @@ public class AdminProductController {
       @Parameter(description = "Keyword for searching products.", example = "T-Shirt")
       @RequestParam(name = "keyword", required = false) String keyword,
       @Parameter(description = "Minimum price for filtering products.", example = "10.00")
-      @RequestParam(name = "min_price", required = false) BigDecimal minPrice,
+      @RequestParam(name = "minPrice", required = false) BigDecimal minPrice,
       @Parameter(description = "Maximum price for filtering products.", example = "100.00")
-      @RequestParam(name = "max_price", required = false) BigDecimal maxPrice,
+      @RequestParam(name = "maxPrice", required = false) BigDecimal maxPrice,
       @Parameter(description = "Status of the product.", example = "IN_STOCK")
       @RequestParam(name = "status", required = false) ProductStatus status,
       @Parameter(description = "Date from which the product is available (ISO 8601 format).", example = "2023-01-01T00:00:00Z")
-      @RequestParam(name = "available_from", required = false) Date availableFrom,
+      @RequestParam(name = "availableFrom", required = false) Date availableFrom,
       @Parameter(description = "Indicates if the product is active.", example = "true")
-      @RequestParam(name = "is_active", required = false) Boolean isActive,
+      @RequestParam(name = "isActive", required = false) Boolean isActive,
       @Parameter(description = "Brand ID for filtering products.", example = "1")
-      @RequestParam(name = "brand_id", required = false) Integer brandId,
+      @RequestParam(name = "brandId", required = false) Integer brandId,
       @Parameter(description = "List of category IDs for filtering products.", example = "[1, 2, 3]")
-      @RequestParam(name = "category_ids", required = false) List<Integer> categoryIds,
+      @RequestParam(name = "categoryIds", required = false) List<Integer> categoryIds,
       @Parameter(description = "The type of the file to export to (e.g., csv, xlsx).", example = "csv")
       @RequestParam(name = "file_type") FileType fileType
   ) throws Exception {

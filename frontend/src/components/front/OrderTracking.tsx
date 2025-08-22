@@ -1,5 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { OrderStatus } from "@/interfaces";
 import { orderService } from "@/services";
 import { useCartStore } from "@/stores";
 import { getOrderStatusBadge } from "@/utils/formatter.util";
@@ -12,9 +11,9 @@ import { toast } from "sonner";
  * Interface for tracking order statuses across different communication methods
  */
 interface OrderStatuses {
-  shortPolling: OrderStatus; // Status from HTTP polling
-  sse: OrderStatus; // Status from Server-Sent Events
-  ws: OrderStatus; // Status from WebSocket
+  shortPolling: string; // Status from HTTP polling
+  sse: string; // Status from Server-Sent Events
+  ws: string; // Status from WebSocket
 }
 
 /**
@@ -26,14 +25,16 @@ interface CanceledReasons {
   ws: string | null;
 }
 
+const DEFAULT_ORDER_STATUS = "PROCESSING";
+
 const OrderTracking: React.FC = () => {
   const { currentOrderId } = useCartStore();
 
   // Reactive state for order statuses and cancellation reasons
   const [orderStatuses, setOrderStatuses] = useState<OrderStatuses>({
-    shortPolling: OrderStatus.PROCESSING,
-    sse: OrderStatus.PROCESSING,
-    ws: OrderStatus.PROCESSING,
+    shortPolling: DEFAULT_ORDER_STATUS,
+    sse: DEFAULT_ORDER_STATUS,
+    ws: DEFAULT_ORDER_STATUS,
   });
 
   const [canceledReasons, setCanceledReasons] = useState<CanceledReasons>({
@@ -59,7 +60,7 @@ const OrderTracking: React.FC = () => {
   const updateOrderStatus = useCallback(
     (
       type: keyof OrderStatuses,
-      status: OrderStatus,
+      status: string,
       reason: string | null = null
     ): void => {
       setOrderStatuses((prev) => ({ ...prev, [type]: status }));
@@ -94,8 +95,8 @@ const OrderTracking: React.FC = () => {
 
             // Stop polling when order reaches final state to avoid unnecessary requests
             if (
-              status === OrderStatus.CONFIRMED ||
-              status === OrderStatus.CANCELED
+              status === "CONFIRMED" ||
+              status === "CANCELED"
             ) {
               stopShortPolling();
             }
@@ -267,14 +268,14 @@ const OrderTracking: React.FC = () => {
    * Called when switching to a new order
    */
   const resetOrderTrackingInfo = useCallback((): void => {
-    // Reset all order statuses to PROCESSING
+    // Reset all order statuses to DEFAULT_ORDER_STATUS
     setOrderStatuses({
-      shortPolling: OrderStatus.PROCESSING,
-      sse: OrderStatus.PROCESSING,
-      ws: OrderStatus.PROCESSING,
+      shortPolling: DEFAULT_ORDER_STATUS,
+      sse: DEFAULT_ORDER_STATUS,
+      ws: DEFAULT_ORDER_STATUS,
     });
 
-    // Clear all cancellation reasons
+    // Reset all cancellation reasons
     setCanceledReasons({
       shortPolling: null,
       sse: null,

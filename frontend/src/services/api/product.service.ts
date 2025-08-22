@@ -34,13 +34,13 @@ export class ProductService extends BaseService {
     const queryParams = new URLSearchParams();
     if (filters.keyword) queryParams.append("keyword", filters.keyword);
     if (filters.minPrice)
-      queryParams.append("min_price", filters.minPrice.toString());
+      queryParams.append("minPrice", filters.minPrice.toString());
     if (filters.maxPrice)
-      queryParams.append("max_price", filters.maxPrice.toString());
+      queryParams.append("maxPrice", filters.maxPrice.toString());
     if (filters.brandId)
-      queryParams.append("brand_id", filters.brandId.toString());
+      queryParams.append("brandId", filters.brandId.toString());
     if (filters.categoryIds?.length)
-      queryParams.append("category_ids", filters.categoryIds.join(","));
+      queryParams.append("categoryIds", filters.categoryIds.join(","));
     queryParams.append("page", (filters.page || 1).toString());
     queryParams.append("size", (filters.size || 20).toString());
 
@@ -59,18 +59,18 @@ export class ProductService extends BaseService {
     if (filters.id) queryParams.append("id", filters.id.toString());
     if (filters.keyword) queryParams.append("keyword", filters.keyword);
     if (filters.minPrice)
-      queryParams.append("min_price", filters.minPrice.toString());
+      queryParams.append("minPrice", filters.minPrice.toString());
     if (filters.maxPrice)
-      queryParams.append("max_price", filters.maxPrice.toString());
+      queryParams.append("maxPrice", filters.maxPrice.toString());
     if (filters.status) queryParams.append("status", filters.status);
     if (filters.availableFrom)
-      queryParams.append("available_from", filters.availableFrom);
+      queryParams.append("availableFrom", filters.availableFrom);
     if (filters.isActive != null)
-      queryParams.append("is_active", filters.isActive.toString());
+      queryParams.append("isActive", filters.isActive.toString());
     if (filters.brandId)
-      queryParams.append("brand_id", filters.brandId.toString());
+      queryParams.append("brandId", filters.brandId.toString());
     if (filters.categoryIds?.length)
-      queryParams.append("category_ids", filters.categoryIds.join(","));
+      queryParams.append("categoryIds", filters.categoryIds.join(","));
     queryParams.append("page", filters.page.toString());
     queryParams.append("size", filters.size.toString());
 
@@ -122,18 +122,18 @@ export class ProductService extends BaseService {
     if (filters.id) queryParams.append("id", filters.id.toString());
     if (filters.keyword) queryParams.append("keyword", filters.keyword);
     if (filters.minPrice)
-      queryParams.append("min_price", filters.minPrice.toString());
+      queryParams.append("minPrice", filters.minPrice.toString());
     if (filters.maxPrice)
-      queryParams.append("max_price", filters.maxPrice.toString());
+      queryParams.append("maxPrice", filters.maxPrice.toString());
     if (filters.status) queryParams.append("status", filters.status);
     if (filters.availableFrom)
-      queryParams.append("available_from", filters.availableFrom);
+      queryParams.append("availableFrom", filters.availableFrom);
     if (filters.isActive != null)
-      queryParams.append("is_active", filters.isActive.toString());
+      queryParams.append("isActive", filters.isActive.toString());
     if (filters.brandId)
-      queryParams.append("brand_id", filters.brandId.toString());
+      queryParams.append("brandId", filters.brandId.toString());
     if (filters.categoryIds?.length) {
-      queryParams.append("category_ids", filters.categoryIds.join(","));
+      queryParams.append("categoryIds", filters.categoryIds.join(","));
     }
     queryParams.append("file_type", filters.fileType);
 
