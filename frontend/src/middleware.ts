@@ -1,148 +1,79 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { jwtDecode } from 'jwt-decode';
+import { userApi } from './api/user';
 
-interface JWTPayload {
-  sub: string;
-  roles: string[];
-  exp: number;
-  iat: number;
-}
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
 
-// Define protected routes and their required roles
-const PROTECTED_ROUTES = {
-  '/admin': ['ADMIN'],
-  '/admin/dashboard': ['ADMIN'],
-  '/admin/users': ['ADMIN'],
-  '/admin/settings': ['ADMIN'],
-  '/profile': ['USER', 'ADMIN'],
-  '/dashboard': ['USER', 'ADMIN']
-};
+  // Define public routes that don't require authentication
+  const PUBLIC_ROUTES = [
+    '/',
+    '/login',
+    '/register'
+  ];
 
-// Public routes that don't require authentication
-const PUBLIC_ROUTES = [
-  '/',
-  '/login',
-  '/register',
-  '/about',
-  '/contact',
-  '/api/auth/login',
-  '/api/auth/register',
-  '/api/auth/refresh-token'
-];
+  // Define protected routes that require authentication
+  const PROTECTED_ROUTES_PREFIXES = [
+    '/admin',
+    '/admin/dashboard',
+  ];
 
-function isTokenExpired(token: string): boolean {
-  try {
-    const decoded = jwtDecode<JWTPayload>(token);
-    const currentTime = Date.now() / 1000;
-    return decoded.exp < currentTime;
-  } catch {
-    return true;
-  }
-}
-
-function getUserRoles(token: string): string[] {
-  try {
-    const decoded = jwtDecode<JWTPayload>(token);
-    return decoded.roles || [];
-  } catch {
-    return [];
-  }
-}
-
-function hasRequiredRole(userRoles: string[], requiredRoles: string[]): boolean {
-  return requiredRoles.some(role => userRoles.includes(role));
-}
-
-function isPublicRoute(pathname: string): boolean {
-  return PUBLIC_ROUTES.some(route => {
+  const isPublicRoute = PUBLIC_ROUTES.some(route => {
     if (route === '/') {
       return pathname === '/';
     }
     return pathname.startsWith(route);
   });
-}
 
-function getRequiredRoles(pathname: string): string[] | null {
-  // Check exact matches first
-  if (PROTECTED_ROUTES[pathname as keyof typeof PROTECTED_ROUTES]) {
-    return PROTECTED_ROUTES[pathname as keyof typeof PROTECTED_ROUTES];
-  }
-  
-  // Check for prefix matches (e.g., /admin/anything should require ADMIN role)
-  for (const [route, roles] of Object.entries(PROTECTED_ROUTES)) {
-    if (pathname.startsWith(route + '/') || pathname === route) {
-      return roles;
+  const isProtectedRoute = PROTECTED_ROUTES_PREFIXES.some(prefix => pathname.startsWith(prefix));
+
+  const accessToken = request.cookies.get('accessToken')?.value;
+
+  // If the user is trying to access a public route but is already authenticated, redirect based on user role
+  if (isPublicRoute && accessToken) {
+    try {
+      const response = await userApi.getProfile();
+
+      if (response.success) {
+        const userProfile = response.data;
+        if (userProfile.role === 'ADMIN') {
+          return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+        } else if (userProfile.role === 'USER') {
+          return NextResponse.redirect(new URL('/', request.url));
+        }
+      } else {
+        // If profile fetch fails, redirect to login to re-authenticate or handle error
+        const loginUrl = new URL('/login', request.url);
+        loginUrl.searchParams.set('redirect', pathname);
+        return NextResponse.redirect(loginUrl);
+      }
+    } catch (error: any) {
+      console.error('Error fetching user profile:', error.message);
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(loginUrl);
     }
   }
-  
-  return null;
-}
 
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  
   // Skip middleware for static files and API routes (except auth)
   if (
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/static/') ||
     pathname.includes('.') ||
-    (pathname.startsWith('/api/') && !pathname.startsWith('/api/auth/'))
+    (pathname.startsWith('/api/') &&
+      !pathname.startsWith('/api/auth/login') &&
+      !pathname.startsWith('/api/auth/register') &&
+      !pathname.startsWith('/api/auth/refresh-token'))
   ) {
     return NextResponse.next();
   }
-  
-  // Allow public routes
-  if (isPublicRoute(pathname)) {
-    return NextResponse.next();
+
+  // If the user is trying to access a protected route and is not authenticated, redirect to login
+  if (isProtectedRoute && !accessToken) {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(loginUrl);
   }
-  
-  // Get access token from cookies or headers
-  const accessToken = request.cookies.get('accessToken')?.value || 
-                     request.headers.get('authorization')?.replace('Bearer ', '');
-  
-  // Check if route requires authentication
-  const requiredRoles = getRequiredRoles(pathname);
-  
-  if (requiredRoles) {
-    // Route requires authentication
-    if (!accessToken) {
-      const loginUrl = new URL('/login', request.url);
-      loginUrl.searchParams.set('redirect', pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-    
-    // Check if token is expired
-    if (isTokenExpired(accessToken)) {
-      const loginUrl = new URL('/login', request.url);
-      loginUrl.searchParams.set('redirect', pathname);
-      loginUrl.searchParams.set('expired', 'true');
-      return NextResponse.redirect(loginUrl);
-    }
-    
-    // Check if user has required roles
-    const userRoles = getUserRoles(accessToken);
-    if (!hasRequiredRole(userRoles, requiredRoles)) {
-      // Redirect to appropriate page based on user roles
-      if (userRoles.includes('ADMIN')) {
-        return NextResponse.redirect(new URL('/admin/dashboard', request.url));
-      } else if (userRoles.includes('USER')) {
-        return NextResponse.redirect(new URL('/dashboard', request.url));
-      } else {
-        return NextResponse.redirect(new URL('/', request.url));
-      }
-    }
-  }
-  
-  // If user is authenticated and trying to access login/register, redirect to appropriate dashboard
-  if (accessToken && !isTokenExpired(accessToken) && (pathname === '/login' || pathname === '/register')) {
-    const userRoles = getUserRoles(accessToken);
-    if (userRoles.includes('ADMIN')) {
-      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
-    } else if (userRoles.includes('USER')) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
-  }
-  
+
   return NextResponse.next();
 }
 

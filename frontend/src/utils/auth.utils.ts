@@ -1,6 +1,3 @@
-import { jwtDecode } from 'jwt-decode';
-import type { JWTPayload } from '@/interfaces/auth.interface';
-
 // Token utilities
 export const getAccessToken = (): string | null => {
   if (typeof window === 'undefined') return null;
@@ -26,43 +23,6 @@ export const clearTokens = (): void => {
   localStorage.removeItem('refreshToken');
   sessionStorage.removeItem('user');
   sessionStorage.removeItem('authState');
-};
-
-// Token validation
-export const isValidToken = (token: string): boolean => {
-  try {
-    if (!token) return false;
-    
-    const decoded = jwtDecode<JWTPayload>(token);
-    const currentTime = Math.floor(Date.now() / 1000);
-    
-    return decoded.exp > currentTime;
-  } catch {
-    return false;
-  }
-};
-
-export const isTokenExpiringSoon = (token: string, thresholdSeconds: number = 300): boolean => {
-  try {
-    if (!token) return true;
-    
-    const decoded = jwtDecode<JWTPayload>(token);
-    const currentTime = Math.floor(Date.now() / 1000);
-    const timeUntilExpiry = decoded.exp - currentTime;
-    
-    return timeUntilExpiry <= thresholdSeconds;
-  } catch {
-    return true;
-  }
-};
-
-export const getTokenPayload = (token: string): JWTPayload | null => {
-  try {
-    if (!token) return null;
-    return jwtDecode<JWTPayload>(token);
-  } catch {
-    return null;
-  }
 };
 
 // Auth error handling

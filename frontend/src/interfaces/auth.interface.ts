@@ -4,15 +4,6 @@
 export type UserRole = 'USER' | 'ADMIN' | 'MODERATOR';
 export type AuthStatus = 'idle' | 'loading' | 'authenticated' | 'unauthenticated' | 'error';
 
-// JWT Token payload interface
-export interface JWTPayload {
-  sub: string; // User ID
-  username: string;
-  roles: UserRole[];
-  exp: number; // Expiration timestamp
-  iat: number; // Issued at timestamp
-  jti?: string; // JWT ID
-}
 
 // Login interfaces
 export interface LoginRequest {
@@ -23,13 +14,6 @@ export interface LoginRequest {
 export interface LoginResponse {
   accessToken: string;
   refreshToken: string;
-  user?: {
-    id: string;
-    username: string;
-    email?: string;
-    fullName?: string;
-    roles: UserRole[];
-  };
 }
 
 // Token refresh interfaces
@@ -58,7 +42,7 @@ export interface AuthUser {
   username: string;
   email?: string;
   fullName?: string;
-  roles: UserRole[];
+  role: UserRole;
   isActive: boolean;
   lastLoginAt?: Date;
   createdAt?: Date;
@@ -126,23 +110,10 @@ export const isAuthenticatedUser = (user: unknown): user is AuthUser => {
     user !== null &&
     'id' in user &&
     'username' in user &&
-    'roles' in user &&
-    Array.isArray((user as AuthUser).roles)
+    'role' in user
   );
 };
 
-export const isValidJWTPayload = (payload: unknown): payload is JWTPayload => {
-  return (
-    typeof payload === 'object' &&
-    payload !== null &&
-    'sub' in payload &&
-    'username' in payload &&
-    'roles' in payload &&
-    'exp' in payload &&
-    'iat' in payload &&
-    Array.isArray((payload as JWTPayload).roles)
-  );
-};
 
 // Default auth configuration
 export const DEFAULT_AUTH_CONFIG: AuthConfig = {

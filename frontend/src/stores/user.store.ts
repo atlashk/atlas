@@ -28,7 +28,7 @@ interface UserActions {
   // Actions
   login: (
     credentials: LoginRequest
-  ) => Promise<{ success: boolean; errorMessage?: string; isAdmin?: boolean }>;
+  ) => Promise<{ success: boolean; errorMessage?: string }>;
   register: (userData: RegisterRequest) => Promise<void>;
   fetchProfile: () => Promise<void>;
   setTokens: (accessToken: string, refreshToken: string) => void;
@@ -93,21 +93,18 @@ export const useUserStore = create<UserStore>()(
         try {
           const response = await authApi.login(request);
           if (response.success && response.data) {
-            const { accessToken, refreshToken } = response.data;
+            const { accessToken, refreshToken, ...profileData } = response.data;
 
-            // Store tokens in both localStorage and Zustand store
             localStorage.setItem("accessToken", accessToken);
             localStorage.setItem("refreshToken", refreshToken);
 
             set({
               accessToken,
               refreshToken,
+              profile: profileData as User,
               loading: false,
             });
-            // Fetch profile after successful login
-            await get().fetchProfile();
-            const { isAdmin } = get();
-            return { success: true, isAdmin: isAdmin() };
+            return { success: true };
           } else {
             set({
               error: response.errorMessage || "Login failed",
