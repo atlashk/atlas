@@ -1,15 +1,15 @@
+import { orderApi } from "@/api";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { PlaceOrderItemRequest } from "@/interfaces";
-import { orderService } from "@/services";
 import { CartItem, useCartStore, useUserStore } from "@/stores";
 import { formatCurrency } from "@/utils/formatter.util";
+import { Minus, Plus, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { toast } from "sonner";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { X, Minus, Plus } from "lucide-react";
 
 const Cart: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -61,7 +61,7 @@ const Cart: React.FC = () => {
         })
       );
 
-      const response = await orderService.placeOrder({ orderItems });
+      const response = await orderApi.placeOrder({ orderItems });
 
       if (response.success && response.data) {
         setCurrentOrderId(response.data.orderId);

@@ -1,5 +1,7 @@
 "use client";
 
+import { orderAdminApi } from "@/api/order.admin";
+import { Metadata } from "@/api/apiClient";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,13 +30,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Metadata } from "@/interfaces";
+import { ORDER_STATUSES } from "@/constants";
 import {
-  ORDER_STATUSES,
   type ListOrderFilters,
   type Order,
 } from "@/interfaces/order.interface";
-import { orderService } from "@/services";
 import {
   formatCurrency,
   formatDate,
@@ -96,7 +96,7 @@ const OrderList: React.FC = () => {
           }
         });
 
-        const response = await orderService.adminListOrders(apiFilters);
+        const response = await orderAdminApi.listOrder(apiFilters);
 
         setOrders(response.data);
         if (response.metadata) {

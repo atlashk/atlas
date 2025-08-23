@@ -1,0 +1,19 @@
+import type { RegisterRequest, User } from "@/interfaces/user.interface";
+import { ApiResponse } from "./apiClient";
+import { BaseApi } from "./baseApi";
+
+export class UserApi extends BaseApi {
+  constructor() {
+    super("/api/user-svc");
+  }
+
+  async getProfile(): Promise<ApiResponse<User>> {
+    return this.get<User>("/users/profile");
+  }
+
+  async register(userData: RegisterRequest): Promise<ApiResponse<void>> {
+    return this.post<void>("/users/register", userData);
+  }
+}
+
+export const userApi = new UserApi();

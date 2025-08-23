@@ -1,3 +1,5 @@
+import { orderApi } from "@/api";
+import { Metadata } from "@/api/apiClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -16,13 +18,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  ListOrderFilters,
-  Metadata,
-  Order,
-  ORDER_STATUSES,
-} from "@/interfaces";
-import { orderService } from "@/services";
+import { ORDER_STATUSES } from "@/constants";
+import { ListOrderFilters, Order } from "@/interfaces";
 import {
   formatCurrency,
   formatDate,
@@ -72,7 +69,7 @@ const OrderHistory: React.FC = () => {
           }
         });
 
-        const response = await orderService.listOrder(apiFilters);
+        const response = await orderApi.listOrder(apiFilters);
         if (response.success) {
           setOrders(response.data || []);
           if (response.metadata) {

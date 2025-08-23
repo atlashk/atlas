@@ -15,7 +15,7 @@ import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
-import org.atlas.infrastructure.api.server.rest.adapter.user.shared.UserResponse;
+import org.atlas.infrastructure.api.server.rest.adapter.user.model.UserResponse;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("api/admin/users")
+@RequestMapping("/api/admin/users")
 @Validated
 @Tag(name = "Admin user management", description = "Admin user management")
 @RequiredArgsConstructor

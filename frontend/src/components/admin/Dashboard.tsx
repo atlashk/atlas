@@ -3,9 +3,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, Users, ShoppingCart, Activity } from "lucide-react";
-import { userService } from "@/services/api/user.service";
-import { productService } from "@/services/api/product.service";
-import { orderService } from "@/services/api/order.service";
+import { userApi } from "@/api/user";
+import { productApi } from "@/api/product";
+import { orderApi } from "@/api/order";
 
 interface StatisticsData {
   totalUsers: number;
@@ -37,10 +37,10 @@ const Dashboard: React.FC = () => {
           ordersResponse,
           revenueResponse,
         ] = await Promise.all([
-          userService.countUsers(),
-          productService.countProducts(),
-          orderService.countOrders(),
-          orderService.sumConfirmedOrderAmount(),
+          userApi.countUsers(),
+          productApi.countProducts(),
+          orderApi.countOrders(),
+          orderApi.sumConfirmedOrderAmount(),
         ]);
 
         setStatistics({

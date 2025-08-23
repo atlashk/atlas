@@ -11,7 +11,6 @@ import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.util.StringUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -27,7 +26,6 @@ import reactor.core.publisher.Flux;
 public class SecurityConfig {
 
   private final ApplicationConfigPort applicationConfigPort;
-  private final AuthRulesProps authRulesProps;
   private final CustomServerAuthenticationEntryPoint serverAuthenticationEntryPoint;
   private final CustomAccessDeniedHandler accessDeniedHandler;
   private final JwtExtractor jwtExtractor;
@@ -84,21 +82,7 @@ public class SecurityConfig {
             }))
         .exceptionHandling(
             exceptionHandlingSpec -> exceptionHandlingSpec.authenticationEntryPoint(serverAuthenticationEntryPoint)
-                .accessDeniedHandler(accessDeniedHandler))
-        .authorizeExchange(auth -> {
-          // Permit preflight requests
-          auth.pathMatchers(HttpMethod.OPTIONS).permitAll();
-
-          // Non-secured paths
-          authRulesProps.getNonSecuredPaths().forEach(path -> auth.pathMatchers(path).permitAll());
-
-          // Secured paths with role-based authorization
-          authRulesProps.getSecuredPaths().forEach(rule -> auth.pathMatchers(rule.getPath())
-              .hasAnyAuthority(rule.getRoles().toArray(String[]::new)));
-
-          // Deny all other requests
-          auth.anyExchange().denyAll();
-        });
+                .accessDeniedHandler(accessDeniedHandler));
 
     return http.build();
   }

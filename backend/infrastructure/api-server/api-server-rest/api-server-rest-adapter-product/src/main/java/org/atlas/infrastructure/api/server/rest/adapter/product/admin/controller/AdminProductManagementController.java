@@ -30,7 +30,7 @@ import org.atlas.framework.util.DateUtil;
 import org.atlas.infrastructure.api.server.rest.adapter.product.admin.mapper.AdminProductMapper;
 import org.atlas.infrastructure.api.server.rest.adapter.product.admin.model.AdminCreateProductRequest;
 import org.atlas.infrastructure.api.server.rest.adapter.product.admin.model.AdminUpdateProductRequest;
-import org.atlas.infrastructure.api.server.rest.adapter.product.shared.ProductResponse;
+import org.atlas.infrastructure.api.server.rest.adapter.product.model.ProductResponse;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -51,7 +51,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("api/admin/products")
+@RequestMapping("/api/admin/products")
 @Validated
 @Tag(name = "Admin product management", description = "Admin product management")
 @RequiredArgsConstructor

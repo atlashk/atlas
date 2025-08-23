@@ -17,7 +17,7 @@ import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingRequest.SortOrder;
 import org.atlas.framework.paging.PagingResult;
-import org.atlas.infrastructure.api.server.rest.adapter.order.shared.model.OrderResponse;
+import org.atlas.infrastructure.api.server.rest.adapter.order.model.OrderResponse;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("api/admin/orders")
+@RequestMapping("/api/admin/orders")
 @Validated
 @Tag(name = "Admin order management", description = "Admin order management")
 @RequiredArgsConstructor

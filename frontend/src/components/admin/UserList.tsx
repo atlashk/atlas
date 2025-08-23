@@ -1,5 +1,7 @@
 "use client";
 
+import { userAdminApi } from "@/api/user.admin";
+import { Metadata } from "@/api/apiClient";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,9 +30,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Metadata, ROLES } from "@/interfaces";
+import { ROLES } from "@/constants";
 import type { ListUserFilters, User } from "@/interfaces/user.interface";
-import { userService } from "@/services";
 import { Loader2, RotateCcw, Search } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -74,7 +75,7 @@ const UserList: React.FC = () => {
           }
         });
 
-        const response = await userService.listUser(apiFilters);
+        const response = await userAdminApi.listUser(apiFilters);
 
         if (response.success) {
           setUsers(response.data || []);

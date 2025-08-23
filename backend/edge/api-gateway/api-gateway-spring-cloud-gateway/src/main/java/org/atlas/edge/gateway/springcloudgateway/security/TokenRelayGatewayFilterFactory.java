@@ -49,7 +49,8 @@ public class TokenRelayGatewayFilterFactory extends
               .request(mutatedRequest)
               .build();
           return chain.filter(mutatedExchange);
-        });
+        })
+        .switchIfEmpty(chain.filter(exchange)); // Skip token relay if no JWT token
   }
 
   public static class Config {

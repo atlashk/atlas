@@ -1,3 +1,5 @@
+import { productApi } from "@/api";
+import { Metadata } from "@/api/apiClient";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,14 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Brand,
-  Category,
-  Metadata,
-  Product,
-  SearchProductFilters,
-} from "@/interfaces";
-import { productService } from "@/services";
+import { Brand, Category, Product, SearchProductFilters } from "@/interfaces";
 import { useCartStore } from "@/stores";
 import { formatCurrency } from "@/utils/formatter.util";
 import { getProductImageUrl } from "@/utils/productImage.util";
@@ -71,7 +66,7 @@ const ProductSearch: React.FC = () => {
   const loadBrands = async () => {
     setIsLoadingBrands(true);
     try {
-      const response = await productService.listBrand();
+      const response = await productApi.listBrand();
       if (response.success) {
         setBrands(response.data || []);
       }
@@ -85,7 +80,7 @@ const ProductSearch: React.FC = () => {
   const loadCategories = async () => {
     setIsLoadingCategories(true);
     try {
-      const response = await productService.listCategory();
+      const response = await productApi.listCategory();
       if (response.success) {
         setCategories(response.data || []);
       }
@@ -105,7 +100,7 @@ const ProductSearch: React.FC = () => {
         const updatedFilters = { ...filters, page };
         setMetadata((prev) => ({ ...prev, currentPage: page }));
 
-        const response = await productService.searchProduct(updatedFilters);
+        const response = await productApi.searchProduct(updatedFilters);
         if (response.success) {
           setProducts(response.data || []);
           setMetadata({
@@ -149,7 +144,7 @@ const ProductSearch: React.FC = () => {
   const showProductDetails = async (product: Product) => {
     setIsLoadingProduct(true);
     try {
-      const response = await productService.getProduct(product.id);
+      const response = await productApi.getProduct(product.id);
       if (response.success && response.data) {
         setSelectedProduct(response.data);
         setShowModal(true);

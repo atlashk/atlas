@@ -1,7 +1,6 @@
+import { authApi, userApi } from "@/api";
 import type { LoginRequest } from "@/interfaces/auth.interface";
 import type { RegisterRequest, User } from "@/interfaces/user.interface";
-import { AuthService } from "@/services/api/auth.service";
-import { UserService } from "@/services/api/user.service";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -40,13 +39,10 @@ interface UserActions {
 
 type UserStore = UserState & UserActions;
 
-const authService = new AuthService()
-const userService = new UserService()
-
 // Utility function to clear authentication tokens
 const clearAuthTokens = () => {
-  localStorage.removeItem('accessToken')
-  localStorage.removeItem('refreshToken')
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
 };
 
 export const useUserStore = create<UserStore>()(
@@ -95,14 +91,14 @@ export const useUserStore = create<UserStore>()(
       login: async (request: LoginRequest) => {
         set({ loading: true, error: null });
         try {
-          const response = await authService.login(request);
+          const response = await authApi.login(request);
           if (response.success && response.data) {
             const { accessToken, refreshToken } = response.data;
-            
+
             // Store tokens in both localStorage and Zustand store
-            localStorage.setItem('accessToken', accessToken);
-            localStorage.setItem('refreshToken', refreshToken);
-            
+            localStorage.setItem("accessToken", accessToken);
+            localStorage.setItem("refreshToken", refreshToken);
+
             set({
               accessToken,
               refreshToken,
@@ -136,7 +132,7 @@ export const useUserStore = create<UserStore>()(
       register: async (userData: RegisterRequest) => {
         set({ loading: true, error: null });
         try {
-          const response = await userService.register(userData);
+          const response = await userApi.register(userData);
           if (response.success) {
             set({ loading: false });
           } else {
@@ -160,7 +156,7 @@ export const useUserStore = create<UserStore>()(
 
         set({ profileLoading: true });
         try {
-          const response = await userService.getProfile();
+          const response = await userApi.getProfile();
           if (response.success && response.data) {
             set({
               profile: response.data,
@@ -188,35 +184,34 @@ export const useUserStore = create<UserStore>()(
       },
 
       logout: () => {
-      authService.logout()
-      clearAuthTokens()
-      
-      set({
-        profile: null,
-        accessToken: null,
-        refreshToken: null,
-        loading: false,
-        error: null,
-        profileLoading: false
-      })
-    },
+        authApi.logout();
+        clearAuthTokens();
+        set({
+          profile: null,
+          accessToken: null,
+          refreshToken: null,
+          loading: false,
+          error: null,
+          profileLoading: false,
+        });
+      },
 
       clearError: () => {
         set({ error: null });
       },
 
       clearAuthState: () => {
-      clearAuthTokens()
-      
-      set({
-        profile: null,
-        accessToken: null,
-        refreshToken: null,
-        loading: false,
-        error: null,
-        profileLoading: false
-      })
-    }
+        clearAuthTokens();
+
+        set({
+          profile: null,
+          accessToken: null,
+          refreshToken: null,
+          loading: false,
+          error: null,
+          profileLoading: false,
+        });
+      },
     }),
     {
       name: "user-store",

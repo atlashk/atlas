@@ -11,7 +11,7 @@ import org.atlas.domain.product.usecase.internal.model.InternalListProductInput;
 import org.atlas.framework.api.server.rest.response.ApiResponseWrapper;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.infrastructure.api.server.rest.adapter.product.internal.model.InternalListProductRequest;
-import org.atlas.infrastructure.api.server.rest.adapter.product.shared.ProductResponse;
+import org.atlas.infrastructure.api.server.rest.adapter.product.model.ProductResponse;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("api/internal/products")
+@RequestMapping("/api/internal/products")
 @Validated
 @RequiredArgsConstructor
 public class InternalProductController {

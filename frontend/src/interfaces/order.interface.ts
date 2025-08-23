@@ -1,3 +1,4 @@
+import { OrderStatus } from "@/constants";
 import type { Product } from "./product.interface";
 import type { User } from "./user.interface";
 
@@ -7,7 +8,7 @@ export interface Order {
   user?: User;
   orderItems: OrderItem[];
   amount: number;
-  status: string;
+  status: OrderStatus;
   cancelReason?: string;
   createdAt: string; // Date usually handled as ISO string
 }
@@ -16,12 +17,6 @@ export interface OrderItem {
   product: Product;
   quantity: number;
 }
-
-export const ORDER_STATUSES = [
-  "PROCESSING",
-  "CONFIRMED",
-  "CANCELED"
-] as const;
 
 export interface PlaceOrderRequest {
   orderItems: PlaceOrderItemRequest[];

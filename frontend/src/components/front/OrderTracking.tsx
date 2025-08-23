@@ -1,5 +1,5 @@
+import { orderApi } from "@/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { orderService } from "@/services";
 import { useCartStore } from "@/stores";
 import { getOrderStatusBadge } from "@/utils/formatter.util";
 import { Client } from "@stomp/stompjs";
@@ -85,19 +85,16 @@ const OrderTracking: React.FC = () => {
    * @param orderId - The order ID to track
    */
   const startShortPolling = useCallback(
-    (orderId: string): void => {
+    (orderId: number): void => {
       const pollOrder = async (): Promise<void> => {
         try {
-          const response = await orderService.getOrderStatus(parseInt(orderId));
+          const response = await orderApi.getOrderStatus(orderId);
           if (response.success && response.data) {
             const { status, canceledReason } = response.data;
             updateOrderStatus("shortPolling", status, canceledReason || null);
 
             // Stop polling when order reaches final state to avoid unnecessary requests
-            if (
-              status === "CONFIRMED" ||
-              status === "CANCELED"
-            ) {
+            if (status === "CONFIRMED" || status === "CANCELED") {
               stopShortPolling();
             }
           } else {
@@ -125,13 +122,13 @@ const OrderTracking: React.FC = () => {
    * @param orderId - The order ID to track
    */
   const connectSSE = useCallback(
-    (orderId: string): void => {
+    (orderId: number): void => {
       // Close existing connection if any
       if (eventSourceRef.current) eventSourceRef.current.close();
 
       // Create new SSE connection to order-specific endpoint
       eventSourceRef.current = new EventSource(
-        `${API_BASE_URL}/notification/sse/orders/${orderId}/status`
+        `${API_BASE_URL}/notification-svc/sse/orders/${orderId}/status`
       );
 
       // Handle successful connection
@@ -172,7 +169,7 @@ const OrderTracking: React.FC = () => {
    * @param orderId - The order ID to track
    */
   const connectWebSocket = useCallback(
-    (orderId: string): void => {
+    (orderId: number): void => {
       // Cleanup existing connection
       if (stompClientRef.current) {
         stompClientRef.current.deactivate();
@@ -183,7 +180,7 @@ const OrderTracking: React.FC = () => {
       stompClientRef.current = new Client({
         // SockJS factory for WebSocket connection with fallback transports
         webSocketFactory: () =>
-          new SockJS(`${API_BASE_URL}/notification/ws`, null, {
+          new SockJS(`${API_BASE_URL}/notification-svc/ws`, null, {
             transports: ["websocket", "xhr-streaming", "xhr-polling"], // Fallback order
             timeout: 10000, // 10 second timeout
           }),
@@ -292,11 +289,10 @@ const OrderTracking: React.FC = () => {
     resetOrderTrackingInfo();
 
     if (currentOrderId) {
-      const orderIdStr = currentOrderId.toString();
       // Start all three communication methods for the new order
-      startShortPolling(orderIdStr);
-      connectSSE(orderIdStr);
-      connectWebSocket(orderIdStr);
+      startShortPolling(currentOrderId);
+      connectSSE(currentOrderId);
+      connectWebSocket(currentOrderId);
     } else {
       // No active order, cleanup all connections
       cleanup();

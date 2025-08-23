@@ -1,5 +1,8 @@
 "use client";
 
+import { productApi } from "@/api";
+import { productAdminApi } from "@/api/product.admin";
+import { Metadata } from "@/api/apiClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -28,17 +31,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Metadata } from "@/interfaces";
+import { PRODUCT_STATUSES } from "@/constants";
 import {
   FileType,
-  PRODUCT_STATUSES,
   type Brand,
   type Category,
   type ExportProductFilters,
   type ListProductFilters,
   type Product,
 } from "@/interfaces/product.interface";
-import { productService } from "@/services";
 import { formatCurrency, getProductStatusBadge } from "@/utils/formatter.util";
 import { getProductImageUrl } from "@/utils/productImage.util";
 import {
@@ -108,13 +109,13 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
 
   const brandsLoaded = useRef(false);
   const categoriesLoaded = useRef(false);
-  
+
   const loadBrands = useCallback(async () => {
     if (brandsLoaded.current || isLoadingBrands) return;
-    
+
     setIsLoadingBrands(true);
     try {
-      const { data } = await productService.listBrand();
+      const { data } = await productApi.listBrand();
       setBrands(data);
       brandsLoaded.current = true;
     } catch {
@@ -126,10 +127,10 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
 
   const loadCategories = useCallback(async () => {
     if (categoriesLoaded.current || isLoadingCategories) return;
-    
+
     setIsLoadingCategories(true);
     try {
-      const { data } = await productService.listCategory();
+      const { data } = await productApi.listCategory();
       setCategories(data);
       categoriesLoaded.current = true;
     } catch {
@@ -159,12 +160,12 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
 
   const filtersRef = useRef(filters);
   const isApplyingFilters = useRef(false);
-  
+
   // Update ref when filters change
   useEffect(() => {
     filtersRef.current = filters;
   }, [filters]);
-  
+
   const applyFilters = useCallback(
     async (page: number, currentFilters?: ListProductFilters) => {
       if (isLoadingProducts || isApplyingFilters.current) return;
@@ -189,7 +190,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
           }
         });
 
-        const response = await productService.adminListProduct(apiFilters);
+        const response = await productAdminApi.listProduct(apiFilters);
         setProducts(response.data);
         setMetadata((prev) => ({ ...prev, ...response.metadata }));
       } catch {
@@ -246,7 +247,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
       if (!confirm("Are you sure you want to delete this product?")) return;
 
       try {
-        await productService.adminDeleteProduct(productId);
+        await productAdminApi.deleteProduct(productId);
         toast.success("Product deleted successfully");
         applyFilters(metadata.currentPage);
       } catch {
@@ -274,7 +275,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
           categoryIds: filters.categoryIds,
           fileType: FileType[fileType.toUpperCase() as keyof typeof FileType],
         };
-        await productService.adminExportProduct(exportFilters);
+        await productAdminApi.exportProduct(exportFilters);
         toast.success(
           `Products exported successfully as ${fileType.toUpperCase()}`
         );
@@ -297,7 +298,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
   }, [applyFilters]);
 
   // Load initial data
-  useEffect(() => {    
+  useEffect(() => {
     const loadInitialData = async () => {
       if (hasInitialLoad.current || isInitializing.current) {
         return;

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { clearAuthTokens } from '@/services/api/apiClient';
+import { clearAuthTokens } from '@/api/apiClient';
 
 interface Props {
   children: ReactNode;
