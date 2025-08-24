@@ -1,14 +1,14 @@
-package org.atlas.edge.gateway.springcloudgateway.security;
+package org.atlas.edge.gateway.springcloudgateway.security.filter;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import lombok.Data;
+import org.atlas.domain.user.shared.enums.Role;
 import org.atlas.edge.gateway.springcloudgateway.security.jwt.JwtExtractor;
 import org.atlas.edge.gateway.springcloudgateway.util.HttpUtil;
 import org.atlas.framework.api.server.rest.response.ApiResponseWrapper;
 import org.atlas.framework.error.AppError;
 import org.atlas.framework.util.CollectionUtil;
-import org.atlas.framework.util.StringUtil;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -36,8 +36,10 @@ public class AuthorizationGatewayFilterFactory extends
     return (exchange, chain) ->
         ReactiveSecurityContextHolder.getContext()
             .map(SecurityContext::getAuthentication)
-            .filter(auth -> auth != null && auth.isAuthenticated()
-                && auth.getCredentials() instanceof Jwt)
+            .filter(auth -> auth != null &&
+                auth.isAuthenticated() &&
+                auth.getCredentials() != null &&
+                auth.getCredentials() instanceof Jwt)
             .map(auth -> (Jwt) auth.getCredentials())
             .flatMap(jwt -> checkRole(jwt, exchange, chain, config));
   }
@@ -45,20 +47,26 @@ public class AuthorizationGatewayFilterFactory extends
   private Mono<Void> checkRole(Jwt jwt, ServerWebExchange exchange,
       GatewayFilterChain chain, Config config) {
     // Extract user roles from JWT claims
-    String userRolesClaim = jwtExtractor.extractUserRoles(jwt);
+    Role userRole = jwtExtractor.extractUserRole(jwt);
 
-    if (StringUtil.isNotBlank(userRolesClaim) && CollectionUtil.isNotEmpty(config.getRoles())) {
-      List<String> userRoles = Arrays.asList(userRolesClaim.split(","));
-      // Check if any role matches
-      boolean hasRole = userRoles.stream().anyMatch(config.getRoles()::contains);
+    if (CollectionUtil.isNotEmpty(config.getRoles())) {
+      boolean hasRole = config.getRoles()
+          .stream()
+          .anyMatch(configRole -> userRole.name().equals(configRole));
       if (hasRole) {
         return chain.filter(exchange);
       }
+      ApiResponseWrapper<Void> response = ApiResponseWrapper.error(
+          AppError.FORBIDDEN.getErrorCode(), "Forbidden");
+      return HttpUtil.respond(exchange, response, HttpStatus.FORBIDDEN);
     }
 
-    ApiResponseWrapper<Void> response = ApiResponseWrapper.error(
-        AppError.FORBIDDEN.getErrorCode(), "Forbidden");
-    return HttpUtil.respond(exchange, response, HttpStatus.FORBIDDEN);
+    return chain.filter(exchange);
+  }
+
+  @Override
+  public List<String> shortcutFieldOrder() {
+    return Collections.singletonList("roles");
   }
 
   @Data

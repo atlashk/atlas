@@ -1,35 +1,35 @@
 // Load app stack configuration from app-stack.cfg
 def loadAppStack() {
-	def configFile = new File(rootDir, "app-stack.cfg")
-	if (!configFile.exists()) {
-		throw new GradleException("Config file not found: ${configFile.absolutePath}")
-	}
+    def configFile = new File(rootDir, "app-stack.cfg")
+    if (!configFile.exists()) {
+        throw new GradleException("Config file not found: ${configFile.absolutePath}")
+    }
 
-	def config = [:]
-	configFile.eachLine('UTF-8') { line ->
-		line = line.trim()
-		if (line && !line.startsWith('#')) {
-			def parts = line.split('=', 2).collect { it.trim() }
-			if (parts.size() == 2 && parts[1]) {
-				config[parts[0]] = parts[1]
-			} else {
-				throw new GradleException("Invalid config line in ${configFile.name}: '${line}'")
-			}
-		}
-	}
-	return config
+    def config = [:]
+    configFile.eachLine('UTF-8') { line ->
+        line = line.trim()
+        if (line && !line.startsWith('#')) {
+            def parts = line.split('=', 2).collect { it.trim() }
+            if (parts.size() == 2 && parts[1]) {
+                config[parts[0]] = parts[1]
+            } else {
+                throw new GradleException("Invalid config line in ${configFile.name}: '${line}'")
+            }
+        }
+    }
+    return config
 }
 
 ext {
-	// Plugins
-	set('springBootPluginVersion', '3.5.4')
-	set('springDependencyManagementPluginVersion', '1.1.7')
+    // Plugins
+    set('springBootPluginVersion', '3.5.4')
+    set('springDependencyManagementPluginVersion', '1.1.7')
 
-	set('springFrameworkVersion', '6.2.9')
-	set('springCloudVersion', '2025.0.0')
-	set('awsSdkVersion', '2.29.33')
-	set('lombokVersion', '1.18.38')
-	set('junitVersion', '5.10.0')
+    set('springFrameworkVersion', '6.2.9')
+    set('springCloudVersion', '2025.0.0')
+    set('awsSdkVersion', '2.29.33')
+    set('lombokVersion', '1.18.38')
+    set('junitVersion', '5.10.0')
 
-	appStack = loadAppStack()
+    appStack = loadAppStack()
 }

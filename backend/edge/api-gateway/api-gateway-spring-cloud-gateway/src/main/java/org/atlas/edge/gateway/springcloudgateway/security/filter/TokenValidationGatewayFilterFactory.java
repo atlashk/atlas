@@ -1,4 +1,4 @@
-package org.atlas.edge.gateway.springcloudgateway.security;
+package org.atlas.edge.gateway.springcloudgateway.security.filter;
 
 import java.time.Instant;
 import org.atlas.edge.gateway.springcloudgateway.security.jwt.JwtExtractor;
@@ -37,8 +37,10 @@ public class TokenValidationGatewayFilterFactory extends
     return (exchange, chain) ->
         ReactiveSecurityContextHolder.getContext()
             .map(SecurityContext::getAuthentication)
-            .filter(auth -> auth != null && auth.isAuthenticated()
-                && auth.getCredentials() instanceof Jwt)
+            .filter(auth -> auth != null &&
+                auth.isAuthenticated() &&
+                auth.getCredentials() != null &&
+                auth.getCredentials() instanceof Jwt)
             .map(auth -> (Jwt) auth.getCredentials())
             .flatMap(jwt -> validateToken(jwt, exchange, chain))
             .switchIfEmpty(chain.filter(exchange)); // Skip validation if no JWT token

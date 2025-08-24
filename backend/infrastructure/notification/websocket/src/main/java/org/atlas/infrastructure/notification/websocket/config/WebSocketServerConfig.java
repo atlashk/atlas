@@ -20,8 +20,8 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 /**
- * WebSocket configuration for real-time notifications.
- * Enables STOMP messaging over WebSocket with SockJS fallback support.
+ * WebSocket configuration for real-time notifications. Enables STOMP messaging over WebSocket with
+ * SockJS fallback support.
  */
 @Configuration
 @EnableWebSocketMessageBroker
@@ -35,8 +35,8 @@ public class WebSocketServerConfig implements WebSocketMessageBrokerConfigurer {
   private final ApplicationConfigPort applicationConfigPort;
 
   /**
-   * Configure the message broker for handling STOMP messages.
-   * Sets up heartbeat mechanism with a task scheduler.
+   * Configure the message broker for handling STOMP messages. Sets up heartbeat mechanism with a
+   * task scheduler.
    */
   @Override
   public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -46,8 +46,8 @@ public class WebSocketServerConfig implements WebSocketMessageBrokerConfigurer {
   }
 
   /**
-   * Register STOMP endpoints for WebSocket connections.
-   * Configures CORS and enables SockJS fallback.
+   * Register STOMP endpoints for WebSocket connections. Configures CORS and enables SockJS
+   * fallback.
    */
   @Override
   public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -83,8 +83,8 @@ public class WebSocketServerConfig implements WebSocketMessageBrokerConfigurer {
   }
 
   /**
-   * Task scheduler bean for handling WebSocket heartbeat mechanism.
-   * Required when heartbeat values are configured.
+   * Task scheduler bean for handling WebSocket heartbeat mechanism. Required when heartbeat values
+   * are configured.
    */
   @Bean
   public TaskScheduler heartBeatTaskScheduler() {

@@ -17,10 +17,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class OneTimeTokenServiceImpl implements OneTimeTokenService {
 
-  private final RedisTemplate<String, Object> redisTemplate;
-
   private static final int TOKEN_BYTE_LENGTH = 32;
   private static final Duration TOKEN_TTL = Duration.ofMinutes(15);
+  private final RedisTemplate<String, Object> redisTemplate;
 
   @Override
   public OneTimeToken generate(GenerateOneTimeTokenRequest request) {
@@ -35,7 +34,8 @@ public class OneTimeTokenServiceImpl implements OneTimeTokenService {
   public OneTimeToken consume(OneTimeTokenAuthenticationToken authenticationToken) {
     // Obtain token from Redis
     String username = (String) authenticationToken.getPrincipal();
-    LinkedHashMap<?, ?> redisValue = (LinkedHashMap<?, ?>) redisTemplate.opsForValue().get(redisKey(username));
+    LinkedHashMap<?, ?> redisValue = (LinkedHashMap<?, ?>) redisTemplate.opsForValue()
+        .get(redisKey(username));
     OneTimeToken token = new DefaultOneTimeToken(
         (String) redisValue.get("tokenValue"),
         (String) redisValue.get("username"),

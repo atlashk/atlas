@@ -9,12 +9,12 @@ import org.atlas.framework.jwt.auth0.Auth0JwtService;
 @UtilityClass
 public class JwtUtil {
 
+  public static JwtService getInstance() {
+    return ServiceHolder.INSTANCE;
+  }
+
   private static class ServiceHolder {
 
     private static final JwtService INSTANCE = new Auth0JwtService();
-  }
-
-  public static JwtService getInstance() {
-    return ServiceHolder.INSTANCE;
   }
 }

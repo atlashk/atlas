@@ -20,10 +20,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ProductApiAdapter implements ProductApiPort {
 
+  private final RestTemplateService service;
   @Value("${app.api-client.rest.product-service.base-url:http://localhost:8082}")
   private String baseUrl;
-
-  private final RestTemplateService service;
 
   @Override
   @SuppressWarnings("unchecked")

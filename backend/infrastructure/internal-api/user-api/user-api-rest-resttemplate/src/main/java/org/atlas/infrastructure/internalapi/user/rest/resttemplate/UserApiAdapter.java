@@ -20,10 +20,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UserApiAdapter implements UserApiPort {
 
+  private final RestTemplateService service;
   @Value("${app.api-client.rest.user-service.base-url:http://localhost:8081}")
   private String baseUrl;
-
-  private final RestTemplateService service;
 
   @Override
   @SuppressWarnings("unchecked")

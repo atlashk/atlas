@@ -14,16 +14,17 @@ public class PrometheusApiLatencyMetricsCollectorAdapter implements ApiLatencyMe
   private final MeterRegistry meterRegistry;
 
   @Override
-  public void collect(String service, String endpoint, String method, int httpStatus, String channel,
+  public void collect(String service, String endpoint, String method, int httpStatus,
+      String channel,
       long elapsedTimeMs) {
-      Tags tags = Tags.of(
-          "service", service,
-          "endpoint", endpoint,
-          "method", method,
-          "http_status", String.valueOf(httpStatus),
-          "channel", channel
-      );
-      meterRegistry.timer(metricName(), tags)
-          .record(elapsedTimeMs, TimeUnit.MILLISECONDS);
+    Tags tags = Tags.of(
+        "service", service,
+        "endpoint", endpoint,
+        "method", method,
+        "http_status", String.valueOf(httpStatus),
+        "channel", channel
+    );
+    meterRegistry.timer(metricName(), tags)
+        .record(elapsedTimeMs, TimeUnit.MILLISECONDS);
   }
 }

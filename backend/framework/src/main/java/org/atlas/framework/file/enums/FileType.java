@@ -11,8 +11,7 @@ public enum FileType {
 
   CSV("csv"),
   EXCEL("xlsx"),
-  PDF("pdf")
-  ;
+  PDF("pdf");
 
   private final String extension;
 

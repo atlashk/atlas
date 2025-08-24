@@ -39,5 +39,6 @@ public interface JpaProductRepository extends JpaBaseRepository<JpaProductEntity
       where p.id = :id
       and p.quantity >= :decrement
       """)
-  int decreaseQuantityWithConstraint(@Param("id") Integer id, @Param("decrement") Integer decrement);
+  int decreaseQuantityWithConstraint(@Param("id") Integer id,
+      @Param("decrement") Integer decrement);
 }

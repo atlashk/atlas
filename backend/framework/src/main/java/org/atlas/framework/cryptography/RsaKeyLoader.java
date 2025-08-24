@@ -35,7 +35,8 @@ public class RsaKeyLoader {
     }
   }
 
-  public static RSAPublicKey loadPublicKey(String publicKeyPath) throws IOException, InvalidKeySpecException {
+  public static RSAPublicKey loadPublicKey(String publicKeyPath)
+      throws IOException, InvalidKeySpecException {
     if (publicKey == null) {
       synchronized (RsaKeyLoader.class) {
         if (publicKey == null) {
@@ -48,7 +49,8 @@ public class RsaKeyLoader {
     return publicKey;
   }
 
-  public static RSAPrivateKey loadPrivateKey(String privateKeyPath) throws IOException, InvalidKeySpecException {
+  public static RSAPrivateKey loadPrivateKey(String privateKeyPath)
+      throws IOException, InvalidKeySpecException {
     if (privateKey == null) {
       synchronized (RsaKeyLoader.class) {
         if (privateKey == null) {
@@ -61,7 +63,8 @@ public class RsaKeyLoader {
     return privateKey;
   }
 
-  private static byte[] readKeyBytes(String resource, String header, String footer) throws IOException {
+  private static byte[] readKeyBytes(String resource, String header, String footer)
+      throws IOException {
     try (InputStream inputStream = FileUtil.readResourceFileAsStream(resource)) {
       String content = new String(inputStream.readAllBytes())
           .replace(header, "")

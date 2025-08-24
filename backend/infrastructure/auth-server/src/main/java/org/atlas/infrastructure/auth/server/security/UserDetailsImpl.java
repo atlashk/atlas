@@ -62,9 +62,10 @@ public class UserDetailsImpl implements UserDetails {
     return true;
   }
 
-  public Set<Role> getRoles() {
+  public Role getRole() {
     return authorities.stream()
         .map(authority -> Role.valueOf(authority.getAuthority()))
-        .collect(Collectors.toSet());
+        .findFirst()
+        .orElse(Role.USER);
   }
 }

@@ -1,7 +1,6 @@
 package org.atlas.framework.jwt;
 
 import java.util.Date;
-import java.util.Set;
 import lombok.Builder;
 import lombok.Data;
 import org.atlas.domain.user.shared.enums.Role;
@@ -23,7 +22,7 @@ public class Jwt {
   // 'exp' claim
   private Date expiresAt;
   // Custom claims
-  private Set<Role> userRoles;
+  private Role userRole;
   private String sessionId;
 
   public Integer getUserId() {

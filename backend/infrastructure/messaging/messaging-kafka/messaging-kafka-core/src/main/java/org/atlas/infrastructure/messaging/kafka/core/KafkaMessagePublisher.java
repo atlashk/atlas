@@ -23,7 +23,7 @@ public class KafkaMessagePublisher implements MessagePublisher {
     // Asynchronous send with context propagation
     kafkaTemplate.send(topic, messageKey, messagePayload)
         .whenCompleteAsync((result, throwable) ->
-                logResult(messagePayload, topic, result, throwable));
+            logResult(messagePayload, topic, result, throwable));
   }
 
   private void logResult(Object messagePayload, String topic,

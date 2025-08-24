@@ -17,10 +17,6 @@ public class PagingResult<T> {
   protected List<T> data;
   protected Pagination pagination;
 
-  public boolean checkEmpty() {
-    return pagination.getTotalRecords() == 0L;
-  }
-
   public static <T> PagingResult<T> empty() {
     return new PagingResult<>(Collections.emptyList(), Pagination.empty());
   }
@@ -32,6 +28,10 @@ public class PagingResult<T> {
   public static <T> PagingResult<T> of(List<T> data, long totalRecords,
       PagingRequest pagingRequest) {
     return new PagingResult<>(data, Pagination.of(totalRecords, pagingRequest));
+  }
+
+  public boolean checkEmpty() {
+    return pagination.getTotalRecords() == 0L;
   }
 
   public <U> PagingResult<U> map(Function<? super T, ? extends U> mapper) {

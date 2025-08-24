@@ -9,8 +9,8 @@ import org.atlas.domain.product.port.file.csv.ProductCsvWriterPort;
 import org.atlas.domain.product.port.file.excel.ProductExcelWriterPort;
 import org.atlas.domain.product.port.file.model.write.ProductRow;
 import org.atlas.domain.product.port.file.pdf.ProductPdfWriterPort;
-import org.atlas.domain.product.repository.criteria.FindProductCriteria;
 import org.atlas.domain.product.repository.ProductRepository;
+import org.atlas.domain.product.repository.criteria.FindProductCriteria;
 import org.atlas.domain.product.usecase.admin.model.AdminExportProductInput;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
@@ -32,7 +32,7 @@ public class AdminExportProductUseCaseHandler {
         .map(input, FindProductCriteria.class);
     PagingResult<ProductEntity> productEntities = productRepository.findByCriteria(criteria,
         PagingRequest.unpaged());
-    
+
     // Use custom mapping method for complex attribute mapping
     List<ProductRow> productRows = ObjectMapperUtil.getInstance()
         .mapList(productEntities.getData(), this::toProductRow);

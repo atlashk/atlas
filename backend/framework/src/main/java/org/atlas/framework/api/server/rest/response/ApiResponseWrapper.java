@@ -34,7 +34,8 @@ public class ApiResponseWrapper<T> {
 
   public static <T> ApiResponseWrapper<List<T>> successPage(PagingResult<T> pagingResult) {
     if (pagingResult.getPagination().getTotalPages() > 0) {
-      pagingResult.getPagination().setCurrentPage(pagingResult.getPagination().getCurrentPage() + 1);
+      pagingResult.getPagination()
+          .setCurrentPage(pagingResult.getPagination().getCurrentPage() + 1);
     }
     return new ApiResponseWrapper<>(true, pagingResult.getData(), pagingResult.getPagination(),
         null, null);

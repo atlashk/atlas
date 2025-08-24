@@ -4,11 +4,10 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.atlas.domain.user.shared.enums.Role;
 import org.atlas.edge.gateway.springcloudgateway.security.jwt.JwtExtractor;
 import org.atlas.framework.config.Application;
 import org.atlas.framework.config.ApplicationConfigPort;
-import org.atlas.framework.util.StringUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -50,20 +49,23 @@ public class SecurityConfig {
               applicationConfigPort.getConfigAsList(Application.SYSTEM, "cors.allowed-headers"));
 
           // Configure headers that are exposed from server to client
-          List<String> exposedHeaders = applicationConfigPort.getConfigAsList(Application.SYSTEM, "cors.exposed-headers");
+          List<String> exposedHeaders = applicationConfigPort.getConfigAsList(Application.SYSTEM,
+              "cors.exposed-headers");
           if (CollectionUtils.isNotEmpty(exposedHeaders)) {
             exposedHeaders.forEach(corsConfig::addExposedHeader);
           }
 
           // Allow sending credentials (cookies, authorization headers) in CORS requests
           corsConfig.setAllowCredentials(
-              applicationConfigPort.getConfigAsBoolean(Application.SYSTEM, "cors.allow-credentials", true));
+              applicationConfigPort.getConfigAsBoolean(Application.SYSTEM, "cors.allow-credentials",
+                  true));
 
           // Cache time for preflight requests (seconds), 0 = no cache
           corsConfig.setMaxAge(
               applicationConfigPort.getConfigAsLong(Application.SYSTEM, "cors.max-age", 0L));
 
-          log.debug("CORS Configuration - Allowed Origins: {}, Allowed Methods: {}, Allowed Headers: {}, Exposed Headers: {}, Allow Credentials: {}, Max Age: {}",
+          log.debug(
+              "CORS Configuration - Allowed Origins: {}, Allowed Methods: {}, Allowed Headers: {}, Exposed Headers: {}, Allow Credentials: {}, Max Age: {}",
               corsConfig.getAllowedOrigins(),
               corsConfig.getAllowedMethods(),
               corsConfig.getAllowedHeaders(),
@@ -81,7 +83,8 @@ public class SecurityConfig {
                   exception);
             }))
         .exceptionHandling(
-            exceptionHandlingSpec -> exceptionHandlingSpec.authenticationEntryPoint(serverAuthenticationEntryPoint)
+            exceptionHandlingSpec -> exceptionHandlingSpec.authenticationEntryPoint(
+                    serverAuthenticationEntryPoint)
                 .accessDeniedHandler(accessDeniedHandler));
 
     return http.build();
@@ -91,11 +94,9 @@ public class SecurityConfig {
   public ReactiveJwtAuthenticationConverter jwtAuthenticationConverter() {
     ReactiveJwtAuthenticationConverter converter = new ReactiveJwtAuthenticationConverter();
     converter.setJwtGrantedAuthoritiesConverter(jwt -> {
-      String roles = jwtExtractor.extractUserRoles(jwt);
-      if (StringUtil.isNotBlank(roles)) {
-        return Flux.fromArray(roles.split(","))
-            .filter(StringUtils::isNotBlank)
-            .map(SimpleGrantedAuthority::new);
+      Role role = jwtExtractor.extractUserRole(jwt);
+      if (role != null) {
+        return Flux.just(new SimpleGrantedAuthority(role.name()));
       }
       return Flux.empty();
     });

@@ -19,7 +19,9 @@ public class EncryptionUtil {
   private static final int TAG_SIZE = 128; // in bits
 
   public static String encrypt(String data, String secretKey) throws Exception {
-    if (data == null) return null;
+    if (data == null) {
+      return null;
+    }
 
     byte[] iv = new byte[IV_SIZE];
     SecureRandom random = new SecureRandom();
@@ -40,7 +42,9 @@ public class EncryptionUtil {
   }
 
   public static String decrypt(String encryptedData, String secretKey) throws Exception {
-    if (encryptedData == null) return null;
+    if (encryptedData == null) {
+      return null;
+    }
 
     byte[] decoded = Base64.getDecoder().decode(encryptedData);
 

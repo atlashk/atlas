@@ -11,8 +11,8 @@ public class StringUtil {
   public static final String EMPTY = "";
 
   /**
-   * Checks if a string is blank (null, empty, or containing only whitespace).
-   * Using Java 11+ isBlank built-in method directly
+   * Checks if a string is blank (null, empty, or containing only whitespace). Using Java 11+
+   * isBlank built-in method directly
    */
   public static boolean isBlank(String str) {
     return str == null || str.isBlank();
@@ -22,7 +22,8 @@ public class StringUtil {
    * Checks if a string is not blank (not null, not empty, and contains non-whitespace characters).
    *
    * @param str the string to check
-   * @return true if the string is not null, not empty, and contains non-whitespace characters; false otherwise
+   * @return true if the string is not null, not empty, and contains non-whitespace characters;
+   * false otherwise
    */
   public static boolean isNotBlank(String str) {
     return !isBlank(str);
@@ -36,8 +37,8 @@ public class StringUtil {
   }
 
   /**
-   * Limits the length of a string to the specified maximum length.
-   * If the string exceeds the maximum length, it is truncated.
+   * Limits the length of a string to the specified maximum length. If the string exceeds the
+   * maximum length, it is truncated.
    *
    */
   public static String limitLength(String str, int maxLength) {
@@ -48,7 +49,8 @@ public class StringUtil {
   }
 
   /**
-   * Masks a string by keeping a specified number of characters at the start and replacing the rest with a mask character.
+   * Masks a string by keeping a specified number of characters at the start and replacing the rest
+   * with a mask character.
    */
   public static String mask(String str, int firstChars, char maskChar) {
     if (str == null) {

@@ -32,7 +32,8 @@ public class RedisTemplateConfig {
   }
 
   @Bean
-  public ReactiveRedisTemplate<String, Object> reactiveRedisTemplate(ReactiveRedisConnectionFactory factory) {
+  public ReactiveRedisTemplate<String, Object> reactiveRedisTemplate(
+      ReactiveRedisConnectionFactory factory) {
     RedisSerializationContext<String, Object> serializationContext = RedisSerializationContext
         .<String, Object>newSerializationContext(keySerializer)
         .value(valueSerializer)

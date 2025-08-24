@@ -18,15 +18,14 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class OpenApiConfig {
 
-  private final ApplicationConfigPort applicationConfigPort;
-
   private static final String DEFAULT_MEDIA_TYPE = org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
   // Map to store status codes and their example responses
   private static final Map<String, String> RESPONSE_EXAMPLES = Map.of(
       "400", "{\"success\": false, \"code\": \"1002\", \"message\": \"Bad request\"}",
-      "500", "{ \"success\": false, \"code\": \"1000\", \"message\": \"An unexpected error occurred\"}"
+      "500",
+      "{ \"success\": false, \"code\": \"1000\", \"message\": \"An unexpected error occurred\"}"
   );
+  private final ApplicationConfigPort applicationConfigPort;
 
   @Bean
   public OpenAPI openAPI() {

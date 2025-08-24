@@ -26,7 +26,8 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
       return;
     }
 
-    ApiResponseWrapper<Void> restApiResponseWrapper = ApiResponseWrapper.error(HttpStatus.UNAUTHORIZED.value(),
+    ApiResponseWrapper<Void> restApiResponseWrapper = ApiResponseWrapper.error(
+        HttpStatus.UNAUTHORIZED.value(),
         exception.getMessage());
     HttpUtil.respondJson(response, restApiResponseWrapper, HttpStatus.UNAUTHORIZED);
   }

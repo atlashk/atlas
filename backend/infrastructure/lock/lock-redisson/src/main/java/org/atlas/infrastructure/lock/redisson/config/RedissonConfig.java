@@ -25,7 +25,8 @@ public class RedissonConfig {
   public RedissonClient redissonClient() {
     Config config = new Config();
 
-    final boolean isSslEnabled = redisProperties.getSsl() != null && redisProperties.getSsl().isEnabled();
+    final boolean isSslEnabled =
+        redisProperties.getSsl() != null && redisProperties.getSsl().isEnabled();
     final String protocol = isSslEnabled ? "rediss://" : "redis://";
     final String password = StringUtil.isNotBlank(redisProperties.getPassword())
         ? redisProperties.getPassword()
@@ -51,7 +52,8 @@ public class RedissonConfig {
       if (StringUtil.isBlank(redisProperties.getHost())) {
         throw new IllegalArgumentException("Redis host must be specified for standalone mode");
       }
-      String address = protocol + redisProperties.getHost().trim() + ":" + redisProperties.getPort();
+      String address =
+          protocol + redisProperties.getHost().trim() + ":" + redisProperties.getPort();
       SingleServerConfig singleConfig = config.useSingleServer()
           .setAddress(address);
       if (StringUtil.isNotBlank(password)) {

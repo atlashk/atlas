@@ -2,7 +2,6 @@ package org.atlas.infrastructure.persistence.jpa.adapter.order.repository;
 
 import java.math.BigDecimal;
 import java.util.Optional;
-
 import org.atlas.domain.order.shared.enums.OrderStatus;
 import org.atlas.infrastructure.persistence.jpa.adapter.order.entity.JpaOrderEntity;
 import org.atlas.infrastructure.persistence.jpa.core.repository.JpaBaseRepository;

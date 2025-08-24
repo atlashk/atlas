@@ -32,15 +32,6 @@ spring:
               max-idle-time: 45m # Allow connections to stay idle longer for SSE/WebSocket
           routes:
             # User service
-            - id: user-service
-              uri: ${USER_SERVICE_URI:lb://user-service}
-              predicates:
-                - Path=/api/user-svc/**
-              filters:
-                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-                - TokenValidation
-                - TokenRelay
-                - RewritePath=/api/user-svc/(?<segment>.*), /api/${segment}
             - id: user-service-admin
               uri: ${USER_SERVICE_URI:lb://user-service}
               predicates:
@@ -51,6 +42,15 @@ spring:
                 - Authorization=ADMIN
                 - TokenRelay
                 - RewritePath=/api/user-svc/admin/(?<segment>.*), /api/admin/${segment}
+            - id: user-service
+              uri: ${USER_SERVICE_URI:lb://user-service}
+              predicates:
+                - Path=/api/user-svc/**
+              filters:
+                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+                - TokenValidation
+                - TokenRelay
+                - RewritePath=/api/user-svc/(?<segment>.*), /api/${segment}
             - id: user-service-auth
               uri: ${USER_SERVICE_URI:lb://user-service}
               predicates:

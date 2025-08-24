@@ -22,10 +22,9 @@ import org.springframework.web.client.RestClient;
 @RequiredArgsConstructor
 public class ProductApiAdapter implements ProductApiPort {
 
+  private final RestClient restClient;
   @Value("${app.api-client.rest.product-service.base-url:http://localhost:8082}")
   private String baseUrl;
-
-  private final RestClient restClient;
 
   @Override
   public List<ProductResponse> call(ListProductRequest request) {

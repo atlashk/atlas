@@ -22,10 +22,9 @@ import org.springframework.web.client.RestClient;
 @RequiredArgsConstructor
 public class UserApiAdapter implements UserApiPort {
 
+  private final RestClient restClient;
   @Value("${app.api-client.rest.user-service.base-url:http://localhost:8081}")
   private String baseUrl;
-
-  private final RestClient restClient;
 
   @Override
   public List<UserResponse> call(ListUserRequest request) {

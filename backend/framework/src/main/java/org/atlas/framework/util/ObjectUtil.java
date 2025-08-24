@@ -11,16 +11,17 @@ import lombok.experimental.UtilityClass;
 public class ObjectUtil {
 
   /**
-   * Creates a deep copy of the provided object using serialization.
-   * The method serializes the input object to a byte stream and then deserializes
-   * it to create a new instance with no shared references to the original object.
-   * All objects in the object graph must implement {@link java.io.Serializable}.
+   * Creates a deep copy of the provided object using serialization. The method serializes the input
+   * object to a byte stream and then deserializes it to create a new instance with no shared
+   * references to the original object. All objects in the object graph must implement
+   * {@link java.io.Serializable}.
    *
    * @param <T>    the type of the object to clone
    * @param object the object to be deeply cloned, or null
    * @return a deep copy of the input object, or null if the input is null
    * @throws java.io.IOException    if an I/O error occurs during serialization or deserialization
-   * @throws ClassNotFoundException if a class in the object graph cannot be found during deserialization
+   * @throws ClassNotFoundException if a class in the object graph cannot be found during
+   *                                deserialization
    */
   @SuppressWarnings("unchecked")
   public static <T> T deepClone(T object) throws IOException, ClassNotFoundException {

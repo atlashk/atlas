@@ -107,7 +107,8 @@ public class ProductExcelWriterAdapter implements ProductExcelWriterPort {
       cell.setCellStyle(style);
 
       cell = row.createCell(5);
-      cell.setCellValue(DateUtil.format(productRow.getAvailableFrom(), CommonConstant.DATE_TIME_FORMAT));
+      cell.setCellValue(
+          DateUtil.format(productRow.getAvailableFrom(), CommonConstant.DATE_TIME_FORMAT));
       cell.setCellStyle(style);
 
       cell = row.createCell(6);

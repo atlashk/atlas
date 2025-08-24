@@ -1,95 +1,96 @@
 <configuration>
-    <!-- use Spring default values -->
-    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+  <!-- use Spring default values -->
+  <appender class="ch.qos.logback.core.ConsoleAppender" name="CONSOLE">
+    <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+      <layout class="org.atlas.infrastructure.observability.logging.logback.MaskingPatternLayout">
+        <Pattern>${CONSOLE_LOG_PATTERN}</Pattern>
+      </layout>
+    </encoder>
+  </appender>
 
-    <springProperty scope="context" name="SERVICE_NAME" source="spring.application.name"/>
-    <property name="LOG_DIR" value="/var/log/${SERVICE_NAME}"/>
+  <appender class="ch.qos.logback.core.rolling.RollingFileAppender" name="FILE">
+    <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+      <layout class="org.atlas.infrastructure.observability.logging.logback.MaskingPatternLayout">
+        <pattern>${FILE_LOG_PATTERN}</pattern>
+      </layout>
+    </encoder>
 
-    <!-- Console Appender using encoder instead of layout -->
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
-            <layout class="org.atlas.infrastructure.observability.logging.logback.MaskingPatternLayout">
-                <Pattern>${CONSOLE_LOG_PATTERN}</Pattern>
-            </layout>
-        </encoder>
-    </appender>
+    <file>${LOG_DIR}/${SERVICE_NAME}.log</file>
 
-    <!-- File Appender with Rolling Policy -->
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_DIR}/${SERVICE_NAME}.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <!-- Rollover daily and when the file size reaches 100MB -->
+      <fileNamePattern>${LOG_DIR}/${SERVICE_NAME}-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+      <maxFileSize>100MB</maxFileSize>
+      <maxHistory>30</maxHistory>
+      <totalSizeCap>3GB</totalSizeCap>
+    </rollingPolicy>
+  </appender>
+  <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
-        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
-            <layout class="org.atlas.infrastructure.observability.logging.logback.MaskingPatternLayout">
-                <pattern>${FILE_LOG_PATTERN}</pattern>
-            </layout>
-        </encoder>
+  <!-- Console Appender using encoder instead of layout -->
+  <logger additivity="false" level="DEBUG" name="org.atlas">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+  </logger>
 
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <!-- Rollover daily and when the file size reaches 100MB -->
-            <fileNamePattern>${LOG_DIR}/${SERVICE_NAME}-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
-            <maxFileSize>100MB</maxFileSize>
-            <maxHistory>30</maxHistory>
-            <totalSizeCap>3GB</totalSizeCap>
-        </rollingPolicy>
-    </appender>
+  <!-- File Appender with Rolling Policy -->
+  <logger additivity="false" level="DEBUG" name="io.github.resilience4j">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+  </logger>
 
-    <!-- Logger for specific packages -->
-    <logger name="org.atlas" level="DEBUG" additivity="false">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </logger>
+  <!-- Logger for specific packages -->
+  <logger additivity="false" level="DEBUG" name="io.github.resilience4j.retry">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+  </logger>
 
-    <!-- Resilience::resilience4j -->
-    <logger name="io.github.resilience4j" level="DEBUG" additivity="false">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </logger>
-    <logger name="io.github.resilience4j.retry" level="DEBUG" additivity="false">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </logger>
-    <logger name="io.github.resilience4j.circuitbreaker" level="DEBUG" additivity="false">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </logger>
-    <logger name="io.github.resilience4j.bulkhead" level="DEBUG" additivity="false">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </logger>
-    <logger name="io.github.resilience4j.ratelimiter" level="DEBUG" additivity="false">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </logger>
-    <logger name="io.github.resilience4j.timelimiter" level="DEBUG" additivity="false">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </logger>
+  <!-- Resilience::resilience4j -->
+  <logger additivity="false" level="DEBUG" name="io.github.resilience4j.circuitbreaker">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+  </logger>
+  <logger additivity="false" level="DEBUG" name="io.github.resilience4j.bulkhead">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+  </logger>
+  <logger additivity="false" level="DEBUG" name="io.github.resilience4j.ratelimiter">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+  </logger>
+  <logger additivity="false" level="DEBUG" name="io.github.resilience4j.timelimiter">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+  </logger>
+  <logger additivity="false" level="DEBUG" name="org.quartz.core">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+  </logger>
+  <logger additivity="false" level="DEBUG"
+    name="org.springframework.cloud.gateway.filter.ratelimit">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+  </logger>
 
-    <!-- Scheduler::Quartz -->
-    <logger name="org.quartz.core" level="DEBUG" additivity="false">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </logger>
+  <!-- Scheduler::Quartz -->
+  <logger additivity="false" level="DEBUG" name="reactor.netty.http.client">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+  </logger>
 
-    <!-- Spring Cloud Gateway -->
-    <logger name="org.springframework.cloud.gateway.filter.ratelimit" level="DEBUG" additivity="false">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </logger>
-    <logger name="reactor.netty.http.client" level="DEBUG" additivity="false">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </logger>
+  <!-- Spring Cloud Gateway -->
+  <logger additivity="false" level="DEBUG" name="org.springframework.security">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+  </logger>
+  <property name="LOG_DIR" value="/var/log/${SERVICE_NAME}"/>
 
-    <!-- Spring Security -->
-    <logger name="org.springframework.security" level="DEBUG" additivity="false">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </logger>
+  <!-- Spring Security -->
+  <root level="INFO">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+  </root>
 
-    <!-- Root Logger -->
-    <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </root>
+  <!-- Root Logger -->
+  <springProperty name="SERVICE_NAME" scope="context" source="spring.application.name"/>
 </configuration>

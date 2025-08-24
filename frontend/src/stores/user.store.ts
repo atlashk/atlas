@@ -1,4 +1,5 @@
 import { authApi, userApi } from "@/api";
+import { Role } from "@/constants";
 import type { LoginRequest } from "@/interfaces/auth.interface";
 import type { RegisterRequest, User } from "@/interfaces/user.interface";
 import { create } from "zustand";
@@ -28,7 +29,7 @@ interface UserActions {
   // Actions
   login: (
     credentials: LoginRequest
-  ) => Promise<{ success: boolean; errorMessage?: string }>;
+  ) => Promise<{ success: boolean; errorMessage?: string; userRole?: Role }>;
   register: (userData: RegisterRequest) => Promise<void>;
   fetchProfile: () => Promise<void>;
   setTokens: (accessToken: string, refreshToken: string) => void;
@@ -104,7 +105,15 @@ export const useUserStore = create<UserStore>()(
               profile: profileData as User,
               loading: false,
             });
-            return { success: true };
+
+            // Fetch complete profile data after login
+            await get().fetchProfile();
+
+            // Return success with user role information
+            return {
+              success: true,
+              userRole: (profileData as User).role
+            };
           } else {
             set({
               error: response.errorMessage || "Login failed",

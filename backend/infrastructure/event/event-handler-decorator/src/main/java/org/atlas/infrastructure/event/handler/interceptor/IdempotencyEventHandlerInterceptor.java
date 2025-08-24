@@ -15,13 +15,12 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class IdempotencyEventHandlerInterceptor implements EventHandlerInterceptor {
 
-  private final ApplicationConfigPort applicationConfigPort;
-  private final RedisTemplate<String, Object> redisTemplate;
-
   private static final String PROCESSING_REDIS_VALUE = "processing";
   private static final Duration PROCESSING_TIMEOUT = Duration.ofMinutes(15);
   private static final String PROCESSED_REDIS_VALUE = "processed";
   private static final Duration PROCESSED_TTL = Duration.ofDays(7);
+  private final ApplicationConfigPort applicationConfigPort;
+  private final RedisTemplate<String, Object> redisTemplate;
 
   @Override
   public void preHandle(DomainEvent event) {

@@ -7,10 +7,10 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class StopWatchUtil {
 
+  private final ReentrantLock lock = new ReentrantLock();
   private long startTime = 0;
   private long endTime = 0;
   private boolean running = false;
-  private final ReentrantLock lock = new ReentrantLock();
 
   public void start() {
     lock.lock();

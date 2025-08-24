@@ -11,15 +11,14 @@ import net.devh.boot.grpc.client.interceptor.GrpcGlobalClientInterceptor;
 import org.atlas.framework.auth.enums.CustomClaim;
 import org.atlas.framework.context.ContextInfo;
 import org.atlas.framework.context.Contexts;
-import org.atlas.framework.util.RoleUtil;
 
 @GrpcGlobalClientInterceptor
 public class UserContextInterceptor implements ClientInterceptor {
 
   private static final Metadata.Key<String> USER_ID_HEADER =
       Metadata.Key.of(CustomClaim.USER_ID.getHeader(), Metadata.ASCII_STRING_MARSHALLER);
-  private static final Metadata.Key<String> USER_ROLES_HEADER =
-      Metadata.Key.of(CustomClaim.USER_ROLES.getHeader(), Metadata.ASCII_STRING_MARSHALLER);
+  private static final Metadata.Key<String> USER_ROLE_HEADER =
+      Metadata.Key.of(CustomClaim.USER_ROLE.getHeader(), Metadata.ASCII_STRING_MARSHALLER);
 
   @Override
   public <ReqT, RespT> ClientCall<ReqT, RespT> interceptCall(MethodDescriptor<ReqT, RespT> method,
@@ -32,7 +31,7 @@ public class UserContextInterceptor implements ClientInterceptor {
       public void start(Listener<RespT> responseListener, Metadata headers) {
         if (contextInfo != null) {
           headers.put(USER_ID_HEADER, String.valueOf(contextInfo.getUserId()));
-          headers.put(USER_ROLES_HEADER, RoleUtil.toRolesString(contextInfo.getUserRoles()));
+          headers.put(USER_ROLE_HEADER, contextInfo.getUserRole().name());
         }
         super.start(responseListener, headers);
       }

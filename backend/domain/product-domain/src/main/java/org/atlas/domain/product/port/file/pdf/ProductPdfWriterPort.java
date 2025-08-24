@@ -5,5 +5,5 @@ import org.atlas.domain.product.port.file.model.write.ProductRow;
 
 public interface ProductPdfWriterPort {
 
-   byte[] write(List<ProductRow> productRows) throws Exception;
+  byte[] write(List<ProductRow> productRows) throws Exception;
 }

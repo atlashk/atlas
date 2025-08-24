@@ -5,8 +5,8 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.product.entity.ProductEntity;
-import org.atlas.domain.product.repository.criteria.FindProductCriteria;
 import org.atlas.domain.product.repository.ProductRepository;
+import org.atlas.domain.product.repository.criteria.FindProductCriteria;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.error.AppError;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
@@ -81,7 +81,8 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
 
   @Override
   public void update(ProductEntity productEntity) {
-    JpaProductEntity jpaProductEntity = jpaProductRepository.findByIdWithAssociations(productEntity.getId())
+    JpaProductEntity jpaProductEntity = jpaProductRepository.findByIdWithAssociations(
+            productEntity.getId())
         .orElseThrow(() -> new DomainException(AppError.PRODUCT_NOT_FOUND));
     JpaProductEntityMapper.merge(productEntity, jpaProductEntity);
     jpaProductRepository.save(jpaProductEntity);
@@ -111,7 +112,8 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
   @Override
   public void decreaseQuantityWithOptimisticLock(Integer id, Integer decrement) {
     RetryUtil.retryOn(() -> {
-      JpaOptimisticProductEntity jpaOptimisticProductEntity = jpaOptimisticProductRepository.findById(id)
+      JpaOptimisticProductEntity jpaOptimisticProductEntity = jpaOptimisticProductRepository.findById(
+              id)
           .orElseThrow(() -> new DomainException(AppError.PRODUCT_NOT_FOUND));
       if (jpaOptimisticProductEntity.getQuantity() < decrement) {
         throw new DomainException(AppError.PRODUCT_INSUFFICIENT_QUANTITY);

@@ -1,4 +1,4 @@
-package org.atlas.edge.gateway.springcloudgateway.security;
+package org.atlas.edge.gateway.springcloudgateway.security.filter;
 
 import org.atlas.edge.gateway.springcloudgateway.security.jwt.JwtExtractor;
 import org.atlas.framework.auth.enums.CustomClaim;
@@ -27,8 +27,10 @@ public class TokenRelayGatewayFilterFactory extends
   public GatewayFilter apply(Config config) {
     return (exchange, chain) -> ReactiveSecurityContextHolder.getContext()
         .map(SecurityContext::getAuthentication)
-        .filter(auth ->
-            auth != null && auth.isAuthenticated() && auth.getCredentials() instanceof Jwt)
+        .filter(auth -> auth != null &&
+            auth.isAuthenticated() &&
+            auth.getCredentials() != null &&
+            auth.getCredentials() instanceof Jwt)
         .map(auth -> (Jwt) auth.getCredentials())
         .flatMap(jwt -> {
           // Mutate the request to add custom headers
@@ -38,8 +40,8 @@ public class TokenRelayGatewayFilterFactory extends
                 httpHeaders.remove(HttpHeaders.AUTHORIZATION);
                 httpHeaders.set(CustomClaim.USER_ID.getHeader(),
                     jwtExtractor.extractUserId(jwt));
-                httpHeaders.set(CustomClaim.USER_ROLES.getHeader(),
-                    jwtExtractor.extractUserRoles(jwt));
+                httpHeaders.set(CustomClaim.USER_ROLE.getHeader(),
+                    jwtExtractor.extractUserRole(jwt).name());
                 assert jwt.getExpiresAt() != null;
                 httpHeaders.set(CustomClaim.EXPIRES_AT.getHeader(),
                     String.valueOf(jwt.getExpiresAt().toEpochMilli()));

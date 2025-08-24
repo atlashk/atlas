@@ -22,6 +22,7 @@ import React, { useState } from "react";
 import { toast } from "sonner";
 import { LoginRequest } from "../../interfaces/auth.interface";
 import { useUserStore } from "../../stores/user.store";
+import { Role } from "@/constants";
 
 const formSchema = z.object({
   username: z.string().min(1, {
@@ -59,9 +60,9 @@ const Login: React.FC = () => {
       const response = await login(credentials);
       if (response.success) {
         toast.success("Login successful!");
-        
+
         // Redirect based on user role
-        if (response.isAdmin) {
+        if (response.userRole === "ADMIN") {
           router.push("/admin/dashboard");
         } else {
           router.push("/");
@@ -69,7 +70,7 @@ const Login: React.FC = () => {
       } else {
         setErrorMessage(
           response.errorMessage ||
-            "Login failed. Please check your credentials."
+          "Login failed. Please check your credentials."
         );
       }
     } catch {

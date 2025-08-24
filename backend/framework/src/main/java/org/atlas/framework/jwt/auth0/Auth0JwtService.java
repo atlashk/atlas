@@ -5,14 +5,13 @@ import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import org.atlas.domain.user.shared.enums.Role;
 import org.atlas.framework.auth.enums.CustomClaim;
 import org.atlas.framework.jwt.DecodeJwtInput;
 import org.atlas.framework.jwt.EncodeJwtInput;
 import org.atlas.framework.jwt.InvalidJwtException;
 import org.atlas.framework.jwt.Jwt;
 import org.atlas.framework.jwt.JwtService;
-import org.atlas.framework.util.CollectionUtil;
-import org.atlas.framework.util.RoleUtil;
 import org.atlas.framework.util.StringUtil;
 import org.atlas.framework.util.UUIDGenerator;
 
@@ -29,9 +28,8 @@ public class Auth0JwtService implements JwtService {
         .withExpiresAt(input.getJwt().getExpiresAt());
 
     // Custom claims
-    if (CollectionUtil.isNotEmpty(input.getJwt().getUserRoles())) {
-      builder.withClaim(CustomClaim.USER_ROLES.getClaim(),
-          RoleUtil.toRolesString(input.getJwt().getUserRoles()));
+    if (input.getJwt().getUserRole() != null) {
+      builder.withClaim(CustomClaim.USER_ROLE.getClaim(), input.getJwt().getUserRole().name());
     }
 
     return builder.sign(Algorithm.RSA256(input.getRsaPublicKey(), input.getRsaPrivateKey()));
@@ -65,10 +63,8 @@ public class Auth0JwtService implements JwtService {
         .expiresAt(decodedJWT.getExpiresAt());
 
     // Custom claims
-    String userRoles = decodedJWT.getClaim(CustomClaim.USER_ROLES.getClaim()).asString();
-    if (StringUtil.isNotBlank(userRoles)) {
-      builder.userRoles(RoleUtil.toRolesSet(userRoles));
-    }
+    builder.userRole(
+        Role.valueOf(decodedJWT.getClaim(CustomClaim.USER_ROLE.getClaim()).asString()));
 
     return builder.build();
   }

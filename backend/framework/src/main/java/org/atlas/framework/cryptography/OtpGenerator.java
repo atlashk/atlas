@@ -11,11 +11,11 @@ public class OtpGenerator {
   /**
    * Generates an HMAC-based One-Time Password (HOTP) as per RFC 4226.
    *
-   * @param secret   The shared secret key in hexadecimal format.
-   *                 Example: "12345678901234567890" (hex) or decode from base32 "GEZDGNBVGY3TQOI=".
-   * @param counter  The counter value used to generate the OTP.
-   * @param digits   The number of digits in the generated OTP (typically 6 or 8).
-   * @return         A string representation of the HOTP with the specified number of digits.
+   * @param secret  The shared secret key in hexadecimal format. Example: "12345678901234567890"
+   *                (hex) or decode from base32 "GEZDGNBVGY3TQOI=".
+   * @param counter The counter value used to generate the OTP.
+   * @param digits  The number of digits in the generated OTP (typically 6 or 8).
+   * @return A string representation of the HOTP with the specified number of digits.
    * @throws Exception If the HMAC-SHA1 algorithm is not supported or the secret is invalid.
    */
   public static String generateHOTP(String secret, long counter, int digits) throws Exception {
@@ -53,12 +53,12 @@ public class OtpGenerator {
   /**
    * Generates a Time-based One-Time Password (TOTP) as per RFC 6238.
    *
-   * @param secret          The shared secret key in hexadecimal format.
-   *                        Example: "12345678901234567890" (hex) or decode from base32 "GEZDGNBVGY3TQOI=".
+   * @param secret          The shared secret key in hexadecimal format. Example:
+   *                        "12345678901234567890" (hex) or decode from base32 "GEZDGNBVGY3TQOI=".
    * @param timeStepSeconds The time step interval in seconds (typically 30).
    * @param digits          The number of digits in the generated OTP (typically 6 or 8).
-   * @return                A string representation of the TOTP with the specified number of digits.
-   * @throws Exception      If the HMAC-SHA1 algorithm is not supported or the secret is invalid.
+   * @return A string representation of the TOTP with the specified number of digits.
+   * @throws Exception If the HMAC-SHA1 algorithm is not supported or the secret is invalid.
    */
   public static String generateTOTP(String secret, long timeStepSeconds, int digits)
       throws Exception {

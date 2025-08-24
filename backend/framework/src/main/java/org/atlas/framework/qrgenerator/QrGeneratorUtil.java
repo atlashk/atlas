@@ -7,12 +7,12 @@ import org.atlas.framework.qrgenerator.zxing.ZxingAdapter;
  */
 public class QrGeneratorUtil {
 
+  public static QrGenerator getInstance() {
+    return JsonHolder.INSTANCE;
+  }
+
   private static class JsonHolder {
 
     private static final QrGenerator INSTANCE = new ZxingAdapter();
-  }
-
-  public static QrGenerator getInstance() {
-    return JsonHolder.INSTANCE;
   }
 }

@@ -43,12 +43,12 @@ public class JpaOrderEntityMapper {
     orderEntity.setStatus(jpaOrderEntity.getStatus());
     orderEntity.setCanceledReason(jpaOrderEntity.getCanceledReason());
     orderEntity.setCreatedAt(jpaOrderEntity.getCreatedAt());
-    
+
     // User
     UserEntity userEntity = new UserEntity();
     userEntity.setId(jpaOrderEntity.getUserId());
     orderEntity.setUser(userEntity);
-    
+
     // Order items
     if (jpaOrderEntity.getOrderItems() != null) {
       jpaOrderEntity.getOrderItems().forEach(jpaOrderItemEntity -> {
@@ -56,17 +56,17 @@ public class JpaOrderEntityMapper {
         orderItemEntity.setId(jpaOrderItemEntity.getId());
         orderItemEntity.setOrderId(jpaOrderEntity.getId());
         orderItemEntity.setQuantity(jpaOrderItemEntity.getQuantity());
-        
+
         // Product
         ProductEntity productEntity = new ProductEntity();
         productEntity.setId(jpaOrderItemEntity.getProductId());
         productEntity.setPrice(jpaOrderItemEntity.getProductPrice());
         orderItemEntity.setProduct(productEntity);
-        
+
         orderEntity.addOrderItem(orderItemEntity);
       });
     }
-    
+
     return orderEntity;
   }
 }

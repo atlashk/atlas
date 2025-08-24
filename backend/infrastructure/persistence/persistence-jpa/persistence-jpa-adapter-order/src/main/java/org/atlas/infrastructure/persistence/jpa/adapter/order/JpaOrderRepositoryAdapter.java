@@ -15,8 +15,6 @@ import org.atlas.infrastructure.persistence.jpa.adapter.order.entity.JpaOrderEnt
 import org.atlas.infrastructure.persistence.jpa.adapter.order.mapper.JpaOrderEntityMapper;
 import org.atlas.infrastructure.persistence.jpa.adapter.order.repository.CustomJpaOrderRepository;
 import org.atlas.infrastructure.persistence.jpa.adapter.order.repository.JpaOrderRepository;
-import org.atlas.infrastructure.persistence.jpa.core.paging.PagingConverter;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 @Component

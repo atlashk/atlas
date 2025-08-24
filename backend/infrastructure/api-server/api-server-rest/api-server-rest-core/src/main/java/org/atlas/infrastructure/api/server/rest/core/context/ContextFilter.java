@@ -7,10 +7,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Date;
 import java.util.regex.Pattern;
+import org.atlas.domain.user.shared.enums.Role;
 import org.atlas.framework.auth.enums.CustomClaim;
 import org.atlas.framework.context.ContextInfo;
 import org.atlas.framework.context.Contexts;
-import org.atlas.framework.util.RoleUtil;
 import org.atlas.framework.util.StringUtil;
 import org.atlas.infrastructure.api.server.rest.core.util.HttpUtil;
 import org.springframework.core.annotation.Order;
@@ -33,13 +33,13 @@ public class ContextFilter extends OncePerRequestFilter {
 
     // For authorized requests
     final String userIdHeader = HttpUtil.getHeader(request, CustomClaim.USER_ID.getHeader());
-    final String userRolesHeader = HttpUtil.getHeader(request, CustomClaim.USER_ROLES.getHeader());
+    final String userRoleHeader = HttpUtil.getHeader(request, CustomClaim.USER_ROLE.getHeader());
     final String expiresAtHeader = HttpUtil.getHeader(request, CustomClaim.EXPIRES_AT.getHeader());
     if (StringUtil.isNotBlank(userIdHeader) &&
-        StringUtil.isNotBlank(userRolesHeader) &&
+        StringUtil.isNotBlank(userRoleHeader) &&
         StringUtil.isNotBlank(expiresAtHeader)) {
       contextInfo.setUserId(Integer.parseInt(userIdHeader));
-      contextInfo.setUserRoles(RoleUtil.toRolesSet(userRolesHeader));
+      contextInfo.setUserRole(Role.valueOf(userRoleHeader));
       contextInfo.setExpiresAt(new Date(Long.parseLong(expiresAtHeader)));
     }
 

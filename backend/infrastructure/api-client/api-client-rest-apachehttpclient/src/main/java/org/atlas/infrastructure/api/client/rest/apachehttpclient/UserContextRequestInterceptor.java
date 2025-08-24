@@ -9,7 +9,6 @@ import org.apache.hc.core5.http.protocol.HttpContext;
 import org.atlas.framework.auth.enums.CustomClaim;
 import org.atlas.framework.context.ContextInfo;
 import org.atlas.framework.context.Contexts;
-import org.atlas.framework.util.RoleUtil;
 
 public class UserContextRequestInterceptor implements HttpRequestInterceptor {
 
@@ -18,9 +17,10 @@ public class UserContextRequestInterceptor implements HttpRequestInterceptor {
       throws HttpException, IOException {
     ContextInfo contextInfo = Contexts.get();
     if (contextInfo != null) {
-      httpRequest.addHeader(CustomClaim.USER_ID.getHeader(), contextInfo.getUserId());
-      httpRequest.addHeader(CustomClaim.USER_ROLES.getHeader(),
-          RoleUtil.toRolesString(contextInfo.getUserRoles()));
+      httpRequest.addHeader(CustomClaim.USER_ID.getHeader(),
+          contextInfo.getUserId());
+      httpRequest.addHeader(CustomClaim.USER_ROLE.getHeader(),
+          contextInfo.getUserRole().name());
     }
   }
 }

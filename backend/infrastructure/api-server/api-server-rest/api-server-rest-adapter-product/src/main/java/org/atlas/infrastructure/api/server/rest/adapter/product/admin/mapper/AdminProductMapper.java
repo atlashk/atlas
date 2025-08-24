@@ -32,7 +32,7 @@ public class AdminProductMapper {
 
     // Attributes
     List<ProductAttributeEntity> attributeEntities = ObjectMapperUtil.getInstance()
-          .mapList(request.getAttributes(), ProductAttributeEntity.class);
+        .mapList(request.getAttributes(), ProductAttributeEntity.class);
     productEntity.setAttributes(attributeEntities);
 
     // Categories

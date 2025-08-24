@@ -1,7 +1,6 @@
 package org.atlas.framework.context;
 
 import java.util.Date;
-import java.util.Set;
 import javax.annotation.Nullable;
 import org.atlas.domain.user.shared.enums.Role;
 import org.atlas.framework.domain.exception.DomainException;
@@ -23,8 +22,8 @@ public class Contexts {
     return require().getUserId();
   }
 
-  public static Set<Role> getUserRoles() {
-    return require().getUserRoles();
+  public static Role getUserRole() {
+    return require().getUserRole();
   }
 
   public static Date getExpiresAt() {

@@ -15,6 +15,19 @@ public class QueryFilter {
   private List<Condition> conditions;
   private LogicalOperator logicalOperator;
 
+  public static QueryFilter of(@Nonnull String key, @Nonnull Object value,
+      @Nonnull QueryOperator queryOperator) {
+    return and(Condition.of(key, value, queryOperator));
+  }
+
+  public static QueryFilter and(@Nonnull Condition... conditions) {
+    return new QueryFilter(Arrays.asList(conditions), LogicalOperator.AND);
+  }
+
+  public static QueryFilter or(@Nonnull Condition... conditions) {
+    return new QueryFilter(Arrays.asList(conditions), LogicalOperator.OR);
+  }
+
   @Getter
 
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -28,18 +41,5 @@ public class QueryFilter {
         @Nonnull QueryOperator queryOperator) {
       return new Condition(key, value, queryOperator);
     }
-  }
-
-  public static QueryFilter of(@Nonnull String key, @Nonnull Object value,
-      @Nonnull QueryOperator queryOperator) {
-    return and(Condition.of(key, value, queryOperator));
-  }
-
-  public static QueryFilter and(@Nonnull Condition... conditions) {
-    return new QueryFilter(Arrays.asList(conditions), LogicalOperator.AND);
-  }
-
-  public static QueryFilter or(@Nonnull Condition... conditions) {
-    return new QueryFilter(Arrays.asList(conditions), LogicalOperator.OR);
   }
 }

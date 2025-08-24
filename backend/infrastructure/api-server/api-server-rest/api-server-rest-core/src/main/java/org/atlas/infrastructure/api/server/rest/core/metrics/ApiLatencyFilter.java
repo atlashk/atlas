@@ -41,11 +41,14 @@ public class ApiLatencyFilter extends OncePerRequestFilter {
       int httpStatus = response.getStatus();
       String channel = Optional.ofNullable(request.getHeader("X-Channel")).orElse("unknown");
       try {
-        apiLatencyMetricsCollector.collect(service, endpoint, method, httpStatus, channel, elapsedTimeMs);
-        log.debug("Collected API Latency metrics: service={}, endpoint={}, method={}, httpStatus={}, channel={}, elapsedTimeMs={}",
+        apiLatencyMetricsCollector.collect(service, endpoint, method, httpStatus, channel,
+            elapsedTimeMs);
+        log.debug(
+            "Collected API Latency metrics: service={}, endpoint={}, method={}, httpStatus={}, channel={}, elapsedTimeMs={}",
             service, endpoint, method, httpStatus, channel, elapsedTimeMs);
       } catch (Exception e) {
-        log.error("Failed to collect API latency metrics: service={}, endpoint={}, method={}, httpStatus={}, channel={}, elapsedTimeMs={}",
+        log.error(
+            "Failed to collect API latency metrics: service={}, endpoint={}, method={}, httpStatus={}, channel={}, elapsedTimeMs={}",
             service, endpoint, method, httpStatus, channel, elapsedTimeMs, e);
       }
     }

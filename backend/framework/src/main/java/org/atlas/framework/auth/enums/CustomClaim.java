@@ -9,7 +9,7 @@ import lombok.Getter;
 public enum CustomClaim {
 
   USER_ID("user_id", "X-User-Id"),
-  USER_ROLES("user_roles", "X-User-Roles"),
+  USER_ROLE("user_role", "X-User-Role"),
   EXPIRES_AT("expires_at", "X-Expires-At"),
   ;
 

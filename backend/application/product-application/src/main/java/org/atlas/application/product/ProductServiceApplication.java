@@ -13,8 +13,9 @@ import org.springframework.context.annotation.FilterType;
 @ComponentScan(basePackages = {
     "org.atlas",
 }, includeFilters = {
-    @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = { DomainService.class, UseCaseHandler.class,
-        DomainEventHandler.class })
+    @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = {DomainService.class,
+        UseCaseHandler.class,
+        DomainEventHandler.class})
 })
 public class ProductServiceApplication {
 

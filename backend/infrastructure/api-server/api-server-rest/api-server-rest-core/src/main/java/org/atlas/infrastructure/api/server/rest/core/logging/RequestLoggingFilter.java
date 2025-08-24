@@ -33,11 +33,12 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
-    
+
     // Check if this is a multipart request
     String contentType = request.getContentType();
-    boolean isMultipartRequest = contentType != null && contentType.toLowerCase().startsWith("multipart/");
-    
+    boolean isMultipartRequest =
+        contentType != null && contentType.toLowerCase().startsWith("multipart/");
+
     if (isMultipartRequest) {
       // For multipart requests, log without caching the body to avoid interfering with Spring's multipart resolver
       logRequestWithoutBody(request);

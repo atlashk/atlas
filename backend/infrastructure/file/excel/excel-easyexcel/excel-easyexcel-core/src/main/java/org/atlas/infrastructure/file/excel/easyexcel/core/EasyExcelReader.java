@@ -13,7 +13,8 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class EasyExcelReader {
 
-  public static <T> List<T> read(byte[] fileContent, String sheetName, Class<T> beanClass) throws IOException {
+  public static <T> List<T> read(byte[] fileContent, String sheetName, Class<T> beanClass)
+      throws IOException {
     List<T> records = new ArrayList<>();
     try (InputStream inputStream = new ByteArrayInputStream(fileContent)) {
       // By default, 100 pieces of data will be read each time and then returned. Just call and use the data directly.

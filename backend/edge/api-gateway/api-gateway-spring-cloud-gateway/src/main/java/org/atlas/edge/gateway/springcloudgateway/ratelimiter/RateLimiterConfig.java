@@ -7,13 +7,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RateLimiterConfig {
 
-    @Bean
-    public RedisRateLimiter anonymousRedisRateLimiter() {
-        return new RedisRateLimiter(1, 5);
-    }
+  @Bean
+  public RedisRateLimiter anonymousRedisRateLimiter() {
+    return new RedisRateLimiter(1, 10);
+  }
 
-    @Bean
-    public RedisRateLimiter userRedisRateLimiter() {
-        return new RedisRateLimiter(1, 10);
-    }
+  @Bean
+  public RedisRateLimiter userRedisRateLimiter() {
+    return new RedisRateLimiter(1, 20);
+  }
 }

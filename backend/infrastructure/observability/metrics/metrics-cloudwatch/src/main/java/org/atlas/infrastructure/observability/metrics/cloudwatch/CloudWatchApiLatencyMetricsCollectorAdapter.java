@@ -17,7 +17,8 @@ public class CloudWatchApiLatencyMetricsCollectorAdapter implements ApiLatencyMe
   private final CloudWatchClient cloudWatchClient;
 
   @Override
-  public void collect(String service, String endpoint, String method, int httpStatus, String channel,
+  public void collect(String service, String endpoint, String method, int httpStatus,
+      String channel,
       long elapsedTimeMs) {
     MetricDatum datum = MetricDatum.builder()
         .metricName(metricName())

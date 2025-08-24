@@ -11,7 +11,8 @@ public enum DecreaseQuantityStrategy {
   CONSTRAINT("constraint"),
   OPTIMISTIC_LOCK("optimistic_lock"),
   PESSIMISTIC_LOCK("pessimistic_lock"),
-  DISTRIBUTED_LOCK("distributed_lock"),;
+  DISTRIBUTED_LOCK("distributed_lock"),
+  ;
 
   private final String value;
 

@@ -21,7 +21,8 @@ public class QuartzJobConfig {
   public JobDetail relayOutboxMessageJobDetail() {
     return JobBuilder.newJob()
         .ofType(RelayOutboxMessageJob.class)
-        .withIdentity(RelayOutboxMessageJob.class.getSimpleName(), applicationConfigPort.getApplicationName())
+        .withIdentity(RelayOutboxMessageJob.class.getSimpleName(),
+            applicationConfigPort.getApplicationName())
         .storeDurably()
         .build();
   }
@@ -30,7 +31,8 @@ public class QuartzJobConfig {
   public Trigger relayOutboxMessageTrigger(JobDetail relayOutboxMessageJobDetail) {
     return TriggerBuilder.newTrigger()
         .forJob(relayOutboxMessageJobDetail)
-        .withIdentity(RelayOutboxMessageJob.class.getSimpleName(), applicationConfigPort.getApplicationName())
+        .withIdentity(RelayOutboxMessageJob.class.getSimpleName(),
+            applicationConfigPort.getApplicationName())
         // Run every 5 seconds
         .withSchedule(CronScheduleBuilder.cronSchedule("*/5 * * * * ?")
             .withMisfireHandlingInstructionFireAndProceed()) // Handle misfires

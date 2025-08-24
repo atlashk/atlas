@@ -4,7 +4,6 @@ import java.io.IOException;
 import org.atlas.framework.auth.enums.CustomClaim;
 import org.atlas.framework.context.ContextInfo;
 import org.atlas.framework.context.Contexts;
-import org.atlas.framework.util.RoleUtil;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -19,8 +18,8 @@ public class UserContextRequestInterceptor implements ClientHttpRequestIntercept
     if (contextInfo != null) {
       request.getHeaders().add(CustomClaim.USER_ID.getHeader(),
           String.valueOf(contextInfo.getUserId()));
-      request.getHeaders().add(CustomClaim.USER_ROLES.getHeader(),
-          RoleUtil.toRolesString(contextInfo.getUserRoles()));
+      request.getHeaders().add(CustomClaim.USER_ROLE.getHeader(),
+          contextInfo.getUserRole().name());
     }
     return execution.execute(request, body);
   }

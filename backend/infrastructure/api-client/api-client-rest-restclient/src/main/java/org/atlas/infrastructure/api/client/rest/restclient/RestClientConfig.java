@@ -24,7 +24,7 @@ public class RestClientConfig {
   @Bean
   public RestClient restClient() {
     SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-    
+
     if (!sslEnabled) { // Note: Only for dev/test environments - security risk
       try {
         // Create an SSL context that trusts all certificates

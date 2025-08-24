@@ -87,12 +87,12 @@ public class CustomJpaUserRepositoryUsingJpql implements CustomJpaUserRepository
           """);
       params.put("keyword", "%" + criteria.getKeyword().toLowerCase() + "%");
     }
-    
+
     if (criteria.getRole() != null) {
       whereClauseBuilder.append(" and u.role = :role ");
       params.put("role", criteria.getRole());
     }
-    
+
     return whereClauseBuilder.toString();
   }
 }

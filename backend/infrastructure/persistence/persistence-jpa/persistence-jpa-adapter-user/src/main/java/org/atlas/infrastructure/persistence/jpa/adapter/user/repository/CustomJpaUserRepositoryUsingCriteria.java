@@ -25,7 +25,8 @@ public class CustomJpaUserRepositoryUsingCriteria implements CustomJpaUserReposi
   private EntityManager entityManager;
 
   @Override
-  public List<JpaUserEntity> findByCriteria(FindUserCriteria criteria, PagingRequest pagingRequest) {
+  public List<JpaUserEntity> findByCriteria(FindUserCriteria criteria,
+      PagingRequest pagingRequest) {
     CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
     CriteriaQuery<JpaUserEntity> criteriaQuery = criteriaBuilder.createQuery(JpaUserEntity.class);
     Root<JpaUserEntity> root = criteriaQuery.from(JpaUserEntity.class);
@@ -71,11 +72,11 @@ public class CustomJpaUserRepositoryUsingCriteria implements CustomJpaUserReposi
 
   private Specification<JpaUserEntity> buildSpec(FindUserCriteria criteria) {
     QuerySpecification<JpaUserEntity> spec = new QuerySpecification<>();
-    
+
     if (criteria.getId() != null) {
       spec.addFilter(QueryFilter.of("id", criteria.getId(), QueryOperator.EQUAL));
     }
-    
+
     if (StringUtil.isNotBlank(criteria.getKeyword())) {
       String lowercaseKeyword = "%" + criteria.getKeyword().toLowerCase() + "%";
       spec.addFilter(QueryFilter.or(

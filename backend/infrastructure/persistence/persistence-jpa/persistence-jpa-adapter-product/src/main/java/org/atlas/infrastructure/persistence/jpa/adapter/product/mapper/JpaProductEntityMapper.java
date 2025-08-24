@@ -106,9 +106,10 @@ public class JpaProductEntityMapper {
     }
 
     // Update attributes (update by name, add new, delete unmatched)
-    List<JpaProductAttributeEntity> existingJpaAttributeEntities = jpaProductEntity.getAttributes() != null
-        ? new ArrayList<>(jpaProductEntity.getAttributes())
-        : new ArrayList<>();
+    List<JpaProductAttributeEntity> existingJpaAttributeEntities =
+        jpaProductEntity.getAttributes() != null
+            ? new ArrayList<>(jpaProductEntity.getAttributes())
+            : new ArrayList<>();
     // Clear the attributes list to rebuild it
     jpaProductEntity.getAttributes().clear();
     // Process attributes from productEntity

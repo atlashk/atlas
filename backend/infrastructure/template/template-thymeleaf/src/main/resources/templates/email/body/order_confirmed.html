@@ -1,90 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Order Confirmation</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-        }
-        .header {
-            background-color: #f8f8f8;
-            padding: 10px;
-            text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-        }
-        .content {
-            margin: 20px;
-        }
-        .order-summary {
-            border-collapse: collapse;
-            width: 100%;
-            margin-top: 20px;
-        }
-        .order-summary th, .order-summary td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        .order-summary th {
-            background-color: #f2f2f2;
-        }
-        .total {
-            font-weight: bold;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Order Confirmation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    .header {
+      background-color: #f8f8f8;
+      padding: 10px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .content {
+      margin: 20px;
+    }
+
+    .order-summary {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .order-summary th, .order-summary td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    .order-summary th {
+      background-color: #f2f2f2;
+    }
+
+    .total {
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
 <div class="header">Order Confirmation</div>
 
 <div class="content">
-    <!-- User's name -->
-    <p>
-        Dear <span th:text="${order.user.firstName}"></span>
-        <span th:text="${order.user.lastName}"></span>,
-    </p>
+  <!-- User's name -->
+  <p>
+    Dear <span th:text="${order.user.firstName}"></span>
+    <span th:text="${order.user.lastName}"></span>,
+  </p>
 
-    <!-- Order confirmation details -->
-    <p>
-        Thank you for your order! Your order <strong><span th:text="${order.orderId}"></span></strong>, placed on
-        <strong><span th:text="${#dates.format(order.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></span></strong>, was confirmed.
-    </p>
+  <!-- Order confirmation details -->
+  <p>
+    Thank you for your order! Your order <strong><span th:text="${order.orderId}"></span></strong>,
+    placed on
+    <strong><span
+        th:text="${#dates.format(order.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></span></strong>, was
+    confirmed.
+  </p>
 
-    <!-- Order details table -->
-    <table class="order-summary">
-        <thead>
-        <tr>
-            <th>Product ID</th>
-            <th>Product Name</th>
-            <th>Price</th>
-            <th>Quantity</th>
-            <th>Subtotal</th>
-        </tr>
-        </thead>
-        <tbody>
-        <!-- Iterate through order items -->
-        <tr th:each="orderItem : ${order.orderItems}">
-            <td th:text="${orderItem.product.id}"></td>
-            <td th:text="${orderItem.product.name}"></td>
-            <td th:text="${#numbers.formatDecimal(orderItem.product.price, 2, 'COMMA', 'DOT')}"></td>
-            <td th:text="${orderItem.quantity}"></td>
-            <td th:text="${#numbers.formatDecimal(orderItem.product.price * orderItem.quantity, 2, 'COMMA', 'DOT')}"></td>
-        </tr>
-        </tbody>
-        <tfoot>
-        <tr>
-            <td colspan="4" class="total">Total Amount</td>
-            <td class="total" th:text="${#numbers.formatDecimal(order.amount, 2, 'COMMA', 'DOT')}"></td>
-        </tr>
-        </tfoot>
-    </table>
+  <!-- Order details table -->
+  <table class="order-summary">
+    <thead>
+    <tr>
+      <th>Product ID</th>
+      <th>Product Name</th>
+      <th>Price</th>
+      <th>Quantity</th>
+      <th>Subtotal</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Iterate through order items -->
+    <tr th:each="orderItem : ${order.orderItems}">
+      <td th:text="${orderItem.product.id}"></td>
+      <td th:text="${orderItem.product.name}"></td>
+      <td th:text="${#numbers.formatDecimal(orderItem.product.price, 2, 'COMMA', 'DOT')}"></td>
+      <td th:text="${orderItem.quantity}"></td>
+      <td th:text="${#numbers.formatDecimal(orderItem.product.price * orderItem.quantity, 2, 'COMMA', 'DOT')}"></td>
+    </tr>
+    </tbody>
+    <tfoot>
+    <tr>
+      <td class="total" colspan="4">Total Amount</td>
+      <td class="total" th:text="${#numbers.formatDecimal(order.amount, 2, 'COMMA', 'DOT')}"></td>
+    </tr>
+    </tfoot>
+  </table>
 
-    <!-- Closing message -->
-    <p>Best regards,</p>
-    <p>Atlas</p>
+  <!-- Closing message -->
+  <p>Best regards,</p>
+  <p>Atlas</p>
 </div>
 </body>
 </html>
