@@ -1,6 +1,5 @@
 package org.atlas.framework.context;
 
-import java.util.Date;
 import lombok.Data;
 import org.atlas.domain.user.shared.enums.Role;
 
@@ -9,7 +8,6 @@ public class ContextInfo {
 
   private Integer userId;
   private Role userRole;
-  private Date expiresAt;
 
   public boolean isAdmin() {
     return Role.ADMIN.equals(userRole);

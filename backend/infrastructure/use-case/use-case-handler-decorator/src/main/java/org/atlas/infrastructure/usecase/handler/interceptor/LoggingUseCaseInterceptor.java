@@ -50,4 +50,16 @@ public class LoggingUseCaseInterceptor implements UseCaseInterceptor {
           contextInfo, useCaseClass.getSimpleName(), elapsedTimeMs);
     }
   }
+
+  @Override
+  public void onError(Class<?> useCaseClass, Object input, Throwable error) {
+    ContextInfo contextInfo = Contexts.get();
+    if (contextInfo == null) {
+      log.error("Anonymous user encountered error while handling use case {}: {}",
+          useCaseClass.getSimpleName(), error.getMessage(), error);
+    } else {
+      log.error("User {} encountered error while handling use case {}: {}",
+          contextInfo, useCaseClass.getSimpleName(), error.getMessage(), error);
+    }
+  }
 }

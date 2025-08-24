@@ -1,11 +1,8 @@
 package org.atlas.framework.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.SerializationUtils;
 
 @UtilityClass
 public class ObjectUtil {
@@ -23,23 +20,7 @@ public class ObjectUtil {
    * @throws ClassNotFoundException if a class in the object graph cannot be found during
    *                                deserialization
    */
-  @SuppressWarnings("unchecked")
-  public static <T> T deepClone(T object) throws IOException, ClassNotFoundException {
-    // Handle null input
-    if (object == null) {
-      return null;
-    }
-
-    // Serialize the object to a byte array
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    try (ObjectOutputStream out = new ObjectOutputStream(bos)) {
-      out.writeObject(object);
-    }
-
-    // Deserialize the byte array to create a new object
-    ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-    try (ObjectInputStream in = new ObjectInputStream(bis)) {
-      return (T) in.readObject();
-    }
+  public static <T extends Serializable> T deepClone(T object) {
+    return SerializationUtils.clone(object);
   }
 }

@@ -38,4 +38,9 @@ public class ValidationUseCaseInterceptor implements UseCaseInterceptor {
   public void postHandle(Class<?> useCaseClass, Object input) {
     // Ignored
   }
+
+  @Override
+  public void onError(Class<?> useCaseClass, Object input, Throwable e) {
+    // Ignored
+  }
 }

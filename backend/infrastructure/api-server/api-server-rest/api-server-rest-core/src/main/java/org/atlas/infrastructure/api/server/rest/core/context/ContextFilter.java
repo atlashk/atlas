@@ -5,7 +5,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Date;
 import java.util.regex.Pattern;
 import org.atlas.domain.user.shared.enums.Role;
 import org.atlas.framework.auth.enums.CustomClaim;
@@ -34,13 +33,10 @@ public class ContextFilter extends OncePerRequestFilter {
     // For authorized requests
     final String userIdHeader = HttpUtil.getHeader(request, CustomClaim.USER_ID.getHeader());
     final String userRoleHeader = HttpUtil.getHeader(request, CustomClaim.USER_ROLE.getHeader());
-    final String expiresAtHeader = HttpUtil.getHeader(request, CustomClaim.EXPIRES_AT.getHeader());
     if (StringUtil.isNotBlank(userIdHeader) &&
-        StringUtil.isNotBlank(userRoleHeader) &&
-        StringUtil.isNotBlank(expiresAtHeader)) {
+        StringUtil.isNotBlank(userRoleHeader)) {
       contextInfo.setUserId(Integer.parseInt(userIdHeader));
       contextInfo.setUserRole(Role.valueOf(userRoleHeader));
-      contextInfo.setExpiresAt(new Date(Long.parseLong(expiresAtHeader)));
     }
 
     try {

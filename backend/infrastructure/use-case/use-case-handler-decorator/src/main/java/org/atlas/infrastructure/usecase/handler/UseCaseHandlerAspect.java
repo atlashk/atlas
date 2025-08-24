@@ -40,6 +40,7 @@ public class UseCaseHandlerAspect {
       transactionPort.commit();
       return result;
     } catch (Throwable e) {
+      interceptors.forEach(interceptor -> interceptor.onError(useCaseHandlerClass, args[0], e));
       transactionPort.rollback();
       throw e;
     } finally {

@@ -42,9 +42,6 @@ public class TokenRelayGatewayFilterFactory extends
                     jwtExtractor.extractUserId(jwt));
                 httpHeaders.set(CustomClaim.USER_ROLE.getHeader(),
                     jwtExtractor.extractUserRole(jwt).name());
-                assert jwt.getExpiresAt() != null;
-                httpHeaders.set(CustomClaim.EXPIRES_AT.getHeader(),
-                    String.valueOf(jwt.getExpiresAt().toEpochMilli()));
               })
               .build();
           ServerWebExchange mutatedExchange = exchange.mutate()

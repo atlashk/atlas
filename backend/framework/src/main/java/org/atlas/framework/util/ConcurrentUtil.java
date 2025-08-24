@@ -30,7 +30,7 @@ public class ConcurrentUtil {
     }
   }
 
-  public static void shutdown(ExecutorService executorService) {
+  public static void gracefulShutdown(ExecutorService executorService) {
     // Initiates an orderly shutdown of the executor service.
     // It prevents new tasks from being submitted, but allows previously submitted tasks to finish.
     executorService.shutdown();

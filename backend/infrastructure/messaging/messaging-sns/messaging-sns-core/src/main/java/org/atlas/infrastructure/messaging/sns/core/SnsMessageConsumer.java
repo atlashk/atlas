@@ -30,7 +30,7 @@ public abstract class SnsMessageConsumer implements DisposableBean {
   public void destroy() {
     log.info("Shutting down SQS consumer");
     isRunning.set(false);
-    ConcurrentUtil.shutdown(executorService);
+    ConcurrentUtil.gracefulShutdown(executorService);
   }
 
   protected void consumeMessages(String queueName, String queueUrl) {
