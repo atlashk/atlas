@@ -231,6 +231,34 @@ project(':infrastructure.messaging.sns.adapter.product').projectDir = file('infr
 include(':infrastructure.messaging.sns.adapter.user')
 project(':infrastructure.messaging.sns.adapter.user').projectDir = file('infrastructure/messaging/messaging-sns/messaging-sns-adapter-user')
 
+// Migration
+
+// Migration::Flyway
+
+// Migration::Flyway::MySQL
+include(':infrastructure.migration.flyway.mysql.core')
+project(':infrastructure.migration.flyway.mysql.core').projectDir = file('infrastructure/migration/migration-flyway/migration-flyway-mysql/migration-flyway-mysql-core')
+include(':infrastructure.migration.flyway.mysql.adapter.user')
+project(':infrastructure.migration.flyway.mysql.adapter.user').projectDir = file('infrastructure/migration/migration-flyway/migration-flyway-mysql/migration-flyway-mysql-adapter-user')
+include(':infrastructure.migration.flyway.mysql.adapter.product')
+project(':infrastructure.migration.flyway.mysql.adapter.product').projectDir = file('infrastructure/migration/migration-flyway/migration-flyway-mysql/migration-flyway-mysql-adapter-product')
+include(':infrastructure.migration.flyway.mysql.adapter.order')
+project(':infrastructure.migration.flyway.mysql.adapter.order').projectDir = file('infrastructure/migration/migration-flyway/migration-flyway-mysql/migration-flyway-mysql-adapter-order')
+include(':infrastructure.migration.flyway.mysql.adapter.notification')
+project(':infrastructure.migration.flyway.mysql.adapter.notification').projectDir = file('infrastructure/migration/migration-flyway/migration-flyway-mysql/migration-flyway-mysql-adapter-notification')
+
+// Migration::Flyway::Postgres
+include(':infrastructure.migration.flyway.postgres.core')
+project(':infrastructure.migration.flyway.postgres.core').projectDir = file('infrastructure/migration/migration-flyway/migration-flyway-postgres/migration-flyway-postgres-core')
+include(':infrastructure.migration.flyway.postgres.adapter.user')
+project(':infrastructure.migration.flyway.postgres.adapter.user').projectDir = file('infrastructure/migration/migration-flyway/migration-flyway-postgres/migration-flyway-postgres-adapter-user')
+include(':infrastructure.migration.flyway.postgres.adapter.product')
+project(':infrastructure.migration.flyway.postgres.adapter.product').projectDir = file('infrastructure/migration/migration-flyway/migration-flyway-postgres/migration-flyway-postgres-adapter-product')
+include(':infrastructure.migration.flyway.postgres.adapter.order')
+project(':infrastructure.migration.flyway.postgres.adapter.order').projectDir = file('infrastructure/migration/migration-flyway/migration-flyway-postgres/migration-flyway-postgres-adapter-order')
+include(':infrastructure.migration.flyway.postgres.adapter.notification')
+project(':infrastructure.migration.flyway.postgres.adapter.notification').projectDir = file('infrastructure/migration/migration-flyway/migration-flyway-postgres/migration-flyway-postgres-adapter-notification')
+
 // Notification
 
 // Notification::Email

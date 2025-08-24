@@ -79,6 +79,7 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['discovery-client']}")
     }
+    api project(':infrastructure.event.event-handler-decorator')
     switch (rootProject.ext.appStack['file.csv']) {
         case 'opencsv':
             api project(':infrastructure.file.csv.opencsv.adapter.product')
@@ -120,7 +121,22 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['messaging']}")
     }
-    api project(':infrastructure.event.event-handler-decorator')
+    switch (rootProject.ext.appStack['migration']) {
+        case 'flyway':
+            switch (rootProject.ext.appStack['datasource']) {
+                case 'mysql':
+                    api project(':infrastructure.migration.flyway.mysql.adapter.product')
+                    break
+                case 'postgres':
+                    api project(':infrastructure.migration.flyway.postgres.adapter.product')
+                    break
+                default:
+                    throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
+            }
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['migration']}")
+    }
     api project(':infrastructure.observability.actuator')
     switch (rootProject.ext.appStack['observability.logging.framework']) {
         case 'logback':

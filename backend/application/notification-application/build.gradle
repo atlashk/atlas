@@ -59,6 +59,7 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['discovery-client']}")
     }
+    api project(':infrastructure.event.event-handler-decorator')
     switch (rootProject.ext.appStack['messaging']) {
         case 'kafka':
             api project(':infrastructure.messaging.kafka.adapter.notification')
@@ -69,7 +70,22 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['messaging']}")
     }
-    api project(':infrastructure.event.event-handler-decorator')
+    switch (rootProject.ext.appStack['migration']) {
+        case 'flyway':
+            switch (rootProject.ext.appStack['datasource']) {
+                case 'mysql':
+                    api project(':infrastructure.migration.flyway.mysql.adapter.notification')
+                    break
+                case 'postgres':
+                    api project(':infrastructure.migration.flyway.postgres.adapter.notification')
+                    break
+                default:
+                    throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
+            }
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['migration']}")
+    }
     switch (rootProject.ext.appStack['notification.email']) {
         case 'spring':
             api project(':infrastructure.notification.email.spring')
