@@ -1,7 +1,7 @@
 "use client";
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { clearAuthTokens } from '@/api/apiClient';
+import { clearAuthCookies } from '@/utils/cookies';
 
 interface Props {
   children: ReactNode;
@@ -65,7 +65,7 @@ class AuthErrorBoundary extends Component<Props, State> {
 
     if (isAuthError) {
       // Clear tokens and redirect to login
-      clearAuthTokens();
+      clearAuthCookies();
       
       // Add a small delay to ensure state is cleared
       setTimeout(() => {

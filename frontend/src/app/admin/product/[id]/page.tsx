@@ -1,12 +1,12 @@
 "use client";
 
+import { productAdminApi } from "@/api";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Product } from "@/interfaces/product.interface";
-import { productService } from "@/services";
 import { withRequireAdmin } from "@/hoc/withAuth";
+import { Product } from "@/interfaces/product.interface";
 import { getProductStatusBadge } from "@/utils/formatter.util";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -29,7 +29,7 @@ function AdminProductDetailsPage() {
       if (productId && !hasLoadedData.current) {
         hasLoadedData.current = true;
         try {
-          const response = await productService.adminGetProduct(productId);
+          const response = await productAdminApi.getProduct(productId);
           if (response.success) {
             setProduct(response.data);
           } else {
@@ -58,7 +58,7 @@ function AdminProductDetailsPage() {
     if (confirm("Are you sure you want to delete this product?")) {
       setIsDeleting(true);
       try {
-        const response = await productService.adminDeleteProduct(product.id);
+        const response = await productAdminApi.deleteProduct(product.id);
         if (response.success) {
           toast.success("Product deleted successfully!");
           router.push("/admin/product");

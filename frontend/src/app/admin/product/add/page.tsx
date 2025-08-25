@@ -1,5 +1,6 @@
 "use client";
 
+import { productApi, productAdminApi } from "@/api";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,14 +22,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { PRODUCT_STATUSES } from "@/constants";
+import { withRequireAdmin } from "@/hoc/withAuth";
 import {
   Brand,
   Category,
   CreateProductRequest,
-  PRODUCT_STATUSES,
 } from "@/interfaces/product.interface";
-import { productService } from "@/services";
-import { withRequireAdmin } from "@/hoc/withAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -103,9 +103,9 @@ function AdminProductAddPage() {
     const loadData = async () => {
       try {
         const [brandsResponse, categoriesResponse] = await Promise.all([
-          productService.listBrand(),
-          productService.listCategory(),
-        ]);
+           productApi.listBrand(),
+           productApi.listCategory(),
+         ]);
 
         if (brandsResponse.success) {
           setBrands(brandsResponse.data);
@@ -158,7 +158,7 @@ function AdminProductAddPage() {
         availableFrom: new Date(data.availableFrom).toISOString(),
       };
 
-      const response = await productService.adminCreateProduct(formData);
+      const response = await productAdminApi.createProduct(formData);
 
       if (response.success) {
         toast.success("Product created successfully!");
@@ -402,7 +402,9 @@ function AdminProductAddPage() {
                                       }
                                     }}
                                   />
-                                  <span className="text-sm">{category.name}</span>
+                                  <span className="text-sm">
+                                    {category.name}
+                                  </span>
                                 </label>
                               ))}
                             </SelectContent>
@@ -548,9 +550,9 @@ function AdminProductAddPage() {
             </div>
           </form>
         </Form>
-  </div>
-      </AdminLayout>
-    );
-  }
+      </div>
+    </AdminLayout>
+  );
+}
 
 export default withRequireAdmin(AdminProductAddPage);

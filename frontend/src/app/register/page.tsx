@@ -1,14 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { RegisterRequest } from "../../interfaces/user.interface";
-import { userService } from "../../services";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { userApi } from "@/api";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -17,10 +12,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { User, Mail, Phone, Lock, Loader2, UserPlus } from "lucide-react";
-import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { withGuestOnly } from "@/hoc/withAuth";
+import { RegisterRequest } from "@/interfaces";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, Lock, Mail, Phone, User, UserPlus } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const formSchema = z
@@ -88,7 +89,7 @@ const Register: React.FC = () => {
 
     try {
       setIsRegistering(true);
-      await userService.register(request);
+      await userApi.register(request);
       toast.success("Registration successful!");
       form.reset();
       setTimeout(goToLogin, 1000);
@@ -318,4 +319,4 @@ const Register: React.FC = () => {
   );
 };
 
-export default Register;
+export default withGuestOnly(Register);

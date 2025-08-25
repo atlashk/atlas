@@ -24,7 +24,7 @@ export class UserAdminApi extends BaseApi {
     return this.get<User[]>(`/users?${queryParams.toString()}`);
   }
 
-  async countUsers(): Promise<ApiResponse<number>> {
+  async countUser(): Promise<ApiResponse<number>> {
     return this.get<number>("/users/statistics/count");
   }
 }

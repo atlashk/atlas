@@ -1,12 +1,8 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -15,14 +11,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Lock, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 import { LoginRequest } from "../../interfaces/auth.interface";
 import { useUserStore } from "../../stores/user.store";
-import { Role } from "@/constants";
+import { withGuestOnly } from "../../hoc/withAuth";
 
 const formSchema = z.object({
   username: z.string().min(1, {
@@ -38,6 +38,15 @@ const Login: React.FC = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { login } = useUserStore();
   const router = useRouter();
+
+  // Get redirect parameter from URL
+  const getRedirectUrl = () => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get("redirect") || null;
+    }
+    return null;
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -58,19 +67,47 @@ const Login: React.FC = () => {
       };
 
       const response = await login(credentials);
+      console.log("Login response:", response);
+
       if (response.success) {
         toast.success("Login successful!");
+        console.log("User role:", response.userRole);
 
-        // Redirect based on user role
-        if (response.userRole === "ADMIN") {
-          router.push("/admin/dashboard");
+        // Add a small delay to ensure tokens are properly set before redirect
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        // Check if there's a redirect URL from the middleware
+        const redirectUrl = getRedirectUrl();
+
+        let targetUrl: string;
+        if (redirectUrl) {
+          // Use the redirect URL from middleware
+          targetUrl = redirectUrl;
+          console.log("Redirecting to original destination:", targetUrl);
         } else {
-          router.push("/");
+          // Default redirect based on user role
+          if (response.userRole === "ADMIN") {
+            targetUrl = "/admin/dashboard";
+            console.log("Redirecting to admin dashboard");
+          } else if (response.userRole === undefined) {
+            // If userRole is undefined (profile fetch failed), redirect to home
+            // and let the AuthContext handle proper role-based redirect
+            targetUrl = "/";
+            console.log("User role undefined, redirecting to home for AuthContext to handle");
+          } else {
+            targetUrl = "/";
+            console.log("Redirecting to home page");
+          }
         }
+
+        console.log('Login page redirecting to:', targetUrl);
+        
+        // Use Next.js router for better navigation
+        router.push(targetUrl);
       } else {
         setErrorMessage(
           response.errorMessage ||
-          "Login failed. Please check your credentials."
+            "Login failed. Please check your credentials."
         );
       }
     } catch {
@@ -190,4 +227,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+export default withGuestOnly(Login);

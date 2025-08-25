@@ -1,8 +1,8 @@
 "use client";
 
-import React, { ComponentType, useEffect, useState } from 'react';
+import React, { ComponentType, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 interface WithAuthOptions {
   requireAuth?: boolean;
@@ -56,76 +56,56 @@ export function withAuth<P extends object>(
   const WithAuthComponent: React.FC<P> = (props) => {
     const router = useRouter();
     const auth = useAuth();
-    const [isChecking, setIsChecking] = useState(true);
-    const [isAuthorized, setIsAuthorized] = useState(false);
 
     useEffect(() => {
-      const checkAuth = () => {
-        // Wait for auth to finish loading
-        if (auth.isLoading) {
-          return;
+      // Wait for auth to finish loading
+      if (auth.isLoading) return;
+
+      // If authentication is not required, allow access
+      if (!requireAuth) return;
+
+      // Handle unauthenticated users
+      if (!auth.isAuthenticated) {
+        const redirectPath = redirectTo || '/login';
+        const currentPath = window.location.pathname;
+        const redirectUrl = `${redirectPath}?redirect=${encodeURIComponent(currentPath)}`;
+        router.push(redirectUrl);
+        return;
+      }
+
+      // Handle unauthorized access (admin or role-based)
+      const hasRequiredRole = allowedRoles.length === 0 || allowedRoles.some(role => auth.hasRole(role));
+      const hasAdminAccess = !requireAdmin || auth.isAdmin;
+      
+      if (!hasRequiredRole || !hasAdminAccess) {
+        if (redirectTo) {
+          router.push(redirectTo);
         }
-
-        // If authentication is not required, allow access
-        if (!requireAuth) {
-          setIsAuthorized(true);
-          setIsChecking(false);
-          return;
-        }
-
-        // Check if user is authenticated
-        if (!auth.isAuthenticated) {
-          const redirectPath = redirectTo || '/login';
-          const currentPath = window.location.pathname;
-          const redirectUrl = `${redirectPath}?redirect=${encodeURIComponent(currentPath)}`;
-          router.push(redirectUrl);
-          return;
-        }
-
-        // Check admin requirement
-        if (requireAdmin && !auth.isAdmin) {
-          if (redirectTo) {
-            router.push(redirectTo);
-          } else {
-            setIsAuthorized(false);
-            setIsChecking(false);
-          }
-          return;
-        }
-
-        // Check specific roles if provided
-        if (allowedRoles.length > 0) {
-          const hasRequiredRole = allowedRoles.some(role => auth.hasRole(role));
-          if (!hasRequiredRole) {
-            if (redirectTo) {
-              router.push(redirectTo);
-            } else {
-              setIsAuthorized(false);
-              setIsChecking(false);
-            }
-            return;
-          }
-        }
-
-        // All checks passed
-        setIsAuthorized(true);
-        setIsChecking(false);
-      };
-
-      checkAuth();
-    }, [auth, router]);
+        return;
+      }
+    }, [auth.isLoading, auth.isAuthenticated, auth.isAdmin, router]);
 
     // Show loading state
-    if (isChecking || auth.isLoading) {
+    if (auth.isLoading) {
       return <DefaultLoadingComponent message="Checking authentication..." />;
     }
 
-    // Show unauthorized state
-    if (!isAuthorized) {
-      if (FallbackComponent) {
-        return <FallbackComponent />;
-      }
-      return <DefaultUnauthorizedComponent />;
+    // If authentication is not required, render component
+    if (!requireAuth) {
+      return <WrappedComponent {...props} />;
+    }
+
+    // Check authentication
+    if (!auth.isAuthenticated) {
+      return null; // Will redirect in useEffect
+    }
+
+    // Check authorization
+    const hasRequiredRole = allowedRoles.length === 0 || allowedRoles.some(role => auth.hasRole(role));
+    const hasAdminAccess = !requireAdmin || auth.isAdmin;
+    
+    if (!hasRequiredRole || !hasAdminAccess) {
+      return FallbackComponent ? <FallbackComponent /> : <DefaultUnauthorizedComponent />;
     }
 
     // Render the wrapped component
@@ -152,22 +132,22 @@ export const withGuestOnly = <P extends object>(
   const WithGuestOnlyComponent: React.FC<P> = (props) => {
     const router = useRouter();
     const auth = useAuth();
-    const [isChecking, setIsChecking] = useState(true);
 
     useEffect(() => {
-      if (!auth.isLoading) {
-        if (auth.isAuthenticated) {
-          // Redirect authenticated users to appropriate dashboard
-          const destination = auth.isAdmin ? '/admin/dashboard' : redirectTo;
-          router.push(destination);
-          return;
-        }
-        setIsChecking(false);
+      if (!auth.isLoading && auth.isAuthenticated) {
+        const destination = auth.isAdmin ? '/admin/dashboard' : redirectTo;
+        router.push(destination);
       }
     }, [auth.isLoading, auth.isAuthenticated, auth.isAdmin, router]);
 
-    if (isChecking || auth.isLoading) {
+    // Show loading while checking auth status
+    if (auth.isLoading) {
       return <DefaultLoadingComponent />;
+    }
+
+    // Redirect if authenticated (handled in useEffect)
+    if (auth.isAuthenticated) {
+      return null;
     }
 
     return <Component {...props} />;

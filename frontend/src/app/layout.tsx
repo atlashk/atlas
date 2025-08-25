@@ -1,4 +1,5 @@
 import { NavBar } from "@/components/layout";
+import { AuthProvider } from "@/contexts/AuthContext";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
@@ -29,9 +30,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <NavBar />
-        <main className="px-10 py-20">{children}</main>
-        <Toaster />
+        <AuthProvider>
+          <NavBar />
+          <main className="px-10 py-20">{children}</main>
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );

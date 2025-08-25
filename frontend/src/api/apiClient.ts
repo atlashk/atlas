@@ -1,4 +1,5 @@
 import axios, { AxiosError } from "axios";
+import { getCookie, isValidToken, clearAuthCookies, setCookie } from '@/utils/cookies';
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -41,31 +42,22 @@ const processQueue = (error: Error | null, token: string | null = null) => {
   failedQueue = [];
 };
 
-// Enhanced token validation
-const isTokenValid = (token: string | null): boolean => {
-  if (!token) return false;
-  
-  try {
-    // Basic JWT structure validation
-    const parts = token.split('.');
-    if (parts.length !== 3) return false;
-    
-    // Decode payload to check expiration
-    const payload = JSON.parse(atob(parts[1]));
-    const currentTime = Math.floor(Date.now() / 1000);
-    
-    // Check if token expires within next 30 seconds (buffer time)
-    return payload.exp && payload.exp > (currentTime + 30);
-  } catch {
-    return false;
-  }
-};
+// Token validation is now imported from auth hook
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000, // 30 seconds timeout
   withCredentials: true, // Add withCredentials to handle CORS
 });
+
+// Helper function to get token from cookies
+const getAccessTokenFromCookies = (): string | null => {
+  return getCookie('accessToken');
+};
+
+const getRefreshTokenFromCookies = (): string | null => {
+  return getCookie('refreshToken');
+};
 
 // Enhanced request interceptor
 apiClient.interceptors.request.use(
@@ -78,13 +70,10 @@ apiClient.interceptors.request.use(
       config.headers["Content-Type"] = "application/json";
     }
 
-    // Add access token with validation
-    const accessToken = localStorage.getItem("accessToken");
-    if (isTokenValid(accessToken)) {
+    // Add access token with validation from cookies
+    const accessToken = getAccessTokenFromCookies();
+    if (isValidToken(accessToken)) {
       config.headers["Authorization"] = `Bearer ${accessToken}`;
-    } else if (accessToken) {
-      // Token exists but is invalid/expired, remove it
-      localStorage.removeItem("accessToken");
     }
 
     return config;
@@ -126,15 +115,15 @@ apiClient.interceptors.response.use(
 
       // Prevent infinite retry loops
       if (originalRequest._retryCount > MAX_REFRESH_RETRIES) {
-        clearAuthTokens();
+        clearAuthCookies();
         redirectToLogin();
         return Promise.reject(new Error('Maximum refresh retries exceeded'));
       }
 
-      const refreshToken = localStorage.getItem("refreshToken");
+      const refreshToken = getRefreshTokenFromCookies();
 
-      if (!refreshToken || !isTokenValid(refreshToken)) {
-        clearAuthTokens();
+      if (!refreshToken || !isValidToken(refreshToken)) {
+        clearAuthCookies();
         redirectToLogin();
         return Promise.reject(error);
       }
@@ -159,7 +148,7 @@ apiClient.interceptors.response.use(
         
         // If we've exceeded max retries, clear tokens and redirect
         if (refreshRetryCount >= MAX_REFRESH_RETRIES) {
-          clearAuthTokens();
+          clearAuthCookies();
           redirectToLogin();
           refreshRetryCount = 0;
         }
@@ -176,15 +165,6 @@ apiClient.interceptors.response.use(
 );
 
 // Helper functions
-function clearAuthTokens(): void {
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("refreshToken");
-  
-  // Clear any auth-related data from sessionStorage as well
-  sessionStorage.removeItem("user");
-  sessionStorage.removeItem("authState");
-}
-
 function redirectToLogin(): void {
   // Avoid redirect loops
   if (window.location.pathname !== '/login') {
@@ -215,12 +195,13 @@ async function performTokenRefresh(refreshToken: string): Promise<string> {
     }
     
     // Validate new tokens before storing
-    if (!isTokenValid(newAccessToken)) {
+    if (!isValidToken(newAccessToken)) {
       throw new Error('Received invalid access token from refresh');
     }
     
-    localStorage.setItem("accessToken", newAccessToken);
-    localStorage.setItem("refreshToken", newRefreshToken);
+    // Store tokens in cookies using auth utilities
+    setCookie('accessToken', newAccessToken);
+    setCookie('refreshToken', newRefreshToken);
     
     return newAccessToken;
   } catch (error) {
@@ -231,5 +212,5 @@ async function performTokenRefresh(refreshToken: string): Promise<string> {
 }
 
 // Export utility functions for external use
-export { clearAuthTokens, isTokenValid };
+export { isValidToken };
 export default apiClient;

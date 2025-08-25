@@ -29,7 +29,7 @@ import { formatCurrency } from "@/utils/formatter.util";
 import { getProductImageUrl } from "@/utils/productImage.util";
 import { RotateCcw, Search } from "lucide-react";
 import Image from "next/image";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import ProductDetailsModal from "./ProductDetailsModal";
 
@@ -45,6 +45,10 @@ const ProductSearch: React.FC = () => {
   const [isLoadingProduct, setIsLoadingProduct] = useState(false);
   const [isLoadingBrands, setIsLoadingBrands] = useState(false);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+  const brandsLoaded = useRef(false);
+  const categoriesLoaded = useRef(false);
+  const hasInitialLoad = useRef(false);
+  const isInitializing = useRef(false);
 
   const [metadata, setMetadata] = useState<Metadata>({
     currentPage: 1,
@@ -64,11 +68,14 @@ const ProductSearch: React.FC = () => {
   });
 
   const loadBrands = async () => {
+    if (brandsLoaded.current || isLoadingBrands) return;
+    
     setIsLoadingBrands(true);
     try {
       const response = await productApi.listBrand();
       if (response.success) {
         setBrands(response.data || []);
+        brandsLoaded.current = true;
       }
     } catch {
       toast.error("Failed to load brands");
@@ -78,11 +85,14 @@ const ProductSearch: React.FC = () => {
   };
 
   const loadCategories = async () => {
+    if (categoriesLoaded.current || isLoadingCategories) return;
+    
     setIsLoadingCategories(true);
     try {
       const response = await productApi.listCategory();
       if (response.success) {
         setCategories(response.data || []);
+        categoriesLoaded.current = true;
       }
     } catch {
       toast.error("Failed to load categories");
@@ -186,7 +196,18 @@ const ProductSearch: React.FC = () => {
 
   useEffect(() => {
     const initializeData = async () => {
-      await Promise.all([loadBrands(), loadCategories(), applyFilters(1)]);
+      if (hasInitialLoad.current || isInitializing.current) {
+        return;
+      }
+
+      isInitializing.current = true;
+
+      try {
+        await Promise.all([loadBrands(), loadCategories(), applyFilters(1)]);
+        hasInitialLoad.current = true;
+      } finally {
+        isInitializing.current = false;
+      }
     };
     initializeData();
     // eslint-disable-next-line react-hooks/exhaustive-deps

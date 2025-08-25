@@ -1,5 +1,6 @@
 "use client";
 
+import { productApi, productAdminApi } from "@/api";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,19 +22,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { PRODUCT_STATUSES } from "@/constants";
+import { withRequireAdmin } from "@/hoc/withAuth";
 import {
   Brand,
   Category,
-  PRODUCT_STATUSES,
   Product,
   UpdateProductRequest,
 } from "@/interfaces/product.interface";
-import { productService } from "@/services";
-import { withRequireAdmin } from "@/hoc/withAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -108,15 +108,15 @@ function AdminProductEditPage() {
       if (hasLoadedData.current || !productId) {
         return;
       }
-      
+
       hasLoadedData.current = true;
 
       try {
         const [brandsResponse, categoriesResponse, productResponse] =
           await Promise.all([
-            productService.listBrand(),
-            productService.listCategory(),
-            productService.adminGetProduct(productId),
+            productApi.listBrand(),
+            productApi.listCategory(),
+            productAdminApi.getProduct(productId),
           ]);
 
         if (brandsResponse.success) {
@@ -213,7 +213,7 @@ function AdminProductEditPage() {
         availableFrom: new Date(data.availableFrom).toISOString(),
       };
 
-      const response = await productService.adminUpdateProduct(formData);
+      const response = await productAdminApi.updateProduct(formData);
 
       if (response.success) {
         toast.success("Product updated successfully!");
@@ -459,8 +459,8 @@ function AdminProductEditPage() {
                           <div className="flex items-center justify-center py-2">
                             <Loader2 className="h-4 w-4 animate-spin" />
                             <span className="ml-2 text-sm text-muted-foreground">
-              Loading categories...
-            </span>
+                              Loading categories...
+                            </span>
                           </div>
                         ) : (
                           <Select value="placeholder" onValueChange={() => {}}>
@@ -498,12 +498,14 @@ function AdminProductEditPage() {
                                       }
                                     }}
                                   />
-                                  <span className="text-sm">{category.name}</span>
+                                  <span className="text-sm">
+                                    {category.name}
+                                  </span>
                                 </label>
-                               ))}
-                             </SelectContent>
-                           </Select>
-                         )}
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
                         <FormMessage />
                       </FormItem>
                     )}

@@ -2,6 +2,7 @@ import { authApi, userApi } from "@/api";
 import { Role } from "@/constants";
 import type { LoginRequest } from "@/interfaces/auth.interface";
 import type { RegisterRequest, User } from "@/interfaces/user.interface";
+import { clearAuthCookies, setCookie } from "@/utils/cookies";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -40,10 +41,9 @@ interface UserActions {
 
 type UserStore = UserState & UserActions;
 
-// Utility function to clear authentication tokens
+// Use centralized cookie utilities
 const clearAuthTokens = () => {
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("refreshToken");
+  clearAuthCookies();
 };
 
 export const useUserStore = create<UserStore>()(
@@ -94,26 +94,43 @@ export const useUserStore = create<UserStore>()(
         try {
           const response = await authApi.login(request);
           if (response.success && response.data) {
-            const { accessToken, refreshToken, ...profileData } = response.data;
+            const { accessToken, refreshToken } = response.data;
 
-            localStorage.setItem("accessToken", accessToken);
-            localStorage.setItem("refreshToken", refreshToken);
+            // Store tokens in cookies for better security and middleware access
+            console.log('Setting cookies with tokens:', { accessToken: accessToken.substring(0, 20) + '...', refreshToken: refreshToken.substring(0, 20) + '...' });
+            setCookie('accessToken', accessToken);
+            setCookie('refreshToken', refreshToken);
+            console.log('Cookies after setting:', document.cookie);
 
             set({
               accessToken,
               refreshToken,
-              profile: profileData as User,
+              profile: null, // Clear any existing profile
               loading: false,
             });
 
-            // Fetch complete profile data after login
-            await get().fetchProfile();
+            // Try to fetch user profile after successful login
+            try {
+              await get().fetchProfile();
+              const { profile } = get();
+              console.log('Profile after login:', profile);
 
-            // Return success with user role information
-            return {
-              success: true,
-              userRole: (profileData as User).role
-            };
+              return {
+                success: true,
+                userRole: profile?.role,
+              };
+            } catch (profileError) {
+              // If profile fetch fails, still consider login successful
+              // Keep tokens but warn about profile fetch failure
+              console.warn(
+                "Login successful but failed to fetch user profile. User will remain authenticated:",
+                profileError
+              );
+              return {
+                success: true,
+                userRole: undefined, // Unknown role due to profile fetch failure
+              };
+            }
           } else {
             set({
               error: response.errorMessage || "Login failed",
@@ -157,10 +174,13 @@ export const useUserStore = create<UserStore>()(
       },
 
       fetchProfile: async () => {
-        const { accessToken } = get();
+        const { accessToken, profile } = get();
         if (!accessToken) return;
+        
+        // Don't fetch if we already have a profile
+        if (profile) return;
 
-        set({ profileLoading: true });
+        set({ profileLoading: true, error: null });
         try {
           const response = await userApi.getProfile();
           if (response.success && response.data) {
@@ -169,27 +189,26 @@ export const useUserStore = create<UserStore>()(
               profileLoading: false,
             });
           } else {
-            set({
-              error: response.errorMessage || "Failed to fetch profile",
-              profileLoading: false,
-            });
+            // Don't set error for profile fetch failures - keep user authenticated
+            console.warn('Failed to fetch profile but keeping user authenticated:', response.errorMessage);
+            set({ profileLoading: false });
           }
         } catch (error) {
-          set({
-            error:
-              error instanceof Error
-                ? error.message
-                : "Failed to fetch profile",
-            profileLoading: false,
-          });
+          // Don't set error for profile fetch failures - keep user authenticated
+          console.warn('Failed to fetch profile but keeping user authenticated:', error);
+          set({ profileLoading: false });
         }
       },
 
       setTokens: (accessToken: string, refreshToken: string) => {
+        // Store in cookies for middleware access
+        setCookie('accessToken', accessToken);
+        setCookie('refreshToken', refreshToken);
         set({ accessToken, refreshToken });
       },
 
       logout: () => {
+        console.log('Logout initiated');
         authApi.logout();
         clearAuthTokens();
         set({
@@ -200,6 +219,12 @@ export const useUserStore = create<UserStore>()(
           error: null,
           profileLoading: false,
         });
+        console.log('Logout completed, redirecting to login');
+        
+        // Force redirect to login page without any query parameters
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
       },
 
       clearError: () => {

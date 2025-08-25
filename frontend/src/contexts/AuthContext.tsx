@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { useUserStore } from '@/stores/user.store';
 import type { User } from '@/interfaces/user.interface';
 import type { LoginRequest } from '@/interfaces/auth.interface';
@@ -29,7 +29,7 @@ interface AuthProviderProps {
   children: React.ReactNode;
 }
 
-export function AuthProvider({ children }: AuthProviderProps) {
+export const AuthProvider = React.memo(function AuthProvider({ children }: AuthProviderProps) {
   const {
     profile,
     accessToken,
@@ -46,47 +46,64 @@ export function AuthProvider({ children }: AuthProviderProps) {
   } = useUserStore();
   
   const [isInitialized, setIsInitialized] = useState(false);
+  const [initError, setInitError] = useState<string | null>(null);
+
+  const initializeAuth = useCallback(async () => {
+    try {
+      setInitError(null);
+      console.log('AuthContext initializing:', { accessToken: !!accessToken, profile: !!profile });
+      
+      // No need to fetch profile here - user store handles this during login
+      // Just mark as initialized
+    } catch (error) {
+      console.warn('AuthContext initialization error:', error);
+      setInitError(error instanceof Error ? error.message : 'Initialization failed');
+    } finally {
+      console.log('AuthContext initialization complete');
+      setIsInitialized(true);
+    }
+  }, [accessToken, profile]);
 
   useEffect(() => {
-    const initializeAuth = async () => {
-      // If we have an access token but no profile, fetch it
-      if (accessToken && !profile) {
-        try {
-          await fetchProfile();
-        } catch (error) {
-          console.error('Failed to fetch profile on initialization:', error);
-        }
-      }
-      setIsInitialized(true);
-    };
-
     initializeAuth();
-  }, [accessToken, profile, fetchProfile]);
+  }, [initializeAuth]);
 
-  const contextValue: AuthContextType = {
+  // Memoize computed values to prevent unnecessary re-renders
+  const isAuthenticated = useMemo(() => storeIsAuthenticated(), [storeIsAuthenticated]);
+  const isAdmin = useMemo(() => storeIsAdmin(), [storeIsAdmin]);
+  const isLoading = useMemo(() => loading || !isInitialized, [loading, isInitialized]);
+  const currentError = useMemo(() => error || initError, [error, initError]);
+  
+  // Memoize callback functions to prevent unnecessary re-renders
+  const handleClearError = useCallback(() => {
+    setInitError(null);
+    storeClearError();
+  }, [storeClearError]);
+  
+  const contextValue: AuthContextType = useMemo(() => ({
     // Auth state
     user: profile,
-    isAuthenticated: storeIsAuthenticated(),
-    isAdmin: storeIsAdmin(),
-    isLoading: loading || !isInitialized,
-    error,
+    isAuthenticated,
+    isAdmin,
+    isLoading,
+    error: currentError,
     
     // Auth actions
     login: storeLogin,
     logout: storeLogout,
-    clearError: storeClearError,
+    clearError: handleClearError,
     
     // Utility functions
     hasRole: storeHasRole,
     getFullName: fullName
-  };
+  }), [profile, isAuthenticated, isAdmin, isLoading, currentError, storeLogin, storeLogout, handleClearError, storeHasRole, fullName]);
 
   return (
     <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
-}
+});
 
 export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
