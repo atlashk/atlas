@@ -1,13 +1,6 @@
 import { productApi } from "@/api";
-import { Metadata } from "@/api/apiClient";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Pagination,
   PaginationContent,
@@ -16,202 +9,206 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Brand, Category, Product, SearchProductFilters } from "@/interfaces";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useDataLoader } from "@/hooks";
+import { Brand, Category, Product } from "@/interfaces";
 import { useCartStore } from "@/stores";
-import { formatCurrency } from "@/utils/formatter.util";
 import { getProductImageUrl } from "@/utils/productImage.util";
 import { RotateCcw, Search } from "lucide-react";
-import Image from "next/image";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { toast } from "sonner";
+import ProductCard from "./ProductCard";
 import ProductDetailsModal from "./ProductDetailsModal";
+
+// Types for better type safety
+interface SearchFilters {
+  keyword?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  brandId?: string;
+  categoryIds?: number[];
+}
+
+interface StaticData {
+  brands: Brand[];
+  categories: Category[];
+}
 
 const ProductSearch: React.FC = () => {
   const { addToCart } = useCartStore();
 
-  const [showModal, setShowModal] = useState(false);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [brands, setBrands] = useState<Brand[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
-  const [isLoadingProduct, setIsLoadingProduct] = useState(false);
-  const [isLoadingBrands, setIsLoadingBrands] = useState(false);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
-  const brandsLoaded = useRef(false);
-  const categoriesLoaded = useRef(false);
-  const hasInitialLoad = useRef(false);
-  const isInitializing = useRef(false);
 
-  const [metadata, setMetadata] = useState<Metadata>({
-    currentPage: 1,
-    pageSize: 9,
-    totalPages: 1,
-    totalRecords: 0,
+  // Combined static data loader
+  const {
+    data: staticData,
+    loading: staticDataLoading,
+    error: staticDataError,
+  } = useDataLoader<StaticData>({
+    loadFunction: async () => {
+      const [brandsResponse, categoriesResponse] = await Promise.all([
+        productApi.listBrand(),
+        productApi.listCategory(),
+      ]);
+
+      if (!brandsResponse.success) throw new Error(brandsResponse.errorMessage);
+      if (!categoriesResponse.success)
+        throw new Error(categoriesResponse.errorMessage);
+
+      return {
+        brands: brandsResponse.data || [],
+        categories: categoriesResponse.data || [],
+      };
+    },
+    autoLoad: true,
+    onError: () => toast.error("Failed to load brands and categories"),
   });
 
-  const [filters, setFilters] = useState<SearchProductFilters>({
-    keyword: undefined,
+  const brands = (staticData as StaticData)?.brands ?? [];
+  const categories = (staticData as StaticData)?.categories ?? [];
+
+  // Filter state - current form values being edited by user
+  const [formFilters, setFormFilters] = useState<SearchFilters>({
+    keyword: "",
     minPrice: undefined,
     maxPrice: undefined,
-    brandId: undefined,
+    brandId: "",
     categoryIds: [],
-    page: 1,
-    size: 9,
   });
 
-  const loadBrands = async () => {
-    if (brandsLoaded.current || isLoadingBrands) return;
-    
-    setIsLoadingBrands(true);
-    try {
-      const response = await productApi.listBrand();
-      if (response.success) {
-        setBrands(response.data || []);
-        brandsLoaded.current = true;
-      }
-    } catch {
-      toast.error("Failed to load brands");
-    } finally {
-      setIsLoadingBrands(false);
-    }
-  };
-
-  const loadCategories = async () => {
-    if (categoriesLoaded.current || isLoadingCategories) return;
-    
-    setIsLoadingCategories(true);
-    try {
-      const response = await productApi.listCategory();
-      if (response.success) {
-        setCategories(response.data || []);
-        categoriesLoaded.current = true;
-      }
-    } catch {
-      toast.error("Failed to load categories");
-    } finally {
-      setIsLoadingCategories(false);
-    }
-  };
-
-  const applyFilters = useCallback(
-    async (page: number) => {
-      if (isLoadingProducts) return;
-
-      setIsLoadingProducts(true);
-      try {
-        const updatedFilters = { ...filters, page };
-        setMetadata((prev) => ({ ...prev, currentPage: page }));
-
-        const response = await productApi.searchProduct(updatedFilters);
-        if (response.success) {
-          setProducts(response.data || []);
-          setMetadata({
-            currentPage: response.metadata?.currentPage ?? 1,
-            pageSize: response.metadata?.pageSize ?? 9,
-            totalPages: response.metadata?.totalPages ?? 1,
-            totalRecords: response.metadata?.totalRecords ?? 0,
-          });
-        } else {
-          toast.error(response.errorMessage || "Failed to load products");
-        }
-      } catch {
-        toast.error("Failed to load products");
-      } finally {
-        setIsLoadingProducts(false);
-      }
+  // Filter update functions
+  const updateFilter = useCallback(
+    <K extends keyof SearchFilters>(key: K, value: SearchFilters[K]) => {
+      setFormFilters((prev) => ({ ...prev, [key]: value }));
     },
-    [filters, isLoadingProducts]
+    []
   );
 
-  const changePage = (newPage: number) => {
-    if (newPage >= 1 && newPage <= metadata.totalPages) {
-      applyFilters(newPage);
-    }
-  };
-
-  const resetFilters = () => {
-    const resetFilters: SearchProductFilters = {
-      keyword: undefined,
+  const resetFilters = useCallback(() => {
+    setFormFilters({
+      keyword: "",
       minPrice: undefined,
       maxPrice: undefined,
-      brandId: undefined,
+      brandId: "",
       categoryIds: [],
-      page: 1,
-      size: 9,
-    };
-    setFilters(resetFilters);
-    applyFilters(1);
-  };
-
-  const showProductDetails = async (product: Product) => {
-    setIsLoadingProduct(true);
-    try {
-      const response = await productApi.getProduct(product.id);
-      if (response.success && response.data) {
-        setSelectedProduct(response.data);
-        setShowModal(true);
-      } else {
-        toast.error(response.errorMessage || "Failed to load product details");
-      }
-    } catch {
-      toast.error("Failed to load product details");
-    } finally {
-      setIsLoadingProduct(false);
-    }
-  };
-
-  const handleAddToCart = (product: Product) => {
-    addToCart({
-      productId: product.id,
-      name: product.name,
-      price: product.price,
-      imageUrl: getProductImageUrl(product.image),
     });
-    toast.success(`${product.name} added to cart`);
+  }, []);
+
+  const updateNumericFilter = useCallback(
+    (key: "minPrice" | "maxPrice", value: string) => {
+      const numValue = value ? parseFloat(value) : undefined;
+      updateFilter(key, numValue);
+    },
+    [updateFilter]
+  );
+
+  const changeCategory = useCallback((categoryId: number) => {
+    setFormFilters((prev) => ({
+      ...prev,
+      categoryIds: prev.categoryIds?.includes(categoryId)
+        ? prev.categoryIds.filter((id) => id !== categoryId)
+        : [...(prev.categoryIds ?? []), categoryId],
+    }));
+  }, []);
+
+  // Products loader with committed search filters
+  const [committedSearchFilters, setCommittedSearchFilters] =
+    useState<SearchFilters>({});
+
+  // API-ready filters with undefined values cleaned up
+  const apiSearchParams = {
+    keyword: committedSearchFilters.keyword || undefined,
+    minPrice: committedSearchFilters.minPrice,
+    maxPrice: committedSearchFilters.maxPrice,
+    brandId: committedSearchFilters.brandId || undefined,
+    categoryIds: committedSearchFilters.categoryIds?.length
+      ? committedSearchFilters.categoryIds
+      : undefined,
   };
 
-  const handleFilterChange = (
-    field: keyof SearchProductFilters,
-    value: string | number | number[] | undefined
-  ) => {
-    // Convert "all" to undefined for brandId to avoid sending it to backend
-    if (field === "brandId" && value === "all") {
-      value = undefined;
+  const {
+    data: products = [],
+    loading: isLoadingProducts,
+    error: productsError,
+    pagination,
+    execute: searchProducts,
+    goToPage,
+  } = useDataLoader<Product>({
+    loadFunction: async (page, size, filters) => {
+      const response = await productApi.searchProduct({
+        page,
+        size,
+        ...apiSearchParams,
+        ...filters,
+      });
+      if (!response.success) throw new Error(response.errorMessage);
+      return {
+        data: response.data || [],
+        totalRecords: response.metadata?.totalRecords || 0,
+      };
+    },
+    pagination: true,
+    autoLoad: true,
+    onError: (error) => {
+      toast.error("Failed to load products: " + error);
+    },
+  });
+
+  const changePage = (newPage: number) => {
+    if (newPage >= 1 && newPage <= (pagination?.totalPages ?? 0)) {
+      goToPage(newPage);
     }
-    setFilters((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    applyFilters(1);
-  };
+  // Simplified event handlers
+  const handleAddToCart = useCallback(
+    (product: Product) => {
+      addToCart({
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        imageUrl: getProductImageUrl(product.image),
+      });
+      toast.success(`${product.name} added to cart`);
+    },
+    [addToCart]
+  );
 
-  useEffect(() => {
-    const initializeData = async () => {
-      if (hasInitialLoad.current || isInitializing.current) {
-        return;
-      }
+  const handleProductClick = useCallback((product: Product) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  }, []);
 
-      isInitializing.current = true;
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+    setSelectedProduct(null);
+  }, []);
 
-      try {
-        await Promise.all([loadBrands(), loadCategories(), applyFilters(1)]);
-        hasInitialLoad.current = true;
-      } finally {
-        isInitializing.current = false;
-      }
-    };
-    initializeData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array - only run once on mount
+  // Loading states
+  const isLoading = staticDataLoading || isLoadingProducts;
+  const hasError = staticDataError || productsError;
+
+  // Error handling
+  if (hasError) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center text-red-600">
+          Error loading data. Please try again later.
+        </div>
+      </div>
+    );
+  }
+
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      // Commit form filters to search and trigger search
+      setCommittedSearchFilters(formFilters);
+      searchProducts();
+    },
+    [formFilters, searchProducts]
+  );
 
   return (
     <>
@@ -236,13 +233,8 @@ const ProductSearch: React.FC = () => {
                   type="text"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Product name, description, attributes, etc."
-                  value={filters.keyword || ""}
-                  onChange={(e) =>
-                    handleFilterChange(
-                      "keyword",
-                      e.target.value.trim() || undefined
-                    )
-                  }
+                  value={formFilters.keyword || ""}
+                  onChange={(e) => updateFilter("keyword", e.target.value)}
                 />
               </div>
 
@@ -259,14 +251,9 @@ const ProductSearch: React.FC = () => {
                       placeholder="Min Price"
                       min="0"
                       step="0.01"
-                      value={filters.minPrice || ""}
+                      value={formFilters.minPrice || ""}
                       onChange={(e) =>
-                        handleFilterChange(
-                          "minPrice",
-                          e.target.value
-                            ? parseFloat(e.target.value)
-                            : undefined
-                        )
+                        updateNumericFilter("minPrice", e.target.value)
                       }
                     />
                   </div>
@@ -277,14 +264,9 @@ const ProductSearch: React.FC = () => {
                       placeholder="Max Price"
                       min="0"
                       step="0.01"
-                      value={filters.maxPrice || ""}
+                      value={formFilters.maxPrice || ""}
                       onChange={(e) =>
-                        handleFilterChange(
-                          "maxPrice",
-                          e.target.value
-                            ? parseFloat(e.target.value)
-                            : undefined
-                        )
+                        updateNumericFilter("maxPrice", e.target.value)
                       }
                     />
                   </div>
@@ -296,33 +278,25 @@ const ProductSearch: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label
-                      htmlFor="brandId"
+                      htmlFor="brand"
                       className="block text-sm font-medium text-gray-700 mb-2"
                     >
                       Brand
                     </label>
-                    {isLoadingBrands ? (
-                      <div
-                        className="flex justify-center py-3"
-                        aria-live="polite"
-                      >
-                        <div
-                          className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"
-                          role="status"
-                          aria-label="Loading brands"
-                        >
-                          <span className="sr-only">Loading...</span>
-                        </div>
+                    {staticDataLoading ? (
+                      <div className="flex justify-center py-3">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
                       </div>
                     ) : (
                       <>
                         <Select
                           disabled={!brands.length}
-                          value={
-                            filters.brandId ? filters.brandId.toString() : "all"
-                          }
+                          value={formFilters.brandId || "all"}
                           onValueChange={(value) =>
-                            handleFilterChange("brandId", value || undefined)
+                            updateFilter(
+                              "brandId",
+                              value === "all" ? "" : value
+                            )
                           }
                         >
                           <SelectTrigger>
@@ -331,10 +305,7 @@ const ProductSearch: React.FC = () => {
                           <SelectContent>
                             <SelectItem value="all">All Brands</SelectItem>
                             {brands.map((brand) => (
-                              <SelectItem
-                                key={brand.id}
-                                value={brand.id.toString()}
-                              >
+                              <SelectItem key={brand.id} value={brand.id.toString()}>
                                 {brand.name}
                               </SelectItem>
                             ))}
@@ -350,78 +321,44 @@ const ProductSearch: React.FC = () => {
                   </div>
                   <div>
                     <label
-                      htmlFor="categoryIds"
+                      htmlFor="category"
                       className="block text-sm font-medium text-gray-700 mb-2"
                     >
                       Categories
                     </label>
-                    {isLoadingCategories ? (
-                      <div
-                        className="flex justify-center py-3"
-                        aria-live="polite"
-                      >
-                        <div
-                          className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"
-                          role="status"
-                          aria-label="Loading categories"
-                        >
-                          <span className="sr-only">Loading...</span>
-                        </div>
+                    {staticDataLoading ? (
+                      <div className="flex justify-center py-3">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
                       </div>
                     ) : (
                       <>
-                        <Select
-                          disabled={!categories.length}
-                          value="placeholder"
-                          onValueChange={() => {}}
-                        >
+                        <Select value="placeholder" onValueChange={() => {}}>
                           <SelectTrigger>
                             <SelectValue>
-                              {filters.categoryIds &&
-                              filters.categoryIds.length > 0
-                                ? `${filters.categoryIds.length} categories selected`
+                              {formFilters.categoryIds && formFilters.categoryIds.length > 0
+                                ? `${formFilters.categoryIds.length} categories selected`
                                 : "All Categories"}
                             </SelectValue>
                           </SelectTrigger>
                           <SelectContent>
-                            <div className="p-2 space-y-2">
-                              {categories.map((category) => (
-                                <label
-                                  key={category.id}
-                                  className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                    checked={
-                                      filters.categoryIds?.includes(
-                                        category.id
-                                      ) || false
-                                    }
-                                    onChange={(e) => {
-                                      const currentCategories =
-                                        filters.categoryIds || [];
-                                      if (e.target.checked) {
-                                        handleFilterChange("categoryIds", [
-                                          ...currentCategories,
-                                          category.id,
-                                        ]);
-                                      } else {
-                                        handleFilterChange(
-                                          "categoryIds",
-                                          currentCategories.filter(
-                                            (id) => id !== category.id
-                                          )
-                                        );
-                                      }
-                                    }}
-                                  />
-                                  <span className="text-sm">
-                                    {category.name}
-                                  </span>
-                                </label>
-                              ))}
-                            </div>
+                            {categories.map((category) => (
+                              <label
+                                key={category.id}
+                                className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded"
+                              >
+                                <input
+                                  type="checkbox"
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                  checked={
+                                    formFilters.categoryIds?.includes(
+                                      category.id
+                                    ) ?? false
+                                  }
+                                  onChange={() => changeCategory(category.id)}
+                                />
+                                <span className="text-sm">{category.name}</span>
+                              </label>
+                            ))}
                           </SelectContent>
                         </Select>
                         {!categories.length && (
@@ -435,19 +372,19 @@ const ProductSearch: React.FC = () => {
                 </div>
               </div>
 
-              {/* Submit Button */}
-              <div className="flex gap-3">
-                <Button type="submit" className="px-4 flex items-center gap-2">
-                  <Search className="h-4 w-4" />
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button type="submit" variant="default" disabled={isLoading}>
+                  <Search className="w-4 h-4" />
                   Search
                 </Button>
                 <Button
                   type="button"
-                  variant="secondary"
+                  variant="outline"
                   onClick={resetFilters}
-                  className="px-4 flex items-center gap-2"
+                  disabled={isLoading}
                 >
-                  <RotateCcw className="h-4 w-4" />
+                  <RotateCcw className="w-4 h-4" />
                   Reset
                 </Button>
               </div>
@@ -463,51 +400,18 @@ const ProductSearch: React.FC = () => {
         </CardHeader>
         <CardContent>
           {isLoadingProducts ? (
-            <div className="flex justify-center py-12" aria-live="polite">
-              <div
-                className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"
-                role="status"
-                aria-label="Loading products"
-              >
-                <span className="sr-only">Loading...</span>
-              </div>
+            <div className="flex justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
-          ) : products && products.length > 0 ? (
+          ) : products && (products as Product[]).length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
-                <Card
+              {(products as Product[]).map((product) => (
+                <ProductCard
                   key={product.id}
-                  className="hover:shadow-md transition-shadow duration-200 overflow-hidden p-0"
-                >
-                  <div className="aspect-[4/3] relative overflow-hidden">
-                    <Image
-                      src={getProductImageUrl(product.image)}
-                      alt={product.name}
-                      fill
-                      className="object-cover hover:scale-105 transition-transform duration-200"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    />
-                  </div>
-                  <CardContent className="p-3 py-0">
-                    <CardTitle
-                      className="text-base font-semibold text-gray-900 mb-1 line-clamp-2 cursor-pointer hover:text-blue-600 hover:underline transition-colors"
-                      onClick={() => showProductDetails(product)}
-                    >
-                      {product.name}
-                    </CardTitle>
-                    <p className="text-lg font-bold text-blue-600">
-                      {formatCurrency(product.price)}
-                    </p>
-                  </CardContent>
-                  <CardFooter className="p-3 pt-0">
-                    <Button
-                      onClick={() => handleAddToCart(product)}
-                      className="w-full"
-                    >
-                      Add to Cart
-                    </Button>
-                  </CardFooter>
-                </Card>
+                  product={product}
+                  onProductClick={handleProductClick}
+                  onAddToCart={handleAddToCart}
+                />
               ))}
             </div>
           ) : (
@@ -518,47 +422,48 @@ const ProductSearch: React.FC = () => {
 
       {/* Product Details Modal */}
       <ProductDetailsModal
-        isOpen={showModal}
+        isOpen={isModalOpen}
         product={selectedProduct}
-        isLoading={isLoadingProduct}
-        onClose={() => setShowModal(false)}
+        isLoading={false}
+        onClose={handleCloseModal}
       />
 
       {/* Pagination */}
-      {metadata.totalPages > 1 && (
+      {pagination.totalPages > 1 && (
         <div className="flex justify-center mt-8">
           <Pagination>
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
-                  onClick={() => changePage(metadata.currentPage - 1)}
+                  onClick={() => changePage(pagination.page - 1)}
                   className={
-                    metadata.currentPage === 1
+                    pagination.page === 1
                       ? "pointer-events-none opacity-50"
                       : "cursor-pointer"
                   }
                 />
               </PaginationItem>
 
-              {Array.from({ length: metadata.totalPages }, (_, i) => i + 1).map(
-                (page) => (
-                  <PaginationItem key={page}>
-                    <PaginationLink
-                      onClick={() => changePage(page)}
-                      isActive={metadata.currentPage === page}
-                      className="cursor-pointer"
-                    >
-                      {page}
-                    </PaginationLink>
-                  </PaginationItem>
-                )
-              )}
+              {Array.from(
+                { length: pagination.totalPages },
+                (_, i) => i + 1
+              ).map((page) => (
+                <PaginationItem key={page}>
+                  <PaginationLink
+                    onClick={() => changePage(page)}
+                    isActive={pagination.page === page}
+                    className="cursor-pointer"
+                  >
+                    {page}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
 
               <PaginationItem>
                 <PaginationNext
-                  onClick={() => changePage(metadata.currentPage + 1)}
+                  onClick={() => changePage(pagination.page + 1)}
                   className={
-                    metadata.currentPage === metadata.totalPages
+                    pagination.page === pagination.totalPages
                       ? "pointer-events-none opacity-50"
                       : "cursor-pointer"
                   }

@@ -39,7 +39,7 @@ export const isValidToken = (token: string | null): boolean => {
     
     // Check if token is expired (with 30 second buffer)
     return payload.exp && payload.exp > (currentTime + 30);
-  } catch (error) {
+  } catch {
     return false;
   }
 };

@@ -24,6 +24,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { PRODUCT_STATUSES } from "@/constants";
 import { withRequireAdmin } from "@/hoc/withAuth";
+import { useDataLoader } from "@/hooks";
 import {
   Brand,
   Category,
@@ -31,8 +32,9 @@ import {
 } from "@/interfaces/product.interface";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -64,12 +66,35 @@ type ProductFormData = z.infer<typeof productSchema>;
 
 function AdminProductAddPage() {
   const router = useRouter();
-  const [brands, setBrands] = useState<Brand[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoadingBrands, setIsLoadingBrands] = useState(true);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const hasLoadedDataRef = useRef(false);
+
+  // Load initial data (brands and categories)
+  interface InitialData extends Record<string, unknown> {
+  brands: Brand[];
+  categories: Category[];
+}
+
+  const { data, loading: isLoadingData } = useDataLoader<InitialData>({
+    multipleLoaders: {
+      brands: async () => {
+        const response = await productApi.listBrand();
+        if (!response.success) throw new Error(response.errorMessage);
+        return response.data || [];
+      },
+      categories: async () => {
+        const response = await productApi.listCategory();
+        if (!response.success) throw new Error(response.errorMessage);
+        return response.data || [];
+      }
+    },
+    autoLoad: true,
+    onError: () => toast.error('Failed to load initial data')
+  });
+
+  const brands = (data as InitialData)?.brands || [];
+  const categories = (data as InitialData)?.categories || [];
+  const isLoadingBrands = typeof isLoadingData === 'boolean' ? isLoadingData : (isLoadingData as Record<string, boolean>)?.brands || false;
+  const isLoadingCategories = typeof isLoadingData === 'boolean' ? isLoadingData : (isLoadingData as Record<string, boolean>)?.categories || false;
 
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -95,34 +120,7 @@ function AdminProductAddPage() {
     name: "attributes",
   });
 
-  // Load data only once
-  useEffect(() => {
-    if (hasLoadedDataRef.current) return;
-    hasLoadedDataRef.current = true;
 
-    const loadData = async () => {
-      try {
-        const [brandsResponse, categoriesResponse] = await Promise.all([
-           productApi.listBrand(),
-           productApi.listCategory(),
-         ]);
-
-        if (brandsResponse.success) {
-          setBrands(brandsResponse.data);
-        }
-        if (categoriesResponse.success) {
-          setCategories(categoriesResponse.data);
-        }
-      } catch {
-        toast.error("Failed to load form data");
-      } finally {
-        setIsLoadingBrands(false);
-        setIsLoadingCategories(false);
-      }
-    };
-
-    loadData();
-  }, []);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -431,9 +429,11 @@ function AdminProductAddPage() {
                       </FormControl>
                       {imagePreview && (
                         <div className="mt-2">
-                          <img
+                          <Image
                             src={imagePreview}
                             alt="Preview"
+                            width={128}
+                            height={128}
                             className="h-32 w-32 object-cover rounded-md"
                           />
                         </div>

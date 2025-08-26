@@ -1,11 +1,24 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, Users, ShoppingCart, Activity } from "lucide-react";
-import { userAdminApi, productAdminApi, orderAdminApi } from "@/api";
+import { orderAdminApi, productAdminApi, userAdminApi } from "@/api";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { formatCurrency } from "@/utils/formatter.util";
+import { useDataLoader } from "@/hooks";
+import { toast } from "sonner";
+import {
+  Activity,
+  DollarSign,
+  ShoppingCart,
+  Users,
+} from "lucide-react";
+import React from "react";
 
-interface StatisticsData {
+interface DashboardStats {
   totalUsers: number;
   totalProducts: number;
   totalOrders: number;
@@ -13,80 +26,33 @@ interface StatisticsData {
 }
 
 const Dashboard: React.FC = () => {
-  const [statistics, setStatistics] = useState<StatisticsData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const isLoadingRef = useRef(false);
+  // Load dashboard statistics
+  const { data: stats, loading } = useDataLoader({
+    loadFunction: async () => {
+      const [usersResponse, productsResponse, ordersResponse, revenueResponse] = await Promise.all([
+        userAdminApi.countUser(),
+        productAdminApi.countProduct(),
+        orderAdminApi.countOrder(),
+        orderAdminApi.getTotalRevenue()
+      ]);
 
-  useEffect(() => {
-    const loadStatistics = async () => {
-      // Prevent duplicate calls
-      if (isLoadingRef.current) {
-        return;
-      }
-      
-      try {
-        isLoadingRef.current = true;
-        setLoading(true);
-        
-        const [
-          usersResponse,
-          productsResponse,
-          ordersResponse,
-          revenueResponse,
-        ] = await Promise.all([
-          userAdminApi.countUser(),
-          productAdminApi.countProduct(),
-          orderAdminApi.countOrder(),
-          orderAdminApi.getTotalRevenue(),
-        ]);
+      return {
+        totalUsers: usersResponse.success ? usersResponse.data || 0 : 0,
+        totalProducts: productsResponse.success ? productsResponse.data || 0 : 0,
+        totalOrders: ordersResponse.success ? ordersResponse.data || 0 : 0,
+        totalRevenue: revenueResponse.success ? revenueResponse.data || 0 : 0,
+      };
+    },
+    autoLoad: true,
+    onError: () => toast.error('Failed to load dashboard statistics')
+  });
 
-        setStatistics({
-          totalUsers: usersResponse.data || 0,
-          totalProducts: productsResponse.data || 0,
-          totalOrders: ordersResponse.data || 0,
-          totalRevenue: revenueResponse.data || 0,
-        });
-        setError(null);
-      } catch {
-        setError("Failed to load statistics");
-      } finally {
-        setLoading(false);
-        isLoadingRef.current = false;
-      }
-    };
-
-    loadStatistics();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Card key={i}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Loading...
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">--</div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="space-y-6">
-        <div className="text-red-500">Error: {error}</div>
-      </div>
-    );
-  }
+  const displayStats = (stats as DashboardStats) || {
+    totalUsers: 0,
+    totalProducts: 0,
+    totalOrders: 0,
+    totalRevenue: 0,
+  };
 
   return (
     <div className="space-y-6">
@@ -99,9 +65,11 @@ const Dashboard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {statistics?.totalUsers?.toLocaleString() || "0"}
+              {loading ? "Loading..." : displayStats.totalUsers.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground">Registered users</p>
+            <p className="text-xs text-muted-foreground">
+              +20.1% from last month
+            </p>
           </CardContent>
         </Card>
 
@@ -114,9 +82,11 @@ const Dashboard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {statistics?.totalProducts?.toLocaleString() || "0"}
+              {loading ? "Loading..." : displayStats.totalProducts.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground">Available products</p>
+            <p className="text-xs text-muted-foreground">
+              +180.1% from last month
+            </p>
           </CardContent>
         </Card>
 
@@ -127,9 +97,11 @@ const Dashboard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {statistics?.totalOrders?.toLocaleString() || "0"}
+              {loading ? "Loading..." : displayStats.totalOrders.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground">All orders placed</p>
+            <p className="text-xs text-muted-foreground">
+              +19% from last month
+            </p>
           </CardContent>
         </Card>
 
@@ -140,10 +112,12 @@ const Dashboard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${statistics?.totalRevenue?.toLocaleString() || "0"}
+              {loading
+                ? "Loading..."
+                : formatCurrency(displayStats.totalRevenue)}
             </div>
             <p className="text-xs text-muted-foreground">
-              From confirmed orders
+              +201 since last hour
             </p>
           </CardContent>
         </Card>

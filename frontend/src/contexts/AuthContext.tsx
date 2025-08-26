@@ -41,8 +41,7 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: AuthP
     hasRole: storeHasRole,
     login: storeLogin,
     logout: storeLogout,
-    clearError: storeClearError,
-    fetchProfile
+    clearError: storeClearError
   } = useUserStore();
   
   const [isInitialized, setIsInitialized] = useState(false);

@@ -2,7 +2,7 @@
 
 import { productApi } from "@/api";
 import { productAdminApi } from "@/api/product.admin";
-import { Metadata } from "@/api/apiClient";
+import type { ApiResponse } from "@/api/apiClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -34,14 +34,15 @@ import {
 import { PRODUCT_STATUSES } from "@/constants";
 import {
   FileType,
-  type Brand,
-  type Category,
   type ExportProductFilters,
   type ListProductFilters,
   type Product,
+  type Brand,
+  type Category,
 } from "@/interfaces/product.interface";
 import { formatCurrency, getProductStatusBadge } from "@/utils/formatter.util";
 import { getProductImageUrl } from "@/utils/productImage.util";
+import { useDataLoader } from "@/hooks";
 import {
   Edit,
   Eye,
@@ -54,7 +55,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { toast } from "sonner";
 import ExportDropdown from "./ExportDropdown";
 import ImportProductModal from "./ImportProductModal";
@@ -76,23 +77,30 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     active: true,
     inactive: true,
   });
-  const [brands, setBrands] = useState<Brand[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoadingBrands, setIsLoadingBrands] = useState(false);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
-  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
-  const hasInitialLoad = useRef(false);
-  const isInitializing = useRef(false);
-  const [metadata, setMetadata] = useState<Metadata>({
-    currentPage: 1,
-    pageSize: 20,
-    totalPages: 1,
-    totalRecords: 0,
+
+  // Load static data (brands and categories)
+  const { data: brands = [], loading: isLoadingBrands } = useDataLoader<Brand[]>({
+    loadFunction: async () => {
+      const { data } = await productApi.listBrand();
+      return data;
+    },
+    autoLoad: true,
+    onError: () => toast.error('Failed to load brands')
   });
+
+  const { data: categories = [], loading: isLoadingCategories } = useDataLoader<Category[]>({
+    loadFunction: async () => {
+      const { data } = await productApi.listCategory();
+      return data;
+    },
+    autoLoad: true,
+    onError: () => toast.error('Failed to load categories')
+  });
+
+  // Product search with pagination and filtering
   const [filters, setFilters] = useState<ListProductFilters>({
     id: undefined,
     keyword: undefined,
@@ -107,38 +115,52 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     size: 20,
   });
 
-  const brandsLoaded = useRef(false);
-  const categoriesLoaded = useRef(false);
+  const { data: productResponse, loading: isLoadingProducts, reload: reloadProducts } = useDataLoader({
+    loadFunction: async () => {
+      // Clean up empty or undefined filters
+      const apiFilters: ListProductFilters = { ...filters };
+      Object.keys(apiFilters).forEach((key) => {
+        const typedKey = key as keyof ListProductFilters;
+        if (
+          apiFilters[typedKey] === "" ||
+          apiFilters[typedKey] === undefined
+        ) {
+          delete apiFilters[typedKey];
+        }
+      });
 
-  const loadBrands = useCallback(async () => {
-    if (brandsLoaded.current || isLoadingBrands) return;
+      const response = await productAdminApi.listProduct(apiFilters);
+      return response;
+    },
+    autoLoad: true,
+    dependencies: [filters],
+    onError: () => toast.error('Failed to load products')
+  });
 
-    setIsLoadingBrands(true);
-    try {
-      const { data } = await productApi.listBrand();
-      setBrands(data);
-      brandsLoaded.current = true;
-    } catch {
-      toast.error("Failed to load brands");
-    } finally {
-      setIsLoadingBrands(false);
-    }
-  }, [isLoadingBrands]);
+  const products = (productResponse as ApiResponse<Product[]>)?.data || [];
+  const pagination = (productResponse as ApiResponse<Product[]>)?.metadata;
 
-  const loadCategories = useCallback(async () => {
-    if (categoriesLoaded.current || isLoadingCategories) return;
+  const goToPage = useCallback((page: number) => {
+    setFilters(prev => ({ ...prev, page }));
+  }, []);
 
-    setIsLoadingCategories(true);
-    try {
-      const { data } = await productApi.listCategory();
-      setCategories(data);
-      categoriesLoaded.current = true;
-    } catch {
-      toast.error("Failed to load categories");
-    } finally {
-      setIsLoadingCategories(false);
-    }
-  }, [isLoadingCategories]);
+  const resetProductFilters = useCallback(() => {
+    setFilters({
+      id: undefined,
+      keyword: undefined,
+      minPrice: undefined,
+      maxPrice: undefined,
+      status: undefined,
+      availableFrom: undefined,
+      isActive: undefined,
+      brandId: undefined,
+      categoryIds: undefined,
+      page: 1,
+      size: 20,
+    });
+  }, []);
+
+
 
   const handleActiveStateChange = useCallback(() => {
     let isActive: boolean | undefined;
@@ -152,83 +174,24 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
       isActive = undefined;
     }
     setFilters((prev) => ({ ...prev, isActive }));
-  }, [activeStates.active, activeStates.inactive]);
+  }, [activeStates.active, activeStates.inactive, setFilters]);
 
   useEffect(() => {
     handleActiveStateChange();
   }, [handleActiveStateChange]);
 
-  const filtersRef = useRef(filters);
-  const isApplyingFilters = useRef(false);
-
-  // Update ref when filters change
-  useEffect(() => {
-    filtersRef.current = filters;
-  }, [filters]);
-
-  const applyFilters = useCallback(
-    async (page: number, currentFilters?: ListProductFilters) => {
-      if (isLoadingProducts || isApplyingFilters.current) return;
-
-      isApplyingFilters.current = true;
-      setIsLoadingProducts(true);
-      try {
-        const filtersToUse = currentFilters || filtersRef.current;
-        const updatedFilters = { ...filtersToUse, page };
-        setFilters(updatedFilters);
-        setMetadata((prev) => ({ ...prev, currentPage: page }));
-
-        // Clean up empty or undefined filters
-        const apiFilters: ListProductFilters = { ...updatedFilters };
-        Object.keys(apiFilters).forEach((key) => {
-          const typedKey = key as keyof ListProductFilters;
-          if (
-            apiFilters[typedKey] === "" ||
-            apiFilters[typedKey] === undefined
-          ) {
-            delete apiFilters[typedKey];
-          }
-        });
-
-        const response = await productAdminApi.listProduct(apiFilters);
-        setProducts(response.data);
-        setMetadata((prev) => ({ ...prev, ...response.metadata }));
-      } catch {
-        toast.error("Failed to load products");
-      } finally {
-        setIsLoadingProducts(false);
-        isApplyingFilters.current = false;
-      }
-    },
-    [isLoadingProducts]
-  );
-
   const changePage = useCallback(
     (newPage: number) => {
-      if (newPage >= 1 && newPage <= metadata.totalPages) {
-        applyFilters(newPage);
+      if (pagination && newPage >= 1 && newPage <= pagination.totalPages) {
+        goToPage(newPage);
       }
     },
-    [metadata.totalPages, applyFilters]
+    [pagination, goToPage]
   );
 
   const resetFilters = () => {
-    const resetFiltersData: ListProductFilters = {
-      id: undefined,
-      keyword: undefined,
-      minPrice: undefined,
-      maxPrice: undefined,
-      status: undefined,
-      availableFrom: undefined,
-      isActive: undefined,
-      brandId: undefined,
-      categoryIds: undefined,
-      page: 1,
-      size: 20,
-    };
     setActiveStates({ active: true, inactive: true });
-    setFilters(resetFiltersData);
-    applyFilters(1, resetFiltersData);
+    resetProductFilters();
   };
 
   const handleFilterChange = (
@@ -239,7 +202,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
   };
 
   const handleSearch = () => {
-    applyFilters(1);
+    // Filters are automatically applied in the new hook
   };
 
   const handleDelete = useCallback(
@@ -249,12 +212,12 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
       try {
         await productAdminApi.deleteProduct(productId);
         toast.success("Product deleted successfully");
-        applyFilters(metadata.currentPage);
+        // Data will be automatically refreshed
       } catch {
         toast.error("Failed to delete product");
       }
     },
-    [metadata.currentPage, applyFilters]
+    []
   );
 
   const handleExport = useCallback(
@@ -294,30 +257,8 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
 
   const handleImportSuccess = useCallback(() => {
     setShowImportModal(false);
-    applyFilters(1);
-  }, [applyFilters]);
-
-  // Load initial data
-  useEffect(() => {
-    const loadInitialData = async () => {
-      if (hasInitialLoad.current || isInitializing.current) {
-        return;
-      }
-
-      isInitializing.current = true;
-
-      try {
-        await Promise.all([loadBrands(), loadCategories(), applyFilters(1)]);
-        hasInitialLoad.current = true;
-      } finally {
-        setIsLoadingProducts(false);
-        isInitializing.current = false;
-      }
-    };
-
-    loadInitialData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array to run only once
+    reloadProducts();
+  }, [reloadProducts]);
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -510,7 +451,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                     <SelectValue placeholder="All Brands" />
                   </SelectTrigger>
                   <SelectContent>
-                    {brands.map((brand) => (
+                    {brands?.filter((brand): brand is Brand => brand != null).map((brand) => (
                       <SelectItem key={brand.id} value={brand.id.toString()}>
                         {brand.name}
                       </SelectItem>
@@ -536,7 +477,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((category) => (
+                    {categories?.filter((category): category is Category => category != null).map((category) => (
                       <label
                         key={category.id}
                         className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded"
@@ -574,14 +515,14 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
           </div>
 
           <div className="flex justify-start space-x-2 mt-4">
-            <Button onClick={handleSearch} disabled={isLoadingProducts}>
+            <Button onClick={handleSearch} disabled={Boolean(isLoadingProducts)}>
               <Search className="h-4 w-4 mr-2" />
               Search
             </Button>
             <Button
               variant="outline"
               onClick={resetFilters}
-              disabled={isLoadingProducts}
+              disabled={Boolean(isLoadingProducts)}
             >
               <RotateCcw className="h-4 w-4 mr-2" />
               Reset
@@ -687,11 +628,11 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
       </Card>
 
       {/* Pagination */}
-      {metadata.totalPages > 1 && (
+      {pagination && pagination.totalPages > 1 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
-            Page {metadata.currentPage} of {metadata.totalPages} (
-            {metadata.totalRecords} records)
+            Page {pagination.currentPage} of {pagination.totalPages} (
+            {pagination.totalRecords} records)
           </div>
           <Pagination>
             <PaginationContent>
@@ -700,12 +641,12 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
-                    if (metadata.currentPage > 1) {
-                      changePage(metadata.currentPage - 1);
+                    if (pagination.currentPage > 1) {
+                      changePage(pagination.currentPage - 1);
                     }
                   }}
                   className={
-                    metadata.currentPage <= 1
+                    pagination.currentPage <= 1
                       ? "pointer-events-none opacity-50"
                       : ""
                   }
@@ -714,18 +655,18 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
 
               {/* Page numbers */}
               {Array.from(
-                { length: Math.min(5, metadata.totalPages) },
+                { length: Math.min(5, pagination.totalPages) },
                 (_, i) => {
                   const pageNumber =
                     Math.max(
                       1,
                       Math.min(
-                        metadata.totalPages - 4,
-                        metadata.currentPage - 2
+                        pagination.totalPages - 4,
+                        pagination.currentPage - 2
                       )
                     ) + i;
 
-                  if (pageNumber <= metadata.totalPages) {
+                  if (pageNumber <= pagination.totalPages) {
                     return (
                       <PaginationItem key={pageNumber}>
                         <PaginationLink
@@ -734,7 +675,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                             e.preventDefault();
                             changePage(pageNumber);
                           }}
-                          isActive={pageNumber === metadata.currentPage}
+                          isActive={pageNumber === pagination.currentPage}
                         >
                           {pageNumber}
                         </PaginationLink>
@@ -750,12 +691,12 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
-                    if (metadata.currentPage < metadata.totalPages) {
-                      changePage(metadata.currentPage + 1);
+                    if (pagination.currentPage < pagination.totalPages) {
+                      changePage(pagination.currentPage + 1);
                     }
                   }}
                   className={
-                    metadata.currentPage >= metadata.totalPages
+                    pagination.currentPage >= pagination.totalPages
                       ? "pointer-events-none opacity-50"
                       : ""
                   }

@@ -62,6 +62,9 @@ const nextConfig: NextConfig = {
     ];
   },
   
+  // Configure output file tracing root to resolve workspace warning
+  outputFileTracingRoot: process.cwd(),
+  
   // Configure turbopack root to silence warning
   // turbopack: {
   //   root: process.cwd()

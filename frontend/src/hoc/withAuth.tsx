@@ -83,7 +83,7 @@ export function withAuth<P extends object>(
         }
         return;
       }
-    }, [auth.isLoading, auth.isAuthenticated, auth.isAdmin, router]);
+    }, [auth, router]);
 
     // Show loading state
     if (auth.isLoading) {

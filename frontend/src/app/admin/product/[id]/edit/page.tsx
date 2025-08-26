@@ -24,6 +24,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { PRODUCT_STATUSES } from "@/constants";
 import { withRequireAdmin } from "@/hoc/withAuth";
+import { useDataLoader } from "@/hooks";
 import {
   Brand,
   Category,
@@ -32,8 +33,9 @@ import {
 } from "@/interfaces/product.interface";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -69,14 +71,36 @@ function AdminProductEditPage() {
   const router = useRouter();
   const params = useParams();
   const productId = parseInt(params.id as string, 10);
-  const [brands, setBrands] = useState<Brand[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoadingBrands, setIsLoadingBrands] = useState(true);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [isLoadingProduct, setIsLoadingProduct] = useState(true);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
-  const hasLoadedData = useRef(false);
+
+  // Load initial data (brands and categories)
+  interface InitialData extends Record<string, unknown> {
+  brands: Brand[];
+  categories: Category[];
+}
+
+  const { data, loading } = useDataLoader<InitialData>({
+    multipleLoaders: {
+      brands: async () => {
+        const response = await productApi.listBrand();
+        if (!response.success) throw new Error(response.errorMessage);
+        return response.data || [];
+      },
+      categories: async () => {
+        const response = await productApi.listCategory();
+        if (!response.success) throw new Error(response.errorMessage);
+        return response.data || [];
+      }
+    },
+    autoLoad: true,
+    onError: () => toast.error('Failed to load initial data')
+  });
+
+  const brands = (data as InitialData)?.brands || [];
+  const categories = (data as InitialData)?.categories || [];
+  const isLoadingData = typeof loading === 'boolean' ? loading : Object.values(loading || {}).some(Boolean);
 
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -102,78 +126,61 @@ function AdminProductEditPage() {
     name: "attributes",
   });
 
-  useEffect(() => {
-    const loadData = async () => {
-      // Load data only once
-      if (hasLoadedData.current || !productId) {
-        return;
-      }
+  const loadProduct = useCallback(async () => {
+    if (!productId) return;
 
-      hasLoadedData.current = true;
+    setIsLoadingProduct(true);
+    try {
+      const productResponse = await productAdminApi.getProduct(productId);
+      
+      if (productResponse.success) {
+        const productData = productResponse.data;
+        setProduct(productData);
 
-      try {
-        const [brandsResponse, categoriesResponse, productResponse] =
-          await Promise.all([
-            productApi.listBrand(),
-            productApi.listCategory(),
-            productAdminApi.getProduct(productId),
-          ]);
+        // Format the date for datetime-local input
+        const availableFromDate = new Date(productData.availableFrom);
+        const formattedDate = availableFromDate.toISOString().slice(0, 16);
 
-        if (brandsResponse.success) {
-          setBrands(brandsResponse.data);
+        // Set form values
+        form.reset({
+          id: productData.id,
+          name: productData.name,
+          price: productData.price,
+          quantity: productData.quantity,
+          status: productData.status,
+          availableFrom: formattedDate,
+          isActive: productData.isActive,
+          brandId: productData.brand?.id || 0,
+          categoryIds: productData.categories?.map((cat) => cat.id) || [],
+          image: productData.image || "",
+          details: {
+            description: productData.details?.description || "",
+          },
+          attributes: productData.attributes || [],
+        });
+
+        // Set image preview
+        if (productData.image) {
+          setImagePreview(productData.image);
         }
-        if (categoriesResponse.success) {
-          setCategories(categoriesResponse.data);
-        }
-        if (productResponse.success) {
-          const productData = productResponse.data;
-          setProduct(productData);
 
-          // Format the date for datetime-local input
-          const availableFromDate = new Date(productData.availableFrom);
-          const formattedDate = availableFromDate.toISOString().slice(0, 16);
-
-          // Set form values
-          form.reset({
-            id: productData.id,
-            name: productData.name,
-            price: productData.price,
-            quantity: productData.quantity,
-            status: productData.status,
-            availableFrom: formattedDate,
-            isActive: productData.isActive,
-            brandId: productData.brand?.id || 0,
-            categoryIds: productData.categories?.map((cat) => cat.id) || [],
-            image: productData.image || "",
-            details: {
-              description: productData.details?.description || "",
-            },
-            attributes: productData.attributes || [],
-          });
-
-          // Set image preview
-          if (productData.image) {
-            setImagePreview(productData.image);
-          }
-
-          // Replace attributes array
-          replace(productData.attributes || []);
-        } else {
-          toast.error("Product not found");
-          router.push("/admin/product");
-        }
-      } catch {
-        toast.error("Failed to load product data");
+        // Replace attributes array
+        replace(productData.attributes || []);
+      } else {
+        toast.error("Product not found");
         router.push("/admin/product");
-      } finally {
-        setIsLoadingBrands(false);
-        setIsLoadingCategories(false);
-        setIsLoadingProduct(false);
       }
-    };
-
-    loadData();
+    } catch {
+      toast.error("Failed to load product data");
+      router.push("/admin/product");
+    } finally {
+      setIsLoadingProduct(false);
+    }
   }, [productId, form, replace, router]);
+
+  useEffect(() => {
+    loadProduct();
+  }, [loadProduct]);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -420,13 +427,13 @@ function AdminProductEditPage() {
                             field.onChange(parseInt(value))
                           }
                           value={field.value.toString()}
-                          disabled={isLoadingBrands || brands.length === 0}
+                          disabled={isLoadingData || brands.length === 0}
                         >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue
                                 placeholder={
-                                  isLoadingBrands
+                                  isLoadingData
                                     ? "Loading brands..."
                                     : "Select a brand"
                                 }
@@ -455,7 +462,7 @@ function AdminProductEditPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Categories *</FormLabel>
-                        {isLoadingCategories ? (
+                        {isLoadingData ? (
                           <div className="flex items-center justify-center py-2">
                             <Loader2 className="h-4 w-4 animate-spin" />
                             <span className="ml-2 text-sm text-muted-foreground">
@@ -515,7 +522,7 @@ function AdminProductEditPage() {
                 <FormField
                   control={form.control}
                   name="image"
-                  render={({ field }) => (
+                  render={() => (
                     <FormItem>
                       <FormLabel>Product Image</FormLabel>
                       <FormControl>
@@ -527,9 +534,11 @@ function AdminProductEditPage() {
                       </FormControl>
                       {imagePreview && (
                         <div className="mt-2">
-                          <img
+                          <Image
                             src={imagePreview}
                             alt="Preview"
+                            width={128}
+                            height={128}
                             className="h-32 w-32 object-cover rounded-md"
                           />
                         </div>

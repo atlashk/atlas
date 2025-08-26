@@ -8,45 +8,36 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { withRequireAdmin } from "@/hoc/withAuth";
 import { Product } from "@/interfaces/product.interface";
 import { getProductStatusBadge } from "@/utils/formatter.util";
+import { useDataLoader } from "@/hooks";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 function AdminProductDetailsPage() {
   const router = useRouter();
   const params = useParams();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
-  const hasLoadedData = useRef(false);
 
   const productId = parseInt(params.id as string, 10);
 
-  useEffect(() => {
-    const loadProductData = async () => {
-      // Load product data only once
-      if (productId && !hasLoadedData.current) {
-        hasLoadedData.current = true;
-        try {
-          const response = await productAdminApi.getProduct(productId);
-          if (response.success) {
-            setProduct(response.data);
-          } else {
-            toast.error(response.errorMessage || "Failed to load product");
-            router.push("/admin/product");
-          }
-        } catch {
-          toast.error("Failed to load product");
-          router.push("/admin/product");
-        } finally {
-          setIsLoading(false);
-        }
+  // Load product data
+  const { data: product, loading: isLoading } = useDataLoader<Product>({
+    loadFunction: async () => {
+      const response = await productAdminApi.getProduct(productId);
+      if (!response.success) {
+        throw new Error(response.errorMessage || 'Product not found');
       }
-    };
-
-    loadProductData();
-  }, [productId, router]);
+      return response.data;
+    },
+    autoLoad: true,
+    dependencies: [productId],
+    onError: () => {
+      toast.error('Failed to load product');
+      router.push('/admin/product');
+    }
+  });
 
   const handleEdit = () => {
     router.push(`/admin/product/${productId}/edit`);
@@ -58,7 +49,7 @@ function AdminProductDetailsPage() {
     if (confirm("Are you sure you want to delete this product?")) {
       setIsDeleting(true);
       try {
-        const response = await productAdminApi.deleteProduct(product.id);
+        const response = await productAdminApi.deleteProduct((product as Product).id);
         if (response.success) {
           toast.success("Product deleted successfully!");
           router.push("/admin/product");
@@ -133,10 +124,12 @@ function AdminProductDetailsPage() {
             <Card>
               <CardContent className="p-6 pt-0">
                 <div className="h-70 w-70 mx-auto mb-4 bg-muted rounded-lg overflow-hidden">
-                  {product.image ? (
-                    <img
-                      src={product.image}
-                      alt={product.name}
+                  {(product as Product).image ? (
+                    <Image
+                      src={(product as Product).image}
+                      alt={(product as Product).name}
+                      width={280}
+                      height={280}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -146,51 +139,51 @@ function AdminProductDetailsPage() {
                   )}
                 </div>
 
-                <h2 className="text-2xl font-bold mb-3">{product.name}</h2>
+                <h2 className="text-2xl font-bold mb-3">{(product as Product).name}</h2>
 
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Price:</span>
                     <span className="font-bold text-primary">
-                      ${product.price.toFixed(2)}
+                      ${(product as Product).price.toFixed(2)}
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Status:</span>
-                    {getProductStatusBadge(product.status)}
+                    {getProductStatusBadge((product as Product).status)}
                   </div>
 
-                  {product.status === "IN_STOCK" && (
+                  {(product as Product).status === "IN_STOCK" && (
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">Stock:</span>
-                      <Badge variant="outline">{product.quantity}</Badge>
+                      <Badge variant="outline">{(product as Product).quantity}</Badge>
                     </div>
                   )}
 
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Active:</span>
-                    <Badge variant={product.isActive ? "default" : "secondary"}>
-                      {product.isActive ? "Yes" : "No"}
+                    <Badge variant={(product as Product).isActive ? "default" : "secondary"}>
+                      {(product as Product).isActive ? "Yes" : "No"}
                     </Badge>
                   </div>
 
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Available From:</span>
                     <span className="text-sm">
-                      {new Date(product.availableFrom).toLocaleDateString()}
+                      {new Date((product as Product).availableFrom).toLocaleDateString()}
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Brand:</span>
-                    <span className="text-sm">{product.brand.name}</span>
+                    <span className="text-sm">{(product as Product).brand.name}</span>
                   </div>
 
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Categories:</span>
                     <div className="flex flex-wrap gap-1">
-                      {product.categories.map((category) => (
+                      {(product as Product).categories.map((category) => (
                         <Badge key={category.id} variant="secondary">
                           {category.name}
                         </Badge>
@@ -211,7 +204,7 @@ function AdminProductDetailsPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm leading-relaxed">
-                  {product.details.description || "No description available."}
+                  {(product as Product).details.description || "No description available."}
                 </p>
               </CardContent>
             </Card>
@@ -222,9 +215,9 @@ function AdminProductDetailsPage() {
                 <CardTitle>Specifications</CardTitle>
               </CardHeader>
               <CardContent>
-                {product.attributes && product.attributes.length > 0 ? (
+                {(product as Product).attributes && (product as Product).attributes.length > 0 ? (
                   <div className="space-y-3">
-                    {product.attributes.map((attr) => (
+                    {(product as Product).attributes.map((attr) => (
                       <div
                         key={attr.id}
                         className="flex items-center justify-between py-2 border-b border-border last:border-b-0"
