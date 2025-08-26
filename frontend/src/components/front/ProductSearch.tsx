@@ -1,4 +1,5 @@
 import { productApi } from "@/api";
+import { Metadata } from "@/api/apiClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -9,13 +10,18 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useDataLoader } from "@/hooks";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Brand, Category, Product } from "@/interfaces";
 import { useCartStore } from "@/stores";
 import { getProductImageUrl } from "@/utils/productImage.util";
 import { RotateCcw, Search } from "lucide-react";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import ProductCard from "./ProductCard";
 import ProductDetailsModal from "./ProductDetailsModal";
@@ -29,44 +35,33 @@ interface SearchFilters {
   categoryIds?: number[];
 }
 
-interface StaticData {
-  brands: Brand[];
-  categories: Category[];
-}
-
 const ProductSearch: React.FC = () => {
   const { addToCart } = useCartStore();
+  const isInitialized = useRef(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  // Combined static data loader
-  const {
-    data: staticData,
-    loading: staticDataLoading,
-    error: staticDataError,
-  } = useDataLoader<StaticData>({
-    loadFunction: async () => {
-      const [brandsResponse, categoriesResponse] = await Promise.all([
-        productApi.listBrand(),
-        productApi.listCategory(),
-      ]);
+  // Brands state
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [isLoadingBrands, setIsLoadingBrands] = useState(true);
+  const [brandsError, setBrandsError] = useState<string | null>(null);
 
-      if (!brandsResponse.success) throw new Error(brandsResponse.errorMessage);
-      if (!categoriesResponse.success)
-        throw new Error(categoriesResponse.errorMessage);
+  // Categories state
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [categoriesError, setCategoriesError] = useState<string | null>(null);
 
-      return {
-        brands: brandsResponse.data || [],
-        categories: categoriesResponse.data || [],
-      };
-    },
-    autoLoad: true,
-    onError: () => toast.error("Failed to load brands and categories"),
+  // Products state
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+  const [productsError, setProductsError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState<Metadata>({
+    currentPage: 1,
+    totalPages: 1,
+    totalRecords: 0,
+    pageSize: 20,
   });
-
-  const brands = (staticData as StaticData)?.brands ?? [];
-  const categories = (staticData as StaticData)?.categories ?? [];
 
   // Filter state - current form values being edited by user
   const [formFilters, setFormFilters] = useState<SearchFilters>({
@@ -112,51 +107,118 @@ const ProductSearch: React.FC = () => {
     }));
   }, []);
 
-  // Products loader with committed search filters
+  // Committed search filters
   const [committedSearchFilters, setCommittedSearchFilters] =
     useState<SearchFilters>({});
 
-  // API-ready filters with undefined values cleaned up
-  const apiSearchParams = {
-    keyword: committedSearchFilters.keyword || undefined,
-    minPrice: committedSearchFilters.minPrice,
-    maxPrice: committedSearchFilters.maxPrice,
-    brandId: committedSearchFilters.brandId || undefined,
-    categoryIds: committedSearchFilters.categoryIds?.length
-      ? committedSearchFilters.categoryIds
-      : undefined,
-  };
+  // Load brands data
+  const loadBrands = useCallback(async () => {
+    try {
+      setIsLoadingBrands(true);
+      setBrandsError(null);
 
-  const {
-    data: products = [],
-    loading: isLoadingProducts,
-    error: productsError,
-    pagination,
-    execute: searchProducts,
-    goToPage,
-  } = useDataLoader<Product>({
-    loadFunction: async (page, size, filters) => {
-      const response = await productApi.searchProduct({
-        page,
-        size,
-        ...apiSearchParams,
-        ...filters,
-      });
-      if (!response.success) throw new Error(response.errorMessage);
-      return {
-        data: response.data || [],
-        totalRecords: response.metadata?.totalRecords || 0,
-      };
+      const brandsResponse = await productApi.listBrand();
+
+      if (!brandsResponse.success) {
+        throw new Error(brandsResponse.errorMessage || "Failed to load brands");
+      }
+
+      setBrands(brandsResponse.data || []);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to load brands";
+      setBrandsError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsLoadingBrands(false);
+    }
+  }, []);
+
+  // Load categories data
+  const loadCategories = useCallback(async () => {
+    try {
+      setIsLoadingCategories(true);
+      setCategoriesError(null);
+
+      const categoriesResponse = await productApi.listCategory();
+
+      if (!categoriesResponse.success) {
+        throw new Error(
+          categoriesResponse.errorMessage || "Failed to load categories"
+        );
+      }
+
+      setCategories(categoriesResponse.data || []);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to load categories";
+      setCategoriesError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsLoadingCategories(false);
+    }
+  }, []);
+
+  // Load products data
+  const loadProducts = useCallback(
+    async (
+      filters: SearchFilters = {},
+      page: number = 1,
+      pageSize: number = 20
+    ) => {
+      try {
+        setIsLoadingProducts(true);
+        setProductsError(null);
+
+        // Clean up filters for API call
+        const apiSearchParams = {
+          page,
+          size: pageSize,
+          keyword: filters.keyword || undefined,
+          minPrice: filters.minPrice,
+          maxPrice: filters.maxPrice,
+          brandId: filters.brandId || undefined,
+          categoryIds: filters.categoryIds?.length
+            ? filters.categoryIds
+            : undefined,
+        };
+
+        const response = await productApi.searchProduct(apiSearchParams);
+
+        if (!response.success) {
+          throw new Error(response.errorMessage || "Failed to load products");
+        }
+
+        setProducts(response.data || []);
+        setPagination({
+          currentPage: page,
+          totalPages: response.metadata?.totalPages || 1,
+          totalRecords: response.metadata?.totalRecords || 0,
+          pageSize: response.metadata?.pageSize || 20,
+        });
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Failed to load products";
+        setProductsError(errorMessage);
+        toast.error(errorMessage);
+        setProducts([]);
+      } finally {
+        setIsLoadingProducts(false);
+      }
     },
-    pagination: true,
-    autoLoad: true,
-    onError: (error) => {
-      toast.error("Failed to load products: " + error);
+    []
+  );
+
+  // Go to specific page
+  const goToPage = useCallback(
+    (page: number) => {
+      loadProducts(committedSearchFilters, page, pagination.pageSize);
     },
-  });
+    [loadProducts, committedSearchFilters, pagination.pageSize]
+  );
 
   const changePage = (newPage: number) => {
-    if (newPage >= 1 && newPage <= (pagination?.totalPages ?? 0)) {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
       goToPage(newPage);
     }
   };
@@ -185,9 +247,37 @@ const ProductSearch: React.FC = () => {
     setSelectedProduct(null);
   }, []);
 
+  // Initial data loading - load static data once and initial products
+  useEffect(() => {
+    if (isInitialized.current) {
+      return;
+    }
+    
+    isInitialized.current = true;
+    
+    const initializeData = async () => {
+      await Promise.all([
+        loadBrands(),
+        loadCategories(),
+        loadProducts({}, 1, 9),
+      ]);
+    };
+    initializeData();
+  }, []); // Empty dependency array to run only once on mount
+
   // Loading states
-  const isLoading = staticDataLoading || isLoadingProducts;
-  const hasError = staticDataError || productsError;
+  const isLoading = isLoadingBrands || isLoadingCategories || isLoadingProducts;
+  const hasError = brandsError || categoriesError || productsError;
+
+  const handleSearch = useCallback(
+    () => {
+      // Commit form filters to search and trigger search
+      setCommittedSearchFilters(formFilters);
+      // Only load products, not static data
+      loadProducts(formFilters, 1, pagination.pageSize);
+    },
+    [formFilters, loadProducts, pagination.pageSize]
+  );
 
   // Error handling
   if (hasError) {
@@ -200,16 +290,6 @@ const ProductSearch: React.FC = () => {
     );
   }
 
-  const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      // Commit form filters to search and trigger search
-      setCommittedSearchFilters(formFilters);
-      searchProducts();
-    },
-    [formFilters, searchProducts]
-  );
-
   return (
     <>
       {/* Filters Card */}
@@ -218,8 +298,7 @@ const ProductSearch: React.FC = () => {
           <CardTitle>Search Filters</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit}>
-            <div className="space-y-6">
+          <div className="space-y-6">
               {/* Search Input */}
               <div>
                 <label
@@ -283,7 +362,7 @@ const ProductSearch: React.FC = () => {
                     >
                       Brand
                     </label>
-                    {staticDataLoading ? (
+                    {isLoadingBrands ? (
                       <div className="flex justify-center py-3">
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
                       </div>
@@ -305,7 +384,10 @@ const ProductSearch: React.FC = () => {
                           <SelectContent>
                             <SelectItem value="all">All Brands</SelectItem>
                             {brands.map((brand) => (
-                              <SelectItem key={brand.id} value={brand.id.toString()}>
+                              <SelectItem
+                                key={brand.id}
+                                value={brand.id.toString()}
+                              >
                                 {brand.name}
                               </SelectItem>
                             ))}
@@ -326,7 +408,7 @@ const ProductSearch: React.FC = () => {
                     >
                       Categories
                     </label>
-                    {staticDataLoading ? (
+                    {isLoadingCategories ? (
                       <div className="flex justify-center py-3">
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
                       </div>
@@ -335,7 +417,8 @@ const ProductSearch: React.FC = () => {
                         <Select value="placeholder" onValueChange={() => {}}>
                           <SelectTrigger>
                             <SelectValue>
-                              {formFilters.categoryIds && formFilters.categoryIds.length > 0
+                              {formFilters.categoryIds &&
+                              formFilters.categoryIds.length > 0
                                 ? `${formFilters.categoryIds.length} categories selected`
                                 : "All Categories"}
                             </SelectValue>
@@ -374,7 +457,12 @@ const ProductSearch: React.FC = () => {
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-2">
-                <Button type="submit" variant="default" disabled={isLoading}>
+                <Button
+                  type="button"
+                  variant="default"
+                  onClick={handleSearch}
+                  disabled={isLoading}
+                >
                   <Search className="w-4 h-4" />
                   Search
                 </Button>
@@ -389,7 +477,6 @@ const ProductSearch: React.FC = () => {
                 </Button>
               </div>
             </div>
-          </form>
         </CardContent>
       </Card>
 
@@ -403,9 +490,9 @@ const ProductSearch: React.FC = () => {
             <div className="flex justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
-          ) : products && (products as Product[]).length > 0 ? (
+          ) : products.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {(products as Product[]).map((product) => (
+              {products.map((product) => (
                 <ProductCard
                   key={product.id}
                   product={product}
@@ -435,9 +522,9 @@ const ProductSearch: React.FC = () => {
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
-                  onClick={() => changePage(pagination.page - 1)}
+                  onClick={() => changePage(pagination.currentPage - 1)}
                   className={
-                    pagination.page === 1
+                    pagination.currentPage === 1
                       ? "pointer-events-none opacity-50"
                       : "cursor-pointer"
                   }
@@ -451,7 +538,7 @@ const ProductSearch: React.FC = () => {
                 <PaginationItem key={page}>
                   <PaginationLink
                     onClick={() => changePage(page)}
-                    isActive={pagination.page === page}
+                    isActive={pagination.currentPage === page}
                     className="cursor-pointer"
                   >
                     {page}
@@ -461,9 +548,9 @@ const ProductSearch: React.FC = () => {
 
               <PaginationItem>
                 <PaginationNext
-                  onClick={() => changePage(pagination.page + 1)}
+                  onClick={() => changePage(pagination.currentPage + 1)}
                   className={
-                    pagination.page === pagination.totalPages
+                    pagination.currentPage === pagination.totalPages
                       ? "pointer-events-none opacity-50"
                       : "cursor-pointer"
                   }

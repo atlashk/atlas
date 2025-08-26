@@ -8,36 +8,49 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { withRequireAdmin } from "@/hoc/withAuth";
 import { Product } from "@/interfaces/product.interface";
 import { getProductStatusBadge } from "@/utils/formatter.util";
-import { useDataLoader } from "@/hooks";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "sonner";
 
 function AdminProductDetailsPage() {
   const router = useRouter();
   const params = useParams();
+  const isInitialized = useRef(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const productId = parseInt(params.id as string, 10);
 
   // Load product data
-  const { data: product, loading: isLoading } = useDataLoader<Product>({
-    loadFunction: async () => {
+  const loadProduct = useCallback(async () => {
+    try {
+      setIsLoading(true);
       const response = await productAdminApi.getProduct(productId);
-      if (!response.success) {
-        throw new Error(response.errorMessage || 'Product not found');
+      if (response.success) {
+        setProduct(response.data);
+      } else {
+        toast.error(response.errorMessage || 'Product not found');
+        router.push('/admin/product');
       }
-      return response.data;
-    },
-    autoLoad: true,
-    dependencies: [productId],
-    onError: () => {
+    } catch (error) {
       toast.error('Failed to load product');
       router.push('/admin/product');
+    } finally {
+      setIsLoading(false);
     }
-  });
+  }, [productId, router]);
+
+  useEffect(() => {
+    if (isInitialized.current) {
+      return;
+    }
+    
+    isInitialized.current = true;
+    loadProduct();
+  }, [loadProduct]);
 
   const handleEdit = () => {
     router.push(`/admin/product/${productId}/edit`);

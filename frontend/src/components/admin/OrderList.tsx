@@ -47,10 +47,11 @@ import {
   RotateCcw,
   Search,
 } from "lucide-react";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 
 const OrderList: React.FC = () => {
+  const isInitialized = useRef(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(true);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
@@ -71,9 +72,9 @@ const OrderList: React.FC = () => {
     totalRecords: 0,
   });
 
-  const toggleDetails = (orderId: number) => {
+  const toggleDetails = useCallback((orderId: number) => {
     setSelectedOrderId(selectedOrderId === orderId ? null : orderId);
-  };
+  }, [selectedOrderId]);
 
   const applyFilters = useCallback(
     async (page: number, currentFilters?: ListOrderFilters) => {
@@ -98,58 +99,67 @@ const OrderList: React.FC = () => {
 
         const response = await orderAdminApi.listOrder(apiFilters);
 
-        setOrders(response.data);
-        if (response.metadata) {
-          setMetadata(response.metadata);
+        if (response.success) {
+          setOrders(response.data || []);
+          if (response.metadata) {
+            setMetadata(response.metadata);
+          }
+        } else {
+          toast.error("Failed to load orders");
+          setOrders([]);
         }
         setSelectedOrderId(null);
-      } catch {
+      } catch (error) {
         toast.error("Failed to load orders");
         setOrders([]);
       } finally {
         setIsLoadingOrders(false);
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [] // Remove filters dependency to prevent infinite loop
+    [filters]
   );
 
-  const changePage = (newPage: number) => {
+  const changePage = useCallback((newPage: number) => {
     if (newPage >= 1 && newPage <= metadata.totalPages) {
       applyFilters(newPage);
     }
-  };
+  }, [metadata.totalPages, applyFilters]);
 
-  const resetFilters = () => {
-    const resetFilters: ListOrderFilters = {
+  const resetFilters = useCallback(() => {
+    const resetFiltersData: ListOrderFilters = {
       orderId: undefined,
       userId: undefined,
       productId: undefined,
-      status: "",
+      status: undefined,
       startDate: undefined,
       endDate: undefined,
       page: 1,
       size: 20,
     };
-    setFilters(resetFilters);
-    applyFilters(1, resetFilters);
-  };
+    setFilters(resetFiltersData);
+    applyFilters(1, resetFiltersData);
+  }, [applyFilters]);
 
-  const handleFilterChange = (
+  const handleFilterChange = useCallback((
     field: keyof ListOrderFilters,
     value: string | number | boolean | undefined
   ) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
-  };
+  }, []);
 
-  const handleSearch = () => {
-    applyFilters(1, filters);
-  };
-
-  // Initial load
-  useEffect(() => {
+  const handleSearch = useCallback(() => {
     applyFilters(1);
   }, [applyFilters]);
+
+  // Load initial data on component mount
+  useEffect(() => {
+    if (isInitialized.current) {
+      return;
+    }
+
+    isInitialized.current = true;
+    applyFilters(1);
+  }, []);
 
   return (
     <div className="space-y-6">

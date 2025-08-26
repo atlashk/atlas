@@ -2,7 +2,6 @@
 
 import { productApi } from "@/api";
 import { productAdminApi } from "@/api/product.admin";
-import type { ApiResponse } from "@/api/apiClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -34,19 +33,19 @@ import {
 import { PRODUCT_STATUSES } from "@/constants";
 import {
   FileType,
+  type Brand,
+  type Category,
   type ExportProductFilters,
   type ListProductFilters,
   type Product,
-  type Brand,
-  type Category,
 } from "@/interfaces/product.interface";
 import { formatCurrency, getProductStatusBadge } from "@/utils/formatter.util";
 import { getProductImageUrl } from "@/utils/productImage.util";
-import { useDataLoader } from "@/hooks";
+
+import { Metadata } from "@/api/apiClient";
 import {
   Edit,
   Eye,
-  Loader2,
   Plus,
   RotateCcw,
   Search,
@@ -55,7 +54,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import ExportDropdown from "./ExportDropdown";
 import ImportProductModal from "./ImportProductModal";
@@ -71,8 +70,9 @@ interface ActiveStates {
 
 const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
   const router = useRouter();
+  const isInitialized = useRef(false);
 
-  // State
+  // UI State
   const [activeStates, setActiveStates] = useState<ActiveStates>({
     active: true,
     inactive: true,
@@ -81,26 +81,71 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
   const [isImporting] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
 
-  // Load static data (brands and categories)
-  const { data: brands = [], loading: isLoadingBrands } = useDataLoader<Brand[]>({
-    loadFunction: async () => {
-      const { data } = await productApi.listBrand();
-      return data;
-    },
-    autoLoad: true,
-    onError: () => toast.error('Failed to load brands')
-  });
+  // Brands state
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [isLoadingBrands, setIsLoadingBrands] = useState(true);
+  const [brandsError, setBrandsError] = useState<string | null>(null);
 
-  const { data: categories = [], loading: isLoadingCategories } = useDataLoader<Category[]>({
-    loadFunction: async () => {
-      const { data } = await productApi.listCategory();
-      return data;
-    },
-    autoLoad: true,
-    onError: () => toast.error('Failed to load categories')
-  });
+  // Categories state
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [categoriesError, setCategoriesError] = useState<string | null>(null);
 
-  // Product search with pagination and filtering
+  // Load brands data
+  const loadBrands = useCallback(async () => {
+    try {
+      setIsLoadingBrands(true);
+      setBrandsError(null);
+
+      const brandsResponse = await productApi.listBrand();
+
+      if (!brandsResponse.success) {
+        throw new Error(brandsResponse.errorMessage || "Failed to load brands");
+      }
+
+      setBrands(brandsResponse.data || []);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to load brands";
+      setBrandsError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsLoadingBrands(false);
+    }
+  }, []);
+
+  // Load categories data
+  const loadCategories = useCallback(async () => {
+    try {
+      setIsLoadingCategories(true);
+      setCategoriesError(null);
+
+      const categoriesResponse = await productApi.listCategory();
+
+      if (!categoriesResponse.success) {
+        throw new Error(
+          categoriesResponse.errorMessage || "Failed to load categories"
+        );
+      }
+
+      setCategories(categoriesResponse.data || []);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to load categories";
+      setCategoriesError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsLoadingCategories(false);
+    }
+  }, []);
+
+  // Products state
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [productsError, setProductsError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState<Metadata | null>(null);
+
+  // Filter state - current form values being edited by user
   const [filters, setFilters] = useState<ListProductFilters>({
     id: undefined,
     keyword: undefined,
@@ -115,33 +160,48 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     size: 20,
   });
 
-  const { data: productResponse, loading: isLoadingProducts, reload: reloadProducts } = useDataLoader({
-    loadFunction: async () => {
-      // Clean up empty or undefined filters
+  // Load products based on filters
+  const loadProducts = useCallback(async () => {
+    try {
+      setIsLoadingProducts(true);
+      setProductsError(null);
+
+      // Clean up empty or undefined filters for API call
       const apiFilters: ListProductFilters = { ...filters };
       Object.keys(apiFilters).forEach((key) => {
         const typedKey = key as keyof ListProductFilters;
-        if (
-          apiFilters[typedKey] === "" ||
-          apiFilters[typedKey] === undefined
-        ) {
+        if (apiFilters[typedKey] === "" || apiFilters[typedKey] === undefined) {
           delete apiFilters[typedKey];
         }
       });
 
       const response = await productAdminApi.listProduct(apiFilters);
-      return response;
-    },
-    autoLoad: true,
-    dependencies: [filters],
-    onError: () => toast.error('Failed to load products')
-  });
 
-  const products = (productResponse as ApiResponse<Product[]>)?.data || [];
-  const pagination = (productResponse as ApiResponse<Product[]>)?.metadata;
+      if (!response.success) {
+        throw new Error(response.errorMessage || "Failed to load products");
+      }
+
+      setProducts(response.data || []);
+      setPagination(response.metadata || null);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to load products";
+      setProductsError(errorMessage);
+      toast.error(errorMessage);
+      setProducts([]);
+      setPagination(null);
+    } finally {
+      setIsLoadingProducts(false);
+    }
+  }, [filters]);
+
+  // Reload products function for external use
+  const reloadProducts = useCallback(() => {
+    loadProducts();
+  }, [loadProducts]);
 
   const goToPage = useCallback((page: number) => {
-    setFilters(prev => ({ ...prev, page }));
+    setFilters((prev) => ({ ...prev, page }));
   }, []);
 
   const resetProductFilters = useCallback(() => {
@@ -159,8 +219,6 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
       size: 20,
     });
   }, []);
-
-
 
   const handleActiveStateChange = useCallback(() => {
     let isActive: boolean | undefined;
@@ -189,21 +247,50 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     [pagination, goToPage]
   );
 
-  const resetFilters = () => {
+  const resetFilters = useCallback(() => {
     setActiveStates({ active: true, inactive: true });
     resetProductFilters();
-  };
+  }, [resetProductFilters]);
 
-  const handleFilterChange = (
-    field: keyof ListProductFilters,
-    value: string | number | boolean | undefined | number[]
-  ) => {
-    setFilters((prev) => ({ ...prev, [field]: value }));
-  };
+  // Initial data loading
+  useEffect(() => {
+    if (isInitialized.current) {
+      return;
+    }
 
-  const handleSearch = () => {
-    // Filters are automatically applied in the new hook
-  };
+    isInitialized.current = true;
+
+    const initializeData = async () => {
+      await Promise.all([loadBrands(), loadCategories(), loadProducts()]);
+    };
+    initializeData();
+  }, []);
+
+  // Filter update functions
+  const updateFilter = useCallback(
+    <K extends keyof ListProductFilters>(
+      key: K,
+      value: ListProductFilters[K]
+    ) => {
+      setFilters((prev) => ({ ...prev, [key]: value }));
+    },
+    []
+  );
+
+  const handleFilterChange = useCallback(
+    (
+      field: keyof ListProductFilters,
+      value: string | number | boolean | undefined | number[]
+    ) => {
+      updateFilter(field, value);
+    },
+    [updateFilter]
+  );
+
+  const handleSearch = useCallback(() => {
+    // Trigger products reload by updating filters
+    setFilters((prev) => ({ ...prev }));
+  }, []);
 
   const handleDelete = useCallback(
     async (productId: number) => {
@@ -212,12 +299,12 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
       try {
         await productAdminApi.deleteProduct(productId);
         toast.success("Product deleted successfully");
-        // Data will be automatically refreshed
+        reloadProducts();
       } catch {
         toast.error("Failed to delete product");
       }
     },
-    []
+    [reloadProducts]
   );
 
   const handleExport = useCallback(
@@ -260,6 +347,21 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     reloadProducts();
   }, [reloadProducts]);
 
+  // Loading states
+  const isLoading = isLoadingBrands || isLoadingCategories || isLoadingProducts;
+  const hasError = brandsError || categoriesError || productsError;
+
+  // Error handling
+  if (hasError) {
+    return (
+      <div className={`space-y-6 ${className}`}>
+        <div className="text-center text-red-600">
+          Error loading data. Please try again later.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header */}
@@ -280,7 +382,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
             <Upload className="h-4 w-4" />
             {isImporting ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
                 Importing...
               </>
             ) : (
@@ -437,94 +539,124 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
             <div className="space-y-2">
               <Label htmlFor="brandId">Brand</Label>
               {isLoadingBrands ? (
-                <div className="flex items-center justify-center py-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                <div className="flex justify-center py-3">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
                 </div>
               ) : (
-                <Select
-                  value={filters.brandId || ""}
-                  onValueChange={(value) =>
-                    handleFilterChange("brandId", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Brands" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {brands?.filter((brand): brand is Brand => brand != null).map((brand) => (
-                      <SelectItem key={brand.id} value={brand.id.toString()}>
-                        {brand.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <>
+                  <Select
+                    disabled={!brands.length}
+                    value={filters.brandId || ""}
+                    onValueChange={(value) =>
+                      handleFilterChange("brandId", value)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="All Brands" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {brands
+                        ?.filter((brand): brand is Brand => brand != null)
+                        .map((brand) => (
+                          <SelectItem
+                            key={brand.id}
+                            value={brand.id.toString()}
+                          >
+                            {brand.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  {!brands.length && (
+                    <div className="text-gray-500 text-sm mt-1">
+                      No brands available
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
             <div className="space-y-2">
               <Label>Categories</Label>
               {isLoadingCategories ? (
-                <div className="flex items-center justify-center py-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                <div className="flex justify-center py-3">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
                 </div>
               ) : (
-                <Select value="placeholder" onValueChange={() => {}}>
-                  <SelectTrigger>
-                    <SelectValue>
-                      {filters.categoryIds && filters.categoryIds.length > 0
-                        ? `${filters.categoryIds.length} categories selected`
-                        : "All Categories"}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories?.filter((category): category is Category => category != null).map((category) => (
-                      <label
-                        key={category.id}
-                        className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded"
-                      >
-                        <input
-                          type="checkbox"
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                          checked={
-                            filters.categoryIds?.includes(category.id) || false
-                          }
-                          onChange={(e) => {
-                            const currentCategories = filters.categoryIds || [];
-                            if (e.target.checked) {
-                              handleFilterChange("categoryIds", [
-                                ...currentCategories,
-                                category.id,
-                              ]);
-                            } else {
-                              handleFilterChange(
-                                "categoryIds",
-                                currentCategories.filter(
-                                  (id) => id !== category.id
-                                )
-                              );
-                            }
-                          }}
-                        />
-                        <span className="text-sm">{category.name}</span>
-                      </label>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <>
+                  <Select value="placeholder" onValueChange={() => {}}>
+                    <SelectTrigger>
+                      <SelectValue>
+                        {filters.categoryIds && filters.categoryIds.length > 0
+                          ? `${filters.categoryIds.length} categories selected`
+                          : "All Categories"}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories
+                        ?.filter(
+                          (category): category is Category => category != null
+                        )
+                        .map((category) => (
+                          <label
+                            key={category.id}
+                            className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded"
+                          >
+                            <input
+                              type="checkbox"
+                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                              checked={
+                                filters.categoryIds?.includes(category.id) ||
+                                false
+                              }
+                              onChange={(e) => {
+                                const currentCategories =
+                                  filters.categoryIds || [];
+                                if (e.target.checked) {
+                                  handleFilterChange("categoryIds", [
+                                    ...currentCategories,
+                                    category.id,
+                                  ]);
+                                } else {
+                                  handleFilterChange(
+                                    "categoryIds",
+                                    currentCategories.filter(
+                                      (id) => id !== category.id
+                                    )
+                                  );
+                                }
+                              }}
+                            />
+                            <span className="text-sm">{category.name}</span>
+                          </label>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  {!categories.length && (
+                    <div className="text-gray-500 text-sm mt-1">
+                      No categories available
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
 
-          <div className="flex justify-start space-x-2 mt-4">
-            <Button onClick={handleSearch} disabled={Boolean(isLoadingProducts)}>
-              <Search className="h-4 w-4 mr-2" />
+          <div className="flex flex-col sm:flex-row gap-2 mt-4">
+            <Button
+              onClick={handleSearch}
+              variant="default"
+              disabled={isLoading}
+            >
+              <Search className="w-4 h-4" />
               Search
             </Button>
             <Button
               variant="outline"
               onClick={resetFilters}
-              disabled={Boolean(isLoadingProducts)}
+              disabled={isLoading}
             >
-              <RotateCcw className="h-4 w-4 mr-2" />
+              <RotateCcw className="w-4 h-4" />
               Reset
             </Button>
           </div>
@@ -538,9 +670,8 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
         </CardHeader>
         <CardContent>
           {isLoadingProducts ? (
-            <div className="flex flex-col items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="mt-2 text-muted-foreground">Loading products...</p>
+            <div className="flex justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
           ) : (
             <div className="rounded-md border">

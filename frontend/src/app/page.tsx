@@ -6,12 +6,14 @@ import { useCartStore } from '../stores/cart.store';
 import { useUserStore } from '../stores/user.store';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ShoppingBag, Clock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const StoreFront: React.FC = () => {
   const { loadCart, currentOrderId, setCurrentOrderId } = useCartStore();
-  const { isAuthenticated } = useUserStore();
+  const { isAuthenticated, profile, loading } = useUserStore();
   const [activeTab, setActiveTab] = useState('products');
   const [isHydrated, setIsHydrated] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     loadCart();
@@ -22,6 +24,25 @@ const StoreFront: React.FC = () => {
   useEffect(() => {
     setIsHydrated(true);
   }, []);
+
+  // Redirect admin users to admin dashboard
+  useEffect(() => {
+    if (!loading && isAuthenticated() && profile?.role === 'ADMIN') {
+      router.push('/admin/dashboard');
+    }
+  }, [loading, isAuthenticated, profile?.role, router]);
+
+  // Show loading while checking authentication
+  if (loading || !isHydrated) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-4">

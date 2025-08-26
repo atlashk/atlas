@@ -24,7 +24,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { PRODUCT_STATUSES } from "@/constants";
 import { withRequireAdmin } from "@/hoc/withAuth";
-import { useDataLoader } from "@/hooks";
+
 import {
   Brand,
   Category,
@@ -35,7 +35,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -71,36 +71,68 @@ function AdminProductEditPage() {
   const router = useRouter();
   const params = useParams();
   const productId = parseInt(params.id as string, 10);
+  const isInitialized = useRef(false);
   const [isLoadingProduct, setIsLoadingProduct] = useState(true);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
 
-  // Load initial data (brands and categories)
-  interface InitialData extends Record<string, unknown> {
-  brands: Brand[];
-  categories: Category[];
-}
+  // Brands state
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [isLoadingBrands, setIsLoadingBrands] = useState(true);
+  const [brandsError, setBrandsError] = useState<string | null>(null);
 
-  const { data, loading } = useDataLoader<InitialData>({
-    multipleLoaders: {
-      brands: async () => {
-        const response = await productApi.listBrand();
-        if (!response.success) throw new Error(response.errorMessage);
-        return response.data || [];
-      },
-      categories: async () => {
-        const response = await productApi.listCategory();
-        if (!response.success) throw new Error(response.errorMessage);
-        return response.data || [];
+  // Categories state
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [categoriesError, setCategoriesError] = useState<string | null>(null);
+
+  // Load brands data
+  const loadBrands = useCallback(async () => {
+    try {
+      setIsLoadingBrands(true);
+      setBrandsError(null);
+
+      const brandsResponse = await productApi.listBrand();
+
+      if (!brandsResponse.success) {
+        throw new Error(brandsResponse.errorMessage || "Failed to load brands");
       }
-    },
-    autoLoad: true,
-    onError: () => toast.error('Failed to load initial data')
-  });
 
-  const brands = (data as InitialData)?.brands || [];
-  const categories = (data as InitialData)?.categories || [];
-  const isLoadingData = typeof loading === 'boolean' ? loading : Object.values(loading || {}).some(Boolean);
+      setBrands(brandsResponse.data || []);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to load brands";
+      setBrandsError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsLoadingBrands(false);
+    }
+  }, []);
+
+  // Load categories data
+  const loadCategories = useCallback(async () => {
+    try {
+      setIsLoadingCategories(true);
+      setCategoriesError(null);
+
+      const categoriesResponse = await productApi.listCategory();
+
+      if (!categoriesResponse.success) {
+        throw new Error(
+          categoriesResponse.errorMessage || "Failed to load categories"
+        );
+      }
+
+      setCategories(categoriesResponse.data || []);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to load categories";
+      setCategoriesError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsLoadingCategories(false);
+    }
+  }, []);
 
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -178,9 +210,21 @@ function AdminProductEditPage() {
     }
   }, [productId, form, replace, router]);
 
+  // Load static data and product on component mount
   useEffect(() => {
-    loadProduct();
-  }, [loadProduct]);
+    if (isInitialized.current) {
+      return;
+    }
+    
+    isInitialized.current = true;
+    
+    const initializeData = async () => {
+      await Promise.all([loadBrands(), loadCategories()]);
+      await loadProduct();
+    };
+    
+    initializeData();
+  }, [loadBrands, loadCategories, loadProduct]);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -427,13 +471,13 @@ function AdminProductEditPage() {
                             field.onChange(parseInt(value))
                           }
                           value={field.value.toString()}
-                          disabled={isLoadingData || brands.length === 0}
+                          disabled={isLoadingBrands || brands.length === 0}
                         >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue
                                 placeholder={
-                                  isLoadingData
+                                  isLoadingBrands
                                     ? "Loading brands..."
                                     : "Select a brand"
                                 }
@@ -462,7 +506,7 @@ function AdminProductEditPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Categories *</FormLabel>
-                        {isLoadingData ? (
+                        {isLoadingCategories ? (
                           <div className="flex items-center justify-center py-2">
                             <Loader2 className="h-4 w-4 animate-spin" />
                             <span className="ml-2 text-sm text-muted-foreground">

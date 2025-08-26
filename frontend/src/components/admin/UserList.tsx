@@ -1,7 +1,7 @@
 "use client";
 
-import { userAdminApi } from "@/api/user.admin";
 import { Metadata } from "@/api/apiClient";
+import { userAdminApi } from "@/api/user.admin";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,13 +33,13 @@ import {
 import { ROLES } from "@/constants";
 import type { ListUserFilters, User } from "@/interfaces/user.interface";
 import { Loader2, RotateCcw, Search } from "lucide-react";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 const UserList: React.FC = () => {
+  const isInitialized = useRef(false);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
-  const [hasInitialLoad, setHasInitialLoad] = useState(false);
   const [filters, setFilters] = useState<ListUserFilters>({
     id: undefined,
     keyword: undefined,
@@ -63,7 +63,7 @@ const UserList: React.FC = () => {
         setFilters(updatedFilters);
         setMetadata((prev) => ({ ...prev, currentPage: page }));
 
-        // Clean up empty or undefined filters
+        // Clean up empty or undefined filters for API call
         const apiFilters: ListUserFilters = { ...updatedFilters };
         Object.keys(apiFilters).forEach((key) => {
           const typedKey = key as keyof ListUserFilters;
@@ -82,7 +82,6 @@ const UserList: React.FC = () => {
           if (response.metadata) {
             setMetadata(response.metadata);
           }
-          setHasInitialLoad(true);
         } else {
           toast.error(response.errorMessage || "Failed to load users");
         }
@@ -98,13 +97,16 @@ const UserList: React.FC = () => {
     [filters]
   );
 
-  const changePage = (newPage: number) => {
-    if (newPage >= 1 && newPage <= metadata.totalPages) {
-      applyFilters(newPage);
-    }
-  };
+  const changePage = useCallback(
+    (newPage: number) => {
+      if (newPage >= 1 && newPage <= metadata.totalPages) {
+        applyFilters(newPage);
+      }
+    },
+    [metadata.totalPages, applyFilters]
+  );
 
-  const resetFilters = () => {
+  const resetFilters = useCallback(() => {
     const resetFiltersData: ListUserFilters = {
       id: undefined,
       keyword: undefined,
@@ -114,25 +116,34 @@ const UserList: React.FC = () => {
     };
     setFilters(resetFiltersData);
     applyFilters(1, resetFiltersData);
-  };
+  }, [applyFilters]);
 
-  const handleFilterChange = (
-    field: keyof ListUserFilters,
-    value: string | number | boolean | undefined
-  ) => {
-    setFilters((prev) => ({ ...prev, [field]: value }));
-  };
+  const handleFilterChange = useCallback(
+    (
+      field: keyof ListUserFilters,
+      value: string | number | boolean | undefined
+    ) => {
+      setFilters((prev) => ({ ...prev, [field]: value }));
+    },
+    []
+  );
 
-  const handleSearch = () => {
+  const handleSearch = useCallback(() => {
     applyFilters(1);
-  };
+  }, [applyFilters]);
 
-  // Initial load
+  // Load initial data on component mount
   useEffect(() => {
-    if (!hasInitialLoad) {
-      applyFilters(1);
+    if (isInitialized.current) {
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    isInitialized.current = true;
+
+    const initializeData = async () => {
+      await applyFilters(1);
+    };
+    initializeData();
   }, []);
 
   return (

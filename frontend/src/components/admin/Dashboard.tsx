@@ -8,7 +8,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { formatCurrency } from "@/utils/formatter.util";
-import { useDataLoader } from "@/hooks";
 import { toast } from "sonner";
 import {
   Activity,
@@ -16,7 +15,7 @@ import {
   ShoppingCart,
   Users,
 } from "lucide-react";
-import React from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 
 interface DashboardStats {
   totalUsers: number;
@@ -26,9 +25,19 @@ interface DashboardStats {
 }
 
 const Dashboard: React.FC = () => {
+  const isInitialized = useRef(false);
+  const [stats, setStats] = useState<DashboardStats>({
+    totalUsers: 0,
+    totalProducts: 0,
+    totalOrders: 0,
+    totalRevenue: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
   // Load dashboard statistics
-  const { data: stats, loading } = useDataLoader({
-    loadFunction: async () => {
+  const loadStats = useCallback(async () => {
+    try {
+      setLoading(true);
       const [usersResponse, productsResponse, ordersResponse, revenueResponse] = await Promise.all([
         userAdminApi.countUser(),
         productAdminApi.countProduct(),
@@ -36,23 +45,29 @@ const Dashboard: React.FC = () => {
         orderAdminApi.getTotalRevenue()
       ]);
 
-      return {
+      setStats({
         totalUsers: usersResponse.success ? usersResponse.data || 0 : 0,
         totalProducts: productsResponse.success ? productsResponse.data || 0 : 0,
         totalOrders: ordersResponse.success ? ordersResponse.data || 0 : 0,
         totalRevenue: revenueResponse.success ? revenueResponse.data || 0 : 0,
-      };
-    },
-    autoLoad: true,
-    onError: () => toast.error('Failed to load dashboard statistics')
-  });
+      });
+    } catch (error) {
+      toast.error('Failed to load dashboard statistics');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const displayStats = (stats as DashboardStats) || {
-    totalUsers: 0,
-    totalProducts: 0,
-    totalOrders: 0,
-    totalRevenue: 0,
-  };
+  useEffect(() => {
+    if (isInitialized.current) {
+      return;
+    }
+    
+    isInitialized.current = true;
+    loadStats();
+  }, []);
+
+  const displayStats = stats;
 
   return (
     <div className="space-y-6">
@@ -67,9 +82,6 @@ const Dashboard: React.FC = () => {
             <div className="text-2xl font-bold">
               {loading ? "Loading..." : displayStats.totalUsers.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground">
-              +20.1% from last month
-            </p>
           </CardContent>
         </Card>
 
@@ -84,9 +96,6 @@ const Dashboard: React.FC = () => {
             <div className="text-2xl font-bold">
               {loading ? "Loading..." : displayStats.totalProducts.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground">
-              +180.1% from last month
-            </p>
           </CardContent>
         </Card>
 
@@ -99,9 +108,6 @@ const Dashboard: React.FC = () => {
             <div className="text-2xl font-bold">
               {loading ? "Loading..." : displayStats.totalOrders.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground">
-              +19% from last month
-            </p>
           </CardContent>
         </Card>
 
@@ -116,9 +122,6 @@ const Dashboard: React.FC = () => {
                 ? "Loading..."
                 : formatCurrency(displayStats.totalRevenue)}
             </div>
-            <p className="text-xs text-muted-foreground">
-              +201 since last hour
-            </p>
           </CardContent>
         </Card>
       </div>

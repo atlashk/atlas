@@ -26,10 +26,11 @@ import {
   getOrderStatusBadge,
 } from "@/utils/formatter.util";
 import { ChevronDown, ChevronUp, RotateCcw, Search } from "lucide-react";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 
 const OrderHistory: React.FC = () => {
+  const isInitialized = useRef(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -57,7 +58,7 @@ const OrderHistory: React.FC = () => {
         const updatedFilters = { ...filtersToUse, page };
         setMetadata((prev) => ({ ...prev, currentPage: page }));
 
-        // Clean up empty or undefined filters
+        // Clean up empty or undefined filters for API call
         const apiFilters: ListOrderFilters = { ...updatedFilters };
         Object.keys(apiFilters).forEach((key) => {
           const typedKey = key as keyof ListOrderFilters;
@@ -78,22 +79,27 @@ const OrderHistory: React.FC = () => {
         } else {
           toast.error(response.errorMessage || "Failed to load orders");
         }
-      } catch {
-        toast.error("Failed to load orders");
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Failed to load orders";
+        toast.error(errorMessage);
       } finally {
         setIsLoading(false);
       }
     },
-    [isLoading, filters]
+    []
   );
 
-  const changePage = (newPage: number) => {
-    if (newPage >= 1 && newPage <= metadata.totalPages) {
-      applyFilters(newPage, filters);
-    }
-  };
+  const changePage = useCallback(
+    (newPage: number) => {
+      if (newPage >= 1 && newPage <= metadata.totalPages) {
+        applyFilters(newPage, filters);
+      }
+    },
+    [metadata.totalPages, applyFilters, filters]
+  );
 
-  const resetFilters = () => {
+  const resetFilters = useCallback(() => {
     const resetFilters: ListOrderFilters = {
       status: undefined,
       startDate: undefined,
@@ -103,30 +109,45 @@ const OrderHistory: React.FC = () => {
     };
     setFilters(resetFilters);
     applyFilters(1, resetFilters);
-  };
+  }, [applyFilters]);
 
-  const toggleDetails = (orderId: number) => {
-    setSelectedOrderId(selectedOrderId === orderId ? null : orderId);
-  };
+  const toggleDetails = useCallback(
+    (orderId: number) => {
+      setSelectedOrderId(selectedOrderId === orderId ? null : orderId);
+    },
+    [selectedOrderId]
+  );
 
-  const handleFilterChange = (
-    field: keyof ListOrderFilters,
-    value: string | number | boolean | undefined
-  ) => {
-    setFilters((prev) => ({ ...prev, [field]: value }));
-  };
+  const handleFilterChange = useCallback(
+    (
+      field: keyof ListOrderFilters,
+      value: string | number | boolean | undefined
+    ) => {
+      setFilters((prev) => ({ ...prev, [field]: value }));
+    },
+    []
+  );
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    applyFilters(1, filters);
-  };
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      applyFilters(1, filters);
+    },
+    [applyFilters, filters]
+  );
 
+  // Load initial data on component mount
   useEffect(() => {
-    const loadInitialData = async () => {
-      applyFilters(1);
+    if (isInitialized.current) {
+      return;
+    }
+
+    isInitialized.current = true;
+
+    const initializeData = async () => {
+      await applyFilters(1);
     };
-    loadInitialData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    initializeData();
   }, []);
 
   return (

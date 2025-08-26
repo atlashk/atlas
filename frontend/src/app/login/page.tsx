@@ -118,7 +118,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="h-screen flex items-start justify-center bg-gradient-to-br from-slate-50 to-slate-200 pt-40">
+    <div className="h-screen flex items-start justify-center pt-40">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2 pb-4">
           <div>

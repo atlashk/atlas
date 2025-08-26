@@ -127,7 +127,7 @@ export const withRequireAdmin = <P extends object>(Component: ComponentType<P>) 
 // HOC for pages that should redirect authenticated users (like login/register)
 export const withGuestOnly = <P extends object>(
   Component: ComponentType<P>,
-  redirectTo: string = '/dashboard'
+  redirectTo: string = '/'
 ) => {
   const WithGuestOnlyComponent: React.FC<P> = (props) => {
     const router = useRouter();
