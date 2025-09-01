@@ -164,22 +164,6 @@ fi
 echo
 
 # =============================================================================
-# CACHE CONFIGURATION
-# =============================================================================
-echo -e "${BLUE}${BOLD}Cache Configuration${NC}"
-select_option "Redis ${YELLOW}(default)${NC}" "Simple"
-cache_choice=$((1 + $?))
-case $cache_choice in
-    2)
-        cache="simple"
-        ;;
-    *)
-        cache="redis"
-        ;;
-esac
-echo
-
-# =============================================================================
 # DATASOURCE CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Datasource Configuration${NC}"
@@ -223,7 +207,7 @@ fi
 echo
 
 # =============================================================================
-# FILE CSV CONFIGURATION
+# FILE - CSV CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}File - CSV Configuration${NC}"
 echo -e "  ${CYAN}▶ ${GREEN}1${NC}) OpenCSV ${YELLOW}(default)${NC}"
@@ -231,7 +215,7 @@ file_csv="opencsv"
 echo
 
 # =============================================================================
-# FILE EXCEL CONFIGURATION
+# FILE - EXCEL CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}File - Excel Configuration${NC}"
 select_option "Apache POI ${YELLOW}(default)${NC}" "EasyExcel"
@@ -247,11 +231,19 @@ esac
 echo
 
 # =============================================================================
-# FILE PDF CONFIGURATION
+# FILE - PDF CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}File - PDF Configuration${NC}"
 echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Apache PDFBox ${YELLOW}(default)${NC}"
 file_pdf="pdfbox"
+echo
+
+# =============================================================================
+# KV CONFIGURATION
+# =============================================================================
+echo -e "${BLUE}${BOLD}KV Configuration${NC}"
+echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Redis ${YELLOW}(default)${NC}"
+kv="redis"
 echo
 
 # =============================================================================
@@ -429,7 +421,7 @@ sleep 2
 cat > "$APP_STACK_CONFIG" << EOF
 api-server=$api_server
 api-client=$api_client
-cache=$cache
+kv=$kv
 config=yaml
 datasource=$datasource
 discovery-client=$discovery_client
@@ -465,14 +457,14 @@ echo -e "${CYAN}${BOLD}Configuration Summary:${NC}"
 echo -e "  ${BLUE}Platform:${NC} ${platform}"
 echo -e "  ${BLUE}API Client:${NC} ${api_client}"
 echo -e "  ${BLUE}API Server:${NC} ${api_server}"
-echo -e "  ${BLUE}Cache:${NC} ${cache}"
-echo -e "  ${BLUE}CSV:${NC} ${file_csv}"
 echo -e "  ${BLUE}Datasource:${NC} ${datasource}"
 echo -e "  ${BLUE}Discovery Client:${NC} ${discovery_client}"
 echo -e "  ${BLUE}Email:${NC} ${notification_email}"
-echo -e "  ${BLUE}Excel:${NC} ${file_excel}"
-echo -e "  ${BLUE}PDF:${NC} ${file_pdf}"
+echo -e "  ${BLUE}File - CSV:${NC} ${file_csv}"
+echo -e "  ${BLUE}File - Excel:${NC} ${file_excel}"
+echo -e "  ${BLUE}File - PDF:${NC} ${file_pdf}"
 echo -e "  ${BLUE}Lock:${NC} ${lock}"
+echo -e "  ${BLUE}Key-Value Store:${NC} ${kv}"
 echo -e "  ${BLUE}Messaging:${NC} ${messaging}"
 echo -e "  ${BLUE}Migration:${NC} ${migration}"
 echo -e "  ${BLUE}Observability - Logging Stack:${NC} ${logging_stack}"

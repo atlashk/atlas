@@ -30,6 +30,7 @@ dependencies {
 
     // Lib
     api 'org.springframework.boot:spring-boot-starter-security'
+    api 'org.springframework.boot:spring-boot-starter-cache'
 
     // Domain
     api project(':domain.user')
@@ -37,16 +38,6 @@ dependencies {
     // Infrastructure
     api project(':infrastructure.api-server.rest.core')
     api project(':infrastructure.bootstrap')
-    switch (rootProject.ext.appStack['cache']) {
-        case 'simple':
-            api project(':infrastructure.cache.simple')
-            break
-        case 'redis':
-            api project(':infrastructure.cache.redis')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['cache']}")
-    }
     switch (rootProject.ext.appStack['redis']) {
         case 'standalone':
             api project(':infrastructure.redis.standalone')

@@ -39,16 +39,6 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
     }
-    switch (rootProject.ext.appStack['cache']) {
-        case 'simple':
-            api project(':infrastructure.cache.simple')
-            break
-        case 'redis':
-            api project(':infrastructure.cache.redis')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['cache']}")
-    }
     api project(':infrastructure.bootstrap')
     switch (rootProject.ext.appStack['config']) {
         case 'yaml':
@@ -103,6 +93,13 @@ dependencies {
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['file.pdf']}")
+    }
+    switch (rootProject.ext.appStack['kv']) {
+        case 'redis':
+            api project(':infrastructure.kv.redis')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['kv']}")
     }
     switch (rootProject.ext.appStack['lock']) {
         case 'redisson':

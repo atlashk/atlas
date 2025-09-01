@@ -91,12 +91,6 @@ project(':infrastructure.auth-server').projectDir = file('infrastructure/auth-se
 include(':infrastructure.bootstrap')
 project(':infrastructure.bootstrap').projectDir = file('infrastructure/bootstrap')
 
-// Cache
-include(':infrastructure.cache.simple')
-project(':infrastructure.cache.simple').projectDir = file('infrastructure/cache/cache-simple')
-include(':infrastructure.cache.redis')
-project(':infrastructure.cache.redis').projectDir = file('infrastructure/cache/cache-redis')
-
 // Config
 include(':infrastructure.config.yaml')
 project(':infrastructure.config.yaml').projectDir = file('infrastructure/config/config-yaml')
@@ -198,6 +192,10 @@ include(':infrastructure.internal-api.user.rest.restclient')
 project(':infrastructure.internal-api.user.rest.restclient').projectDir = file('infrastructure/internal-api/user-api/user-api-rest-restclient')
 include(':infrastructure.internal-api.user.rest.resttemplate')
 project(':infrastructure.internal-api.user.rest.resttemplate').projectDir = file('infrastructure/internal-api/user-api/user-api-rest-resttemplate')
+
+// Key-Value Store
+include(':infrastructure.kv.redis')
+project(':infrastructure.kv.redis').projectDir = file('infrastructure/kv/kv-redis')
 
 // Lock
 include(':infrastructure.lock.redisson')

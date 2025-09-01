@@ -25,28 +25,11 @@ repositories {
 }
 
 dependencies {
+    // Framework
+    api project(':framework')
+
     // Lib
     api 'org.springframework.boot:spring-boot-starter-aop'
-
-    // Infrastructure
-    switch (rootProject.ext.appStack['config']) {
-        case 'yaml':
-            api project(':infrastructure.config.yaml')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['config']}")
-    }
-    switch (rootProject.ext.appStack['redis']) {
-        case 'standalone':
-            api project(':infrastructure.redis.standalone')
-            break
-        case 'cluster':
-            api project(':infrastructure.redis.cluster')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['redis']}")
-    }
-    api project(':infrastructure.transaction')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
