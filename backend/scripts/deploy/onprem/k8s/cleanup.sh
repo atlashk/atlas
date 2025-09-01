@@ -12,65 +12,22 @@ set -e
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
-
-# Load logger
-source "$PROJECT_ROOT/backend/scripts/logger.sh"
-
-# Default environment
-ENVIRONMENT="local"
-
-# =============================================================================
-# CONFIGURATION - Centralized resource definitions
-# =============================================================================
-
-# Atlas application services
-declare -ra ATLAS_APPLICATIONS=(
-    "user-service"
-    "product-service"
-    "order-service"
-    "notification-service"
-    "api-gateway"
-)
-
-# Infrastructure services
-declare -ra INFRASTRUCTURE_SERVICES=(
-    "mysql"
-    "redis"
-    "kafka"
-    "smtp4dev"
-)
-
-# Observability services
-declare -ra OBSERVABILITY_SERVICES=(
-    "zipkin"
-    "loki"
-    "promtail"
-    "prometheus"
-    "grafana"
-)
+NAMESPACE="atlas-onprem-k8s"
 
 # =============================================================================
 # ARGUMENT PARSING
 # =============================================================================
 
 show_help() {
-    log_info "Usage: $0 [OPTIONS]"
-    log_info ""
-    log_info "Atlas Kubernetes Cleanup Script - Removes all Atlas-related resources"
-    log_info ""
-    log_info "Options:"
-    log_info "  --env ENVIRONMENT       Target environment (default: local)"
-    log_info "  -h, --help              Show this help message"
-    log_info ""
-    log_info "Environments:"
-    log_info "  local (default)         Local environment"
-    log_info ""
-    log_info "Examples:"
-    log_info "  $0                      # Clean all resources in local env"
-    log_info "  $0 --env local          # Clean all resources in local env"
-    log_info ""
-    log_warn "⚠️  WARNING: This operation is DESTRUCTIVE and will delete ALL Atlas resources!"
-    log_warn "This includes applications, databases, configuration data, and ingress."
+    echo "Usage: $0 [OPTIONS]"
+    echo ""
+    echo "Atlas Kubernetes Cleanup Script - Removes all Atlas-related resources"
+    echo ""
+    echo "Options:"
+    echo "  -h, --help              Show this help message"
+    echo ""
+    echo "⚠️  WARNING: This operation is DESTRUCTIVE and will delete ALL Atlas resources!"
+    echo "This includes applications, databases, configuration data, and ingress."
 }
 
 parse_arguments() {
@@ -80,18 +37,9 @@ parse_arguments() {
                 show_help
                 exit 0
                 ;;
-            --env)
-                if [[ -n "${2:-}" && ! "$2" =~ ^-- ]]; then
-                    ENVIRONMENT="$2"
-                    shift 2
-                else
-                    log_error "--env requires an environment value"
-                    exit 1
-                fi
-                ;;
             *)
-                log_error "Unknown option: $1"
-                log_info "Use --help for usage information"
+                echo "Unknown option: $1" >&2
+                echo "Use --help for usage information"
                 exit 1
                 ;;
         esac
@@ -103,33 +51,33 @@ parse_arguments() {
 # =============================================================================
 
 check_prerequisites() {
-    log_section "Checking Prerequisites"
+    echo "=== Checking Prerequisites ==="
 
     # Check Docker
     if docker info > /dev/null 2>&1; then
-        log_success "Docker found and running"
+        echo "Docker found and running"
     else
-        log_error "Docker is not running. Please start Docker and try again."
+        echo "Docker is not running. Please start Docker and try again." >&2
         exit 1
     fi
 
     # Check kubectl
     if command -v kubectl &> /dev/null; then
-        log_success "kubectl found"
+        echo "kubectl found"
     else
-        log_error "kubectl is not installed"
+        echo "kubectl is not installed" >&2
         exit 1
     fi
 
     # Check Kubernetes cluster
     if kubectl cluster-info &> /dev/null; then
-        log_success "Kubernetes cluster found"
+        echo "Kubernetes cluster found"
     else
-        log_error "Cannot connect to Kubernetes cluster. Make sure you have a running Kubernetes cluster (minikube, kind, etc.)"
+        echo "Cannot connect to Kubernetes cluster. Make sure you have a running Kubernetes cluster (minikube, kind, etc.)" >&2
         exit 1
     fi
 
-    log_success "Prerequisites check passed"
+    echo "Prerequisites check passed"
 }
 
 # =============================================================================
@@ -138,58 +86,57 @@ check_prerequisites() {
 
 # Function to perform complete namespace cleanup
 remove_namespace() {
-    local namespace="atlas-${ENVIRONMENT}"
-    log_info "Deleting namespace '$namespace' (this will remove all resources within)..."
+    echo "Deleting namespace '$NAMESPACE' (this will remove all resources within)..."
 
-    if ! kubectl get namespace "$namespace" &> /dev/null; then
-        log_info "Namespace '$namespace' does not exist"
+    if ! kubectl get namespace "$NAMESPACE" &> /dev/null; then
+        echo "Namespace '$NAMESPACE' does not exist"
         return
     fi
 
     # Delete the namespace (this automatically deletes all resources within)
-    kubectl delete namespace "$namespace" --ignore-not-found=true
+    kubectl delete namespace "$NAMESPACE" --ignore-not-found=true
     
     # Wait for namespace deletion to complete
-    log_info "Waiting for namespace deletion to complete..."
+    echo "Waiting for namespace deletion to complete..."
     timeout=120  # Increased timeout as namespace deletion can take time
-    while kubectl get namespace "$namespace" &> /dev/null && [[ $timeout -gt 0 ]]; do
+    while kubectl get namespace "$NAMESPACE" &> /dev/null && [[ $timeout -gt 0 ]]; do
         sleep 2
         ((timeout-=2))
         if [[ $((timeout % 20)) -eq 0 ]]; then
-            log_info "Still waiting for namespace deletion... ($timeout seconds remaining)"
+            echo "Still waiting for namespace deletion... ($timeout seconds remaining)"
         fi
     done
 
-    if kubectl get namespace "$namespace" &> /dev/null; then
-        log_warn "Namespace deletion is taking longer than expected"
-        log_info "This may be due to finalizers. Checking for stuck resources..."
-        log_info "You can manually check with: kubectl get namespace $namespace -o yaml"
+    if kubectl get namespace "$NAMESPACE" &> /dev/null; then
+        echo "Namespace deletion is taking longer than expected"
+        echo "This may be due to finalizers. Checking for stuck resources..."
+        echo "You can manually check with: kubectl get namespace $NAMESPACE -o yaml"
     else
-        log_success "Namespace '$namespace' deleted successfully"
+        echo "Namespace '$NAMESPACE' deleted successfully"
     fi
 
-    log_success "Namespace cleanup completed successfully!"
+    echo "Namespace cleanup completed successfully!"
 }
 
 # Function to cleanup NGINX Ingress Controller
 cleanup_ingress_controller() {
-    log_info "Cleaning up NGINX Ingress Controller..."
+    echo "Cleaning up NGINX Ingress Controller..."
     
     if kubectl get namespace ingress-nginx &> /dev/null; then
-        log_info "Deleting NGINX Ingress Controller..."
+        echo "Deleting NGINX Ingress Controller..."
         kubectl delete namespace ingress-nginx --ignore-not-found=true
         
         # Wait for deletion
-        log_info "Waiting for ingress-nginx namespace deletion..."
+        echo "Waiting for ingress-nginx namespace deletion..."
         timeout=60
         while kubectl get namespace ingress-nginx &> /dev/null && [[ $timeout -gt 0 ]]; do
             sleep 2
             ((timeout-=2))
         done
         
-        log_success "NGINX Ingress Controller removed"
+        echo "NGINX Ingress Controller removed"
     else
-        log_info "NGINX Ingress Controller not found"
+        echo "NGINX Ingress Controller not found"
     fi
 }
 
@@ -202,22 +149,19 @@ main() {
     parse_arguments "$@"
     check_prerequisites
 
-    local namespace="atlas-${ENVIRONMENT}"
+    echo "=== Atlas OnPrem K8s Platform - Cleanup ==="
+    echo "Namespace: $NAMESPACE"
 
-    log_section "Atlas OnPrem K8s Platform - Cleanup"
-    log_info "Environment: $ENVIRONMENT"
-    log_info "Namespace: $namespace"
-
-    log_section "Removing all Atlas resources"
-    log_info "  ✓ All services and applications"
-    log_info "  ✓ Namespace and volumes"
-    log_info "  ✓ Ingress Controller"
+    echo "=== Removing all Atlas resources ==="
+    echo "  ✓ All services and applications"
+    echo "  ✓ Namespace and volumes"
+    echo "  ✓ Ingress Controller"
 
     remove_namespace
     cleanup_ingress_controller
     
-    log_success "All Atlas resources removed successfully!"
-    log_success "Atlas platform cleanup completed!"
+    echo "All Atlas resources removed successfully!"
+    echo "Atlas platform cleanup completed!"
 }
 
 # Execute main function

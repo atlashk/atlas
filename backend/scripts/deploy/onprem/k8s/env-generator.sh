@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # =============================================================================
-# Atlas Environment File Generator
+# Atlas Kubernetes Environment Generator
 # =============================================================================
-# This script generates environment files for Atlas microservices based on
+# This script generates Kubernetes ConfigMaps for Atlas microservices based on
 # configuration from app-stack.cfg
 # =============================================================================
 
@@ -18,15 +18,15 @@ source "$PROJECT_ROOT/backend/scripts/common.sh"
 # Project configuration
 PROJECT_NAME="atlas"
 APP_STACK_CONFIG="$PROJECT_ROOT/backend/app-stack.cfg"
-ENV_DIR="$SCRIPT_DIR/env"
+ENV_DIR="$SCRIPT_DIR/.env"
 
 # Service configuration arrays
 declare -A SERVICE_CONFIGS=(
-    ["api-gateway"]="api-gateway.env"
-    ["user-service"]="user-service.env"
-    ["product-service"]="product-service.env"
-    ["order-service"]="order-service.env"
-    ["notification-service"]="notification-service.env"
+    ["api-gateway"]="api-gateway-config"
+    ["user-service"]="user-service-config"
+    ["product-service"]="product-service-config"
+    ["order-service"]="order-service-config"
+    ["notification-service"]="notification-service-config"
 )
 
 declare -A SERVICE_DATABASES=(
@@ -89,24 +89,24 @@ generate_database_config() {
     case "$DATASOURCE" in
         mysql)
             cat << EOF
-# Database Configuration (MySQL) for $service_name
-DB_URL=jdbc:mysql://mysql:3306/$database_name?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-DB_USERNAME=root
-DB_PASSWORD=root
-DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-DB_QUARTZ_USERNAME=root
-DB_QUARTZ_PASSWORD=root
+  # Database Configuration (MySQL) for $service_name
+  DB_URL: "jdbc:mysql://mysql:3306/$database_name?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
+  DB_USERNAME: "root"
+  DB_PASSWORD: "root"
+  DB_QUARTZ_URL: "jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
+  DB_QUARTZ_USERNAME: "root"
+  DB_QUARTZ_PASSWORD: "root"
 EOF
             ;;
         postgres)
             cat << EOF
-# Database Configuration (PostgreSQL) for $service_name
-DB_URL=jdbc:postgresql://postgres:5432/$database_name
-DB_USERNAME=root
-DB_PASSWORD=root
-DB_QUARTZ_URL=jdbc:postgresql://postgres:5432/db_quartz
-DB_QUARTZ_USERNAME=root
-DB_QUARTZ_PASSWORD=root
+  # Database Configuration (PostgreSQL) for $service_name
+  DB_URL: "jdbc:postgresql://postgres:5432/$database_name"
+  DB_USERNAME: "root"
+  DB_PASSWORD: "root"
+  DB_QUARTZ_URL: "jdbc:postgresql://postgres:5432/db_quartz"
+  DB_QUARTZ_USERNAME: "root"
+  DB_QUARTZ_PASSWORD: "root"
 EOF
             ;;
     esac
@@ -117,18 +117,18 @@ generate_messaging_config() {
         kafka)
             cat << EOF
 
-# Messaging Configuration (Kafka)
-KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+  # Messaging Configuration (Kafka)
+  KAFKA_BOOTSTRAP_SERVERS: "kafka:29092"
 EOF
             ;;
         rabbitmq)
             cat << EOF
 
-# Messaging Configuration (RabbitMQ)
-RABBITMQ_HOST=rabbitmq
-RABBITMQ_PORT=5672
-RABBITMQ_USERNAME=guest
-RABBITMQ_PASSWORD=guest
+  # Messaging Configuration (RabbitMQ)
+  RABBITMQ_HOST: "rabbitmq"
+  RABBITMQ_PORT: "5672"
+  RABBITMQ_USERNAME: "guest"
+  RABBITMQ_PASSWORD: "guest"
 EOF
             ;;
     esac
@@ -137,12 +137,12 @@ EOF
 generate_common_infrastructure_config() {
     cat << EOF
 
-# Redis Configuration
-REDIS_HOST=redis
-REDIS_PORT=6379
+  # Redis Configuration
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
 
-# Service Discovery Configuration
-EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
+  # Service Discovery Configuration
+  EUREKA_DEFAULT_ZONE: "http://eureka-server:8761/eureka"
 EOF
 }
 
@@ -150,8 +150,8 @@ generate_observability_config() {
     if [[ "$OBSERVABILITY_TRACING" == "zipkin" ]]; then
         cat << EOF
 
-# Tracing Configuration (Zipkin)
-ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+  # Tracing Configuration (Zipkin)
+  ZIPKIN_ENDPOINT: "http://zipkin:9411/api/v2/spans"
 EOF
     fi
 }
@@ -159,8 +159,8 @@ EOF
 generate_jwt_config() {
     cat << EOF
 
-# JWT Configuration
-JWK_SET_URI=http://user-service:8081/.well-known/jwks.json
+  # JWT Configuration
+  JWK_SET_URI: "http://user-service:8081/.well-known/jwks.json"
 EOF
 }
 
@@ -170,16 +170,16 @@ generate_api_client_config() {
     if [[ "$api_client_prefix" == "rest" ]]; then
         cat << EOF
 
-# REST API Configuration
-API_CLIENT_REST_USER_SERVICE_BASE_URL=http://user-service:8081
-API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL=http://product-service:8082
+  # REST API Configuration
+  API_CLIENT_REST_USER_SERVICE_BASE_URL: "http://user-service:8081"
+  API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL: "http://product-service:8082"
 EOF
     elif [[ "$api_client_prefix" == "grpc" ]]; then
         cat << EOF
 
-# gRPC Configuration
-GRPC_CLIENT_USER_ADDRESS=static://user-service:50051
-GRPC_CLIENT_PRODUCT_ADDRESS=static://product-service:50052
+  # gRPC Configuration
+  GRPC_CLIENT_USER_ADDRESS: "static://user-service:50051"
+  GRPC_CLIENT_PRODUCT_ADDRESS: "static://product-service:50052"
 EOF
     fi
 }
@@ -188,41 +188,66 @@ generate_email_config() {
     if [[ "$NOTIFICATION_EMAIL" == "spring" ]]; then
         cat << EOF
 
-# Email Configuration
-MAIL_SERVER_HOST=smtp4dev
+  # Email Configuration
+  MAIL_SERVER_HOST: "smtp4dev"
 EOF
     fi
 }
 
 # =============================================================================
-# SERVICE-SPECIFIC ENVIRONMENT FILE GENERATION
+# SERVICE-SPECIFIC CONFIGMAP GENERATION
 # =============================================================================
 
-generate_api_gateway_env() {
-    local env_file="$ENV_DIR/api-gateway.env"
-    log_info "Creating $env_file"
+generate_api_gateway_configmap() {
+    local namespace="$1"
+    local configmap_file="$ENV_DIR/$namespace/api-gateway-configmap.yaml"
+    log_info "Creating $configmap_file"
     
     {
-        echo "# Service Discovery Configuration"
-        echo "EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka"
-        echo ""
-        echo "# Redis Configuration"
-        echo "REDIS_HOST=redis"
-        echo "REDIS_PORT=6379"
+        cat << EOF
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-config
+  namespace: $namespace
+  labels:
+    app: api-gateway
+    component: config
+data:
+  # Service Discovery Configuration
+  EUREKA_DEFAULT_ZONE: "http://eureka-server:8761/eureka"
+  
+  # Redis Configuration
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+EOF
         generate_jwt_config
         generate_observability_config
-    } > "$env_file"
+    } > "$configmap_file"
     
-    log_success "Generated $env_file"
+    log_success "Generated $configmap_file"
 }
 
-generate_service_env() {
+generate_service_configmap() {
     local service_name="$1"
-    local env_file="$ENV_DIR/${SERVICE_CONFIGS[$service_name]}"
+    local namespace="$2"
+    local configmap_name="${SERVICE_CONFIGS[$service_name]}"
+    local configmap_file="$ENV_DIR/$namespace/${service_name}-configmap.yaml"
     
-    log_info "Creating $env_file"
+    log_info "Creating $configmap_file"
     
     {
+        cat << EOF
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: $configmap_name
+  namespace: $namespace
+  labels:
+    app: $service_name
+    component: config
+data:
+EOF
         generate_database_config "$service_name"
         generate_messaging_config
         generate_common_infrastructure_config
@@ -241,28 +266,29 @@ generate_service_env() {
         fi
         
         generate_observability_config
-    } > "$env_file"
+    } > "$configmap_file"
     
-    log_success "Generated $env_file"
+    log_success "Generated $configmap_file"
 }
 
-generate_env_files() {
-    log_section "Generating .env files for each service..."
+generate_configmaps() {
+    local namespace="$1"
+    log_section "Generating ConfigMaps for each service..."
     
     # Create env directory if it doesn't exist
-    mkdir -p "$ENV_DIR"
+    mkdir -p "$ENV_DIR/$namespace"
     
-    # Remove existing .env files
-    rm -f "$ENV_DIR/"*.env
+    # Remove existing ConfigMap files
+    rm -f "$ENV_DIR/$namespace/"*-configmap.yaml
     
-    log_info "Creating service-specific .env files with configuration from app-stack.cfg"
+    log_info "Creating service-specific ConfigMaps with configuration from app-stack.cfg"
     
-    # Generate API Gateway env file (special case)
-    generate_api_gateway_env
+    # Generate API Gateway ConfigMap (special case)
+    generate_api_gateway_configmap "$namespace"
     
-    # Generate env files for other services
+    # Generate ConfigMaps for other services
     for service in "user-service" "product-service" "order-service" "notification-service"; do
-        generate_service_env "$service"
+        generate_service_configmap "$service" "$namespace"
     done
 }
 
@@ -271,9 +297,11 @@ generate_env_files() {
 # =============================================================================
 
 main() {
+    local namespace="${1:-atlas-local}"
+    
     read_app_stack_config
     
-    generate_env_files
+    generate_configmaps "$namespace"
 }
 
 # Execute main function if script is run directly

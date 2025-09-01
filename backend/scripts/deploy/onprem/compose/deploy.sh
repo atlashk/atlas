@@ -1,9 +1,11 @@
 #!/bin/bash
 
 # =============================================================================
-# Atlas Docker Compose Start Script (Refactored)
+# Atlas Docker Compose Deployment Script (Optimized)
 # =============================================================================
-# This script starts the Atlas microservices platform using Docker Compose
+# This script generates environment files and starts the Atlas microservices 
+# platform using Docker Compose. It includes integrated environment file 
+# generation functionality for optimal performance.
 # =============================================================================
 
 set -euo pipefail
@@ -17,11 +19,7 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../../.." && pwd)"
 PROJECT_NAME="atlas-onprem-compose"
 COMPOSE_FILE="$PROJECT_ROOT/backend/scripts/deploy/onprem/compose/docker-compose.yml"
 APP_STACK_CONFIG="$PROJECT_ROOT/backend/app-stack.cfg"
-ENV_DIR="$SCRIPT_DIR/env"
-
-# Source logger and common utilities
-source "$PROJECT_ROOT/backend/scripts/logger.sh"
-source "$PROJECT_ROOT/backend/scripts/common.sh"
+ENV_DIR="$SCRIPT_DIR/.env"
 
 # Default options
 SKIP_BUILD=false
@@ -31,26 +29,57 @@ FORCE_RECREATE=false
 DOCKER_COMPOSE_CMD="docker-compose"
 
 # Configuration variables (populated by read_app_stack_config)
-declare -g DATASOURCE MESSAGING NOTIFICATION_EMAIL OBSERVABILITY_LOGGING_STACK OBSERVABILITY_METRICS OBSERVABILITY_TRACING
+declare -g DATASOURCE MESSAGING API_CLIENT NOTIFICATION_EMAIL OBSERVABILITY_LOGGING_STACK OBSERVABILITY_METRICS OBSERVABILITY_TRACING
+
+# Service configuration arrays for environment file generation
+declare -A SERVICE_CONFIGS=(
+    ["api-gateway"]="api-gateway.env"
+    ["user-service"]="user-service.env"
+    ["product-service"]="product-service.env"
+    ["order-service"]="order-service.env"
+    ["notification-service"]="notification-service.env"
+)
+
+declare -A SERVICE_DATABASES=(
+    ["user-service"]="db_user"
+    ["product-service"]="db_product"
+    ["order-service"]="db_order"
+    ["notification-service"]="db_notification"
+)
+
+# Define service-specific configurations
+declare -A SERVICE_SPECIFIC_CONFIGS=(
+    ["api-gateway"]="jwt_config"
+    ["order-service"]="api_client_config"
+    ["notification-service"]="email_config"
+)
 
 # =============================================================================
 # ARGUMENT PARSING
 # =============================================================================
 
 show_help() {
-    log_info "Usage: $0 [OPTIONS]"
-    log_info ""
-    log_info "Atlas Docker Compose Start Script - Starts the Atlas microservices platform"
-    log_info ""
-    log_info "Options:"
-    log_info "  --skip-build        Skip all build steps (backend JAR, frontend, Docker images)"
-    log_info "  --force-recreate    Force recreate containers even if they exist"
-    log_info "  -h, --help          Show this help message"
-    log_info ""
-    log_info "Examples:"
-    log_info "  $0                  # Start with builds"
-    log_info "  $0 --skip-build     # Start without builds"
-    log_info "  $0 --force-recreate # Force recreate all containers"
+    echo "Usage: $0 [OPTIONS]"
+    echo ""
+    echo "Atlas Docker Compose Deployment Script - Generates environment files and starts the Atlas microservices platform"
+    echo ""
+    echo "Options:"
+    echo "  --skip-build        Skip all build steps (JAR, Docker images)"
+    echo "  --force-recreate    Force recreate containers even if they exist"
+
+    echo "  -h, --help          Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  $0                  # Full deployment with parallel startup and environment generation"
+    echo "  $0 --skip-build     # Deploy without builds (uses existing images)"
+    echo "  $0 --force-recreate # Force recreate all containers with fresh environment files"
+
+    echo ""
+    echo "Features:"
+    echo "  - Integrated environment file generation"
+    echo "  - Configurable infrastructure stack (database, messaging, observability)"
+    echo "  - Enhanced health checks and service dependency management"
+    echo "  - Comprehensive error handling and validation"
 }
 
 parse_arguments() {
@@ -68,9 +97,10 @@ parse_arguments() {
                 FORCE_RECREATE=true
                 shift
                 ;;
+
             *)
-                log_error "Unknown option: $1"
-                log_info "Use --help for usage information"
+                echo "Unknown option: $1" >&2
+                echo "Use --help for usage information"
                 exit 1
                 ;;
         esac
@@ -83,7 +113,7 @@ parse_arguments() {
 
 check_java_version() {
     if ! command -v java &> /dev/null; then
-        log_error "Java is not installed. Please install Java 17 or later."
+        echo "Java is not installed. Please install Java 17 or later." >&2
         return 1
     fi
 
@@ -99,20 +129,20 @@ check_java_version() {
     fi
 
     if [[ $major_version -lt 17 ]]; then
-        log_error "Java version $java_version is not supported. Please install Java 17 or later."
+        echo "Java version $java_version is not supported. Please install Java 17 or later." >&2
         return 1
     fi
     
-    log_success "Java found: $java_version"
+    echo "Java found: $java_version"
     return 0
 }
 
 check_docker() {
     if ! docker info > /dev/null 2>&1; then
-        log_error "Docker is not running. Please start Docker and try again."
+        echo "Docker is not running. Please start Docker and try again." >&2
         return 1
     fi
-    log_success "Docker found and running"
+    echo "Docker found and running"
     return 0
 }
 
@@ -120,21 +150,21 @@ check_docker_compose() {
     # Check for both docker-compose and docker compose (newer version)
     if command -v docker-compose &> /dev/null; then
         DOCKER_COMPOSE_CMD="docker-compose"
-        log_success "Docker Compose (standalone) found"
+        echo "Docker Compose (standalone) found"
         return 0
     elif docker compose version &> /dev/null; then
         DOCKER_COMPOSE_CMD="docker compose"
-        log_success "Docker Compose (plugin) found"
+        echo "Docker Compose (plugin) found"
         return 0
     else
-        log_error "Docker Compose is not installed or not available"
-        log_info "Please install Docker Compose or ensure Docker Desktop is running"
+        echo "Docker Compose is not installed or not available" >&2
+        echo "Please install Docker Compose or ensure Docker Desktop is running"
         return 1
     fi
 }
 
 check_prerequisites() {
-    log_section "Checking prerequisites..."
+    echo "Checking prerequisites..."
 
     # Check build prerequisites only if not skipping build
     if [[ "$SKIP_BUILD" == false ]]; then
@@ -144,40 +174,278 @@ check_prerequisites() {
     check_docker || exit 1
     check_docker_compose || exit 1
     
-    log_success "Prerequisites check passed"
+    echo "Prerequisites check passed"
+    echo
 }
 
 # =============================================================================
 # CONFIGURATION FUNCTIONS
 # =============================================================================
 
+read_config_value() {
+    local key="$1"
+    local default_value="$2"
+    local value
+    
+    value=$(grep "^${key}=" "$APP_STACK_CONFIG" 2>/dev/null | cut -d'=' -f2 | tr -d '[:space:]')
+    echo "${value:-$default_value}"
+}
+
 read_app_stack_config() {
-    log_section "Reading application stack configuration..."
+    echo "Reading application stack configuration..."
     
     if [[ ! -f "$APP_STACK_CONFIG" ]]; then
-        log_error "Configuration file not found: $APP_STACK_CONFIG"
-        log_info "Please run the configuration script first: backend/scripts/app-stack-config.sh"
+        echo "Configuration file not found: $APP_STACK_CONFIG" >&2
+        echo "Please run the configuration script first: backend/scripts/app-stack-config.sh"
         exit 1
     fi
     
-    # Use common function to read platform config
-    read_platform_config "$APP_STACK_CONFIG"
+    if [[ ! -r "$APP_STACK_CONFIG" ]]; then
+        echo "Configuration file is not readable: $APP_STACK_CONFIG" >&2
+        exit 1
+    fi
     
-    # Read additional configuration values specific to this deployment
-    DATASOURCE=$(grep "^datasource=" "$APP_STACK_CONFIG" | cut -d'=' -f2 || echo "mysql")
-    MESSAGING=$(grep "^messaging=" "$APP_STACK_CONFIG" | cut -d'=' -f2 || echo "kafka")
-    NOTIFICATION_EMAIL=$(grep "^notification.email=" "$APP_STACK_CONFIG" | cut -d'=' -f2 || echo "spring")
-    OBSERVABILITY_LOGGING_STACK=$(grep "^observability.logging.stack=" "$APP_STACK_CONFIG" | cut -d'=' -f2 || echo "loki")
-    OBSERVABILITY_METRICS=$(grep "^observability.metrics=" "$APP_STACK_CONFIG" | cut -d'=' -f2 || echo "prometheus")
-    OBSERVABILITY_TRACING=$(grep "^observability.tracing=" "$APP_STACK_CONFIG" | cut -d'=' -f2 || echo "zipkin")
+    # Read configuration values with improved error handling
+    DATASOURCE=$(read_config_value "datasource" "mysql")
+    MESSAGING=$(read_config_value "messaging" "kafka")
+    API_CLIENT=$(read_config_value "api-client" "rest-restclient")
+    NOTIFICATION_EMAIL=$(read_config_value "notification.email" "spring")
+    OBSERVABILITY_LOGGING_STACK=$(read_config_value "observability.logging.stack" "loki")
+    OBSERVABILITY_METRICS=$(read_config_value "observability.metrics" "prometheus")
+    OBSERVABILITY_TRACING=$(read_config_value "observability.tracing" "zipkin")
     
-    log_info "Configuration loaded:"
-    log_info "  - Datasource: $DATASOURCE"
-    log_info "  - Messaging: $MESSAGING"
-    log_info "  - Email: $NOTIFICATION_EMAIL"
-    log_info "  - Logging: $OBSERVABILITY_LOGGING_STACK"
-    log_info "  - Metrics: $OBSERVABILITY_METRICS"
-    log_info "  - Tracing: $OBSERVABILITY_TRACING"
+    # Validate critical configuration values
+    if [[ ! "$DATASOURCE" =~ ^(mysql|postgres)$ ]]; then
+        echo "Warning: Invalid datasource '$DATASOURCE', defaulting to 'mysql'"
+        DATASOURCE="mysql"
+    fi
+    
+    if [[ ! "$MESSAGING" =~ ^(kafka|rabbitmq)$ ]]; then
+        echo "Warning: Invalid messaging system '$MESSAGING', defaulting to 'kafka'"
+        MESSAGING="kafka"
+    fi
+    
+    echo "Configuration loaded:"
+    echo "  - Datasource: $DATASOURCE"
+    echo "  - Messaging: $MESSAGING"
+    echo "  - API Client: $API_CLIENT"
+    echo "  - Email: $NOTIFICATION_EMAIL"
+    echo "  - Logging: $OBSERVABILITY_LOGGING_STACK"
+    echo "  - Metrics: $OBSERVABILITY_METRICS"
+    echo "  - Tracing: $OBSERVABILITY_TRACING"
+    echo
+}
+
+# =============================================================================
+# ENVIRONMENT FILE GENERATION FUNCTIONS
+# =============================================================================
+
+generate_database_config() {
+    local service_name="$1"
+    local database_name="${SERVICE_DATABASES[$service_name]:-}"
+
+    if [[ -z "$database_name" ]]; then
+        return 0  # No database config needed for this service
+    fi
+
+    case "$DATASOURCE" in
+        mysql)
+            cat << EOF
+# Database Configuration (MySQL) for $service_name
+DB_URL=jdbc:mysql://mysql:3306/$database_name?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
+DB_USERNAME=root
+DB_PASSWORD=root
+DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
+DB_QUARTZ_USERNAME=root
+DB_QUARTZ_PASSWORD=root
+EOF
+            ;;
+        postgres)
+            cat << EOF
+# Database Configuration (PostgreSQL) for $service_name
+DB_URL=jdbc:postgresql://postgres:5432/$database_name
+DB_USERNAME=root
+DB_PASSWORD=root
+DB_QUARTZ_URL=jdbc:postgresql://postgres:5432/db_quartz
+DB_QUARTZ_USERNAME=root
+DB_QUARTZ_PASSWORD=root
+EOF
+            ;;
+    esac
+}
+
+generate_messaging_config() {
+    case "$MESSAGING" in
+        kafka)
+            cat << EOF
+
+# Messaging Configuration (Kafka)
+KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+EOF
+            ;;
+        rabbitmq)
+            cat << EOF
+
+# Messaging Configuration (RabbitMQ)
+RABBITMQ_HOST=rabbitmq
+RABBITMQ_PORT=5672
+RABBITMQ_USERNAME=guest
+RABBITMQ_PASSWORD=guest
+EOF
+            ;;
+    esac
+}
+
+generate_common_infrastructure_config() {
+    cat << EOF
+
+# Redis Configuration
+REDIS_HOST=redis
+REDIS_PORT=6379
+
+# Service Discovery Configuration
+EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
+EOF
+}
+
+generate_observability_config() {
+    if [[ "$OBSERVABILITY_TRACING" == "zipkin" ]]; then
+        cat << EOF
+
+# Tracing Configuration (Zipkin)
+ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+EOF
+    fi
+}
+
+generate_jwt_config() {
+    cat << EOF
+
+# JWT Configuration
+JWK_SET_URI=http://user-service:8081/.well-known/jwks.json
+EOF
+}
+
+generate_api_client_config() {
+    local api_client_prefix="$1"
+    
+    if [[ "$api_client_prefix" == "rest" ]]; then
+        cat << EOF
+
+# REST API Configuration
+API_CLIENT_REST_USER_SERVICE_BASE_URL=http://user-service:8081
+API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL=http://product-service:8082
+EOF
+    elif [[ "$api_client_prefix" == "grpc" ]]; then
+        cat << EOF
+
+# gRPC Configuration
+GRPC_CLIENT_USER_ADDRESS=static://user-service:50051
+GRPC_CLIENT_PRODUCT_ADDRESS=static://product-service:50052
+EOF
+    fi
+}
+
+generate_email_config() {
+    if [[ "$NOTIFICATION_EMAIL" == "spring" ]]; then
+        cat << EOF
+
+# Email Configuration
+MAIL_SERVER_HOST=smtp4dev
+EOF
+    fi
+}
+
+generate_api_gateway_env() {
+    local env_file="$ENV_DIR/api-gateway.env"
+    echo "Creating $env_file"
+    
+    {
+        echo "# Service Discovery Configuration"
+        echo "EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka"
+        echo ""
+        echo "# Redis Configuration"
+        echo "REDIS_HOST=redis"
+        echo "REDIS_PORT=6379"
+        generate_jwt_config
+        generate_observability_config
+    } > "$env_file"
+    
+    echo "Generated $env_file"
+}
+
+generate_service_env() {
+    local service_name="$1"
+    local env_file="$ENV_DIR/${SERVICE_CONFIGS[$service_name]}"
+    
+    echo "Creating $env_file"
+    
+    {
+        generate_database_config "$service_name"
+        generate_messaging_config
+        generate_common_infrastructure_config
+        
+        # Add service-specific configurations
+        local specific_config="${SERVICE_SPECIFIC_CONFIGS[$service_name]:-}"
+        if [[ -n "$specific_config" ]]; then
+            case "$specific_config" in
+                "api_client_config") 
+                    # Extract prefix from API_CLIENT configuration (e.g., "rest-restclient" -> "rest")
+                    local api_client_prefix="${API_CLIENT%%-*}"
+                    generate_api_client_config "$api_client_prefix" 
+                    ;;
+                "email_config") generate_email_config ;;
+            esac
+        fi
+        
+        generate_observability_config
+    } > "$env_file"
+    
+    echo "Generated $env_file"
+}
+
+generate_environment_files() {
+    echo "Generating environment files..."
+    
+    # Create env directory if it doesn't exist
+    if ! mkdir -p "$ENV_DIR"; then
+        echo "Failed to create environment directory: $ENV_DIR" >&2
+        exit 1
+    fi
+    
+    # Remove existing .env files
+    if ! rm -f "$ENV_DIR/"*.env 2>/dev/null; then
+        echo "Warning: Could not clean existing environment files"
+    fi
+    
+    echo "Creating service-specific .env files with configuration from app-stack.cfg"
+    
+    # Generate API Gateway env file (special case)
+    if ! generate_api_gateway_env; then
+        echo "Failed to generate API Gateway environment file" >&2
+        exit 1
+    fi
+    
+    # Generate env files for other services
+    local services=("user-service" "product-service" "order-service" "notification-service")
+    for service in "${services[@]}"; do
+        if ! generate_service_env "$service"; then
+            echo "Failed to generate environment file for service: $service" >&2
+            exit 1
+        fi
+    done
+    
+    # Verify all expected files were created
+    local expected_files=("api-gateway.env" "user-service.env" "product-service.env" "order-service.env" "notification-service.env")
+    for file in "${expected_files[@]}"; do
+        if [[ ! -f "$ENV_DIR/$file" ]]; then
+            echo "Error: Expected environment file not found: $ENV_DIR/$file" >&2
+            exit 1
+        fi
+    done
+    
+    echo "Environment files generated successfully (${#expected_files[@]} files created)"
+    echo
 }
 
 # =============================================================================
@@ -185,24 +453,25 @@ read_app_stack_config() {
 # =============================================================================
 
 build_services() {
-    log_section "Building Services"
+    echo "Building services..."
 
     local build_script="$PROJECT_ROOT/backend/scripts/buildSrc/build.sh"
     if [[ ! -f "$build_script" ]]; then
-        log_error "Build script not found: $build_script"
+        echo "Build script not found: $build_script" >&2
         exit 1
     fi
 
-    log_info "Granting execute permission to build script..."
+    echo "Granting execute permission to build script..."
     chmod +x "$build_script"
 
-    log_info "Invoking build script..."
+    echo "Invoking build script..."
     if "$build_script"; then
-        log_success "Build completed successfully"
+        echo "Build completed successfully"
     else
-        log_error "Build failed"
+        echo "Build failed" >&2
         exit 1
     fi
+    echo
 }
 
 # =============================================================================
@@ -216,7 +485,7 @@ get_infrastructure_services() {
         mysql) services+=("mysql") ;;
         postgres|postgresql) services+=("postgres") ;;
         *) 
-            log_warn "Unknown datasource: $DATASOURCE, defaulting to mysql"
+            echo "Warning: Unknown datasource: $DATASOURCE, defaulting to mysql"
             services+=("mysql")
             ;;
     esac
@@ -225,7 +494,7 @@ get_infrastructure_services() {
         kafka) services+=("kafka") ;;
         rabbitmq) services+=("rabbitmq") ;;
         *)
-            log_warn "Unknown messaging system: $MESSAGING, defaulting to kafka"
+            echo "Warning: Unknown messaging system: $MESSAGING, defaulting to kafka"
             services+=("kafka")
             ;;
     esac
@@ -259,14 +528,14 @@ get_observability_services() {
     echo "${services[@]}"
 }
 
-get_backend_services() {
+get_application_services() {
     local services=("user-service" "product-service" "order-service" "notification-service")
     echo "${services[@]}"
 }
 
 start_services() {
-    log_section "Starting Atlas services..."
-    log_info "Using compose file: $COMPOSE_FILE"
+    echo "Starting services..."
+    echo "Using compose file: $COMPOSE_FILE"
 
     # Infrastructure services
     local infrastructure_services
@@ -284,12 +553,12 @@ start_services() {
 
     # Service discovery
     start_service_group "Service Discovery" "eureka-server"
-    
-    # Backend services
-    local backend_services
-    read -ra backend_services <<< "$(get_backend_services)"
-    if [[ ${#backend_services[@]} -gt 0 ]]; then
-        start_service_group "Backend" "${backend_services[@]}"
+
+    # Application services
+    local application_services
+    read -ra application_services <<< "$(get_application_services)"
+    if [[ ${#application_services[@]} -gt 0 ]]; then
+        start_service_group "Application" "${application_services[@]}"
     fi
 
     # API gateway
@@ -304,7 +573,7 @@ start_service_group() {
     shift
     local services=("$@")
 
-    log_info "Starting $group_name services: ${services[*]}"
+    echo "Starting $group_name services: ${services[*]}"
 
     local compose_args=()
     if [[ "$FORCE_RECREATE" == true ]]; then
@@ -312,13 +581,14 @@ start_service_group() {
     fi
 
     if $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" -p "$PROJECT_NAME" up -d "${compose_args[@]}" "${services[@]}"; then
-        log_success "$group_name services started"
+        echo "$group_name services started"
         wait_for_service_group_healthy "${services[@]}"
     else
-        log_error "Failed to start $group_name services"
-        log_info "You can check logs with: $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME logs"
+        echo "Failed to start $group_name services" >&2
+        echo "You can check logs with: $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME logs"
         exit 1
     fi
+    echo
 }
 
 wait_for_service_group_healthy() {
@@ -328,7 +598,7 @@ wait_for_service_group_healthy() {
     local elapsed_time=0
     local all_healthy=false
 
-    log_info "Waiting for services to be healthy: ${services[*]}"
+    echo "Waiting for services to be healthy: ${services[*]}"
 
     while [[ $elapsed_time -lt $max_wait_time ]] && [[ $all_healthy == false ]]; do
         all_healthy=true
@@ -342,19 +612,19 @@ wait_for_service_group_healthy() {
         done
         
         if [[ $all_healthy == true ]]; then
-            log_success "All services in group are healthy: ${services[*]}"
+            echo "All services in group are healthy: ${services[*]}"
             break
         else
-            log_info "Waiting for services: ${unhealthy_services[*]} (${elapsed_time}s/${max_wait_time}s)"
+            echo "Waiting for services: ${unhealthy_services[*]} (${elapsed_time}s/${max_wait_time}s)"
             sleep $check_interval
             elapsed_time=$((elapsed_time + check_interval))
         fi
     done
     
     if [[ $all_healthy == false ]]; then
-        log_error "Timeout waiting for service group to be healthy after ${max_wait_time} seconds: ${services[*]}"
-        log_info "You can check service logs with: $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME logs [service_name]"
-        log_info "You can check service status with: $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME ps"
+        echo "Timeout waiting for service group to be healthy after ${max_wait_time} seconds: ${services[*]}"
+        echo "You can check service logs with: $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME logs [service_name]"
+        echo "You can check service status with: $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME ps"
         exit 1
     fi
 }
@@ -386,25 +656,6 @@ check_service_health() {
 # MAIN EXECUTION
 # =============================================================================
 
-generate_environment_files() {
-    log_info "Generating environment files..."
-    
-    local env_generator="$SCRIPT_DIR/env-generator.sh"
-    if [[ ! -f "$env_generator" ]]; then
-        log_error "Environment generator script not found: $env_generator"
-        exit 1
-    fi
-    
-    chmod +x "$env_generator"
-
-    if ! "$env_generator"; then
-        log_error "Failed to generate environment files"
-        exit 1
-    fi
-    
-    log_success "Environment files generated successfully"
-}
-
 main() {
     parse_arguments "$@"
 
@@ -417,26 +668,26 @@ main() {
     if [[ "$SKIP_BUILD" == false ]]; then
         build_services
     else
-        log_info "Skipping build step (--skip-build flag provided)"
+        echo "Skipping build step (--skip-build flag provided)"
     fi
 
     start_services
-    
-    log_section "Deployment completed successfully!"
-    log_info "All Atlas services are now running and healthy."
-    log_info "You can check service status with: $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME ps"
-    log_info "You can view logs with: $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME logs -f [service_name]"
-    log_info "Network 'atlas-network' is available for all services to communicate"
+
+    echo "=== Deployment completed successfully! ==="
+    echo "All Atlas services are now running and healthy."
+    echo "You can check service status with: $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME ps"
+    echo "You can view logs with: $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME logs -f [service_name]"
+    echo "Network 'atlas-network' is available for all services to communicate"
 
     # Display access URLs
-    log_info ""
-    log_info "Service Access URLs:"
-    log_info "  - API Gateway: http://localhost:8080"
-    log_info "  - Grafana: http://localhost:3000 (admin/admin)"
-    log_info "  - Prometheus: http://localhost:9090"
-    log_info "  - Zipkin: http://localhost:9411"
+    echo ""
+    echo "Service Access URLs:"
+    echo "  - API Gateway: http://localhost:8080"
+    echo "  - Grafana: http://localhost:3000 (admin/admin)"
+    echo "  - Prometheus: http://localhost:9090"
+    echo "  - Zipkin: http://localhost:9411"
     if [[ "$NOTIFICATION_EMAIL" == "spring" ]]; then
-        log_info "  - SMTP4Dev: http://localhost:5000"
+        echo "  - SMTP4Dev: http://localhost:5000"
     fi
 }
 

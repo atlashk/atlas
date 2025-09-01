@@ -44,9 +44,11 @@ const Cart: React.FC = () => {
   };
 
   const handlePlaceOrder = async () => {
-    if (!cart.length || isProcessing) return;
+    if (!cart.length || isProcessing) {
+      return;
+    }
 
-    if (!isAuthenticated) {
+    if (!isAuthenticated()) {
       router.push("/login");
       return;
     }

@@ -2,7 +2,7 @@ import { authApi, userApi } from "@/api";
 import { Role } from "@/constants";
 import type { LoginRequest } from "@/interfaces/auth.interface";
 import type { RegisterRequest, User } from "@/interfaces/user.interface";
-import { clearAuthCookies, setCookie } from "@/utils/cookies";
+import { clearAuthCookies, setCookie, getCookie, isValidToken } from "@/utils/cookies";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -37,6 +37,7 @@ interface UserActions {
   logout: () => void;
   clearError: () => void;
   clearAuthState: () => void;
+  initializeFromCookies: () => void;
 }
 
 type UserStore = UserState & UserActions;
@@ -60,7 +61,10 @@ export const useUserStore = create<UserStore>()(
       // Getters
       isAuthenticated: () => {
         const { accessToken } = get();
-        return !!accessToken;
+        // Check both store state and cookies for better reliability
+        const cookieToken = getCookie('accessToken');
+        const tokenToCheck = accessToken || cookieToken;
+        return isValidToken(tokenToCheck);
       },
 
       isAdmin: () => {
@@ -242,6 +246,28 @@ export const useUserStore = create<UserStore>()(
           error: null,
           profileLoading: false,
         });
+      },
+
+      initializeFromCookies: () => {
+        const cookieAccessToken = getCookie('accessToken');
+        const cookieRefreshToken = getCookie('refreshToken');
+        const { accessToken, refreshToken } = get();
+        
+        // If cookies have valid tokens but store doesn't, update store
+        if (isValidToken(cookieAccessToken) && !accessToken) {
+          set({
+            accessToken: cookieAccessToken,
+            refreshToken: cookieRefreshToken,
+          });
+        }
+        // If store has tokens but cookies don't, clear store
+        else if (!isValidToken(cookieAccessToken) && accessToken) {
+          set({
+            accessToken: null,
+            refreshToken: null,
+            profile: null,
+          });
+        }
       },
     }),
     {

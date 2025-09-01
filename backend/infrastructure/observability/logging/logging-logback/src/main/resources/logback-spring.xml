@@ -1,4 +1,8 @@
 <configuration>
+  <!-- Spring Property Definition - must be defined before use -->
+  <springProperty name="SERVICE_NAME" scope="context" source="spring.application.name"/>
+  <property name="LOG_DIR" value="/var/log/${SERVICE_NAME}"/>
+
   <!-- use Spring default values -->
   <appender class="ch.qos.logback.core.ConsoleAppender" name="CONSOLE">
     <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
@@ -83,14 +87,10 @@
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>
   </logger>
-  <property name="LOG_DIR" value="/var/log/${SERVICE_NAME}"/>
 
   <!-- Spring Security -->
   <root level="INFO">
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>
   </root>
-
-  <!-- Root Logger -->
-  <springProperty name="SERVICE_NAME" scope="context" source="spring.application.name"/>
 </configuration>

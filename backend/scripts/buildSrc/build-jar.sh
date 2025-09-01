@@ -7,9 +7,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 GRADLEW="$PROJECT_ROOT/backend/gradlew"
 
-# Load logger.sh
-source "$PROJECT_ROOT/backend/scripts/logger.sh"
-
 # Default values
 SKIP_TESTS="true"
 
@@ -36,7 +33,7 @@ for arg in "$@"; do
             exit 0
             ;;
         *)
-            log_error "Unknown parameter: $arg"
+            echo "Unknown parameter: $arg" >&2
             usage
             exit 1
             ;;
@@ -47,21 +44,21 @@ done
 chmod +x "$GRADLEW"
 
 # Build with Gradle
-log_info "Starting Gradle build..."
+echo "Starting Gradle build..."
 if [ "$SKIP_TESTS" = "true" ]; then
     if (cd "$PROJECT_ROOT/backend" && "$GRADLEW" clean build -x test); then
-        log_success "Gradle build completed successfully."
+        echo "Gradle build completed successfully."
     else
-        log_error "Gradle build failed."
+        echo "Gradle build failed." >&2
         exit 1
     fi
 else
     if (cd "$PROJECT_ROOT/backend" && "$GRADLEW" clean build); then
-        log_success "Gradle build completed successfully."
+        echo "Gradle build completed successfully."
     else
-        log_error "Gradle build failed."
+        echo "Gradle build failed." >&2
         exit 1
     fi
 fi
 
-log_success "JAR build process completed successfully."
+echo "JAR build process completed successfully."

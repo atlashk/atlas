@@ -3,27 +3,6 @@
 # =============================================================================
 # Atlas Common Utilities
 # =============================================================================
-# This file contains common functions used across Atlas scripts
-# =============================================================================
-
-# Read platform configuration from app-stack.cfg
-read_platform_config() {
-    local app_stack_config="$1"
-    
-    if [ ! -f "$app_stack_config" ]; then
-        log_error "Configuration file not found: $app_stack_config"
-        exit 1
-    fi
-    
-    PLATFORM=$(grep "^platform=" "$app_stack_config" | cut -d'=' -f2)
-    
-    if [ -z "$PLATFORM" ]; then
-        log_error "Platform configuration not found in $app_stack_config"
-        exit 1
-    fi
-    
-    log_info "Platform configuration: $PLATFORM"
-}
 
 # Get deployment script path based on platform and action
 get_deployment_script() {

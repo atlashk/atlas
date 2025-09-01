@@ -7,9 +7,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 GRADLEW="$PROJECT_ROOT/backend/gradlew"
 
-# Load logger.sh
-source "$PROJECT_ROOT/backend/scripts/logger.sh"
-
 # Default values
 SKIP_TESTS="true"
 BUILD_JAR="true"
@@ -64,7 +61,7 @@ for arg in "$@"; do
             exit 0
             ;;
         *)
-            log_error "Unknown parameter: $arg"
+            echo "Unknown parameter: $arg" >&2
             usage
             exit 1
             ;;
@@ -73,24 +70,26 @@ done
 
 # Build JAR files if requested
 if [ "$BUILD_JAR" = "true" ]; then
-    log_info "Starting JAR build process..."
+    echo "Starting JAR build process..."
     if "$SCRIPT_DIR/build-jar.sh" --skip-tests="$SKIP_TESTS"; then
-        log_success "JAR build completed successfully."
+        echo "JAR build completed successfully."
     else
-        log_error "JAR build failed."
+        echo "JAR build failed." >&2
         exit 1
     fi
 fi
+echo
 
 # Build Docker images if requested
 if [ "$BUILD_DOCKER" = "true" ]; then
-    log_info "Starting Docker build process..."
+    echo "Starting Docker build process..."
     if "$SCRIPT_DIR/build-docker.sh" "${DOCKER_ARGS[@]}"; then
-        log_success "Docker build completed successfully."
+        echo "Docker build completed successfully."
     else
-        log_error "Docker build failed."
+        echo "Docker build failed." >&2
         exit 1
     fi
 fi
+echo
 
-log_success "Build process completed successfully."
+echo "Build process completed successfully."

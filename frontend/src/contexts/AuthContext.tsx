@@ -41,7 +41,8 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: AuthP
     hasRole: storeHasRole,
     login: storeLogin,
     logout: storeLogout,
-    clearError: storeClearError
+    clearError: storeClearError,
+    initializeFromCookies
   } = useUserStore();
   
   const [isInitialized, setIsInitialized] = useState(false);
@@ -52,6 +53,9 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: AuthP
       setInitError(null);
       console.log('AuthContext initializing:', { accessToken: !!accessToken, profile: !!profile });
       
+      // Initialize store from cookies to sync state
+      initializeFromCookies();
+      
       // No need to fetch profile here - user store handles this during login
       // Just mark as initialized
     } catch (error) {
@@ -61,7 +65,7 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: AuthP
       console.log('AuthContext initialization complete');
       setIsInitialized(true);
     }
-  }, [accessToken, profile]);
+  }, [accessToken, profile, initializeFromCookies]);
 
   useEffect(() => {
     initializeAuth();

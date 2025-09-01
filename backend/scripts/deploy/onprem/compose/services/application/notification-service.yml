@@ -8,7 +8,7 @@ services:
     image: atlas-notification-service
     ports:
       - "8084:8084"
-    env_file: "../../env/notification-service.env"
+    env_file: "../../.env/notification-service.env"
     volumes:
       - notification-service-log:/var/log/notification-service
     healthcheck:

@@ -6,9 +6,6 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
-# Load logger.sh
-source "$PROJECT_ROOT/backend/scripts/logger.sh"
-
 # Service definitions with name and build context
 SERVICES=(
     "user-service:$PROJECT_ROOT/backend/application/user-application"
@@ -51,7 +48,7 @@ for arg in "$@"; do
             exit 0
             ;;
         *)
-            log_error "Unknown parameter: $arg"
+            echo "Unknown parameter: $arg" >&2
             usage
             exit 1
             ;;
@@ -59,11 +56,11 @@ for arg in "$@"; do
 done
 
 # Build Docker images
-log_info "Starting Docker image builds..."
+echo "Starting Docker image builds..."
 
 # Validate services
 if [ "${#SERVICES[@]}" -eq 0 ]; then
-    log_error "No services specified to build."
+    echo "No services specified to build." >&2
     exit 1
 fi
 
@@ -77,12 +74,13 @@ for service in "${SERVICES[@]}"; do
         continue
     fi
 
-    log_info "Building Docker image for atlas-$name..."
+    echo "Building Docker image for atlas-$name..."
     if ! docker build -t "atlas-$name" "$context"; then
-        log_error "Failed to build Docker image for atlas-$name." 
+        echo "Failed to build Docker image for atlas-$name." >&2
         exit 1
     fi
-    log_success "Built Docker image for atlas-$name successfully."
+    echo "Built Docker image for atlas-$name successfully."
+    echo
 done
 
-log_success "Docker build process completed successfully."
+echo "Docker build process completed successfully."

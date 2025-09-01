@@ -8,7 +8,7 @@ services:
     image: atlas-product-service
     ports:
       - "8082:8082"
-    env_file: "../../env/product-service.env"
+    env_file: "../../.env/product-service.env"
     volumes:
       - product-service-log:/var/log/product-service
     healthcheck:

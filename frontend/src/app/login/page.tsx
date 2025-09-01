@@ -67,11 +67,9 @@ const Login: React.FC = () => {
       };
 
       const response = await login(credentials);
-      console.log("Login response:", response);
 
       if (response.success) {
         toast.success("Login successful!");
-        console.log("User role:", response.userRole);
 
         // Add a small delay to ensure tokens are properly set before redirect
         await new Promise((resolve) => setTimeout(resolve, 100));
