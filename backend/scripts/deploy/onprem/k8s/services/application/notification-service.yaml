@@ -33,45 +33,13 @@ spec:
     spec:
       containers:
         - name: notification-service
-          image: notification-service:latest
+          image: atlas-notification-service:latest
           imagePullPolicy: Never
-          env:
-            - name: SPRING_PROFILES_ACTIVE
-              valueFrom:
-                configMapKeyRef:
-                  name: atlas-config
-                  key: SPRING_PROFILES_ACTIVE
-            - name: LOG_LEVEL
-              valueFrom:
-                configMapKeyRef:
-                  name: atlas-config
-                  key: LOG_LEVEL
-            # Database configuration
-            - name: DB_URL
-              value: "jdbc:mysql://mysql:3306/db_notification?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
-            - name: DB_USERNAME
-              value: "root"
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mysql-secret
-                  key: mysql-root-password
-            - name: DB_QUARTZ_URL
-              value: "jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
-            # Redis configuration
-            - name: REDIS_HOST
-              value: "redis"
-            - name: REDIS_PORT
-              value: "6379"
-            # Kafka configuration
-            - name: KAFKA_BOOTSTRAP_SERVERS
-              value: "kafka:29092"
-            # SMTP configuration
-            - name: MAIL_SERVER_HOST
-              value: "smtp4dev"
-            # Observability
-            - name: ZIPKIN_ENDPOINT
-              value: "http://zipkin:9411/api/v2/spans"
+          envFrom:
+            - configMapRef:
+                name: notification-service-config
+            - secretRef:
+                name: notification-service-secret
           ports:
             - containerPort: 8084
               name: http
@@ -141,4 +109,4 @@ spec:
     - port: 8084
       targetPort: 8084
       name: http
-  type: ClusterIP 
+  type: ClusterIP

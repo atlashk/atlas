@@ -653,6 +653,48 @@ check_service_health() {
 }
 
 # =============================================================================
+# SUMMARY AND REPORTING
+# =============================================================================
+
+show_deployment_summary() {
+    local start_time="$1"
+    local end_time=$(date +%s)
+    local total_time=$((end_time - start_time))
+    local minutes=$((total_time / 60))
+    local seconds=$((total_time % 60))
+
+    echo "=== Deployment Summary ==="
+    echo "Atlas platform deployment completed successfully!"
+    echo "Total execution time: ${minutes}m ${seconds}s"
+    echo
+
+    show_access_information
+
+    show_management_commands
+}
+
+show_access_information() {
+    echo "Service Access URLs:"
+    echo "  API Gateway:   http://api.atlas.local"
+    echo "  Grafana:       http://grafana.atlas.local (admin/admin)"
+    echo "  Prometheus:    http://prometheus.atlas.local"
+    echo "  Zipkin:        http://zipkin.atlas.local"
+    if [[ "$NOTIFICATION_EMAIL" == "spring" ]]; then
+        echo "  SMTP4Dev:      http://smtp4dev.atlas.local"
+    fi
+    echo
+}
+
+show_management_commands() {
+    echo "Management commands:"
+    echo "  Status:        $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME ps"
+    echo "  Services:      $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME ps --services"
+    echo "  Logs:          $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME logs -f [service_name]"
+    echo "  Stop:          $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME down"
+    echo "  Restart:       $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME restart [service_name]"
+}
+
+# =============================================================================
 # MAIN EXECUTION
 # =============================================================================
 
@@ -660,6 +702,10 @@ main() {
     parse_arguments "$@"
 
     check_prerequisites
+
+    local start_time=$(date +%s)
+
+    echo "Atlas Docker Compose Platform - Starting..."
 
     read_app_stack_config
     
@@ -673,22 +719,7 @@ main() {
 
     start_services
 
-    echo "=== Deployment completed successfully! ==="
-    echo "All Atlas services are now running and healthy."
-    echo "You can check service status with: $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME ps"
-    echo "You can view logs with: $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME logs -f [service_name]"
-    echo "Network 'atlas-network' is available for all services to communicate"
-
-    # Display access URLs
-    echo ""
-    echo "Service Access URLs:"
-    echo "  - API Gateway: http://localhost:8080"
-    echo "  - Grafana: http://localhost:3000 (admin/admin)"
-    echo "  - Prometheus: http://localhost:9090"
-    echo "  - Zipkin: http://localhost:9411"
-    if [[ "$NOTIFICATION_EMAIL" == "spring" ]]; then
-        echo "  - SMTP4Dev: http://localhost:5000"
-    fi
+    show_deployment_summary "$start_time"
 }
 
 # Execute main function

@@ -16,47 +16,12 @@ spec:
         app: zipkin
         tier: infrastructure
     spec:
-      initContainers:
-        - name: wait-for-mysql
-          image: mysql:8.0
-          command:
-            - /bin/sh
-            - -c
-            - |
-              until mysqladmin ping -h mysql -P 3306 -u root -p"$MYSQL_ROOT_PASSWORD" --silent; do
-                echo "Waiting for MySQL to be ready..."
-                sleep 5
-              done
-              echo "MySQL is ready!"
-          env:
-            - name: MYSQL_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mysql-secret
-                  key: mysql-root-password
       containers:
         - name: zipkin
           image: openzipkin/zipkin
           env:
             - name: STORAGE_TYPE
-              value: "mysql"
-            - name: MYSQL_HOST
-              value: "mysql"
-            - name: MYSQL_PORT
-              value: "3306"
-            - name: MYSQL_DB
-              value: "db_zipkin"
-            - name: MYSQL_USER
-              value: "root"
-            - name: MYSQL_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: mysql-secret
-                  key: mysql-root-password
-            - name: MYSQL_TCP_KEEP_ALIVE
-              value: "true"
-            - name: MYSQL_MAX_CONNECTIONS
-              value: "10"
+              value: "mem"
           ports:
             - containerPort: 9411
               name: http
@@ -99,4 +64,4 @@ spec:
     - port: 9411
       targetPort: 9411
       name: http
-  type: ClusterIP 
+  type: ClusterIP

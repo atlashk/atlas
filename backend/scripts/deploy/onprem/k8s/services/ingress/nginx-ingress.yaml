@@ -71,7 +71,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: atlas-proxy-headers
-  namespace: atlas-local
+  namespace: atlas-onprem-k8s
   labels:
     app: atlas-ingress
     tier: ingress

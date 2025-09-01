@@ -33,42 +33,13 @@ spec:
     spec:
       containers:
         - name: user-service
-          image: user-service:latest
+          image: atlas-user-service:latest
           imagePullPolicy: Never  # For local development
-          env:
-            - name: SPRING_PROFILES_ACTIVE
-              valueFrom:
-                configMapKeyRef:
-                  name: atlas-config
-                  key: SPRING_PROFILES_ACTIVE
-            - name: LOG_LEVEL
-              valueFrom:
-                configMapKeyRef:
-                  name: atlas-config
-                  key: LOG_LEVEL
-            # Database configuration
-            - name: DB_URL
-              value: "jdbc:mysql://mysql:3306/db_user?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
-            - name: DB_USERNAME
-              value: "root"
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mysql-secret
-                  key: mysql-root-password
-            - name: DB_QUARTZ_URL
-              value: "jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
-            # Redis configuration
-            - name: REDIS_HOST
-              value: "redis"
-            - name: REDIS_PORT
-              value: "6379"
-            # Kafka configuration
-            - name: KAFKA_BOOTSTRAP_SERVERS
-              value: "kafka:29092"
-            # Observability
-            - name: ZIPKIN_ENDPOINT
-              value: "http://zipkin:9411/api/v2/spans"
+          envFrom:
+            - configMapRef:
+                name: user-service-config
+            - secretRef:
+                name: user-service-secret
           ports:
             - containerPort: 8081
               name: http
@@ -145,4 +116,4 @@ spec:
     - port: 50051
       targetPort: 50051
       name: grpc
-  type: ClusterIP 
+  type: ClusterIP

@@ -51,7 +51,7 @@ parse_arguments() {
 # =============================================================================
 
 check_prerequisites() {
-    echo "=== Checking Prerequisites ==="
+    echo "Checking prerequisites..."
 
     # Check Docker
     if docker info > /dev/null 2>&1; then
@@ -78,6 +78,7 @@ check_prerequisites() {
     fi
 
     echo "Prerequisites check passed"
+    echo
 }
 
 # =============================================================================
@@ -116,6 +117,7 @@ remove_namespace() {
     fi
 
     echo "Namespace cleanup completed successfully!"
+    echo
 }
 
 # Function to cleanup NGINX Ingress Controller
@@ -138,6 +140,7 @@ cleanup_ingress_controller() {
     else
         echo "NGINX Ingress Controller not found"
     fi
+    echo
 }
 
 # =============================================================================
@@ -149,19 +152,20 @@ main() {
     parse_arguments "$@"
     check_prerequisites
 
-    echo "=== Atlas OnPrem K8s Platform - Cleanup ==="
+    echo "Atlas On-Premise Kubernetes Platform - Cleaning up..."
     echo "Namespace: $NAMESPACE"
+    echo
 
-    echo "=== Removing all Atlas resources ==="
+    echo "Removing all resources:"
     echo "  ✓ All services and applications"
     echo "  ✓ Namespace and volumes"
     echo "  ✓ Ingress Controller"
+    echo
 
     remove_namespace
     cleanup_ingress_controller
-    
-    echo "All Atlas resources removed successfully!"
-    echo "Atlas platform cleanup completed!"
+
+    echo "Atlas platform resources cleanup completed successfully!"
 }
 
 # Execute main function

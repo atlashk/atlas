@@ -251,7 +251,7 @@ echo
 # =============================================================================
 echo -e "${BLUE}${BOLD}File - PDF Configuration${NC}"
 echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Apache PDFBox ${YELLOW}(default)${NC}"
-file_csv="pdfbox"
+file_pdf="pdfbox"
 echo
 
 # =============================================================================
@@ -399,6 +399,14 @@ fi
 echo
 
 # =============================================================================
+# MIGRATION CONFIGURATION
+# =============================================================================
+echo -e "${BLUE}${BOLD}Migration Configuration${NC}"
+echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Flyway ${YELLOW}(default)${NC}"
+migration="flyway"
+echo
+
+# =============================================================================
 # TEMPLATE ENGINE CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Template Engine Configuration${NC}"
@@ -427,8 +435,10 @@ datasource=$datasource
 discovery-client=$discovery_client
 file.csv=$file_csv
 file.excel=$file_excel
+file.pdf=$file_pdf
 lock=$lock
 messaging=$messaging
+migration=$migration
 notification.email=$notification_email
 observability.logging.stack=$logging_stack
 observability.logging.framework=$logging_framework
@@ -461,8 +471,10 @@ echo -e "  ${BLUE}Datasource:${NC} ${datasource}"
 echo -e "  ${BLUE}Discovery Client:${NC} ${discovery_client}"
 echo -e "  ${BLUE}Email:${NC} ${notification_email}"
 echo -e "  ${BLUE}Excel:${NC} ${file_excel}"
+echo -e "  ${BLUE}PDF:${NC} ${file_pdf}"
 echo -e "  ${BLUE}Lock:${NC} ${lock}"
 echo -e "  ${BLUE}Messaging:${NC} ${messaging}"
+echo -e "  ${BLUE}Migration:${NC} ${migration}"
 echo -e "  ${BLUE}Observability - Logging Stack:${NC} ${logging_stack}"
 echo -e "  ${BLUE}Observability - Logging Framework:${NC} ${logging_framework}"
 echo -e "  ${BLUE}Observability - Metrics:${NC} ${metrics}"

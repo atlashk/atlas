@@ -33,30 +33,11 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: api-gateway:latest
+          image: atlas-api-gateway:latest
           imagePullPolicy: Never
-          env:
-            - name: SPRING_PROFILES_ACTIVE
-              valueFrom:
-                configMapKeyRef:
-                  name: atlas-config
-                  key: SPRING_PROFILES_ACTIVE
-            - name: LOG_LEVEL
-              valueFrom:
-                configMapKeyRef:
-                  name: atlas-config
-                  key: LOG_LEVEL
-            # JWT configuration
-            - name: JWK_SET_URI
-              value: "http://user-service:8081/.well-known/jwks.json"
-            # Redis configuration
-            - name: REDIS_HOST
-              value: "redis"
-            - name: REDIS_PORT
-              value: "6379"
-            # Observability
-            - name: ZIPKIN_ENDPOINT
-              value: "http://zipkin:9411/api/v2/spans"
+          envFrom:
+            - configMapRef:
+                name: api-gateway-config
           ports:
             - containerPort: 8080
               name: http
@@ -125,4 +106,4 @@ spec:
     - port: 8080
       targetPort: 8080
       name: http
-  type: ClusterIP 
+  type: ClusterIP
