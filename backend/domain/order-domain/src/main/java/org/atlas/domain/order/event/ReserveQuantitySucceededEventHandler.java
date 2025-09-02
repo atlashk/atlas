@@ -6,13 +6,14 @@ import org.atlas.domain.order.port.messaging.OrderMessagePublisherPort;
 import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.shared.enums.OrderStatus;
 import org.atlas.framework.config.ApplicationConfigPort;
+import org.atlas.framework.domain.event.DomainEventType;
 import org.atlas.framework.domain.event.contract.order.OrderConfirmedEvent;
-import org.atlas.framework.domain.event.contract.product.ReserveQuantitySucceededEvent;
+import org.atlas.framework.domain.event.contract.order.ReserveQuantitySucceededEvent;
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.error.AppError;
 
-@DomainEventHandler
+@DomainEventHandler(type = DomainEventType.RESERVE_QUANTITY_SUCCEEDED)
 @RequiredArgsConstructor
 public class ReserveQuantitySucceededEventHandler {
 

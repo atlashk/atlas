@@ -3,9 +3,8 @@ package org.atlas.domain.product.service;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.config.Application;
-import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.domain.service.DomainService;
+import org.atlas.framework.storage.StorageConfig;
 import org.atlas.framework.storage.StoragePort;
 import org.atlas.framework.storage.model.DeleteFileRequest;
 import org.atlas.framework.storage.model.GetFileRequest;
@@ -19,8 +18,8 @@ import org.atlas.framework.util.StringUtil;
 @Slf4j
 public class ProductImageService {
 
-  private final ApplicationConfigPort applicationConfigPort;
   private final StoragePort storagePort;
+  private final StorageConfig storageConfig;
 
   public void uploadImage(Integer productId, String base64St) {
     String bucket = getBucket();
@@ -61,8 +60,7 @@ public class ProductImageService {
   }
 
   private String getBucket() {
-    String bucket = applicationConfigPort.getConfig(Application.PRODUCT_SERVICE,
-        "product-images-bucket");
+    String bucket = storageConfig.getProductImageBucket();
     if (StringUtil.isBlank(bucket)) {
       throw new IllegalArgumentException("No bucket configured");
     }

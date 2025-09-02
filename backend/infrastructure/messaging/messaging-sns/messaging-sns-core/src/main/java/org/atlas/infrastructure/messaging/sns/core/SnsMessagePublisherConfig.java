@@ -1,11 +1,11 @@
 package org.atlas.infrastructure.messaging.sns.core;
 
-import org.atlas.framework.messaging.InstantMessageGateway;
-import org.atlas.framework.messaging.MessageGateway;
-import org.atlas.framework.messaging.MessagePublisher;
-import org.atlas.framework.messaging.outbox.OutboxMessageGateway;
-import org.atlas.framework.messaging.outbox.OutboxMessageRepository;
-import org.atlas.framework.messaging.outbox.RelayOutboxMessageTask;
+import org.atlas.framework.messaging.gateway.InstantMessageGateway;
+import org.atlas.framework.messaging.gateway.MessageGateway;
+import org.atlas.framework.messaging.gateway.MessagePublisher;
+import org.atlas.framework.messaging.gateway.outbox.OutboxMessageGateway;
+import org.atlas.framework.messaging.gateway.outbox.OutboxMessageRepository;
+import org.atlas.framework.messaging.gateway.outbox.RelayOutboxMessageTask;
 import org.atlas.framework.transaction.TransactionPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

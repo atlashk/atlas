@@ -2,9 +2,9 @@ package org.atlas.infrastructure.persistence.jpa.adapter.outbox;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.atlas.framework.messaging.outbox.OutboxMessageEntity;
-import org.atlas.framework.messaging.outbox.OutboxMessageRepository;
-import org.atlas.framework.messaging.outbox.OutboxMessageStatus;
+import org.atlas.framework.messaging.gateway.outbox.OutboxMessageEntity;
+import org.atlas.framework.messaging.gateway.outbox.OutboxMessageRepository;
+import org.atlas.framework.messaging.gateway.outbox.OutboxMessageStatus;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.infrastructure.persistence.jpa.adapter.outbox.entity.JpaOutboxMessageEntity;
 import org.atlas.infrastructure.persistence.jpa.adapter.outbox.repository.JpaOutboxMessageRepository;

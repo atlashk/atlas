@@ -2,7 +2,7 @@ package org.atlas.infrastructure.messaging.sns.adapter.order.consumer;
 
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.order.event.ReserveQuantitySucceededEventHandler;
-import org.atlas.framework.domain.event.contract.product.ReserveQuantitySucceededEvent;
+import org.atlas.framework.domain.event.contract.order.ReserveQuantitySucceededEvent;
 import org.atlas.infrastructure.messaging.sns.core.SnsMessageConsumer;
 import org.atlas.infrastructure.messaging.sns.core.SnsProps;
 import org.springframework.beans.factory.InitializingBean;

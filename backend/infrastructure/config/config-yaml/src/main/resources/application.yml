@@ -21,7 +21,6 @@ app:
           allow-credentials: true
           max-age: 0 # always fetch the latest data
       product-service:
-        product-images-bucket: product-images
         decrease-quantity-strategy: DISTRIBUTED_LOCK
       notification-service:
         email:

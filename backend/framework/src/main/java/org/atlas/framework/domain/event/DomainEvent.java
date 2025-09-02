@@ -26,6 +26,8 @@ public abstract class DomainEvent implements Serializable {
     this.version = 0L;
   }
 
+  public abstract DomainEventType getDomainEventType();
+
   public void markAsProcessed() {
     this.processedAt = new Date();
   }

@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.user.entity.UserEntity;
-import org.atlas.domain.user.port.messaging.UserMessagePublisherPort;
+import org.atlas.framework.messaging.UserMessagePublisherPort;
 import org.atlas.domain.user.repository.UserRepository;
 import org.atlas.domain.user.shared.enums.Role;
 import org.atlas.domain.user.usecase.front.model.RegisterInput;

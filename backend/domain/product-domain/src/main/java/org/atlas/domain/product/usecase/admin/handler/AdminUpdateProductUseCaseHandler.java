@@ -2,7 +2,7 @@ package org.atlas.domain.product.usecase.admin.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.ProductEntity;
-import org.atlas.domain.product.port.messaging.ProductMessagePublisherPort;
+import org.atlas.framework.messaging.ProductMessagePublisherPort;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.service.ProductImageService;
 import org.atlas.framework.config.ApplicationConfigPort;

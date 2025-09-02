@@ -242,8 +242,22 @@ echo
 # KV CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}KV Configuration${NC}"
-echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Redis ${YELLOW}(default)${NC}"
-kv="redis"
+if [[ "$platform" == aws-* ]]; then
+    select_option "Redis ${YELLOW}(default)${NC}" "DynamoDB"
+    kv_choice=$((1 + $?))
+
+    case $kv_choice in
+        2)
+            kv="dynamodb"
+            ;;
+        *)
+            kv="redis"
+            ;;
+    esac
+else
+    echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Redis ${YELLOW}(default)${NC}"
+    kv="redis"
+fi
 echo
 
 # =============================================================================
@@ -262,8 +276,17 @@ if [[ "$platform" == aws-* ]]; then
     echo -e "  ${CYAN}▶ ${GREEN}1${NC}) SNS+SQS ${YELLOW}(default)${NC}"
     messaging="sns"
 else
-    echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Apache Kafka ${YELLOW}(default)${NC}"
-    messaging="kafka"
+    select_option "Apache Kafka ${YELLOW}(default)${NC}" "RabbitMQ"
+    messaging_choice=$((1 + $?))
+
+    case $messaging_choice in
+        2)
+            messaging="rabbitmq"
+            ;;
+        *)
+            messaging="kafka"
+            ;;
+    esac
 fi
 echo
 

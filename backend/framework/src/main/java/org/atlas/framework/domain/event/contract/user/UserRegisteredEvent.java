@@ -4,12 +4,12 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.atlas.domain.user.shared.enums.Role;
-import org.atlas.framework.domain.event.DomainEvent;
+import org.atlas.framework.domain.event.DomainEventType;
 
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class UserRegisteredEvent extends DomainEvent {
+public class UserRegisteredEvent extends BaseUserEvent {
 
   private Integer userId;
   private String username;
@@ -21,5 +21,10 @@ public class UserRegisteredEvent extends DomainEvent {
 
   public UserRegisteredEvent(String eventSource) {
     super(eventSource);
+  }
+
+  @Override
+  public DomainEventType getDomainEventType() {
+    return DomainEventType.USER_REGISTERED;
   }
 }

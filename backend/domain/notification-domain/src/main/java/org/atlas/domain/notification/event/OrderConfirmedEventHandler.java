@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.config.Application;
 import org.atlas.framework.config.ApplicationConfigPort;
+import org.atlas.framework.domain.event.DomainEventType;
 import org.atlas.framework.domain.event.contract.order.OrderConfirmedEvent;
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.notification.email.Attachment;
@@ -26,7 +27,7 @@ import org.atlas.framework.template.exception.ResolveTemplateException;
 import org.atlas.framework.util.FileUtil;
 import org.atlas.framework.util.UUIDGenerator;
 
-@DomainEventHandler
+@DomainEventHandler(type = DomainEventType.ORDER_CONFIRMED)
 @RequiredArgsConstructor
 @Slf4j
 public class OrderConfirmedEventHandler {

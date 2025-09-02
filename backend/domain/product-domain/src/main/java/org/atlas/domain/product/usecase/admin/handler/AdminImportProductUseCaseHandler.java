@@ -11,7 +11,7 @@ import org.atlas.domain.product.entity.ProductEntity;
 import org.atlas.domain.product.port.file.csv.ProductCsvReaderPort;
 import org.atlas.domain.product.port.file.excel.ProductExcelReaderPort;
 import org.atlas.domain.product.port.file.model.read.ProductRow;
-import org.atlas.domain.product.port.messaging.ProductMessagePublisherPort;
+import org.atlas.framework.messaging.ProductMessagePublisherPort;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.usecase.admin.model.AdminImportProductInput;
 import org.atlas.framework.config.ApplicationConfigPort;

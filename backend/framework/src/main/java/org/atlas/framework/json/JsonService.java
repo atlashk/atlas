@@ -5,6 +5,8 @@ import java.util.List;
 
 public interface JsonService {
 
+  Object toObject(String source);
+
   <T> T toObject(String source, Class<T> type);
 
   <T> T toObject(LinkedHashMap<?, ?> source, Class<T> type);

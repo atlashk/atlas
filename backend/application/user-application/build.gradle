@@ -71,9 +71,22 @@ dependencies {
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['discovery-client']}")
     }
     api project(':infrastructure.event.event-handler-decorator')
+    switch (rootProject.ext.appStack['kv']) {
+        case 'redis':
+            api project(':infrastructure.kv.redis')
+            break
+        case 'dynamodb':
+            api project(':infrastructure.kv.dynamodb')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['kv']}")
+    }
     switch (rootProject.ext.appStack['messaging']) {
         case 'kafka':
-            api project(':infrastructure.messaging.kafka.adapter.user')
+            api project(':infrastructure.messaging.kafka')
+            break
+        case 'rabbitmq':
+            api project(':infrastructure.messaging.rabbitmq.adapter.user')
             break
         case 'sns':
             api project(':infrastructure.messaging.sns.adapter.user')

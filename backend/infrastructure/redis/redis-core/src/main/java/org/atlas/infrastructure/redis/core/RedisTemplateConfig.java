@@ -16,7 +16,7 @@ public class RedisTemplateConfig {
 
   private static final StringRedisSerializer keySerializer = new StringRedisSerializer();
   private static final GenericJackson2JsonRedisSerializer valueSerializer =
-      new GenericJackson2JsonRedisSerializer(JacksonService.objectMapper);
+      new GenericJackson2JsonRedisSerializer(JacksonService.OBJECT_MAPPER);
 
   @Bean
   public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {

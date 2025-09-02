@@ -98,6 +98,9 @@ dependencies {
         case 'redis':
             api project(':infrastructure.kv.redis')
             break
+        case 'dynamodb':
+            api project(':infrastructure.kv.dynamodb')
+            break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['kv']}")
     }
@@ -110,7 +113,10 @@ dependencies {
     }
     switch (rootProject.ext.appStack['messaging']) {
         case 'kafka':
-            api project(':infrastructure.messaging.kafka.adapter.product')
+            api project(':infrastructure.messaging.kafka')
+            break
+        case 'rabbitmq':
+            api project(':infrastructure.messaging.rabbitmq.adapter.product')
             break
         case 'sns':
             api project(':infrastructure.messaging.sns.adapter.product')

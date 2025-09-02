@@ -3,7 +3,7 @@ package org.atlas.infrastructure.messaging.sns.core;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.json.JsonUtil;
-import org.atlas.framework.messaging.MessagePublisher;
+import org.atlas.framework.messaging.gateway.MessagePublisher;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sns.model.PublishRequest;

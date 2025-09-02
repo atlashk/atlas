@@ -78,6 +78,10 @@ project(':infrastructure.api-server.rest.adapter.product').projectDir = file('in
 include(':infrastructure.api-server.rest.adapter.user')
 project(':infrastructure.api-server.rest.adapter.user').projectDir = file('infrastructure/api-server/api-server-rest/api-server-rest-adapter-user')
 
+// Application Context
+include(':infrastructure.application-context')
+project(':infrastructure.application-context').projectDir = file('infrastructure/application-context')
+
 // Auth client
 // Auth client::Keycloak
 include(':infrastructure.auth-client.keycloak')
@@ -196,6 +200,8 @@ project(':infrastructure.internal-api.user.rest.resttemplate').projectDir = file
 // Key-Value Store
 include(':infrastructure.kv.redis')
 project(':infrastructure.kv.redis').projectDir = file('infrastructure/kv/kv-redis')
+include(':infrastructure.kv.dynamodb')
+project(':infrastructure.kv.dynamodb').projectDir = file('infrastructure/kv/kv-dynamodb')
 
 // Lock
 include(':infrastructure.lock.redisson')
@@ -206,16 +212,20 @@ project(':infrastructure.lock.util').projectDir = file('infrastructure/lock/lock
 // Messaging
 
 // Messaging::Kafka
-include(':infrastructure.messaging.kafka.core')
-project(':infrastructure.messaging.kafka.core').projectDir = file('infrastructure/messaging/messaging-kafka/messaging-kafka-core')
-include(':infrastructure.messaging.kafka.adapter.notification')
-project(':infrastructure.messaging.kafka.adapter.notification').projectDir = file('infrastructure/messaging/messaging-kafka/messaging-kafka-adapter-notification')
-include(':infrastructure.messaging.kafka.adapter.order')
-project(':infrastructure.messaging.kafka.adapter.order').projectDir = file('infrastructure/messaging/messaging-kafka/messaging-kafka-adapter-order')
-include(':infrastructure.messaging.kafka.adapter.product')
-project(':infrastructure.messaging.kafka.adapter.product').projectDir = file('infrastructure/messaging/messaging-kafka/messaging-kafka-adapter-product')
-include(':infrastructure.messaging.kafka.adapter.user')
-project(':infrastructure.messaging.kafka.adapter.user').projectDir = file('infrastructure/messaging/messaging-kafka/messaging-kafka-adapter-user')
+include(':infrastructure.messaging.kafka')
+project(':infrastructure.messaging.kafka').projectDir = file('infrastructure/messaging/messaging-kafka')
+
+// Messaging::RabbitMQ
+include(':infrastructure.messaging.rabbitmq.core')
+project(':infrastructure.messaging.rabbitmq.core').projectDir = file('infrastructure/messaging/messaging-rabbitmq/messaging-rabbitmq-core')
+include(':infrastructure.messaging.rabbitmq.adapter.notification')
+project(':infrastructure.messaging.rabbitmq.adapter.notification').projectDir = file('infrastructure/messaging/messaging-rabbitmq/messaging-rabbitmq-adapter-notification')
+include(':infrastructure.messaging.rabbitmq.adapter.product')
+project(':infrastructure.messaging.rabbitmq.adapter.product').projectDir = file('infrastructure/messaging/messaging-rabbitmq/messaging-rabbitmq-adapter-product')
+include(':infrastructure.messaging.rabbitmq.adapter.order')
+project(':infrastructure.messaging.rabbitmq.adapter.order').projectDir = file('infrastructure/messaging/messaging-rabbitmq/messaging-rabbitmq-adapter-order')
+include(':infrastructure.messaging.rabbitmq.adapter.user')
+project(':infrastructure.messaging.rabbitmq.adapter.user').projectDir = file('infrastructure/messaging/messaging-rabbitmq/messaging-rabbitmq-adapter-user')
 
 // Messaging::SNS
 include(':infrastructure.messaging.sns.core')

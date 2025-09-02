@@ -2,7 +2,7 @@ package org.atlas.infrastructure.messaging.sns.adapter.order.consumer;
 
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.order.event.ReserveQuantityFailedEventHandler;
-import org.atlas.framework.domain.event.contract.product.ReserveQuantityFailedEvent;
+import org.atlas.framework.domain.event.contract.order.ReserveQuantityFailedEvent;
 import org.atlas.infrastructure.messaging.sns.core.SnsMessageConsumer;
 import org.atlas.infrastructure.messaging.sns.core.SnsProps;
 import org.springframework.beans.factory.InitializingBean;

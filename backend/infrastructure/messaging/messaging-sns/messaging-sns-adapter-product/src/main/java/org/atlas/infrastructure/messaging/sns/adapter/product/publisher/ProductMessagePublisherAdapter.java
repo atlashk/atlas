@@ -1,13 +1,13 @@
 package org.atlas.infrastructure.messaging.sns.adapter.product.publisher;
 
 import lombok.RequiredArgsConstructor;
-import org.atlas.domain.product.port.messaging.ProductMessagePublisherPort;
+import org.atlas.framework.messaging.ProductMessagePublisherPort;
 import org.atlas.framework.domain.event.contract.product.ProductCreatedEvent;
 import org.atlas.framework.domain.event.contract.product.ProductDeletedEvent;
 import org.atlas.framework.domain.event.contract.product.ProductUpdatedEvent;
-import org.atlas.framework.domain.event.contract.product.ReserveQuantityFailedEvent;
-import org.atlas.framework.domain.event.contract.product.ReserveQuantitySucceededEvent;
-import org.atlas.framework.messaging.MessageGateway;
+import org.atlas.framework.domain.event.contract.order.ReserveQuantityFailedEvent;
+import org.atlas.framework.domain.event.contract.order.ReserveQuantitySucceededEvent;
+import org.atlas.framework.messaging.gateway.MessageGateway;
 import org.atlas.infrastructure.messaging.sns.core.SnsProps;
 import org.springframework.stereotype.Component;
 

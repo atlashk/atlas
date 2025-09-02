@@ -3,6 +3,7 @@ package org.atlas.domain.notification.event;
 import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.atlas.framework.domain.event.DomainEventType;
 import org.atlas.framework.domain.event.contract.order.OrderCanceledEvent;
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.notification.realtime.enums.RealtimeNotificationType;
@@ -13,7 +14,7 @@ import org.atlas.framework.notification.realtime.websocket.WebSocketNotification
 import org.atlas.framework.notification.realtime.websocket.WebSocketPort;
 import org.atlas.framework.util.UUIDGenerator;
 
-@DomainEventHandler
+@DomainEventHandler(type = DomainEventType.ORDER_CANCELED)
 @RequiredArgsConstructor
 @Slf4j
 public class OrderCanceledEventHandler {

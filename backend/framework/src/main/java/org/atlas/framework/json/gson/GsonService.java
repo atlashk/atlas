@@ -27,6 +27,11 @@ public class GsonService implements JsonService {
   }
 
   @Override
+  public Object toObject(String source) {
+    return JsonParser.parseString(source);
+  }
+
+  @Override
   public <T> T toObject(String source, Class<T> objectClass) {
     return gson.fromJson(source, objectClass);
   }
