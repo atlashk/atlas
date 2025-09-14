@@ -32,7 +32,7 @@ export class InfrastructureStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: InfrastructureStackProps) {
     super(scope, id, props);
 
-    const { environmentName } = props;
+    const {environmentName} = props;
 
     // Load configuration based on environment
     this.config = this.loadConfiguration(environmentName);
@@ -115,7 +115,7 @@ export class InfrastructureStack extends cdk.Stack {
   }
 
   private createOutputs(): void {
-    const { environmentName } = this.config;
+    const {environmentName} = this.config;
 
     // Networking outputs
     new cdk.CfnOutput(this, 'VPCId', {
@@ -204,9 +204,9 @@ export class InfrastructureStack extends cdk.Stack {
 
   private toPascalCase(str: string): string {
     return str
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join('');
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join('');
   }
 
   // Convenience getters for backward compatibility

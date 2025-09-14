@@ -1,13 +1,11 @@
 package org.atlas.edge.config.springcloudconfig;
 
-import org.atlas.infrastructure.bootstrap.YamlConfigLoader;
+import org.atlas.infrastructure.application.context.YamlConfigLoader;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.config.server.EnableConfigServer;
 
-@SpringBootApplication(scanBasePackages = {
-    "org.atlas"
-})
+@SpringBootApplication(scanBasePackages = "org.atlas")
 @EnableConfigServer
 public class ConfigServerApplication {
 

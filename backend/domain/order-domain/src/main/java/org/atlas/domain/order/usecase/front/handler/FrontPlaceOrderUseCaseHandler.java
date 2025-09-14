@@ -8,7 +8,6 @@ import org.atlas.domain.order.entity.OrderEntity;
 import org.atlas.domain.order.entity.OrderItemEntity;
 import org.atlas.domain.order.entity.ProductEntity;
 import org.atlas.domain.order.entity.UserEntity;
-import org.atlas.domain.order.port.messaging.OrderMessagePublisherPort;
 import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.service.OrderAggregator;
 import org.atlas.domain.order.shared.enums.OrderStatus;
@@ -22,6 +21,7 @@ import org.atlas.framework.domain.event.contract.order.model.User;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.error.AppError;
+import org.atlas.framework.messaging.MessagePublisherPort;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.framework.sequencegenerator.enums.SequenceType;
@@ -34,7 +34,7 @@ public class FrontPlaceOrderUseCaseHandler {
   private final OrderRepository orderRepository;
   private final OrderAggregator orderAggregator;
   private final ApplicationConfigPort applicationConfigPort;
-  private final OrderMessagePublisherPort orderMessagePublisherPort;
+  private final MessagePublisherPort messagePublisherPort;
   private final SequenceGenerator sequenceGenerator;
 
   public OrderEntity handle(FrontPlaceOrderInput input) {
@@ -119,6 +119,6 @@ public class FrontPlaceOrderUseCaseHandler {
       }
     }
 
-    orderMessagePublisherPort.publish(event);
+    messagePublisherPort.publish(event);
   }
 }

@@ -2,25 +2,16 @@ app:
   messaging:
     sns:
       sns-topic-arn:
-        user-registered-event: ${SNS_TOPIC_ARN_USER_REGISTERED_EVENT}
-        product-created-event: ${SNS_TOPIC_ARN_PRODUCT_CREATED_EVENT}
-        product-updated-event: ${SNS_TOPIC_ARN_PRODUCT_UPDATED_EVENT}
-        product-deleted-event: ${SNS_TOPIC_ARN_PRODUCT_DELETED_EVENT}
-        order-created-event: ${SNS_TOPIC_ARN_ORDER_CREATED_EVENT}
-        reserve-quantity-succeeded-event: ${SNS_TOPIC_ARN_RESERVE_QUANTITY_SUCCEEDED_EVENT}
-        reserve-quantity-failed-event: ${SNS_TOPIC_ARN_RESERVE_QUANTITY_FAILED_EVENT}
-        order-confirmed-event: ${SNS_TOPIC_ARN_ORDER_CONFIRMED_EVENT}
-        order-canceled-event: ${SNS_TOPIC_ARN_ORDER_CANCELED_EVENT}
+        user-event: ${SNS_TOPIC_ARN_USER_EVENT}
+        product-event: ${SNS_TOPIC_ARN_PRODUCT_EVENT}
+        order-event: ${SNS_TOPIC_ARN_ORDER_EVENT}
       sqs-queue-url:
-        user-registered-event: ${SQS_QUEUE_URL_USER_REGISTERED_EVENT}
-        product-created-event: ${SQS_QUEUE_URL_PRODUCT_CREATED_EVENT}
-        product-updated-event: ${SQS_QUEUE_URL_PRODUCT_UPDATED_EVENT}
-        product-deleted-event: ${SQS_QUEUE_URL_PRODUCT_DELETED_EVENT}
-        order-created-event: ${SQS_QUEUE_URL_ORDER_CREATED_EVENT}
-        reserve-quantity-succeeded-event: ${SQS_QUEUE_URL_RESERVE_QUANTITY_SUCCEEDED_EVENT}
-        reserve-quantity-failed-event: ${SQS_QUEUE_URL_RESERVE_QUANTITY_FAILED_EVENT}
-        order-confirmed-event: ${SQS_QUEUE_URL_ORDER_CONFIRMED_EVENT}
-        order-canceled-event: ${SQS_QUEUE_URL_ORDER_CANCELED_EVENT}
+        # Product service
+        product-svc-order-event: ${SQS_QUEUE_URL_PRODUCT_SVC_ORDER_EVENT}
+        # Order service
+        order-svc-order-event: ${SQS_QUEUE_URL_ORDER_SVC_ORDER_EVENT}
+        # Notification service
+        notification-svc-order-event: ${SQS_QUEUE_URL_NOTIFICATION_SVC_ORDER_EVENT}
       visibility-timeout: 30
       wait-time-seconds: 20
       batch-size: 10

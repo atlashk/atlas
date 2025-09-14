@@ -29,7 +29,7 @@ dependencies {
     api project(':domain.notification')
 
     // Infrastructure
-    api project(':infrastructure.bootstrap')
+    api project(':infrastructure.application-context')
     switch (rootProject.ext.appStack['config']) {
         case 'yaml':
             api project(':infrastructure.config.yaml')
@@ -39,10 +39,10 @@ dependencies {
     }
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
-            api project(':infrastructure.datasource.mysql.adapter.notification')
+            api project(':infrastructure.datasource.mysql.impl.notification')
             break
         case 'postgres':
-            api project(':infrastructure.datasource.postgres.adapter.notification')
+            api project(':infrastructure.datasource.postgres.impl.notification')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
@@ -72,13 +72,13 @@ dependencies {
     }
     switch (rootProject.ext.appStack['messaging']) {
         case 'kafka':
-            api project(':infrastructure.messaging.kafka')
+            api project(':infrastructure.messaging.kafka.impl.notification')
             break
         case 'rabbitmq':
-            api project(':infrastructure.messaging.rabbitmq.adapter.notification')
+            api project(':infrastructure.messaging.rabbitmq.impl.notification')
             break
         case 'sns':
-            api project(':infrastructure.messaging.sns.adapter.notification')
+            api project(':infrastructure.messaging.sns.impl.notification')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['messaging']}")
@@ -87,10 +87,10 @@ dependencies {
         case 'flyway':
             switch (rootProject.ext.appStack['datasource']) {
                 case 'mysql':
-                    api project(':infrastructure.migration.flyway.mysql.adapter.notification')
+                    api project(':infrastructure.migration.flyway.mysql.impl.notification')
                     break
                 case 'postgres':
-                    api project(':infrastructure.migration.flyway.postgres.adapter.notification')
+                    api project(':infrastructure.migration.flyway.postgres.impl.notification')
                     break
                 default:
                     throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
@@ -137,12 +137,15 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.tracing']}")
     }
+    if (rootProject.ext.appStack['outbox'] == 'true') {
+        api project(':infrastructure.outbox.parent')
+    }
     switch (rootProject.ext.appStack['scheduler']) {
         case 'spring':
-            api project(':infrastructure.scheduler.spring.adapter.notification')
+            api project(':infrastructure.scheduler.spring.impl.notification')
             break
         case 'quartz':
-            api project(':infrastructure.scheduler.quartz.adapter.notification')
+            api project(':infrastructure.scheduler.quartz.impl.notification')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['scheduler']}")

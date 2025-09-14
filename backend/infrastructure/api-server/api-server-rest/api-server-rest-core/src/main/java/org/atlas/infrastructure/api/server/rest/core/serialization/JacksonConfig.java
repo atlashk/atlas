@@ -10,6 +10,6 @@ public class JacksonConfig {
 
   @Bean
   public ObjectMapper objectMapper() {
-    return JacksonService.objectMapper;
+    return JacksonService.OBJECT_MAPPER;
   }
 }

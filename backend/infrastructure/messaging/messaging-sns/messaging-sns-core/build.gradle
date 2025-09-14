@@ -25,20 +25,17 @@ repositories {
 }
 
 dependencies {
+    // Framework
+    api project(':framework')
+
+    // Infrastructure
+    api project(':infrastructure.application-context')
+
     // Lib
     api 'org.springframework.boot:spring-boot-starter'
     api "software.amazon.awssdk:sns:${awsSdkVersion}"
     api "software.amazon.awssdk:sqs:${awsSdkVersion}"
     api 'org.apache.httpcomponents:httpclient:4.5.14'
-
-    // Infrastructure
-    switch (rootProject.ext.appStack['persistence']) {
-        case 'jpa':
-            api project(':infrastructure.persistence.jpa.adapter.outbox')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['persistence']}")
-    }
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

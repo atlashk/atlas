@@ -25,17 +25,14 @@ repositories {
 }
 
 dependencies {
+    // Framework
+    api project(':framework')
+
     // Lib
     api 'org.springframework.boot:spring-boot-starter-amqp'
 
     // Infrastructure
-    switch (rootProject.ext.appStack['persistence']) {
-        case 'jpa':
-            api project(':infrastructure.persistence.jpa.adapter.outbox')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['persistence']}")
-    }
+    api project(':infrastructure.application-context')
     switch (rootProject.ext.appStack['observability.tracing']) {
         case 'zipkin':
             api project(':infrastructure.observability.tracing.zipkin')

@@ -11,7 +11,6 @@ import org.atlas.domain.product.entity.ProductEntity;
 import org.atlas.domain.product.port.file.csv.ProductCsvReaderPort;
 import org.atlas.domain.product.port.file.excel.ProductExcelReaderPort;
 import org.atlas.domain.product.port.file.model.read.ProductRow;
-import org.atlas.framework.messaging.ProductMessagePublisherPort;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.usecase.admin.model.AdminImportProductInput;
 import org.atlas.framework.config.ApplicationConfigPort;
@@ -19,6 +18,7 @@ import org.atlas.framework.domain.event.contract.product.ProductCreatedEvent;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.error.AppError;
+import org.atlas.framework.messaging.MessagePublisherPort;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.util.CollectionUtil;
 
@@ -31,7 +31,7 @@ public class AdminImportProductUseCaseHandler {
   private final ApplicationConfigPort applicationConfigPort;
   private final ProductCsvReaderPort productCsvReaderPort;
   private final ProductExcelReaderPort productExcelReaderPort;
-  private final ProductMessagePublisherPort productMessagePublisherPort;
+  private final MessagePublisherPort messagePublisherPort;
 
   public Void handle(AdminImportProductInput input) throws Exception {
     // Read rows from file content
@@ -57,7 +57,7 @@ public class AdminImportProductUseCaseHandler {
             applicationConfigPort.getApplicationName());
         ObjectMapperUtil.getInstance().merge(productEntity, event);
         event.setProductId(productEntity.getId());
-        productMessagePublisherPort.publish(event);
+        messagePublisherPort.publish(event);
       });
       log.info("Imported {} products", rows.size());
       return null;

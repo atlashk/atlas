@@ -437,6 +437,22 @@ case $template_choice in
 esac
 echo
 
+# =============================================================================
+# OUTBOX CONFIGURATION
+# =============================================================================
+echo -e "${BLUE}${BOLD}Outbox Configuration${NC}"
+select_option "True ${YELLOW}(default)${NC}" "False"
+outbox_choice=$((1 + $?))
+case $outbox_choice in
+    2)
+        outbox="false"
+        ;;
+    *)
+        outbox="true"
+        ;;
+esac
+echo
+
 echo -e "${PURPLE}${BOLD}Generating ${APP_STACK_CONFIG} file...${NC}"
 sleep 2
 
@@ -459,6 +475,7 @@ observability.logging.stack=$logging_stack
 observability.logging.framework=$logging_framework
 observability.metrics=$metrics
 observability.tracing=$tracing
+outbox=$outbox
 persistence=jpa
 platform=$platform
 redis=$redis
@@ -494,6 +511,7 @@ echo -e "  ${BLUE}Observability - Logging Stack:${NC} ${logging_stack}"
 echo -e "  ${BLUE}Observability - Logging Framework:${NC} ${logging_framework}"
 echo -e "  ${BLUE}Observability - Metrics:${NC} ${metrics}"
 echo -e "  ${BLUE}Observability - Tracing:${NC} ${tracing}"
+echo -e "  ${BLUE}Outbox:${NC} ${outbox}"
 echo -e "  ${BLUE}Redis:${NC} ${redis}"
 echo -e "  ${BLUE}Scheduler:${NC} ${scheduler}"
 echo -e "  ${BLUE}Storage:${NC} ${storage}"

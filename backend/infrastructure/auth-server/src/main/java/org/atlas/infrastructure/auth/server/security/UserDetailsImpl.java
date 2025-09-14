@@ -2,8 +2,6 @@ package org.atlas.infrastructure.auth.server.security;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.Data;
 import org.atlas.domain.user.entity.UserEntity;
 import org.atlas.domain.user.shared.enums.Role;

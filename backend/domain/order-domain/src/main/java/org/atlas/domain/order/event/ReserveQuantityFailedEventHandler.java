@@ -2,7 +2,6 @@ package org.atlas.domain.order.event;
 
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.order.entity.OrderEntity;
-import org.atlas.domain.order.port.messaging.OrderMessagePublisherPort;
 import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.shared.enums.OrderStatus;
 import org.atlas.framework.config.ApplicationConfigPort;
@@ -12,6 +11,7 @@ import org.atlas.framework.domain.event.contract.order.ReserveQuantityFailedEven
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.error.AppError;
+import org.atlas.framework.messaging.MessagePublisherPort;
 
 @DomainEventHandler(type = DomainEventType.RESERVE_QUANTITY_FAILED)
 @RequiredArgsConstructor
@@ -19,7 +19,7 @@ public class ReserveQuantityFailedEventHandler {
 
   private final OrderRepository orderRepository;
   private final ApplicationConfigPort applicationConfigPort;
-  private final OrderMessagePublisherPort orderMessagePublisherPort;
+  private final MessagePublisherPort messagePublisherPort;
 
   public void handle(ReserveQuantityFailedEvent reserveQuantityFailedEvent) {
     // Find order
@@ -39,6 +39,6 @@ public class ReserveQuantityFailedEventHandler {
         applicationConfigPort.getApplicationName());
     orderCanceledEvent.merge(reserveQuantityFailedEvent);
     orderCanceledEvent.setCanceledReason(orderEntity.getCanceledReason());
-    orderMessagePublisherPort.publish(orderCanceledEvent);
+    messagePublisherPort.publish(orderCanceledEvent);
   }
 }

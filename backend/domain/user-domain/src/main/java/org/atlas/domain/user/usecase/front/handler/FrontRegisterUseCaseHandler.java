@@ -4,7 +4,6 @@ import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.user.entity.UserEntity;
-import org.atlas.framework.messaging.UserMessagePublisherPort;
 import org.atlas.domain.user.repository.UserRepository;
 import org.atlas.domain.user.shared.enums.Role;
 import org.atlas.domain.user.usecase.front.model.RegisterInput;
@@ -15,6 +14,7 @@ import org.atlas.framework.domain.event.contract.user.UserRegisteredEvent;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.error.AppError;
+import org.atlas.framework.messaging.MessagePublisherPort;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 
 @UseCaseHandler
@@ -25,7 +25,7 @@ public class FrontRegisterUseCaseHandler {
   private final UserRepository userRepository;
   private final @Nullable AuthClientPort authClientPort;
   private final ApplicationConfigPort applicationConfigPort;
-  private final UserMessagePublisherPort userMessagePublisherPort;
+  private final MessagePublisherPort messagePublisherPort;
 
   public Void handle(RegisterInput input) throws Exception {
     checkValidity(input);
@@ -70,6 +70,6 @@ public class FrontRegisterUseCaseHandler {
     ObjectMapperUtil.getInstance()
         .merge(userEntity, event);
     event.setUserId(userEntity.getId());
-    userMessagePublisherPort.publish(event);
+    messagePublisherPort.publish(event);
   }
 }

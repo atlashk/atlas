@@ -33,6 +33,29 @@ public class ReflectionUtil {
   }
 
   /**
+   * Invokes a method on an object without parameters using a specific target class
+   *
+   * @param target      the target object to invoke the method on
+   * @param targetClass the class to use for method lookup (useful for proxy objects)
+   * @param methodName  the name of the method to invoke
+   * @return the result of the method invocation, or null if an error occurs
+   */
+  public static Object invokeMethod(Object target, Class<?> targetClass, String methodName) {
+    if (target == null || targetClass == null || methodName == null) {
+      return null;
+    }
+
+    try {
+      Method method = targetClass.getMethod(methodName);
+      return method.invoke(target);
+    } catch (Exception e) {
+      log.error("Error while invoking method '{}' on object of type '{}' using target class '{}'", 
+          methodName, target.getClass().getSimpleName(), targetClass.getSimpleName(), e);
+      return null;
+    }
+  }
+
+  /**
    * Invokes a method on an object using a Map of parameter types and values
    *
    * @param target     the target object to invoke the method on
@@ -55,6 +78,34 @@ public class ReflectionUtil {
     } catch (Exception e) {
       log.error("Error while invoking method '{}' on object of type '{}'", methodName,
           target.getClass().getSimpleName(), e);
+      return null;
+    }
+  }
+
+  /**
+   * Invokes a method on an object using a Map of parameter types and values with a specific target class
+   *
+   * @param target      the target object to invoke the method on
+   * @param targetClass the class to use for method lookup (useful for proxy objects)
+   * @param methodName  the name of the method to invoke
+   * @param parameters  a Map where keys are parameter types and values are the arguments
+   * @return the result of the method invocation, or null if an error occurs
+   */
+  public static Object invokeMethod(Object target, Class<?> targetClass, String methodName,
+      Map<Class<?>, Object> parameters) {
+    if (target == null || targetClass == null || methodName == null) {
+      return null;
+    }
+
+    try {
+      Class<?>[] parameterTypes = parameters.keySet().toArray(new Class<?>[0]);
+      Object[] args = parameters.values().toArray();
+
+      Method method = targetClass.getMethod(methodName, parameterTypes);
+      return method.invoke(target, args);
+    } catch (Exception e) {
+      log.error("Error while invoking method '{}' on object of type '{}' using target class '{}'", 
+          methodName, target.getClass().getSimpleName(), targetClass.getSimpleName(), e);
       return null;
     }
   }

@@ -1,6 +1,6 @@
 package org.atlas.edge.gateway.springcloudgateway;
 
-import org.atlas.infrastructure.bootstrap.YamlConfigLoader;
+import org.atlas.infrastructure.application.context.YamlConfigLoader;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
@@ -11,6 +11,7 @@ public class ApiGatewayApplication {
 
   public static void main(String[] args) {
     new SpringApplicationBuilder(ApiGatewayApplication.class)
-        .initializers(new YamlConfigLoader()).run(args);
+        .initializers(new YamlConfigLoader())
+        .run(args);
   }
 }

@@ -31,15 +31,15 @@ dependencies {
     // Infrastructure
     switch (rootProject.ext.appStack['api-server']) {
         case 'rest':
-            api project(':infrastructure.api-server.rest.adapter.product')
+            api project(':infrastructure.api-server.rest.impl.product')
             break
         case 'grpc':
-            api project(':infrastructure.api-server.grpc.netdevh.adapter.product')
+            api project(':infrastructure.api-server.grpc.netdevh.impl.product')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
     }
-    api project(':infrastructure.bootstrap')
+    api project(':infrastructure.application-context')
     switch (rootProject.ext.appStack['config']) {
         case 'yaml':
             api project(':infrastructure.config.yaml')
@@ -49,10 +49,10 @@ dependencies {
     }
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
-            api project(':infrastructure.datasource.mysql.adapter.product')
+            api project(':infrastructure.datasource.mysql.impl.product')
             break
         case 'postgres':
-            api project(':infrastructure.datasource.postgres.adapter.product')
+            api project(':infrastructure.datasource.postgres.impl.product')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
@@ -72,24 +72,24 @@ dependencies {
     api project(':infrastructure.event.event-handler-decorator')
     switch (rootProject.ext.appStack['file.csv']) {
         case 'opencsv':
-            api project(':infrastructure.file.csv.opencsv.adapter.product')
+            api project(':infrastructure.file.csv.opencsv.impl.product')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['file.csv']}")
     }
     switch (rootProject.ext.appStack['file.excel']) {
         case 'easyexcel':
-            api project(':infrastructure.file.excel.easyexcel.adapter.product')
+            api project(':infrastructure.file.excel.easyexcel.impl.product')
             break
         case 'poi':
-            api project(':infrastructure.file.excel.poi.adapter.product')
+            api project(':infrastructure.file.excel.poi.impl.product')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['file.excel']}")
     }
     switch (rootProject.ext.appStack['file.pdf']) {
         case 'pdfbox':
-            api project(':infrastructure.file.pdf.pdfbox.adapter.product')
+            api project(':infrastructure.file.pdf.pdfbox.impl.product')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['file.pdf']}")
@@ -113,13 +113,13 @@ dependencies {
     }
     switch (rootProject.ext.appStack['messaging']) {
         case 'kafka':
-            api project(':infrastructure.messaging.kafka')
+            api project(':infrastructure.messaging.kafka.impl.product')
             break
         case 'rabbitmq':
-            api project(':infrastructure.messaging.rabbitmq.adapter.product')
+            api project(':infrastructure.messaging.rabbitmq.impl.product')
             break
         case 'sns':
-            api project(':infrastructure.messaging.sns.adapter.product')
+            api project(':infrastructure.messaging.sns.impl.product')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['messaging']}")
@@ -128,10 +128,10 @@ dependencies {
         case 'flyway':
             switch (rootProject.ext.appStack['datasource']) {
                 case 'mysql':
-                    api project(':infrastructure.migration.flyway.mysql.adapter.product')
+                    api project(':infrastructure.migration.flyway.mysql.impl.product')
                     break
                 case 'postgres':
-                    api project(':infrastructure.migration.flyway.postgres.adapter.product')
+                    api project(':infrastructure.migration.flyway.postgres.impl.product')
                     break
                 default:
                     throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
@@ -165,19 +165,22 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.tracing']}")
     }
+    if (rootProject.ext.appStack['outbox'] == 'true') {
+        api project(':infrastructure.outbox.parent')
+    }
     switch (rootProject.ext.appStack['persistence']) {
         case 'jpa':
-            api project(':infrastructure.persistence.jpa.adapter.product')
+            api project(':infrastructure.persistence.jpa.impl.product')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['persistence']}")
     }
     switch (rootProject.ext.appStack['scheduler']) {
         case 'spring':
-            api project(':infrastructure.scheduler.spring.adapter.product')
+            api project(':infrastructure.scheduler.spring.impl.product')
             break
         case 'quartz':
-            api project(':infrastructure.scheduler.quartz.adapter.product')
+            api project(':infrastructure.scheduler.quartz.impl.product')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['scheduler']}")

@@ -2,7 +2,6 @@ package org.atlas.domain.product.usecase.admin.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.ProductEntity;
-import org.atlas.framework.messaging.ProductMessagePublisherPort;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.service.ProductImageService;
 import org.atlas.framework.config.ApplicationConfigPort;
@@ -10,6 +9,7 @@ import org.atlas.framework.domain.event.contract.product.ProductUpdatedEvent;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.error.AppError;
+import org.atlas.framework.messaging.MessagePublisherPort;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.util.StringUtil;
 
@@ -20,7 +20,7 @@ public class AdminUpdateProductUseCaseHandler {
   private final ProductRepository productRepository;
   private final ProductImageService productImageService;
   private final ApplicationConfigPort applicationConfigPort;
-  private final ProductMessagePublisherPort productMessagePublisherPort;
+  private final MessagePublisherPort productMessagePublisherPort;
 
   public Void handle(ProductEntity productEntity) throws Exception {
     // Find product

@@ -55,15 +55,15 @@ dependencies {
     }
     switch (rootProject.ext.appStack['api-server']) {
         case 'rest':
-            api project(':infrastructure.api-server.rest.adapter.order')
+            api project(':infrastructure.api-server.rest.impl.order')
             break
         case 'grpc':
-            api project(':infrastructure.api-server.grpc.netdevh.adapter.order')
+            api project(':infrastructure.api-server.grpc.netdevh.impl.order')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
     }
-    api project(':infrastructure.bootstrap')
+    api project(':infrastructure.application-context')
     switch (rootProject.ext.appStack['config']) {
         case 'yaml':
             api project(':infrastructure.config.yaml')
@@ -73,10 +73,10 @@ dependencies {
     }
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
-            api project(':infrastructure.datasource.mysql.adapter.order')
+            api project(':infrastructure.datasource.mysql.impl.order')
             break
         case 'postgres':
-            api project(':infrastructure.datasource.postgres.adapter.order')
+            api project(':infrastructure.datasource.postgres.impl.order')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
@@ -106,13 +106,13 @@ dependencies {
     }
     switch (rootProject.ext.appStack['messaging']) {
         case 'kafka':
-            api project(':infrastructure.messaging.kafka')
+            api project(':infrastructure.messaging.kafka.impl.order')
             break
         case 'rabbitmq':
-            api project(':infrastructure.messaging.rabbitmq.adapter.order')
+            api project(':infrastructure.messaging.rabbitmq.impl.order')
             break
         case 'sns':
-            api project(':infrastructure.messaging.sns.adapter.order')
+            api project(':infrastructure.messaging.sns.impl.order')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['messaging']}")
@@ -121,10 +121,10 @@ dependencies {
         case 'flyway':
             switch (rootProject.ext.appStack['datasource']) {
                 case 'mysql':
-                    api project(':infrastructure.migration.flyway.mysql.adapter.order')
+                    api project(':infrastructure.migration.flyway.mysql.impl.order')
                     break
                 case 'postgres':
-                    api project(':infrastructure.migration.flyway.postgres.adapter.order')
+                    api project(':infrastructure.migration.flyway.postgres.impl.order')
                     break
                 default:
                     throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
@@ -158,19 +158,22 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.tracing']}")
     }
+    if (rootProject.ext.appStack['outbox'] == 'true') {
+        api project(':infrastructure.outbox.parent')
+    }
     switch (rootProject.ext.appStack['persistence']) {
         case 'jpa':
-            api project(':infrastructure.persistence.jpa.adapter.order')
+            api project(':infrastructure.persistence.jpa.impl.order')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['persistence']}")
     }
     switch (rootProject.ext.appStack['scheduler']) {
         case 'spring':
-            api project(':infrastructure.scheduler.spring.adapter.order')
+            api project(':infrastructure.scheduler.spring.impl.order')
             break
         case 'quartz':
-            api project(':infrastructure.scheduler.quartz.adapter.order')
+            api project(':infrastructure.scheduler.quartz.impl.order')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['scheduler']}")

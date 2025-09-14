@@ -30,7 +30,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     // Infrastructure
-    api project(':infrastructure.bootstrap')
+    api project(':infrastructure.application-context')
     switch (rootProject.ext.appStack['config']) {
         case 'yaml':
             api project(':infrastructure.config.yaml')

@@ -37,7 +37,7 @@ dependencies {
 
     // Infrastructure
     api project(':infrastructure.api-server.rest.core')
-    api project(':infrastructure.bootstrap')
+    api project(':infrastructure.application-context')
     switch (rootProject.ext.appStack['redis']) {
         case 'standalone':
             api project(':infrastructure.redis.standalone')

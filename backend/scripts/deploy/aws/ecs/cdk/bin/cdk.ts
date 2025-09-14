@@ -14,7 +14,7 @@ const environmentName = app.node.tryGetContext('environment') || 'dev';
 const region = app.node.tryGetContext('region') || 'us-east-1';
 const account = app.node.tryGetContext('account') || process.env.CDK_DEFAULT_ACCOUNT;
 
-const env = { account, region };
+const env = {account, region};
 
 // Infrastructure Stack (VPC, RDS, Redis, ECS Cluster, etc.)
 const infrastructureStack = new InfrastructureStack(app, `atlas-infrastructure-${environmentName}`, {

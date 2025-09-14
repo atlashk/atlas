@@ -6,7 +6,9 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.atlas.framework.util.MapUtil;
 import org.atlas.framework.util.ReflectionUtil;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,9 +27,11 @@ public class ApplicationContextService {
     return beans.values()
         .stream()
         .filter(o -> {
-          T annotation = o
-              .getClass()
-              .getAnnotation(annotationType);
+          // Get the target class if it's a proxy
+          Class<?> targetClass = AopUtils.isAopProxy(o) ? AopUtils.getTargetClass(o) : o.getClass();
+
+          // Use AnnotationUtils to find annotation on target class
+          T annotation = AnnotationUtils.findAnnotation(targetClass, annotationType);
           if (annotation == null) {
             return false;
           }

@@ -2,8 +2,8 @@ package org.atlas.infrastructure.notification.websocket.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.config.Application;
 import org.atlas.framework.config.ApplicationConfigPort;
+import org.atlas.framework.constant.Application;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;

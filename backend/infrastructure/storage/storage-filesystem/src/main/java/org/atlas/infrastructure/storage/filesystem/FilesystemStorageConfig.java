@@ -12,6 +12,6 @@ public class FilesystemStorageConfig implements StorageConfig {
 
   @Override
   public String getProductImageBucket() {
-    return "";
+    return productImageBucket;
   }
 }

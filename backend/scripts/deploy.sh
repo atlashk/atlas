@@ -5,8 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 APP_STACK_CONFIG="$PROJECT_ROOT/backend/app-stack.cfg"
 
-# Load logger and common utilities
-source "$PROJECT_ROOT/backend/scripts/logger.sh"
+# Load utilities
 source "$PROJECT_ROOT/backend/scripts/common.sh"
 
 # Default options

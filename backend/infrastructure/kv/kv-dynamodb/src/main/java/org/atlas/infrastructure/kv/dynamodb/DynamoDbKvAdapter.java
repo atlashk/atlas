@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.kv.KvPort;
-
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
@@ -60,7 +59,8 @@ public class DynamoDbKvAdapter implements KvPort {
       dynamoDbClient.putItem(request);
       log.debug("Successfully put item with key: {} and TTL: {} in table: {}", key, ttl, tableName);
     } catch (Exception e) {
-      throw new RuntimeException("Failed to put item with key: " + key + " and expiration: " + expiration,
+      throw new RuntimeException(
+          "Failed to put item with key: " + key + " and expiration: " + expiration,
           e);
     }
   }

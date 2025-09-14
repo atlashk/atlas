@@ -9,32 +9,32 @@ app:
   messaging:
     rabbitmq:
       exchanges:
-        - name: user_events
+        - name: user_event
           type: TOPIC
-        - name: product_events
+        - name: product_event
           type: TOPIC
-        - name: order_events
+        - name: order_event
           type: TOPIC
       queues:
-        # Product Service queues
-        - name: product_svc.order_events
-        # Order Service queues
-        - name: order_svc.product_events
-        # Notification Service queues
-        - name: notification_svc.order_events
+        # Product service
+        - name: product_svc.order_event
+        # Order service
+        - name: order_svc.order_event
+        # Notification service
+        - name: notification_svc.order_event
       bindings:
-        # Product Service bindings
-        - exchange: order_events
-          queue: product_svc.order_events
-          routing-key: order_created
-        # Order Service bindings
-        - exchange: product_events
-          queue: order_svc.product_events
-          routing-key: reserve_quantity_*
-        # Notification Service bindings
-        - exchange: order_events
-          queue: notification_svc.order_events
-          routing-key: order_confirmed
-        - exchange: order_events
-          queue: notification_svc.order_events
-          routing-key: order_canceled
+        # Product service
+        - exchange: order_event
+          queue: product_svc.order_event
+          routing-key: ORDER_CREATED
+        # Order service
+        - exchange: order_event
+          queue: order_svc.order_event
+          routing-key: RESERVE_QUANTITY_*
+        # Notification service
+        - exchange: order_event
+          queue: notification_svc.order_event
+          routing-key: ORDER_CONFIRMED
+        - exchange: order_event
+          queue: notification_svc.order_event
+          routing-key: ORDER_CANCELED
