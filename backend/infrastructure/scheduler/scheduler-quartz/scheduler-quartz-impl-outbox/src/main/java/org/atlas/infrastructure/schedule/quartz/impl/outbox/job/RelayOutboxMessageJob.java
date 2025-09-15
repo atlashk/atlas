@@ -1,7 +1,7 @@
 package org.atlas.infrastructure.schedule.quartz.impl.outbox.job;
 
 import lombok.RequiredArgsConstructor;
-import org.atlas.infrastructure.outbox.core.RelayOutboxMessageTask;
+import org.atlas.infrastructure.messaging.outbox.core.RelayOutboxMessageTask;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;

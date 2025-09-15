@@ -2,7 +2,7 @@ package org.atlas.infrastructure.messaging.rabbitmq.impl.order;
 
 import com.rabbitmq.client.Channel;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.infrastructure.application.context.ApplicationContextService;
+import org.atlas.infrastructure.domain.event.handler.DomainEventDispatcher;
 import org.atlas.infrastructure.messaging.rabbitmq.core.common.RabbitmqConstant;
 import org.atlas.infrastructure.messaging.rabbitmq.core.consumer.BaseRabbitmqMessageConsumer;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -15,8 +15,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class RabbitmqMessageConsumer extends BaseRabbitmqMessageConsumer {
 
-  public RabbitmqMessageConsumer(ApplicationContextService applicationContextService) {
-    super(applicationContextService);
+  public RabbitmqMessageConsumer(DomainEventDispatcher domainEventDispatcher) {
+    super(domainEventDispatcher);
   }
 
   @RabbitListener(

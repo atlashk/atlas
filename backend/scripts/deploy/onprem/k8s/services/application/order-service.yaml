@@ -93,6 +93,17 @@ spec:
         - name: order-service-logs
           persistentVolumeClaim:
             claimName: order-service-logs
+      # Graceful shutdown configuration for Kubernetes pods
+      # When a pod is terminated, Kubernetes follows this graceful shutdown process:
+      # 1. Pod is marked as "Terminating" and removed from service endpoints
+      # 2. SIGTERM signal is sent to all containers in the pod
+      # 3. Application should handle SIGTERM to begin graceful shutdown:
+      #    - Stop accepting new requests
+      #    - Complete processing of existing requests
+      #    - Close database connections and release resources
+      #    - Perform cleanup operations
+      # 4. If the process doesn't exit within the grace period (Default is 30 seconds if not specified), SIGKILL is sent
+      # 5. Pod is removed from the cluster
       terminationGracePeriodSeconds: 30
 ---
 apiVersion: v1

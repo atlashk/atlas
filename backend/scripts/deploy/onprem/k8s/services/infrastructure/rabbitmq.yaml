@@ -114,7 +114,6 @@ spec:
         - name: rabbitmq-config
           configMap:
             name: rabbitmq-config
-      terminationGracePeriodSeconds: 30
   volumeClaimTemplates:
     - metadata:
         name: rabbitmq-data

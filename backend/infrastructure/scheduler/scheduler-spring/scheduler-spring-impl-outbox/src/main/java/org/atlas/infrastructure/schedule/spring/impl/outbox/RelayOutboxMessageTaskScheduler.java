@@ -2,7 +2,7 @@ package org.atlas.infrastructure.schedule.spring.impl.outbox;
 
 import lombok.RequiredArgsConstructor;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
-import org.atlas.infrastructure.outbox.core.RelayOutboxMessageTask;
+import org.atlas.infrastructure.messaging.outbox.core.RelayOutboxMessageTask;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 

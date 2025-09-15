@@ -81,7 +81,6 @@ spec:
         - name: grafana-dashboards
           configMap:
             name: grafana-dashboards
-      terminationGracePeriodSeconds: 30
 ---
 apiVersion: v1
 kind: Service
@@ -149,7 +148,7 @@ data:
           timeInterval: 5s
           queryTimeout: 60s
           httpMethod: POST
-        secureJsonData: {}
+        secureJsonData: { }
 
       # Loki for logs
       - name: Loki
@@ -165,7 +164,7 @@ data:
               matcherRegex: "traceID=(\\w+)"
               name: TraceID
               url: "$${__value.raw}"
-        secureJsonData: {}
+        secureJsonData: { }
 
       # Zipkin for distributed tracing
       - name: Zipkin
@@ -177,7 +176,7 @@ data:
         jsonData:
           nodeGraph:
             enabled: true
-        secureJsonData: {}
+        secureJsonData: { }
 ---
 apiVersion: v1
 kind: ConfigMap

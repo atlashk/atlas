@@ -18,10 +18,14 @@ metadata:
     tier: infrastructure
 data:
   init_db.sql: |
-    CREATE DATABASE db_user;
-    CREATE DATABASE db_product;
-    CREATE DATABASE db_order;
-    CREATE DATABASE db_notification;
+    CREATE
+    DATABASE db_user;
+    CREATE
+    DATABASE db_product;
+    CREATE
+    DATABASE db_order;
+    CREATE
+    DATABASE db_notification;
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -100,7 +104,6 @@ spec:
         - name: mysql-init
           configMap:
             name: mysql-init
-      terminationGracePeriodSeconds: 30
   volumeClaimTemplates:
     - metadata:
         name: mysql-data

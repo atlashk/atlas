@@ -29,7 +29,7 @@ dependencies {
     api 'org.springframework.kafka:spring-kafka'
 
     // Infrastructure
-    api project(':infrastructure.application-context')
+    api project(':infrastructure.domain-event-handler')
     switch (rootProject.ext.appStack['observability.tracing']) {
         case 'zipkin':
             api project(':infrastructure.observability.tracing.zipkin')

@@ -1,7 +1,7 @@
 package org.atlas.infrastructure.messaging.sns.impl.notification;
 
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.infrastructure.application.context.ApplicationContextService;
+import org.atlas.infrastructure.domain.event.handler.DomainEventDispatcher;
 import org.atlas.infrastructure.messaging.sns.core.common.SnsConstant;
 import org.atlas.infrastructure.messaging.sns.core.common.SnsProps;
 import org.atlas.infrastructure.messaging.sns.core.consumer.BaseSnsMessageConsumer;
@@ -14,10 +14,10 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 public class SnsMessageConsumer extends BaseSnsMessageConsumer implements
     InitializingBean {
 
-  public SnsMessageConsumer(ApplicationContextService applicationContextService,
+  public SnsMessageConsumer(DomainEventDispatcher domainEventDispatcher,
       SnsProps snsProps,
       SqsClient sqsClient) {
-    super(applicationContextService, snsProps, sqsClient);
+    super(domainEventDispatcher, snsProps, sqsClient);
   }
 
   @Override

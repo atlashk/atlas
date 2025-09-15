@@ -53,7 +53,6 @@ spec:
             limits:
               cpu: "200m"
               memory: "256Mi"
-      terminationGracePeriodSeconds: 30
   volumeClaimTemplates:
     - metadata:
         name: smtp4dev-data

@@ -54,7 +54,6 @@ spec:
             limits:
               cpu: "200m"
               memory: "256Mi"
-      terminationGracePeriodSeconds: 30
   volumeClaimTemplates:
     - metadata:
         name: redis-data

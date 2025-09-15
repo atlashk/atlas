@@ -124,9 +124,9 @@ project(':infrastructure.discovery-client.eureka').projectDir = file('infrastruc
 include(':infrastructure.discovery-client.kubernetes')
 project(':infrastructure.discovery-client.kubernetes').projectDir = file('infrastructure/discovery-client/discovery-client-kubernetes')
 
-// Event handler decorator
-include(':infrastructure.event.event-handler-decorator')
-project(':infrastructure.event.event-handler-decorator').projectDir = file('infrastructure/event/event-handler-decorator')
+// Domain event handler
+include(':infrastructure.domain-event-handler')
+project(':infrastructure.domain-event-handler').projectDir = file('infrastructure/domain-event-handler')
 
 // File
 
@@ -308,9 +308,9 @@ project(':infrastructure.observability.tracing.zipkin').projectDir = file('infra
 
 // Outbox
 include(':infrastructure.outbox.core')
-project(':infrastructure.outbox.core').projectDir = file('infrastructure/outbox/outbox-core')
+project(':infrastructure.outbox.core').projectDir = file('infrastructure/messaging/outbox/outbox-core')
 include(':infrastructure.outbox.parent')
-project(':infrastructure.outbox.parent').projectDir = file('infrastructure/outbox/outbox-parent')
+project(':infrastructure.outbox.parent').projectDir = file('infrastructure/messaging/outbox/outbox-parent')
 
 // Persistence
 

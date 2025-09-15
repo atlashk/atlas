@@ -1,23 +1,17 @@
 package org.atlas.infrastructure.messaging.sns.core.consumer;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.domain.event.DomainEvent;
-import org.atlas.framework.domain.event.DomainEventType;
-import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.util.CollectionUtil;
 import org.atlas.framework.util.ConcurrentUtil;
-import org.atlas.framework.util.ReflectionUtil;
-import org.atlas.infrastructure.application.context.ApplicationContextService;
+import org.atlas.infrastructure.domain.event.handler.DomainEventDispatcher;
 import org.atlas.infrastructure.messaging.sns.core.common.SnsProps;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.DisposableBean;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
@@ -28,7 +22,7 @@ import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 @Slf4j
 public abstract class BaseSnsMessageConsumer implements DisposableBean {
 
-  private final ApplicationContextService applicationContextService;
+  private final DomainEventDispatcher domainEventDispatcher;
   protected final SnsProps snsProps;
   private final SqsClient sqsClient;
 
@@ -69,7 +63,11 @@ public abstract class BaseSnsMessageConsumer implements DisposableBean {
                     // Note: Need to enable raw message delivery when create subscription to be able to get message body directly
                     Object messagePayload = JsonUtil.getInstance()
                         .toObject(message.body(), Object.class);
-                    handleMessage(messagePayload);
+
+                    // Handle message
+                    domainEventDispatcher.dispatch(messagePayload);
+
+                    // Delete message after handling done
                     deleteMessage(message, queueUrl);
                   } catch (Exception e) {
                     log.error("Failed to handle message: messageId={}", message.messageId(), e);
@@ -85,23 +83,6 @@ public abstract class BaseSnsMessageConsumer implements DisposableBean {
           log.error("Fatal error in SQS consumer", throwable);
           return null;
         });
-  }
-
-  private void handleMessage(Object messagePayload) {
-    DomainEvent domainEvent = (DomainEvent) messagePayload;
-    DomainEventType domainEventType = domainEvent.getDomainEventType();
-    Object domainEventHandler = applicationContextService.getBeanByAnnotationAttribute(
-            DomainEventHandler.class, DomainEventType.class, "type", domainEventType)
-        .orElseThrow(() -> new RuntimeException(
-            "Domain event handler not found for type " + domainEventType));
-
-    // Get the target class to handle CGLIB proxies
-    Class<?> targetClass = AopUtils.isAopProxy(domainEventHandler)
-        ? AopUtils.getTargetClass(domainEventHandler)
-        : domainEventHandler.getClass();
-
-    ReflectionUtil.invokeMethod(domainEventHandler, targetClass, "handle",
-        Map.of(domainEvent.getClass(), domainEvent));
   }
 
   private void deleteMessage(Message message, String queueUrl) {

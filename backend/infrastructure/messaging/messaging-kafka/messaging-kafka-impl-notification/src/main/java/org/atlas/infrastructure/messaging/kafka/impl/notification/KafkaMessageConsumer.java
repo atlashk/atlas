@@ -3,6 +3,7 @@ package org.atlas.infrastructure.messaging.kafka.impl.notification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.atlas.infrastructure.application.context.ApplicationContextService;
+import org.atlas.infrastructure.domain.event.handler.DomainEventDispatcher;
 import org.atlas.infrastructure.messaging.kafka.core.common.KafkaConstant;
 import org.atlas.infrastructure.messaging.kafka.core.consumer.BaseKafkaMessageConsumer;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -16,8 +17,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class KafkaMessageConsumer extends BaseKafkaMessageConsumer {
 
-  public KafkaMessageConsumer(ApplicationContextService applicationContextService) {
-    super(applicationContextService);
+  public KafkaMessageConsumer(DomainEventDispatcher domainEventDispatcher) {
+    super(domainEventDispatcher);
   }
 
   @KafkaListener(

@@ -59,7 +59,6 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['discovery-client']}")
     }
-    api project(':infrastructure.event.event-handler-decorator')
     switch (rootProject.ext.appStack['kv']) {
         case 'redis':
             api project(':infrastructure.kv.redis')

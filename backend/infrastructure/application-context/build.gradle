@@ -29,7 +29,7 @@ dependencies {
     api project(':framework')
 
     // Lib
-    api 'org.springframework.boot:spring-boot-starter'
+    api 'org.springframework.boot:spring-boot-starter-aop'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
