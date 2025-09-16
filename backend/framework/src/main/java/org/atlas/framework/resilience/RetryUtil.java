@@ -2,7 +2,7 @@ package org.atlas.framework.resilience;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.util.ConcurrentUtil;
+import org.atlas.framework.concurrent.ConcurrentUtil;
 
 @UtilityClass
 @Slf4j

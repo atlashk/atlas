@@ -2,7 +2,7 @@ package org.atlas.infrastructure.notification.sse.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.notification.realtime.enums.RealtimeNotificationType;
+import org.atlas.framework.notification.common.NotificationType;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,8 +15,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class OrderStatusChangedController extends SseController<Integer> {
 
   @Override
-  public RealtimeNotificationType getEventType() {
-    return RealtimeNotificationType.ORDER_STATUS_CHANGED;
+  public NotificationType getEventType() {
+    return NotificationType.ORDER_STATUS_CHANGED;
   }
 
   @GetMapping(value = "/notification/sse/orders/{orderId}/status",

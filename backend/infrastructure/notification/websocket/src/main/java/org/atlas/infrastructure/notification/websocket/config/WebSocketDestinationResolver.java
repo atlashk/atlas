@@ -3,8 +3,8 @@ package org.atlas.infrastructure.notification.websocket.config;
 import static org.atlas.infrastructure.notification.websocket.config.WebSocketServerConfig.DESTINATION_PREFIX;
 
 import lombok.experimental.UtilityClass;
-import org.atlas.framework.notification.realtime.enums.RealtimeNotificationType;
-import org.atlas.framework.notification.realtime.payload.OrderStatusChangedPayload;
+import org.atlas.framework.notification.common.NotificationType;
+import org.atlas.framework.notification.realtime.payload.OrderCanceledPayload;
 import org.atlas.framework.notification.realtime.websocket.WebSocketNotification;
 
 @UtilityClass
@@ -15,14 +15,14 @@ public class WebSocketDestinationResolver {
       throw new IllegalArgumentException("Notification cannot be null.");
     }
 
-    RealtimeNotificationType notificationType = notification.getType();
+    NotificationType notificationType = notification.getType();
     if (notificationType == null) {
       throw new IllegalArgumentException("Notification type cannot be null.");
     }
 
     switch (notificationType) {
       case ORDER_STATUS_CHANGED:
-        if (!(notification.getPayload() instanceof OrderStatusChangedPayload payload)) {
+        if (!(notification.getPayload() instanceof OrderCanceledPayload payload)) {
           throw new IllegalArgumentException(
               "Payload must be of type OrderStatusChangedPayload for ORDER_STATUS_CHANGED notification.");
         }

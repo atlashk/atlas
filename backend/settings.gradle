@@ -55,25 +55,25 @@ project(':infrastructure.api-client.rest.resttemplate').projectDir = file('infra
 
 // API server::gRPC::Protobuf
 include(':infrastructure.api-server.grpc.protobuf')
-project(':infrastructure.api-server.grpc.protobuf').projectDir = file('infrastructure/api-server/api-server-grpc/api-server-grpc-protobuf')
+project(':infrastructure.api-server.grpc.protobuf').projectDir = file('infrastructure/api-server/grpc/api-server-grpc-protobuf')
 
 // API server::gRPC::netdevh
 include(':infrastructure.api-server.grpc.netdevh.core')
-project(':infrastructure.api-server.grpc.netdevh.core').projectDir = file('infrastructure/api-server/api-server-grpc/api-server-grpc-netdevh/api-server-grpc-netdevh-core')
+project(':infrastructure.api-server.grpc.netdevh.core').projectDir = file('infrastructure/api-server/grpc/api-server-grpc-netdevh/api-server-grpc-netdevh-core')
 include(':infrastructure.api-server.grpc.netdevh.impl.product')
-project(':infrastructure.api-server.grpc.netdevh.impl.product').projectDir = file('infrastructure/api-server/api-server-grpc/api-server-grpc-netdevh/api-server-grpc-netdevh-impl-product')
+project(':infrastructure.api-server.grpc.netdevh.impl.product').projectDir = file('infrastructure/api-server/grpc/api-server-grpc-netdevh/api-server-grpc-netdevh-impl-product')
 include(':infrastructure.api-server.grpc.netdevh.impl.user')
-project(':infrastructure.api-server.grpc.netdevh.impl.user').projectDir = file('infrastructure/api-server/api-server-grpc/api-server-grpc-netdevh/api-server-grpc-netdevh-impl-user')
+project(':infrastructure.api-server.grpc.netdevh.impl.user').projectDir = file('infrastructure/api-server/grpc/api-server-grpc-netdevh/api-server-grpc-netdevh-impl-user')
 
 // API server::REST
 include(':infrastructure.api-server.rest.core')
-project(':infrastructure.api-server.rest.core').projectDir = file('infrastructure/api-server/api-server-rest/api-server-rest-core')
+project(':infrastructure.api-server.rest.core').projectDir = file('infrastructure/api-server/rest/api-server-rest-core')
 include(':infrastructure.api-server.rest.impl.order')
-project(':infrastructure.api-server.rest.impl.order').projectDir = file('infrastructure/api-server/api-server-rest/api-server-rest-impl-order')
+project(':infrastructure.api-server.rest.impl.order').projectDir = file('infrastructure/api-server/rest/api-server-rest-impl-order')
 include(':infrastructure.api-server.rest.impl.product')
-project(':infrastructure.api-server.rest.impl.product').projectDir = file('infrastructure/api-server/api-server-rest/api-server-rest-impl-product')
+project(':infrastructure.api-server.rest.impl.product').projectDir = file('infrastructure/api-server/rest/api-server-rest-impl-product')
 include(':infrastructure.api-server.rest.impl.user')
-project(':infrastructure.api-server.rest.impl.user').projectDir = file('infrastructure/api-server/api-server-rest/api-server-rest-impl-user')
+project(':infrastructure.api-server.rest.impl.user').projectDir = file('infrastructure/api-server/rest/api-server-rest-impl-user')
 
 // Application Context
 include(':infrastructure.application-context')
@@ -96,27 +96,27 @@ project(':infrastructure.config.yaml').projectDir = file('infrastructure/config/
 
 // Datasource::MySQL
 include(':infrastructure.datasource.mysql.core')
-project(':infrastructure.datasource.mysql.core').projectDir = file('infrastructure/datasource/datasource-mysql/datasource-mysql-core')
+project(':infrastructure.datasource.mysql.core').projectDir = file('infrastructure/datasource/mysql/datasource-mysql-core')
 include(':infrastructure.datasource.mysql.impl.notification')
-project(':infrastructure.datasource.mysql.impl.notification').projectDir = file('infrastructure/datasource/datasource-mysql/datasource-mysql-impl-notification')
+project(':infrastructure.datasource.mysql.impl.notification').projectDir = file('infrastructure/datasource/mysql/datasource-mysql-impl-notification')
 include(':infrastructure.datasource.mysql.impl.order')
-project(':infrastructure.datasource.mysql.impl.order').projectDir = file('infrastructure/datasource/datasource-mysql/datasource-mysql-impl-order')
+project(':infrastructure.datasource.mysql.impl.order').projectDir = file('infrastructure/datasource/mysql/datasource-mysql-impl-order')
 include(':infrastructure.datasource.mysql.impl.product')
-project(':infrastructure.datasource.mysql.impl.product').projectDir = file('infrastructure/datasource/datasource-mysql/datasource-mysql-impl-product')
+project(':infrastructure.datasource.mysql.impl.product').projectDir = file('infrastructure/datasource/mysql/datasource-mysql-impl-product')
 include(':infrastructure.datasource.mysql.impl.user')
-project(':infrastructure.datasource.mysql.impl.user').projectDir = file('infrastructure/datasource/datasource-mysql/datasource-mysql-impl-user')
+project(':infrastructure.datasource.mysql.impl.user').projectDir = file('infrastructure/datasource/mysql/datasource-mysql-impl-user')
 
 // Datasource::Postgres
 include(':infrastructure.datasource.postgres.core')
-project(':infrastructure.datasource.postgres.core').projectDir = file('infrastructure/datasource/datasource-postgres/datasource-postgres-core')
+project(':infrastructure.datasource.postgres.core').projectDir = file('infrastructure/datasource/postgres/datasource-postgres-core')
 include(':infrastructure.datasource.postgres.impl.notification')
-project(':infrastructure.datasource.postgres.impl.notification').projectDir = file('infrastructure/datasource/datasource-postgres/datasource-postgres-impl-notification')
+project(':infrastructure.datasource.postgres.impl.notification').projectDir = file('infrastructure/datasource/postgres/datasource-postgres-impl-notification')
 include(':infrastructure.datasource.postgres.impl.order')
-project(':infrastructure.datasource.postgres.impl.order').projectDir = file('infrastructure/datasource/datasource-postgres/datasource-postgres-impl-order')
+project(':infrastructure.datasource.postgres.impl.order').projectDir = file('infrastructure/datasource/postgres/datasource-postgres-impl-order')
 include(':infrastructure.datasource.postgres.impl.product')
-project(':infrastructure.datasource.postgres.impl.product').projectDir = file('infrastructure/datasource/datasource-postgres/datasource-postgres-impl-product')
+project(':infrastructure.datasource.postgres.impl.product').projectDir = file('infrastructure/datasource/postgres/datasource-postgres-impl-product')
 include(':infrastructure.datasource.postgres.impl.user')
-project(':infrastructure.datasource.postgres.impl.user').projectDir = file('infrastructure/datasource/datasource-postgres/datasource-postgres-impl-user')
+project(':infrastructure.datasource.postgres.impl.user').projectDir = file('infrastructure/datasource/postgres/datasource-postgres-impl-user')
 
 // Discovery client
 include(':infrastructure.discovery-client.eureka')
@@ -125,8 +125,8 @@ include(':infrastructure.discovery-client.kubernetes')
 project(':infrastructure.discovery-client.kubernetes').projectDir = file('infrastructure/discovery-client/discovery-client-kubernetes')
 
 // Domain event handler
-include(':infrastructure.domain-event-handler')
-project(':infrastructure.domain-event-handler').projectDir = file('infrastructure/domain-event-handler')
+include(':infrastructure.domain-event.domain-event-handler')
+project(':infrastructure.domain-event.domain-event-handler').projectDir = file('infrastructure/domain-event/domain-event-handler')
 
 // File
 
@@ -134,31 +134,31 @@ project(':infrastructure.domain-event-handler').projectDir = file('infrastructur
 
 // File::CSV::OpenCSV
 include(':infrastructure.file.csv.opencsv.core')
-project(':infrastructure.file.csv.opencsv.core').projectDir = file('infrastructure/file/csv/csv-opencsv/csv-opencsv-core')
+project(':infrastructure.file.csv.opencsv.core').projectDir = file('infrastructure/file/csv/opencsv/csv-opencsv-core')
 include(':infrastructure.file.csv.opencsv.impl.product')
-project(':infrastructure.file.csv.opencsv.impl.product').projectDir = file('infrastructure/file/csv/csv-opencsv/csv-opencsv-impl-product')
+project(':infrastructure.file.csv.opencsv.impl.product').projectDir = file('infrastructure/file/csv/opencsv/csv-opencsv-impl-product')
 
 // File::Excel
 
 // File::Excel::Easyexcel
 include(':infrastructure.file.excel.easyexcel.core')
-project(':infrastructure.file.excel.easyexcel.core').projectDir = file('infrastructure/file/excel/excel-easyexcel/excel-easyexcel-core')
+project(':infrastructure.file.excel.easyexcel.core').projectDir = file('infrastructure/file/excel/easyexcel/excel-easyexcel-core')
 include(':infrastructure.file.excel.easyexcel.impl.product')
-project(':infrastructure.file.excel.easyexcel.impl.product').projectDir = file('infrastructure/file/excel/excel-easyexcel/excel-easyexcel-impl-product')
+project(':infrastructure.file.excel.easyexcel.impl.product').projectDir = file('infrastructure/file/excel/easyexcel/excel-easyexcel-impl-product')
 
 // File::Excel::Poi
 include(':infrastructure.file.excel.poi.core')
-project(':infrastructure.file.excel.poi.core').projectDir = file('infrastructure/file/excel/excel-poi/excel-poi-core')
+project(':infrastructure.file.excel.poi.core').projectDir = file('infrastructure/file/excel/poi/excel-poi-core')
 include(':infrastructure.file.excel.poi.impl.product')
-project(':infrastructure.file.excel.poi.impl.product').projectDir = file('infrastructure/file/excel/excel-poi/excel-poi-impl-product')
+project(':infrastructure.file.excel.poi.impl.product').projectDir = file('infrastructure/file/excel/poi/excel-poi-impl-product')
 
 // File::PDF
 
 // File::PDF::PDFBox
 include(':infrastructure.file.pdf.pdfbox.core')
-project(':infrastructure.file.pdf.pdfbox.core').projectDir = file('infrastructure/file/pdf/pdf-pdfbox/pdf-pdfbox-core')
+project(':infrastructure.file.pdf.pdfbox.core').projectDir = file('infrastructure/file/pdf/pdfbox/pdf-pdfbox-core')
 include(':infrastructure.file.pdf.pdfbox.impl.product')
-project(':infrastructure.file.pdf.pdfbox.impl.product').projectDir = file('infrastructure/file/pdf/pdf-pdfbox/pdf-pdfbox-impl-product')
+project(':infrastructure.file.pdf.pdfbox.impl.product').projectDir = file('infrastructure/file/pdf/pdfbox/pdf-pdfbox-impl-product')
 
 // i18n
 include(':infrastructure.i18n')
@@ -204,41 +204,55 @@ project(':infrastructure.lock.util').projectDir = file('infrastructure/lock/lock
 
 // Messaging
 
-// Messaging::Kafka
-include(':infrastructure.messaging.kafka.core')
-project(':infrastructure.messaging.kafka.core').projectDir = file('infrastructure/messaging/messaging-kafka/messaging-kafka-core')
-include(':infrastructure.messaging.kafka.impl.notification')
-project(':infrastructure.messaging.kafka.impl.notification').projectDir = file('infrastructure/messaging/messaging-kafka/messaging-kafka-impl-notification')
-include(':infrastructure.messaging.kafka.impl.product')
-project(':infrastructure.messaging.kafka.impl.product').projectDir = file('infrastructure/messaging/messaging-kafka/messaging-kafka-impl-product')
-include(':infrastructure.messaging.kafka.impl.order')
-project(':infrastructure.messaging.kafka.impl.order').projectDir = file('infrastructure/messaging/messaging-kafka/messaging-kafka-impl-order')
-include(':infrastructure.messaging.kafka.impl.user')
-project(':infrastructure.messaging.kafka.impl.user').projectDir = file('infrastructure/messaging/messaging-kafka/messaging-kafka-impl-user')
+// Messaging::Internal
 
-// Messaging::RabbitMQ
-include(':infrastructure.messaging.rabbitmq.core')
-project(':infrastructure.messaging.rabbitmq.core').projectDir = file('infrastructure/messaging/messaging-rabbitmq/messaging-rabbitmq-core')
-include(':infrastructure.messaging.rabbitmq.impl.notification')
-project(':infrastructure.messaging.rabbitmq.impl.notification').projectDir = file('infrastructure/messaging/messaging-rabbitmq/messaging-rabbitmq-impl-notification')
-include(':infrastructure.messaging.rabbitmq.impl.product')
-project(':infrastructure.messaging.rabbitmq.impl.product').projectDir = file('infrastructure/messaging/messaging-rabbitmq/messaging-rabbitmq-impl-product')
-include(':infrastructure.messaging.rabbitmq.impl.order')
-project(':infrastructure.messaging.rabbitmq.impl.order').projectDir = file('infrastructure/messaging/messaging-rabbitmq/messaging-rabbitmq-impl-order')
-include(':infrastructure.messaging.rabbitmq.impl.user')
-project(':infrastructure.messaging.rabbitmq.impl.user').projectDir = file('infrastructure/messaging/messaging-rabbitmq/messaging-rabbitmq-impl-user')
+// Messaging::Internal::Spring
+include(':infrastructure.messaging.internal.spring')
+project(':infrastructure.messaging.internal.spring').projectDir = file('infrastructure/messaging/internal/messaging-internal-spring')
 
-// Messaging::SNS
-include(':infrastructure.messaging.sns.core')
-project(':infrastructure.messaging.sns.core').projectDir = file('infrastructure/messaging/messaging-sns/messaging-sns-core')
-include(':infrastructure.messaging.sns.impl.notification')
-project(':infrastructure.messaging.sns.impl.notification').projectDir = file('infrastructure/messaging/messaging-sns/messaging-sns-impl-notification')
-include(':infrastructure.messaging.sns.impl.order')
-project(':infrastructure.messaging.sns.impl.order').projectDir = file('infrastructure/messaging/messaging-sns/messaging-sns-impl-order')
-include(':infrastructure.messaging.sns.impl.product')
-project(':infrastructure.messaging.sns.impl.product').projectDir = file('infrastructure/messaging/messaging-sns/messaging-sns-impl-product')
-include(':infrastructure.messaging.sns.impl.user')
-project(':infrastructure.messaging.sns.impl.user').projectDir = file('infrastructure/messaging/messaging-sns/messaging-sns-impl-user')
+// Messaging::External
+
+// Messaging::External::Kafka
+include(':infrastructure.messaging.external.kafka.core')
+project(':infrastructure.messaging.external.kafka.core').projectDir = file('infrastructure/messaging/external/kafka/messaging-external-kafka-core')
+include(':infrastructure.messaging.external.kafka.impl.notification')
+project(':infrastructure.messaging.external.kafka.impl.notification').projectDir = file('infrastructure/messaging/external/kafka/messaging-external-kafka-impl-notification')
+include(':infrastructure.messaging.external.kafka.impl.product')
+project(':infrastructure.messaging.external.kafka.impl.product').projectDir = file('infrastructure/messaging/external/kafka/messaging-external-kafka-impl-product')
+include(':infrastructure.messaging.external.kafka.impl.order')
+project(':infrastructure.messaging.external.kafka.impl.order').projectDir = file('infrastructure/messaging/external/kafka/messaging-external-kafka-impl-order')
+include(':infrastructure.messaging.external.kafka.impl.user')
+project(':infrastructure.messaging.external.kafka.impl.user').projectDir = file('infrastructure/messaging/external/kafka/messaging-external-kafka-impl-user')
+
+// Messaging::External::RabbitMQ
+include(':infrastructure.messaging.external.rabbitmq.core')
+project(':infrastructure.messaging.external.rabbitmq.core').projectDir = file('infrastructure/messaging/external/rabbitmq/messaging-external-rabbitmq-core')
+include(':infrastructure.messaging.external.rabbitmq.impl.notification')
+project(':infrastructure.messaging.external.rabbitmq.impl.notification').projectDir = file('infrastructure/messaging/external/rabbitmq/messaging-external-rabbitmq-impl-notification')
+include(':infrastructure.messaging.external.rabbitmq.impl.product')
+project(':infrastructure.messaging.external.rabbitmq.impl.product').projectDir = file('infrastructure/messaging/external/rabbitmq/messaging-external-rabbitmq-impl-product')
+include(':infrastructure.messaging.external.rabbitmq.impl.order')
+project(':infrastructure.messaging.external.rabbitmq.impl.order').projectDir = file('infrastructure/messaging/external/rabbitmq/messaging-external-rabbitmq-impl-order')
+include(':infrastructure.messaging.external.rabbitmq.impl.user')
+project(':infrastructure.messaging.external.rabbitmq.impl.user').projectDir = file('infrastructure/messaging/external/rabbitmq/messaging-external-rabbitmq-impl-user')
+
+// Messaging::External::SNS
+include(':infrastructure.messaging.external.sns.core')
+project(':infrastructure.messaging.external.sns.core').projectDir = file('infrastructure/messaging/external/sns/messaging-external-sns-core')
+include(':infrastructure.messaging.external.sns.impl.notification')
+project(':infrastructure.messaging.external.sns.impl.notification').projectDir = file('infrastructure/messaging/external/sns/messaging-external-sns-impl-notification')
+include(':infrastructure.messaging.external.sns.impl.order')
+project(':infrastructure.messaging.external.sns.impl.order').projectDir = file('infrastructure/messaging/external/sns/messaging-external-sns-impl-order')
+include(':infrastructure.messaging.external.sns.impl.product')
+project(':infrastructure.messaging.external.sns.impl.product').projectDir = file('infrastructure/messaging/external/sns/messaging-external-sns-impl-product')
+include(':infrastructure.messaging.external.sns.impl.user')
+project(':infrastructure.messaging.external.sns.impl.user').projectDir = file('infrastructure/messaging/external/sns/messaging-external-sns-impl-user')
+
+// Messaging::External::Outbox
+include(':infrastructure.messaging.external.outbox.core')
+project(':infrastructure.messaging.external.outbox.core').projectDir = file('infrastructure/messaging/external/outbox/messaging-external-outbox-core')
+include(':infrastructure.messaging.external.outbox.parent')
+project(':infrastructure.messaging.external.outbox.parent').projectDir = file('infrastructure/messaging/external/outbox/messaging-external-outbox-parent')
 
 // Migration
 
@@ -246,27 +260,27 @@ project(':infrastructure.messaging.sns.impl.user').projectDir = file('infrastruc
 
 // Migration::Flyway::MySQL
 include(':infrastructure.migration.flyway.mysql.core')
-project(':infrastructure.migration.flyway.mysql.core').projectDir = file('infrastructure/migration/migration-flyway/migration-flyway-mysql/migration-flyway-mysql-core')
+project(':infrastructure.migration.flyway.mysql.core').projectDir = file('infrastructure/migration/flyway/mysql/migration-flyway-mysql-core')
 include(':infrastructure.migration.flyway.mysql.impl.user')
-project(':infrastructure.migration.flyway.mysql.impl.user').projectDir = file('infrastructure/migration/migration-flyway/migration-flyway-mysql/migration-flyway-mysql-impl-user')
+project(':infrastructure.migration.flyway.mysql.impl.user').projectDir = file('infrastructure/migration/flyway/mysql/migration-flyway-mysql-impl-user')
 include(':infrastructure.migration.flyway.mysql.impl.product')
-project(':infrastructure.migration.flyway.mysql.impl.product').projectDir = file('infrastructure/migration/migration-flyway/migration-flyway-mysql/migration-flyway-mysql-impl-product')
+project(':infrastructure.migration.flyway.mysql.impl.product').projectDir = file('infrastructure/migration/flyway/mysql/migration-flyway-mysql-impl-product')
 include(':infrastructure.migration.flyway.mysql.impl.order')
-project(':infrastructure.migration.flyway.mysql.impl.order').projectDir = file('infrastructure/migration/migration-flyway/migration-flyway-mysql/migration-flyway-mysql-impl-order')
+project(':infrastructure.migration.flyway.mysql.impl.order').projectDir = file('infrastructure/migration/flyway/mysql/migration-flyway-mysql-impl-order')
 include(':infrastructure.migration.flyway.mysql.impl.notification')
-project(':infrastructure.migration.flyway.mysql.impl.notification').projectDir = file('infrastructure/migration/migration-flyway/migration-flyway-mysql/migration-flyway-mysql-impl-notification')
+project(':infrastructure.migration.flyway.mysql.impl.notification').projectDir = file('infrastructure/migration/flyway/mysql/migration-flyway-mysql-impl-notification')
 
 // Migration::Flyway::Postgres
 include(':infrastructure.migration.flyway.postgres.core')
-project(':infrastructure.migration.flyway.postgres.core').projectDir = file('infrastructure/migration/migration-flyway/migration-flyway-postgres/migration-flyway-postgres-core')
+project(':infrastructure.migration.flyway.postgres.core').projectDir = file('infrastructure/migration/flyway/postgres/migration-flyway-postgres-core')
 include(':infrastructure.migration.flyway.postgres.impl.user')
-project(':infrastructure.migration.flyway.postgres.impl.user').projectDir = file('infrastructure/migration/migration-flyway/migration-flyway-postgres/migration-flyway-postgres-impl-user')
+project(':infrastructure.migration.flyway.postgres.impl.user').projectDir = file('infrastructure/migration/flyway/postgres/migration-flyway-postgres-impl-user')
 include(':infrastructure.migration.flyway.postgres.impl.product')
-project(':infrastructure.migration.flyway.postgres.impl.product').projectDir = file('infrastructure/migration/migration-flyway/migration-flyway-postgres/migration-flyway-postgres-impl-product')
+project(':infrastructure.migration.flyway.postgres.impl.product').projectDir = file('infrastructure/migration/flyway/postgres/migration-flyway-postgres-impl-product')
 include(':infrastructure.migration.flyway.postgres.impl.order')
-project(':infrastructure.migration.flyway.postgres.impl.order').projectDir = file('infrastructure/migration/migration-flyway/migration-flyway-postgres/migration-flyway-postgres-impl-order')
+project(':infrastructure.migration.flyway.postgres.impl.order').projectDir = file('infrastructure/migration/flyway/postgres/migration-flyway-postgres-impl-order')
 include(':infrastructure.migration.flyway.postgres.impl.notification')
-project(':infrastructure.migration.flyway.postgres.impl.notification').projectDir = file('infrastructure/migration/migration-flyway/migration-flyway-postgres/migration-flyway-postgres-impl-notification')
+project(':infrastructure.migration.flyway.postgres.impl.notification').projectDir = file('infrastructure/migration/flyway/postgres/migration-flyway-postgres-impl-notification')
 
 // Notification
 
@@ -306,25 +320,19 @@ project(':infrastructure.observability.metrics.prometheus').projectDir = file('i
 include(':infrastructure.observability.tracing.zipkin')
 project(':infrastructure.observability.tracing.zipkin').projectDir = file('infrastructure/observability/tracing/tracing-zipkin')
 
-// Outbox
-include(':infrastructure.outbox.core')
-project(':infrastructure.outbox.core').projectDir = file('infrastructure/messaging/outbox/outbox-core')
-include(':infrastructure.outbox.parent')
-project(':infrastructure.outbox.parent').projectDir = file('infrastructure/messaging/outbox/outbox-parent')
-
 // Persistence
 
 // Persistence::JPA
 include(':infrastructure.persistence.jpa.core')
-project(':infrastructure.persistence.jpa.core').projectDir = file('infrastructure/persistence/persistence-jpa/persistence-jpa-core')
+project(':infrastructure.persistence.jpa.core').projectDir = file('infrastructure/persistence/jpa/persistence-jpa-core')
 include(':infrastructure.persistence.jpa.impl.order')
-project(':infrastructure.persistence.jpa.impl.order').projectDir = file('infrastructure/persistence/persistence-jpa/persistence-jpa-impl-order')
+project(':infrastructure.persistence.jpa.impl.order').projectDir = file('infrastructure/persistence/jpa/persistence-jpa-impl-order')
 include(':infrastructure.persistence.jpa.impl.outbox')
-project(':infrastructure.persistence.jpa.impl.outbox').projectDir = file('infrastructure/persistence/persistence-jpa/persistence-jpa-impl-outbox')
+project(':infrastructure.persistence.jpa.impl.outbox').projectDir = file('infrastructure/persistence/jpa/persistence-jpa-impl-outbox')
 include(':infrastructure.persistence.jpa.impl.product')
-project(':infrastructure.persistence.jpa.impl.product').projectDir = file('infrastructure/persistence/persistence-jpa/persistence-jpa-impl-product')
+project(':infrastructure.persistence.jpa.impl.product').projectDir = file('infrastructure/persistence/jpa/persistence-jpa-impl-product')
 include(':infrastructure.persistence.jpa.impl.user')
-project(':infrastructure.persistence.jpa.impl.user').projectDir = file('infrastructure/persistence/persistence-jpa/persistence-jpa-impl-user')
+project(':infrastructure.persistence.jpa.impl.user').projectDir = file('infrastructure/persistence/jpa/persistence-jpa-impl-user')
 
 // Redis
 include(':infrastructure.redis.core')
@@ -342,35 +350,23 @@ project(':infrastructure.resilience.resilience4j').projectDir = file('infrastruc
 
 // Scheduler::Spring
 include(':infrastructure.scheduler.spring.core')
-project(':infrastructure.scheduler.spring.core').projectDir = file('infrastructure/scheduler/scheduler-spring/scheduler-spring-core')
-include(':infrastructure.scheduler.spring.impl.notification')
-project(':infrastructure.scheduler.spring.impl.notification').projectDir = file('infrastructure/scheduler/scheduler-spring/scheduler-spring-impl-notification')
+project(':infrastructure.scheduler.spring.core').projectDir = file('infrastructure/scheduler/spring/scheduler-spring-core')
 include(':infrastructure.scheduler.spring.impl.order')
-project(':infrastructure.scheduler.spring.impl.order').projectDir = file('infrastructure/scheduler/scheduler-spring/scheduler-spring-impl-order')
+project(':infrastructure.scheduler.spring.impl.order').projectDir = file('infrastructure/scheduler/spring/scheduler-spring-impl-order')
 include(':infrastructure.scheduler.spring.impl.outbox')
-project(':infrastructure.scheduler.spring.impl.outbox').projectDir = file('infrastructure/scheduler/scheduler-spring/scheduler-spring-impl-outbox')
-include(':infrastructure.scheduler.spring.impl.product')
-project(':infrastructure.scheduler.spring.impl.product').projectDir = file('infrastructure/scheduler/scheduler-spring/scheduler-spring-impl-product')
-include(':infrastructure.scheduler.spring.impl.user')
-project(':infrastructure.scheduler.spring.impl.user').projectDir = file('infrastructure/scheduler/scheduler-spring/scheduler-spring-impl-user')
+project(':infrastructure.scheduler.spring.impl.outbox').projectDir = file('infrastructure/scheduler/spring/scheduler-spring-impl-outbox')
 
 // Scheduler::Quartz
 include(':infrastructure.scheduler.quartz.core')
-project(':infrastructure.scheduler.quartz.core').projectDir = file('infrastructure/scheduler/scheduler-quartz/scheduler-quartz-core')
+project(':infrastructure.scheduler.quartz.core').projectDir = file('infrastructure/scheduler/quartz/scheduler-quartz-core')
 include(':infrastructure.scheduler.quartz.jobstore.mysql')
-project(':infrastructure.scheduler.quartz.jobstore.mysql').projectDir = file('infrastructure/scheduler/scheduler-quartz/scheduler-quartz-jobstore-mysql')
+project(':infrastructure.scheduler.quartz.jobstore.mysql').projectDir = file('infrastructure/scheduler/quartz/scheduler-quartz-jobstore-mysql')
 include(':infrastructure.scheduler.quartz.jobstore.postgres')
-project(':infrastructure.scheduler.quartz.jobstore.postgres').projectDir = file('infrastructure/scheduler/scheduler-quartz/scheduler-quartz-jobstore-postgres')
-include(':infrastructure.scheduler.quartz.impl.notification')
-project(':infrastructure.scheduler.quartz.impl.notification').projectDir = file('infrastructure/scheduler/scheduler-quartz/scheduler-quartz-impl-notification')
+project(':infrastructure.scheduler.quartz.jobstore.postgres').projectDir = file('infrastructure/scheduler/quartz/scheduler-quartz-jobstore-postgres')
 include(':infrastructure.scheduler.quartz.impl.order')
-project(':infrastructure.scheduler.quartz.impl.order').projectDir = file('infrastructure/scheduler/scheduler-quartz/scheduler-quartz-impl-order')
+project(':infrastructure.scheduler.quartz.impl.order').projectDir = file('infrastructure/scheduler/quartz/scheduler-quartz-impl-order')
 include(':infrastructure.scheduler.quartz.impl.outbox')
-project(':infrastructure.scheduler.quartz.impl.outbox').projectDir = file('infrastructure/scheduler/scheduler-quartz/scheduler-quartz-impl-outbox')
-include(':infrastructure.scheduler.quartz.impl.product')
-project(':infrastructure.scheduler.quartz.impl.product').projectDir = file('infrastructure/scheduler/scheduler-quartz/scheduler-quartz-impl-product')
-include(':infrastructure.scheduler.quartz.impl.user')
-project(':infrastructure.scheduler.quartz.impl.user').projectDir = file('infrastructure/scheduler/scheduler-quartz/scheduler-quartz-impl-user')
+project(':infrastructure.scheduler.quartz.impl.outbox').projectDir = file('infrastructure/scheduler/quartz/scheduler-quartz-impl-outbox')
 
 // Sequence generator
 include(':infrastructure.sequence-generator')
@@ -392,9 +388,9 @@ project(':infrastructure.template.thymeleaf').projectDir = file('infrastructure/
 include(':infrastructure.transaction')
 project(':infrastructure.transaction').projectDir = file('infrastructure/transaction')
 
-// Use case handler decorator
-include(':infrastructure.use-case.use-case-handler-decorator')
-project(':infrastructure.use-case.use-case-handler-decorator').projectDir = file('infrastructure/use-case/use-case-handler-decorator')
+// Use case handler
+include(':infrastructure.use-case.use-case-handler')
+project(':infrastructure.use-case.use-case-handler').projectDir = file('infrastructure/use-case/use-case-handler')
 
 // =================================================================================================
 // Application

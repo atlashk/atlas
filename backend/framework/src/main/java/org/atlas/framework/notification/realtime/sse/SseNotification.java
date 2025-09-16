@@ -1,19 +1,20 @@
 package org.atlas.framework.notification.realtime.sse;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import org.atlas.framework.notification.realtime.enums.RealtimeNotificationType;
+import org.atlas.framework.notification.common.Notification;
+import org.atlas.framework.notification.common.NotificationType;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class SseNotification<K> {
+public class SseNotification<K> extends Notification {
 
-  private String notificationId;
-  private RealtimeNotificationType type;
+  public SseNotification(NotificationType notificationType, K key, Object payload) {
+    super(notificationType);
+    this.key = key;
+    this.payload = payload;
+  }
+
   private K key;
   private Object payload;
 }

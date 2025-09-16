@@ -2,17 +2,19 @@ package org.atlas.framework.notification.email;
 
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import org.atlas.framework.notification.common.Notification;
+import org.atlas.framework.notification.common.NotificationType;
 import org.atlas.framework.util.CollectionUtil;
 import org.atlas.framework.util.StringUtil;
 
 @Getter
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class EmailNotification {
+public class EmailNotification extends Notification {
 
-  private String notificationId;
+  private EmailNotification(NotificationType type) {
+    super(type);
+  }
+
   private String sender;
   private List<String> recipients;
   private String subject;
@@ -22,12 +24,18 @@ public class EmailNotification {
 
   public static class Builder {
 
+    private NotificationType notificationType;
     private String sender;
     private List<String> recipients;
     private String subject;
     private String body;
     private List<Attachment> attachments;
     private boolean html;
+
+    public Builder setNotificationType(NotificationType notificationType) {
+      this.notificationType = notificationType;
+      return this;
+    }
 
     public Builder setSender(String sender) {
       this.sender = sender;
@@ -78,20 +86,21 @@ public class EmailNotification {
     public EmailNotification build() {
       if (!validateRequired()) {
         throw new RuntimeException(
-            "Failed to build SendMailRequest, please check the required fields.");
+            "Failed to build EmailNotification, please check the required fields.");
       }
-      EmailNotification request = new EmailNotification();
-      request.sender = this.sender;
-      request.recipients = this.recipients;
-      request.subject = this.subject;
-      request.body = this.body;
-      request.attachments = this.attachments;
-      request.html = this.html;
-      return request;
+      EmailNotification notification = new EmailNotification(notificationType);
+      notification.sender = this.sender;
+      notification.recipients = this.recipients;
+      notification.subject = this.subject;
+      notification.body = this.body;
+      notification.attachments = this.attachments;
+      notification.html = this.html;
+      return notification;
     }
 
     private boolean validateRequired() {
-      return StringUtil.isNotBlank(this.sender) &&
+      return notificationType != null &&
+          StringUtil.isNotBlank(this.sender) &&
           CollectionUtil.isNotEmpty(recipients) &&
           StringUtil.isNotBlank(subject) &&
           StringUtil.isNotBlank(body);

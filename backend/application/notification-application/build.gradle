@@ -71,13 +71,13 @@ dependencies {
     }
     switch (rootProject.ext.appStack['messaging']) {
         case 'kafka':
-            api project(':infrastructure.messaging.kafka.impl.notification')
+            api project(':infrastructure.messaging.external.kafka.impl.notification')
             break
         case 'rabbitmq':
-            api project(':infrastructure.messaging.rabbitmq.impl.notification')
+            api project(':infrastructure.messaging.external.rabbitmq.impl.notification')
             break
         case 'sns':
-            api project(':infrastructure.messaging.sns.impl.notification')
+            api project(':infrastructure.messaging.external.sns.impl.notification')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['messaging']}")
@@ -137,17 +137,7 @@ dependencies {
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.tracing']}")
     }
     if (rootProject.ext.appStack['outbox'] == 'true') {
-        api project(':infrastructure.outbox.parent')
-    }
-    switch (rootProject.ext.appStack['scheduler']) {
-        case 'spring':
-            api project(':infrastructure.scheduler.spring.impl.notification')
-            break
-        case 'quartz':
-            api project(':infrastructure.scheduler.quartz.impl.notification')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['scheduler']}")
+        api project(':infrastructure.messaging.external.outbox.parent')
     }
     api project(':infrastructure.notification.sse')
     switch (rootProject.ext.appStack['template']) {
@@ -160,7 +150,7 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['template']}")
     }
-    api project(':infrastructure.use-case.use-case-handler-decorator')
+    api project(':infrastructure.use-case.use-case-handler')
     api project(':infrastructure.notification.websocket')
     implementation 'org.springframework.boot:spring-boot-starter-web'
 

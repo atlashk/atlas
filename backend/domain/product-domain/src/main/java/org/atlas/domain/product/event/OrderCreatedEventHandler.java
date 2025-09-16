@@ -10,13 +10,13 @@ import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.constant.Application;
 import org.atlas.framework.domain.event.DomainEventType;
 import org.atlas.framework.domain.event.contract.order.OrderCreatedEvent;
-import org.atlas.framework.domain.event.contract.order.ReserveQuantityFailedEvent;
-import org.atlas.framework.domain.event.contract.order.ReserveQuantitySucceededEvent;
+import org.atlas.framework.domain.event.contract.product.ProductReserveQuantityFailedEvent;
+import org.atlas.framework.domain.event.contract.product.ProductReserveQuantitySucceededEvent;
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.error.AppError;
 import org.atlas.framework.lock.LockPort;
-import org.atlas.framework.messaging.MessagePublisherPort;
+import org.atlas.framework.messaging.ExternalMessagePublisherPort;
 
 @DomainEventHandler(type = DomainEventType.ORDER_CREATED)
 @RequiredArgsConstructor
@@ -26,23 +26,23 @@ public class OrderCreatedEventHandler {
   private final ProductRepository productRepository;
   private final ApplicationConfigPort applicationConfigPort;
   private final LockPort lockPort;
-  private final MessagePublisherPort messagePublisherPort;
+  private final ExternalMessagePublisherPort messagePublisherPort;
 
   public void handle(OrderCreatedEvent orderCreatedEvent) {
     try {
       orderCreatedEvent.getOrderItems().forEach(orderItem ->
           decreaseQuantity(orderItem.getProduct().getId(), orderItem.getQuantity()));
-      ReserveQuantitySucceededEvent reserveQuantitySucceededEvent =
-          new ReserveQuantitySucceededEvent(applicationConfigPort.getApplicationName());
-      reserveQuantitySucceededEvent.merge(orderCreatedEvent);
-      messagePublisherPort.publish(reserveQuantitySucceededEvent);
+      ProductReserveQuantitySucceededEvent productReserveQuantitySucceededEvent =
+          new ProductReserveQuantitySucceededEvent(applicationConfigPort.getApplicationName());
+      productReserveQuantitySucceededEvent.merge(orderCreatedEvent);
+      messagePublisherPort.publish(productReserveQuantitySucceededEvent);
     } catch (Exception e) {
       log.error("Failed to handle event {}", orderCreatedEvent.getEventId(), e);
-      ReserveQuantityFailedEvent reserveQuantityFailedEvent =
-          new ReserveQuantityFailedEvent(applicationConfigPort.getApplicationName());
-      reserveQuantityFailedEvent.merge(orderCreatedEvent);
-      reserveQuantityFailedEvent.setError(e.getMessage());
-      messagePublisherPort.publish(reserveQuantityFailedEvent);
+      ProductReserveQuantityFailedEvent productReserveQuantityFailedEvent =
+          new ProductReserveQuantityFailedEvent(applicationConfigPort.getApplicationName());
+      productReserveQuantityFailedEvent.merge(orderCreatedEvent);
+      productReserveQuantityFailedEvent.setError(e.getMessage());
+      messagePublisherPort.publish(productReserveQuantityFailedEvent);
     }
   }
 

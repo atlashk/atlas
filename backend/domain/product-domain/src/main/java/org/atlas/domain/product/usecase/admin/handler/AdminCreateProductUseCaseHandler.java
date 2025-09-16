@@ -7,7 +7,7 @@ import org.atlas.domain.product.service.ProductImageService;
 import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.domain.event.contract.product.ProductCreatedEvent;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
-import org.atlas.framework.messaging.MessagePublisherPort;
+import org.atlas.framework.messaging.ExternalMessagePublisherPort;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 
 @UseCaseHandler
@@ -17,7 +17,7 @@ public class AdminCreateProductUseCaseHandler {
   private final ProductRepository productRepository;
   private final ProductImageService productImageService;
   private final ApplicationConfigPort applicationConfigPort;
-  private final MessagePublisherPort messagePublisherPort;
+  private final ExternalMessagePublisherPort messagePublisherPort;
 
   public Integer handle(ProductEntity productEntity) throws Exception {
     // Insert product into DB

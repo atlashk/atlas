@@ -1,7 +1,7 @@
 package org.atlas.edge.gateway.springcloudgateway.security;
 
 import org.atlas.edge.gateway.springcloudgateway.util.HttpUtil;
-import org.atlas.framework.api.server.rest.response.ApiResponseWrapper;
+import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.error.AppError;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;

@@ -7,11 +7,11 @@ import org.atlas.domain.order.shared.enums.OrderStatus;
 import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.domain.event.DomainEventType;
 import org.atlas.framework.domain.event.contract.order.OrderConfirmedEvent;
-import org.atlas.framework.domain.event.contract.order.ReserveQuantitySucceededEvent;
+import org.atlas.framework.domain.event.contract.product.ProductReserveQuantitySucceededEvent;
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.error.AppError;
-import org.atlas.framework.messaging.MessagePublisherPort;
+import org.atlas.framework.messaging.ExternalMessagePublisherPort;
 
 @DomainEventHandler(type = DomainEventType.RESERVE_QUANTITY_SUCCEEDED)
 @RequiredArgsConstructor
@@ -19,11 +19,11 @@ public class ReserveQuantitySucceededEventHandler {
 
   private final OrderRepository orderRepository;
   private final ApplicationConfigPort applicationConfigPort;
-  private final MessagePublisherPort messagePublisherPort;
+  private final ExternalMessagePublisherPort messagePublisherPort;
 
-  public void handle(ReserveQuantitySucceededEvent reserveQuantitySucceededEvent) {
+  public void handle(ProductReserveQuantitySucceededEvent productReserveQuantitySucceededEvent) {
     // Find order
-    OrderEntity orderEntity = orderRepository.findById(reserveQuantitySucceededEvent.getOrderId())
+    OrderEntity orderEntity = orderRepository.findById(productReserveQuantitySucceededEvent.getOrderId())
         .orElseThrow(() -> new DomainException(AppError.ORDER_NOT_FOUND));
     if (orderEntity.getStatus() != OrderStatus.PROCESSING) {
       throw new DomainException(AppError.ORDER_INVALID_STATUS);
@@ -36,7 +36,7 @@ public class ReserveQuantitySucceededEventHandler {
     // Publish event
     OrderConfirmedEvent orderConfirmedEvent = new OrderConfirmedEvent(
         applicationConfigPort.getApplicationName());
-    orderConfirmedEvent.merge(reserveQuantitySucceededEvent);
+    orderConfirmedEvent.merge(productReserveQuantitySucceededEvent);
     messagePublisherPort.publish(orderConfirmedEvent);
   }
 }

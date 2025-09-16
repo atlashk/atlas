@@ -9,7 +9,7 @@ import org.atlas.framework.domain.event.contract.product.ProductDeletedEvent;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.error.AppError;
-import org.atlas.framework.messaging.MessagePublisherPort;
+import org.atlas.framework.messaging.ExternalMessagePublisherPort;
 
 @UseCaseHandler
 @RequiredArgsConstructor
@@ -18,7 +18,7 @@ public class AdminDeleteProductUseCaseHandler {
   private final ProductRepository productRepository;
   private final ProductImageService productImageService;
   private final ApplicationConfigPort applicationConfigPort;
-  private final MessagePublisherPort messagePublisherPort;
+  private final ExternalMessagePublisherPort messagePublisherPort;
 
   public Void handle(Integer productId) throws Exception {
     // Delete product from DB

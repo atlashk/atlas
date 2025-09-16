@@ -18,7 +18,7 @@ import org.atlas.framework.domain.event.contract.product.ProductCreatedEvent;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.error.AppError;
-import org.atlas.framework.messaging.MessagePublisherPort;
+import org.atlas.framework.messaging.ExternalMessagePublisherPort;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.util.CollectionUtil;
 
@@ -31,7 +31,7 @@ public class AdminImportProductUseCaseHandler {
   private final ApplicationConfigPort applicationConfigPort;
   private final ProductCsvReaderPort productCsvReaderPort;
   private final ProductExcelReaderPort productExcelReaderPort;
-  private final MessagePublisherPort messagePublisherPort;
+  private final ExternalMessagePublisherPort messagePublisherPort;
 
   public Void handle(AdminImportProductInput input) throws Exception {
     // Read rows from file content

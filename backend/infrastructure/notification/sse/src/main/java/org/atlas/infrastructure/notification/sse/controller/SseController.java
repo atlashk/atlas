@@ -2,7 +2,7 @@ package org.atlas.infrastructure.notification.sse.controller;
 
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.notification.realtime.enums.RealtimeNotificationType;
+import org.atlas.framework.notification.common.NotificationType;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Slf4j
@@ -10,7 +10,7 @@ public abstract class SseController<K> {
 
   protected final ConcurrentHashMap<K, SseEmitter> sseEmitters = new ConcurrentHashMap<>();
 
-  public abstract RealtimeNotificationType getEventType();
+  public abstract NotificationType getEventType();
 
   public SseEmitter getSseEmitter(K key) {
     return sseEmitters.get(key);

@@ -2,7 +2,7 @@ package org.atlas.infrastructure.sequencegenerator;
 
 import lombok.RequiredArgsConstructor;
 import org.atlas.framework.sequencegenerator.SequenceGenerator;
-import org.atlas.framework.sequencegenerator.enums.SequenceType;
+import org.atlas.framework.sequencegenerator.SequenceType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

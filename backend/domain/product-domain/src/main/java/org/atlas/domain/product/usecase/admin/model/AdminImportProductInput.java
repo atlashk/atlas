@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.atlas.framework.file.enums.FileType;
+import org.atlas.framework.file.FileType;
 
 @Data
 @Builder

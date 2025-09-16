@@ -105,13 +105,13 @@ dependencies {
     }
     switch (rootProject.ext.appStack['messaging']) {
         case 'kafka':
-            api project(':infrastructure.messaging.kafka.impl.order')
+            api project(':infrastructure.messaging.external.kafka.impl.order')
             break
         case 'rabbitmq':
-            api project(':infrastructure.messaging.rabbitmq.impl.order')
+            api project(':infrastructure.messaging.external.rabbitmq.impl.order')
             break
         case 'sns':
-            api project(':infrastructure.messaging.sns.impl.order')
+            api project(':infrastructure.messaging.external.sns.impl.order')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['messaging']}")
@@ -158,7 +158,7 @@ dependencies {
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.tracing']}")
     }
     if (rootProject.ext.appStack['outbox'] == 'true') {
-        api project(':infrastructure.outbox.parent')
+        api project(':infrastructure.messaging.external.outbox.parent')
     }
     switch (rootProject.ext.appStack['persistence']) {
         case 'jpa':
@@ -178,7 +178,7 @@ dependencies {
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['scheduler']}")
     }
     api project(':infrastructure.sequence-generator')
-    api project(':infrastructure.use-case.use-case-handler-decorator')
+    api project(':infrastructure.use-case.use-case-handler')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

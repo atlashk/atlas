@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.api.server.rest.response.ApiResponseWrapper;
+import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.error.AppError;
 import org.atlas.infrastructure.api.server.rest.core.util.HttpUtil;
 import org.springframework.http.HttpStatus;

@@ -27,15 +27,22 @@ public class OrderAggregator {
   private final UserApiPort userApiPort;
   private final ProductApiPort productApiPort;
 
-  public void aggregate(List<OrderEntity> orderEntities, boolean ignoreNotFound) {
+  public void aggregate(OrderEntity orderEntity, boolean skippedNotFound) {
+    if (orderEntity == null) {
+      return;
+    }
+    aggregate(List.of(orderEntity), skippedNotFound);
+  }
+
+  public void aggregate(List<OrderEntity> orderEntities, boolean skippedNotFound) {
     if (CollectionUtil.isEmpty(orderEntities)) {
       return;
     }
-    loadUsers(orderEntities, ignoreNotFound);
-    loadProducts(orderEntities, ignoreNotFound);
+    loadUsers(orderEntities, skippedNotFound);
+    loadProducts(orderEntities, skippedNotFound);
   }
 
-  private void loadUsers(List<OrderEntity> orderEntities, boolean ignoreNotFound) {
+  private void loadUsers(List<OrderEntity> orderEntities, boolean skippedNotFound) {
     // Collect user IDs
     List<Integer> userIds = orderEntities.stream()
         .map(orderEntity -> orderEntity.getUser().getId())
@@ -49,7 +56,7 @@ public class OrderAggregator {
     ListUserRequest request = new ListUserRequest(userIds);
     List<UserResponse> userResponses = userApiPort.call(request);
     if (CollectionUtil.isEmpty(userResponses)) {
-      if (ignoreNotFound) {
+      if (skippedNotFound) {
         return;
       } else {
         throw new DomainException(AppError.USER_NOT_FOUND);
@@ -66,7 +73,7 @@ public class OrderAggregator {
             .map(userResponse, UserEntity.class);
         orderEntity.setUser(userEntity);
       } else {
-        if (ignoreNotFound) {
+        if (skippedNotFound) {
           throw new DomainException(AppError.USER_NOT_FOUND,
               String.format("User %d not found", orderEntity.getUser().getId()));
         }

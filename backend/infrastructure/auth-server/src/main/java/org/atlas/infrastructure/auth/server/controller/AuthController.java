@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.atlas.framework.api.server.rest.response.ApiResponseWrapper;
+import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.infrastructure.auth.server.model.GenerateOneTimeTokenRequest;
 import org.atlas.infrastructure.auth.server.model.GenerateOneTimeTokenResponse;
 import org.atlas.infrastructure.auth.server.model.LoginRequest;

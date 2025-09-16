@@ -3,11 +3,11 @@ package org.atlas.edge.gateway.springcloudgateway.security;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.atlas.domain.user.shared.enums.Role;
 import org.atlas.edge.gateway.springcloudgateway.security.jwt.JwtExtractor;
 import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.constant.Application;
+import org.atlas.framework.util.CollectionUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -51,7 +51,7 @@ public class SecurityConfig {
           // Configure headers that are exposed from server to client
           List<String> exposedHeaders = applicationConfigPort.getConfigAsList(Application.SYSTEM,
               "cors.exposed-headers");
-          if (CollectionUtils.isNotEmpty(exposedHeaders)) {
+          if (CollectionUtil.isNotEmpty(exposedHeaders)) {
             exposedHeaders.forEach(corsConfig::addExposedHeader);
           }
 

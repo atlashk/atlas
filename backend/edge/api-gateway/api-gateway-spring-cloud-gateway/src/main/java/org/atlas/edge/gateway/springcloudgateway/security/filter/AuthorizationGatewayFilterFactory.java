@@ -6,7 +6,7 @@ import lombok.Data;
 import org.atlas.domain.user.shared.enums.Role;
 import org.atlas.edge.gateway.springcloudgateway.security.jwt.JwtExtractor;
 import org.atlas.edge.gateway.springcloudgateway.util.HttpUtil;
-import org.atlas.framework.api.server.rest.response.ApiResponseWrapper;
+import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.error.AppError;
 import org.atlas.framework.util.CollectionUtil;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
