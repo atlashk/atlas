@@ -1,31 +1,17 @@
 package org.atlas.framework.domain.event.contract.order;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.atlas.framework.domain.event.DomainEventType;
-import org.atlas.framework.domain.event.contract.order.model.OrderItem;
-import org.atlas.framework.domain.event.contract.order.model.User;
-import org.atlas.framework.domain.event.contract.product.ProductReserveQuantityFailedEvent;
 
-@Data
-@NoArgsConstructor
-@EqualsAndHashCode(callSuper = false)
+@Getter
+@Setter
 public class OrderCanceledEvent extends BaseOrderEvent {
+
+  private String cancelReason;
 
   public OrderCanceledEvent(String eventSource) {
     super(eventSource);
-  }
-
-  public void merge(ProductReserveQuantityFailedEvent event) {
-    this.orderId = event.getOrderId();
-    this.user = new User(event.getUser());
-    this.orderItems = event.getOrderItems() // Deep copy
-        .stream()
-        .map(OrderItem::new)
-        .toList();
-    this.amount = event.getAmount();
-    this.createdAt = event.getCreatedAt();
   }
 
   @Override

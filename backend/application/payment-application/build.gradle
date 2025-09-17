@@ -1,0 +1,148 @@
+plugins {
+    id 'java-library'
+    id 'org.springframework.boot' version "${springBootPluginVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagementPluginVersion}"
+    id 'idea'
+}
+
+group = 'org.atlas'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Domain
+    api project(':domain.payment')
+
+    // Infrastructure
+    api project(':infrastructure.application-context')
+    switch (rootProject.ext.appStack['datasource']) {
+        case 'mysql':
+            api project(':infrastructure.datasource.mysql.impl.payment')
+            break
+        case 'postgres':
+            api project(':infrastructure.datasource.postgres.impl.payment')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
+    }
+    switch (rootProject.ext.appStack['discovery-client']) {
+        case 'none':
+            break
+        case 'eureka':
+            api project(':infrastructure.discovery-client.eureka')
+            break
+        case 'kubernetes':
+            api project(':infrastructure.discovery-client.kubernetes')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['discovery-client']}")
+    }
+    switch (rootProject.ext.appStack['kv']) {
+        case 'redis':
+            api project(':infrastructure.kv.redis')
+            break
+        case 'dynamodb':
+            api project(':infrastructure.kv.dynamodb')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['kv']}")
+    }
+    switch (rootProject.ext.appStack['messaging']) {
+        case 'kafka':
+            api project(':infrastructure.messaging.external.kafka.impl.payment')
+            break
+        case 'rabbitmq':
+            api project(':infrastructure.messaging.external.rabbitmq.impl.payment')
+            break
+        case 'sns':
+            api project(':infrastructure.messaging.external.sns.impl.payment')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['messaging']}")
+    }
+    switch (rootProject.ext.appStack['migration']) {
+        case 'flyway':
+            switch (rootProject.ext.appStack['datasource']) {
+                case 'mysql':
+                    api project(':infrastructure.migration.flyway.mysql.impl.payment')
+                    break
+                case 'postgres':
+                    api project(':infrastructure.migration.flyway.postgres.impl.payment')
+                    break
+                default:
+                    throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
+            }
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['migration']}")
+    }
+    api project(':infrastructure.observability.actuator')
+    switch (rootProject.ext.appStack['observability.logging.framework']) {
+        case 'logback':
+            api project(':infrastructure.observability.logging.logback')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.logging.framework']}")
+    }
+    switch (rootProject.ext.appStack['observability.metrics']) {
+        case 'prometheus':
+            api project(':infrastructure.observability.metrics.prometheus')
+            break
+        case 'cloudwatch':
+            api project(':infrastructure.observability.metrics.cloudwatch')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.metrics']}")
+    }
+    switch (rootProject.ext.appStack['observability.tracing']) {
+        case 'zipkin':
+            api project(':infrastructure.observability.tracing.zipkin')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.tracing']}")
+    }
+    if (rootProject.ext.appStack['outbox'] == 'true') {
+        api project(':infrastructure.messaging.external.outbox.parent')
+    }
+    api project(':infrastructure.use-case.use-case-handler')
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}

@@ -7,14 +7,12 @@ import org.atlas.framework.notification.common.NotificationType;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class SseNotification<K> extends Notification {
+public class SseNotification extends Notification {
 
-  public SseNotification(NotificationType notificationType, K key, Object payload) {
+  public SseNotification(NotificationType notificationType, String payload) {
     super(notificationType);
-    this.key = key;
     this.payload = payload;
   }
 
-  private K key;
-  private Object payload;
+  private String payload;
 }

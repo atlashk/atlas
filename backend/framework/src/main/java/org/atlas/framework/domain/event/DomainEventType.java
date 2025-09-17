@@ -14,10 +14,11 @@ public enum DomainEventType {
 
   // Order Service event types
   ORDER_CREATED,
-  ORDER_CONFIRMED,
+  ORDER_FULFILLED,
   ORDER_CANCELED,
 
   // Payment Service event types
+  PAYMENT_INTENT_CREATED,
   PAYMENT_SUCCEEDED,
   PAYMENT_FAILED,
 }

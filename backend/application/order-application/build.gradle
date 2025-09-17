@@ -132,6 +132,21 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['migration']}")
     }
+    switch (rootProject.ext.appStack['notification.email']) {
+        case 'spring':
+            api project(':infrastructure.notification.email.spring')
+            break
+        case 'ses':
+            api project(':infrastructure.notification.email.ses')
+            break
+        case 'sendgrid':
+            api project(':infrastructure.notification.email.sendgrid')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['notification.email']}")
+    }
+    api project(':infrastructure.notification.sse')
+    api project(':infrastructure.notification.websocket')
     api project(':infrastructure.observability.actuator')
     switch (rootProject.ext.appStack['observability.logging.framework']) {
         case 'logback':
@@ -167,17 +182,17 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['persistence']}")
     }
-    switch (rootProject.ext.appStack['scheduler']) {
-        case 'spring':
-            api project(':infrastructure.scheduler.spring.impl.order')
+    api project(':infrastructure.sequence-generator')
+    switch (rootProject.ext.appStack['template']) {
+        case 'freemarker':
+            api project(':infrastructure.template.freemarker')
             break
-        case 'quartz':
-            api project(':infrastructure.scheduler.quartz.impl.order')
+        case 'thymeleaf':
+            api project(':infrastructure.template.thymeleaf')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['scheduler']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['template']}")
     }
-    api project(':infrastructure.sequence-generator')
     api project(':infrastructure.use-case.use-case-handler')
 
     // Lombok

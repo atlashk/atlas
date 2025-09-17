@@ -19,13 +19,13 @@ project(':domain.product').projectDir = file('domain/product-domain')
 include(':domain.product.shared')
 project(':domain.product.shared').projectDir = file('domain/product-domain-shared')
 
+include(':domain.payment')
+project(':domain.payment').projectDir = file('domain/payment-domain')
+
 include(':domain.order')
 project(':domain.order').projectDir = file('domain/order-domain')
 include(':domain.order.shared')
 project(':domain.order.shared').projectDir = file('domain/order-domain-shared')
-
-include(':domain.notification')
-project(':domain.notification').projectDir = file('domain/notification-domain')
 
 // =================================================================================================
 // Infrastructure
@@ -97,8 +97,8 @@ project(':infrastructure.config.yaml').projectDir = file('infrastructure/config/
 // Datasource::MySQL
 include(':infrastructure.datasource.mysql.core')
 project(':infrastructure.datasource.mysql.core').projectDir = file('infrastructure/datasource/mysql/datasource-mysql-core')
-include(':infrastructure.datasource.mysql.impl.notification')
-project(':infrastructure.datasource.mysql.impl.notification').projectDir = file('infrastructure/datasource/mysql/datasource-mysql-impl-notification')
+include(':infrastructure.datasource.mysql.impl.payment')
+project(':infrastructure.datasource.mysql.impl.payment').projectDir = file('infrastructure/datasource/mysql/datasource-mysql-impl-payment')
 include(':infrastructure.datasource.mysql.impl.order')
 project(':infrastructure.datasource.mysql.impl.order').projectDir = file('infrastructure/datasource/mysql/datasource-mysql-impl-order')
 include(':infrastructure.datasource.mysql.impl.product')
@@ -109,8 +109,8 @@ project(':infrastructure.datasource.mysql.impl.user').projectDir = file('infrast
 // Datasource::Postgres
 include(':infrastructure.datasource.postgres.core')
 project(':infrastructure.datasource.postgres.core').projectDir = file('infrastructure/datasource/postgres/datasource-postgres-core')
-include(':infrastructure.datasource.postgres.impl.notification')
-project(':infrastructure.datasource.postgres.impl.notification').projectDir = file('infrastructure/datasource/postgres/datasource-postgres-impl-notification')
+include(':infrastructure.datasource.postgres.impl.payment')
+project(':infrastructure.datasource.postgres.impl.payment').projectDir = file('infrastructure/datasource/postgres/datasource-postgres-impl-payment')
 include(':infrastructure.datasource.postgres.impl.order')
 project(':infrastructure.datasource.postgres.impl.order').projectDir = file('infrastructure/datasource/postgres/datasource-postgres-impl-order')
 include(':infrastructure.datasource.postgres.impl.product')
@@ -215,8 +215,8 @@ project(':infrastructure.messaging.internal.spring').projectDir = file('infrastr
 // Messaging::External::Kafka
 include(':infrastructure.messaging.external.kafka.core')
 project(':infrastructure.messaging.external.kafka.core').projectDir = file('infrastructure/messaging/external/kafka/messaging-external-kafka-core')
-include(':infrastructure.messaging.external.kafka.impl.notification')
-project(':infrastructure.messaging.external.kafka.impl.notification').projectDir = file('infrastructure/messaging/external/kafka/messaging-external-kafka-impl-notification')
+include(':infrastructure.messaging.external.kafka.impl.payment')
+project(':infrastructure.messaging.external.kafka.impl.payment').projectDir = file('infrastructure/messaging/external/kafka/messaging-external-kafka-impl-payment')
 include(':infrastructure.messaging.external.kafka.impl.product')
 project(':infrastructure.messaging.external.kafka.impl.product').projectDir = file('infrastructure/messaging/external/kafka/messaging-external-kafka-impl-product')
 include(':infrastructure.messaging.external.kafka.impl.order')
@@ -227,8 +227,8 @@ project(':infrastructure.messaging.external.kafka.impl.user').projectDir = file(
 // Messaging::External::RabbitMQ
 include(':infrastructure.messaging.external.rabbitmq.core')
 project(':infrastructure.messaging.external.rabbitmq.core').projectDir = file('infrastructure/messaging/external/rabbitmq/messaging-external-rabbitmq-core')
-include(':infrastructure.messaging.external.rabbitmq.impl.notification')
-project(':infrastructure.messaging.external.rabbitmq.impl.notification').projectDir = file('infrastructure/messaging/external/rabbitmq/messaging-external-rabbitmq-impl-notification')
+include(':infrastructure.messaging.external.rabbitmq.impl.payment')
+project(':infrastructure.messaging.external.rabbitmq.impl.payment').projectDir = file('infrastructure/messaging/external/rabbitmq/messaging-external-rabbitmq-impl-payment')
 include(':infrastructure.messaging.external.rabbitmq.impl.product')
 project(':infrastructure.messaging.external.rabbitmq.impl.product').projectDir = file('infrastructure/messaging/external/rabbitmq/messaging-external-rabbitmq-impl-product')
 include(':infrastructure.messaging.external.rabbitmq.impl.order')
@@ -239,8 +239,8 @@ project(':infrastructure.messaging.external.rabbitmq.impl.user').projectDir = fi
 // Messaging::External::SNS
 include(':infrastructure.messaging.external.sns.core')
 project(':infrastructure.messaging.external.sns.core').projectDir = file('infrastructure/messaging/external/sns/messaging-external-sns-core')
-include(':infrastructure.messaging.external.sns.impl.notification')
-project(':infrastructure.messaging.external.sns.impl.notification').projectDir = file('infrastructure/messaging/external/sns/messaging-external-sns-impl-notification')
+include(':infrastructure.messaging.external.sns.impl.payment')
+project(':infrastructure.messaging.external.sns.impl.payment').projectDir = file('infrastructure/messaging/external/sns/messaging-external-sns-impl-payment')
 include(':infrastructure.messaging.external.sns.impl.order')
 project(':infrastructure.messaging.external.sns.impl.order').projectDir = file('infrastructure/messaging/external/sns/messaging-external-sns-impl-order')
 include(':infrastructure.messaging.external.sns.impl.product')
@@ -267,8 +267,8 @@ include(':infrastructure.migration.flyway.mysql.impl.product')
 project(':infrastructure.migration.flyway.mysql.impl.product').projectDir = file('infrastructure/migration/flyway/mysql/migration-flyway-mysql-impl-product')
 include(':infrastructure.migration.flyway.mysql.impl.order')
 project(':infrastructure.migration.flyway.mysql.impl.order').projectDir = file('infrastructure/migration/flyway/mysql/migration-flyway-mysql-impl-order')
-include(':infrastructure.migration.flyway.mysql.impl.notification')
-project(':infrastructure.migration.flyway.mysql.impl.notification').projectDir = file('infrastructure/migration/flyway/mysql/migration-flyway-mysql-impl-notification')
+include(':infrastructure.migration.flyway.mysql.impl.payment')
+project(':infrastructure.migration.flyway.mysql.impl.payment').projectDir = file('infrastructure/migration/flyway/mysql/migration-flyway-mysql-impl-payment')
 
 // Migration::Flyway::Postgres
 include(':infrastructure.migration.flyway.postgres.core')
@@ -279,8 +279,8 @@ include(':infrastructure.migration.flyway.postgres.impl.product')
 project(':infrastructure.migration.flyway.postgres.impl.product').projectDir = file('infrastructure/migration/flyway/postgres/migration-flyway-postgres-impl-product')
 include(':infrastructure.migration.flyway.postgres.impl.order')
 project(':infrastructure.migration.flyway.postgres.impl.order').projectDir = file('infrastructure/migration/flyway/postgres/migration-flyway-postgres-impl-order')
-include(':infrastructure.migration.flyway.postgres.impl.notification')
-project(':infrastructure.migration.flyway.postgres.impl.notification').projectDir = file('infrastructure/migration/flyway/postgres/migration-flyway-postgres-impl-notification')
+include(':infrastructure.migration.flyway.postgres.impl.payment')
+project(':infrastructure.migration.flyway.postgres.impl.payment').projectDir = file('infrastructure/migration/flyway/postgres/migration-flyway-postgres-impl-payment')
 
 // Notification
 
@@ -329,6 +329,8 @@ include(':infrastructure.persistence.jpa.impl.order')
 project(':infrastructure.persistence.jpa.impl.order').projectDir = file('infrastructure/persistence/jpa/persistence-jpa-impl-order')
 include(':infrastructure.persistence.jpa.impl.outbox')
 project(':infrastructure.persistence.jpa.impl.outbox').projectDir = file('infrastructure/persistence/jpa/persistence-jpa-impl-outbox')
+include(':infrastructure.persistence.jpa.impl.payment')
+project(':infrastructure.persistence.jpa.impl.payment').projectDir = file('infrastructure/persistence/jpa/persistence-jpa-impl-payment')
 include(':infrastructure.persistence.jpa.impl.product')
 project(':infrastructure.persistence.jpa.impl.product').projectDir = file('infrastructure/persistence/jpa/persistence-jpa-impl-product')
 include(':infrastructure.persistence.jpa.impl.user')
@@ -351,8 +353,6 @@ project(':infrastructure.resilience.resilience4j').projectDir = file('infrastruc
 // Scheduler::Spring
 include(':infrastructure.scheduler.spring.core')
 project(':infrastructure.scheduler.spring.core').projectDir = file('infrastructure/scheduler/spring/scheduler-spring-core')
-include(':infrastructure.scheduler.spring.impl.order')
-project(':infrastructure.scheduler.spring.impl.order').projectDir = file('infrastructure/scheduler/spring/scheduler-spring-impl-order')
 include(':infrastructure.scheduler.spring.impl.outbox')
 project(':infrastructure.scheduler.spring.impl.outbox').projectDir = file('infrastructure/scheduler/spring/scheduler-spring-impl-outbox')
 
@@ -363,8 +363,6 @@ include(':infrastructure.scheduler.quartz.jobstore.mysql')
 project(':infrastructure.scheduler.quartz.jobstore.mysql').projectDir = file('infrastructure/scheduler/quartz/scheduler-quartz-jobstore-mysql')
 include(':infrastructure.scheduler.quartz.jobstore.postgres')
 project(':infrastructure.scheduler.quartz.jobstore.postgres').projectDir = file('infrastructure/scheduler/quartz/scheduler-quartz-jobstore-postgres')
-include(':infrastructure.scheduler.quartz.impl.order')
-project(':infrastructure.scheduler.quartz.impl.order').projectDir = file('infrastructure/scheduler/quartz/scheduler-quartz-impl-order')
 include(':infrastructure.scheduler.quartz.impl.outbox')
 project(':infrastructure.scheduler.quartz.impl.outbox').projectDir = file('infrastructure/scheduler/quartz/scheduler-quartz-impl-outbox')
 
@@ -409,8 +407,8 @@ project(':application.product').projectDir = file('application/product-applicati
 include(':application.order')
 project(':application.order').projectDir = file('application/order-application')
 
-include(':application.notification')
-project(':application.notification').projectDir = file('application/notification-application')
+include(':application.payment')
+project(':application.payment').projectDir = file('application/payment-application')
 
 // =================================================================================================
 // Edge

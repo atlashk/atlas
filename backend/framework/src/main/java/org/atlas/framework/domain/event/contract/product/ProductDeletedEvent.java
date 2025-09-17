@@ -1,17 +1,15 @@
 package org.atlas.framework.domain.event.contract.product;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.atlas.framework.domain.event.DomainEventType;
 
-@Data
-@NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 public class ProductDeletedEvent extends BaseProductEvent {
 
-  public ProductDeletedEvent(String eventSource) {
-    super(eventSource);
+  public ProductDeletedEvent(String eventSource, Integer productId) {
+    super(eventSource, productId);
   }
 
   @Override

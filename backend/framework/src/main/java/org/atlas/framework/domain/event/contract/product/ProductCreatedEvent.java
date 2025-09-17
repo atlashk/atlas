@@ -1,21 +1,19 @@
 package org.atlas.framework.domain.event.contract.product;
 
 import java.math.BigDecimal;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.atlas.framework.domain.event.DomainEventType;
 
-@Data
-@NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 public class ProductCreatedEvent extends BaseProductEvent {
 
   private String name;
   private BigDecimal price;
 
-  public ProductCreatedEvent(String eventSource) {
-    super(eventSource);
+  public ProductCreatedEvent(String eventSource, Integer productId) {
+    super(eventSource, productId);
   }
 
   @Override

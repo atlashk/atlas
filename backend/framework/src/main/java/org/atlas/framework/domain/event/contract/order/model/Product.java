@@ -1,11 +1,11 @@
 package org.atlas.framework.domain.event.contract.order.model;
 
 import java.math.BigDecimal;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-@NoArgsConstructor
+@Getter
+@Setter
 public class Product {
 
   private Integer id;

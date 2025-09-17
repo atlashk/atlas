@@ -16,8 +16,6 @@ import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.context.Contexts;
 import org.atlas.framework.domain.event.contract.order.OrderCreatedEvent;
 import org.atlas.framework.domain.event.contract.order.model.OrderItem;
-import org.atlas.framework.domain.event.contract.order.model.Product;
-import org.atlas.framework.domain.event.contract.order.model.User;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.error.AppError;

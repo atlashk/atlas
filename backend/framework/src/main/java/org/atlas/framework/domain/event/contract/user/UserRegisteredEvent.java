@@ -1,14 +1,12 @@
 package org.atlas.framework.domain.event.contract.user;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.atlas.domain.user.shared.enums.Role;
 import org.atlas.framework.domain.event.DomainEventType;
 
-@Data
-@NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 public class UserRegisteredEvent extends BaseUserEvent {
 
   private Integer userId;
@@ -19,8 +17,8 @@ public class UserRegisteredEvent extends BaseUserEvent {
   private String phoneNumber;
   private Role role;
 
-  public UserRegisteredEvent(String eventSource) {
-    super(eventSource);
+  public UserRegisteredEvent(String eventSource, Integer userId) {
+    super(eventSource, userId);
   }
 
   @Override
