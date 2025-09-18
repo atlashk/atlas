@@ -8,8 +8,10 @@ import org.atlas.framework.domain.event.DomainEventType;
 @Setter
 public class ProductDeletedEvent extends BaseProductEvent {
 
-  public ProductDeletedEvent(String eventSource, Integer productId) {
-    super(eventSource, productId);
+  private Integer productId;
+
+  public ProductDeletedEvent(String eventSource) {
+    super(eventSource);
   }
 
   @Override

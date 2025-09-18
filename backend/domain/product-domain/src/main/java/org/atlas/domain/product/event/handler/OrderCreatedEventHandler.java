@@ -1,4 +1,4 @@
-package org.atlas.domain.product.event;
+package org.atlas.domain.product.event.handler;
 
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
@@ -26,23 +26,32 @@ public class OrderCreatedEventHandler {
   private final ProductRepository productRepository;
   private final ApplicationConfigPort applicationConfigPort;
   private final LockPort lockPort;
-  private final ExternalMessagePublisherPort messagePublisherPort;
+  private final ExternalMessagePublisherPort externalMessagePublisherPort;
 
   public void handle(OrderCreatedEvent orderCreatedEvent) {
     try {
-      orderCreatedEvent.getOrderItems().forEach(orderItem ->
+      // Try to reserve products
+      orderCreatedEvent.getOrder().getOrderItems().forEach(orderItem ->
           decreaseQuantity(orderItem.getProduct().getId(), orderItem.getQuantity()));
+      log.info("Successfully reserved products: eventId={}, orderId={}",
+          orderCreatedEvent.getEventId(), orderCreatedEvent.getOrder().getOrderId());
+
+      // Publish succeeded event
       ProductReserveQuantitySucceededEvent productReserveQuantitySucceededEvent =
           new ProductReserveQuantitySucceededEvent(applicationConfigPort.getApplicationName());
-      productReserveQuantitySucceededEvent.merge(orderCreatedEvent);
-      messagePublisherPort.publish(productReserveQuantitySucceededEvent);
+      productReserveQuantitySucceededEvent.setOrder(orderCreatedEvent.getOrder());
+      externalMessagePublisherPort.publish(productReserveQuantitySucceededEvent);
     } catch (Exception e) {
-      log.error("Failed to handle event {}", orderCreatedEvent.getEventId(), e);
+      log.error("Failed to reserve products: eventId={}, orderId={}, error={}",
+          orderCreatedEvent.getEventId(), orderCreatedEvent.getOrder().getOrderId(), e.getMessage(),
+          e);
+
+      // Publish failed event
       ProductReserveQuantityFailedEvent productReserveQuantityFailedEvent =
           new ProductReserveQuantityFailedEvent(applicationConfigPort.getApplicationName());
-      productReserveQuantityFailedEvent.merge(orderCreatedEvent);
+      productReserveQuantityFailedEvent.setOrder(orderCreatedEvent.getOrder());
       productReserveQuantityFailedEvent.setError(e.getMessage());
-      messagePublisherPort.publish(productReserveQuantityFailedEvent);
+      externalMessagePublisherPort.publish(productReserveQuantityFailedEvent);
     }
   }
 

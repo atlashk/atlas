@@ -8,10 +8,7 @@ import org.atlas.framework.domain.event.DomainEvent;
 @Setter
 public abstract class BaseProductEvent extends DomainEvent {
 
-  protected Integer productId;
-
-  public BaseProductEvent(String eventSource, Integer productId) {
+  public BaseProductEvent(String eventSource) {
     super(eventSource);
-    this.productId = productId;
   }
 }

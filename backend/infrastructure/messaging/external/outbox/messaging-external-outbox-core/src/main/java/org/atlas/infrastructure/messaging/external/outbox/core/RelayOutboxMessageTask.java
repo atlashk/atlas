@@ -20,7 +20,7 @@ public class RelayOutboxMessageTask {
   private static final int MAX_RETRIES = 3;
 
   private final OutboxMessageRepository outboxMessageRepository;
-  private final ExternalMessagePublisherPort messagePublisherPort;
+  private final ExternalMessagePublisherPort externalMessagePublisherPort;
   private final TransactionPort transactionPort;
 
   public void execute() {

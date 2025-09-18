@@ -13,16 +13,12 @@ public class PaymentEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
   private Integer id;
-  private Integer paymentIntentId;
-  private String stripeChargeId;
   private Integer orderId;
   private Integer userId;
   private BigDecimal amount;
-  private String status;
+  private String currency;
   private String paymentMethodType;
-  private String cardBrand;
-  private String cardLast4;
-  private String failureCode;
-  private String failureMessage;
+  private PaymentStatus status;
+  private String error;
   private String receiptUrl;
 }

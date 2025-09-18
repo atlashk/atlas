@@ -31,7 +31,7 @@ public class AdminImportProductUseCaseHandler {
   private final ApplicationConfigPort applicationConfigPort;
   private final ProductCsvReaderPort productCsvReaderPort;
   private final ProductExcelReaderPort productExcelReaderPort;
-  private final ExternalMessagePublisherPort messagePublisherPort;
+  private final ExternalMessagePublisherPort externalMessagePublisherPort;
 
   public Void handle(AdminImportProductInput input) throws Exception {
     // Read rows from file content

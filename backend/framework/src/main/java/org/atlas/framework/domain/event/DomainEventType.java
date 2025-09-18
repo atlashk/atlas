@@ -18,7 +18,7 @@ public enum DomainEventType {
   ORDER_CANCELED,
 
   // Payment Service event types
-  PAYMENT_INTENT_CREATED,
+  PAYMENT_CREATED,
   PAYMENT_SUCCEEDED,
   PAYMENT_FAILED,
 }

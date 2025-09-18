@@ -1,4 +1,4 @@
-package org.atlas.domain.order.event;
+package org.atlas.domain.order.event.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.order.entity.OrderEntity;
@@ -18,11 +18,12 @@ public class ProductReserveQuantitySucceededEventHandler {
 
   private final OrderRepository orderRepository;
   private final ApplicationConfigPort applicationConfigPort;
-  private final ExternalMessagePublisherPort messagePublisherPort;
+  private final ExternalMessagePublisherPort externalMessagePublisherPort;
 
   public void handle(ProductReserveQuantitySucceededEvent productReserveQuantitySucceededEvent) {
     // Find order
-    OrderEntity orderEntity = orderRepository.findById(productReserveQuantitySucceededEvent.getOrderId())
+    OrderEntity orderEntity = orderRepository.findById(
+            productReserveQuantitySucceededEvent.getOrderId())
         .orElseThrow(() -> new DomainException(AppError.ORDER_NOT_FOUND));
     if (orderEntity.getStatus() != OrderStatus.PROCESSING) {
       throw new DomainException(AppError.ORDER_INVALID_STATUS);

@@ -9,11 +9,12 @@ import org.atlas.framework.domain.event.DomainEventType;
 @Setter
 public class ProductCreatedEvent extends BaseProductEvent {
 
+  private Integer productId;
   private String name;
   private BigDecimal price;
 
-  public ProductCreatedEvent(String eventSource, Integer productId) {
-    super(eventSource, productId);
+  public ProductCreatedEvent(String eventSource) {
+    super(eventSource);
   }
 
   @Override

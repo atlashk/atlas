@@ -1,4 +1,4 @@
-package org.atlas.domain.order.event;
+package org.atlas.domain.order.event.handler;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;

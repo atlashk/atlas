@@ -16,6 +16,8 @@ import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.context.Contexts;
 import org.atlas.framework.domain.event.contract.order.OrderCreatedEvent;
 import org.atlas.framework.domain.event.contract.order.model.OrderItem;
+import org.atlas.framework.domain.event.contract.order.model.Product;
+import org.atlas.framework.domain.event.contract.order.model.User;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.error.AppError;
@@ -32,7 +34,7 @@ public class FrontPlaceOrderUseCaseHandler {
   private final OrderRepository orderRepository;
   private final OrderAggregator orderAggregator;
   private final ApplicationConfigPort applicationConfigPort;
-  private final ExternalMessagePublisherPort messagePublisherPort;
+  private final ExternalMessagePublisherPort externalMessagePublisherPort;
   private final SequenceGenerator sequenceGenerator;
 
   public OrderEntity handle(FrontPlaceOrderInput input) {
@@ -105,14 +107,9 @@ public class FrontPlaceOrderUseCaseHandler {
     if (orderEntity.getOrderItems() != null) {
       for (OrderItemEntity orderItemEntity : orderEntity.getOrderItems()) {
         OrderItem orderItem = new OrderItem();
+        orderItem.setProduct(
+            ObjectMapperUtil.getInstance().map(orderItemEntity.getProduct(), Product.class));
         orderItem.setQuantity(orderItemEntity.getQuantity());
-
-        // Map product
-        if (orderItemEntity.getProduct() != null) {
-          orderItem.setProduct(
-              ObjectMapperUtil.getInstance().map(orderItemEntity.getProduct(), Product.class));
-        }
-
         event.addOrderItem(orderItem);
       }
     }

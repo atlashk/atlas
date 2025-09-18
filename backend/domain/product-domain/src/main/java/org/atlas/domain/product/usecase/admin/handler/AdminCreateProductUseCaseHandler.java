@@ -17,7 +17,7 @@ public class AdminCreateProductUseCaseHandler {
   private final ProductRepository productRepository;
   private final ProductImageService productImageService;
   private final ApplicationConfigPort applicationConfigPort;
-  private final ExternalMessagePublisherPort messagePublisherPort;
+  private final ExternalMessagePublisherPort externalMessagePublisherPort;
 
   public Integer handle(ProductEntity productEntity) throws Exception {
     // Insert product into DB

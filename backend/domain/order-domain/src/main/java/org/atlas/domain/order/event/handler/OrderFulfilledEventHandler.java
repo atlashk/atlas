@@ -1,4 +1,4 @@
-package org.atlas.domain.order.event;
+package org.atlas.domain.order.event.handler;
 
 import java.io.File;
 import java.io.IOException;
@@ -148,7 +148,8 @@ public class OrderFulfilledEventHandler {
     return new AsyncTask() {
       @Override
       public void run() {
-        WebSocketNotification notification = new WebSocketNotification(NotificationType.ORDER_FULFILLED, null);
+        WebSocketNotification notification = new WebSocketNotification(
+            NotificationType.ORDER_FULFILLED, null);
         webSocketPort.notify(notification);
       }
 

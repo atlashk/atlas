@@ -25,7 +25,7 @@ public class FrontRegisterUseCaseHandler {
   private final UserRepository userRepository;
   private final @Nullable AuthClientPort authClientPort;
   private final ApplicationConfigPort applicationConfigPort;
-  private final ExternalMessagePublisherPort messagePublisherPort;
+  private final ExternalMessagePublisherPort externalMessagePublisherPort;
 
   public Void handle(RegisterInput input) throws Exception {
     checkValidity(input);
@@ -66,10 +66,9 @@ public class FrontRegisterUseCaseHandler {
   }
 
   private void publishEvent(UserEntity userEntity) {
-    UserRegisteredEvent event = new UserRegisteredEvent(applicationConfigPort.getApplicationName());
-    ObjectMapperUtil.getInstance()
-        .merge(userEntity, event);
-    event.setUserId(userEntity.getId());
-    messagePublisherPort.publish(event);
+    UserRegisteredEvent event = new UserRegisteredEvent(applicationConfigPort.getApplicationName(),
+        userEntity.getId());
+    ObjectMapperUtil.getInstance().merge(userEntity, event);
+    externalMessagePublisherPort.publish(event);
   }
 }

@@ -9,7 +9,6 @@ import org.atlas.framework.domain.event.DomainEventType;
 @Setter
 public class UserRegisteredEvent extends BaseUserEvent {
 
-  private Integer userId;
   private String username;
   private String firstName;
   private String lastName;

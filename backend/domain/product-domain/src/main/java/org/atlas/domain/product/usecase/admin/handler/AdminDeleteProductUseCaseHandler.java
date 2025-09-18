@@ -18,7 +18,7 @@ public class AdminDeleteProductUseCaseHandler {
   private final ProductRepository productRepository;
   private final ProductImageService productImageService;
   private final ApplicationConfigPort applicationConfigPort;
-  private final ExternalMessagePublisherPort messagePublisherPort;
+  private final ExternalMessagePublisherPort externalMessagePublisherPort;
 
   public Void handle(Integer productId) throws Exception {
     // Delete product from DB

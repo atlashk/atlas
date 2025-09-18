@@ -55,15 +55,15 @@ project(':infrastructure.api-client.rest.resttemplate').projectDir = file('infra
 
 // API server::gRPC::Protobuf
 include(':infrastructure.api-server.grpc.protobuf')
-project(':infrastructure.api-server.grpc.protobuf').projectDir = file('infrastructure/api-server/grpc/api-server-grpc-protobuf')
+project(':infrastructure.api-server.grpc.protobuf').projectDir = file('infrastructure/api-server/grpc/protobuf')
 
 // API server::gRPC::netdevh
 include(':infrastructure.api-server.grpc.netdevh.core')
-project(':infrastructure.api-server.grpc.netdevh.core').projectDir = file('infrastructure/api-server/grpc/api-server-grpc-netdevh/api-server-grpc-netdevh-core')
+project(':infrastructure.api-server.grpc.netdevh.core').projectDir = file('infrastructure/api-server/grpc/netdevh/api-server-grpc-netdevh-core')
 include(':infrastructure.api-server.grpc.netdevh.impl.product')
-project(':infrastructure.api-server.grpc.netdevh.impl.product').projectDir = file('infrastructure/api-server/grpc/api-server-grpc-netdevh/api-server-grpc-netdevh-impl-product')
+project(':infrastructure.api-server.grpc.netdevh.impl.product').projectDir = file('infrastructure/api-server/grpc/netdevh/api-server-grpc-netdevh-impl-product')
 include(':infrastructure.api-server.grpc.netdevh.impl.user')
-project(':infrastructure.api-server.grpc.netdevh.impl.user').projectDir = file('infrastructure/api-server/grpc/api-server-grpc-netdevh/api-server-grpc-netdevh-impl-user')
+project(':infrastructure.api-server.grpc.netdevh.impl.user').projectDir = file('infrastructure/api-server/grpc/netdevh/api-server-grpc-netdevh-impl-user')
 
 // API server::REST
 include(':infrastructure.api-server.rest.core')

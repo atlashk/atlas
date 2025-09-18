@@ -3,15 +3,16 @@ package org.atlas.framework.domain.event.contract.product;
 import lombok.Getter;
 import lombok.Setter;
 import org.atlas.framework.domain.event.DomainEventType;
+import org.atlas.framework.domain.event.contract.order.model.Order;
 
 @Getter
 @Setter
 public class ProductReserveQuantitySucceededEvent extends BaseProductEvent {
 
-  private Integer orderId;
+  private Order order;
 
-  public ProductReserveQuantitySucceededEvent(String eventSource, Integer productId) {
-    super(eventSource, productId);
+  public ProductReserveQuantitySucceededEvent(String eventSource) {
+    super(eventSource);
   }
 
   @Override
