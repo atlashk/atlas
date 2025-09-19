@@ -29,6 +29,13 @@ dependencies {
     api project(':domain.payment')
 
     // Infrastructure
+    switch (rootProject.ext.appStack['api-server']) {
+        case 'rest':
+            api project(':infrastructure.api-server.rest.impl.payment')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
+    }
     api project(':infrastructure.application-context')
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
@@ -61,6 +68,13 @@ dependencies {
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['kv']}")
+    }
+    switch (rootProject.ext.appStack['lock']) {
+        case 'redisson':
+            api project(':infrastructure.lock.redisson')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['lock']}")
     }
     switch (rootProject.ext.appStack['messaging']) {
         case 'kafka':

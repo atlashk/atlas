@@ -1,4 +1,4 @@
-package org.atlas.domain.payment.entity;
+package org.atlas.domain.payment.shared.enums;
 
 public enum PaymentStatus {
 

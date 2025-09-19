@@ -26,6 +26,7 @@ repositories {
 dependencies {
     // Shared domain
     api project(':domain.order.shared')
+    api project(':domain.payment.shared')
     api project(':domain.product.shared')
     api project(':domain.user.shared')
 
@@ -41,7 +42,7 @@ dependencies {
     // Validation annotations
     api 'jakarta.validation:jakarta.validation-api:3.0.2'
 
-    // Cryptography
+    // Security
     api 'org.springframework.security:spring-security-crypto:6.4.4'
     api 'commons-codec:commons-codec:1.18.0'
 

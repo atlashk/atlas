@@ -12,8 +12,10 @@ public class WebhookEventEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
   private Integer id;
-  private String stripeEventId;
-  private String eventType;
+  private Integer paymentId;
+  private Integer userId;
+  private Integer orderId;
+  private String transactionId;
   private String eventData;
   private Boolean processed = false;
   private String errorMessage;

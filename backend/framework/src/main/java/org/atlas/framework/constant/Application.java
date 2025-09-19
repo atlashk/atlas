@@ -10,5 +10,5 @@ public final class Application {
   public static final String USER_SERVICE = "user-service";
   public static final String PRODUCT_SERVICE = "product-service";
   public static final String ORDER_SERVICE = "order-service";
-  public static final String NOTIFICATION_SERVICE = "notification-service";
+  public static final String PAYMENT_SERVICE = "payment-service";
 }

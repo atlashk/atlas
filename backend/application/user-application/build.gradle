@@ -80,6 +80,13 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['kv']}")
     }
+    switch (rootProject.ext.appStack['lock']) {
+        case 'redisson':
+            api project(':infrastructure.lock.redisson')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['lock']}")
+    }
     switch (rootProject.ext.appStack['messaging']) {
         case 'kafka':
             api project(':infrastructure.messaging.external.kafka.impl.user')

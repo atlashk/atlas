@@ -16,6 +16,12 @@ public class DomainException extends RuntimeException {
     this.messageCode = error.getMessageCode();
   }
 
+  public DomainException(AppError error, Throwable cause) {
+    super(cause);
+    this.errorCode = error.getErrorCode();
+    this.messageCode = error.getMessageCode();
+  }
+
   public DomainException(AppError error, String errorMessage) {
     super(errorMessage);
     this.errorCode = error.getErrorCode();

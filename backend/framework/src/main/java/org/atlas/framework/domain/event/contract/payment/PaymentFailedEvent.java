@@ -10,8 +10,8 @@ public class PaymentFailedEvent extends BasePaymentEvent {
 
   private String error;
 
-  public PaymentFailedEvent(String eventSource) {
-    super(eventSource);
+  public PaymentFailedEvent(String eventSource, Integer paymentId, Integer orderId) {
+    super(eventSource, paymentId, orderId);
   }
 
   @Override

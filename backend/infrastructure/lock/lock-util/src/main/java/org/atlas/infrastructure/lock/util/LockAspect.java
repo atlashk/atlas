@@ -20,7 +20,8 @@ public class LockAspect {
   @Around("@annotation(lock)")
   public Object applyLock(ProceedingJoinPoint joinPoint, Lock lock) throws Throwable {
     String key = lock.key();
-    Duration timeout = Duration.of(lock.timeout(), lock.timeUnit().toChronoUnit());
+    Duration waitTime = Duration.of(lock.waitTime(), lock.timeUnit().toChronoUnit());
+    Duration leaseTime = Duration.of(lock.leaseTime(), lock.timeUnit().toChronoUnit());
 
     final Object[] result = new Object[1];
 
@@ -30,7 +31,7 @@ public class LockAspect {
       } catch (Throwable ex) {
         throw new RuntimeException(ex); // will be unwrapped in AOP
       }
-    }, key, timeout);
+    }, key, waitTime, leaseTime, lock.unlockOnCompletion());
 
     return result[0];
   }

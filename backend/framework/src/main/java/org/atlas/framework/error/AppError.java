@@ -33,6 +33,9 @@ public enum AppError {
   ORDER_NOT_FOUND(3000, "error.order.not_found"),
   FAILED_TO_PLACE_ORDER(3001, "error.order.failed_to_place_order"),
   ORDER_INVALID_STATUS(3002, "error.order.invalid_status"),
+
+  // Payment-related errors
+  PAYMENT_GATEWAY_NOT_SUPPORTED(4000, "error.payment.payment_gateway_not_supported"),
   ;
 
   private final int errorCode;

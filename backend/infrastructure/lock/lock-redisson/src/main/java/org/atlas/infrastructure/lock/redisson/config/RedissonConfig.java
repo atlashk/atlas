@@ -46,7 +46,6 @@ public class RedissonConfig {
       if (isSslEnabled) {
         clusterConfig.setSslVerificationMode(SslVerificationMode.STRICT);
       }
-
     } else {
       // Standalone mode
       if (StringUtil.isBlank(redisProperties.getHost())) {

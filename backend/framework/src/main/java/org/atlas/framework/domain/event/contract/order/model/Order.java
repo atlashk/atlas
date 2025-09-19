@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import org.atlas.domain.payment.shared.enums.PaymentGateway;
 
 @Getter
 @Setter
@@ -15,6 +16,7 @@ public class Order {
   private User user;
   private List<OrderItem> orderItems;
   private BigDecimal amount;
+  private PaymentGateway paymentGateway;
   private Date createdAt;
 
   public void addOrderItem(OrderItem orderItem) {

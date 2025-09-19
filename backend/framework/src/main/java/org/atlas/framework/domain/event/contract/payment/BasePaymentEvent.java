@@ -13,7 +13,9 @@ public abstract class BasePaymentEvent extends DomainEvent {
   protected Integer paymentId;
   protected Integer orderId;
 
-  public BasePaymentEvent(String eventSource) {
+  public BasePaymentEvent(String eventSource, Integer paymentId, Integer orderId) {
     super(eventSource);
+    this.paymentId = paymentId;
+    this.orderId = orderId;
   }
 }

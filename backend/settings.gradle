@@ -21,6 +21,8 @@ project(':domain.product.shared').projectDir = file('domain/product-domain-share
 
 include(':domain.payment')
 project(':domain.payment').projectDir = file('domain/payment-domain')
+include(':domain.payment.shared')
+project(':domain.payment.shared').projectDir = file('domain/payment-domain-shared')
 
 include(':domain.order')
 project(':domain.order').projectDir = file('domain/order-domain')
@@ -70,6 +72,8 @@ include(':infrastructure.api-server.rest.core')
 project(':infrastructure.api-server.rest.core').projectDir = file('infrastructure/api-server/rest/api-server-rest-core')
 include(':infrastructure.api-server.rest.impl.order')
 project(':infrastructure.api-server.rest.impl.order').projectDir = file('infrastructure/api-server/rest/api-server-rest-impl-order')
+include(':infrastructure.api-server.rest.impl.payment')
+project(':infrastructure.api-server.rest.impl.payment').projectDir = file('infrastructure/api-server/rest/api-server-rest-impl-payment')
 include(':infrastructure.api-server.rest.impl.product')
 project(':infrastructure.api-server.rest.impl.product').projectDir = file('infrastructure/api-server/rest/api-server-rest-impl-product')
 include(':infrastructure.api-server.rest.impl.user')

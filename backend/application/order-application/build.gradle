@@ -57,9 +57,6 @@ dependencies {
         case 'rest':
             api project(':infrastructure.api-server.rest.impl.order')
             break
-        case 'grpc':
-            api project(':infrastructure.api-server.grpc.netdevh.impl.order')
-            break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
     }
@@ -102,6 +99,13 @@ dependencies {
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['kv']}")
+    }
+    switch (rootProject.ext.appStack['lock']) {
+        case 'redisson':
+            api project(':infrastructure.lock.redisson')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['lock']}")
     }
     switch (rootProject.ext.appStack['messaging']) {
         case 'kafka':

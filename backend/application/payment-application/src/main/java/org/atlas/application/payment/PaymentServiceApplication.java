@@ -1,4 +1,4 @@
-package org.atlas.application.notification;
+package org.atlas.application.payment;
 
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.service.DomainService;
@@ -25,10 +25,10 @@ import org.springframework.context.annotation.FilterType;
         )
     }
 )
-public class NotificationServiceApplication {
+public class PaymentServiceApplication {
 
   public static void main(String[] args) {
-    new SpringApplicationBuilder(NotificationServiceApplication.class)
+    new SpringApplicationBuilder(PaymentServiceApplication.class)
         .initializers(new YamlConfigLoader()).run(args);
   }
 }

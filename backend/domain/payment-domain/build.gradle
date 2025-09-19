@@ -24,6 +24,9 @@ repositories {
 }
 
 dependencies {
+    // Domain
+    api project(':domain.payment.shared')
+
     // Framework
     api project(':framework')
 

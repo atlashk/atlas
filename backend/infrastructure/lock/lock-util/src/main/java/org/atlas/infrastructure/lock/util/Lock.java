@@ -11,8 +11,8 @@ import java.util.concurrent.TimeUnit;
 public @interface Lock {
 
   String key();
-
-  long timeout() default 30;
-
-  TimeUnit timeUnit() default TimeUnit.SECONDS;
+  long waitTime();
+  long leaseTime();
+  TimeUnit timeUnit();
+  boolean unlockOnCompletion() default true;
 }

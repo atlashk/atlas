@@ -1,6 +1,8 @@
 package org.atlas.domain.order.usecase.front.handler;
 
+import java.time.Duration;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,13 +16,17 @@ import org.atlas.domain.order.shared.enums.OrderStatus;
 import org.atlas.domain.order.usecase.front.model.FrontPlaceOrderInput;
 import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.context.Contexts;
+import org.atlas.framework.cryptography.HashingUtil;
 import org.atlas.framework.domain.event.contract.order.OrderCreatedEvent;
+import org.atlas.framework.domain.event.contract.order.model.Order;
 import org.atlas.framework.domain.event.contract.order.model.OrderItem;
 import org.atlas.framework.domain.event.contract.order.model.Product;
 import org.atlas.framework.domain.event.contract.order.model.User;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.error.AppError;
+import org.atlas.framework.lock.LockAcquisitionException;
+import org.atlas.framework.lock.LockPort;
 import org.atlas.framework.messaging.ExternalMessagePublisherPort;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.sequencegenerator.SequenceGenerator;
@@ -35,36 +41,66 @@ public class FrontPlaceOrderUseCaseHandler {
   private final OrderAggregator orderAggregator;
   private final ApplicationConfigPort applicationConfigPort;
   private final ExternalMessagePublisherPort externalMessagePublisherPort;
+  private final LockPort lockPort;
   private final SequenceGenerator sequenceGenerator;
 
   public OrderEntity handle(FrontPlaceOrderInput input) {
+    OrderEntity[] result = new OrderEntity[1];
+
+    final Integer userId = Contexts.getUserId();
+
+    // Payment idempotence guarantee
+    String lockKey = obtainLockKey(input, userId);
+    Duration waitTime = Duration.ofSeconds(30);
+    Duration leaseTime = Duration.ofMinutes(15);
+
     try {
-      OrderEntity orderEntity = newOrder(input);
-      orderEntity.setCode(sequenceGenerator.generate(SequenceType.ORDER));
+      lockPort.doWithLock(() -> {
+        OrderEntity orderEntity = newOrderEntity(input);
 
-      // Fetch user and products info from internal services
-      orderAggregator.aggregate(Collections.singletonList(orderEntity), false);
+        // Fetch user and products info from internal services
+        orderAggregator.aggregate(Collections.singletonList(orderEntity), false);
 
-      // Calculate order amount
-      orderEntity.calculateOrderAmount();
+        // Calculate order amount
+        orderEntity.calculateOrderAmount();
 
-      // Save into DB
-      orderRepository.insert(orderEntity);
+        // Save into DB
+        orderRepository.insert(orderEntity);
 
-      // Publish event
-      publishEvent(orderEntity);
+        // Publish event
+        publishEvent(orderEntity);
 
-      // Return the inserted order
-      return orderEntity;
-    } catch (Exception e) {
-      log.error("Failed to place order", e);
-      throw new DomainException(AppError.FAILED_TO_PLACE_ORDER);
+        // Return the inserted order
+        result[0] = orderEntity;
+      }, lockKey, waitTime, leaseTime, true);
+    } catch (LockAcquisitionException e) {
+      log.warn("Duplicate order attempt detected: userId={}, input={}", 
+           userId, input, e);
+      throw new DomainException(AppError.CONFLICT, e);
     }
+
+    return result[0];
   }
 
-  private OrderEntity newOrder(FrontPlaceOrderInput input) {
+  private String obtainLockKey(FrontPlaceOrderInput input, Integer userId) {
+    // Create a deterministic signature based on order items
+    StringBuilder signature = new StringBuilder();
+    input.getOrderItems().stream()
+        .sorted(Comparator.comparingLong(
+            FrontPlaceOrderInput.OrderItem::getProductId)) // Sort for consistency
+        .forEach(item -> signature.append(item.getProductId())
+            .append(":")
+            .append(item.getQuantity())
+            .append(";"));
+    String hash = HashingUtil.sha256ToHex(signature.toString());
+    return String.format("place-order:%d:%s", userId, hash);
+  }
+
+  private OrderEntity newOrderEntity(FrontPlaceOrderInput input) {
     // Order
     OrderEntity orderEntity = new OrderEntity();
+    orderEntity.setCode(sequenceGenerator.generate(SequenceType.ORDER));
+    orderEntity.setPaymentGateway(input.getPaymentGateway());
     orderEntity.setStatus(OrderStatus.PROCESSING);
     orderEntity.setCreatedAt(new Date());
 
@@ -94,13 +130,15 @@ public class FrontPlaceOrderUseCaseHandler {
     OrderCreatedEvent event = new OrderCreatedEvent(applicationConfigPort.getApplicationName());
 
     // Map basic fields
-    event.setOrderId(orderEntity.getId());
-    event.setAmount(orderEntity.getAmount());
-    event.setCreatedAt(orderEntity.getCreatedAt());
+    Order order = new Order();
+    order.setOrderId(orderEntity.getId());
+    order.setAmount(orderEntity.getAmount());
+    order.setPaymentGateway(orderEntity.getPaymentGateway());
+    order.setCreatedAt(orderEntity.getCreatedAt());
 
     // Map user
     if (orderEntity.getUser() != null) {
-      event.setUser(ObjectMapperUtil.getInstance().map(orderEntity.getUser(), User.class));
+      order.setUser(ObjectMapperUtil.getInstance().map(orderEntity.getUser(), User.class));
     }
 
     // Map order items
@@ -110,10 +148,10 @@ public class FrontPlaceOrderUseCaseHandler {
         orderItem.setProduct(
             ObjectMapperUtil.getInstance().map(orderItemEntity.getProduct(), Product.class));
         orderItem.setQuantity(orderItemEntity.getQuantity());
-        event.addOrderItem(orderItem);
+        order.addOrderItem(orderItem);
       }
     }
 
-    messagePublisherPort.publish(event);
+    externalMessagePublisherPort.publish(event);
   }
 }
