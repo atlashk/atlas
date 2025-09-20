@@ -20,7 +20,7 @@ public class SpringWebSocketAdapter implements WebSocketPort {
     log.info("Notifying {}", notification);
     try {
       String destination = WebSocketDestinationResolver.resolve(notification);
-      messagingTemplate.convertAndSend(destination, notification.getPayload());
+      messagingTemplate.convertAndSend(destination, notification);
       log.info("Notified {}", notification);
     } catch (Exception e) {
       log.error("Failed to notify {}", notification, e);

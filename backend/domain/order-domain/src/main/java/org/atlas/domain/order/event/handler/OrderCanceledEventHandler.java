@@ -6,19 +6,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.order.entity.OrderEntity;
 import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.service.OrderAggregator;
-import org.atlas.domain.order.shared.enums.OrderStatus;
-import org.atlas.framework.concurrent.AsyncTask;
-import org.atlas.framework.concurrent.ConcurrentUtil;
+import org.atlas.domain.order.shared.OrderStatus;
+import org.atlas.framework.async.AsyncTask;
+import org.atlas.framework.async.AsyncUtil;
 import org.atlas.framework.domain.event.DomainEventType;
 import org.atlas.framework.domain.event.contract.order.OrderCanceledEvent;
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.error.AppError;
-import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.notification.common.NotificationType;
 import org.atlas.framework.notification.realtime.sse.SseNotification;
 import org.atlas.framework.notification.realtime.sse.SsePort;
-import org.atlas.framework.notification.realtime.sse.payload.OrderCanceledPayload;
 import org.atlas.framework.notification.realtime.websocket.WebSocketNotification;
 import org.atlas.framework.notification.realtime.websocket.WebSocketPort;
 
@@ -29,7 +27,7 @@ public class OrderCanceledEventHandler {
 
   private final OrderRepository orderRepository;
   private final OrderAggregator orderAggregator;
-  private final SsePort<Integer> ssePort;
+  private final SsePort ssePort;
   private final WebSocketPort webSocketPort;
 
   public void handle(OrderCanceledEvent event) {
@@ -40,7 +38,7 @@ public class OrderCanceledEventHandler {
     }
     orderAggregator.aggregate(order, false);
 
-    ConcurrentUtil.executeAsync(List.of(
+    AsyncUtil.executeAsync(List.of(
         notifySse(event),
         notifyWebSocket(event)
     ));
@@ -50,10 +48,11 @@ public class OrderCanceledEventHandler {
     return new AsyncTask() {
       @Override
       public void run() {
-        OrderCanceledPayload payload = new OrderCanceledPayload(event.getCancelReason());
-        String payloadStr = JsonUtil.getInstance().toJson(payload);
-        SseNotification notification = new SseNotification(NotificationType.ORDER_CANCELED,
-            payloadStr);
+        SseNotification notification = new SseNotification(
+            NotificationType.ORDER_CANCELED,
+            String.valueOf(event.getOrderId()),
+            event
+        );
         ssePort.notify(notification);
       }
 
@@ -73,9 +72,10 @@ public class OrderCanceledEventHandler {
     return new AsyncTask() {
       @Override
       public void run() {
-        OrderCanceledPayload payload = new OrderCanceledPayload(event.getCancelReason());
         WebSocketNotification notification = new WebSocketNotification(
-            NotificationType.ORDER_CANCELED, payload);
+            NotificationType.ORDER_CANCELED,
+            event
+        );
         webSocketPort.notify(notification);
       }
 

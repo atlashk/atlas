@@ -1,11 +1,11 @@
-import { orderApi } from "@/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useCartStore } from "@/stores";
-import { getOrderStatusBadge } from "@/utils/formatter.util";
-import { Client } from "@stomp/stompjs";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import {orderApi} from "@/api";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {useCartStore} from "@/stores";
+import {getOrderStatusBadge} from "@/utils/formatter.util";
+import {Client} from "@stomp/stompjs";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import SockJS from "sockjs-client";
-import { toast } from "sonner";
+import {toast} from "sonner";
 
 /**
  * Interface for tracking order statuses across different communication methods
@@ -19,7 +19,7 @@ interface OrderStatuses {
 /**
  * Interface for tracking cancellation reasons across different communication methods
  */
-interface CanceledReasons {
+interface CancellationReasons {
   shortPolling: string | null;
   sse: string | null;
   ws: string | null;
@@ -28,7 +28,7 @@ interface CanceledReasons {
 const DEFAULT_ORDER_STATUS = "PROCESSING";
 
 const OrderTracking: React.FC = () => {
-  const { currentOrderId } = useCartStore();
+  const {currentOrderId} = useCartStore();
 
   // Reactive state for order statuses and cancellation reasons
   const [orderStatuses, setOrderStatuses] = useState<OrderStatuses>({
@@ -37,7 +37,7 @@ const OrderTracking: React.FC = () => {
     ws: DEFAULT_ORDER_STATUS,
   });
 
-  const [canceledReasons, setCanceledReasons] = useState<CanceledReasons>({
+  const [cancellationReasons, setCancellationReasons] = useState<CancellationReasons>({
     shortPolling: null,
     sse: null,
     ws: null,
@@ -58,15 +58,15 @@ const OrderTracking: React.FC = () => {
    * @param reason - The cancellation reason (if applicable)
    */
   const updateOrderStatus = useCallback(
-    (
-      type: keyof OrderStatuses,
-      status: string,
-      reason: string | null = null
-    ): void => {
-      setOrderStatuses((prev) => ({ ...prev, [type]: status }));
-      setCanceledReasons((prev) => ({ ...prev, [type]: reason }));
-    },
-    []
+      (
+          type: keyof OrderStatuses,
+          status: string,
+          reason: string | null = null
+      ): void => {
+        setOrderStatuses((prev) => ({...prev, [type]: status}));
+        setCancellationReasons((prev) => ({...prev, [type]: reason}));
+      },
+      []
   );
 
   /**
@@ -85,35 +85,35 @@ const OrderTracking: React.FC = () => {
    * @param orderId - The order ID to track
    */
   const startShortPolling = useCallback(
-    (orderId: number): void => {
-      const pollOrder = async (): Promise<void> => {
-        try {
-          const response = await orderApi.getOrderStatus(orderId);
-          if (response.success && response.data) {
-            const { status, canceledReason } = response.data;
-            updateOrderStatus("shortPolling", status, canceledReason || null);
+      (orderId: number): void => {
+        const pollOrder = async (): Promise<void> => {
+          try {
+            const response = await orderApi.getOrderStatus(orderId);
+            if (response.success && response.data) {
+              const {status, cancellationReason} = response.data;
+              updateOrderStatus("shortPolling", status, cancellationReason || null);
 
-            // Stop polling when order reaches final state to avoid unnecessary requests
-            if (status === "CONFIRMED" || status === "CANCELED") {
-              stopShortPolling();
+              // Stop polling when order reaches final state to avoid unnecessary requests
+              if (status === "CONFIRMED" || status === "CANCELED") {
+                stopShortPolling();
+              }
+            } else {
+              toast.error(
+                  response.errorMessage || "Failed to fetch order status"
+              );
             }
-          } else {
-            toast.error(
-              response.errorMessage || "Failed to fetch order status"
-            );
+          } catch (error: unknown) {
+            console.error("Error in short polling:", error);
+            const errorMessage =
+                error instanceof Error ? error.message : "Unknown error";
+            toast.error("Error fetching order status: " + errorMessage);
           }
-        } catch (error: unknown) {
-          console.error("Error in short polling:", error);
-          const errorMessage =
-            error instanceof Error ? error.message : "Unknown error";
-          toast.error("Error fetching order status: " + errorMessage);
-        }
-      };
+        };
 
-      pollOrder(); // Execute initial poll immediately
-      pollingIntervalRef.current = setInterval(pollOrder, 5000); // Poll every 5 seconds
-    },
-    [updateOrderStatus, stopShortPolling]
+        pollOrder(); // Execute initial poll immediately
+        pollingIntervalRef.current = setInterval(pollOrder, 5000); // Poll every 5 seconds
+      },
+      [updateOrderStatus, stopShortPolling]
   );
 
   /**
@@ -122,45 +122,45 @@ const OrderTracking: React.FC = () => {
    * @param orderId - The order ID to track
    */
   const connectSSE = useCallback(
-    (orderId: number): void => {
-      // Close existing connection if any
-      if (eventSourceRef.current) eventSourceRef.current.close();
+      (orderId: number): void => {
+        // Close existing connection if any
+        if (eventSourceRef.current) eventSourceRef.current.close();
 
-      // Create new SSE connection to order-specific endpoint
-      eventSourceRef.current = new EventSource(
-        `${API_BASE_URL}/notification-svc/sse/orders/${orderId}/status`
-      );
+        // Create new SSE connection to order-specific endpoint
+        eventSourceRef.current = new EventSource(
+            `${API_BASE_URL}/notification-svc/sse/orders/${orderId}/status`
+        );
 
-      // Handle successful connection
-      eventSourceRef.current.addEventListener("open", () => {
-        console.log("SSE connection established");
-      });
+        // Handle successful connection
+        eventSourceRef.current.addEventListener("open", () => {
+          console.log("SSE connection established");
+        });
 
-      // Listen for order status change events
-      eventSourceRef.current.addEventListener(
-        "ORDER_STATUS_CHANGED",
-        (event: MessageEvent) => {
-          try {
-            const data = JSON.parse(event.data);
-            updateOrderStatus(
-              "sse",
-              data.orderStatus,
-              data.canceledReason || null
-            );
-          } catch (error: unknown) {
-            const errorMessage =
-              error instanceof Error ? error.message : "Unknown error";
-            console.error("SSE error parsing message:", errorMessage);
-          }
-        }
-      );
+        // Listen for order status change events
+        eventSourceRef.current.addEventListener(
+            "ORDER_STATUS_CHANGED",
+            (event: MessageEvent) => {
+              try {
+                const data = JSON.parse(event.data);
+                updateOrderStatus(
+                    "sse",
+                    data.orderStatus,
+                    data.cancellationReason || null
+                );
+              } catch (error: unknown) {
+                const errorMessage =
+                    error instanceof Error ? error.message : "Unknown error";
+                console.error("SSE error parsing message:", errorMessage);
+              }
+            }
+        );
 
-      // Handle connection errors
-      eventSourceRef.current.addEventListener("error", () => {
-        console.error("SSE connection error");
-      });
-    },
-    [API_BASE_URL, updateOrderStatus]
+        // Handle connection errors
+        eventSourceRef.current.addEventListener("error", () => {
+          console.error("SSE connection error");
+        });
+      },
+      [API_BASE_URL, updateOrderStatus]
   );
 
   /**
@@ -169,74 +169,74 @@ const OrderTracking: React.FC = () => {
    * @param orderId - The order ID to track
    */
   const connectWebSocket = useCallback(
-    (orderId: number): void => {
-      // Cleanup existing connection
-      if (stompClientRef.current) {
-        stompClientRef.current.deactivate();
-        stompClientRef.current = null;
-      }
+      (orderId: number): void => {
+        // Cleanup existing connection
+        if (stompClientRef.current) {
+          stompClientRef.current.deactivate();
+          stompClientRef.current = null;
+        }
 
-      // Create new STOMP client with SockJS transport
-      stompClientRef.current = new Client({
-        // SockJS factory for WebSocket connection with fallback transports
-        webSocketFactory: () =>
-          new SockJS(`${API_BASE_URL}/notification-svc/ws`, null, {
-            transports: ["websocket", "xhr-streaming", "xhr-polling"], // Fallback order
-            timeout: 10000, // 10 second timeout
-          }),
-        connectHeaders: {}, // Additional headers for STOMP connection
-        reconnectDelay: 5000, // Auto-reconnect after 5 seconds
-        heartbeatIncoming: 4000, // Expect heartbeat from server every 4 seconds
-        heartbeatOutgoing: 4000, // Send heartbeat to server every 4 seconds
+        // Create new STOMP client with SockJS transport
+        stompClientRef.current = new Client({
+          // SockJS factory for WebSocket connection with fallback transports
+          webSocketFactory: () =>
+              new SockJS(`${API_BASE_URL}/notification-svc/ws`, null, {
+                transports: ["websocket", "xhr-streaming", "xhr-polling"], // Fallback order
+                timeout: 10000, // 10 second timeout
+              }),
+          connectHeaders: {}, // Additional headers for STOMP connection
+          reconnectDelay: 5000, // Auto-reconnect after 5 seconds
+          heartbeatIncoming: 4000, // Expect heartbeat from server every 4 seconds
+          heartbeatOutgoing: 4000, // Send heartbeat to server every 4 seconds
 
-        // Handle successful STOMP connection
-        onConnect: () => {
-          if (!stompClientRef.current) return;
+          // Handle successful STOMP connection
+          onConnect: () => {
+            if (!stompClientRef.current) return;
 
-          // Subscribe to order-specific topic for status updates
-          stompClientRef.current.subscribe(
-            `/topic/orders/${orderId}/status`,
-            (message: { body: string }) => {
-              try {
-                const { orderStatus, canceledReason } = JSON.parse(
-                  message.body
-                );
-                updateOrderStatus("ws", orderStatus, canceledReason || null);
-              } catch (error: unknown) {
-                const errorMessage =
-                  error instanceof Error ? error.message : "Unknown error";
-                console.error("WebSocket error parsing message:", errorMessage);
-              }
+            // Subscribe to order-specific topic for status updates
+            stompClientRef.current.subscribe(
+                `/topic/orders/${orderId}/status`,
+                (message: { body: string }) => {
+                  try {
+                    const {orderStatus, cancellationReason} = JSON.parse(
+                        message.body
+                    );
+                    updateOrderStatus("ws", orderStatus, cancellationReason || null);
+                  } catch (error: unknown) {
+                    const errorMessage =
+                        error instanceof Error ? error.message : "Unknown error";
+                    console.error("WebSocket error parsing message:", errorMessage);
+                  }
+                }
+            );
+          },
+
+          // Handle STOMP protocol errors
+          onStompError: (frame) => {
+            console.error("STOMP error:", frame.headers["message"]);
+            toast.error("WebSocket connection error");
+          },
+
+          // Handle WebSocket connection errors
+          onWebSocketError: () => {
+            console.error("WebSocket connection failed");
+            toast.error("WebSocket connection failed");
+          },
+
+          // Handle WebSocket connection closure
+          onWebSocketClose: (event) => {
+            // Code 2000 indicates all SockJS transports failed
+            if (event.code === 2000) {
+              console.error("All WebSocket transports failed");
+              toast.error("WebSocket connection failed: All transports failed");
             }
-          );
-        },
+          },
+        });
 
-        // Handle STOMP protocol errors
-        onStompError: (frame) => {
-          console.error("STOMP error:", frame.headers["message"]);
-          toast.error("WebSocket connection error");
-        },
-
-        // Handle WebSocket connection errors
-        onWebSocketError: () => {
-          console.error("WebSocket connection failed");
-          toast.error("WebSocket connection failed");
-        },
-
-        // Handle WebSocket connection closure
-        onWebSocketClose: (event) => {
-          // Code 2000 indicates all SockJS transports failed
-          if (event.code === 2000) {
-            console.error("All WebSocket transports failed");
-            toast.error("WebSocket connection failed: All transports failed");
-          }
-        },
-      });
-
-      // Activate the STOMP client to start connection
-      stompClientRef.current.activate();
-    },
-    [API_BASE_URL, updateOrderStatus]
+        // Activate the STOMP client to start connection
+        stompClientRef.current.activate();
+      },
+      [API_BASE_URL, updateOrderStatus]
   );
 
   /**
@@ -273,7 +273,7 @@ const OrderTracking: React.FC = () => {
     });
 
     // Reset all cancellation reasons
-    setCanceledReasons({
+    setCancellationReasons({
       shortPolling: null,
       sse: null,
       ws: null,
@@ -315,76 +315,76 @@ const OrderTracking: React.FC = () => {
   }
 
   return (
-    <Card className="order-tracking shadow-sm mt-6">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-blue-600">Order Tracking</CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="flex justify-between items-center mb-6">
-          <span className="text-gray-500">Order ID:</span>
-          <span className="font-bold">{currentOrderId}</span>
-        </div>
-
-        {/* Short polling updates */}
-        <div className="space-y-4">
-          <div className="border-b border-gray-200 pb-4">
-            <div className="flex items-center gap-2 mb-3">
-              <h6 className="text-gray-600 font-medium">
-                Short Polling Updates
-              </h6>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-500">Status:</span>
-              {getOrderStatusBadge(orderStatuses.shortPolling)}
-            </div>
-            {canceledReasons.shortPolling && (
-              <div className="mt-3">
-                <span className="text-gray-500">Cancellation Reason:</span>
-                <p className="text-red-600 mt-1">
-                  {canceledReasons.shortPolling}
-                </p>
-              </div>
-            )}
+      <Card className="order-tracking shadow-sm mt-6">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-blue-600">Order Tracking</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex justify-between items-center mb-6">
+            <span className="text-gray-500">Order ID:</span>
+            <span className="font-bold">{currentOrderId}</span>
           </div>
 
-          {/* SSE updates */}
-          <div className="border-b border-gray-200 pb-4">
-            <div className="flex items-center gap-2 mb-3">
-              <h6 className="text-gray-600 font-medium">SSE Updates</h6>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-500">Status:</span>
-              {getOrderStatusBadge(orderStatuses.sse)}
-            </div>
-            {canceledReasons.sse && (
-              <div className="mt-3">
-                <span className="text-gray-500">Cancellation Reason:</span>
-                <p className="text-red-600 mt-1">{canceledReasons.sse}</p>
+          {/* Short polling updates */}
+          <div className="space-y-4">
+            <div className="border-b border-gray-200 pb-4">
+              <div className="flex items-center gap-2 mb-3">
+                <h6 className="text-gray-600 font-medium">
+                  Short Polling Updates
+                </h6>
               </div>
-            )}
-          </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-500">Status:</span>
+                {getOrderStatusBadge(orderStatuses.shortPolling)}
+              </div>
+              {cancellationReasons.shortPolling && (
+                  <div className="mt-3">
+                    <span className="text-gray-500">Cancellation Reason:</span>
+                    <p className="text-red-600 mt-1">
+                      {cancellationReasons.shortPolling}
+                    </p>
+                  </div>
+              )}
+            </div>
 
-          {/* WebSocket updates */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <h6 className="text-gray-600 font-medium">WebSocket Updates</h6>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-500">Status:</span>
-              {getOrderStatusBadge(orderStatuses.ws)}
-            </div>
-            {canceledReasons.ws && (
-              <div className="mt-3">
-                <span className="text-gray-500">Cancellation Reason:</span>
-                <p className="text-red-600 mt-1">{canceledReasons.ws}</p>
+            {/* SSE updates */}
+            <div className="border-b border-gray-200 pb-4">
+              <div className="flex items-center gap-2 mb-3">
+                <h6 className="text-gray-600 font-medium">SSE Updates</h6>
               </div>
-            )}
+              <div className="flex justify-between items-center">
+                <span className="text-gray-500">Status:</span>
+                {getOrderStatusBadge(orderStatuses.sse)}
+              </div>
+              {cancellationReasons.sse && (
+                  <div className="mt-3">
+                    <span className="text-gray-500">Cancellation Reason:</span>
+                    <p className="text-red-600 mt-1">{cancellationReasons.sse}</p>
+                  </div>
+              )}
+            </div>
+
+            {/* WebSocket updates */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <h6 className="text-gray-600 font-medium">WebSocket Updates</h6>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-500">Status:</span>
+                {getOrderStatusBadge(orderStatuses.ws)}
+              </div>
+              {cancellationReasons.ws && (
+                  <div className="mt-3">
+                    <span className="text-gray-500">Cancellation Reason:</span>
+                    <p className="text-red-600 mt-1">{cancellationReasons.ws}</p>
+                  </div>
+              )}
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
   );
 };
 

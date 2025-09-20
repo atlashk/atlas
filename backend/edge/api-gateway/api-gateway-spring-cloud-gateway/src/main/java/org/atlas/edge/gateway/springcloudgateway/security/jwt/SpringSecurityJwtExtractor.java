@@ -1,6 +1,6 @@
 package org.atlas.edge.gateway.springcloudgateway.security.jwt;
 
-import org.atlas.domain.user.shared.enums.Role;
+import org.atlas.domain.user.shared.Role;
 import org.atlas.framework.auth.enums.CustomClaim;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.oauth2.jwt.Jwt;

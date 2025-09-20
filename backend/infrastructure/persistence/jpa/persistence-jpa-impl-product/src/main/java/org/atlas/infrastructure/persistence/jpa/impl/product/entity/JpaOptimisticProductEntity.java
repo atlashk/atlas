@@ -24,7 +24,7 @@ import java.util.Set;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.atlas.domain.product.shared.enums.ProductStatus;
+import org.atlas.domain.product.shared.ProductStatus;
 import org.atlas.infrastructure.persistence.jpa.core.entity.JpaBaseEntity;
 
 @Entity

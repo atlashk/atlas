@@ -6,7 +6,7 @@ import org.atlas.domain.product.entity.ProductEntity;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.repository.criteria.FindProductCriteria;
 import org.atlas.domain.product.service.ProductImageService;
-import org.atlas.domain.product.shared.enums.ProductStatus;
+import org.atlas.domain.product.shared.ProductStatus;
 import org.atlas.domain.product.usecase.front.model.FrontSearchProductInput;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;

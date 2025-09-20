@@ -3,33 +3,32 @@ package org.atlas.infrastructure.notification.websocket.config;
 import static org.atlas.infrastructure.notification.websocket.config.WebSocketServerConfig.DESTINATION_PREFIX;
 
 import lombok.experimental.UtilityClass;
-import org.atlas.framework.notification.common.NotificationType;
-import org.atlas.framework.notification.realtime.payload.OrderCanceledPayload;
+import org.atlas.framework.domain.event.contract.order.OrderCanceledEvent;
+import org.atlas.framework.domain.event.contract.order.OrderFulfilledEvent;
+import org.atlas.framework.domain.event.contract.payment.PaymentCreatedEvent;
 import org.atlas.framework.notification.realtime.websocket.WebSocketNotification;
 
 @UtilityClass
 public class WebSocketDestinationResolver {
 
   public static String resolve(WebSocketNotification notification) {
-    if (notification == null) {
-      throw new IllegalArgumentException("Notification cannot be null.");
-    }
-
-    NotificationType notificationType = notification.getType();
-    if (notificationType == null) {
-      throw new IllegalArgumentException("Notification type cannot be null.");
-    }
-
-    switch (notificationType) {
-      case ORDER_STATUS_CHANGED:
-        if (!(notification.getPayload() instanceof OrderCanceledPayload payload)) {
-          throw new IllegalArgumentException(
-              "Payload must be of type OrderStatusChangedPayload for ORDER_STATUS_CHANGED notification.");
-        }
-        return String.format("%s/orders/%d/status", DESTINATION_PREFIX, payload.getOrderId());
+    return switch (notification.getType()) {
+      case PAYMENT_CREATED -> {
+        PaymentCreatedEvent paymentCreatedEvent = (PaymentCreatedEvent) notification.getPayload();
+        yield String.format("%s/orders/%d",
+            DESTINATION_PREFIX, paymentCreatedEvent.getOrderId());
+      }
+      case ORDER_FULFILLED -> {
+        OrderFulfilledEvent orderFulfilledEvent = (OrderFulfilledEvent) notification.getPayload();
+        yield String.format("%s/orders/%d", DESTINATION_PREFIX,
+            orderFulfilledEvent.getOrder().getOrderId());
+      }
+      case ORDER_CANCELED -> {
+        OrderCanceledEvent orderCanceledEvent = (OrderCanceledEvent) notification.getPayload();
+        yield String.format("%s/orders/%d", DESTINATION_PREFIX,
+            orderCanceledEvent.getOrder().getOrderId());
+      }
       // Add more cases here for different notification types if needed
-      default:
-        throw new IllegalArgumentException("Unknown notification type: " + notificationType);
-    }
+    };
   }
 }

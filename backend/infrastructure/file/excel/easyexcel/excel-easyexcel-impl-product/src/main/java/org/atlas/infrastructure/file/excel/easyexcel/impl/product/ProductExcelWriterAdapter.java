@@ -7,7 +7,7 @@ import java.util.List;
 import lombok.Data;
 import org.atlas.domain.product.port.file.excel.ProductExcelWriterPort;
 import org.atlas.domain.product.port.file.model.write.ProductRow;
-import org.atlas.domain.product.shared.enums.ProductStatus;
+import org.atlas.domain.product.shared.ProductStatus;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.infrastructure.file.excel.easyexcel.core.EasyExcelWriter;
 import org.springframework.stereotype.Component;

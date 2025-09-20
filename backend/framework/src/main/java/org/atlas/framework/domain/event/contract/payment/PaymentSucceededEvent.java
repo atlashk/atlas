@@ -8,6 +8,8 @@ import org.atlas.framework.domain.event.DomainEventType;
 @Setter
 public class PaymentSucceededEvent extends BasePaymentEvent {
 
+  private Integer orderId;
+
   public PaymentSucceededEvent(String eventSource) {
     super(eventSource);
   }

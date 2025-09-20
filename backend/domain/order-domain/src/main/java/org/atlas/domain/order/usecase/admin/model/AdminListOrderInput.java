@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.atlas.domain.order.shared.enums.OrderStatus;
+import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.framework.paging.PagingRequest;
 
 @Data

@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.order.entity.OrderEntity;
-import org.atlas.domain.order.shared.enums.OrderStatus;
+import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.domain.order.usecase.admin.handler.AdminListOrderUseCaseHandler;
 import org.atlas.domain.order.usecase.admin.model.AdminListOrderInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;

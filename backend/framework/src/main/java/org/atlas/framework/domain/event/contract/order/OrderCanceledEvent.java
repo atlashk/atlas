@@ -8,7 +8,8 @@ import org.atlas.framework.domain.event.DomainEventType;
 @Setter
 public class OrderCanceledEvent extends BaseOrderEvent {
 
-  private String cancelReason;
+  private Integer orderId;
+  private String cancellationReason;
 
   public OrderCanceledEvent(String eventSource) {
     super(eventSource);

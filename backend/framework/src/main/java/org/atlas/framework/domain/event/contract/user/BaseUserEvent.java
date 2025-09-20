@@ -8,10 +8,7 @@ import org.atlas.framework.domain.event.DomainEvent;
 @Setter
 public abstract class BaseUserEvent extends DomainEvent {
 
-  protected Integer userId;
-
-  public BaseUserEvent(String eventSource, Integer userId) {
+  public BaseUserEvent(String eventSource) {
     super(eventSource);
-    this.userId = userId;
   }
 }

@@ -3,7 +3,7 @@ package org.atlas.edge.gateway.springcloudgateway.security;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.domain.user.shared.enums.Role;
+import org.atlas.domain.user.shared.Role;
 import org.atlas.edge.gateway.springcloudgateway.security.jwt.JwtExtractor;
 import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.constant.Application;

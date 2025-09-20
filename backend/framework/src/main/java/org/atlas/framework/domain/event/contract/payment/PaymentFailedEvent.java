@@ -8,10 +8,12 @@ import org.atlas.framework.domain.event.DomainEventType;
 @Setter
 public class PaymentFailedEvent extends BasePaymentEvent {
 
-  private String error;
+  private Integer orderId;
+  private String errorCode;
+  private String errorMessage;
 
-  public PaymentFailedEvent(String eventSource, Integer paymentId, Integer orderId) {
-    super(eventSource, paymentId, orderId);
+  public PaymentFailedEvent(String eventSource) {
+    super(eventSource);
   }
 
   @Override

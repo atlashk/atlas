@@ -19,7 +19,7 @@ public class FrontGetOrderStatusUseCaseHandler {
         .orElseThrow(() -> new DomainException(AppError.ORDER_NOT_FOUND));
     return FrontGetOrderStatusOutput.builder()
         .status(orderEntity.getStatus())
-        .canceledReason(orderEntity.getCanceledReason())
+        .cancellationReason(orderEntity.getCancellationReason())
         .build();
   }
 }

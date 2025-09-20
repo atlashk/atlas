@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.atlas.domain.user.shared.enums.Role;
+import org.atlas.domain.user.shared.Role;
 
 @Data
 @Builder

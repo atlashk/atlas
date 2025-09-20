@@ -25,12 +25,15 @@ repositories {
 }
 
 dependencies {
+    // Framework
+    api project(':framework')
+
     // Lib
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     // Infrastructure
-    api project(':infrastructure.application-context')
+    api project(':infrastructure.bootstrap')
     switch (rootProject.ext.appStack['config']) {
         case 'yaml':
             api project(':infrastructure.config.yaml')

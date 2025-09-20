@@ -1,6 +1,6 @@
-import { OrderStatus } from "@/constants";
-import type { Product } from "./product.interface";
-import type { User } from "./user.interface";
+import {OrderStatus} from "@/constants";
+import type {Product} from "./product.interface";
+import type {User} from "./user.interface";
 
 export interface Order {
   id: number;
@@ -9,7 +9,7 @@ export interface Order {
   orderItems: OrderItem[];
   amount: number;
   status: OrderStatus;
-  cancelReason?: string;
+  cancellationReason?: string;
   createdAt: string; // Date usually handled as ISO string
 }
 
@@ -45,5 +45,5 @@ export interface ListOrderFilters {
 
 export interface GetOrderStatusResponse {
   status: string;
-  canceledReason: string;
+  cancellationReason: string;
 }

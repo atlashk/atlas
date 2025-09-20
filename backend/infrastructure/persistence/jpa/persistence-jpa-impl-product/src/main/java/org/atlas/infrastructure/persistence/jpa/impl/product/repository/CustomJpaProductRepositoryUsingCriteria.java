@@ -13,10 +13,10 @@ import org.atlas.domain.product.repository.criteria.FindProductCriteria;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.util.CollectionUtil;
 import org.atlas.framework.util.StringUtil;
-import org.atlas.infrastructure.persistence.jpa.impl.product.entity.JpaProductEntity;
 import org.atlas.infrastructure.persistence.jpa.core.specification.QueryFilter;
 import org.atlas.infrastructure.persistence.jpa.core.specification.QueryOperator;
 import org.atlas.infrastructure.persistence.jpa.core.specification.QuerySpecification;
+import org.atlas.infrastructure.persistence.jpa.impl.product.entity.JpaProductEntity;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 

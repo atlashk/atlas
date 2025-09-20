@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.ProductEntity;
-import org.atlas.domain.product.shared.enums.ProductStatus;
+import org.atlas.domain.product.shared.ProductStatus;
 import org.atlas.domain.product.usecase.admin.handler.AdminCreateProductUseCaseHandler;
 import org.atlas.domain.product.usecase.admin.handler.AdminDeleteProductUseCaseHandler;
 import org.atlas.domain.product.usecase.admin.handler.AdminExportProductUseCaseHandler;

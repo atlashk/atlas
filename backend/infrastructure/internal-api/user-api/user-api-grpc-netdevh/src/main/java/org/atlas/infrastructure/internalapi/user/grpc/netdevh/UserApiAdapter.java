@@ -5,7 +5,7 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import java.util.List;
 import net.devh.boot.grpc.client.inject.GrpcClient;
-import org.atlas.domain.user.shared.enums.Role;
+import org.atlas.domain.user.shared.Role;
 import org.atlas.framework.internalapi.user.UserApiPort;
 import org.atlas.framework.internalapi.user.model.ListUserRequest;
 import org.atlas.framework.internalapi.user.model.UserResponse;

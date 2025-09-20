@@ -49,7 +49,7 @@ public class RelayOutboxMessageTask {
       Class<?> messageClass = Class.forName(outboxMessage.getMessageClass());
       Object messagePayload = JsonUtil.getInstance()
           .toObject(outboxMessage.getMessagePayload(), messageClass);
-      messagePublisherPort.doPublish(messagePayload, outboxMessage.getMessageKey(),
+      externalMessagePublisherPort.doPublish(messagePayload, outboxMessage.getMessageKey(),
           outboxMessage.getDestination());
       outboxMessage.markAsProcessed();
     } catch (Exception e) {

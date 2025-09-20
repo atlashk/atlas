@@ -36,7 +36,7 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
     }
-    api project(':infrastructure.application-context')
+    api project(':infrastructure.bootstrap')
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
             api project(':infrastructure.datasource.mysql.impl.payment')

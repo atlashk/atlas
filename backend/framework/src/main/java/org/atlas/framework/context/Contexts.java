@@ -1,7 +1,7 @@
 package org.atlas.framework.context;
 
 import javax.annotation.Nullable;
-import org.atlas.domain.user.shared.enums.Role;
+import org.atlas.domain.user.shared.Role;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.error.AppError;
 

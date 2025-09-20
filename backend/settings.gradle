@@ -79,10 +79,6 @@ project(':infrastructure.api-server.rest.impl.product').projectDir = file('infra
 include(':infrastructure.api-server.rest.impl.user')
 project(':infrastructure.api-server.rest.impl.user').projectDir = file('infrastructure/api-server/rest/api-server-rest-impl-user')
 
-// Application Context
-include(':infrastructure.application-context')
-project(':infrastructure.application-context').projectDir = file('infrastructure/application-context')
-
 // Auth client
 // Auth client::Keycloak
 include(':infrastructure.auth-client.keycloak')
@@ -91,6 +87,10 @@ project(':infrastructure.auth-client.keycloak').projectDir = file('infrastructur
 // Auth server
 include(':infrastructure.auth-server')
 project(':infrastructure.auth-server').projectDir = file('infrastructure/auth-server')
+
+// Bootstrap
+include(':infrastructure.bootstrap')
+project(':infrastructure.bootstrap').projectDir = file('infrastructure/bootstrap')
 
 // Config
 include(':infrastructure.config.yaml')
@@ -121,6 +121,10 @@ include(':infrastructure.datasource.postgres.impl.product')
 project(':infrastructure.datasource.postgres.impl.product').projectDir = file('infrastructure/datasource/postgres/datasource-postgres-impl-product')
 include(':infrastructure.datasource.postgres.impl.user')
 project(':infrastructure.datasource.postgres.impl.user').projectDir = file('infrastructure/datasource/postgres/datasource-postgres-impl-user')
+
+// Dependency
+include(':infrastructure.dependency.spring')
+project(':infrastructure.dependency.spring').projectDir = file('infrastructure/dependency/dependency-spring')
 
 // Discovery client
 include(':infrastructure.discovery-client.eureka')
@@ -323,6 +327,12 @@ project(':infrastructure.observability.metrics.prometheus').projectDir = file('i
 // Observability::Tracing
 include(':infrastructure.observability.tracing.zipkin')
 project(':infrastructure.observability.tracing.zipkin').projectDir = file('infrastructure/observability/tracing/tracing-zipkin')
+
+// Payment
+
+// Payment::Stripe
+include(':infrastructure.payment.stripe')
+project(':infrastructure.payment.stripe').projectDir = file('infrastructure/payment/stripe')
 
 // Persistence
 

@@ -10,7 +10,7 @@ import java.util.List;
 import lombok.Data;
 import org.atlas.domain.product.port.file.csv.ProductCsvReaderPort;
 import org.atlas.domain.product.port.file.model.read.ProductRow;
-import org.atlas.domain.product.shared.enums.ProductStatus;
+import org.atlas.domain.product.shared.ProductStatus;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.infrastructure.file.csv.opencsv.core.OpenCsvReader;
 import org.springframework.stereotype.Component;

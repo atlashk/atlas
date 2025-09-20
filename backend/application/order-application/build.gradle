@@ -60,7 +60,7 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
     }
-    api project(':infrastructure.application-context')
+    api project(':infrastructure.bootstrap')
     switch (rootProject.ext.appStack['config']) {
         case 'yaml':
             api project(':infrastructure.config.yaml')

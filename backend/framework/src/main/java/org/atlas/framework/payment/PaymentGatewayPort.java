@@ -1,20 +1,18 @@
 package org.atlas.framework.payment;
 
-import java.math.BigDecimal;
 import java.util.Map;
-import org.atlas.domain.payment.shared.enums.PaymentGateway;
-import org.atlas.domain.payment.shared.enums.PaymentStatus;
+import org.atlas.domain.payment.shared.PaymentStatus;
+import org.atlas.framework.payment.exception.PaymentGatewayException;
+import org.atlas.framework.payment.model.CreatePaymentRequest;
+import org.atlas.framework.payment.model.CreatePaymentResponse;
+import org.atlas.framework.payment.model.WebhookResponse;
 
 public interface PaymentGatewayPort {
 
-  PaymentGateway supports();
+  CreatePaymentResponse createPayment(CreatePaymentRequest request) throws PaymentGatewayException;
 
-  Map<String, Object> createPayment(Integer orderId, Integer userId, BigDecimal amount,
-      String currency);
+  PaymentStatus getPaymentStatus(String transactionId) throws PaymentGatewayException;
 
-  PaymentStatus getPaymentStatus(String transactionId);
-
-  Map<String, Object> handleWebhook(Map<String, Object> payload, Map<String, String> headers);
-
-  boolean verifySignature(Map<String, Object> payload, Map<String, String> headers);
+  WebhookResponse handleWebhook(Map<String, Object> payload, Map<String, String> headers)
+      throws PaymentGatewayException;
 }

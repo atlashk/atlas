@@ -3,7 +3,7 @@ package org.atlas.domain.product.port.file.model.read;
 import java.math.BigDecimal;
 import java.util.Date;
 import lombok.Data;
-import org.atlas.domain.product.shared.enums.ProductStatus;
+import org.atlas.domain.product.shared.ProductStatus;
 
 @Data
 public class ProductRow {

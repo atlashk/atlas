@@ -6,8 +6,7 @@ import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.atlas.domain.order.shared.enums.OrderStatus;
-import org.atlas.domain.payment.shared.enums.PaymentGateway;
+import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.framework.domain.entity.DomainEntity;
 import org.atlas.framework.util.CollectionUtil;
 
@@ -22,9 +21,9 @@ public class OrderEntity extends DomainEntity {
   private UserEntity user;
   private List<OrderItemEntity> orderItems;
   private BigDecimal amount;
-  private PaymentGateway paymentGateway;
+  private PaymentEntity payment;
   private OrderStatus status;
-  private String canceledReason;
+  private String cancellationReason;
 
   public void addOrderItem(OrderItemEntity orderItem) {
     if (orderItems == null) {

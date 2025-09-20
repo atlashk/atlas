@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.user.entity.UserEntity;
-import org.atlas.domain.user.shared.enums.Role;
+import org.atlas.domain.user.shared.Role;
 import org.atlas.domain.user.usecase.admin.handler.AdminListUserUseCaseHandler;
 import org.atlas.domain.user.usecase.admin.model.AdminListUserInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;

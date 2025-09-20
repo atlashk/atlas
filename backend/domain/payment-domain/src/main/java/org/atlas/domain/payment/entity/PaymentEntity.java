@@ -4,7 +4,9 @@ import java.math.BigDecimal;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.atlas.domain.payment.shared.enums.PaymentStatus;
+import org.atlas.domain.payment.shared.PaymentGateway;
+import org.atlas.domain.payment.shared.PaymentMethod;
+import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.framework.domain.entity.DomainEntity;
 
 @Getter
@@ -16,11 +18,16 @@ public class PaymentEntity extends DomainEntity {
   private Integer id;
   private Integer userId;
   private Integer orderId;
-  private String transactionId; // External payment gateway transaction ID
   private BigDecimal amount;
   private String currency;
+  private PaymentMethod method;
+  private PaymentGateway gateway;
   private PaymentStatus status;
+
+  // External payment gateway information
+  private String transactionId;
+  private String receiptUrl;
   private String errorCode;
   private String errorMessage;
-  private String receiptUrl;
+  private String cancellationReason;
 }

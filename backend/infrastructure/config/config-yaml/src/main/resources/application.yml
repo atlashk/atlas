@@ -2,8 +2,6 @@ app:
   config:
     local:
       system:
-        encryption-key: 123456
-        locale: en-US
         cors:
           allowed-origins:
             - http://localhost:9000 # Frontend
@@ -20,8 +18,13 @@ app:
             - "Content-Disposition"
           allow-credentials: true
           max-age: 0 # always fetch the latest data
+        encryption-key: 123456
+        locale: en-US
+        notification:
+          email:
+            sender: admin@atlas.org
       product-service:
         decrease-quantity-strategy: DISTRIBUTED_LOCK
-      notification-service:
-        email:
-          sender: admin@atlas.org
+      payment-service:
+        currency: USD
+        gateway: stripe

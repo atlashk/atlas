@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Webhook;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.atlas.domain.payment.shared.enums.PaymentGateway;
+import org.atlas.domain.payment.shared.PaymentGateway;
 import org.atlas.domain.payment.usecase.webhook.handler.WebhookHandler;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;

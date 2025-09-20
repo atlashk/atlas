@@ -21,7 +21,8 @@ public class KafkaMessagePublisherAdapter implements ExternalMessagePublisherPor
 
   @Override
   public void publish(BaseOrderEvent event) {
-    this.doPublish(event, String.valueOf(event.getOrderId()), KafkaConstant.TOPIC_ORDER_EVENT);
+    this.doPublish(event, String.valueOf(event.getOrder().getOrderId()),
+        KafkaConstant.TOPIC_ORDER_EVENT);
   }
 
   @Override

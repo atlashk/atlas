@@ -1,7 +1,7 @@
 package org.atlas.framework.context;
 
 import lombok.Data;
-import org.atlas.domain.user.shared.enums.Role;
+import org.atlas.domain.user.shared.Role;
 
 @Data
 public class ContextInfo {

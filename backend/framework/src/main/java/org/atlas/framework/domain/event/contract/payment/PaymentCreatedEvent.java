@@ -9,10 +9,11 @@ import org.atlas.framework.domain.event.DomainEventType;
 @Setter
 public class PaymentCreatedEvent extends BasePaymentEvent {
 
+  private Integer orderId;
   private Map<String, Object> paymentData;
 
-  public PaymentCreatedEvent(String eventSource, Integer paymentId, Integer orderId) {
-    super(eventSource, paymentId, orderId);
+  public PaymentCreatedEvent(String eventSource) {
+    super(eventSource);
   }
 
   @Override

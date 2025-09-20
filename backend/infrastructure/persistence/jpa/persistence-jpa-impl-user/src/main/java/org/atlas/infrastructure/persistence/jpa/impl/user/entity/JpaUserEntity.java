@@ -12,7 +12,7 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.atlas.domain.user.shared.enums.Role;
+import org.atlas.domain.user.shared.Role;
 import org.atlas.infrastructure.persistence.jpa.core.converter.StringCryptoConverter;
 import org.atlas.infrastructure.persistence.jpa.core.entity.JpaBaseEntity;
 

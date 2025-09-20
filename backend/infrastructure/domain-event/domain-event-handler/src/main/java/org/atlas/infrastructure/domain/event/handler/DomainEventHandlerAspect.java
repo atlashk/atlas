@@ -38,7 +38,7 @@ public class DomainEventHandlerAspect {
     Object[] result = new Object[1];
     Throwable[] exception = new Throwable[1];
 
-    // Step 2: Try acquiring lock and execute the following steps within the lock
+    // Try acquiring lock and execute the following steps within the lock
     String lockKey = applicationConfigPort.getApplicationName() + "::" + event.getEventId();
     Duration waitTime = Duration.ofSeconds(30);
     Duration leaseTime = Duration.ofDays(7);

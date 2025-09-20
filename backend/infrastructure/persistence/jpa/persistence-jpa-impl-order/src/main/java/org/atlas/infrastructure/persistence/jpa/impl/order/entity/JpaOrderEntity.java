@@ -16,7 +16,7 @@ import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.atlas.domain.order.shared.enums.OrderStatus;
+import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.infrastructure.persistence.jpa.core.entity.JpaBaseEntity;
 
 @Entity
@@ -43,8 +43,8 @@ public class JpaOrderEntity extends JpaBaseEntity {
   @Enumerated(EnumType.STRING)
   private OrderStatus status;
 
-  @Column(name = "canceled_reason")
-  private String canceledReason;
+  @Column(name = "cancellation_reason")
+  private String cancellationReason;
 
   public void addOrderItem(JpaOrderItemEntity orderItem) {
     orderItem.setOrder(this);

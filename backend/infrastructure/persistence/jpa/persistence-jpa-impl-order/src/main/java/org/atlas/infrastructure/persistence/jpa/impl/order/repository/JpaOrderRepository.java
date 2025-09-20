@@ -2,9 +2,9 @@ package org.atlas.infrastructure.persistence.jpa.impl.order.repository;
 
 import java.math.BigDecimal;
 import java.util.Optional;
-import org.atlas.domain.order.shared.enums.OrderStatus;
-import org.atlas.infrastructure.persistence.jpa.impl.order.entity.JpaOrderEntity;
+import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.infrastructure.persistence.jpa.core.repository.JpaBaseRepository;
+import org.atlas.infrastructure.persistence.jpa.impl.order.entity.JpaOrderEntity;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;

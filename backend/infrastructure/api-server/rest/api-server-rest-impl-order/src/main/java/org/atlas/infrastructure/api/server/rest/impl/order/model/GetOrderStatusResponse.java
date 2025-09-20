@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.atlas.domain.order.shared.enums.OrderStatus;
+import org.atlas.domain.order.shared.OrderStatus;
 
 @Data
 @Builder
@@ -18,5 +18,5 @@ public class GetOrderStatusResponse {
   private OrderStatus status;
 
   @Schema(description = "Reason for canceling the order, if applicable.")
-  private String canceledReason;
+  private String cancellationReason;
 }

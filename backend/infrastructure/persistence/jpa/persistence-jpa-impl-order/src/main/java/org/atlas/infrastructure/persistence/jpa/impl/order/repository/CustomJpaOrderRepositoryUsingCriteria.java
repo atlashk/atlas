@@ -11,10 +11,10 @@ import jakarta.persistence.criteria.Root;
 import java.util.List;
 import org.atlas.domain.order.repository.criteria.FindOrderCriteria;
 import org.atlas.framework.paging.PagingRequest;
-import org.atlas.infrastructure.persistence.jpa.impl.order.entity.JpaOrderEntity;
 import org.atlas.infrastructure.persistence.jpa.core.specification.QueryFilter;
 import org.atlas.infrastructure.persistence.jpa.core.specification.QueryOperator;
 import org.atlas.infrastructure.persistence.jpa.core.specification.QuerySpecification;
+import org.atlas.infrastructure.persistence.jpa.impl.order.entity.JpaOrderEntity;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 

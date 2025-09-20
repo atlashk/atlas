@@ -8,11 +8,11 @@ import org.atlas.framework.util.UUIDGenerator;
 @NoArgsConstructor
 public class Notification {
 
-  private String notificationId;
-  private NotificationType notificationType;
+  private String id;
+  private NotificationType type;
 
-  public Notification(NotificationType notificationType) {
-    this.notificationId = UUIDGenerator.generate();
-    this.notificationType = notificationType;
+  public Notification(NotificationType type) {
+    this.id = UUIDGenerator.generate();
+    this.type = type;
   }
 }

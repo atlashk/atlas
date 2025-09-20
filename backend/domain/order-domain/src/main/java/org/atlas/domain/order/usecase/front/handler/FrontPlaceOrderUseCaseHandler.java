@@ -8,27 +8,24 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.order.entity.OrderEntity;
 import org.atlas.domain.order.entity.OrderItemEntity;
+import org.atlas.domain.order.entity.PaymentEntity;
 import org.atlas.domain.order.entity.ProductEntity;
 import org.atlas.domain.order.entity.UserEntity;
+import org.atlas.domain.order.mapper.OrderEventMapper;
 import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.service.OrderAggregator;
-import org.atlas.domain.order.shared.enums.OrderStatus;
+import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.domain.order.usecase.front.model.FrontPlaceOrderInput;
 import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.context.Contexts;
 import org.atlas.framework.cryptography.HashingUtil;
 import org.atlas.framework.domain.event.contract.order.OrderCreatedEvent;
-import org.atlas.framework.domain.event.contract.order.model.Order;
-import org.atlas.framework.domain.event.contract.order.model.OrderItem;
-import org.atlas.framework.domain.event.contract.order.model.Product;
-import org.atlas.framework.domain.event.contract.order.model.User;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.error.AppError;
 import org.atlas.framework.lock.LockAcquisitionException;
 import org.atlas.framework.lock.LockPort;
 import org.atlas.framework.messaging.ExternalMessagePublisherPort;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.framework.sequencegenerator.SequenceType;
 
@@ -68,14 +65,16 @@ public class FrontPlaceOrderUseCaseHandler {
         orderRepository.insert(orderEntity);
 
         // Publish event
-        publishEvent(orderEntity);
+        OrderCreatedEvent event = new OrderCreatedEvent(applicationConfigPort.getApplicationName());
+        event.setOrder(OrderEventMapper.fromOrderEntity(orderEntity));
+        externalMessagePublisherPort.publish(event);
 
         // Return the inserted order
         result[0] = orderEntity;
       }, lockKey, waitTime, leaseTime, true);
     } catch (LockAcquisitionException e) {
-      log.warn("Duplicate order attempt detected: userId={}, input={}", 
-           userId, input, e);
+      log.warn("Duplicate order attempt detected: userId={}, input={}",
+          userId, input, e);
       throw new DomainException(AppError.CONFLICT, e);
     }
 
@@ -100,8 +99,7 @@ public class FrontPlaceOrderUseCaseHandler {
     // Order
     OrderEntity orderEntity = new OrderEntity();
     orderEntity.setCode(sequenceGenerator.generate(SequenceType.ORDER));
-    orderEntity.setPaymentGateway(input.getPaymentGateway());
-    orderEntity.setStatus(OrderStatus.PROCESSING);
+    orderEntity.setStatus(OrderStatus.AWAITING_PRODUCT_RESERVATION);
     orderEntity.setCreatedAt(new Date());
 
     // User
@@ -123,35 +121,12 @@ public class FrontPlaceOrderUseCaseHandler {
 
       orderEntity.addOrderItem(orderItemEntity);
     }
+
+    // Payment
+    PaymentEntity paymentEntity = new PaymentEntity();
+    paymentEntity.setMethod(input.getPaymentMethod());
+    orderEntity.setPayment(paymentEntity);
+
     return orderEntity;
-  }
-
-  private void publishEvent(OrderEntity orderEntity) {
-    OrderCreatedEvent event = new OrderCreatedEvent(applicationConfigPort.getApplicationName());
-
-    // Map basic fields
-    Order order = new Order();
-    order.setOrderId(orderEntity.getId());
-    order.setAmount(orderEntity.getAmount());
-    order.setPaymentGateway(orderEntity.getPaymentGateway());
-    order.setCreatedAt(orderEntity.getCreatedAt());
-
-    // Map user
-    if (orderEntity.getUser() != null) {
-      order.setUser(ObjectMapperUtil.getInstance().map(orderEntity.getUser(), User.class));
-    }
-
-    // Map order items
-    if (orderEntity.getOrderItems() != null) {
-      for (OrderItemEntity orderItemEntity : orderEntity.getOrderItems()) {
-        OrderItem orderItem = new OrderItem();
-        orderItem.setProduct(
-            ObjectMapperUtil.getInstance().map(orderItemEntity.getProduct(), Product.class));
-        orderItem.setQuantity(orderItemEntity.getQuantity());
-        order.addOrderItem(orderItem);
-      }
-    }
-
-    externalMessagePublisherPort.publish(event);
   }
 }

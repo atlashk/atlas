@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.util.CollectionUtil;
-import org.atlas.framework.concurrent.ConcurrentUtil;
+import org.atlas.framework.util.ConcurrentUtil;
 import org.atlas.infrastructure.domain.event.handler.DomainEventDispatcher;
 import org.atlas.infrastructure.messaging.external.sns.core.common.SnsProps;
 import org.springframework.beans.factory.DisposableBean;

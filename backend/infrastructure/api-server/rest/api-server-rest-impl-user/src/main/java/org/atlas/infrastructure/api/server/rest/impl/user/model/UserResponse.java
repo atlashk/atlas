@@ -3,7 +3,7 @@ package org.atlas.infrastructure.api.server.rest.impl.user.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.atlas.domain.user.shared.enums.Role;
+import org.atlas.domain.user.shared.Role;
 
 @Data
 @EqualsAndHashCode(callSuper = false)

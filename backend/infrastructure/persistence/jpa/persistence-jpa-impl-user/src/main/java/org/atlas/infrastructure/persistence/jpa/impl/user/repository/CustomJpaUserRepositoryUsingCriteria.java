@@ -11,10 +11,10 @@ import java.util.List;
 import org.atlas.domain.user.repository.criteria.FindUserCriteria;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.util.StringUtil;
-import org.atlas.infrastructure.persistence.jpa.impl.user.entity.JpaUserEntity;
 import org.atlas.infrastructure.persistence.jpa.core.specification.QueryFilter;
 import org.atlas.infrastructure.persistence.jpa.core.specification.QueryOperator;
 import org.atlas.infrastructure.persistence.jpa.core.specification.QuerySpecification;
+import org.atlas.infrastructure.persistence.jpa.impl.user.entity.JpaUserEntity;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 

@@ -35,7 +35,7 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.6'
 
     // Infrastructure
-    api project(':infrastructure.application-context')
+    api project(':infrastructure.bootstrap')
     switch (rootProject.ext.appStack['config']) {
         case 'yaml':
             api project(':infrastructure.config.yaml')

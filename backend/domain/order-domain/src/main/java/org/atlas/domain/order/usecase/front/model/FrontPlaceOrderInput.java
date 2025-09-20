@@ -9,7 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.atlas.domain.payment.shared.enums.PaymentGateway;
+import org.atlas.domain.payment.shared.PaymentMethod;
 
 @Data
 @Builder
@@ -21,7 +21,7 @@ public class FrontPlaceOrderInput {
   private List<@Valid OrderItem> orderItems;
 
   @NotNull
-  private PaymentGateway paymentGateway;
+  private PaymentMethod paymentMethod;
 
   @Data
   @Builder

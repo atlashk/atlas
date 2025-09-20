@@ -35,7 +35,9 @@ public enum AppError {
   ORDER_INVALID_STATUS(3002, "error.order.invalid_status"),
 
   // Payment-related errors
-  PAYMENT_GATEWAY_NOT_SUPPORTED(4000, "error.payment.payment_gateway_not_supported"),
+  PAYMENT_NOT_FOUND(4000, "error.payment.payment_not_found"),
+  PAYMENT_GATEWAY_NOT_SUPPORTED(4001, "error.payment.payment_gateway_not_supported"),
+  PAYMENT_METHOD_NOT_SUPPORTED(4002, "error.payment.payment_method_not_supported"),
   ;
 
   private final int errorCode;

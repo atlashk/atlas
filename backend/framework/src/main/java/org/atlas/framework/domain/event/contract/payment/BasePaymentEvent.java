@@ -10,12 +10,7 @@ import org.atlas.framework.domain.event.DomainEvent;
 @Setter
 public abstract class BasePaymentEvent extends DomainEvent {
 
-  protected Integer paymentId;
-  protected Integer orderId;
-
-  public BasePaymentEvent(String eventSource, Integer paymentId, Integer orderId) {
+  public BasePaymentEvent(String eventSource) {
     super(eventSource);
-    this.paymentId = paymentId;
-    this.orderId = orderId;
   }
 }

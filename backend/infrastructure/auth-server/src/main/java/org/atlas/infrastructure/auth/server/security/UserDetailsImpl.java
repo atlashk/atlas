@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import lombok.Data;
 import org.atlas.domain.user.entity.UserEntity;
-import org.atlas.domain.user.shared.enums.Role;
+import org.atlas.domain.user.shared.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

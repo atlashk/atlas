@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.atlas.domain.order.shared.enums.OrderStatus;
+import org.atlas.domain.order.shared.OrderStatus;
 
 @Data
 @Builder
@@ -13,5 +13,5 @@ import org.atlas.domain.order.shared.enums.OrderStatus;
 public class FrontGetOrderStatusOutput {
 
   private OrderStatus status;
-  private String canceledReason;
+  private String cancellationReason;
 }

@@ -25,11 +25,14 @@ repositories {
 }
 
 dependencies {
+    // Framework
+    api project(':framework')
+
     // Lib
     implementation 'org.springframework.cloud:spring-cloud-config-server'
 
     // Infrastructure
-    api project(':infrastructure.application-context')
+    api project(':infrastructure.bootstrap')
     api project(':infrastructure.observability.actuator')
     switch (rootProject.ext.appStack['observability.logging.framework']) {
         case 'logback':

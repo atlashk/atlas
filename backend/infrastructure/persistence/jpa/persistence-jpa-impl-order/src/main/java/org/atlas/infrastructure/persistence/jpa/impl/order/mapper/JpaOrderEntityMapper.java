@@ -19,7 +19,7 @@ public class JpaOrderEntityMapper {
     jpaOrderEntity.setUserId(orderEntity.getUser().getId());
     jpaOrderEntity.setAmount(orderEntity.getAmount());
     jpaOrderEntity.setStatus(orderEntity.getStatus());
-    jpaOrderEntity.setCanceledReason(orderEntity.getCanceledReason());
+    jpaOrderEntity.setCancellationReason(orderEntity.getCancellationReason());
     jpaOrderEntity.setCreatedAt(orderEntity.getCreatedAt());
 
     // Order items
@@ -41,7 +41,7 @@ public class JpaOrderEntityMapper {
     orderEntity.setCode(jpaOrderEntity.getCode());
     orderEntity.setAmount(jpaOrderEntity.getAmount());
     orderEntity.setStatus(jpaOrderEntity.getStatus());
-    orderEntity.setCanceledReason(jpaOrderEntity.getCanceledReason());
+    orderEntity.setCancellationReason(jpaOrderEntity.getCancellationReason());
     orderEntity.setCreatedAt(jpaOrderEntity.getCreatedAt());
 
     // User

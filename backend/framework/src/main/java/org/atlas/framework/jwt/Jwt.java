@@ -3,7 +3,7 @@ package org.atlas.framework.jwt;
 import java.util.Date;
 import lombok.Builder;
 import lombok.Data;
-import org.atlas.domain.user.shared.enums.Role;
+import org.atlas.domain.user.shared.Role;
 
 @Data
 @Builder

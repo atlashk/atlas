@@ -2,7 +2,7 @@ package org.atlas.domain.order.repository.criteria;
 
 import java.util.Date;
 import lombok.Data;
-import org.atlas.domain.order.shared.enums.OrderStatus;
+import org.atlas.domain.order.shared.OrderStatus;
 
 @Data
 public class FindOrderCriteria {

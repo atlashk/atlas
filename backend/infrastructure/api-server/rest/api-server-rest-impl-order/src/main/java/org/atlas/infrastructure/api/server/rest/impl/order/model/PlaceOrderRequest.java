@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import lombok.Data;
-import org.atlas.domain.payment.shared.enums.PaymentGateway;
+import org.atlas.domain.payment.shared.PaymentMethod;
 
 @Data
 @Schema(description = "Request object for placing a new order.")
@@ -19,8 +19,8 @@ public class PlaceOrderRequest {
   private List<@Valid OrderItem> orderItems;
 
   @NotNull
-  @Schema(description = "Payment gateway to be used for the order.", example = "STRIPE", requiredMode = RequiredMode.REQUIRED)
-  private PaymentGateway paymentGateway;
+  @Schema(description = "Payment method to be used for the order.", example = "card", requiredMode = RequiredMode.REQUIRED)
+  private PaymentMethod paymentMethod;
 
   @Data
   @Schema(description = "Represents an item in the order.")

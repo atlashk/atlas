@@ -2,23 +2,24 @@ package org.atlas.framework.domain.event;
 
 public enum DomainEventType {
 
-  // User Service event types
+  // User event types
   USER_REGISTERED,
 
-  // Product Service event types
+  // Product event types
   PRODUCT_CREATED,
   PRODUCT_UPDATED,
   PRODUCT_DELETED,
-  PRODUCT_RESERVE_QUANTITY_SUCCEEDED,
-  PRODUCT_RESERVE_QUANTITY_FAILED,
+  PRODUCT_RESERVATION_SUCCEEDED,
+  PRODUCT_RESERVATION_FAILED,
 
-  // Order Service event types
+  // Order event types
   ORDER_CREATED,
   ORDER_FULFILLED,
   ORDER_CANCELED,
 
-  // Payment Service event types
+  // Payment event types
   PAYMENT_CREATED,
   PAYMENT_SUCCEEDED,
   PAYMENT_FAILED,
+  PAYMENT_CANCELED,
 }

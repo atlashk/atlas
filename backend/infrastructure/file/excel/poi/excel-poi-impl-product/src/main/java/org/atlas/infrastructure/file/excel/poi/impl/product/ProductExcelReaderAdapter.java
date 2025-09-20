@@ -11,7 +11,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.atlas.domain.product.port.file.excel.ProductExcelReaderPort;
 import org.atlas.domain.product.port.file.model.read.ProductRow;
-import org.atlas.domain.product.shared.enums.ProductStatus;
+import org.atlas.domain.product.shared.ProductStatus;
 import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.util.DateUtil;
 import org.atlas.infrastructure.file.excel.poi.core.PoiUtil;
