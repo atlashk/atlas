@@ -45,7 +45,7 @@ public class ProductReservationSucceededEventHandler {
             paymentGatewayInstanceName, PaymentGatewayPort.class)
         .orElseThrow(() -> new DomainException(AppError.PAYMENT_GATEWAY_NOT_SUPPORTED));
 
-    // Create payment entity
+    // Insert new payment entity
     PaymentEntity paymentEntity = new PaymentEntity();
     paymentEntity.setOrderId(productReservationSucceededEvent.getOrder().getId());
     paymentEntity.setUserId(productReservationSucceededEvent.getOrder().getUserId());
@@ -54,7 +54,7 @@ public class ProductReservationSucceededEventHandler {
         Application.PAYMENT_SERVICE, "currency", CommonConstant.DEFAULT_CURRENCY));
     paymentEntity.setMethod(productReservationSucceededEvent.getOrder().getPaymentMethod());
     paymentEntity.setGateway(paymentGateway);
-    paymentRepository.save(paymentEntity);
+    paymentRepository.insert(paymentEntity);
 
     // Create external payment
     CreatePaymentRequest createPaymentRequest = CreatePaymentRequest.builder()
@@ -78,7 +78,7 @@ public class ProductReservationSucceededEventHandler {
       paymentEntity.setTransactionId(transactionId);
       paymentEntity.setReceiptUrl(receiptUrl);
       paymentEntity.setStatus(PaymentStatus.CREATED);
-      paymentRepository.save(paymentEntity);
+      paymentRepository.update(paymentEntity);
 
       // Publish PAYMENT_CREATED event
       productReservationSucceededEvent.getOrder().setPaymentId(paymentEntity.getId());
@@ -96,7 +96,7 @@ public class ProductReservationSucceededEventHandler {
       paymentEntity.setStatus(PaymentStatus.FAILED);
       paymentEntity.setErrorCode(response.getErrorCode());
       paymentEntity.setErrorMessage(response.getErrorMessage());
-      paymentRepository.save(paymentEntity);
+      paymentRepository.update(paymentEntity);
 
       // Publish PAYMENT_FAILED event
       productReservationSucceededEvent.getOrder().setPaymentId(paymentEntity.getId());

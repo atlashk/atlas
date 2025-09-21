@@ -7,17 +7,17 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 
+@Schema(description = "Represents a brand in the brand list")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Represents a brand in the brand list.")
 public class BrandResponse {
 
-  @Schema(description = "Unique identifier of the brand.", example = "1")
+  @Schema(description = "Unique identifier of the brand", example = "1")
   private Integer id;
 
-  @Schema(description = "Name of the brand.", example = "Brand Name")
+  @Schema(description = "Name of the brand", example = "Brand Name")
   private String name;
 }

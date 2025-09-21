@@ -67,7 +67,7 @@ public class WebhookHandler {
             paymentEntity.setCancellationReason(paymentResult.getCancellationReason());
           }
         }
-        paymentRepository.save(paymentEntity);
+        paymentRepository.update(paymentEntity);
 
         // Publish event
         Order order = new Order();

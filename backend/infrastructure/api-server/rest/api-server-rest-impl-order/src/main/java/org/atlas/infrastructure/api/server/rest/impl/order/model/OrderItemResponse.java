@@ -7,12 +7,12 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 
+@Schema(description = "Represents an item in an order")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Represents an item in an order")
 public class OrderItemResponse {
 
   @Schema(description = "Product associated with the order item")

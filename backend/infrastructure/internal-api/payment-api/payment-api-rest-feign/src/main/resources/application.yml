@@ -1,0 +1,5 @@
+app:
+  api-client:
+    rest:
+      payment-service:
+        base-url: ${API_CLIENT_REST_PAYMENT_SERVICE_BASE_URL:http://localhost:8084}

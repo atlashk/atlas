@@ -7,20 +7,20 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 
+@Schema(description = "Attributes associated with the product")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Attributes associated with the product.")
 public class ProductAttributeResponse {
 
-  @Schema(description = "Unique identifier of the product attribute.", example = "1")
+  @Schema(description = "Unique identifier of the product attribute", example = "1")
   private Integer id;
 
-  @Schema(description = "Name of the product attribute.", example = "Color")
+  @Schema(description = "Name of the product attribute", example = "Color")
   private String name;
 
-  @Schema(description = "Value of the product attribute.", example = "Red")
+  @Schema(description = "Value of the product attribute", example = "Red")
   private String value;
 }

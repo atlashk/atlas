@@ -62,6 +62,8 @@ project(':infrastructure.api-server.grpc.protobuf').projectDir = file('infrastru
 // API server::gRPC::netdevh
 include(':infrastructure.api-server.grpc.netdevh.core')
 project(':infrastructure.api-server.grpc.netdevh.core').projectDir = file('infrastructure/api-server/grpc/netdevh/api-server-grpc-netdevh-core')
+include(':infrastructure.api-server.grpc.netdevh.impl.payment')
+project(':infrastructure.api-server.grpc.netdevh.impl.payment').projectDir = file('infrastructure/api-server/grpc/netdevh/api-server-grpc-netdevh-impl-payment')
 include(':infrastructure.api-server.grpc.netdevh.impl.product')
 project(':infrastructure.api-server.grpc.netdevh.impl.product').projectDir = file('infrastructure/api-server/grpc/netdevh/api-server-grpc-netdevh-impl-product')
 include(':infrastructure.api-server.grpc.netdevh.impl.user')
@@ -173,6 +175,18 @@ include(':infrastructure.i18n')
 project(':infrastructure.i18n').projectDir = file('infrastructure/i18n')
 
 // Internal API
+
+// Internal API::Payment API
+include(':infrastructure.internal-api.payment.grpc.netdevh')
+project(':infrastructure.internal-api.payment.grpc.netdevh').projectDir = file('infrastructure/internal-api/payment-api/payment-api-grpc-netdevh')
+include(':infrastructure.internal-api.payment.rest.apachehttpclient')
+project(':infrastructure.internal-api.payment.rest.apachehttpclient').projectDir = file('infrastructure/internal-api/payment-api/payment-api-rest-apachehttpclient')
+include(':infrastructure.internal-api.payment.rest.feign')
+project(':infrastructure.internal-api.payment.rest.feign').projectDir = file('infrastructure/internal-api/payment-api/payment-api-rest-feign')
+include(':infrastructure.internal-api.payment.rest.restclient')
+project(':infrastructure.internal-api.payment.rest.restclient').projectDir = file('infrastructure/internal-api/payment-api/payment-api-rest-restclient')
+include(':infrastructure.internal-api.payment.rest.resttemplate')
+project(':infrastructure.internal-api.payment.rest.resttemplate').projectDir = file('infrastructure/internal-api/payment-api/payment-api-rest-resttemplate')
 
 // Internal API::Product API
 include(':infrastructure.internal-api.product.grpc.netdevh')
@@ -329,10 +343,12 @@ include(':infrastructure.observability.tracing.zipkin')
 project(':infrastructure.observability.tracing.zipkin').projectDir = file('infrastructure/observability/tracing/tracing-zipkin')
 
 // Payment
+include(':infrastructure.payment.parent')
+project(':infrastructure.payment.parent').projectDir = file('infrastructure/payment/payment-parent')
 
 // Payment::Stripe
 include(':infrastructure.payment.stripe')
-project(':infrastructure.payment.stripe').projectDir = file('infrastructure/payment/stripe')
+project(':infrastructure.payment.stripe').projectDir = file('infrastructure/payment/payment-stripe')
 
 // Persistence
 

@@ -7,17 +7,17 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 
+@Schema(description = "Represents a category in the category list")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Represents a category in the category list.")
 public class CategoryResponse {
 
-  @Schema(description = "Unique identifier of the category.", example = "1")
+  @Schema(description = "Unique identifier of the category", example = "1")
   private Integer id;
 
-  @Schema(description = "Name of the category.", example = "Category Name")
+  @Schema(description = "Name of the category", example = "LAPTOP")
   private String name;
 }

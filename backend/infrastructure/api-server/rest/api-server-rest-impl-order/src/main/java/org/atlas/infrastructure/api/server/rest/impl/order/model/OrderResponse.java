@@ -11,12 +11,12 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import org.atlas.domain.order.shared.OrderStatus;
 
+@Schema(description = "Represents an order in the order list")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Represents an order in the order list.")
 public class OrderResponse {
 
   @Schema(description = "Unique identifier of the order", example = "1")

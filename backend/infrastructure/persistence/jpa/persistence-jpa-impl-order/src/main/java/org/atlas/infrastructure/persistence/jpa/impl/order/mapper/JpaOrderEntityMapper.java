@@ -3,6 +3,7 @@ package org.atlas.infrastructure.persistence.jpa.impl.order.mapper;
 import lombok.experimental.UtilityClass;
 import org.atlas.domain.order.entity.OrderEntity;
 import org.atlas.domain.order.entity.OrderItemEntity;
+import org.atlas.domain.order.entity.PaymentEntity;
 import org.atlas.domain.order.entity.ProductEntity;
 import org.atlas.domain.order.entity.UserEntity;
 import org.atlas.infrastructure.persistence.jpa.impl.order.entity.JpaOrderEntity;
@@ -18,6 +19,8 @@ public class JpaOrderEntityMapper {
     jpaOrderEntity.setCode(orderEntity.getCode());
     jpaOrderEntity.setUserId(orderEntity.getUser().getId());
     jpaOrderEntity.setAmount(orderEntity.getAmount());
+    jpaOrderEntity.setPaymentId(orderEntity.getPayment().getId());
+    jpaOrderEntity.setPaymentMethod(orderEntity.getPayment().getMethod());
     jpaOrderEntity.setStatus(orderEntity.getStatus());
     jpaOrderEntity.setCancellationReason(orderEntity.getCancellationReason());
     jpaOrderEntity.setCreatedAt(orderEntity.getCreatedAt());
@@ -66,6 +69,12 @@ public class JpaOrderEntityMapper {
         orderEntity.addOrderItem(orderItemEntity);
       });
     }
+
+    // Payment
+    PaymentEntity paymentEntity = new PaymentEntity();
+    paymentEntity.setId(jpaOrderEntity.getPaymentId());
+    paymentEntity.setMethod(jpaOrderEntity.getPaymentMethod());
+    orderEntity.setPayment(paymentEntity);
 
     return orderEntity;
   }

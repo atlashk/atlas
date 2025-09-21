@@ -30,10 +30,10 @@ public class StringUtil {
   }
 
   /**
-   * Returns the input string if it is not null; otherwise, returns the specified default value.
+   * Returns the input string if it is not null; otherwise, returns an empty value by default.
    */
-  public static String nvl(String str, String defaultValue) {
-    return str == null ? defaultValue : str;
+  public static String nvl(String str) {
+    return str == null ? StringUtil.EMPTY : str;
   }
 
   /**

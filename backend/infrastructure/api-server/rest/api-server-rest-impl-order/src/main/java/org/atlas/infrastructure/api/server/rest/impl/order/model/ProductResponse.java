@@ -8,12 +8,12 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 
+@Schema(description = "Represents a product in the order item")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Represents a product in the order item")
 public class ProductResponse {
 
   @Schema(description = "Unique identifier of the product", example = "1")

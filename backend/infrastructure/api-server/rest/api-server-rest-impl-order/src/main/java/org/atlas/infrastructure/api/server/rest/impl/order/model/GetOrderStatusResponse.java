@@ -8,17 +8,17 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import org.atlas.domain.order.shared.OrderStatus;
 
+@Schema(description = "Response object containing the status of an order")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Response object containing the status of an order.")
 public class GetOrderStatusResponse {
 
-  @Schema(description = "Current status of the order.")
+  @Schema(description = "Current status of the order", example = "AWAITING_PAYMENT")
   private OrderStatus status;
 
-  @Schema(description = "Reason for canceling the order, if applicable.")
+  @Schema(description = "Reason for canceling the order, if applicable", example = "Payment failed")
   private String cancellationReason;
 }

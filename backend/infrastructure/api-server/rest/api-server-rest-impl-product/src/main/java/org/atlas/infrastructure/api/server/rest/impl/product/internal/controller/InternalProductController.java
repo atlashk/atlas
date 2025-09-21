@@ -35,16 +35,8 @@ public class InternalProductController {
     InternalListProductInput input = ObjectMapperUtil.getInstance()
         .map(request, InternalListProductInput.class);
     List<ProductEntity> productEntities = internalListProductUseCaseHandler.handle(input);
-    List<ProductResponse> productResponses = productEntities.stream()
-        .map(productEntity -> {
-          ProductResponse productResponse = new ProductResponse();
-          productResponse.setId(productEntity.getId());
-          productResponse.setName(productEntity.getName());
-          productResponse.setPrice(productEntity.getPrice());
-          productResponse.setImage(productEntity.getImage());
-          return productResponse;
-        })
-        .toList();
+    List<ProductResponse> productResponses = ObjectMapperUtil.getInstance()
+        .mapList(productEntities, ProductResponse.class);
     return ApiResponseWrapper.success(productResponses);
   }
 }

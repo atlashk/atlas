@@ -7,14 +7,14 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 
+@Schema(description = "Detailed information about the product")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Detailed information about the product.")
 public class ProductDetailsResponse {
 
-  @Schema(description = "Description of the product.", example = "A comfortable cotton t-shirt.")
+  @Schema(description = "Description of the product", example = "A comfortable cotton T-shirt")
   private String description;
 }

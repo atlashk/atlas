@@ -17,6 +17,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.atlas.domain.order.shared.OrderStatus;
+import org.atlas.domain.payment.shared.PaymentMethod;
 import org.atlas.infrastructure.persistence.jpa.core.entity.JpaBaseEntity;
 
 @Entity
@@ -39,6 +40,13 @@ public class JpaOrderEntity extends JpaBaseEntity {
   private List<JpaOrderItemEntity> orderItems;
 
   private BigDecimal amount;
+
+  @Column(name = "payment_id")
+  private Integer paymentId;
+
+  @Column(name = "payment_method")
+  @Enumerated(EnumType.STRING)
+  private PaymentMethod paymentMethod;
 
   @Enumerated(EnumType.STRING)
   private OrderStatus status;

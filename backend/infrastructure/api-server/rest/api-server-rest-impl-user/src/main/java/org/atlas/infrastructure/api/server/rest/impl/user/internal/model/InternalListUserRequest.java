@@ -6,12 +6,12 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
+@Schema(description = "Request object for listing users by their IDs")
 @Getter
 @Setter
-@Schema(description = "Request object for listing users by their IDs.")
 public class InternalListUserRequest {
 
   @NotEmpty
-  @Schema(description = "List of user IDs to retrieve.", example = "[1,2,3,4]")
+  @Schema(description = "List of user IDs to retrieve", example = "[1,2,3,4]")
   private List<Integer> ids;
 }

@@ -31,22 +31,27 @@ dependencies {
     // Infrastructure
     switch (rootProject.ext.appStack['api-client']) {
         case 'grpc-netdevh':
+            api project(':infrastructure.internal-api.payment.grpc.netdevh')
             api project(':infrastructure.internal-api.product.grpc.netdevh')
             api project(':infrastructure.internal-api.user.grpc.netdevh')
             break
         case 'rest-apachehttpclient':
+            api project(':infrastructure.internal-api.payment.rest.apachehttpclient')
             api project(':infrastructure.internal-api.product.rest.apachehttpclient')
             api project(':infrastructure.internal-api.user.rest.apachehttpclient')
             break
         case 'rest-feign':
+            api project(':infrastructure.internal-api.payment.rest.feign')
             api project(':infrastructure.internal-api.product.rest.feign')
             api project(':infrastructure.internal-api.user.rest.feign')
             break
         case 'rest-restclient':
+            api project(':infrastructure.internal-api.payment.rest.restclient')
             api project(':infrastructure.internal-api.product.rest.restclient')
             api project(':infrastructure.internal-api.user.rest.restclient')
             break
         case 'rest-resttemplate':
+            api project(':infrastructure.internal-api.payment.rest.resttemplate')
             api project(':infrastructure.internal-api.product.rest.resttemplate')
             api project(':infrastructure.internal-api.user.rest.resttemplate')
             break

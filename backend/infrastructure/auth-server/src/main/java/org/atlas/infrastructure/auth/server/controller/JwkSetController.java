@@ -1,5 +1,6 @@
 package org.atlas.infrastructure.auth.server.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import java.io.IOException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Map;
@@ -21,6 +22,10 @@ public class JwkSetController {
 
   @GetMapping
   @Cacheable(cacheNames = "jwks")
+  @Operation(
+      summary = "JwkSet",
+      description = "Return the public key as JWKSet."
+  )
   public Map<String, Object> getJwks() throws IOException, InvalidKeySpecException {
     return JwkSetUtil.getInstance()
         .generate(RsaKeyLoader.loadPublicKey(SecurityConstant.RSA_PUBLIC_KEY_PATH),

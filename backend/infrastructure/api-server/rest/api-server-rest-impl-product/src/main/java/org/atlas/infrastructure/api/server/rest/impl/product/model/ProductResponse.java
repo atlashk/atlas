@@ -11,47 +11,47 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import org.atlas.domain.product.shared.ProductStatus;
 
+@Schema(description = "Response object for retrieving product details")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Response object for retrieving product details.")
 public class ProductResponse {
 
-  @Schema(description = "Unique identifier of the product.", example = "123")
+  @Schema(description = "Unique identifier of the product", example = "123")
   private Integer id;
 
-  @Schema(description = "Name of the product.", example = "T-Shirt")
+  @Schema(description = "Name of the product", example = "T-Shirt")
   private String name;
 
-  @Schema(description = "Image of the product.", example = "https://example.com/product-image.jpg")
+  @Schema(description = "Image of the product", example = "https://example.com/product-image.jpg")
   private String image;
 
-  @Schema(description = "Price of the product.", example = "19.99")
+  @Schema(description = "Price of the product", example = "19.99")
   private BigDecimal price;
 
-  @Schema(description = "Quantity of the product available.", example = "100")
+  @Schema(description = "Quantity of the product available", example = "100")
   private Integer quantity;
 
-  @Schema(description = "Status of the product.", example = "IN_STOCK")
+  @Schema(description = "Status of the product", example = "IN_STOCK")
   private ProductStatus status;
 
-  @Schema(description = "Date and time the product becomes available in ISO 8601 format.", example = "2023-10-01T10:00:00Z")
+  @Schema(description = "Date and time the product becomes available in ISO 8601 format", example = "2023-10-01T10:00:00Z")
   private Date availableFrom;
 
-  @Schema(description = "Indicates if the product is active.", example = "true")
+  @Schema(description = "Indicates if the product is active", example = "true")
   private Boolean isActive;
 
-  @Schema(description = "Brand information of the product.")
+  @Schema(description = "Brand information of the product")
   private BrandResponse brand;
 
-  @Schema(description = "Detailed information about the product.")
+  @Schema(description = "Detailed information about the product")
   private ProductDetailsResponse details;
 
-  @Schema(description = "List of attributes associated with the product.")
+  @Schema(description = "List of attributes associated with the product")
   private List<ProductAttributeResponse> attributes;
 
-  @Schema(description = "List of categories the product belongs to.")
+  @Schema(description = "List of categories the product belongs to")
   private List<CategoryResponse> categories;
 }
