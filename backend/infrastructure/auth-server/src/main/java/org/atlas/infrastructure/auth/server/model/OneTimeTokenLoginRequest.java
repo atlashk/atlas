@@ -2,10 +2,12 @@ package org.atlas.infrastructure.auth.server.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.EqualsAndHashCode;
 
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = false)
 @Schema(description = "Request object for user login.")
 public class OneTimeTokenLoginRequest {

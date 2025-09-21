@@ -3,12 +3,14 @@ package org.atlas.domain.user.usecase.admin.model;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 import org.atlas.domain.user.shared.Role;
 import org.atlas.framework.paging.PagingRequest;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

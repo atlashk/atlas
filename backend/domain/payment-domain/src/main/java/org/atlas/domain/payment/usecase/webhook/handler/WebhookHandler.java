@@ -11,9 +11,10 @@ import org.atlas.framework.async.AsyncTask;
 import org.atlas.framework.async.AsyncUtil;
 import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.dependency.DependencyPort;
-import org.atlas.framework.domain.event.contract.payment.PaymentCanceledEvent;
-import org.atlas.framework.domain.event.contract.payment.PaymentFailedEvent;
-import org.atlas.framework.domain.event.contract.payment.PaymentSucceededEvent;
+import org.atlas.framework.domain.event.contract.order.PaymentCanceledEvent;
+import org.atlas.framework.domain.event.contract.order.PaymentFailedEvent;
+import org.atlas.framework.domain.event.contract.order.PaymentSucceededEvent;
+import org.atlas.framework.domain.event.contract.order.model.Order;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.error.AppError;
@@ -69,25 +70,28 @@ public class WebhookHandler {
         paymentRepository.save(paymentEntity);
 
         // Publish event
+        Order order = new Order();
+        order.setId(paymentEntity.getOrderId());
+        order.setUserId(paymentEntity.getUserId());
+        order.setAmount(paymentEntity.getAmount());
+        order.setPaymentId(paymentEntity.getId());
+        order.setPaymentMethod(paymentEntity.getMethod());
         switch (paymentResult.getStatus()) {
           case SUCCEEDED -> {
             PaymentSucceededEvent paymentSucceededEvent = new PaymentSucceededEvent(
-                applicationConfigPort.getApplicationName());
-            paymentSucceededEvent.setOrderId(paymentEntity.getOrderId());
+                applicationConfigPort.getApplicationName(), order);
             externalMessagePublisherPort.publish(paymentSucceededEvent);
           }
           case FAILED -> {
             PaymentFailedEvent paymentFailedEvent = new PaymentFailedEvent(
-                applicationConfigPort.getApplicationName());
-            paymentFailedEvent.setOrderId(paymentEntity.getOrderId());
+                applicationConfigPort.getApplicationName(), order);
             paymentFailedEvent.setErrorCode(paymentResult.getErrorCode());
             paymentFailedEvent.setErrorMessage(paymentResult.getErrorMessage());
             externalMessagePublisherPort.publish(paymentFailedEvent);
           }
           case CANCELED -> {
             PaymentCanceledEvent paymentCanceledEvent = new PaymentCanceledEvent(
-                applicationConfigPort.getApplicationName());
-            paymentCanceledEvent.setOrderId(paymentEntity.getOrderId());
+                applicationConfigPort.getApplicationName(), order);
             paymentCanceledEvent.setCancellationReason(paymentResult.getCancellationReason());
             externalMessagePublisherPort.publish(paymentCanceledEvent);
           }

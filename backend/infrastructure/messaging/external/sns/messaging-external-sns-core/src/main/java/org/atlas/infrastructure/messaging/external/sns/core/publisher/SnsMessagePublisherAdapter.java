@@ -24,20 +24,29 @@ public class SnsMessagePublisherAdapter implements ExternalMessagePublisherPort 
 
   @Override
   public void publish(BaseOrderEvent event) {
-    this.doPublish(event, String.valueOf(event.getOrderId()),
-        snsProps.getSnsTopicArn().get(SnsConstant.SNS_TOPIC_ARN_ORDER_EVENT));
+    this.doPublish(
+        event,
+        String.valueOf(event.getOrder().getId()),
+        snsProps.getSnsTopicArn().get(SnsConstant.SNS_TOPIC_ARN_ORDER_EVENT)
+    );
   }
 
   @Override
   public void publish(BaseProductEvent event) {
-    this.doPublish(event, String.valueOf(event.getProductId()),
-        snsProps.getSnsTopicArn().get(SnsConstant.SNS_TOPIC_ARN_PRODUCT_EVENT));
+    this.doPublish(
+        event,
+        String.valueOf(event.getProduct().getId()),
+        snsProps.getSnsTopicArn().get(SnsConstant.SNS_TOPIC_ARN_PRODUCT_EVENT)
+    );
   }
 
   @Override
   public void publish(BaseUserEvent event) {
-    this.doPublish(event, String.valueOf(event.getUserId()),
-        snsProps.getSnsTopicArn().get(SnsConstant.SNS_TOPIC_ARN_USER_EVENT));
+    this.doPublish(
+        event,
+        String.valueOf(event.getUser().getId()),
+        snsProps.getSnsTopicArn().get(SnsConstant.SNS_TOPIC_ARN_USER_EVENT)
+    );
   }
 
   @Override

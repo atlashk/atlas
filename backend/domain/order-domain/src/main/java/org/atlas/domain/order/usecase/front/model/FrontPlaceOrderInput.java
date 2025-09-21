@@ -7,11 +7,13 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 import org.atlas.domain.payment.shared.PaymentMethod;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,7 +25,8 @@ public class FrontPlaceOrderInput {
   @NotNull
   private PaymentMethod paymentMethod;
 
-  @Data
+  @Getter
+@Setter
   @Builder
   @NoArgsConstructor
   @AllArgsConstructor

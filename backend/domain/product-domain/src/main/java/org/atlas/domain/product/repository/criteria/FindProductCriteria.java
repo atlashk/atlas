@@ -3,10 +3,12 @@ package org.atlas.domain.product.repository.criteria;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.atlas.domain.product.shared.ProductStatus;
 
-@Data
+@Getter
+@Setter
 public class FindProductCriteria {
 
   private Integer id;

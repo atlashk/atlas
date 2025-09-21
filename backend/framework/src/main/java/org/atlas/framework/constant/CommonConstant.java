@@ -9,4 +9,6 @@ public class CommonConstant {
 
   public static final int DEFAULT_PAGE_SIZE = 20;
   public static final String DEFAULT_PAGE_SIZE_STR = "20";
+
+  public static final String DEFAULT_CURRENCY = "USD";
 }

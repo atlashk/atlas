@@ -4,13 +4,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.order.entity.OrderEntity;
+import org.atlas.domain.order.entity.PaymentEntity;
 import org.atlas.domain.order.entity.ProductEntity;
 import org.atlas.domain.order.entity.UserEntity;
-import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.service.DomainService;
-import org.atlas.framework.error.AppError;
+import org.atlas.framework.internalapi.payment.PaymentApiPort;
+import org.atlas.framework.internalapi.payment.model.ListPaymentRequest;
+import org.atlas.framework.internalapi.payment.model.PaymentResponse;
 import org.atlas.framework.internalapi.product.ProductApiPort;
 import org.atlas.framework.internalapi.product.model.ListProductRequest;
 import org.atlas.framework.internalapi.product.model.ProductResponse;
@@ -18,6 +22,7 @@ import org.atlas.framework.internalapi.user.UserApiPort;
 import org.atlas.framework.internalapi.user.model.ListUserRequest;
 import org.atlas.framework.internalapi.user.model.UserResponse;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ArrayUtil;
 import org.atlas.framework.util.CollectionUtil;
 
 @DomainService
@@ -26,23 +31,38 @@ public class OrderAggregator {
 
   private final UserApiPort userApiPort;
   private final ProductApiPort productApiPort;
+  private final PaymentApiPort paymentApiPort;
 
-  public void aggregate(OrderEntity orderEntity, boolean skippedNotFound) {
+  /**
+   * Aggregate specific data types for a single order entity
+   */
+  public void aggregate(OrderEntity orderEntity, AggregationOptions... options) {
     if (orderEntity == null) {
       return;
     }
-    aggregate(List.of(orderEntity), skippedNotFound);
+    aggregate(List.of(orderEntity), options);
   }
 
-  public void aggregate(List<OrderEntity> orderEntities, boolean skippedNotFound) {
-    if (CollectionUtil.isEmpty(orderEntities)) {
+  /**
+   * Aggregate specific data types for multiple order entities
+   */
+  public void aggregate(List<OrderEntity> orderEntities, AggregationOptions... options) {
+    if (CollectionUtil.isEmpty(orderEntities) || ArrayUtil.isEmpty(options)) {
       return;
     }
-    loadUsers(orderEntities, skippedNotFound);
-    loadProducts(orderEntities, skippedNotFound);
+
+    if (options[0].isLoadUsers()) {
+      loadUsers(orderEntities);
+    }
+    if (options[0].isLoadProducts()) {
+      loadProducts(orderEntities);
+    }
+    if (options[0].isLoadPayments()) {
+      loadPayments(orderEntities);
+    }
   }
 
-  private void loadUsers(List<OrderEntity> orderEntities, boolean skippedNotFound) {
+  private void loadUsers(List<OrderEntity> orderEntities) {
     // Collect user IDs
     List<Integer> userIds = orderEntities.stream()
         .map(orderEntity -> orderEntity.getUser().getId())
@@ -56,11 +76,7 @@ public class OrderAggregator {
     ListUserRequest request = new ListUserRequest(userIds);
     List<UserResponse> userResponses = userApiPort.call(request);
     if (CollectionUtil.isEmpty(userResponses)) {
-      if (skippedNotFound) {
-        return;
-      } else {
-        throw new DomainException(AppError.USER_NOT_FOUND);
-      }
+      return; // Skip if no users found
     }
 
     // Update order's user
@@ -72,16 +88,12 @@ public class OrderAggregator {
         UserEntity userEntity = ObjectMapperUtil.getInstance()
             .map(userResponse, UserEntity.class);
         orderEntity.setUser(userEntity);
-      } else {
-        if (skippedNotFound) {
-          throw new DomainException(AppError.USER_NOT_FOUND,
-              String.format("User %d not found", orderEntity.getUser().getId()));
-        }
       }
+      // Skip if user not found instead of throwing exception
     });
   }
 
-  private void loadProducts(List<OrderEntity> orderEntities, boolean ignoreNotFound) {
+  private void loadProducts(List<OrderEntity> orderEntities) {
     // Collect product IDs
     List<Integer> productIds = orderEntities.stream()
         .flatMap(orderEntity -> orderEntity.getOrderItems()
@@ -90,18 +102,14 @@ public class OrderAggregator {
         .distinct()
         .toList();
     if (CollectionUtil.isEmpty(productIds)) {
-      if (ignoreNotFound) {
-        return;
-      } else {
-        throw new DomainException(AppError.PRODUCT_NOT_FOUND);
-      }
+      return;
     }
 
     // Call product-service to fetch product info
     ListProductRequest request = new ListProductRequest(productIds);
     List<ProductResponse> productResponses = productApiPort.call(request);
     if (CollectionUtil.isEmpty(productResponses)) {
-      return;
+      return; // Skip if no products found
     }
 
     // Update order item's product
@@ -115,13 +123,53 @@ public class OrderAggregator {
           ProductEntity productEntity = ObjectMapperUtil.getInstance()
               .map(productResponse, ProductEntity.class);
           orderItemEntity.setProduct(productEntity);
-        } else {
-          if (ignoreNotFound) {
-            throw new DomainException(AppError.PRODUCT_NOT_FOUND,
-                String.format("Product %d not found", orderItemEntity.getProduct().getId()));
-          }
         }
+        // Skip if product not found instead of throwing exception
       });
     });
+  }
+
+  private void loadPayments(List<OrderEntity> orderEntities) {
+    // Collect payment IDs
+    List<Integer> paymentIds = orderEntities.stream()
+        .map(orderEntity -> orderEntity.getPayment().getId())
+        .distinct()
+        .toList();
+    if (CollectionUtil.isEmpty(paymentIds)) {
+      return;
+    }
+
+    // Call payment-service to fetch payment info by order IDs
+    ListPaymentRequest request = ListPaymentRequest.builder()
+        .paymentIds(paymentIds)
+        .build();
+    List<PaymentResponse> paymentResponses = paymentApiPort.call(request);
+    if (CollectionUtil.isEmpty(paymentResponses)) {
+      return; // Skip if no payments found
+    }
+
+    // Create a map of orderId to PaymentResponse
+    Map<Integer, PaymentResponse> paymentResponseMap = paymentResponses.stream()
+        .collect(Collectors.toMap(PaymentResponse::getId, Function.identity()));
+
+    // Update order's payment
+    orderEntities.forEach(orderEntity -> {
+      PaymentResponse paymentResponse = paymentResponseMap.get(orderEntity.getPayment().getId());
+      if (paymentResponse != null) {
+        PaymentEntity paymentEntity = ObjectMapperUtil.getInstance()
+            .map(paymentResponse, PaymentEntity.class);
+        orderEntity.setPayment(paymentEntity);
+      }
+      // Skip if payment not found instead of throwing exception
+    });
+  }
+
+  @Getter
+  @Builder
+  public static class AggregationOptions {
+
+    private boolean loadUsers;
+    private boolean loadProducts;
+    private boolean loadPayments;
   }
 }

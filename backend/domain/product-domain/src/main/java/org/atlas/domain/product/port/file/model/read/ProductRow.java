@@ -2,10 +2,12 @@ package org.atlas.domain.product.port.file.model.read;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.atlas.domain.product.shared.ProductStatus;
 
-@Data
+@Getter
+@Setter
 public class ProductRow {
 
   private String name;

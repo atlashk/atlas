@@ -2,10 +2,12 @@ package org.atlas.framework.jwt;
 
 import java.util.Date;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.atlas.domain.user.shared.Role;
 
-@Data
+@Getter
+@Setter
 @Builder
 public class Jwt {
 

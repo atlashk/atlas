@@ -2,13 +2,15 @@ package org.atlas.framework.paging;
 
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.util.StringUtil;
 import org.checkerframework.checker.index.qual.Positive;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class PagingRequest {

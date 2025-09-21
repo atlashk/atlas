@@ -36,17 +36,16 @@ public class SendgridEmailAdapter implements EmailPort {
       Response response = sendGrid.api(request);
       if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
         log.info("Sent email successfully: notificationId={}, recipients={}",
-            notification.getNotificationId(), notification.getRecipients());
+            notification.getId(), notification.getRecipients());
       } else {
         log.error("Failed to send email: notificationId={}, recipients={}, status={}, body={}",
-            notification.getNotificationId(), notification.getRecipients(),
-            response.getStatusCode(),
+            notification.getId(), notification.getRecipients(), response.getStatusCode(),
             response.getBody());
         throw new SendEmailException("SendGrid API error: " + response.getBody());
       }
     } catch (IOException e) {
       log.error("Failed to send email: notificationId={}, recipients={}",
-          notification.getNotificationId(), notification.getRecipients(), e);
+          notification.getId(), notification.getRecipients(), e);
       throw new SendEmailException(e);
     }
   }

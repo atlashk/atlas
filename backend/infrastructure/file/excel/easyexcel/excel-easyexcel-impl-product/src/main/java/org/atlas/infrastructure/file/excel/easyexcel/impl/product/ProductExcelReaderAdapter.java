@@ -6,7 +6,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.atlas.domain.product.port.file.excel.ProductExcelReaderPort;
 import org.atlas.domain.product.port.file.model.read.ProductRow;
 import org.atlas.domain.product.shared.ProductStatus;
@@ -26,7 +27,8 @@ public class ProductExcelReaderAdapter implements ProductExcelReaderPort {
         .mapList(excelRows, ProductRow.class);
   }
 
-  @Data
+  @Getter
+@Setter
   public static class ProductExcelRow {
 
     @ExcelProperty(value = "Name")

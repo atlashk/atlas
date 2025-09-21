@@ -11,10 +11,12 @@ import jakarta.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.atlas.domain.product.shared.ProductStatus;
 
-@Data
+@Getter
+@Setter
 @Schema(description = "Request object for creating a new product.")
 public class AdminCreateProductRequest {
 
@@ -64,7 +66,8 @@ public class AdminCreateProductRequest {
   @Schema(description = "List of category IDs the product belongs to.", example = "[1, 2, 3]", requiredMode = RequiredMode.REQUIRED)
   private List<Integer> categoryIds;
 
-  @Data
+  @Getter
+@Setter
   @Schema(description = "Detailed information about the product.")
   public static class ProductDetails {
 
@@ -73,7 +76,8 @@ public class AdminCreateProductRequest {
     private String description;
   }
 
-  @Data
+  @Getter
+@Setter
   @Schema(description = "Attributes associated with the product.")
   public static class ProductAttribute {
 

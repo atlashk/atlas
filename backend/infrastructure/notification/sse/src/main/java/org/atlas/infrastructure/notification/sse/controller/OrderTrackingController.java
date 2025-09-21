@@ -12,16 +12,14 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-public class OrderNotificationController extends SseController {
+public class OrderTrackingController extends SseController {
 
   @Override
   public boolean canHandle(NotificationType notificationType) {
-    // This controller handles all order-related notifications
-    return notificationType == NotificationType.ORDER_FULFILLED ||
-        notificationType == NotificationType.ORDER_CANCELED;
+    return notificationType == NotificationType.ORDER_TRACKING;
   }
 
-  @GetMapping(value = "/notification/sse/orders/{orderId}",
+  @GetMapping(value = "/notification/sse/orders/{orderId}/tracking",
       produces = MediaType.TEXT_EVENT_STREAM_VALUE)
   public SseEmitter streamOrderNotifications(@PathVariable("orderId") Integer orderId) {
     log.info("Client subscribing to order notifications for orderId: {}", orderId);

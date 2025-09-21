@@ -1,10 +1,12 @@
 package org.atlas.domain.order.repository.criteria;
 
 import java.util.Date;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.atlas.domain.order.shared.OrderStatus;
 
-@Data
+@Getter
+@Setter
 public class FindOrderCriteria {
 
   private Integer orderId;

@@ -2,9 +2,11 @@ package org.atlas.infrastructure.auth.server.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Schema(description = "Request object for user generate one-time token.")
 public class GenerateOneTimeTokenRequest {
 

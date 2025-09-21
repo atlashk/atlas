@@ -7,16 +7,16 @@ import org.atlas.framework.domain.event.contract.order.model.Order;
 
 @Getter
 @Setter
-public class OrderFulfilledEvent extends BaseOrderEvent {
+public class PaymentCanceledEvent extends BaseOrderEvent {
 
-  private Order order;
+  private String cancellationReason;
 
-  public OrderFulfilledEvent(String eventSource) {
-    super(eventSource);
+  public PaymentCanceledEvent(String eventSource, Order order) {
+    super(eventSource, order);
   }
 
   @Override
   public DomainEventType getDomainEventType() {
-    return DomainEventType.ORDER_FULFILLED;
+    return DomainEventType.PAYMENT_CANCELED;
   }
 }

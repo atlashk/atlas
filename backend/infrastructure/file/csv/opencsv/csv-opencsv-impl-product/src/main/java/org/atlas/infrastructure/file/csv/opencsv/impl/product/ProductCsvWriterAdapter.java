@@ -5,7 +5,8 @@ import com.opencsv.bean.CsvBindByPosition;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.atlas.domain.product.port.file.csv.ProductCsvWriterPort;
 import org.atlas.domain.product.port.file.model.write.ProductRow;
 import org.atlas.domain.product.shared.ProductStatus;
@@ -23,7 +24,8 @@ public class ProductCsvWriterAdapter implements ProductCsvWriterPort {
     return OpenCsvWriter.write(csvRows, ProductCsvRow.class);
   }
 
-  @Data
+  @Getter
+@Setter
   public static class ProductCsvRow {
 
     @CsvBindByName(column = "ID")

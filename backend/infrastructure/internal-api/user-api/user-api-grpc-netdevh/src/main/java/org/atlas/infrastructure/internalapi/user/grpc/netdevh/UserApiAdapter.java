@@ -34,7 +34,7 @@ public class UserApiAdapter implements UserApiPort {
 
   private ListUserRequestProto map(ListUserRequest request) {
     return ListUserRequestProto.newBuilder()
-        .addAllId(request.getIds())
+        .addAllId(request.getUserIds())
         .build();
   }
 

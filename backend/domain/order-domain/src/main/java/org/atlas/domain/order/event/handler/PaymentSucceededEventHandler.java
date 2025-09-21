@@ -9,16 +9,16 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.order.entity.OrderEntity;
-import org.atlas.domain.order.mapper.OrderEventMapper;
 import org.atlas.domain.order.repository.OrderRepository;
+import org.atlas.domain.order.service.OrderAggregator;
+import org.atlas.domain.order.service.OrderAggregator.AggregationOptions;
 import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.framework.async.AsyncTask;
 import org.atlas.framework.async.AsyncUtil;
 import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.constant.Application;
 import org.atlas.framework.domain.event.DomainEventType;
-import org.atlas.framework.domain.event.contract.order.OrderFulfilledEvent;
-import org.atlas.framework.domain.event.contract.payment.PaymentSucceededEvent;
+import org.atlas.framework.domain.event.contract.order.PaymentSucceededEvent;
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.error.AppError;
@@ -26,6 +26,7 @@ import org.atlas.framework.notification.common.NotificationType;
 import org.atlas.framework.notification.email.Attachment;
 import org.atlas.framework.notification.email.EmailNotification;
 import org.atlas.framework.notification.email.EmailPort;
+import org.atlas.framework.notification.realtime.payload.OrderTrackingPayload;
 import org.atlas.framework.notification.realtime.sse.SseNotification;
 import org.atlas.framework.notification.realtime.sse.SsePort;
 import org.atlas.framework.notification.realtime.websocket.WebSocketNotification;
@@ -40,6 +41,7 @@ import org.atlas.framework.util.FileUtil;
 public class PaymentSucceededEventHandler {
 
   private final OrderRepository orderRepository;
+  private final OrderAggregator orderAggregator;
   private final ApplicationConfigPort applicationConfigPort;
   private final EmailPort emailPort;
   private final SsePort ssePort;
@@ -48,7 +50,7 @@ public class PaymentSucceededEventHandler {
 
   public void handle(PaymentSucceededEvent paymentSucceededEvent) {
     // Find order
-    OrderEntity orderEntity = orderRepository.findById(paymentSucceededEvent.getOrderId())
+    OrderEntity orderEntity = orderRepository.findById(paymentSucceededEvent.getOrder().getId())
         .orElseThrow(() -> new DomainException(AppError.ORDER_NOT_FOUND));
 
     // Validate order status
@@ -56,28 +58,38 @@ public class PaymentSucceededEventHandler {
       throw new DomainException(AppError.ORDER_INVALID_STATUS);
     }
 
-    // Update order status to AWAITING_PAYMENT
+    // Mark order as FULFILLED
     orderEntity.setStatus(OrderStatus.FULFILLED);
     orderRepository.update(orderEntity);
 
-    // Notify channels
-    OrderFulfilledEvent orderFulfilledEvent = new OrderFulfilledEvent(
-        applicationConfigPort.getApplicationName());
-    orderFulfilledEvent.setOrder(OrderEventMapper.fromOrderEntity(orderEntity));
+    // Aggregate order
+    orderAggregator.aggregate(
+        orderEntity,
+        AggregationOptions.builder()
+            .loadUsers(true)
+            .loadProducts(true)
+            .build()
+    );
+
+    // Notify to channels
+    OrderTrackingPayload orderTrackingPayload = OrderTrackingPayload.builder()
+        .orderId(orderEntity.getId())
+        .orderStatus(orderEntity.getStatus())
+        .build();
     AsyncUtil.executeAsync(List.of(
-        notifyEmail(orderFulfilledEvent),
-        notifySse(orderFulfilledEvent),
-        notifyWebSocket(orderFulfilledEvent)
+        notifyEmail(orderEntity),
+        notifySse(orderTrackingPayload),
+        notifyWebSocket(orderTrackingPayload)
     ));
   }
 
-  private AsyncTask notifyEmail(OrderFulfilledEvent event) {
+  private AsyncTask notifyEmail(OrderEntity orderEntity) {
     return new AsyncTask() {
       @Override
       public void run() {
         // Model
         Map<String, Object> model = new HashMap<>();
-        model.put("order", event.getOrder());
+        model.put("order", orderEntity);
 
         // Subject
         String subject;
@@ -111,7 +123,7 @@ public class PaymentSucceededEventHandler {
 
         EmailNotification notification = new EmailNotification.Builder()
             .setSender(sender)
-            .addRecipient(event.getOrder().getUser().getEmail())
+            .addRecipient(orderEntity.getUser().getEmail())
             .setSubject(subject)
             .setBody(body)
             .addAttachment(attachment)
@@ -123,63 +135,66 @@ public class PaymentSucceededEventHandler {
       @Override
       public void onSuccess() {
         log.info("Email notification for order fulfilled succeeded: orderId={}",
-            event.getOrder().getOrderId());
+            orderEntity.getId());
       }
 
       @Override
       public void onError(Throwable ex) {
         log.error("Email notification for order fulfilled failed: orderId={}, error={}",
-            event.getOrder().getOrderId(), ex.getMessage(), ex);
+            orderEntity.getId(), ex.getMessage(), ex);
       }
     };
   }
 
-  private AsyncTask notifySse(OrderFulfilledEvent event) {
+  private AsyncTask notifySse(OrderTrackingPayload orderTrackingPayload) {
     return new AsyncTask() {
       @Override
       public void run() {
-        // Create payload with order information
-        SseNotification notification = new SseNotification(
-            NotificationType.ORDER_FULFILLED,
-            String.valueOf(event.getOrder().getOrderId()),
-            event
+        SseNotification<OrderTrackingPayload> notification = new SseNotification<>(
+            NotificationType.ORDER_TRACKING,
+            String.valueOf(orderTrackingPayload.getOrderId()),
+            orderTrackingPayload
         );
         ssePort.notify(notification);
       }
 
       @Override
       public void onSuccess() {
-        log.info("SSE notification for order fulfilled succeeded: orderId={}",
-            event.getOrder().getOrderId());
+        log.info("Notified SSE for order {}: status={}",
+            orderTrackingPayload.getOrderId(), orderTrackingPayload.getOrderStatus());
       }
 
       @Override
       public void onError(Throwable ex) {
-        log.error("SSE notification for order fulfilled failed: orderId={}, error={}",
-            event.getOrder().getOrderId(), ex.getMessage(), ex);
+        log.error("Failed to notify SSE for order {}: status={}, error={}",
+            orderTrackingPayload.getOrderId(), orderTrackingPayload.getOrderStatus(),
+            ex.getMessage(), ex);
       }
     };
   }
 
-  private AsyncTask notifyWebSocket(OrderFulfilledEvent event) {
+  private AsyncTask notifyWebSocket(OrderTrackingPayload orderTrackingPayload) {
     return new AsyncTask() {
       @Override
       public void run() {
-        WebSocketNotification notification = new WebSocketNotification(
-            NotificationType.ORDER_FULFILLED, null);
+        WebSocketNotification<OrderTrackingPayload> notification = new WebSocketNotification<>(
+            NotificationType.ORDER_TRACKING,
+            orderTrackingPayload
+        );
         webSocketPort.notify(notification);
       }
 
       @Override
       public void onSuccess() {
-        log.info("WebSocket notification for order fulfilled succeeded: orderId={}",
-            event.getOrder().getOrderId());
+        log.info("Notified WebSocket for order {}: status={}",
+            orderTrackingPayload.getOrderId(), orderTrackingPayload.getOrderStatus());
       }
 
       @Override
       public void onError(Throwable ex) {
-        log.error("WebSocket notification for order fulfilled failed: orderId={}, error={}",
-            event.getOrder().getOrderId(), ex.getMessage(), ex);
+        log.error("Failed to notify WebSocket for order {}: status={}, error={}",
+            orderTrackingPayload.getOrderId(), orderTrackingPayload.getOrderStatus(),
+            ex.getMessage(), ex);
       }
     };
   }

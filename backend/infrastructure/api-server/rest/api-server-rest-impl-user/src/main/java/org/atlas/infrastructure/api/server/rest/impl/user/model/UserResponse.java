@@ -1,11 +1,13 @@
 package org.atlas.infrastructure.api.server.rest.impl.user.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.EqualsAndHashCode;
 import org.atlas.domain.user.shared.Role;
 
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = false)
 @Schema(description = "Response containing a paginated list of users.")
 public class UserResponse {

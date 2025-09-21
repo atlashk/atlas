@@ -10,8 +10,8 @@ import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.constant.Application;
 import org.atlas.framework.domain.event.DomainEventType;
 import org.atlas.framework.domain.event.contract.order.OrderCreatedEvent;
-import org.atlas.framework.domain.event.contract.product.ProductReservationFailedEvent;
-import org.atlas.framework.domain.event.contract.product.ProductReservationSucceededEvent;
+import org.atlas.framework.domain.event.contract.order.ProductReservationFailedEvent;
+import org.atlas.framework.domain.event.contract.order.ProductReservationSucceededEvent;
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.error.AppError;
@@ -31,26 +31,28 @@ public class OrderCreatedEventHandler {
   public void handle(OrderCreatedEvent orderCreatedEvent) {
     try {
       // Try to reserve products
-      orderCreatedEvent.getOrder().getOrderItems().forEach(orderItem ->
-          decreaseQuantity(orderItem.getProduct().getId(), orderItem.getQuantity()));
+      orderCreatedEvent.getOrder()
+          .getOrderItems()
+          .forEach(orderItem ->
+              decreaseQuantity(orderItem.getProductId(), orderItem.getQuantity())
+          );
       log.info("Successfully reserved products: eventId={}, orderId={}",
-          orderCreatedEvent.getEventId(), orderCreatedEvent.getOrder().getOrderId());
+          orderCreatedEvent.getEventId(), orderCreatedEvent.getOrder().getId());
 
       // Publish succeeded event
       ProductReservationSucceededEvent productReservationSucceededEvent =
-          new ProductReservationSucceededEvent(applicationConfigPort.getApplicationName());
-      productReservationSucceededEvent.setOrder(orderCreatedEvent.getOrder());
+          new ProductReservationSucceededEvent(applicationConfigPort.getApplicationName(),
+              orderCreatedEvent.getOrder());
       externalMessagePublisherPort.publish(productReservationSucceededEvent);
     } catch (Exception e) {
       log.error("Failed to reserve products: eventId={}, orderId={}, error={}",
-          orderCreatedEvent.getEventId(), orderCreatedEvent.getOrder().getOrderId(), e.getMessage(),
-          e);
+          orderCreatedEvent.getEventId(), orderCreatedEvent.getOrder().getId(), e.getMessage(), e);
 
       // Publish failed event
       ProductReservationFailedEvent productReservationFailedEvent =
-          new ProductReservationFailedEvent(applicationConfigPort.getApplicationName());
-      productReservationFailedEvent.setOrder(orderCreatedEvent.getOrder());
-      productReservationFailedEvent.setError(e.getMessage());
+          new ProductReservationFailedEvent(applicationConfigPort.getApplicationName(),
+              orderCreatedEvent.getOrder());
+      productReservationFailedEvent.setErrorMessage(e.getMessage());
       externalMessagePublisherPort.publish(productReservationFailedEvent);
     }
   }

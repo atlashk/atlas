@@ -29,7 +29,7 @@ public class StripeService {
     PaymentIntentCreateParams params =
         PaymentIntentCreateParams.builder()
             .setAmount(CurrencyUtil.getAmountInSmallestUnit(amount, currency))
-            .setCurrency("usd")
+            .setCurrency(currency)
             .setPaymentMethod(paymentMethod.getType())
             .putAllMetadata(metadata)
             .build();

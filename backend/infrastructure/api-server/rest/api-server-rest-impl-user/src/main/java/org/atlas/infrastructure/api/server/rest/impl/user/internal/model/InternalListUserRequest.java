@@ -3,9 +3,11 @@ package org.atlas.infrastructure.api.server.rest.impl.user.internal.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Schema(description = "Request object for listing users by their IDs.")
 public class InternalListUserRequest {
 

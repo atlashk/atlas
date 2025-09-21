@@ -10,13 +10,13 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
+@Slf4j(topic = "SpringWebSocket")
 public class SpringWebSocketAdapter implements WebSocketPort {
 
   private final SimpMessagingTemplate messagingTemplate;
 
   @Override
-  public void notify(WebSocketNotification notification) {
+  public <T> void notify(WebSocketNotification<T> notification) {
     log.info("Notifying {}", notification);
     try {
       String destination = WebSocketDestinationResolver.resolve(notification);

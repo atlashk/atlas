@@ -6,10 +6,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class PagingResult<T> {
@@ -41,7 +43,8 @@ public class PagingResult<T> {
     return new PagingResult<>(mappedData, pagination);
   }
 
-  @Data
+  @Getter
+@Setter
   public static class Pagination {
 
     private int currentPage;

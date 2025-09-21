@@ -5,27 +5,29 @@ import java.util.List;
 import java.util.Map;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties("app.messaging.rabbitmq")
-@Data
+@Getter
+@Setter
 public class RabbitmqProps {
 
   private List<ExchangeConfig> exchanges;
   private List<QueueConfig> queues;
   private List<BindingConfig> bindings;
 
-  @Data
+  @Getter
+  @Setter
   public static class ExchangeConfig {
 
-    private final String name;
-    private final ExchangeType type;
-    private final boolean durable = true;
-    private final boolean autoDelete = true;
+    private String name;
+    private ExchangeType type;
+    private boolean durable = true;
+    private boolean autoDelete = true;
     private Map<String, Object> arguments = new HashMap<>();
   }
 
@@ -40,22 +42,24 @@ public class RabbitmqProps {
     private final String value;
   }
 
-  @Data
+  @Getter
+  @Setter
   public static class QueueConfig {
 
-    private final String name;
-    private final boolean durable = true;
-    private final boolean exclusive = true;
-    private final boolean autoDelete = true;
+    private String name;
+    private boolean durable = true;
+    private boolean exclusive = true;
+    private boolean autoDelete = true;
     private Map<String, Object> arguments = new HashMap<>();
   }
 
-  @Data
+  @Getter
+  @Setter
   public static class BindingConfig {
 
-    private final String exchange;
-    private final String queue;
-    private final String routingKey;
+    private String exchange;
+    private String queue;
+    private String routingKey;
     private Map<String, Object> arguments = new HashMap<>();
   }
 }

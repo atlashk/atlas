@@ -1,7 +1,6 @@
 package org.atlas.domain.order.usecase.front.handler;
 
 import java.time.Duration;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +12,6 @@ import org.atlas.domain.order.entity.ProductEntity;
 import org.atlas.domain.order.entity.UserEntity;
 import org.atlas.domain.order.mapper.OrderEventMapper;
 import org.atlas.domain.order.repository.OrderRepository;
-import org.atlas.domain.order.service.OrderAggregator;
 import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.domain.order.usecase.front.model.FrontPlaceOrderInput;
 import org.atlas.framework.config.ApplicationConfigPort;
@@ -35,7 +33,6 @@ import org.atlas.framework.sequencegenerator.SequenceType;
 public class FrontPlaceOrderUseCaseHandler {
 
   private final OrderRepository orderRepository;
-  private final OrderAggregator orderAggregator;
   private final ApplicationConfigPort applicationConfigPort;
   private final ExternalMessagePublisherPort externalMessagePublisherPort;
   private final LockPort lockPort;
@@ -53,20 +50,15 @@ public class FrontPlaceOrderUseCaseHandler {
 
     try {
       lockPort.doWithLock(() -> {
+        // Insert order into DB
         OrderEntity orderEntity = newOrderEntity(input);
-
-        // Fetch user and products info from internal services
-        orderAggregator.aggregate(Collections.singletonList(orderEntity), false);
-
-        // Calculate order amount
-        orderEntity.calculateOrderAmount();
-
-        // Save into DB
         orderRepository.insert(orderEntity);
 
         // Publish event
-        OrderCreatedEvent event = new OrderCreatedEvent(applicationConfigPort.getApplicationName());
-        event.setOrder(OrderEventMapper.fromOrderEntity(orderEntity));
+        OrderCreatedEvent event = new OrderCreatedEvent(
+            applicationConfigPort.getApplicationName(),
+            OrderEventMapper.fromOrderEntity(orderEntity)
+        );
         externalMessagePublisherPort.publish(event);
 
         // Return the inserted order
@@ -121,6 +113,9 @@ public class FrontPlaceOrderUseCaseHandler {
 
       orderEntity.addOrderItem(orderItemEntity);
     }
+
+    // Amount
+    orderEntity.calculateOrderAmount();
 
     // Payment
     PaymentEntity paymentEntity = new PaymentEntity();

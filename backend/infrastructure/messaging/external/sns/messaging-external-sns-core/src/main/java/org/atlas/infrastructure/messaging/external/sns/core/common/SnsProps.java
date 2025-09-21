@@ -1,13 +1,15 @@
 package org.atlas.infrastructure.messaging.external.sns.core.common;
 
 import java.util.Map;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties("app.messaging.sns")
-@Data
+@Getter
+@Setter
 public class SnsProps {
 
   private Map<String, String> snsTopicArn;

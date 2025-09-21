@@ -9,12 +9,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class OrderItem {
 
-  private Product product;
+  private Integer productId;
   private Integer quantity;
-
-  // Copy constructor
-  public OrderItem(OrderItem other) {
-    this.product = new Product(other.product);
-    this.quantity = other.quantity;
-  }
 }

@@ -15,13 +15,15 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
+@Slf4j(topic = "SpringSSE")
 public class SpringSseAdapter implements SsePort {
 
   private final List<SseController> sseControllers;
 
   @Override
-  public void notify(SseNotification notification) {
+  public <T> void notify(SseNotification<T> notification) {
+    log.info("Notifying {}", notification);
+
     // Find the relevant SSE controller
     SseController sseController = findSseController(notification.getType())
         .orElseThrow(() -> new IllegalStateException(

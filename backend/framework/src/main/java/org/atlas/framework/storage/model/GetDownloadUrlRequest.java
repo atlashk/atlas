@@ -1,10 +1,12 @@
 package org.atlas.framework.storage.model;
 
 import java.time.Duration;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.EqualsAndHashCode;
 
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = false)
 public class GetDownloadUrlRequest extends BaseRequest {
 

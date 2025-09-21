@@ -1,10 +1,12 @@
 package org.atlas.framework.notification.common;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 import org.atlas.framework.util.UUIDGenerator;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 public class Notification {
 

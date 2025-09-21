@@ -8,11 +8,12 @@ import org.atlas.domain.payment.shared.PaymentGateway;
 import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.constant.Application;
+import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.dependency.DependencyPort;
 import org.atlas.framework.domain.event.DomainEventType;
-import org.atlas.framework.domain.event.contract.payment.PaymentCreatedEvent;
-import org.atlas.framework.domain.event.contract.payment.PaymentFailedEvent;
-import org.atlas.framework.domain.event.contract.product.ProductReservationSucceededEvent;
+import org.atlas.framework.domain.event.contract.order.PaymentCreatedEvent;
+import org.atlas.framework.domain.event.contract.order.PaymentFailedEvent;
+import org.atlas.framework.domain.event.contract.order.ProductReservationSucceededEvent;
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.error.AppError;
@@ -31,7 +32,7 @@ public class ProductReservationSucceededEventHandler {
   private final DependencyPort dependencyPort;
   private final ExternalMessagePublisherPort externalMessagePublisherPort;
 
-  public void handle(ProductReservationSucceededEvent event) {
+  public void handle(ProductReservationSucceededEvent productReservationSucceededEvent) {
     // Find payment gateway
     PaymentGateway paymentGateway = applicationConfigPort.getConfigAsClass(
         Application.PAYMENT_SERVICE, "defaultGateway",
@@ -46,12 +47,12 @@ public class ProductReservationSucceededEventHandler {
 
     // Create payment entity
     PaymentEntity paymentEntity = new PaymentEntity();
-    paymentEntity.setOrderId(event.getOrder().getOrderId());
-    paymentEntity.setUserId(event.getOrder().getUser().getId());
-    paymentEntity.setAmount(event.getOrder().getAmount());
+    paymentEntity.setOrderId(productReservationSucceededEvent.getOrder().getId());
+    paymentEntity.setUserId(productReservationSucceededEvent.getOrder().getUserId());
+    paymentEntity.setAmount(productReservationSucceededEvent.getOrder().getAmount());
     paymentEntity.setCurrency(applicationConfigPort.getConfig(
-        Application.PAYMENT_SERVICE, "currency", "USD"));
-    paymentEntity.setMethod(event.getOrder().getPaymentMethod());
+        Application.PAYMENT_SERVICE, "currency", CommonConstant.DEFAULT_CURRENCY));
+    paymentEntity.setMethod(productReservationSucceededEvent.getOrder().getPaymentMethod());
     paymentEntity.setGateway(paymentGateway);
     paymentRepository.save(paymentEntity);
 
@@ -60,7 +61,7 @@ public class ProductReservationSucceededEventHandler {
         .paymentId(paymentEntity.getId())
         .amount(paymentEntity.getAmount())
         .currency(paymentEntity.getCurrency())
-        .method(event.getOrder().getPaymentMethod())
+        .method(productReservationSucceededEvent.getOrder().getPaymentMethod())
         .build();
     CreatePaymentResponse response = paymentGatewayPort.createPayment(createPaymentRequest);
 
@@ -80,11 +81,10 @@ public class ProductReservationSucceededEventHandler {
       paymentRepository.save(paymentEntity);
 
       // Publish PAYMENT_CREATED event
+      productReservationSucceededEvent.getOrder().setPaymentId(paymentEntity.getId());
       PaymentCreatedEvent paymentCreatedEvent = new PaymentCreatedEvent(
-          applicationConfigPort.getApplicationName());
-      paymentCreatedEvent.setOrderId(paymentEntity.getOrderId());
-      response.getData().put("gateway", paymentGateway);
-      paymentCreatedEvent.setPaymentData(response.getData());
+          applicationConfigPort.getApplicationName(), productReservationSucceededEvent.getOrder());
+      paymentCreatedEvent.setPaymentGatewayData(response.getData());
       externalMessagePublisherPort.publish(paymentCreatedEvent);
     } else {
       log.error(
@@ -99,9 +99,9 @@ public class ProductReservationSucceededEventHandler {
       paymentRepository.save(paymentEntity);
 
       // Publish PAYMENT_FAILED event
+      productReservationSucceededEvent.getOrder().setPaymentId(paymentEntity.getId());
       PaymentFailedEvent paymentFailedEvent = new PaymentFailedEvent(
-          applicationConfigPort.getApplicationName());
-      paymentFailedEvent.setOrderId(paymentEntity.getOrderId());
+          applicationConfigPort.getApplicationName(), productReservationSucceededEvent.getOrder());
       paymentFailedEvent.setErrorCode(response.getErrorCode());
       paymentFailedEvent.setErrorMessage(response.getErrorMessage());
       externalMessagePublisherPort.publish(paymentFailedEvent);

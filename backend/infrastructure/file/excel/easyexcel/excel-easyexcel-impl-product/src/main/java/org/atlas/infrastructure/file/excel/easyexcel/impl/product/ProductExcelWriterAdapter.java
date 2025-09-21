@@ -4,7 +4,8 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.atlas.domain.product.port.file.excel.ProductExcelWriterPort;
 import org.atlas.domain.product.port.file.model.write.ProductRow;
 import org.atlas.domain.product.shared.ProductStatus;
@@ -22,7 +23,8 @@ public class ProductExcelWriterAdapter implements ProductExcelWriterPort {
     return EasyExcelWriter.write(csvRows, SHEET_NAME, ProductExcelRow.class);
   }
 
-  @Data
+  @Getter
+@Setter
   public static class ProductExcelRow {
 
     @ExcelProperty(value = "ID")

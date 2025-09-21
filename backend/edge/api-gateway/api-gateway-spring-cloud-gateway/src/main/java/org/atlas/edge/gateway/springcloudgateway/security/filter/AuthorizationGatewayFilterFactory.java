@@ -2,7 +2,8 @@ package org.atlas.edge.gateway.springcloudgateway.security.filter;
 
 import java.util.Collections;
 import java.util.List;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.atlas.domain.user.shared.Role;
 import org.atlas.edge.gateway.springcloudgateway.security.jwt.JwtExtractor;
 import org.atlas.edge.gateway.springcloudgateway.util.HttpUtil;
@@ -69,7 +70,8 @@ public class AuthorizationGatewayFilterFactory extends
     return Collections.singletonList("roles");
   }
 
-  @Data
+  @Getter
+@Setter
   public static class Config {
 
     private List<String> roles;

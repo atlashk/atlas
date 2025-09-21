@@ -7,15 +7,17 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.atlas.domain.payment.shared.PaymentMethod;
+import org.atlas.framework.domain.event.contract.user.model.User;
 
 @Getter
 @Setter
 public class Order {
 
-  private Integer orderId;
-  private User user;
+  private Integer id;
+  private Integer userId;
   private List<OrderItem> orderItems;
   private BigDecimal amount;
+  private Integer paymentId;
   private PaymentMethod paymentMethod;
   private String cancellationReason;
   private Date createdAt;

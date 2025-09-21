@@ -1,10 +1,12 @@
 package org.atlas.framework.storage.model;
 
 import java.util.Map;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.EqualsAndHashCode;
 
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = false)
 public class UploadFileRequest extends BaseRequest {
 

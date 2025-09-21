@@ -33,7 +33,7 @@ public class ProductApiAdapter implements ProductApiPort {
 
   private ListProductRequestProto map(ListProductRequest request) {
     return ListProductRequestProto.newBuilder()
-        .addAllId(request.getIds())
+        .addAllId(request.getProductIds())
         .build();
   }
 

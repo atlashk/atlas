@@ -9,10 +9,8 @@ import org.atlas.framework.domain.event.contract.order.model.Order;
 @Setter
 public class OrderCreatedEvent extends BaseOrderEvent {
 
-  private Order order;
-
-  public OrderCreatedEvent(String eventSource) {
-    super(eventSource);
+  public OrderCreatedEvent(String eventSource, Order order) {
+    super(eventSource, order);
   }
 
   @Override

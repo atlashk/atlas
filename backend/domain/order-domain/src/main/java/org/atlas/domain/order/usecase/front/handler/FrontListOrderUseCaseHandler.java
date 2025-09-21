@@ -5,6 +5,7 @@ import org.atlas.domain.order.entity.OrderEntity;
 import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.repository.criteria.FindOrderCriteria;
 import org.atlas.domain.order.service.OrderAggregator;
+import org.atlas.domain.order.service.OrderAggregator.AggregationOptions;
 import org.atlas.domain.order.usecase.front.model.FrontListOrderInput;
 import org.atlas.framework.context.Contexts;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
@@ -19,7 +20,7 @@ public class FrontListOrderUseCaseHandler {
   private final OrderAggregator orderAggregator;
 
   public PagingResult<OrderEntity> handle(FrontListOrderInput input) throws Exception {
-    // Query order
+    // Find orders
     FindOrderCriteria criteria = ObjectMapperUtil.getInstance()
         .map(input, FindOrderCriteria.class);
     criteria.setUserId(Contexts.getUserId());
@@ -29,8 +30,15 @@ public class FrontListOrderUseCaseHandler {
       return PagingResult.empty();
     }
 
-    // Load users and products
-    orderAggregator.aggregate(orderEntityPage.getData(), true);
+    // Aggregate orders
+    orderAggregator.aggregate(
+        orderEntityPage.getData(),
+        AggregationOptions.builder()
+            .loadUsers(true)
+            .loadProducts(true)
+            .loadPayments(true)
+            .build()
+    );
 
     return orderEntityPage;
   }

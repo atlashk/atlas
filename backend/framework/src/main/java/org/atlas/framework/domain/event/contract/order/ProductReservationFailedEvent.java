@@ -1,4 +1,4 @@
-package org.atlas.framework.domain.event.contract.product;
+package org.atlas.framework.domain.event.contract.order;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -7,13 +7,12 @@ import org.atlas.framework.domain.event.contract.order.model.Order;
 
 @Getter
 @Setter
-public class ProductReservationFailedEvent extends BaseProductEvent {
+public class ProductReservationFailedEvent extends BaseOrderEvent {
 
-  private Order order;
-  private String error;
+  private String errorMessage;
 
-  public ProductReservationFailedEvent(String eventSource) {
-    super(eventSource);
+  public ProductReservationFailedEvent(String eventSource, Order order) {
+    super(eventSource, order);
   }
 
   @Override

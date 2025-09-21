@@ -1,8 +1,10 @@
 package org.atlas.framework.domain.usecase.input;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class InternalInput {
 
   private boolean isValidationRequired = false;

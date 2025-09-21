@@ -7,7 +7,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.atlas.domain.product.port.file.csv.ProductCsvReaderPort;
 import org.atlas.domain.product.port.file.model.read.ProductRow;
 import org.atlas.domain.product.shared.ProductStatus;
@@ -25,7 +26,8 @@ public class ProductCsvReaderAdapter implements ProductCsvReaderPort {
         .mapList(csvRows, ProductRow.class);
   }
 
-  @Data
+  @Getter
+@Setter
   public static class ProductCsvRow {
 
     @CsvBindByName(column = "Name")

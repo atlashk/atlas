@@ -1,15 +1,12 @@
 package org.atlas.framework.messaging;
 
 import org.atlas.framework.domain.event.contract.order.BaseOrderEvent;
-import org.atlas.framework.domain.event.contract.payment.BasePaymentEvent;
 import org.atlas.framework.domain.event.contract.product.BaseProductEvent;
 import org.atlas.framework.domain.event.contract.user.BaseUserEvent;
 
 public interface ExternalMessagePublisherPort {
 
   void publish(BaseOrderEvent event);
-
-  void publish(BasePaymentEvent event);
 
   void publish(BaseProductEvent event);
 

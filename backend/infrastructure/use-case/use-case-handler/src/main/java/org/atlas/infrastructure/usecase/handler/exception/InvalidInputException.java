@@ -1,10 +1,12 @@
 package org.atlas.infrastructure.usecase.handler.exception;
 
 import java.util.List;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.EqualsAndHashCode;
 
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = false)
 public class InvalidInputException extends RuntimeException {
 

@@ -11,6 +11,7 @@ import org.atlas.framework.auth.client.AuthClientPort;
 import org.atlas.framework.auth.client.model.CreateAuthUserRequest;
 import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.domain.event.contract.user.UserRegisteredEvent;
+import org.atlas.framework.domain.event.contract.user.model.User;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
 import org.atlas.framework.error.AppError;
@@ -48,8 +49,7 @@ public class FrontRegisterUseCaseHandler {
   }
 
   private UserEntity createUser(RegisterInput input) {
-    UserEntity userEntity = ObjectMapperUtil.getInstance()
-        .map(input, UserEntity.class);
+    UserEntity userEntity = ObjectMapperUtil.getInstance().map(input, UserEntity.class);
     userEntity.setRole(Role.USER);
     userRepository.insert(userEntity);
     return userEntity;
@@ -66,9 +66,9 @@ public class FrontRegisterUseCaseHandler {
   }
 
   private void publishEvent(UserEntity userEntity) {
+    User user = ObjectMapperUtil.getInstance().map(userEntity, User.class);
     UserRegisteredEvent event = new UserRegisteredEvent(applicationConfigPort.getApplicationName(),
-        userEntity.getId());
-    ObjectMapperUtil.getInstance().merge(userEntity, event);
+        user);
     externalMessagePublisherPort.publish(event);
   }
 }

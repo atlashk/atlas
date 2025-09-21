@@ -6,6 +6,9 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.payment.shared.PaymentGateway;
 import org.atlas.domain.payment.usecase.webhook.handler.WebhookHandler;
+import org.atlas.framework.payment.model.WebhookResponse;
+import org.atlas.infrastructure.api.server.rest.impl.payment.webhook.util.WebhookResponseUtil;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,9 +32,11 @@ public class StripeWebhookController {
       )
   )
   @PostMapping
-  public Map<String, Object> handleStripeWebhook(
+  public ResponseEntity<Map<String, Object>> handleStripeWebhook(
       @RequestBody Map<String, Object> payload,
-      @RequestHeader Map<String, String> headers) {
-    return webhookHandler.handle(PaymentGateway.STRIPE, payload, headers);
+      @RequestHeader Map<String, String> headers
+  ) {
+    WebhookResponse response = webhookHandler.handle(PaymentGateway.STRIPE, payload, headers);
+    return WebhookResponseUtil.convert(response);
   }
 }
