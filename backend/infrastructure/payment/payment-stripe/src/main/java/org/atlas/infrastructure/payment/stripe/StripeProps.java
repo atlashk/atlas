@@ -12,5 +12,6 @@ import org.springframework.context.annotation.Configuration;
 public class StripeProps {
 
   private String secretKey;
+  private String publishableKey;
   private String webhookEndpointSecret;
 }

@@ -20,3 +20,6 @@ export const ORDER_STATUSES = [
 ] as const;
 
 export type OrderStatus = typeof ORDER_STATUSES[number];
+
+// Re-export payment constants
+export * from './payment.constants';

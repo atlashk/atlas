@@ -1,6 +1,6 @@
-package org.atlas.framework.qrgenerator;
+package org.atlas.framework.qrcode;
 
-public interface QrGenerator {
+public interface QRCodeGenerator {
 
   byte[] generate(String text) throws Exception;
 

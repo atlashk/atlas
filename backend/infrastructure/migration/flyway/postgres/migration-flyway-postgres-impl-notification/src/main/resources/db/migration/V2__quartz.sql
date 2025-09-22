@@ -3,59 +3,61 @@
 DO
 $$
     DECLARE
-        DropDb INT := 1; -- Set this to 0 to skip DROP statements, 1 to include them
-    BEGIN
-        IF DropDb = 1 THEN
+DropDb INT := 1; -- Set this to 0 to skip DROP statements, 1 to include them
+BEGIN
+        IF
+DropDb = 1 THEN
             SET client_min_messages = WARNING;
-            DROP TABLE IF EXISTS qrtz_fired_triggers;
-            DROP TABLE IF EXISTS qrtz_paused_trigger_grps;
-            DROP TABLE IF EXISTS qrtz_scheduler_state;
-            DROP TABLE IF EXISTS qrtz_locks;
-            DROP TABLE IF EXISTS qrtz_simprop_triggers;
-            DROP TABLE IF EXISTS qrtz_simple_triggers;
-            DROP TABLE IF EXISTS qrtz_cron_triggers;
-            DROP TABLE IF EXISTS qrtz_blob_triggers;
-            DROP TABLE IF EXISTS qrtz_triggers;
-            DROP TABLE IF EXISTS qrtz_job_details;
-            DROP TABLE IF EXISTS qrtz_calendars;
-            SET client_min_messages = NOTICE;
-        END IF;
-    END
+DROP TABLE IF EXISTS qrtz_fired_triggers;
+DROP TABLE IF EXISTS qrtz_paused_trigger_grps;
+DROP TABLE IF EXISTS qrtz_scheduler_state;
+DROP TABLE IF EXISTS qrtz_locks;
+DROP TABLE IF EXISTS qrtz_simprop_triggers;
+DROP TABLE IF EXISTS qrtz_simple_triggers;
+DROP TABLE IF EXISTS qrtz_cron_triggers;
+DROP TABLE IF EXISTS qrtz_blob_triggers;
+DROP TABLE IF EXISTS qrtz_triggers;
+DROP TABLE IF EXISTS qrtz_job_details;
+DROP TABLE IF EXISTS qrtz_calendars;
+SET
+client_min_messages = NOTICE;
+END IF;
+END
 $$;
 
 CREATE TABLE qrtz_job_details
 (
-    sched_name        TEXT  NOT NULL,
-    job_name          TEXT  NOT NULL,
-    job_group         TEXT  NOT NULL,
-    description       TEXT  NULL,
-    job_class_name    TEXT  NOT NULL,
-    is_durable        BOOL  NOT NULL,
-    is_nonconcurrent  BOOL  NOT NULL,
-    is_update_data    BOOL  NOT NULL,
-    requests_recovery BOOL  NOT NULL,
+    sched_name        TEXT NOT NULL,
+    job_name          TEXT NOT NULL,
+    job_group         TEXT NOT NULL,
+    description       TEXT NULL,
+    job_class_name    TEXT NOT NULL,
+    is_durable        BOOL NOT NULL,
+    is_nonconcurrent  BOOL NOT NULL,
+    is_update_data    BOOL NOT NULL,
+    requests_recovery BOOL NOT NULL,
     job_data          BYTEA NULL,
     PRIMARY KEY (sched_name, job_name, job_group)
 );
 
 CREATE TABLE qrtz_triggers
 (
-    sched_name     TEXT     NOT NULL,
-    trigger_name   TEXT     NOT NULL,
-    trigger_group  TEXT     NOT NULL,
-    job_name       TEXT     NOT NULL,
-    job_group      TEXT     NOT NULL,
-    description    TEXT     NULL,
-    next_fire_time BIGINT   NULL,
-    prev_fire_time BIGINT   NULL,
-    priority       INTEGER  NULL,
-    trigger_state  TEXT     NOT NULL,
-    trigger_type   TEXT     NOT NULL,
-    start_time     BIGINT   NOT NULL,
-    end_time       BIGINT   NULL,
-    calendar_name  TEXT     NULL,
+    sched_name     TEXT   NOT NULL,
+    trigger_name   TEXT   NOT NULL,
+    trigger_group  TEXT   NOT NULL,
+    job_name       TEXT   NOT NULL,
+    job_group      TEXT   NOT NULL,
+    description    TEXT NULL,
+    next_fire_time BIGINT NULL,
+    prev_fire_time BIGINT NULL,
+    priority       INTEGER NULL,
+    trigger_state  TEXT   NOT NULL,
+    trigger_type   TEXT   NOT NULL,
+    start_time     BIGINT NOT NULL,
+    end_time       BIGINT NULL,
+    calendar_name  TEXT NULL,
     misfire_instr  SMALLINT NULL,
-    job_data       BYTEA    NULL,
+    job_data       BYTEA NULL,
     PRIMARY KEY (sched_name, trigger_name, trigger_group),
     FOREIGN KEY (sched_name, job_name, job_group)
         REFERENCES qrtz_job_details (sched_name, job_name, job_group)
@@ -77,21 +79,21 @@ CREATE TABLE qrtz_simple_triggers
 
 CREATE TABLE qrtz_simprop_triggers
 (
-    sched_name    TEXT    NOT NULL,
-    trigger_name  TEXT    NOT NULL,
-    trigger_group TEXT    NOT NULL,
-    str_prop_1    TEXT    NULL,
-    str_prop_2    TEXT    NULL,
-    str_prop_3    TEXT    NULL,
+    sched_name    TEXT NOT NULL,
+    trigger_name  TEXT NOT NULL,
+    trigger_group TEXT NOT NULL,
+    str_prop_1    TEXT NULL,
+    str_prop_2    TEXT NULL,
+    str_prop_3    TEXT NULL,
     int_prop_1    INTEGER NULL,
     int_prop_2    INTEGER NULL,
-    long_prop_1   BIGINT  NULL,
-    long_prop_2   BIGINT  NULL,
+    long_prop_1   BIGINT NULL,
+    long_prop_2   BIGINT NULL,
     dec_prop_1    NUMERIC NULL,
     dec_prop_2    NUMERIC NULL,
-    bool_prop_1   BOOL    NULL,
-    bool_prop_2   BOOL    NULL,
-    time_zone_id  TEXT    NULL,
+    bool_prop_1   BOOL NULL,
+    bool_prop_2   BOOL NULL,
+    time_zone_id  TEXT NULL,
     PRIMARY KEY (sched_name, trigger_name, trigger_group),
     FOREIGN KEY (sched_name, trigger_name, trigger_group)
         REFERENCES qrtz_triggers (sched_name, trigger_name, trigger_group)
@@ -113,9 +115,9 @@ CREATE TABLE qrtz_cron_triggers
 
 CREATE TABLE qrtz_blob_triggers
 (
-    sched_name    TEXT  NOT NULL,
-    trigger_name  TEXT  NOT NULL,
-    trigger_group TEXT  NOT NULL,
+    sched_name    TEXT NOT NULL,
+    trigger_name  TEXT NOT NULL,
+    trigger_group TEXT NOT NULL,
     blob_data     BYTEA NULL,
     PRIMARY KEY (sched_name, trigger_name, trigger_group),
     FOREIGN KEY (sched_name, trigger_name, trigger_group)
@@ -149,10 +151,10 @@ CREATE TABLE qrtz_fired_triggers
     sched_time        BIGINT  NOT NULL,
     priority          INTEGER NOT NULL,
     state             TEXT    NOT NULL,
-    job_name          TEXT    NULL,
-    job_group         TEXT    NULL,
+    job_name          TEXT NULL,
+    job_group         TEXT NULL,
     is_nonconcurrent  BOOL    NOT NULL,
-    requests_recovery BOOL    NULL,
+    requests_recovery BOOL NULL,
     PRIMARY KEY (sched_name, entry_id)
 );
 

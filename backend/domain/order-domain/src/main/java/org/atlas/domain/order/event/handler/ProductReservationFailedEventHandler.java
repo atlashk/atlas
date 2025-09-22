@@ -12,7 +12,7 @@ import org.atlas.framework.domain.event.contract.order.OrderCanceledEvent;
 import org.atlas.framework.domain.event.contract.order.ProductReservationFailedEvent;
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.exception.DomainException;
-import org.atlas.framework.error.AppError;
+import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.messaging.InternalMessagePublisherPort;
 
 @DomainEventHandler(type = DomainEventType.PRODUCT_RESERVATION_FAILED)
@@ -26,9 +26,9 @@ public class ProductReservationFailedEventHandler {
   public void handle(ProductReservationFailedEvent event) {
     // Find order
     OrderEntity orderEntity = orderRepository.findById(event.getOrder().getId())
-        .orElseThrow(() -> new DomainException(AppError.ORDER_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
     if (orderEntity.getStatus() != OrderStatus.AWAITING_PRODUCT_RESERVATION) {
-      throw new DomainException(AppError.ORDER_INVALID_STATUS);
+      throw new DomainException(DomainError.ORDER_INVALID_STATUS);
     }
 
     // Mark order as CANCELED

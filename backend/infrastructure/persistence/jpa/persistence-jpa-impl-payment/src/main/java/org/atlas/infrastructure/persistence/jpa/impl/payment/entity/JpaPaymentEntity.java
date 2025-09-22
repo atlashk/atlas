@@ -57,9 +57,6 @@ public class JpaPaymentEntity extends JpaBaseEntity {
   @Column(name = "transaction_id")
   private String transactionId;
 
-  @Column(name = "receipt_url")
-  private String receiptUrl;
-
   @Column(name = "error_code")
   private String errorCode;
 

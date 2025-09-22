@@ -8,7 +8,7 @@ import org.atlas.domain.user.shared.Role;
 import org.atlas.edge.gateway.springcloudgateway.security.jwt.JwtExtractor;
 import org.atlas.edge.gateway.springcloudgateway.util.HttpUtil;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
-import org.atlas.framework.error.AppError;
+import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.util.CollectionUtil;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -58,7 +58,7 @@ public class AuthorizationGatewayFilterFactory extends
         return chain.filter(exchange);
       }
       ApiResponseWrapper<Void> response = ApiResponseWrapper.error(
-          AppError.FORBIDDEN.getErrorCode(), "Forbidden");
+          DomainError.FORBIDDEN.getErrorCode(), "Forbidden");
       return HttpUtil.respond(exchange, response, HttpStatus.FORBIDDEN);
     }
 
@@ -71,7 +71,7 @@ public class AuthorizationGatewayFilterFactory extends
   }
 
   @Getter
-@Setter
+  @Setter
   public static class Config {
 
     private List<String> roles;

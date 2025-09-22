@@ -24,14 +24,8 @@ public class StripeWebhookController {
 
   private final WebhookHandler webhookHandler;
 
-  @Webhook(
-      name = "orderCreatedWebhook",
-      operation = @Operation(
-          summary = "Handle Stripe Webhook",
-          description = "Handles incoming webhooks from Stripe."
-      )
-  )
   @PostMapping
+  @Webhook(name = "stripe", operation = @Operation(summary = "Handle Stripe Webhook"))
   public ResponseEntity<Map<String, Object>> handleStripeWebhook(
       @RequestBody Map<String, Object> payload,
       @RequestHeader Map<String, String> headers

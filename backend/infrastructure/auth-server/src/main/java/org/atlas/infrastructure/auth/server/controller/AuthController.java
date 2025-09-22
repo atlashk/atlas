@@ -29,22 +29,16 @@ public class AuthController {
   private final AuthService authService;
 
   @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
-  @Operation(
-      summary = "User Login",
-      description = "Authenticates a user using username, email, or phone number and returns a login response."
-  )
+  @Operation(summary = "User login")
   public ApiResponseWrapper<LoginResponse> login(
-      @Parameter(description = "Request object containing user credentials for login.", required = true)
+      @Parameter(description = "Request object containing user credentials for login", required = true)
       @Valid @RequestBody LoginRequest request) throws Exception {
     LoginResponse loginResponse = authService.login(request);
     return ApiResponseWrapper.success(loginResponse);
   }
 
   @PostMapping("/ott/login")
-  @Operation(
-      summary = "One-Time Token Login",
-      description = "Logs in a user using a valid one-time token and returns access and refresh tokens."
-  )
+  @Operation(summary = "One-time token login")
   public ApiResponseWrapper<LoginResponse> oneTimeTokenLogin(
       @Valid @RequestBody OneTimeTokenLoginRequest request) throws Exception {
     LoginResponse loginResponse = authService.oneTimeTokenLogin(request);
@@ -52,10 +46,7 @@ public class AuthController {
   }
 
   @PostMapping("/ott/generate")
-  @Operation(
-      summary = "Generate One-Time Token",
-      description = "Generates a new one-time token for temporary login."
-  )
+  @Operation(summary = "Generate one-time token")
   public ApiResponseWrapper<GenerateOneTimeTokenResponse> generateOneTimeToken(
       @Valid @RequestBody GenerateOneTimeTokenRequest request) {
     GenerateOneTimeTokenResponse response = authService.generateOneTimeToken(request);
@@ -63,10 +54,7 @@ public class AuthController {
   }
 
   @PostMapping(value = "/refresh-token", produces = MediaType.APPLICATION_JSON_VALUE)
-  @Operation(
-      summary = "Refresh Token",
-      description = "Issues a new access token using a valid refresh token."
-  )
+  @Operation(summary = "Refresh token")
   public ApiResponseWrapper<RefreshTokenResponse> refreshToken(
       @Parameter(description = "Refresh token sent in the request body", required = true)
       @Valid @RequestBody RefreshTokenRequest request) throws Exception {
@@ -75,10 +63,7 @@ public class AuthController {
   }
 
   @PostMapping(value = "/logout", produces = MediaType.APPLICATION_JSON_VALUE)
-  @Operation(
-      summary = "User Logout",
-      description = "Logs out the user and clears authentication cookies."
-  )
+  @Operation(summary = "User logout")
   public ApiResponseWrapper<Void> logout() throws Exception {
     authService.logout();
     return ApiResponseWrapper.success();

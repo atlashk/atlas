@@ -6,7 +6,7 @@ import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.usecase.front.model.FrontGetOrderStatusOutput;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
-import org.atlas.framework.error.AppError;
+import org.atlas.framework.domain.error.DomainError;
 
 @UseCaseHandler
 @RequiredArgsConstructor
@@ -16,7 +16,7 @@ public class FrontGetOrderStatusUseCaseHandler {
 
   public FrontGetOrderStatusOutput handle(Integer orderId) throws Exception {
     OrderEntity orderEntity = orderRepository.findById(orderId)
-        .orElseThrow(() -> new DomainException(AppError.ORDER_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
     return FrontGetOrderStatusOutput.builder()
         .status(orderEntity.getStatus())
         .cancellationReason(orderEntity.getCancellationReason())

@@ -14,7 +14,7 @@ import org.atlas.framework.domain.event.contract.order.ProductReservationFailedE
 import org.atlas.framework.domain.event.contract.order.ProductReservationSucceededEvent;
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.exception.DomainException;
-import org.atlas.framework.error.AppError;
+import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.lock.LockPort;
 import org.atlas.framework.messaging.ExternalMessagePublisherPort;
 
@@ -74,9 +74,9 @@ public class OrderCreatedEventHandler {
         final Duration leaseTime = Duration.ofSeconds(15);
         lockPort.doWithLock(() -> {
           ProductEntity productEntity = productRepository.findById(productId)
-              .orElseThrow(() -> new DomainException(AppError.PRODUCT_NOT_FOUND));
+              .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
           if (productEntity.getQuantity() < quantity) {
-            throw new DomainException(AppError.PRODUCT_INSUFFICIENT_QUANTITY);
+            throw new DomainException(DomainError.PRODUCT_INSUFFICIENT_QUANTITY);
           }
           productEntity.setQuantity(productEntity.getQuantity() - quantity);
           productRepository.update(productEntity);

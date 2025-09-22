@@ -4,19 +4,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.payment.entity.PaymentEntity;
 import org.atlas.domain.payment.repository.PaymentRepository;
-import org.atlas.domain.payment.shared.PaymentGateway;
+import org.atlas.domain.payment.service.PaymentRoutingService;
 import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.constant.Application;
 import org.atlas.framework.constant.CommonConstant;
-import org.atlas.framework.dependency.DependencyPort;
 import org.atlas.framework.domain.event.DomainEventType;
 import org.atlas.framework.domain.event.contract.order.PaymentCreatedEvent;
 import org.atlas.framework.domain.event.contract.order.PaymentFailedEvent;
 import org.atlas.framework.domain.event.contract.order.ProductReservationSucceededEvent;
+import org.atlas.framework.domain.event.contract.order.model.Order;
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
-import org.atlas.framework.domain.exception.DomainException;
-import org.atlas.framework.error.AppError;
 import org.atlas.framework.messaging.ExternalMessagePublisherPort;
 import org.atlas.framework.payment.PaymentGatewayPort;
 import org.atlas.framework.payment.model.CreatePaymentRequest;
@@ -28,82 +26,82 @@ import org.atlas.framework.payment.model.CreatePaymentResponse;
 public class ProductReservationSucceededEventHandler {
 
   private final PaymentRepository paymentRepository;
+  private final PaymentRoutingService paymentRoutingService;
   private final ApplicationConfigPort applicationConfigPort;
-  private final DependencyPort dependencyPort;
   private final ExternalMessagePublisherPort externalMessagePublisherPort;
 
   public void handle(ProductReservationSucceededEvent productReservationSucceededEvent) {
-    // Find payment gateway
-    PaymentGateway paymentGateway = applicationConfigPort.getConfigAsClass(
-        Application.PAYMENT_SERVICE, "defaultGateway",
-        PaymentGateway.class, PaymentGateway.STRIPE);
+    final Order order = productReservationSucceededEvent.getOrder();
 
-    // Find payment gateway port implementation
-    String paymentGatewayInstanceName = String.format("%sPaymentGatewayAdapter",
-        paymentGateway.name().toLowerCase());
-    PaymentGatewayPort paymentGatewayPort = dependencyPort.getInstanceByName(
-            paymentGatewayInstanceName, PaymentGatewayPort.class)
-        .orElseThrow(() -> new DomainException(AppError.PAYMENT_GATEWAY_NOT_SUPPORTED));
+    try {
+      // Find the relevant payment gateway
+      PaymentGatewayPort paymentGatewayPort = paymentRoutingService.getPaymentGateway(
+          order.getPaymentMethod());
 
-    // Insert new payment entity
-    PaymentEntity paymentEntity = new PaymentEntity();
-    paymentEntity.setOrderId(productReservationSucceededEvent.getOrder().getId());
-    paymentEntity.setUserId(productReservationSucceededEvent.getOrder().getUserId());
-    paymentEntity.setAmount(productReservationSucceededEvent.getOrder().getAmount());
-    paymentEntity.setCurrency(applicationConfigPort.getConfig(
-        Application.PAYMENT_SERVICE, "currency", CommonConstant.DEFAULT_CURRENCY));
-    paymentEntity.setMethod(productReservationSucceededEvent.getOrder().getPaymentMethod());
-    paymentEntity.setGateway(paymentGateway);
-    paymentRepository.insert(paymentEntity);
+      // Insert new payment entity
+      PaymentEntity paymentEntity = new PaymentEntity();
+      paymentEntity.setOrderId(order.getId());
+      paymentEntity.setUserId(order.getUserId());
+      paymentEntity.setAmount(order.getAmount());
+      paymentEntity.setCurrency(applicationConfigPort.getConfig(
+          Application.PAYMENT_SERVICE, "currency", CommonConstant.DEFAULT_CURRENCY));
+      paymentEntity.setMethod(order.getPaymentMethod());
+      paymentEntity.setGateway(paymentGatewayPort.supports());
+      paymentRepository.insert(paymentEntity);
+      order.setPaymentId(paymentEntity.getId());
 
-    // Create external payment
-    CreatePaymentRequest createPaymentRequest = CreatePaymentRequest.builder()
-        .paymentId(paymentEntity.getId())
-        .amount(paymentEntity.getAmount())
-        .currency(paymentEntity.getCurrency())
-        .method(productReservationSucceededEvent.getOrder().getPaymentMethod())
-        .build();
-    CreatePaymentResponse response = paymentGatewayPort.createPayment(createPaymentRequest);
+      // Create external payment
+      CreatePaymentRequest createPaymentRequest = CreatePaymentRequest.builder()
+          .paymentId(paymentEntity.getId())
+          .amount(paymentEntity.getAmount())
+          .currency(paymentEntity.getCurrency())
+          .method(paymentEntity.getMethod())
+          .build();
+      CreatePaymentResponse response = paymentGatewayPort.createPayment(createPaymentRequest);
 
-    if (response.isSuccess()) {
-      final String transactionId = response.getData().getOrDefault("transactionId", "")
-          .toString();
-      final String receiptUrl = response.getData().getOrDefault("receiptUrl", "").toString();
-      log.info(
-          "Created payment successfully: paymentId={}, userId={}, orderId={}, transactionId={}, receiptUrl={}",
-          paymentEntity.getId(), paymentEntity.getUserId(), paymentEntity.getOrderId(),
-          transactionId, receiptUrl);
+      if (response.isSuccess()) {
+        log.info(
+            "Created payment via payment gateway successfully: orderId={}, userId={}, paymentId={}, transactionId={}",
+            paymentEntity.getOrderId(), paymentEntity.getUserId(), paymentEntity.getId(),
+            response.getTransactionId());
 
-      // Update payment entity
-      paymentEntity.setTransactionId(transactionId);
-      paymentEntity.setReceiptUrl(receiptUrl);
-      paymentEntity.setStatus(PaymentStatus.CREATED);
-      paymentRepository.update(paymentEntity);
+        // Update payment entity
+        paymentEntity.setTransactionId(response.getTransactionId());
+        paymentEntity.setStatus(PaymentStatus.CREATED);
+        paymentRepository.update(paymentEntity);
 
-      // Publish PAYMENT_CREATED event
-      productReservationSucceededEvent.getOrder().setPaymentId(paymentEntity.getId());
-      PaymentCreatedEvent paymentCreatedEvent = new PaymentCreatedEvent(
-          applicationConfigPort.getApplicationName(), productReservationSucceededEvent.getOrder());
-      paymentCreatedEvent.setPaymentGatewayData(response.getData());
-      externalMessagePublisherPort.publish(paymentCreatedEvent);
-    } else {
-      log.error(
-          "Failed to create payment: paymentId={}, userId={}, orderId={}, errorCode={}, errorMessage={}",
-          paymentEntity.getId(), paymentEntity.getUserId(), paymentEntity.getOrderId(),
-          response.getErrorCode(), response.getErrorMessage());
+        // Publish PAYMENT_CREATED event
+        PaymentCreatedEvent paymentCreatedEvent = new PaymentCreatedEvent(
+            applicationConfigPort.getApplicationName(), order);
+        paymentCreatedEvent.setNextAction(response.getNextAction());
+        externalMessagePublisherPort.publish(paymentCreatedEvent);
+      } else {
+        log.error(
+            "Failed to create payment via payment gateway: orderId={}, userId={}, paymentId={}, errorCode={}, errorMessage={}",
+            paymentEntity.getId(), paymentEntity.getUserId(), paymentEntity.getOrderId(),
+            response.getErrorCode(), response.getErrorMessage());
 
-      // Update payment entity
-      paymentEntity.setStatus(PaymentStatus.FAILED);
-      paymentEntity.setErrorCode(response.getErrorCode());
-      paymentEntity.setErrorMessage(response.getErrorMessage());
-      paymentRepository.update(paymentEntity);
+        // Update payment entity
+        paymentEntity.setStatus(PaymentStatus.FAILED);
+        paymentEntity.setErrorCode(response.getErrorCode());
+        paymentEntity.setErrorMessage(response.getErrorMessage());
+        paymentRepository.update(paymentEntity);
+
+        // Publish PAYMENT_FAILED event
+        PaymentFailedEvent paymentFailedEvent = new PaymentFailedEvent(
+            applicationConfigPort.getApplicationName(), order);
+        paymentFailedEvent.setErrorCode(response.getErrorCode());
+        paymentFailedEvent.setErrorMessage(response.getErrorMessage());
+        externalMessagePublisherPort.publish(paymentFailedEvent);
+      }
+    } catch (Exception e) {
+      log.error("Error create payment: orderId={}, userId={}, error={}",
+          order.getUserId(), order.getId(), e.getMessage(), e);
 
       // Publish PAYMENT_FAILED event
-      productReservationSucceededEvent.getOrder().setPaymentId(paymentEntity.getId());
       PaymentFailedEvent paymentFailedEvent = new PaymentFailedEvent(
-          applicationConfigPort.getApplicationName(), productReservationSucceededEvent.getOrder());
-      paymentFailedEvent.setErrorCode(response.getErrorCode());
-      paymentFailedEvent.setErrorMessage(response.getErrorMessage());
+          applicationConfigPort.getApplicationName(), order);
+      paymentFailedEvent.setErrorMessage(e.getMessage());
       externalMessagePublisherPort.publish(paymentFailedEvent);
     }
   }

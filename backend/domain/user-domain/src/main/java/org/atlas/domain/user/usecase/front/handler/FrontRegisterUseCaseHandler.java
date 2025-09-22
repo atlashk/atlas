@@ -14,7 +14,7 @@ import org.atlas.framework.domain.event.contract.user.UserRegisteredEvent;
 import org.atlas.framework.domain.event.contract.user.model.User;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
-import org.atlas.framework.error.AppError;
+import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.messaging.ExternalMessagePublisherPort;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 
@@ -38,13 +38,13 @@ public class FrontRegisterUseCaseHandler {
 
   private void checkValidity(RegisterInput input) {
     if (userRepository.findByUsername(input.getUsername()).isPresent()) {
-      throw new DomainException(AppError.USERNAME_ALREADY_EXISTS);
+      throw new DomainException(DomainError.USERNAME_ALREADY_EXISTS);
     }
     if (userRepository.findByEmail(input.getEmail()).isPresent()) {
-      throw new DomainException(AppError.EMAIL_ALREADY_EXISTS);
+      throw new DomainException(DomainError.EMAIL_ALREADY_EXISTS);
     }
     if (userRepository.findByPhoneNumber(input.getPhoneNumber()).isPresent()) {
-      throw new DomainException(AppError.PHONE_NUMBER_ALREADY_EXISTS);
+      throw new DomainException(DomainError.PHONE_NUMBER_ALREADY_EXISTS);
     }
   }
 

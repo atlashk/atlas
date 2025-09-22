@@ -2,7 +2,6 @@ package org.atlas.infrastructure.api.server.rest.impl.user.admin.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.user.entity.UserEntity;
@@ -25,14 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/admin/users")
 @Validated
-@Tag(name = "Admin user management", description = "Admin user management")
 @RequiredArgsConstructor
 public class AdminUserManagementController {
 
   private final AdminListUserUseCaseHandler adminListUserUseCaseHandler;
 
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-  @Operation(summary = "List users", description = "Retrieves a paginated list of users.")
+  @Operation(summary = "List users")
   public ApiResponseWrapper<List<UserResponse>> listUser(
       @Parameter(name = "id", description = "User ID", example = "1")
       @RequestParam(name = "id", required = false) Integer id,

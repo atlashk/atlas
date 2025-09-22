@@ -16,28 +16,28 @@ import org.atlas.domain.product.shared.ProductStatus;
 
 @Getter
 @Setter
-@Schema(description = "Request object for updating an existing product.")
+@Schema(description = "Request object for updating an existing product")
 public class AdminUpdateProductRequest {
 
   @NotBlank
-  @Schema(description = "Name of the product.", example = "T-Shirt")
+  @Schema(description = "Name of the product", example = "T-Shirt")
   private String name;
 
   @NotNull
   @DecimalMin(value = "0.0")
-  @Schema(description = "Price of the product.", example = "19.99")
+  @Schema(description = "Price of the product", example = "19.99")
   private BigDecimal price = BigDecimal.ZERO;
 
-  @Schema(description = "Base64 string of the product's image.", example = "data:image/jpeg;base64,..")
+  @Schema(description = "Base64 string of the product's image", example = "data:image/jpeg;base64,...")
   private String image;
 
   @NotNull
   @PositiveOrZero
-  @Schema(description = "Quantity of the product available.", example = "100")
+  @Schema(description = "Quantity of the product available", example = "100")
   private Integer quantity;
 
   @NotNull
-  @Schema(description = "Status of the product.", example = "IN_STOCK")
+  @Schema(description = "Status of the product", example = "IN_STOCK")
   private ProductStatus status;
 
   @NotNull
@@ -45,51 +45,51 @@ public class AdminUpdateProductRequest {
   private Date availableFrom;
 
   @NotNull
-  @Schema(description = "Indicates if the product is active.", example = "true")
+  @Schema(description = "Indicates if the product is active", example = "true")
   private Boolean isActive;
 
   @NotNull
-  @Schema(description = "ID of the brand associated with the product.", example = "1")
+  @Schema(description = "ID of the brand associated with the product", example = "1")
   private Integer brandId;
 
   @NotNull
   @Valid
-  @Schema(description = "Detailed information about the product.")
+  @Schema(description = "Detailed information about the product")
   private ProductDetails details;
 
   @Valid
-  @Schema(description = "List of product attributes.")
+  @Schema(description = "List of product attributes")
   private List<ProductAttribute> attributes;
 
   @NotEmpty
-  @Schema(description = "List of category IDs the product belongs to.", example = "[1, 2, 3]")
+  @Schema(description = "List of category IDs the product belongs to", example = "[1, 2, 3]")
   private List<Integer> categoryIds;
 
   @Getter
-@Setter
-  @Schema(description = "Detailed information about the product.")
+  @Setter
+  @Schema(description = "Detailed information about the product")
   public static class ProductDetails {
 
     @NotBlank
-    @Schema(description = "Description of the product.", example = "A comfortable cotton t-shirt.")
+    @Schema(description = "Description of the product", example = "A comfortable cotton t-shirt")
     private String description;
   }
 
   @Getter
-@Setter
-  @Schema(description = "Attributes associated with the product.")
+  @Setter
+  @Schema(description = "Attributes associated with the product")
   public static class ProductAttribute {
 
     @NotNull
-    @Schema(description = "Unique identifier of the product attribute.", example = "1")
+    @Schema(description = "Unique identifier of the product attribute", example = "1")
     private Integer id;
 
     @NotBlank
-    @Schema(description = "Name of the product attribute.", example = "Color")
+    @Schema(description = "Name of the product attribute", example = "Color")
     private String name;
 
     @NotBlank
-    @Schema(description = "Value of the product attribute.", example = "Red")
+    @Schema(description = "Value of the product attribute", example = "Red")
     private String value;
   }
 }

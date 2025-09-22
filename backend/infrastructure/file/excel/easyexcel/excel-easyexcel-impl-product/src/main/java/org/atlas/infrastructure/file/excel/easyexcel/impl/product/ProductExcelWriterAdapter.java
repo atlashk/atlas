@@ -24,7 +24,7 @@ public class ProductExcelWriterAdapter implements ProductExcelWriterPort {
   }
 
   @Getter
-@Setter
+  @Setter
   public static class ProductExcelRow {
 
     @ExcelProperty(value = "ID")

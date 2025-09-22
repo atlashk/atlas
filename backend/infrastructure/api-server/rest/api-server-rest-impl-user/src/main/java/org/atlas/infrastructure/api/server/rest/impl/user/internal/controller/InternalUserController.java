@@ -28,7 +28,7 @@ public class InternalUserController {
   private final InternalListUserUseCaseHandler internalListUserUseCaseHandler;
 
   @PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
-  @Operation(summary = "List users", description = "Retrieves a list of users based on the provided user IDs.")
+  @Operation(summary = "List users")
   public ApiResponseWrapper<List<UserResponse>> listUser(
       @Parameter(description = "Request object containing the user IDs for the user list.", required = true)
       @Valid @RequestBody InternalListUserRequest request)

@@ -22,8 +22,8 @@ import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 @Slf4j
 public abstract class BaseSnsMessageConsumer implements DisposableBean {
 
-  private final DomainEventDispatcher domainEventDispatcher;
   protected final SnsProps snsProps;
+  private final DomainEventDispatcher domainEventDispatcher;
   private final SqsClient sqsClient;
 
   private final AtomicBoolean isRunning = new AtomicBoolean(true);

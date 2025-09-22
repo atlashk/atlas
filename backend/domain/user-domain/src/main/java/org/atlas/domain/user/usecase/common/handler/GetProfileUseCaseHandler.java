@@ -6,7 +6,7 @@ import org.atlas.domain.user.repository.UserRepository;
 import org.atlas.framework.context.Contexts;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
-import org.atlas.framework.error.AppError;
+import org.atlas.framework.domain.error.DomainError;
 
 @UseCaseHandler
 @RequiredArgsConstructor
@@ -17,6 +17,6 @@ public class GetProfileUseCaseHandler {
   public UserEntity handle(Void input) throws Exception {
     Integer userId = Contexts.getUserId();
     return userRepository.findById(userId)
-        .orElseThrow(() -> new DomainException(AppError.USER_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
   }
 }

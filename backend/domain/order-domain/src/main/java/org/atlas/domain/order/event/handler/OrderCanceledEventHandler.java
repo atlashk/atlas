@@ -12,7 +12,7 @@ import org.atlas.framework.domain.event.DomainEventType;
 import org.atlas.framework.domain.event.contract.order.OrderCanceledEvent;
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.exception.DomainException;
-import org.atlas.framework.error.AppError;
+import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.notification.common.NotificationType;
 import org.atlas.framework.notification.realtime.payload.OrderTrackingPayload;
 import org.atlas.framework.notification.realtime.sse.SseNotification;
@@ -31,9 +31,9 @@ public class OrderCanceledEventHandler {
 
   public void handle(OrderCanceledEvent event) {
     OrderEntity orderEntity = orderRepository.findById(event.getOrder().getId())
-        .orElseThrow(() -> new DomainException(AppError.ORDER_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
     if (orderEntity.getStatus() != OrderStatus.CANCELED) {
-      throw new DomainException(AppError.ORDER_INVALID_STATUS);
+      throw new DomainException(DomainError.ORDER_INVALID_STATUS);
     }
 
     // Notify to channels

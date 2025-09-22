@@ -1,156 +1,70 @@
-import { configStore } from '@/lib/config';
-import { loadStripe, Stripe, StripeElements, ConfirmPaymentData } from '@stripe/stripe-js';
-import StripePaymentForm from '@/components/front/StripePaymentForm';
+import { PaymentNextAction } from '@/interfaces/payment.interface';
+import { 
+  paymentGatewayService,
+  paymentNextActionService,
+  paymentComponentService,
+  PaymentGatewayHandler,
+  PaymentFormProps,
+  PaymentData,
+  PaymentResult,
+  NextActionComponentProps
+} from './payment';
 
-export interface PaymentGatewayHandler {
-  initialize(): Promise<void>;
-  createPaymentForm(): React.ComponentType<PaymentFormProps>;
-  processPayment(paymentData: PaymentData): Promise<PaymentResult>;
-}
-
-export interface PaymentFormProps {
-  clientSecret: string;
-  orderId: string;
-  onPaymentResult: (result: PaymentResult) => void;
-  onCancel: () => void;
-}
-
-export interface PaymentData {
-  elements: StripeElements;
-  clientSecret: string;
-  confirmParams: ConfirmPaymentData;
-}
-
-export interface PaymentResult {
-  success: boolean;
-  paymentIntent?: {
-    id: string;
-    status: string;
-    amount: number;
-    currency: string;
-    [key: string]: unknown;
-  };
-  error?: {
-    message: string;
-    type: string;
-  };
-}
-
-class StripePaymentHandler implements PaymentGatewayHandler {
-  private stripe: Stripe | null = null;
-
-  async initialize(): Promise<void> {
-    const config = configStore.getPaymentConfig();
-    const stripeConfig = config.gateways.stripe;
-    
-    if (!stripeConfig?.enabled || !stripeConfig.publishableKey) {
-      throw new Error('Stripe is not configured or enabled');
-    }
-
-    this.stripe = await loadStripe(stripeConfig.publishableKey);
-    if (!this.stripe) {
-      throw new Error('Failed to initialize Stripe');
-    }
-  }
-
-  createPaymentForm(): React.ComponentType<PaymentFormProps> {
-    // Return the existing StripePaymentForm component
-    return StripePaymentForm;
-  }
-
-  async processPayment(paymentData: PaymentData): Promise<PaymentResult> {
-    if (!this.stripe) {
-      throw new Error('Stripe not initialized');
-    }
-
-    try {
-      const { error } = await this.stripe.confirmPayment(paymentData);
-      
-      if (error) {
-        return {
-          success: false,
-          error: {
-            message: error.message || 'Payment failed',
-            type: error.type || 'unknown',
-          },
-        };
-      }
-
-      // If no error, payment was successful
-      return {
-        success: true,
-      };
-    } catch {
-      return {
-        success: false,
-        error: {
-          message: 'An unexpected error occurred',
-          type: 'unknown',
-        },
-      };
-    }
-  }
-}
-
-
-
+/**
+ * Legacy PaymentService - delegates to new modular services
+ * @deprecated Use individual payment services instead
+ */
 class PaymentService {
-  private handlers: Map<string, PaymentGatewayHandler> = new Map();
-  private initialized = false;
-
-  constructor() {
-    this.handlers.set('stripe', new StripePaymentHandler());
-  }
-
-  async initialize(): Promise<void> {
-    if (this.initialized) return;
-
-    const config = configStore.getPaymentConfig();
-    const defaultGateway = config.defaultGateway;
-    
-    const handler = this.handlers.get(defaultGateway);
-    if (!handler) {
-      throw new Error(`Payment gateway '${defaultGateway}' not supported`);
-    }
-
-    await handler.initialize();
-    this.initialized = true;
-  }
-
-  getPaymentHandler(gateway?: string): PaymentGatewayHandler {
-    const config = configStore.getPaymentConfig();
-    const gatewayToUse = gateway || config.defaultGateway;
-    
-    const handler = this.handlers.get(gatewayToUse);
-    if (!handler) {
-      throw new Error(`Payment gateway '${gatewayToUse}' not supported`);
-    }
-
-    return handler;
+  // Delegate to PaymentGatewayService
+  async initializeHandler(paymentNextAction: PaymentNextAction): Promise<PaymentGatewayHandler> {
+    return paymentGatewayService.initializeHandler(paymentNextAction);
   }
 
   async createPaymentForm(
-    gateway?: string
+    paymentNextAction: PaymentNextAction
   ): Promise<React.ComponentType<PaymentFormProps>> {
-    const handler = this.getPaymentHandler(gateway);
-    return handler.createPaymentForm();
+    return paymentGatewayService.createPaymentForm(paymentNextAction);
   }
 
-  async processPayment(paymentData: PaymentData, gateway?: string): Promise<PaymentResult> {
-    const handler = this.getPaymentHandler(gateway);
-    return handler.processPayment(paymentData);
+  async processPayment(
+    paymentData: PaymentData, 
+    paymentNextAction: PaymentNextAction
+  ): Promise<PaymentResult> {
+    return paymentGatewayService.processPayment(paymentData, paymentNextAction);
   }
 
-  changeDefaultGateway(gateway: 'stripe'): void {
-    configStore.setDefaultPaymentGateway(gateway);
-    this.initialized = false; // Force re-initialization
+  getSupportedProviders(): string[] {
+    return paymentGatewayService.getSupportedProviders();
   }
 
-  getSupportedGateways(): string[] {
-    const config = configStore.getPaymentConfig();
-    return Object.entries(config.gateways)
-      .filter(([, gatewayConfig]) => gatewayConfig?.enabled)
-      .map(([gateway]) => gateway);
+  clearInitializedHandlers(): void {
+    paymentGatewayService.clearInitializedHandlers();
+  }
+
+  // Delegate to PaymentNextActionService
+  getNextActionComponent(paymentNextAction: PaymentNextAction): React.ComponentType<any> | null {
+    return paymentNextActionService.getNextActionComponent(paymentNextAction);
+  }
+
+  getNextActionProps(paymentNextAction: PaymentNextAction, additionalProps: NextActionComponentProps = {}): any {
+    return paymentNextActionService.getNextActionProps(paymentNextAction, additionalProps);
+  }
+
+  isNextActionSupported(type: string): boolean {
+    return paymentNextActionService.isNextActionSupported(type);
+  }
+
+  // Delegate to PaymentComponentService
+  getComponentConfig(paymentNextAction: PaymentNextAction, additionalProps: NextActionComponentProps = {}) {
+    return paymentComponentService.getComponentConfig(paymentNextAction, additionalProps);
+  }
+
+  renderComponent(paymentNextAction: PaymentNextAction, additionalProps: NextActionComponentProps = {}) {
+    return paymentComponentService.renderComponent(paymentNextAction, additionalProps);
+  }
+
+  canRender(paymentNextAction: PaymentNextAction): boolean {
+    return paymentComponentService.canRender(paymentNextAction);
   }
 }
 

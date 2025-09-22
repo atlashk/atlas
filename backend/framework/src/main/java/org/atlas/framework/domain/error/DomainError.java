@@ -1,11 +1,11 @@
-package org.atlas.framework.error;
+package org.atlas.framework.domain.error;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum AppError {
+public enum DomainError {
 
   // Common errors
   DEFAULT(500, "error.commons.default"),

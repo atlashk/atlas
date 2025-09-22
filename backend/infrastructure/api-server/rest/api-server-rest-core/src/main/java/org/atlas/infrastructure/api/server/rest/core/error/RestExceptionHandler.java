@@ -3,8 +3,8 @@ package org.atlas.infrastructure.api.server.rest.core.error;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
+import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
-import org.atlas.framework.error.AppError;
 import org.atlas.framework.i18n.I18nPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +43,7 @@ public class RestExceptionHandler {
     FieldError firstFieldError = e.getBindingResult().getFieldErrors().get(0);
     String message = String.format("[%s] %s", firstFieldError.getField(),
         firstFieldError.getDefaultMessage());
-    return ApiResponseWrapper.error(AppError.BAD_REQUEST.getErrorCode(), message);
+    return ApiResponseWrapper.error(DomainError.BAD_REQUEST.getErrorCode(), message);
   }
 
   /**
@@ -53,7 +53,7 @@ public class RestExceptionHandler {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ApiResponseWrapper<Void> handle(MissingServletRequestParameterException e) {
     log.error("Invalid request", e);
-    return ApiResponseWrapper.error(AppError.BAD_REQUEST.getErrorCode(),
+    return ApiResponseWrapper.error(DomainError.BAD_REQUEST.getErrorCode(),
         "Missing " + e.getParameterName());
   }
 
@@ -61,6 +61,6 @@ public class RestExceptionHandler {
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public ApiResponseWrapper<Void> handle(Exception e) {
     log.error("Occurred exception", e);
-    return ApiResponseWrapper.error(AppError.DEFAULT.getErrorCode(), e.getMessage());
+    return ApiResponseWrapper.error(DomainError.DEFAULT.getErrorCode(), e.getMessage());
   }
 }

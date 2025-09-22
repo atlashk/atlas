@@ -28,7 +28,7 @@ public class ProductExcelReaderAdapter implements ProductExcelReaderPort {
   }
 
   @Getter
-@Setter
+  @Setter
   public static class ProductExcelRow {
 
     @ExcelProperty(value = "Name")

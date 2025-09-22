@@ -1,7 +1,6 @@
 // Frontend configuration system
 export interface AppConfig {
   notification: NotificationConfig;
-  payment: PaymentConfig;
 }
 
 export interface NotificationConfig {
@@ -11,18 +10,6 @@ export interface NotificationConfig {
   reconnectDelay?: number; // in milliseconds
 }
 
-export interface PaymentConfig {
-  defaultGateway: 'stripe';
-  gateways: {
-    stripe: StripeConfig;
-  };
-}
-
-export interface StripeConfig {
-  publishableKey: string;
-  enabled: boolean;
-}
-
 // Default configuration
 export const DEFAULT_CONFIG: AppConfig = {
   notification: {
@@ -30,15 +17,6 @@ export const DEFAULT_CONFIG: AppConfig = {
     pollingInterval: 5000,
     reconnectAttempts: 3,
     reconnectDelay: 2000,
-  },
-  payment: {
-    defaultGateway: 'stripe',
-    gateways: {
-      stripe: {
-        publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '',
-        enabled: true,
-      },
-    },
   },
 };
 
@@ -58,14 +36,6 @@ class ConfigStore {
       notification: {
         ...this.config.notification,
         ...newConfig.notification,
-      },
-      payment: {
-        ...this.config.payment,
-        ...newConfig.payment,
-        gateways: {
-          ...this.config.payment.gateways,
-          ...newConfig.payment?.gateways,
-        },
       },
     };
     this.notifySubscribers();
@@ -89,30 +59,8 @@ class ConfigStore {
     return this.config.notification;
   }
 
-  getPaymentConfig(): PaymentConfig {
-    return this.config.payment;
-  }
-
   setNotificationMethod(method: 'polling' | 'sse' | 'ws'): void {
     this.config.notification.defaultMethod = method;
-    this.notifySubscribers();
-  }
-
-  setDefaultPaymentGateway(gateway: 'stripe'): void {
-    this.config.payment.defaultGateway = gateway;
-    this.notifySubscribers();
-  }
-
-  setPaymentGatewayEnabled(gateway: 'stripe', enabled: boolean): void {
-    this.config.payment.gateways[gateway].enabled = enabled;
-    this.notifySubscribers();
-  }
-
-  updatePaymentGatewayConfig(gateway: 'stripe', config: Partial<StripeConfig>): void {
-    this.config.payment.gateways[gateway] = {
-      ...this.config.payment.gateways[gateway],
-      ...config,
-    };
     this.notifySubscribers();
   }
 }

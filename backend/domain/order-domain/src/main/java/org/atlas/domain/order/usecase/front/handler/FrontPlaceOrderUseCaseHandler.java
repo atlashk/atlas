@@ -20,7 +20,7 @@ import org.atlas.framework.cryptography.HashingUtil;
 import org.atlas.framework.domain.event.contract.order.OrderCreatedEvent;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
-import org.atlas.framework.error.AppError;
+import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.lock.LockAcquisitionException;
 import org.atlas.framework.lock.LockPort;
 import org.atlas.framework.messaging.ExternalMessagePublisherPort;
@@ -67,7 +67,7 @@ public class FrontPlaceOrderUseCaseHandler {
     } catch (LockAcquisitionException e) {
       log.warn("Duplicate order attempt detected: userId={}, input={}",
           userId, input, e);
-      throw new DomainException(AppError.CONFLICT, e);
+      throw new DomainException(DomainError.CONFLICT, e);
     }
 
     return result[0];

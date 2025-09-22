@@ -22,8 +22,8 @@ public class BrandController {
 
   private final ListBrandUseCaseHandler listBrandUseCaseHandler;
 
-  @Operation(summary = "List Brands", description = "Retrieves a list of all available brands.")
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "List brands")
   public ApiResponseWrapper<List<BrandResponse>> listBrand() throws Exception {
     List<BrandEntity> brandEntities = listBrandUseCaseHandler.handle(null);
     List<BrandResponse> brandResponses = ObjectMapperUtil.getInstance()

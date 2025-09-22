@@ -29,11 +29,8 @@ public class UserController {
   private final GetProfileUseCaseHandler getProfileUseCaseHandler;
   private final FrontRegisterUseCaseHandler frontRegisterUseCaseHandler;
 
-  @Operation(
-      summary = "Get User Profile",
-      description = "Retrieves the profile information of the authenticated user."
-  )
   @GetMapping(value = "/profile", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Get user profile")
   public ApiResponseWrapper<UserResponse> getProfile() throws Exception {
     UserEntity userEntity = getProfileUseCaseHandler.handle(null);
     UserResponse userResponse = ObjectMapperUtil.getInstance()
@@ -41,10 +38,10 @@ public class UserController {
     return ApiResponseWrapper.success(userResponse);
   }
 
-  @Operation(summary = "User registration", description = "Registers a new user with the provided details.")
   @PostMapping(value = "/register", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "User registration")
   public ApiResponseWrapper<Void> register(
-      @Parameter(description = "Request object containing the needed information to register a user.", required = true)
+      @Parameter(description = "Request object containing the needed information to register a user", required = true)
       @Valid @RequestBody RegisterRequest request) throws Exception {
     RegisterInput input = ObjectMapperUtil.getInstance()
         .map(request, RegisterInput.class);

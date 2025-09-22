@@ -8,7 +8,7 @@ import org.atlas.framework.domain.event.DomainEventType;
 import org.atlas.framework.domain.event.contract.order.ProductReservationSucceededEvent;
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.exception.DomainException;
-import org.atlas.framework.error.AppError;
+import org.atlas.framework.domain.error.DomainError;
 
 @DomainEventHandler(type = DomainEventType.PRODUCT_RESERVATION_SUCCEEDED)
 @RequiredArgsConstructor
@@ -20,9 +20,9 @@ public class ProductReservationSucceededEventHandler {
     // Find order
     OrderEntity orderEntity = orderRepository.findById(
             productReservationSucceededEvent.getOrder().getId())
-        .orElseThrow(() -> new DomainException(AppError.ORDER_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
     if (orderEntity.getStatus() != OrderStatus.AWAITING_PRODUCT_RESERVATION) {
-      throw new DomainException(AppError.ORDER_INVALID_STATUS);
+      throw new DomainException(DomainError.ORDER_INVALID_STATUS);
     }
 
     // Mark order as PRODUCT_RESERVATION_SUCCEEDED

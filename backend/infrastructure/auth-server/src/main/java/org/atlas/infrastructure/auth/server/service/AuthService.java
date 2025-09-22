@@ -9,8 +9,8 @@ import org.atlas.domain.user.repository.UserRepository;
 import org.atlas.framework.constant.SecurityConstant;
 import org.atlas.framework.context.ContextInfo;
 import org.atlas.framework.context.Contexts;
+import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
-import org.atlas.framework.error.AppError;
 import org.atlas.framework.jwt.Jwt;
 import org.atlas.infrastructure.auth.server.model.GenerateOneTimeTokenRequest;
 import org.atlas.infrastructure.auth.server.model.GenerateOneTimeTokenResponse;
@@ -70,12 +70,12 @@ public class AuthService {
     try {
       refreshTokenJwt = tokenService.parseToken(request.getRefreshToken());
     } catch (Exception e) {
-      throw new DomainException(AppError.UNAUTHORIZED, "Invalid refresh token");
+      throw new DomainException(DomainError.UNAUTHORIZED, "Invalid refresh token");
     }
 
     // Reissue tokens
     UserEntity userEntity = userRepository.findById(refreshTokenJwt.getUserId())
-        .orElseThrow(() -> new DomainException(AppError.USER_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
     UserDetailsImpl userDetails = new UserDetailsImpl(userEntity);
 
     // Issue new access token
@@ -97,7 +97,7 @@ public class AuthService {
   public void logout() {
     ContextInfo contextInfo = Contexts.get();
     if (contextInfo == null) {
-      throw new DomainException(AppError.UNAUTHORIZED, "Unauthorized");
+      throw new DomainException(DomainError.UNAUTHORIZED, "Unauthorized");
     }
 
     // Update last logout timestamp in Redis

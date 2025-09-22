@@ -27,10 +27,10 @@ public class InternalPaymentController {
 
   private final InternalListPaymentUseCaseHandler internalListPaymentUseCaseHandler;
 
-  @Operation(summary = "List payments", description = "Retrieves a list of payments based on the provided criteria.")
   @PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "List payments")
   public ApiResponseWrapper<List<PaymentResponse>> listPayment(
-      @Parameter(description = "Request object containing the criteria for listing payments.", required = true)
+      @Parameter(description = "Request object containing the criteria for listing payments", required = true)
       @Valid @RequestBody InternalListPaymentRequest request) throws Exception {
     InternalListPaymentInput input = ObjectMapperUtil.getInstance()
         .map(request, InternalListPaymentInput.class);

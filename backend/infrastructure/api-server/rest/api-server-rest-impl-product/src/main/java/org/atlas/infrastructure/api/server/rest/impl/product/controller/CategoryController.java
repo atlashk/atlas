@@ -22,8 +22,8 @@ public class CategoryController {
 
   private final ListCategoryUseCaseHandler listCategoryUseCaseHandler;
 
-  @Operation(summary = "List Categories", description = "Retrieves a list of all available categories.")
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "List categories")
   public ApiResponseWrapper<List<CategoryResponse>> listCategory() throws Exception {
     List<CategoryEntity> categoryEntities = listCategoryUseCaseHandler.handle(null);
     List<CategoryResponse> categoryResponses = ObjectMapperUtil.getInstance()

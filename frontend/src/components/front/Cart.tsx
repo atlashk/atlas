@@ -2,8 +2,7 @@ import { orderApi } from "@/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { PaymentMethod, PlaceOrderItemRequest, OrderTrackingPayload } from "@/interfaces";
-import { configStore } from "@/lib/config";
+import { PaymentMethod, PlaceOrderItemRequest, OrderTrackingPayload, PaymentNextAction } from "@/interfaces";
 import { notificationService } from "@/services/notificationService";
 import { PaymentFormProps, PaymentResult, paymentService } from "@/services/paymentService";
 import { CartItem, useCartStore, useUserStore } from "@/stores";
@@ -13,16 +12,15 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
-import PaymentMethodSelector from "./PaymentMethodSelector";
-import PaymentStatusModal from "./PaymentStatusModal";
+import { PaymentMethodSelector, PaymentStatusModal } from "@/components/payment";
 
 const Cart: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>(PaymentMethod.CARD);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [clientSecret, setClientSecret] = useState<string>('');
   const [currentOrderId, setCurrentOrderIdState] = useState<number | null>(null);
   const [PaymentFormComponent, setPaymentFormComponent] = useState<React.ComponentType<PaymentFormProps> | null>(null);
+  const [paymentNextAction, setPaymentNextAction] = useState<PaymentNextAction | null>(null);
   const [paymentStatusModal, setPaymentStatusModal] = useState({
     isOpen: false,
     isSuccess: false,
@@ -43,18 +41,7 @@ const Cart: React.FC = () => {
 
   const total = getTotal();
 
-  // Initialize services and listen for order notifications
-  useEffect(() => {
-    const initializeServices = async () => {
-      try {
-        await paymentService.initialize();
-      } catch (error) {
-        console.error('Failed to initialize payment service:', error);
-      }
-    };
-
-    initializeServices();
-  }, []);
+  // Payment service no longer needs global initialization with the new paymentNextAction approach
 
   // Listen for order tracking notifications using the notification service
   useEffect(() => {
@@ -62,14 +49,12 @@ const Cart: React.FC = () => {
 
     const handleOrderUpdate = async (payload: OrderTrackingPayload) => {
       try {
-        if (payload.orderStatus === 'AWAITING_PAYMENT' && payload.paymentGatewayData?.clientSecret) {
-          setClientSecret(payload.paymentGatewayData.clientSecret);
+        if (payload.orderStatus === 'AWAITING_PAYMENT' && payload.paymentNextAction) {
+          setPaymentNextAction(payload.paymentNextAction);
           
-          // Get the appropriate payment form component based on configuration
-          const config = configStore.getPaymentConfig();
-          const PaymentForm = await paymentService.createPaymentForm(
-            config.defaultGateway
-          );
+          // Initialize payment handler and get payment form component based on paymentNextAction
+          await paymentService.initializeHandler(payload.paymentNextAction);
+          const PaymentForm = await paymentService.createPaymentForm(payload.paymentNextAction);
           setPaymentFormComponent(() => PaymentForm);
           setShowPaymentForm(true);
         } else if (payload.orderStatus === 'PAYMENT_SUCCEEDED') {
@@ -177,7 +162,7 @@ const Cart: React.FC = () => {
 
   const handleCancelPayment = () => {
     setShowPaymentForm(false);
-    setClientSecret('');
+    setPaymentNextAction(null);
   };
 
   const handleCloseStatusModal = () => {
@@ -305,11 +290,11 @@ const Cart: React.FC = () => {
       </CardContent>
 
       {/* Dynamic Payment Form Modal */}
-      {showPaymentForm && clientSecret && PaymentFormComponent && (
+      {showPaymentForm && paymentNextAction && PaymentFormComponent && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="max-w-md w-full">
             <PaymentFormComponent
-              clientSecret={clientSecret}
+              clientSecret={paymentNextAction.client_secret || ''}
               orderId={currentOrderId?.toString() || ''}
               onPaymentResult={handlePaymentResult}
               onCancel={handleCancelPayment}

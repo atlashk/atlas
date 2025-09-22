@@ -27,7 +27,7 @@ public class ProductCsvReaderAdapter implements ProductCsvReaderPort {
   }
 
   @Getter
-@Setter
+  @Setter
   public static class ProductCsvRow {
 
     @CsvBindByName(column = "Name")

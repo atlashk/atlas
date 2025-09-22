@@ -2,7 +2,6 @@ package org.atlas.infrastructure.api.server.rest.impl.order.admin.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -28,14 +27,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/admin/orders")
 @Validated
-@Tag(name = "Admin order management", description = "Admin order management")
 @RequiredArgsConstructor
 public class AdminOrderManagementController {
 
   private final AdminListOrderUseCaseHandler adminListOrderUseCaseHandler;
 
-  @Operation(summary = "List Orders", description = "Retrieves a paginated list of orders.")
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "List orders")
   public ApiResponseWrapper<List<OrderResponse>> listOrder(
       @Parameter(name = "orderId", description = "Order ID", example = "1")
       @RequestParam(name = "orderId", required = false) Integer orderId,
@@ -51,9 +49,9 @@ public class AdminOrderManagementController {
       @Parameter(name = "endDate", description = "End date")
       @RequestParam(name = "endDate", required = false)
       @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
-      @Parameter(name = "page", description = "The page number to be retrieved (default is 1).", example = "1")
+      @Parameter(name = "page", description = "The page number to be retrieved (default is 1)", example = "1")
       @RequestParam(name = "page", required = false, defaultValue = "1") Integer page,
-      @Parameter(name = "size", description = "The number of orders per page (default is defined by the constant).", example = "20")
+      @Parameter(name = "size", description = "The number of orders per page (default is defined by the constant)", example = "20")
       @RequestParam(name = "size", required = false, defaultValue = CommonConstant.DEFAULT_PAGE_SIZE_STR) Integer size
   ) throws Exception {
     AdminListOrderInput input = AdminListOrderInput.builder()

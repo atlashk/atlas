@@ -1,16 +1,16 @@
 package org.atlas.framework.domain.event.contract.order;
 
-import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import org.atlas.framework.domain.event.DomainEventType;
 import org.atlas.framework.domain.event.contract.order.model.Order;
+import org.atlas.framework.payment.model.nextaction.NextAction;
 
 @Getter
 @Setter
 public class PaymentCreatedEvent extends BaseOrderEvent {
 
-  private Map<String, Object> paymentGatewayData;
+  private NextAction nextAction;
 
   public PaymentCreatedEvent(String eventSource, Order order) {
     super(eventSource, order);

@@ -5,7 +5,7 @@ import org.atlas.edge.gateway.springcloudgateway.security.jwt.JwtExtractor;
 import org.atlas.edge.gateway.springcloudgateway.util.HttpUtil;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.constant.SecurityConstant;
-import org.atlas.framework.error.AppError;
+import org.atlas.framework.domain.error.DomainError;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -74,7 +74,7 @@ public class TokenValidationGatewayFilterFactory extends
     return invalidIssuedAt.flatMap(isInvalidIssuedAt -> {
       if (isInvalidIssuedAt) {
         ApiResponseWrapper<Void> response = ApiResponseWrapper.error(
-            AppError.UNAUTHORIZED.getErrorCode(), "Token has been inactivated");
+            DomainError.UNAUTHORIZED.getErrorCode(), "Token has been inactivated");
         return HttpUtil.respond(exchange, response, HttpStatus.UNAUTHORIZED);
       }
       return chain.filter(exchange);

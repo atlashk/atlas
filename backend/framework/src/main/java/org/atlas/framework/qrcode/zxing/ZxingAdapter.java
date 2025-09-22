@@ -1,4 +1,4 @@
-package org.atlas.framework.qrgenerator.zxing;
+package org.atlas.framework.qrcode.zxing;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
@@ -10,9 +10,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.atlas.framework.qrgenerator.QrGenerator;
+import org.atlas.framework.qrcode.QRCodeGenerator;
 
-public class ZxingAdapter implements QrGenerator {
+public class ZxingAdapter implements QRCodeGenerator {
 
   private static final int DEFAULT_WIDTH = 200;
   private static final int DEFAULT_HEIGHT = 200;

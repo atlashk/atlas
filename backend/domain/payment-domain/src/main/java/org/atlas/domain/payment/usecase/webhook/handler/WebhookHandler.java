@@ -17,7 +17,7 @@ import org.atlas.framework.domain.event.contract.order.PaymentSucceededEvent;
 import org.atlas.framework.domain.event.contract.order.model.Order;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
-import org.atlas.framework.error.AppError;
+import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.messaging.ExternalMessagePublisherPort;
 import org.atlas.framework.payment.PaymentGatewayPort;
 import org.atlas.framework.payment.model.PaymentResult;
@@ -43,7 +43,7 @@ public class WebhookHandler {
         paymentGateway.name().toLowerCase());
     PaymentGatewayPort paymentGatewayPort = dependencyPort.getInstanceByName(
             paymentGatewayInstanceName, PaymentGatewayPort.class)
-        .orElseThrow(() -> new DomainException(AppError.PAYMENT_GATEWAY_NOT_SUPPORTED));
+        .orElseThrow(() -> new DomainException(DomainError.PAYMENT_GATEWAY_NOT_SUPPORTED));
 
     WebhookResponse response = paymentGatewayPort.handleWebhook(payload, headers);
 
@@ -54,7 +54,7 @@ public class WebhookHandler {
         // Update payment entity
         PaymentResult paymentResult = new PaymentResult();
         PaymentEntity paymentEntity = paymentRepository.findById(paymentResult.getPaymentId())
-            .orElseThrow(() -> new DomainException(AppError.PAYMENT_NOT_FOUND));
+            .orElseThrow(() -> new DomainException(DomainError.PAYMENT_NOT_FOUND));
         switch (paymentResult.getStatus()) {
           case SUCCEEDED -> paymentEntity.setStatus(PaymentStatus.SUCCEEDED);
           case FAILED -> {

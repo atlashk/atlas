@@ -3,10 +3,8 @@ package org.atlas.infrastructure.payment.stripe;
 import com.stripe.StripeClient;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
-import com.stripe.model.Charge;
 import com.stripe.model.PaymentIntent;
 import com.stripe.net.Webhook;
-import com.stripe.param.ChargeCreateParams;
 import com.stripe.param.PaymentIntentCreateParams;
 import java.math.BigDecimal;
 import java.util.Map;
@@ -38,30 +36,6 @@ public class StripeService {
         .create(params);
     log.info("Created new PaymentIntent {} successfully: amount={}, currency={}, paymentMethod={}",
         paymentIntent.getId(), amount, currency, paymentMethod);
-    return paymentIntent;
-  }
-
-  public Charge createCharge(BigDecimal amount, String currency, String cardToken)
-      throws StripeException {
-    ChargeCreateParams params = ChargeCreateParams.builder()
-        .setSource(cardToken)
-        .setAmount(CurrencyUtil.getAmountInSmallestUnit(amount, currency))
-        .setCurrency(currency)
-        .build();
-    Charge charge = stripeClient.v1()
-        .charges()
-        .create(params);
-    log.info("Created new Charge {} successfully: amount={}, currency={}",
-        charge.getId(), amount, currency);
-    return charge;
-  }
-
-  public PaymentIntent retrievePaymentIntent(String paymentIntentId) throws StripeException {
-    PaymentIntent paymentIntent = stripeClient.v1()
-        .paymentIntents()
-        .retrieve(paymentIntentId);
-    log.debug("Retrieved PaymentIntent {} successfully: status={}",
-        paymentIntent.getId(), paymentIntent.getStatus());
     return paymentIntent;
   }
 

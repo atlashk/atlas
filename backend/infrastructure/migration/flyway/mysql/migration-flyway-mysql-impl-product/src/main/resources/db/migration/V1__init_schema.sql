@@ -1,66 +1,198 @@
-CREATE TABLE IF NOT EXISTS brand (
-  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `name` VARCHAR(255) NOT NULL,
-  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+CREATE TABLE IF NOT EXISTS brand
+(
+    `id`
+    INT
+    NOT
+    NULL
+    AUTO_INCREMENT
+    PRIMARY
+    KEY,
+    `name`
+    VARCHAR
+(
+    255
+) NOT NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS category
+(
+    `id`
+    INT
+    NOT
+    NULL
+    AUTO_INCREMENT
+    PRIMARY
+    KEY,
+    `name`
+    VARCHAR
+(
+    255
+) NOT NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS product
+(
+    `id`
+    INT
+    NOT
+    NULL
+    AUTO_INCREMENT
+    PRIMARY
+    KEY,
+    `name`
+    VARCHAR
+(
+    255
+) NOT NULL,
+    `price` DECIMAL
+(
+    9,
+    2
+) NOT NULL,
+    `quantity` INT NOT NULL,
+    `status` VARCHAR
+(
+    20
+) NOT NULL,
+    `available_from` DATETIME NOT NULL,
+    `is_active` TINYINT
+(
+    1
+) NOT NULL,
+    `brand_id` INT NOT NULL,
+    `version` BIGINT DEFAULT 0,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS product_details
+(
+    `product_id`
+    INT
+    NOT
+    NULL
+    PRIMARY
+    KEY,
+    `description`
+    TEXT,
+    `created_at`
+    DATETIME
+    NOT
+    NULL
+    DEFAULT
+    CURRENT_TIMESTAMP,
+    `updated_at`
+    DATETIME
+    DEFAULT
+    CURRENT_TIMESTAMP
+    ON
+    UPDATE
+    CURRENT_TIMESTAMP
 ) ENGINE = InnoDB;
 
-CREATE TABLE IF NOT EXISTS category (
-  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `name` VARCHAR(255) NOT NULL,
-  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE = InnoDB;
+CREATE TABLE IF NOT EXISTS product_attribute
+(
+    `id`
+    INT
+    NOT
+    NULL
+    AUTO_INCREMENT
+    PRIMARY
+    KEY,
+    `product_id`
+    INT
+    NOT
+    NULL,
+    `name`
+    VARCHAR
+(
+    255
+) NOT NULL,
+    `value` VARCHAR
+(
+    255
+) NOT NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_product_id
+(
+    product_id
+),
+    UNIQUE INDEX idx_product_id_name
+(
+    product_id,
+    name
+)
+    ) ENGINE = InnoDB;
 
-CREATE TABLE IF NOT EXISTS product (
-  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `name` VARCHAR(255) NOT NULL,
-  `price` DECIMAL(9, 2) NOT NULL,
-  `quantity` INT NOT NULL,
-  `status` VARCHAR(20) NOT NULL,
-  `available_from` DATETIME NOT NULL,
-  `is_active` TINYINT(1) NOT NULL,
-  `brand_id` INT NOT NULL,
-  `version` BIGINT DEFAULT 0,
-  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE = InnoDB;
+CREATE TABLE IF NOT EXISTS product_category
+(
+    `product_id`
+    INT
+    NOT
+    NULL,
+    `category_id`
+    INT
+    NOT
+    NULL,
+    `created_at`
+    DATETIME
+    NOT
+    NULL
+    DEFAULT
+    CURRENT_TIMESTAMP,
+    `updated_at`
+    DATETIME
+    DEFAULT
+    CURRENT_TIMESTAMP
+    ON
+    UPDATE
+    CURRENT_TIMESTAMP,
+    PRIMARY
+    KEY
+(
+    `product_id`,
+    `category_id`
+)
+    ) ENGINE = InnoDB;
 
-CREATE TABLE IF NOT EXISTS product_details (
-  `product_id` INT NOT NULL PRIMARY KEY,
-  `description` TEXT, `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE = InnoDB;
-
-CREATE TABLE IF NOT EXISTS product_attribute (
-  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `product_id` INT NOT NULL,
-  `name` VARCHAR(255) NOT NULL,
-  `value` VARCHAR(255) NOT NULL,
-  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_product_id (product_id),
-  UNIQUE INDEX idx_product_id_name (product_id, name)
-) ENGINE = InnoDB;
-
-CREATE TABLE IF NOT EXISTS product_category (
-  `product_id` INT NOT NULL,
-  `category_id` INT NOT NULL,
-  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`product_id`, `category_id`)
-) ENGINE = InnoDB;
-
-CREATE TABLE IF NOT EXISTS outbox_message (
-  id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  message_payload TEXT NOT NULL,
-  message_class VARCHAR(255) NOT NULL,
-  message_key VARCHAR(255) NOT NULL,
-  destination VARCHAR(255) NOT NULL,
-  status VARCHAR(20) NOT NULL,
-  processed_at DATETIME,
-  error TEXT,
-  retries INT DEFAULT 0,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE = InnoDB;
+CREATE TABLE IF NOT EXISTS outbox_message
+(
+    id
+    BIGINT
+    NOT
+    NULL
+    AUTO_INCREMENT
+    PRIMARY
+    KEY,
+    message_payload
+    TEXT
+    NOT
+    NULL,
+    message_class
+    VARCHAR
+(
+    255
+) NOT NULL,
+    message_key VARCHAR
+(
+    255
+) NOT NULL,
+    destination VARCHAR
+(
+    255
+) NOT NULL,
+    status VARCHAR
+(
+    20
+) NOT NULL,
+    processed_at DATETIME,
+    error TEXT,
+    retries INT DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE = InnoDB;

@@ -16,7 +16,8 @@ public class SpringMessageConsumerConfig {
     taskExecutor.setCorePoolSize(0); // No core threads
     taskExecutor.setMaxPoolSize(Integer.MAX_VALUE); // Maximum pool size
     taskExecutor.setQueueCapacity(0); // Use a SynchronousQueue-like behavior
-    taskExecutor.setKeepAliveSeconds(60); // Threads will be terminated after 60 seconds of inactivity
+    taskExecutor.setKeepAliveSeconds(
+        60); // Threads will be terminated after 60 seconds of inactivity
     taskExecutor.setAllowCoreThreadTimeOut(true); // Allow core threads to time out
     taskExecutor.setThreadNamePrefix("SpringMessageConsumerTaskExecutor-");
     taskExecutor.initialize();

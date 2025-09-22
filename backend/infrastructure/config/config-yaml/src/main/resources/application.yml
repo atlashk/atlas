@@ -27,4 +27,6 @@ app:
         decrease-quantity-strategy: DISTRIBUTED_LOCK
       payment-service:
         currency: USD
-        gateway: stripe
+        routing:
+          card: stripe
+          paypal: paypal

@@ -2,6 +2,7 @@ export * from './auth';
 export * from './order';
 export * from './product';
 export * from './user';
+export * from './payment';
 export { userAdminApi } from './user.admin';
 export { productAdminApi } from './product.admin';
 export { orderAdminApi } from './order.admin';

@@ -18,7 +18,8 @@ public class RedissonLockAdapter implements LockPort {
   private final RedissonClient redissonClient;
 
   @Override
-  public void doWithLock(Runnable task, String key, Duration waitTime, Duration leaseTime, boolean unlockOnCompletion)
+  public void doWithLock(Runnable task, String key, Duration waitTime, Duration leaseTime,
+      boolean unlockOnCompletion)
       throws LockAcquisitionException {
     try {
       // Try acquiring the lock

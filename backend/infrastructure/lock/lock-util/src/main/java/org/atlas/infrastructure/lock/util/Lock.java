@@ -11,8 +11,12 @@ import java.util.concurrent.TimeUnit;
 public @interface Lock {
 
   String key();
+
   long waitTime();
+
   long leaseTime();
+
   TimeUnit timeUnit();
+
   boolean unlockOnCompletion() default true;
 }

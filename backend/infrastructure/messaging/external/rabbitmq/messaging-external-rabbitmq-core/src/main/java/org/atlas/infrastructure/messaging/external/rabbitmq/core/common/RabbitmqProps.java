@@ -21,17 +21,6 @@ public class RabbitmqProps {
   private List<BindingConfig> bindings;
 
   @Getter
-  @Setter
-  public static class ExchangeConfig {
-
-    private String name;
-    private ExchangeType type;
-    private boolean durable = true;
-    private boolean autoDelete = true;
-    private Map<String, Object> arguments = new HashMap<>();
-  }
-
-  @Getter
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   public enum ExchangeType {
     DIRECT("direct"),
@@ -40,6 +29,17 @@ public class RabbitmqProps {
     HEADERS("headers");
 
     private final String value;
+  }
+
+  @Getter
+  @Setter
+  public static class ExchangeConfig {
+
+    private String name;
+    private ExchangeType type;
+    private boolean durable = true;
+    private boolean autoDelete = true;
+    private Map<String, Object> arguments = new HashMap<>();
   }
 
   @Getter

@@ -47,8 +47,8 @@ public class OrderController {
   private final FrontGetOrderStatusUseCaseHandler frontGetOrderStatusUseCaseHandler;
   private final FrontPlaceOrderUseCaseHandler frontPlaceOrderUseCaseHandler;
 
-  @Operation(summary = "List Orders", description = "Retrieves a paginated list of orders for the front-end.")
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "List orders")
   public ApiResponseWrapper<List<OrderResponse>> listOrder(
       @Parameter(name = "status", description = "Order status")
       @RequestParam(name = "status", required = false) OrderStatus status,
@@ -77,8 +77,8 @@ public class OrderController {
     return ApiResponseWrapper.successPage(orderResponsePage);
   }
 
-  @Operation(summary = "Get Order Status", description = "Retrieves the status of a specific order by its ID.")
   @GetMapping(value = "/{orderId}/status", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Get order status")
   public ApiResponseWrapper<GetOrderStatusResponse> getOrderStatus(
       @Parameter(name = "orderId", description = "ID of the order to retrieve the status for.", example = "123")
       @PathVariable("orderId") Integer orderId) throws Exception {
@@ -89,8 +89,8 @@ public class OrderController {
     return ApiResponseWrapper.success(response);
   }
 
-  @Operation(summary = "Place Order", description = "Places a new order based on the provided order details.")
   @PostMapping(value = "/place", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Place order")
   @ResponseStatus(HttpStatus.CREATED)
   public ApiResponseWrapper<PlaceOrderResponse> placeOrder(
       @Parameter(description = "Order details to create a new order.", required = true)

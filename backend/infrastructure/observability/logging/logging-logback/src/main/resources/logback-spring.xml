@@ -1,9 +1,5 @@
 <configuration>
   <!-- Spring Property Definition - must be defined before use -->
-  <springProperty name="SERVICE_NAME" scope="context" source="spring.application.name"/>
-  <property name="LOG_DIR" value="/var/log/${SERVICE_NAME}"/>
-
-  <!-- use Spring default values -->
   <appender class="ch.qos.logback.core.ConsoleAppender" name="CONSOLE">
     <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
       <layout class="org.atlas.infrastructure.observability.logging.logback.MaskingPatternLayout">
@@ -11,7 +7,6 @@
       </layout>
     </encoder>
   </appender>
-
   <appender class="ch.qos.logback.core.rolling.RollingFileAppender" name="FILE">
     <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
       <layout class="org.atlas.infrastructure.observability.logging.logback.MaskingPatternLayout">
@@ -29,35 +24,38 @@
       <totalSizeCap>3GB</totalSizeCap>
     </rollingPolicy>
   </appender>
+
+  <!-- use Spring default values -->
   <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
-  <!-- Console Appender using encoder instead of layout -->
   <logger additivity="false" level="DEBUG" name="org.atlas">
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>
   </logger>
-
-  <!-- File Appender with Rolling Policy -->
   <logger additivity="false" level="DEBUG" name="io.github.resilience4j">
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>
   </logger>
 
-  <!-- Logger for specific packages -->
+  <!-- Console Appender using encoder instead of layout -->
   <logger additivity="false" level="DEBUG" name="io.github.resilience4j.retry">
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>
   </logger>
 
-  <!-- Resilience::resilience4j -->
+  <!-- File Appender with Rolling Policy -->
   <logger additivity="false" level="DEBUG" name="io.github.resilience4j.circuitbreaker">
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>
   </logger>
+
+  <!-- Logger for specific packages -->
   <logger additivity="false" level="DEBUG" name="io.github.resilience4j.bulkhead">
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>
   </logger>
+
+  <!-- Resilience::resilience4j -->
   <logger additivity="false" level="DEBUG" name="io.github.resilience4j.ratelimiter">
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>
@@ -75,22 +73,24 @@
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>
   </logger>
-
-  <!-- Scheduler::Quartz -->
   <logger additivity="false" level="DEBUG" name="reactor.netty.http.client">
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>
   </logger>
-
-  <!-- Spring Cloud Gateway -->
   <logger additivity="false" level="DEBUG" name="org.springframework.security">
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>
   </logger>
 
-  <!-- Spring Security -->
+  <!-- Scheduler::Quartz -->
+  <property name="LOG_DIR" value="/var/log/${SERVICE_NAME}"/>
+
+  <!-- Spring Cloud Gateway -->
   <root level="INFO">
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>
   </root>
+
+  <!-- Spring Security -->
+  <springProperty name="SERVICE_NAME" scope="context" source="spring.application.name"/>
 </configuration>

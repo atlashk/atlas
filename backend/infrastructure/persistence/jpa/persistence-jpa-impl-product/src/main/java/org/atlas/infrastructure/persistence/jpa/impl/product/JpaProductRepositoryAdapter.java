@@ -7,8 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.product.entity.ProductEntity;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.repository.criteria.FindProductCriteria;
+import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
-import org.atlas.framework.error.AppError;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
@@ -83,7 +83,7 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
   public void update(ProductEntity productEntity) {
     JpaProductEntity jpaProductEntity = jpaProductRepository.findByIdWithAssociations(
             productEntity.getId())
-        .orElseThrow(() -> new DomainException(AppError.PRODUCT_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
     JpaProductEntityMapper.merge(productEntity, jpaProductEntity);
     jpaProductRepository.save(jpaProductEntity);
   }
@@ -92,7 +92,7 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
   public void decreaseQuantityWithConstraint(Integer id, Integer decrement) {
     int updated = jpaProductRepository.decreaseQuantityWithConstraint(id, decrement);
     if (updated == 0) {
-      throw new DomainException(AppError.PRODUCT_INSUFFICIENT_QUANTITY);
+      throw new DomainException(DomainError.PRODUCT_INSUFFICIENT_QUANTITY);
     }
   }
 
@@ -100,9 +100,9 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
   public void decreaseQuantityWithPessimisticLock(Integer id, Integer decrement) {
     RetryUtil.retryOn(() -> {
       JpaProductEntity product = jpaProductRepository.findByIdWithLock(id)
-          .orElseThrow(() -> new DomainException(AppError.PRODUCT_NOT_FOUND));
+          .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
       if (product.getQuantity() < decrement) {
-        throw new DomainException(AppError.PRODUCT_INSUFFICIENT_QUANTITY);
+        throw new DomainException(DomainError.PRODUCT_INSUFFICIENT_QUANTITY);
       }
       product.setQuantity(product.getQuantity() - decrement);
       jpaProductRepository.save(product);
@@ -114,9 +114,9 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
     RetryUtil.retryOn(() -> {
       JpaOptimisticProductEntity jpaOptimisticProductEntity = jpaOptimisticProductRepository.findById(
               id)
-          .orElseThrow(() -> new DomainException(AppError.PRODUCT_NOT_FOUND));
+          .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
       if (jpaOptimisticProductEntity.getQuantity() < decrement) {
-        throw new DomainException(AppError.PRODUCT_INSUFFICIENT_QUANTITY);
+        throw new DomainException(DomainError.PRODUCT_INSUFFICIENT_QUANTITY);
       }
       jpaOptimisticProductEntity.setQuantity(jpaOptimisticProductEntity.getQuantity() - decrement);
       jpaOptimisticProductRepository.save(jpaOptimisticProductEntity);

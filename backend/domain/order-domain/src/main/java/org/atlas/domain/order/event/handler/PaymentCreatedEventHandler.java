@@ -12,7 +12,7 @@ import org.atlas.framework.domain.event.DomainEventType;
 import org.atlas.framework.domain.event.contract.order.PaymentCreatedEvent;
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.exception.DomainException;
-import org.atlas.framework.error.AppError;
+import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.notification.common.NotificationType;
 import org.atlas.framework.notification.realtime.payload.OrderTrackingPayload;
 import org.atlas.framework.notification.realtime.sse.SseNotification;
@@ -32,11 +32,11 @@ public class PaymentCreatedEventHandler {
   public void handle(PaymentCreatedEvent event) {
     // Find order
     OrderEntity orderEntity = orderRepository.findById(event.getOrder().getId())
-        .orElseThrow(() -> new DomainException(AppError.ORDER_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
 
     // Validate order status
     if (orderEntity.getStatus() != OrderStatus.PRODUCT_RESERVATION_SUCCEEDED) {
-      throw new DomainException(AppError.ORDER_INVALID_STATUS);
+      throw new DomainException(DomainError.ORDER_INVALID_STATUS);
     }
 
     // Mark order as AWAITING_PAYMENT
@@ -47,7 +47,7 @@ public class PaymentCreatedEventHandler {
     OrderTrackingPayload orderTrackingPayload = OrderTrackingPayload.builder()
         .orderId(orderEntity.getId())
         .orderStatus(orderEntity.getStatus())
-        .paymentGatewayData(event.getPaymentGatewayData())
+        .paymentNextAction(event.getNextAction())
         .build();
     AsyncUtil.executeAsync(List.of(
         notifySse(orderTrackingPayload),

@@ -34,7 +34,8 @@ public class RedisKvAdapter implements KvPort {
   @Override
   public boolean putIfAbsent(String storeName, String key, Object value, Duration expiration) {
     String finalKey = buildKey(storeName, key);
-    return Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(finalKey, value, expiration));
+    return Boolean.TRUE.equals(
+        redisTemplate.opsForValue().setIfAbsent(finalKey, value, expiration));
   }
 
   @Override

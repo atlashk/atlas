@@ -22,10 +22,7 @@ public class JwkSetController {
 
   @GetMapping
   @Cacheable(cacheNames = "jwks")
-  @Operation(
-      summary = "JwkSet",
-      description = "Return the public key as JWKSet."
-  )
+  @Operation(summary = "Retrieve JwkSet")
   public Map<String, Object> getJwks() throws IOException, InvalidKeySpecException {
     return JwkSetUtil.getInstance()
         .generate(RsaKeyLoader.loadPublicKey(SecurityConstant.RSA_PUBLIC_KEY_PATH),

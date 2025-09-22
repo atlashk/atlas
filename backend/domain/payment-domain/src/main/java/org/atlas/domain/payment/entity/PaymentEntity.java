@@ -26,7 +26,6 @@ public class PaymentEntity extends DomainEntity {
 
   // External payment gateway information
   private String transactionId;
-  private String receiptUrl;
   private String errorCode;
   private String errorMessage;
   private String cancellationReason;

@@ -27,8 +27,8 @@ public class InternalProductController {
 
   private final InternalListProductUseCaseHandler internalListProductUseCaseHandler;
 
-  @Operation(summary = "List products", description = "Retrieves a list of products based on the provided criteria.")
   @PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "List products")
   public ApiResponseWrapper<List<ProductResponse>> listProduct(
       @Parameter(description = "Request object containing the criteria for listing products.", required = true)
       @Valid @RequestBody InternalListProductRequest request) throws Exception {

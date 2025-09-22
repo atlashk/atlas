@@ -18,7 +18,7 @@ import org.atlas.framework.domain.event.contract.product.ProductCreatedEvent;
 import org.atlas.framework.domain.event.contract.product.model.Product;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
-import org.atlas.framework.error.AppError;
+import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.messaging.ExternalMessagePublisherPort;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.util.CollectionUtil;
@@ -44,7 +44,7 @@ public class AdminImportProductUseCaseHandler {
           "Unsupported file type: " + input.getFileType());
     }
     if (CollectionUtil.isEmpty(rows)) {
-      throw new DomainException(AppError.NO_IMPORTED_PRODUCT);
+      throw new DomainException(DomainError.NO_IMPORTED_PRODUCT);
     }
 
     // Sync into DB and publish events
@@ -62,7 +62,7 @@ public class AdminImportProductUseCaseHandler {
       log.info("Imported {} products", rows.size());
       return null;
     } catch (Exception e) {
-      throw new DomainException(AppError.FAILED_TO_IMPORT_PRODUCT, e.getMessage());
+      throw new DomainException(DomainError.FAILED_TO_IMPORT_PRODUCT, e.getMessage());
     }
   }
 

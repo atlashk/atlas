@@ -8,21 +8,18 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { configStore } from '@/lib/config';
 import { notificationService } from '@/services/notificationService';
-import { paymentService } from '@/services/paymentService';
-import { Bell, CreditCard, Save, Settings } from 'lucide-react';
+import { Bell, Save, Settings } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function ConfigPanel() {
   const [notificationConfig, setNotificationConfig] = useState(configStore.getNotificationConfig());
-  const [paymentConfig, setPaymentConfig] = useState(configStore.getPaymentConfig());
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     // Subscribe to config changes
     const unsubscribe = configStore.subscribe((config) => {
       setNotificationConfig(config.notification);
-      setPaymentConfig(config.payment);
     });
 
     return unsubscribe;
@@ -35,26 +32,14 @@ export default function ConfigPanel() {
     }));
   };
 
-  const handlePaymentGatewayChange = (gateway: 'stripe') => {
-    setPaymentConfig(prev => ({
-      ...prev,
-      defaultGateway: gateway
-    }));
-  };
-
   const handleSave = async () => {
     setIsSaving(true);
     try {
       // Update notification configuration
       configStore.setNotificationMethod(notificationConfig.defaultMethod);
 
-      // Update payment configuration
-      configStore.setDefaultPaymentGateway(paymentConfig.defaultGateway);
-      configStore.setPaymentGatewayEnabled('stripe', paymentConfig.gateways.stripe?.enabled || false);
-
       // Apply changes to services
       notificationService.changeNotificationMethod(notificationConfig.defaultMethod);
-      paymentService.changeDefaultGateway(paymentConfig.defaultGateway);
 
       toast.success('Configuration saved successfully!');
     } catch (error) {
@@ -64,10 +49,6 @@ export default function ConfigPanel() {
       setIsSaving(false);
     }
   };
-
-  const enabledPaymentGateways = Object.entries(paymentConfig.gateways)
-    .filter(([, config]) => config?.enabled)
-    .map(([gateway]) => gateway);
 
   const availableNotificationMethods = ['polling', 'sse', 'ws'] as const;
 
@@ -104,55 +85,6 @@ export default function ConfigPanel() {
             </RadioGroup>
           </div>
         </div>
-
-        <Separator />
-
-        {/* Payment Settings */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <CreditCard className="h-4 w-4" />
-            <h3 className="text-lg font-semibold">Payment Settings</h3>
-          </div>
-          
-          <div className="space-y-3">
-            <Label className="text-sm font-medium">Enable Payment Gateways</Label>
-            {Object.entries(paymentConfig.gateways).map(([gateway, config]) => (
-              <div key={gateway} className="flex items-center justify-between">
-                <Label htmlFor={`payment-${gateway}`} className="capitalize">
-                  {gateway}
-                </Label>
-                <Switch
-                  id={`payment-${gateway}`}
-                  checked={config?.enabled || false}
-                  onCheckedChange={(enabled: boolean) => 
-                    configStore.setPaymentGatewayEnabled(gateway as 'stripe', enabled)
-                  }
-                />
-              </div>
-            ))}
-          </div>
-
-          {enabledPaymentGateways.length > 0 && (
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">Default Payment Gateway</Label>
-              <RadioGroup
-                value={paymentConfig.defaultGateway}
-                onValueChange={handlePaymentGatewayChange}
-              >
-                {enabledPaymentGateways.map((gateway) => (
-                  <div key={gateway} className="flex items-center space-x-2">
-                    <RadioGroupItem value={gateway} id={`default-payment-${gateway}`} />
-                    <Label htmlFor={`default-payment-${gateway}`} className="capitalize">
-                      {gateway}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </div>
-          )}
-        </div>
-
-        <Separator />
 
         {/* Save Button */}
         <div className="flex justify-end">

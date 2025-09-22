@@ -25,7 +25,7 @@ public class ProductCsvWriterAdapter implements ProductCsvWriterPort {
   }
 
   @Getter
-@Setter
+  @Setter
   public static class ProductCsvRow {
 
     @CsvBindByName(column = "ID")

@@ -1,7 +1,8 @@
 package org.atlas.infrastructure.api.server.rest.core.config;
 
 import lombok.RequiredArgsConstructor;
-import org.atlas.infrastructure.api.server.rest.core.converter.StringToFileTypeConverter;
+import org.atlas.infrastructure.api.server.rest.core.converter.FileTypeConverter;
+import org.atlas.infrastructure.api.server.rest.core.converter.PaymentMethodConverter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.MediaType;
@@ -12,11 +13,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 public class RestWebConfig implements WebMvcConfigurer {
 
-  private final StringToFileTypeConverter stringToFileTypeConverter;
+  private final FileTypeConverter fileTypeConverter;
+  private final PaymentMethodConverter paymentMethodConverter;
 
   @Override
   public void addFormatters(FormatterRegistry registry) {
-    registry.addConverter(stringToFileTypeConverter);
+    registry.addConverter(fileTypeConverter);
+    registry.addConverter(paymentMethodConverter);
   }
 
   /**

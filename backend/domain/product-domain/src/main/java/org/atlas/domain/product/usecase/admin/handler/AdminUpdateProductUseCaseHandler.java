@@ -9,7 +9,7 @@ import org.atlas.framework.domain.event.contract.product.ProductUpdatedEvent;
 import org.atlas.framework.domain.event.contract.product.model.Product;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
-import org.atlas.framework.error.AppError;
+import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.messaging.ExternalMessagePublisherPort;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.util.StringUtil;
@@ -26,7 +26,7 @@ public class AdminUpdateProductUseCaseHandler {
   public Void handle(ProductEntity productEntity) throws Exception {
     // Find product
     ProductEntity existingProductEntity = productRepository.findById(productEntity.getId())
-        .orElseThrow(() -> new DomainException(AppError.PRODUCT_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
 
     // Update product into DB
     ObjectMapperUtil.getInstance().merge(productEntity, existingProductEntity);

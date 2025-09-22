@@ -13,7 +13,7 @@ import org.atlas.framework.domain.event.contract.order.OrderCanceledEvent;
 import org.atlas.framework.domain.event.contract.order.PaymentFailedEvent;
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.exception.DomainException;
-import org.atlas.framework.error.AppError;
+import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.messaging.InternalMessagePublisherPort;
 
 @DomainEventHandler(type = DomainEventType.PAYMENT_FAILED)
@@ -28,9 +28,9 @@ public class PaymentFailedEventHandler {
   public void handle(PaymentFailedEvent paymentFailedEvent) {
     // Find order
     OrderEntity orderEntity = orderRepository.findById(paymentFailedEvent.getOrder().getId())
-        .orElseThrow(() -> new DomainException(AppError.ORDER_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
     if (orderEntity.getStatus() != OrderStatus.AWAITING_PAYMENT) {
-      throw new DomainException(AppError.ORDER_INVALID_STATUS);
+      throw new DomainException(DomainError.ORDER_INVALID_STATUS);
     }
 
     // Mark order as CANCELED

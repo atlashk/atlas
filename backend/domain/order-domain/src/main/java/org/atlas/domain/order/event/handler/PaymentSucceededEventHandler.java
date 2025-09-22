@@ -21,7 +21,7 @@ import org.atlas.framework.domain.event.DomainEventType;
 import org.atlas.framework.domain.event.contract.order.PaymentSucceededEvent;
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.exception.DomainException;
-import org.atlas.framework.error.AppError;
+import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.notification.common.NotificationType;
 import org.atlas.framework.notification.email.Attachment;
 import org.atlas.framework.notification.email.EmailNotification;
@@ -51,11 +51,11 @@ public class PaymentSucceededEventHandler {
   public void handle(PaymentSucceededEvent paymentSucceededEvent) {
     // Find order
     OrderEntity orderEntity = orderRepository.findById(paymentSucceededEvent.getOrder().getId())
-        .orElseThrow(() -> new DomainException(AppError.ORDER_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
 
     // Validate order status
     if (orderEntity.getStatus() != OrderStatus.AWAITING_PAYMENT) {
-      throw new DomainException(AppError.ORDER_INVALID_STATUS);
+      throw new DomainException(DomainError.ORDER_INVALID_STATUS);
     }
 
     // Mark order as FULFILLED

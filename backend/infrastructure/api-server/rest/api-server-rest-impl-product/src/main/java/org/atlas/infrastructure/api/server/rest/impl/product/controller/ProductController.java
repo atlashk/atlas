@@ -32,8 +32,8 @@ public class ProductController {
   private final FrontSearchProductUseCaseHandler frontSearchProductUseCaseHandler;
   private final FrontGetProductUseCaseHandler frontGetProductUseCaseHandler;
 
-  @Operation(summary = "Search for products based on various filters.")
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Search for products based on various filters")
   public ApiResponseWrapper<List<ProductResponse>> searchProduct(
       @Parameter(name = "keyword", description = "Keyword for searching products.", example = "T-Shirt")
       @RequestParam(name = "keyword", required = false) String keyword,
@@ -77,8 +77,8 @@ public class ProductController {
     return ApiResponseWrapper.successPage(productResponsePage);
   }
 
-  @Operation(summary = "Retrieve details of a specific product by ID.")
   @GetMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Retrieve details of a specific product by ID")
   public ApiResponseWrapper<ProductResponse> getProduct(
       @Parameter(name = "productId", description = "The unique identifier of the product.", example = "1", required = true)
       @PathVariable("productId") Integer productId) throws Exception {
