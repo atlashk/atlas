@@ -264,7 +264,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
       await Promise.all([loadBrands(), loadCategories(), loadProducts()]);
     };
     initializeData();
-  }, []);
+  }, [loadBrands, loadCategories, loadProducts]);
 
   // Filter update functions
   const updateFilter = useCallback(

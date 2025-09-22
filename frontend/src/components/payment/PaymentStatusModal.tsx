@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,15 @@ export default function PaymentStatusModal({
   const router = useRouter();
   const [countdown, setCountdown] = useState(5);
 
+  const handleAutoRedirect = useCallback(() => {
+    if (status === 'PAYMENT_SUCCEEDED') {
+      router.push('/payment-success');
+    } else if (status === 'PAYMENT_FAILED') {
+      router.push('/payment-failed');
+    }
+    onClose();
+  }, [status, router, onClose]);
+
   useEffect(() => {
     if (status === 'PAYMENT_SUCCEEDED' || status === 'PAYMENT_FAILED') {
       const timer = setInterval(() => {
@@ -38,16 +47,7 @@ export default function PaymentStatusModal({
 
       return () => clearInterval(timer);
     }
-  }, [status]);
-
-  const handleAutoRedirect = () => {
-    if (status === 'PAYMENT_SUCCEEDED') {
-      router.push('/payment-success');
-    } else if (status === 'PAYMENT_FAILED') {
-      router.push('/payment-failed');
-    }
-    onClose();
-  };
+  }, [status, handleAutoRedirect]);
 
   const handleManualRedirect = () => {
     if (status === 'PAYMENT_SUCCEEDED') {

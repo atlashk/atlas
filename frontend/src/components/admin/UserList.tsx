@@ -144,7 +144,7 @@ const UserList: React.FC = () => {
       await applyFilters(1);
     };
     initializeData();
-  }, []);
+  }, [applyFilters]);
 
   return (
     <div className="space-y-6">

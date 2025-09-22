@@ -1,19 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, ArrowLeft } from 'lucide-react';
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [countdown, setCountdown] = useState(5);
 
   const paymentIntentId = searchParams.get('payment_intent');
-  const paymentIntentClientSecret = searchParams.get('payment_intent_client_secret');
-  const redirectStatus = searchParams.get('redirect_status');
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -75,5 +73,27 @@ export default function PaymentSuccessPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+              <CheckCircle className="w-8 h-8 text-green-600" />
+            </div>
+            <CardTitle className="text-2xl text-green-600">Payment Successful!</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-gray-600">Loading...</p>
+          </CardContent>
+        </Card>
+      </div>
+    }>
+      <PaymentSuccessContent />
+    </Suspense>
   );
 }

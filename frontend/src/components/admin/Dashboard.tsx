@@ -51,7 +51,7 @@ const Dashboard: React.FC = () => {
         totalOrders: ordersResponse.success ? ordersResponse.data || 0 : 0,
         totalRevenue: revenueResponse.success ? revenueResponse.data || 0 : 0,
       });
-    } catch (error) {
+    } catch {
       toast.error('Failed to load dashboard statistics');
     } finally {
       setLoading(false);
@@ -65,7 +65,7 @@ const Dashboard: React.FC = () => {
     
     isInitialized.current = true;
     loadStats();
-  }, []);
+  }, [loadStats]);
 
   const displayStats = stats;
 

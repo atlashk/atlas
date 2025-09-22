@@ -14,7 +14,6 @@ interface StripePaymentFormProps {
 }
 
 export default function StripePaymentForm({ 
-  clientSecret, 
   onPaymentResult, 
   onCancel 
 }: StripePaymentFormProps) {
@@ -58,10 +57,15 @@ export default function StripePaymentForm({
       } else if (paymentIntent && paymentIntent.status === 'succeeded') {
         onPaymentResult({
           success: true,
-          paymentIntent,
+          paymentIntent: {
+            id: paymentIntent.id,
+            status: paymentIntent.status,
+            amount: paymentIntent.amount,
+            currency: paymentIntent.currency,
+          },
         });
       }
-    } catch (err) {
+    } catch {
       onPaymentResult({
         success: false,
         error: {

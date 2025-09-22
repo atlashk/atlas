@@ -35,7 +35,7 @@ function AdminProductDetailsPage() {
         toast.error(response.errorMessage || 'Product not found');
         router.push('/admin/product');
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to load product');
       router.push('/admin/product');
     } finally {

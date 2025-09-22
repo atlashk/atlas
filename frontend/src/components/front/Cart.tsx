@@ -2,22 +2,19 @@ import { orderApi } from "@/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { PlaceOrderItemRequest, PaymentMethod, OrderTrackingPayload, StripePaymentResult } from "@/interfaces";
+import { PaymentMethod, PlaceOrderItemRequest, OrderTrackingPayload } from "@/interfaces";
+import { configStore } from "@/lib/config";
+import { notificationService } from "@/services/notificationService";
+import { PaymentFormProps, PaymentResult, paymentService } from "@/services/paymentService";
 import { CartItem, useCartStore, useUserStore } from "@/stores";
 import { formatCurrency } from "@/utils/formatter.util";
 import { Minus, Plus, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
-import PaymentMethodSelector from "../payment/PaymentMethodSelector";
-import StripePaymentForm from "../payment/StripePaymentForm";
-import PaymentStatusModal from "../payment/PaymentStatusModal";
-import { Elements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
-
-// Initialize Stripe
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
+import PaymentMethodSelector from "./PaymentMethodSelector";
+import PaymentStatusModal from "./PaymentStatusModal";
 
 const Cart: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -25,6 +22,7 @@ const Cart: React.FC = () => {
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [clientSecret, setClientSecret] = useState<string>('');
   const [currentOrderId, setCurrentOrderIdState] = useState<number | null>(null);
+  const [PaymentFormComponent, setPaymentFormComponent] = useState<React.ComponentType<PaymentFormProps> | null>(null);
   const [paymentStatusModal, setPaymentStatusModal] = useState({
     isOpen: false,
     isSuccess: false,
@@ -45,65 +43,61 @@ const Cart: React.FC = () => {
 
   const total = getTotal();
 
-  // Listen for order tracking notifications
+  // Initialize services and listen for order notifications
+  useEffect(() => {
+    const initializeServices = async () => {
+      try {
+        await paymentService.initialize();
+      } catch (error) {
+        console.error('Failed to initialize payment service:', error);
+      }
+    };
+
+    initializeServices();
+  }, []);
+
+  // Listen for order tracking notifications using the notification service
   useEffect(() => {
     if (!currentOrderId) return;
 
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-    let stompClient: any = null;
-
-    const connectWebSocket = () => {
-      const { Client } = require('@stomp/stompjs');
-      const SockJS = require('sockjs-client');
-
-      stompClient = new Client({
-        webSocketFactory: () => new SockJS(`${API_BASE_URL}/notification-svc/ws`),
-        reconnectDelay: 5000,
-        onConnect: () => {
-          stompClient.subscribe(
-            `/topic/orders/${currentOrderId}/status`,
-            (message: { body: string }) => {
-              try {
-                const payload: OrderTrackingPayload = JSON.parse(message.body);
-                
-                if (payload.orderStatus === 'AWAITING_PAYMENT' && payload.paymentGatewayData?.clientSecret) {
-                  setClientSecret(payload.paymentGatewayData.clientSecret);
-                  setShowPaymentForm(true);
-                } else if (payload.orderStatus === 'PAYMENT_SUCCEEDED') {
-                  setShowPaymentForm(false);
-                  setPaymentStatusModal({
-                    isOpen: true,
-                    isSuccess: true,
-                    message: 'Payment completed successfully! Your order is being processed.',
-                  });
-                } else if (payload.orderStatus === 'PAYMENT_FAILED') {
-                  setShowPaymentForm(false);
-                  setPaymentStatusModal({
-                    isOpen: true,
-                    isSuccess: false,
-                    message: 'Payment failed. Please try again.',
-                  });
-                }
-              } catch (error) {
-                console.error('Error parsing WebSocket message:', error);
-              }
-            }
+    const handleOrderUpdate = async (payload: OrderTrackingPayload) => {
+      try {
+        if (payload.orderStatus === 'AWAITING_PAYMENT' && payload.paymentGatewayData?.clientSecret) {
+          setClientSecret(payload.paymentGatewayData.clientSecret);
+          
+          // Get the appropriate payment form component based on configuration
+          const config = configStore.getPaymentConfig();
+          const PaymentForm = await paymentService.createPaymentForm(
+            config.defaultGateway
           );
-        },
-        onStompError: (frame: any) => {
-          console.error('STOMP error:', frame);
-        },
-      });
-
-      stompClient.activate();
+          setPaymentFormComponent(() => PaymentForm);
+          setShowPaymentForm(true);
+        } else if (payload.orderStatus === 'PAYMENT_SUCCEEDED') {
+          setShowPaymentForm(false);
+          setPaymentStatusModal({
+            isOpen: true,
+            isSuccess: true,
+            message: 'Payment completed successfully! Your order is being processed.',
+          });
+        } else if (payload.orderStatus === 'PAYMENT_FAILED') {
+          setShowPaymentForm(false);
+          setPaymentStatusModal({
+            isOpen: true,
+            isSuccess: false,
+            message: 'Payment failed. Please try again.',
+          });
+        }
+      } catch (error) {
+        console.error('Error handling order update:', error);
+        toast.error('Failed to process order update');
+      }
     };
 
-    connectWebSocket();
+    // Subscribe to order notifications using the notification service
+    const subscription = notificationService.subscribeToOrder(currentOrderId, handleOrderUpdate);
 
     return () => {
-      if (stompClient) {
-        stompClient.deactivate();
-      }
+      subscription.unsubscribe();
     };
   }, [currentOrderId]);
 
@@ -164,10 +158,14 @@ const Cart: React.FC = () => {
     }
   };
 
-  const handlePaymentResult = (result: StripePaymentResult) => {
+  const handlePaymentResult = (result: PaymentResult) => {
     if (result.success) {
-      // Payment success will be handled by WebSocket notification
-      toast.success("Payment submitted successfully!");
+      setShowPaymentForm(false);
+      setPaymentStatusModal({
+        isOpen: true,
+        isSuccess: true,
+        message: 'Payment completed successfully! Your order is being processed.',
+      });
     } else {
       setPaymentStatusModal({
         isOpen: true,
@@ -247,7 +245,7 @@ const Cart: React.FC = () => {
                     <Input
                       type="number"
                       value={item.quantity}
-                      onChange={(e) =>
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         updateQuantity(
                           item.productId,
                           parseInt(e.target.value) || 1
@@ -306,17 +304,16 @@ const Cart: React.FC = () => {
         )}
       </CardContent>
 
-      {/* Stripe Payment Form Modal */}
-      {showPaymentForm && clientSecret && (
+      {/* Dynamic Payment Form Modal */}
+      {showPaymentForm && clientSecret && PaymentFormComponent && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="max-w-md w-full">
-            <Elements stripe={stripePromise} options={{ clientSecret }}>
-              <StripePaymentForm
-                clientSecret={clientSecret}
-                onPaymentResult={handlePaymentResult}
-                onCancel={handleCancelPayment}
-              />
-            </Elements>
+            <PaymentFormComponent
+              clientSecret={clientSecret}
+              orderId={currentOrderId?.toString() || ''}
+              onPaymentResult={handlePaymentResult}
+              onCancel={handleCancelPayment}
+            />
           </div>
         </div>
       )}

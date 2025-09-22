@@ -36,7 +36,7 @@ import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useRef } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, ControllerRenderProps } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -79,18 +79,15 @@ function AdminProductEditPage() {
   // Brands state
   const [brands, setBrands] = useState<Brand[]>([]);
   const [isLoadingBrands, setIsLoadingBrands] = useState(true);
-  const [brandsError, setBrandsError] = useState<string | null>(null);
 
   // Categories state
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
-  const [categoriesError, setCategoriesError] = useState<string | null>(null);
 
   // Load brands data
   const loadBrands = useCallback(async () => {
     try {
       setIsLoadingBrands(true);
-      setBrandsError(null);
 
       const brandsResponse = await productApi.listBrand();
 
@@ -102,7 +99,6 @@ function AdminProductEditPage() {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to load brands";
-      setBrandsError(errorMessage);
       toast.error(errorMessage);
     } finally {
       setIsLoadingBrands(false);
@@ -113,7 +109,6 @@ function AdminProductEditPage() {
   const loadCategories = useCallback(async () => {
     try {
       setIsLoadingCategories(true);
-      setCategoriesError(null);
 
       const categoriesResponse = await productApi.listCategory();
 
@@ -127,7 +122,6 @@ function AdminProductEditPage() {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to load categories";
-      setCategoriesError(errorMessage);
       toast.error(errorMessage);
     } finally {
       setIsLoadingCategories(false);
@@ -340,7 +334,7 @@ function AdminProductEditPage() {
                   <FormField
                     control={form.control}
                     name="name"
-                    render={({ field }) => (
+                    render={({ field }: { field: ControllerRenderProps<ProductFormData, "name"> }) => (
                       <FormItem>
                         <FormLabel>Product Name *</FormLabel>
                         <FormControl>
@@ -354,7 +348,7 @@ function AdminProductEditPage() {
                   <FormField
                     control={form.control}
                     name="price"
-                    render={({ field }) => (
+                    render={({ field }: { field: ControllerRenderProps<ProductFormData, "price"> }) => (
                       <FormItem>
                         <FormLabel>Price *</FormLabel>
                         <FormControl>
@@ -368,7 +362,7 @@ function AdminProductEditPage() {
                               step="0.01"
                               min="0"
                               className="pl-8"
-                              onChange={(e) =>
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                 field.onChange(parseFloat(e.target.value) || 0)
                               }
                             />
@@ -382,7 +376,7 @@ function AdminProductEditPage() {
                   <FormField
                     control={form.control}
                     name="quantity"
-                    render={({ field }) => (
+                    render={({ field }: { field: ControllerRenderProps<ProductFormData, "quantity"> }) => (
                       <FormItem>
                         <FormLabel>Quantity *</FormLabel>
                         <FormControl>
@@ -390,7 +384,7 @@ function AdminProductEditPage() {
                             {...field}
                             type="number"
                             min="0"
-                            onChange={(e) =>
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                               field.onChange(parseInt(e.target.value) || 0)
                             }
                           />
@@ -403,7 +397,7 @@ function AdminProductEditPage() {
                   <FormField
                     control={form.control}
                     name="status"
-                    render={({ field }) => (
+                    render={({ field }: { field: ControllerRenderProps<ProductFormData, "status"> }) => (
                       <FormItem>
                         <FormLabel>Status *</FormLabel>
                         <Select
@@ -431,7 +425,7 @@ function AdminProductEditPage() {
                   <FormField
                     control={form.control}
                     name="availableFrom"
-                    render={({ field }) => (
+                    render={({ field }: { field: ControllerRenderProps<ProductFormData, "availableFrom"> }) => (
                       <FormItem>
                         <FormLabel>Available From *</FormLabel>
                         <FormControl>
@@ -445,7 +439,7 @@ function AdminProductEditPage() {
                   <FormField
                     control={form.control}
                     name="isActive"
-                    render={({ field }) => (
+                    render={({ field }: { field: ControllerRenderProps<ProductFormData, "isActive"> }) => (
                       <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                         <FormControl>
                           <Checkbox
@@ -463,11 +457,11 @@ function AdminProductEditPage() {
                   <FormField
                     control={form.control}
                     name="brandId"
-                    render={({ field }) => (
+                    render={({ field }: { field: ControllerRenderProps<ProductFormData, "brandId"> }) => (
                       <FormItem>
                         <FormLabel>Brand *</FormLabel>
                         <Select
-                          onValueChange={(value) =>
+                          onValueChange={(value: string) =>
                             field.onChange(parseInt(value))
                           }
                           value={field.value.toString()}
@@ -503,7 +497,7 @@ function AdminProductEditPage() {
                   <FormField
                     control={form.control}
                     name="categoryIds"
-                    render={({ field }) => (
+                    render={({ field }: { field: ControllerRenderProps<ProductFormData, "categoryIds"> }) => (
                       <FormItem>
                         <FormLabel>Categories *</FormLabel>
                         {isLoadingCategories ? (
@@ -534,7 +528,7 @@ function AdminProductEditPage() {
                                     type="checkbox"
                                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                     checked={field.value.includes(category.id)}
-                                    onChange={(e) => {
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                       if (e.target.checked) {
                                         field.onChange([
                                           ...field.value,
@@ -603,7 +597,7 @@ function AdminProductEditPage() {
                 <FormField
                   control={form.control}
                   name="details.description"
-                  render={({ field }) => (
+                  render={({ field }: { field: ControllerRenderProps<ProductFormData, "details.description"> }) => (
                     <FormItem>
                       <FormLabel>Description *</FormLabel>
                       <FormControl>
@@ -637,7 +631,7 @@ function AdminProductEditPage() {
                       <FormField
                         control={form.control}
                         name={`attributes.${index}.name`}
-                        render={({ field }) => (
+                        render={({ field }: { field: ControllerRenderProps<ProductFormData, `attributes.${number}.name`> }) => (
                           <FormItem className="flex-1">
                             <FormLabel>Attribute Name</FormLabel>
                             <FormControl>
@@ -653,7 +647,7 @@ function AdminProductEditPage() {
                       <FormField
                         control={form.control}
                         name={`attributes.${index}.value`}
-                        render={({ field }) => (
+                        render={({ field }: { field: ControllerRenderProps<ProductFormData, `attributes.${number}.value`> }) => (
                           <FormItem className="flex-1">
                             <FormLabel>Attribute Value</FormLabel>
                             <FormControl>

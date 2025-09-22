@@ -88,7 +88,7 @@ const OrderHistory: React.FC = () => {
           setIsLoading(false);
         }
       },
-      []
+      [filters, isLoading]
   );
 
   const changePage = useCallback(
@@ -149,7 +149,7 @@ const OrderHistory: React.FC = () => {
       await applyFilters(1);
     };
     initializeData();
-  }, []);
+  }, [applyFilters]);
 
   return (
       <>

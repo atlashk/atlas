@@ -109,7 +109,7 @@ const OrderList: React.FC = () => {
             setOrders([]);
           }
           setSelectedOrderId(null);
-        } catch (error) {
+        } catch {
           toast.error("Failed to load orders");
           setOrders([]);
         } finally {
@@ -159,7 +159,7 @@ const OrderList: React.FC = () => {
 
     isInitialized.current = true;
     applyFilters(1);
-  }, []);
+  }, [applyFilters]);
 
   return (
       <div className="space-y-6">

@@ -3,14 +3,20 @@ export interface OrderTrackingPayload {
   orderStatus: string;
   paymentGatewayData?: {
     clientSecret?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
   cancellationReason?: string;
 }
 
 export interface StripePaymentResult {
   success: boolean;
-  paymentIntent?: any;
+  paymentIntent?: {
+    id: string;
+    status: string;
+    amount: number;
+    currency: string;
+    [key: string]: unknown;
+  };
   error?: {
     message: string;
     type: string;

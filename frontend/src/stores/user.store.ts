@@ -251,7 +251,7 @@ export const useUserStore = create<UserStore>()(
       initializeFromCookies: () => {
         const cookieAccessToken = getCookie('accessToken');
         const cookieRefreshToken = getCookie('refreshToken');
-        const { accessToken, refreshToken } = get();
+        const { accessToken } = get();
         
         // If cookies have valid tokens but store doesn't, update store
         if (isValidToken(cookieAccessToken) && !accessToken) {

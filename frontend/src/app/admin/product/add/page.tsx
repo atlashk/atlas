@@ -70,18 +70,15 @@ function AdminProductAddPage() {
   // Brands state
   const [brands, setBrands] = useState<Brand[]>([]);
   const [isLoadingBrands, setIsLoadingBrands] = useState(true);
-  const [brandsError, setBrandsError] = useState<string | null>(null);
 
   // Categories state
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
-  const [categoriesError, setCategoriesError] = useState<string | null>(null);
 
   // Load brands data
   const loadBrands = useCallback(async () => {
     try {
       setIsLoadingBrands(true);
-      setBrandsError(null);
 
       const brandsResponse = await productApi.listBrand();
 
@@ -93,7 +90,6 @@ function AdminProductAddPage() {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to load brands";
-      setBrandsError(errorMessage);
       toast.error(errorMessage);
     } finally {
       setIsLoadingBrands(false);
@@ -104,7 +100,6 @@ function AdminProductAddPage() {
   const loadCategories = useCallback(async () => {
     try {
       setIsLoadingCategories(true);
-      setCategoriesError(null);
 
       const categoriesResponse = await productApi.listCategory();
 
@@ -118,7 +113,6 @@ function AdminProductAddPage() {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to load categories";
-      setCategoriesError(errorMessage);
       toast.error(errorMessage);
     } finally {
       setIsLoadingCategories(false);

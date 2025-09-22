@@ -45,17 +45,14 @@ const ProductSearch: React.FC = () => {
   // Brands state
   const [brands, setBrands] = useState<Brand[]>([]);
   const [isLoadingBrands, setIsLoadingBrands] = useState(true);
-  const [brandsError, setBrandsError] = useState<string | null>(null);
 
   // Categories state
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
-  const [categoriesError, setCategoriesError] = useState<string | null>(null);
 
   // Products state
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
-  const [productsError, setProductsError] = useState<string | null>(null);
   const [pagination, setPagination] = useState<Metadata>({
     currentPage: 1,
     totalPages: 1,
@@ -115,7 +112,6 @@ const ProductSearch: React.FC = () => {
   const loadBrands = useCallback(async () => {
     try {
       setIsLoadingBrands(true);
-      setBrandsError(null);
 
       const brandsResponse = await productApi.listBrand();
 
@@ -127,7 +123,6 @@ const ProductSearch: React.FC = () => {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to load brands";
-      setBrandsError(errorMessage);
       toast.error(errorMessage);
     } finally {
       setIsLoadingBrands(false);
@@ -138,7 +133,6 @@ const ProductSearch: React.FC = () => {
   const loadCategories = useCallback(async () => {
     try {
       setIsLoadingCategories(true);
-      setCategoriesError(null);
 
       const categoriesResponse = await productApi.listCategory();
 
@@ -152,7 +146,6 @@ const ProductSearch: React.FC = () => {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to load categories";
-      setCategoriesError(errorMessage);
       toast.error(errorMessage);
     } finally {
       setIsLoadingCategories(false);
@@ -168,7 +161,6 @@ const ProductSearch: React.FC = () => {
     ) => {
       try {
         setIsLoadingProducts(true);
-        setProductsError(null);
 
         // Clean up filters for API call
         const apiSearchParams = {
@@ -199,7 +191,6 @@ const ProductSearch: React.FC = () => {
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "Failed to load products";
-        setProductsError(errorMessage);
         toast.error(errorMessage);
         setProducts([]);
       } finally {
@@ -263,11 +254,10 @@ const ProductSearch: React.FC = () => {
       ]);
     };
     initializeData();
-  }, []); // Empty dependency array to run only once on mount
+  }, [loadBrands, loadCategories, loadProducts]); // Include function dependencies
 
   // Loading states
   const isLoading = isLoadingBrands || isLoadingCategories || isLoadingProducts;
-  const hasError = brandsError || categoriesError || productsError;
 
   const handleSearch = useCallback(
     () => {
@@ -278,17 +268,6 @@ const ProductSearch: React.FC = () => {
     },
     [formFilters, loadProducts, pagination.pageSize]
   );
-
-  // Error handling
-  if (hasError) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center text-red-600">
-          Error loading data. Please try again later.
-        </div>
-      </div>
-    );
-  }
 
   return (
     <>
