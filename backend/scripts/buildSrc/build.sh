@@ -17,7 +17,7 @@ SERVICES=(
     "user-service:$PROJECT_ROOT/backend/application/user-application"
     "product-service:$PROJECT_ROOT/backend/application/product-application"
     "order-service:$PROJECT_ROOT/backend/application/order-application"
-    "notification-service:$PROJECT_ROOT/backend/application/notification-application"
+    "payment-service:$PROJECT_ROOT/backend/application/payment-application"
     "eureka-server:$PROJECT_ROOT/backend/edge/discovery-server/discovery-server-eureka"
     "api-gateway:$PROJECT_ROOT/backend/edge/api-gateway/api-gateway-spring-cloud-gateway"
 )

@@ -128,9 +128,9 @@ data:
           - targets: [ 'order-service:8083' ]
         metrics_path: '/actuator/prometheus'
 
-      - job_name: 'notification-service'
+      - job_name: 'payment-service'
         static_configs:
-          - targets: [ 'notification-service:8084' ]
+          - targets: [ 'payment-service:8084' ]
         metrics_path: '/actuator/prometheus'
 
       - job_name: 'api-gateway'

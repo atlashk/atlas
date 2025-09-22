@@ -37,21 +37,21 @@ declare -A SERVICE_CONFIGS=(
     ["user-service"]="user-service.env"
     ["product-service"]="product-service.env"
     ["order-service"]="order-service.env"
-    ["notification-service"]="notification-service.env"
+    ["payment-service"]="payment-service.env"
 )
 
 declare -A SERVICE_DATABASES=(
     ["user-service"]="db_user"
     ["product-service"]="db_product"
     ["order-service"]="db_order"
-    ["notification-service"]="db_notification"
+    ["payment-service"]="db_payment"
 )
 
 # Define service-specific configurations
 declare -A SERVICE_SPECIFIC_CONFIGS=(
     ["api-gateway"]="jwt_config"
     ["order-service"]="api_client_config"
-    ["notification-service"]="email_config"
+    ["order-service"]="email_config"
 )
 
 # =============================================================================
@@ -427,7 +427,7 @@ generate_environment_files() {
     fi
     
     # Generate env files for other services
-    local services=("user-service" "product-service" "order-service" "notification-service")
+    local services=("user-service" "product-service" "order-service" "payment-service")
     for service in "${services[@]}"; do
         if ! generate_service_env "$service"; then
             echo "Failed to generate environment file for service: $service" >&2
@@ -436,7 +436,7 @@ generate_environment_files() {
     done
     
     # Verify all expected files were created
-    local expected_files=("api-gateway.env" "user-service.env" "product-service.env" "order-service.env" "notification-service.env")
+    local expected_files=("api-gateway.env" "user-service.env" "product-service.env" "order-service.env" "payment-service.env")
     for file in "${expected_files[@]}"; do
         if [[ ! -f "$ENV_DIR/$file" ]]; then
             echo "Error: Expected environment file not found: $ENV_DIR/$file" >&2
@@ -529,7 +529,7 @@ get_observability_services() {
 }
 
 get_application_services() {
-    local services=("user-service" "product-service" "order-service" "notification-service")
+    local services=("user-service" "product-service" "order-service" "payment-service")
     echo "${services[@]}"
 }
 

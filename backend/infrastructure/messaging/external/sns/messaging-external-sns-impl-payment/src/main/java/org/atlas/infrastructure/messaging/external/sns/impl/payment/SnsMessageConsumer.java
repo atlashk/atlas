@@ -23,6 +23,6 @@ public class SnsMessageConsumer extends BaseSnsMessageConsumer implements
   @Override
   public void afterPropertiesSet() throws Exception {
     consumeMessages("order-event",
-        snsProps.getSqsQueueUrl().get(SnsConstant.QUEUE_NOTIFICATION_SVC_ORDER_EVENT));
+        snsProps.getSqsQueueUrl().get(SnsConstant.QUEUE_PAYMENT_SVC_ORDER_EVENT));
   }
 }

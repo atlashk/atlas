@@ -34,6 +34,9 @@ public class OrderResponse {
   @Schema(description = "Total amount of the order", example = "99.99")
   private BigDecimal amount;
 
+  @Schema(description = "Payment information for the order")
+  private PaymentResponse payment;
+
   @Schema(description = "Current status of the order")
   private OrderStatus status;
 

@@ -20,8 +20,8 @@ app:
         - name: product_svc.order_event
         # Order service
         - name: order_svc.order_event
-        # Notification service
-        - name: notification_svc.order_event
+        # Payment service
+        - name: payment_svc.order_event
       bindings:
         # Product service
         - exchange: order_event
@@ -30,11 +30,11 @@ app:
         # Order service
         - exchange: order_event
           queue: order_svc.order_event
-          routing-key: RESERVE_QUANTITY_*
-        # Notification service
+          routing-key: PRODUCT_RESERVATION_*
         - exchange: order_event
-          queue: notification_svc.order_event
-          routing-key: ORDER_CONFIRMED
+          queue: order_svc.order_event
+          routing-key: PAYMENT_*
+        # Payment service
         - exchange: order_event
-          queue: notification_svc.order_event
-          routing-key: ORDER_CANCELED
+          queue: payment_svc.order_event
+          routing-key: PRODUCT_RESERVATION_SUCCEEDED

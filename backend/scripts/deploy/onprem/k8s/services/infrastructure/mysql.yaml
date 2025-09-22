@@ -25,7 +25,7 @@ data:
     CREATE
     DATABASE db_order;
     CREATE
-    DATABASE db_notification;
+    DATABASE db_payment;
 ---
 apiVersion: apps/v1
 kind: StatefulSet

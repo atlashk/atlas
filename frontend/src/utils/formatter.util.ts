@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { PaymentStatus } from "@/interfaces/order.interface";
 import React from "react";
 
 export const formatDate = (dateString: string) => {
@@ -66,6 +67,22 @@ export const getOrderStatusBadge = (status: string): React.ReactElement => {
     case "CANCELED":
     case "CANCELLED":
       return React.createElement(Badge, { variant: "destructive" }, "Canceled");
+    default:
+      return React.createElement(Badge, { variant: "outline" }, "Unknown");
+  }
+};
+
+export const getPaymentStatusBadge = (status: PaymentStatus): React.ReactElement => {
+  switch (status) {
+    case PaymentStatus.SUCCEEDED:
+      return React.createElement(Badge, { variant: "default", className: "bg-green-500 text-white" }, "Succeeded");
+    case PaymentStatus.CREATED:
+      return React.createElement(Badge, { variant: "outline", className: "bg-blue-500 text-white" }, "Created");
+    case PaymentStatus.CANCELED:
+      return React.createElement(Badge, { variant: "destructive" }, "Canceled");
+    case PaymentStatus.FAILED:
+      return React.createElement(Badge, { variant: "destructive", className: "bg-red-600 text-white" }, "Failed");
+    case PaymentStatus.UNKNOWN:
     default:
       return React.createElement(Badge, { variant: "outline" }, "Unknown");
   }

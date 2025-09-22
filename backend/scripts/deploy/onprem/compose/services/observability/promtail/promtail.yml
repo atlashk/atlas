@@ -12,11 +12,11 @@ services:
       - user-service-log:/var/log/user-service
       - product-service-log:/var/log/product-service
       - order-service-log:/var/log/order-service
-      - notification-service-log:/var/log/notification-service
+      - payment-service-log:/var/log/payment-service
       - eureka-server-log:/var/log/eureka-server
       - api-gateway-log:/var/log/api-gateway
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9080/metrics || exit 1"]
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9080/metrics || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -28,7 +28,7 @@ volumes:
   user-service-log:
   product-service-log:
   order-service-log:
-  notification-service-log:
+  payment-service-log:
   eureka-server-log:
   api-gateway-log:
 

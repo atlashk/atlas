@@ -12,6 +12,7 @@ import org.atlas.domain.payment.shared.PaymentStatus;
 public class PaymentEntity {
 
   private Integer id;
+  private String transactionId;
   private BigDecimal amount;
   private String currency;
   private PaymentMethod method;

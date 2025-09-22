@@ -30,7 +30,7 @@ include:
   - services/application/user-service.yml
   - services/application/product-service.yml
   - services/application/order-service.yml
-  - services/application/notification-service.yml
+  - services/application/payment-service.yml
 
 # Global network definition
 networks:

@@ -15,6 +15,6 @@ public class RabbitmqConstant {
   public static final String QUEUE_PRODUCT_SVC_ORDER_EVENT = "product_svc_order_event";
   // Order service
   public static final String QUEUE_ORDER_SVC_ORDER_EVENT = "order_svc_order_event";
-  // Notification service
-  public static final String QUEUE_NOTIFICATION_SVC_ORDER_EVENT = "notification_svc_order_event";
+  // Payment service
+  public static final String QUEUE_PAYMENT_SVC_ORDER_EVENT = "payment_svc_order_event";
 }

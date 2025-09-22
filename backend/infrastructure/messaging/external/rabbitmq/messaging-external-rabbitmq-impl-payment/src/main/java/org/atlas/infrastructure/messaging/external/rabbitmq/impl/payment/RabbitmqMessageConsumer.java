@@ -20,7 +20,7 @@ public class RabbitmqMessageConsumer extends BaseRabbitmqMessageConsumer {
   }
 
   @RabbitListener(
-      queues = RabbitmqConstant.QUEUE_NOTIFICATION_SVC_ORDER_EVENT,
+      queues = RabbitmqConstant.QUEUE_PAYMENT_SVC_ORDER_EVENT,
       containerFactory = "customContainerFactory"
   )
   public void consumeOrderEvent(@Payload Object messagePayload,

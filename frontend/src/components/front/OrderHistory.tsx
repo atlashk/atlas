@@ -24,6 +24,7 @@ import {
   formatCurrency,
   formatDate,
   getOrderStatusBadge,
+  getPaymentStatusBadge,
 } from "@/utils/formatter.util";
 import {ChevronDown, ChevronUp, RotateCcw, Search} from "lucide-react";
 import React, {useCallback, useEffect, useState, useRef} from "react";
@@ -311,34 +312,85 @@ const OrderHistory: React.FC = () => {
                           {/* Order Details */}
                           {selectedOrderId === order.id && (
                               <div className="mt-4 pt-4 border-t border-gray-200">
-                                <Table>
-                                  <TableHeader>
-                                    <TableRow>
-                                      <TableHead>Product ID</TableHead>
-                                      <TableHead>Product Name</TableHead>
-                                      <TableHead>Price</TableHead>
-                                      <TableHead>Quantity</TableHead>
-                                      <TableHead>Subtotal</TableHead>
-                                    </TableRow>
-                                  </TableHeader>
-                                  <TableBody>
-                                    {order.orderItems?.map((item) => (
-                                        <TableRow key={item.product.id}>
-                                          <TableCell>{item.product.id}</TableCell>
-                                          <TableCell>{item.product.name}</TableCell>
-                                          <TableCell>
-                                            {formatCurrency(item.product.price)}
-                                          </TableCell>
-                                          <TableCell>{item.quantity}</TableCell>
-                                          <TableCell>
-                                            {formatCurrency(
-                                                item.product.price * item.quantity
-                                            )}
-                                          </TableCell>
-                                        </TableRow>
-                                    ))}
-                                  </TableBody>
-                                </Table>
+                                {/* Order Items Table */}
+                                <div className="mb-6">
+                                  <h4 className="text-lg font-semibold mb-3">Order Items</h4>
+                                  <Table>
+                                    <TableHeader>
+                                      <TableRow>
+                                        <TableHead>Product ID</TableHead>
+                                        <TableHead>Product Name</TableHead>
+                                        <TableHead>Price</TableHead>
+                                        <TableHead>Quantity</TableHead>
+                                        <TableHead>Subtotal</TableHead>
+                                      </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                      {order.orderItems?.map((item) => (
+                                          <TableRow key={item.product.id}>
+                                            <TableCell>{item.product.id}</TableCell>
+                                            <TableCell>{item.product.name}</TableCell>
+                                            <TableCell>
+                                              {formatCurrency(item.product.price)}
+                                            </TableCell>
+                                            <TableCell>{item.quantity}</TableCell>
+                                            <TableCell>
+                                              {formatCurrency(
+                                                  item.product.price * item.quantity
+                                              )}
+                                            </TableCell>
+                                          </TableRow>
+                                      ))}
+                                    </TableBody>
+                                  </Table>
+                                </div>
+
+                                {/* Payment Information */}
+                                {order.payment && (
+                                    <div className="mt-6 pt-4 border-t border-gray-200">
+                                      <h4 className="text-lg font-semibold mb-3">Payment Information</h4>
+                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                          <p>
+                                            <span className="font-medium">Transaction ID:</span> {order.payment.transactionId}
+                                          </p>
+                                          <p>
+                                            <span className="font-medium">Payment amount:</span> {formatCurrency(order.payment.amount)} {order.payment.currency}
+                                          </p>
+                                          <p>
+                                            <span className="font-medium">Payment method:</span> {order.payment.method.charAt(0).toUpperCase() + order.payment.method.slice(1).toLowerCase()}
+                                          </p>
+                                          <p>
+                                            <span className="font-medium">Payment gateway:</span> {order.payment.gateway.charAt(0).toUpperCase() + order.payment.gateway.slice(1).toLowerCase()}
+                                          </p>
+                                        </div>
+                                        <div className="space-y-2">
+                                          <p className="flex items-center gap-2">
+                                            <span className="font-medium">Status:</span>
+                                            {getPaymentStatusBadge(order.payment.status)}
+                                          </p>
+                                          {order.payment.errorCode && (
+                                              <p>
+                                                <span className="font-medium">Error Code:</span> 
+                                                <span className="text-red-600 ml-1">{order.payment.errorCode}</span>
+                                              </p>
+                                          )}
+                                          {order.payment.errorMessage && (
+                                              <p>
+                                                <span className="font-medium">Error Message:</span> 
+                                                <span className="text-red-600 ml-1">{order.payment.errorMessage}</span>
+                                              </p>
+                                          )}
+                                          {order.payment.cancellationReason && (
+                                              <p>
+                                                <span className="font-medium">Cancellation Reason:</span> 
+                                                <span className="text-red-600 ml-1">{order.payment.cancellationReason}</span>
+                                              </p>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                )}
                               </div>
                           )}
                         </CardContent>

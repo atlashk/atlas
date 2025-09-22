@@ -1,18 +1,18 @@
 # =============================================================================
-# Notification Service
+# Payment Service
 # =============================================================================
 
 services:
-  notification-service:
-    container_name: notification-service
-    image: atlas-notification-service
+  payment-service:
+    container_name: payment-service
+    image: atlas-payment-service
     ports:
       - "8084:8084"
-    env_file: "../../.env/notification-service.env"
+    env_file: "../../.env/payment-service.env"
     volumes:
-      - notification-service-log:/var/log/notification-service
+      - payment-service-log:/var/log/payment-service
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8084/actuator/health || exit 1"]
+      test: [ "CMD-SHELL", "curl -f http://localhost:8084/actuator/health || exit 1" ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -21,6 +21,6 @@ services:
       - atlas-network
 
 volumes:
-  notification-service-log:
+  payment-service-log:
 
 # Network is defined globally in main docker-compose.yml

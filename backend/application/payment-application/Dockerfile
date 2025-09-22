@@ -17,8 +17,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends dumb-init && \
     rm -rf /var/lib/apt/lists/*
 
 # Create log directory with proper permissions
-RUN mkdir -p /var/log/notification-service && \
-    chown -R spring:spring /var/log/notification-service
+RUN mkdir -p /var/log/payment-service && \
+    chown -R spring:spring /var/log/payment-service
 
 # Set working directory
 WORKDIR /app

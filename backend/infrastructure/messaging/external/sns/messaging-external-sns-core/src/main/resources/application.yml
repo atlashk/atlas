@@ -10,8 +10,8 @@ app:
         product-svc-order-event: ${SQS_QUEUE_URL_PRODUCT_SVC_ORDER_EVENT}
         # Order service
         order-svc-order-event: ${SQS_QUEUE_URL_ORDER_SVC_ORDER_EVENT}
-        # Notification service
-        notification-svc-order-event: ${SQS_QUEUE_URL_NOTIFICATION_SVC_ORDER_EVENT}
+        # Payment service
+        payment-svc-order-event: ${SQS_QUEUE_URL_PAYMENT_SVC_ORDER_EVENT}
       visibility-timeout: 30
       wait-time-seconds: 20
       batch-size: 10

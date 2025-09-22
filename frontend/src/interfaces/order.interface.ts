@@ -8,9 +8,35 @@ export interface Order {
   user?: User;
   orderItems: OrderItem[];
   amount: number;
+  payment?: Payment;
   status: OrderStatus;
   cancellationReason?: string;
   createdAt: string; // Date usually handled as ISO string
+}
+
+export interface Payment {
+  id: number;
+  transactionId: string;
+  amount: number;
+  currency: string;
+  method: string;
+  gateway: string;
+  status: PaymentStatus;
+  errorCode?: string;
+  errorMessage?: string;
+  cancellationReason?: string;
+}
+
+export enum PaymentStatus {
+  CREATED = "CREATED",
+  SUCCEEDED = "SUCCEEDED",
+  CANCELED = "CANCELED",
+  FAILED = "FAILED",
+  UNKNOWN = "UNKNOWN"
+}
+
+export enum PaymentMethod {
+  CARD = "CARD"
 }
 
 export interface OrderItem {
@@ -20,6 +46,7 @@ export interface OrderItem {
 
 export interface PlaceOrderRequest {
   orderItems: PlaceOrderItemRequest[];
+  paymentMethod: PaymentMethod;
 }
 
 export interface PlaceOrderResponse {

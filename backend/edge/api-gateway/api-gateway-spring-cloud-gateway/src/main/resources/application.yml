@@ -110,27 +110,26 @@ spring:
                 - Authorization=ADMIN
                 - TokenRelay
                 - RewritePath=/api/order-svc/admin/(?<segment>.*), /api/admin/${segment}
+            - id: order-service-sse
+              uri: ${ORDER_SERVICE_URI:lb://order-service}
+              predicates:
+                - Path=/order-svc/sse/**
+              filters:
+                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+                - RewritePath=/order-svc/sse/(?<segment>.*), /notification/sse/${segment}
+            - id: order-service-websocket
+              uri: ${ORDER_SERVICE_URI:lb://order-service}
+              predicates:
+                - Path=/order-svc/ws/**
+              filters:
+                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+                - RewritePath=/order-svc/ws/(?<segment>.*), /notification/ws/${segment}
             - id: order-service-api-docs
               uri: ${ORDER_SERVICE_URI:lb://order-service}
               predicates:
                 - Path=/api-docs/order-svc
               filters:
                 - RewritePath=/api-docs/order-svc, /api-docs
-            # Notification service
-            - id: notification-service-sse
-              uri: ${NOTIFICATION_SERVICE_URI:lb://notification-service}
-              predicates:
-                - Path=/notification-svc/sse/**
-              filters:
-                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-                - RewritePath=/notification-svc/sse/(?<segment>.*), /notification/sse/${segment}
-            - id: notification-service-websocket
-              uri: ${NOTIFICATION_SERVICE_URI:lb://notification-service}
-              predicates:
-                - Path=/notification-svc/ws/**
-              filters:
-                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-                - RewritePath=/notification-svc/ws/(?<segment>.*), /notification/ws/${segment}
           discovery:
             locator:
               enabled: true

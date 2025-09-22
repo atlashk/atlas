@@ -35,21 +35,21 @@ declare -A SERVICE_CONFIGS=(
     ["user-service"]="user-service-config"
     ["product-service"]="product-service-config"
     ["order-service"]="order-service-config"
-    ["notification-service"]="notification-service-config"
+    ["payment-service"]="payment-service-config"
 )
 
 declare -A SERVICE_DATABASES=(
     ["user-service"]="db_user"
     ["product-service"]="db_product"
     ["order-service"]="db_order"
-    ["notification-service"]="db_notification"
+    ["payment-service"]="db_payment"
 )
 
 # Define service-specific configurations
 declare -A SERVICE_SPECIFIC_CONFIGS=(
     ["api-gateway"]="jwt_config"
     ["order-service"]="api_client_config"
-    ["notification-service"]="email_config"
+    ["order-service"]="email_config"
 )
 
 # =============================================================================
@@ -504,7 +504,7 @@ generate_configmaps_and_secrets() {
     fi
 
     # Generate ConfigMaps and Secrets for other services
-    local services=("user-service" "product-service" "order-service" "notification-service")
+    local services=("user-service" "product-service" "order-service" "payment-service")
     for service in "${services[@]}"; do
         if ! generate_service_configmap "$service" "$namespace"; then
             echo "Failed to generate ConfigMap for service: $service" >&2
@@ -519,7 +519,7 @@ generate_configmaps_and_secrets() {
     done
     
     # Verify all expected ConfigMap files were created
-    local expected_configmap_files=("api-gateway-configmap.yaml" "user-service-configmap.yaml" "product-service-configmap.yaml" "order-service-configmap.yaml" "notification-service-configmap.yaml")
+    local expected_configmap_files=("api-gateway-configmap.yaml" "user-service-configmap.yaml" "product-service-configmap.yaml" "order-service-configmap.yaml" "payment-service-configmap.yaml")
     for file in "${expected_configmap_files[@]}"; do
         if [[ ! -f "$ENV_DIR/$file" ]]; then
             echo "Error: Expected ConfigMap file not found: $ENV_DIR/$file" >&2
@@ -528,7 +528,7 @@ generate_configmaps_and_secrets() {
     done
     
     # Verify all expected Secret files were created
-    local expected_secret_files=("user-service-secret.yaml" "product-service-secret.yaml" "order-service-secret.yaml" "notification-service-secret.yaml")
+    local expected_secret_files=("user-service-secret.yaml" "product-service-secret.yaml" "order-service-secret.yaml" "payment-service-secret.yaml")
     for file in "${expected_secret_files[@]}"; do
         if [[ ! -f "$ENV_DIR/$file" ]]; then
             echo "Error: Expected Secret file not found: $ENV_DIR/$file" >&2
@@ -827,7 +827,7 @@ get_observability_services() {
 }
 
 get_application_services() {
-    local services=("user-service" "product-service" "order-service" "notification-service")
+    local services=("user-service" "product-service" "order-service" "payment-service")
     echo "${services[@]}"
 }
 

@@ -134,7 +134,7 @@ get_observability_services() {
 }
 
 get_application_services() {
-    local services=("eureka-server" "api-gateway" "user-service" "product-service" "order-service" "notification-service")
+    local services=("eureka-server" "api-gateway" "user-service" "product-service" "order-service" "payment-service")
     echo "${services[@]}"
 }
 
@@ -202,7 +202,7 @@ get_external_images() {
 }
 
 get_atlas_images() {
-    local images=("eureka-server:latest" "api-gateway:latest" "user-service:latest" "product-service:latest" "order-service:latest" "notification-service:latest" "frontend:latest")
+    local images=("eureka-server:latest" "api-gateway:latest" "user-service:latest" "product-service:latest" "order-service:latest" "payment-service:latest" "frontend:latest")
     echo "${images[@]}"
 }
 

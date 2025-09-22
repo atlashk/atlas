@@ -2,17 +2,35 @@ import { orderApi } from "@/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { PlaceOrderItemRequest } from "@/interfaces";
+import { PlaceOrderItemRequest, PaymentMethod, OrderTrackingPayload, StripePaymentResult } from "@/interfaces";
 import { CartItem, useCartStore, useUserStore } from "@/stores";
 import { formatCurrency } from "@/utils/formatter.util";
 import { Minus, Plus, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
+import PaymentMethodSelector from "../payment/PaymentMethodSelector";
+import StripePaymentForm from "../payment/StripePaymentForm";
+import PaymentStatusModal from "../payment/PaymentStatusModal";
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+
+// Initialize Stripe
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
 const Cart: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>(PaymentMethod.CARD);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [clientSecret, setClientSecret] = useState<string>('');
+  const [currentOrderId, setCurrentOrderIdState] = useState<number | null>(null);
+  const [paymentStatusModal, setPaymentStatusModal] = useState({
+    isOpen: false,
+    isSuccess: false,
+    message: '',
+  });
+  
   const {
     cart,
     getTotal,
@@ -26,6 +44,68 @@ const Cart: React.FC = () => {
   const router = useRouter();
 
   const total = getTotal();
+
+  // Listen for order tracking notifications
+  useEffect(() => {
+    if (!currentOrderId) return;
+
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+    let stompClient: any = null;
+
+    const connectWebSocket = () => {
+      const { Client } = require('@stomp/stompjs');
+      const SockJS = require('sockjs-client');
+
+      stompClient = new Client({
+        webSocketFactory: () => new SockJS(`${API_BASE_URL}/notification-svc/ws`),
+        reconnectDelay: 5000,
+        onConnect: () => {
+          stompClient.subscribe(
+            `/topic/orders/${currentOrderId}/status`,
+            (message: { body: string }) => {
+              try {
+                const payload: OrderTrackingPayload = JSON.parse(message.body);
+                
+                if (payload.orderStatus === 'AWAITING_PAYMENT' && payload.paymentGatewayData?.clientSecret) {
+                  setClientSecret(payload.paymentGatewayData.clientSecret);
+                  setShowPaymentForm(true);
+                } else if (payload.orderStatus === 'PAYMENT_SUCCEEDED') {
+                  setShowPaymentForm(false);
+                  setPaymentStatusModal({
+                    isOpen: true,
+                    isSuccess: true,
+                    message: 'Payment completed successfully! Your order is being processed.',
+                  });
+                } else if (payload.orderStatus === 'PAYMENT_FAILED') {
+                  setShowPaymentForm(false);
+                  setPaymentStatusModal({
+                    isOpen: true,
+                    isSuccess: false,
+                    message: 'Payment failed. Please try again.',
+                  });
+                }
+              } catch (error) {
+                console.error('Error parsing WebSocket message:', error);
+              }
+            }
+          );
+        },
+        onStompError: (frame: any) => {
+          console.error('STOMP error:', frame);
+        },
+      });
+
+      stompClient.activate();
+    };
+
+    connectWebSocket();
+
+    return () => {
+      if (stompClient) {
+        stompClient.deactivate();
+      }
+    };
+  }, [currentOrderId]);
 
   const handleRemoveFromCart = (productId: number) => {
     removeFromCart(productId);
@@ -63,12 +143,16 @@ const Cart: React.FC = () => {
         })
       );
 
-      const response = await orderApi.placeOrder({ orderItems });
+      const response = await orderApi.placeOrder({ 
+        orderItems,
+        paymentMethod: selectedPaymentMethod 
+      });
 
       if (response.success && response.data) {
         setCurrentOrderId(response.data.orderId);
+        setCurrentOrderIdState(response.data.orderId);
         clearCart();
-        toast.success("Order placed successfully!");
+        toast.success("Order placed successfully! Preparing payment...");
       } else {
         toast.error(response.errorMessage || "Failed to place order");
       }
@@ -78,6 +162,32 @@ const Cart: React.FC = () => {
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handlePaymentResult = (result: StripePaymentResult) => {
+    if (result.success) {
+      // Payment success will be handled by WebSocket notification
+      toast.success("Payment submitted successfully!");
+    } else {
+      setPaymentStatusModal({
+        isOpen: true,
+        isSuccess: false,
+        message: result.error?.message || 'Payment failed. Please try again.',
+      });
+    }
+  };
+
+  const handleCancelPayment = () => {
+    setShowPaymentForm(false);
+    setClientSecret('');
+  };
+
+  const handleCloseStatusModal = () => {
+    setPaymentStatusModal({
+      isOpen: false,
+      isSuccess: false,
+      message: '',
+    });
   };
 
   return (
@@ -171,20 +281,53 @@ const Cart: React.FC = () => {
         )}
 
         {cart.length > 0 && (
-          <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-            <span className="font-bold text-lg">Total:</span>
-            <span className="font-bold text-lg">${formatCurrency(total)}</span>
-          </div>
-        )}
+          <>
+            <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+              <span className="font-bold text-lg">Total:</span>
+              <span className="font-bold text-lg">${formatCurrency(total)}</span>
+            </div>
 
-        <Button
-          onClick={handlePlaceOrder}
-          className="w-full mt-6"
-          disabled={!cart.length || isProcessing}
-        >
-          {isProcessing ? "Processing..." : "Place Order"}
-        </Button>
+            {/* Payment Method Selection */}
+            <div className="mt-6">
+              <PaymentMethodSelector
+                selectedMethod={selectedPaymentMethod}
+                onMethodChange={setSelectedPaymentMethod}
+              />
+            </div>
+
+            <Button
+              onClick={handlePlaceOrder}
+              className="w-full mt-6"
+              disabled={!cart.length || isProcessing}
+            >
+              {isProcessing ? "Processing..." : "Place Order"}
+            </Button>
+          </>
+        )}
       </CardContent>
+
+      {/* Stripe Payment Form Modal */}
+      {showPaymentForm && clientSecret && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="max-w-md w-full">
+            <Elements stripe={stripePromise} options={{ clientSecret }}>
+              <StripePaymentForm
+                clientSecret={clientSecret}
+                onPaymentResult={handlePaymentResult}
+                onCancel={handleCancelPayment}
+              />
+            </Elements>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Status Modal */}
+      <PaymentStatusModal
+        isOpen={paymentStatusModal.isOpen}
+        isSuccess={paymentStatusModal.isSuccess}
+        message={paymentStatusModal.message}
+        onClose={handleCloseStatusModal}
+      />
     </Card>
   );
 };

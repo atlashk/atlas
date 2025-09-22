@@ -38,13 +38,13 @@ scrape_configs:
         labels:
           service_name: order-service
           __path__: /var/log/order-service/*.log
-  - job_name: notification-service
+  - job_name: payment-service
     static_configs:
       - targets:
           - localhost
         labels:
-          service_name: notification-service
-          __path__: /var/log/notification-service/*.log
+          service_name: payment-service
+          __path__: /var/log/payment-service/*.log
   - job_name: api-gateway
     static_configs:
       - targets:

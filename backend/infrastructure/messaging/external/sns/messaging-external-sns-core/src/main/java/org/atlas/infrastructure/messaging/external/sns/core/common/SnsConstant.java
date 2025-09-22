@@ -16,5 +16,5 @@ public class SnsConstant {
   // Order queues
   public static final String QUEUE_ORDER_SVC_ORDER_EVENT = "order_svc_order_event";
   // Notification queues
-  public static final String QUEUE_NOTIFICATION_SVC_ORDER_EVENT = "notification_svc_order_event";
+  public static final String QUEUE_PAYMENT_SVC_ORDER_EVENT = "payment_svc_order_event";
 }
