@@ -33,14 +33,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     // Infrastructure
-    api project(':infrastructure.bootstrap')
-    switch (rootProject.ext.appStack['config']) {
-        case 'yaml':
-            api project(':infrastructure.config.yaml')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['config']}")
-    }
     api project(':infrastructure.observability.actuator')
     switch (rootProject.ext.appStack['observability.logging.framework']) {
         case 'logback':

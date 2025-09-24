@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.shared.OrderStatus;
-import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
+import org.atlas.framework.domain.usecase.UseCaseHandler;
 
 @UseCaseHandler
 @RequiredArgsConstructor

@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.domain.payment.entity.PaymentEntity;
 import org.atlas.domain.payment.repository.PaymentRepository;
 import org.atlas.domain.payment.usecase.internal.model.InternalListPaymentInput;
-import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
+import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.util.CollectionUtil;
 
 @UseCaseHandler

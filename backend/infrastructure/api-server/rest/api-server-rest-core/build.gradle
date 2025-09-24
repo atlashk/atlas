@@ -33,16 +33,6 @@ dependencies {
     api 'org.springframework.boot:spring-boot-starter-validation'
     api 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
 
-    // Infrastructure
-    switch (rootProject.ext.appStack['config']) {
-        case 'yaml':
-            api project(':infrastructure.config.yaml')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['config']}")
-    }
-    api project(':infrastructure.i18n')
-
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

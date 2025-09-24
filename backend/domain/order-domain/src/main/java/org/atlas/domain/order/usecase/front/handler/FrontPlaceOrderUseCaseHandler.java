@@ -19,7 +19,7 @@ import org.atlas.framework.context.Contexts;
 import org.atlas.framework.cryptography.HashingUtil;
 import org.atlas.framework.domain.event.contract.order.OrderCreatedEvent;
 import org.atlas.framework.domain.exception.DomainException;
-import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
+import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.lock.LockAcquisitionException;
 import org.atlas.framework.lock.LockPort;

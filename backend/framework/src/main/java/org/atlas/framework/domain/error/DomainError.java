@@ -38,6 +38,12 @@ public enum DomainError {
   PAYMENT_NOT_FOUND(4000, "error.payment.payment_not_found"),
   PAYMENT_GATEWAY_NOT_SUPPORTED(4001, "error.payment.payment_gateway_not_supported"),
   PAYMENT_METHOD_NOT_SUPPORTED(4002, "error.payment.payment_method_not_supported"),
+
+  // Cart-related errors
+  CART_NOT_FOUND(5000, "error.cart.not_found"),
+  CART_ITEM_NOT_FOUND(5001, "error.cart.item_not_found"),
+  CART_ITEM_ALREADY_EXISTS(5002, "error.cart.item_already_exists"),
+  CART_EMPTY(5003, "error.cart.empty"),
   ;
 
   private final int errorCode;

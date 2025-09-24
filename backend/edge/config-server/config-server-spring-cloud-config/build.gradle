@@ -32,7 +32,6 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-config-server'
 
     // Infrastructure
-    api project(':infrastructure.bootstrap')
     api project(':infrastructure.observability.actuator')
     switch (rootProject.ext.appStack['observability.logging.framework']) {
         case 'logback':

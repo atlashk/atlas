@@ -4,3 +4,9 @@ server:
 spring:
   application:
     name: payment-service
+
+app:
+  currency: USD
+  routing:
+    card: stripe
+    paypal: paypal

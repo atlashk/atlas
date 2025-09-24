@@ -2,7 +2,7 @@ package org.atlas.domain.product.usecase.admin.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.repository.ProductRepository;
-import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
+import org.atlas.framework.domain.usecase.UseCaseHandler;
 
 @UseCaseHandler
 @RequiredArgsConstructor

@@ -8,7 +8,7 @@ import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.domain.event.contract.product.ProductDeletedEvent;
 import org.atlas.framework.domain.event.contract.product.model.Product;
 import org.atlas.framework.domain.exception.DomainException;
-import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
+import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.messaging.ExternalMessagePublisherPort;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;

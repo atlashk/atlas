@@ -10,8 +10,8 @@ public class DynamoDbKvConfig implements KvConfig {
   @Value("${DYNAMODB_PRODUCT_STORE:product}")
   private String productStoreName;
 
-  @Value("${DYNAMODB_EVENT_STORE:event}")
-  private String eventStoreName;
+  @Value("${DYNAMODB_CART_STORE:cart}")
+  private String cartStoreName;
 
   @Override
   public String getProductStoreName() {
@@ -19,7 +19,7 @@ public class DynamoDbKvConfig implements KvConfig {
   }
 
   @Override
-  public String getEventStoreName() {
-    return eventStoreName;
+  public String getCartStoreName() {
+    return cartStoreName;
   }
 }

@@ -35,14 +35,6 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.6'
 
     // Infrastructure
-    api project(':infrastructure.bootstrap')
-    switch (rootProject.ext.appStack['config']) {
-        case 'yaml':
-            api project(':infrastructure.config.yaml')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['config']}")
-    }
     switch (rootProject.ext.appStack['discovery-client']) {
         case 'none':
             break

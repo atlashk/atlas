@@ -5,7 +5,7 @@ import org.atlas.domain.user.entity.UserEntity;
 import org.atlas.domain.user.repository.UserRepository;
 import org.atlas.framework.context.Contexts;
 import org.atlas.framework.domain.exception.DomainException;
-import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
+import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.domain.error.DomainError;
 
 @UseCaseHandler

@@ -36,7 +36,6 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
     }
-    api project(':infrastructure.bootstrap')
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
             api project(':infrastructure.datasource.mysql.impl.payment')
@@ -78,13 +77,13 @@ dependencies {
     }
     switch (rootProject.ext.appStack['messaging']) {
         case 'kafka':
-            api project(':infrastructure.messaging.external.kafka.impl.payment')
+            api project(':infrastructure.messaging.kafka.impl.payment')
             break
         case 'rabbitmq':
-            api project(':infrastructure.messaging.external.rabbitmq.impl.payment')
+            api project(':infrastructure.messaging.rabbitmq.impl.payment')
             break
         case 'sns':
-            api project(':infrastructure.messaging.external.sns.impl.payment')
+            api project(':infrastructure.messaging.sns.impl.payment')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['messaging']}")
@@ -131,10 +130,9 @@ dependencies {
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.tracing']}")
     }
     if (rootProject.ext.appStack['outbox'] == 'true') {
-        api project(':infrastructure.messaging.external.outbox.parent')
+        api project(':infrastructure.messaging.outbox.parent')
     }
     api project(':infrastructure.payment.parent')
-    api project(':infrastructure.use-case.use-case-handler')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

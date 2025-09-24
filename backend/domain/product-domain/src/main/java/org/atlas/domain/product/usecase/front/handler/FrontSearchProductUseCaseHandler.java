@@ -8,7 +8,7 @@ import org.atlas.domain.product.repository.criteria.FindProductCriteria;
 import org.atlas.domain.product.service.ProductImageService;
 import org.atlas.domain.product.shared.ProductStatus;
 import org.atlas.domain.product.usecase.front.model.FrontSearchProductInput;
-import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
+import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingResult;
 import org.atlas.framework.search.SearchPort;

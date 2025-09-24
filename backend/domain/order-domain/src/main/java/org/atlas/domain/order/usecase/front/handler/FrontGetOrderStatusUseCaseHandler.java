@@ -5,7 +5,7 @@ import org.atlas.domain.order.entity.OrderEntity;
 import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.usecase.front.model.FrontGetOrderStatusOutput;
 import org.atlas.framework.domain.exception.DomainException;
-import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
+import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.domain.error.DomainError;
 
 @UseCaseHandler

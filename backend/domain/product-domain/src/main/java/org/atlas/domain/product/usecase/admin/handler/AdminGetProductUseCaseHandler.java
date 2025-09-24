@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.ProductEntity;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.framework.domain.exception.DomainException;
-import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
+import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.domain.error.DomainError;
 
 @UseCaseHandler

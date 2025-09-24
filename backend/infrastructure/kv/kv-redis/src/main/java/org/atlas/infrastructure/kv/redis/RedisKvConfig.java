@@ -10,8 +10,8 @@ public class RedisKvConfig implements KvConfig {
   @Value("${REDIS_PRODUCT_STORE:product}")
   private String productStoreName;
 
-  @Value("${REDIS_EVENT_STORE:event}")
-  private String eventStoreName;
+  @Value("${REDIS_CART_STORE:cart}")
+  private String cartStoreName;
 
   @Override
   public String getProductStoreName() {
@@ -19,7 +19,7 @@ public class RedisKvConfig implements KvConfig {
   }
 
   @Override
-  public String getEventStoreName() {
-    return eventStoreName;
+  public String getCartStoreName() {
+    return cartStoreName;
   }
 }

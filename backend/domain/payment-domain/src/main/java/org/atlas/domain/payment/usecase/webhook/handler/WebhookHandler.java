@@ -16,7 +16,7 @@ import org.atlas.framework.domain.event.contract.order.PaymentFailedEvent;
 import org.atlas.framework.domain.event.contract.order.PaymentSucceededEvent;
 import org.atlas.framework.domain.event.contract.order.model.Order;
 import org.atlas.framework.domain.exception.DomainException;
-import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
+import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.messaging.ExternalMessagePublisherPort;
 import org.atlas.framework.payment.PaymentGatewayPort;

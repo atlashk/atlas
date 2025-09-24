@@ -2,7 +2,7 @@ package org.atlas.application.order;
 
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.service.DomainService;
-import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
+import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.infrastructure.application.context.YamlConfigLoader;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;

@@ -4,5 +4,5 @@ public interface KvConfig {
 
   String getProductStoreName();
 
-  String getEventStoreName();
+  String getCartStoreName();
 }

@@ -1,0 +1,22 @@
+app:
+  cors:
+    allowed-origins:
+      - http://localhost:9000 # Frontend
+    allowed-methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "PATCH"
+      - "DELETE"
+      - "OPTIONS"
+    allowed-headers:
+      - "*"
+    exposed-headers:
+      - "Content-Disposition"
+    allow-credentials: true
+    max-age: 0 # always fetch the latest data
+  encryption-key: 123456
+  locale: en-US
+  notification:
+    email:
+      sender: admin@atlas.org

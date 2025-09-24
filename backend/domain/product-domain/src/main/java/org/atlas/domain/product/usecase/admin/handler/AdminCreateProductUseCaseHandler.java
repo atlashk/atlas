@@ -7,7 +7,7 @@ import org.atlas.domain.product.service.ProductImageService;
 import org.atlas.framework.config.ApplicationConfigPort;
 import org.atlas.framework.domain.event.contract.product.ProductCreatedEvent;
 import org.atlas.framework.domain.event.contract.product.model.Product;
-import org.atlas.framework.domain.usecase.handler.UseCaseHandler;
+import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.messaging.ExternalMessagePublisherPort;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 

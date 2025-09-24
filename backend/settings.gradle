@@ -90,14 +90,6 @@ project(':infrastructure.auth-client.keycloak').projectDir = file('infrastructur
 include(':infrastructure.auth-server')
 project(':infrastructure.auth-server').projectDir = file('infrastructure/auth-server')
 
-// Bootstrap
-include(':infrastructure.bootstrap')
-project(':infrastructure.bootstrap').projectDir = file('infrastructure/bootstrap')
-
-// Config
-include(':infrastructure.config.yaml')
-project(':infrastructure.config.yaml').projectDir = file('infrastructure/config/config-yaml')
-
 // Datasource
 
 // Datasource::MySQL
@@ -124,19 +116,11 @@ project(':infrastructure.datasource.postgres.impl.product').projectDir = file('i
 include(':infrastructure.datasource.postgres.impl.user')
 project(':infrastructure.datasource.postgres.impl.user').projectDir = file('infrastructure/datasource/postgres/datasource-postgres-impl-user')
 
-// Dependency
-include(':infrastructure.dependency.spring')
-project(':infrastructure.dependency.spring').projectDir = file('infrastructure/dependency/dependency-spring')
-
 // Discovery client
 include(':infrastructure.discovery-client.eureka')
 project(':infrastructure.discovery-client.eureka').projectDir = file('infrastructure/discovery-client/discovery-client-eureka')
 include(':infrastructure.discovery-client.kubernetes')
 project(':infrastructure.discovery-client.kubernetes').projectDir = file('infrastructure/discovery-client/discovery-client-kubernetes')
-
-// Domain event handler
-include(':infrastructure.domain-event.domain-event-handler')
-project(':infrastructure.domain-event.domain-event-handler').projectDir = file('infrastructure/domain-event/domain-event-handler')
 
 // File
 
@@ -169,10 +153,6 @@ include(':infrastructure.file.pdf.pdfbox.core')
 project(':infrastructure.file.pdf.pdfbox.core').projectDir = file('infrastructure/file/pdf/pdfbox/pdf-pdfbox-core')
 include(':infrastructure.file.pdf.pdfbox.impl.product')
 project(':infrastructure.file.pdf.pdfbox.impl.product').projectDir = file('infrastructure/file/pdf/pdfbox/pdf-pdfbox-impl-product')
-
-// i18n
-include(':infrastructure.i18n')
-project(':infrastructure.i18n').projectDir = file('infrastructure/i18n')
 
 // Internal API
 
@@ -221,60 +201,50 @@ project(':infrastructure.kv.dynamodb').projectDir = file('infrastructure/kv/kv-d
 // Lock
 include(':infrastructure.lock.redisson')
 project(':infrastructure.lock.redisson').projectDir = file('infrastructure/lock/lock-redisson')
-include(':infrastructure.lock.util')
-project(':infrastructure.lock.util').projectDir = file('infrastructure/lock/lock-util')
 
 // Messaging
 
-// Messaging::Internal
+// Messaging::Kafka
+include(':infrastructure.messaging.kafka.core')
+project(':infrastructure.messaging.kafka.core').projectDir = file('infrastructure/messaging/kafka/messaging-kafka-core')
+include(':infrastructure.messaging.kafka.impl.payment')
+project(':infrastructure.messaging.kafka.impl.payment').projectDir = file('infrastructure/messaging/kafka/messaging-kafka-impl-payment')
+include(':infrastructure.messaging.kafka.impl.product')
+project(':infrastructure.messaging.kafka.impl.product').projectDir = file('infrastructure/messaging/kafka/messaging-kafka-impl-product')
+include(':infrastructure.messaging.kafka.impl.order')
+project(':infrastructure.messaging.kafka.impl.order').projectDir = file('infrastructure/messaging/kafka/messaging-kafka-impl-order')
+include(':infrastructure.messaging.kafka.impl.user')
+project(':infrastructure.messaging.kafka.impl.user').projectDir = file('infrastructure/messaging/kafka/messaging-kafka-impl-user')
 
-// Messaging::Internal::Spring
-include(':infrastructure.messaging.internal.spring')
-project(':infrastructure.messaging.internal.spring').projectDir = file('infrastructure/messaging/internal/messaging-internal-spring')
+// Messaging::RabbitMQ
+include(':infrastructure.messaging.rabbitmq.core')
+project(':infrastructure.messaging.rabbitmq.core').projectDir = file('infrastructure/messaging/rabbitmq/messaging-rabbitmq-core')
+include(':infrastructure.messaging.rabbitmq.impl.payment')
+project(':infrastructure.messaging.rabbitmq.impl.payment').projectDir = file('infrastructure/messaging/rabbitmq/messaging-rabbitmq-impl-payment')
+include(':infrastructure.messaging.rabbitmq.impl.product')
+project(':infrastructure.messaging.rabbitmq.impl.product').projectDir = file('infrastructure/messaging/rabbitmq/messaging-rabbitmq-impl-product')
+include(':infrastructure.messaging.rabbitmq.impl.order')
+project(':infrastructure.messaging.rabbitmq.impl.order').projectDir = file('infrastructure/messaging/rabbitmq/messaging-rabbitmq-impl-order')
+include(':infrastructure.messaging.rabbitmq.impl.user')
+project(':infrastructure.messaging.rabbitmq.impl.user').projectDir = file('infrastructure/messaging/rabbitmq/messaging-rabbitmq-impl-user')
 
-// Messaging::External
-
-// Messaging::External::Kafka
-include(':infrastructure.messaging.external.kafka.core')
-project(':infrastructure.messaging.external.kafka.core').projectDir = file('infrastructure/messaging/external/kafka/messaging-external-kafka-core')
-include(':infrastructure.messaging.external.kafka.impl.payment')
-project(':infrastructure.messaging.external.kafka.impl.payment').projectDir = file('infrastructure/messaging/external/kafka/messaging-external-kafka-impl-payment')
-include(':infrastructure.messaging.external.kafka.impl.product')
-project(':infrastructure.messaging.external.kafka.impl.product').projectDir = file('infrastructure/messaging/external/kafka/messaging-external-kafka-impl-product')
-include(':infrastructure.messaging.external.kafka.impl.order')
-project(':infrastructure.messaging.external.kafka.impl.order').projectDir = file('infrastructure/messaging/external/kafka/messaging-external-kafka-impl-order')
-include(':infrastructure.messaging.external.kafka.impl.user')
-project(':infrastructure.messaging.external.kafka.impl.user').projectDir = file('infrastructure/messaging/external/kafka/messaging-external-kafka-impl-user')
-
-// Messaging::External::RabbitMQ
-include(':infrastructure.messaging.external.rabbitmq.core')
-project(':infrastructure.messaging.external.rabbitmq.core').projectDir = file('infrastructure/messaging/external/rabbitmq/messaging-external-rabbitmq-core')
-include(':infrastructure.messaging.external.rabbitmq.impl.payment')
-project(':infrastructure.messaging.external.rabbitmq.impl.payment').projectDir = file('infrastructure/messaging/external/rabbitmq/messaging-external-rabbitmq-impl-payment')
-include(':infrastructure.messaging.external.rabbitmq.impl.product')
-project(':infrastructure.messaging.external.rabbitmq.impl.product').projectDir = file('infrastructure/messaging/external/rabbitmq/messaging-external-rabbitmq-impl-product')
-include(':infrastructure.messaging.external.rabbitmq.impl.order')
-project(':infrastructure.messaging.external.rabbitmq.impl.order').projectDir = file('infrastructure/messaging/external/rabbitmq/messaging-external-rabbitmq-impl-order')
-include(':infrastructure.messaging.external.rabbitmq.impl.user')
-project(':infrastructure.messaging.external.rabbitmq.impl.user').projectDir = file('infrastructure/messaging/external/rabbitmq/messaging-external-rabbitmq-impl-user')
-
-// Messaging::External::SNS
-include(':infrastructure.messaging.external.sns.core')
-project(':infrastructure.messaging.external.sns.core').projectDir = file('infrastructure/messaging/external/sns/messaging-external-sns-core')
-include(':infrastructure.messaging.external.sns.impl.payment')
-project(':infrastructure.messaging.external.sns.impl.payment').projectDir = file('infrastructure/messaging/external/sns/messaging-external-sns-impl-payment')
-include(':infrastructure.messaging.external.sns.impl.order')
-project(':infrastructure.messaging.external.sns.impl.order').projectDir = file('infrastructure/messaging/external/sns/messaging-external-sns-impl-order')
-include(':infrastructure.messaging.external.sns.impl.product')
-project(':infrastructure.messaging.external.sns.impl.product').projectDir = file('infrastructure/messaging/external/sns/messaging-external-sns-impl-product')
-include(':infrastructure.messaging.external.sns.impl.user')
-project(':infrastructure.messaging.external.sns.impl.user').projectDir = file('infrastructure/messaging/external/sns/messaging-external-sns-impl-user')
+// Messaging::SNS
+include(':infrastructure.messaging.sns.core')
+project(':infrastructure.messaging.sns.core').projectDir = file('infrastructure/messaging/sns/messaging-sns-core')
+include(':infrastructure.messaging.sns.impl.payment')
+project(':infrastructure.messaging.sns.impl.payment').projectDir = file('infrastructure/messaging/sns/messaging-sns-impl-payment')
+include(':infrastructure.messaging.sns.impl.order')
+project(':infrastructure.messaging.sns.impl.order').projectDir = file('infrastructure/messaging/sns/messaging-sns-impl-order')
+include(':infrastructure.messaging.sns.impl.product')
+project(':infrastructure.messaging.sns.impl.product').projectDir = file('infrastructure/messaging/sns/messaging-sns-impl-product')
+include(':infrastructure.messaging.sns.impl.user')
+project(':infrastructure.messaging.sns.impl.user').projectDir = file('infrastructure/messaging/sns/messaging-sns-impl-user')
 
 // Messaging::External::Outbox
-include(':infrastructure.messaging.external.outbox.core')
-project(':infrastructure.messaging.external.outbox.core').projectDir = file('infrastructure/messaging/external/outbox/messaging-external-outbox-core')
-include(':infrastructure.messaging.external.outbox.parent')
-project(':infrastructure.messaging.external.outbox.parent').projectDir = file('infrastructure/messaging/external/outbox/messaging-external-outbox-parent')
+include(':infrastructure.messaging.outbox.core')
+project(':infrastructure.messaging.outbox.core').projectDir = file('infrastructure/messaging/outbox/messaging-outbox-core')
+include(':infrastructure.messaging.outbox.parent')
+project(':infrastructure.messaging.outbox.parent').projectDir = file('infrastructure/messaging/outbox/messaging-outbox-parent')
 
 // Migration
 
@@ -411,14 +381,6 @@ include(':infrastructure.template.freemarker')
 project(':infrastructure.template.freemarker').projectDir = file('infrastructure/template/template-freemarker')
 include(':infrastructure.template.thymeleaf')
 project(':infrastructure.template.thymeleaf').projectDir = file('infrastructure/template/template-thymeleaf')
-
-// Transaction
-include(':infrastructure.transaction')
-project(':infrastructure.transaction').projectDir = file('infrastructure/transaction')
-
-// Use case handler
-include(':infrastructure.use-case.use-case-handler')
-project(':infrastructure.use-case.use-case-handler').projectDir = file('infrastructure/use-case/use-case-handler')
 
 // =================================================================================================
 // Application

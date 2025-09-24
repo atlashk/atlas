@@ -26,7 +26,7 @@ repositories {
 
 dependencies {
     // Infrastructure
-    api project(':infrastructure.messaging.external.outbox.core')
+    api project(':infrastructure.messaging.outbox.core')
     api project(':infrastructure.scheduler.quartz.core')
 
     // Lombok

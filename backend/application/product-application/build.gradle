@@ -39,14 +39,6 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
     }
-    api project(':infrastructure.bootstrap')
-    switch (rootProject.ext.appStack['config']) {
-        case 'yaml':
-            api project(':infrastructure.config.yaml')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['config']}")
-    }
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
             api project(':infrastructure.datasource.mysql.impl.product')
@@ -112,13 +104,13 @@ dependencies {
     }
     switch (rootProject.ext.appStack['messaging']) {
         case 'kafka':
-            api project(':infrastructure.messaging.external.kafka.impl.product')
+            api project(':infrastructure.messaging.kafka.impl.product')
             break
         case 'rabbitmq':
-            api project(':infrastructure.messaging.external.rabbitmq.impl.product')
+            api project(':infrastructure.messaging.rabbitmq.impl.product')
             break
         case 'sns':
-            api project(':infrastructure.messaging.external.sns.impl.product')
+            api project(':infrastructure.messaging.sns.impl.product')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['messaging']}")
@@ -165,7 +157,7 @@ dependencies {
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.tracing']}")
     }
     if (rootProject.ext.appStack['outbox'] == 'true') {
-        api project(':infrastructure.messaging.external.outbox.parent')
+        api project(':infrastructure.messaging.outbox.parent')
     }
     switch (rootProject.ext.appStack['persistence']) {
         case 'jpa':
@@ -184,7 +176,6 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['storage']}")
     }
-    api project(':infrastructure.use-case.use-case-handler')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
