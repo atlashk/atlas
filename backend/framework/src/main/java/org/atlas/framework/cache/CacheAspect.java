@@ -1,9 +1,13 @@
 package org.atlas.framework.cache;
 
+import java.lang.reflect.Method;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.atlas.framework.spel.SpelParser;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,39 +17,36 @@ import org.springframework.stereotype.Component;
  * for the given key 2. If exists, return cached value 3. If not exists, execute method and cache
  * the result
  */
-@Aspect
 @Component
+@Aspect
+@RequiredArgsConstructor
 public class CacheAspect {
 
   private final CachePort cachePort;
-
-  public CacheAspect(CachePort cachePort) {
-    this.cachePort = cachePort;
-  }
+  private final SpelParser spelParser;
 
   /**
    * Around advice for methods annotated with @Cache. Implements cache-aside pattern.
    */
   @Around("@annotation(cache)")
   public Object handleCaching(ProceedingJoinPoint joinPoint, Cache cache) throws Throwable {
-    // Use cache key directly from annotation
-    String cacheKey = cache.key();
+    // Evaluate SpEL
+    MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+    Method method = signature.getMethod();
+    String cacheKey = spelParser.parse(cache.key(), method, joinPoint.getArgs());
 
-    // Try to get value from cache
+    // Cache-aside pattern
     Optional<Object> cachedValue = cachePort.get(cacheKey);
     if (cachedValue.isPresent()) {
       return cachedValue.get();
     }
 
-    // Execute the method if cache miss
     Object result = joinPoint.proceed();
 
-    // Cache the result if it's not null
     if (result != null) {
       cachePort.put(cacheKey, result, cache.ttl());
     }
 
     return result;
   }
-
 }

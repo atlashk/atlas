@@ -6,5 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class FrontRemoveCartItemInput {
+
+  private Integer userId;
   private Integer productId;
 }

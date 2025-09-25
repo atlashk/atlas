@@ -7,13 +7,7 @@ public interface CartRepository {
 
   Optional<CartEntity> findByUserId(Integer userId);
 
-  Optional<CartEntity> findById(Integer id);
-
   void insert(CartEntity cartEntity);
 
   void update(CartEntity cartEntity);
-
-  void delete(Integer id);
-
-  void deleteByUserId(Integer userId);
 }

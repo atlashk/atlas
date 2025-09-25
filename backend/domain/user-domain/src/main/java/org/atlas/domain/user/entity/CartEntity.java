@@ -1,11 +1,13 @@
 package org.atlas.domain.user.entity;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.atlas.framework.domain.entity.DomainEntity;
+import org.atlas.framework.util.CollectionUtil;
 
 @Getter
 @Setter
@@ -24,18 +26,42 @@ public class CartEntity extends DomainEntity {
     this.cartItems = new ArrayList<>();
   }
 
-  // Helper methods
-  public synchronized void addCartItem(CartItemEntity cartItem) {
-    if (cartItems == null) {
-      cartItems = new ArrayList<>();
-    }
-    cartItems.add(cartItem);
-    cartItem.setCartId(this.id);
+  public boolean isEmpty() {
+    return CollectionUtil.isEmpty(cartItems);
   }
 
-  public void removeCartItem(CartItemEntity cartItem) {
-    if (cartItems != null) {
-      cartItems.remove(cartItem);
+  // Helper methods
+  public synchronized void putCartItem(Integer productId, Integer quantity) {
+    if (isEmpty()) {
+      cartItems = new ArrayList<>();
+    }
+    cartItems.stream()
+        .filter(it -> it.getProduct().getId().equals(productId))
+        .findFirst()
+        .ifPresentOrElse(
+            it -> it.setQuantity(quantity),
+            () -> {
+              // Add new cart item
+              CartItemEntity cartItem = new CartItemEntity();
+              ProductEntity product = new ProductEntity();
+              product.setId(productId);
+              cartItem.setProduct(product);
+              cartItem.setQuantity(quantity);
+              cartItems.add(cartItem);
+            }
+        );
+  }
+
+  public void removeCartItem(Integer productId) {
+    if (!isEmpty()) {
+      Iterator<CartItemEntity> iterator = cartItems.iterator();
+      while (iterator.hasNext()) {
+        CartItemEntity cartItemEntity = iterator.next();
+        if (cartItemEntity.getProduct().getId().equals(productId)) {
+          iterator.remove();
+          break;
+        }
+      }
     }
   }
 
@@ -47,7 +73,7 @@ public class CartEntity extends DomainEntity {
 
   public List<Integer> getProductIds() {
     return cartItems.stream()
-        .map(CartItemEntity::getProductId)
+        .map(cartItemEntity -> cartItemEntity.getProduct().getId())
         .distinct()
         .toList();
   }

@@ -37,16 +37,7 @@ dependencies {
 
     // Infrastructure
     api project(':infrastructure.api-server.rest.core')
-    switch (rootProject.ext.appStack['redis']) {
-        case 'standalone':
-            api project(':infrastructure.redis.standalone')
-            break
-        case 'cluster':
-            api project(':infrastructure.redis.cluster')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['redis']}")
-    }
+    api project(':infrastructure.kv.redis.parent')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

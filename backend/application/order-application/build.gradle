@@ -65,6 +65,13 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
     }
+    switch (rootProject.ext.appStack['cache']) {
+        case 'redis':
+            api project(':infrastructure.cache.redis')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['cache']}")
+    }
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
             api project(':infrastructure.datasource.mysql.impl.order')
@@ -89,7 +96,7 @@ dependencies {
     }
     switch (rootProject.ext.appStack['kv']) {
         case 'redis':
-            api project(':infrastructure.kv.redis')
+            api project(':infrastructure.kv.redis.parent')
             break
         case 'dynamodb':
             api project(':infrastructure.kv.dynamodb')

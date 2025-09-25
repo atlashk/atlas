@@ -12,7 +12,6 @@ public class CartItemEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
   private Integer id;
-  private Integer cartId;
   private ProductEntity product;
   private Integer quantity;
 }

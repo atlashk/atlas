@@ -29,16 +29,7 @@ dependencies {
     api project(':framework')
 
     // Infrastructure
-    switch (rootProject.ext.appStack['redis']) {
-        case 'standalone':
-            api project(':infrastructure.redis.standalone')
-            break
-        case 'cluster':
-            api project(':infrastructure.redis.cluster')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['redis']}")
-    }
+    api project(':infrastructure.kv.redis.parent')
 
     // Lib
     api 'org.redisson:redisson-spring-boot-starter:3.45.1'
@@ -46,10 +37,6 @@ dependencies {
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-
-    // Testing
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 bootJar {

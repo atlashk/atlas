@@ -10,7 +10,8 @@ import org.atlas.domain.user.entity.CartItemEntity;
 import org.atlas.domain.user.entity.ProductEntity;
 import org.atlas.domain.user.repository.CartRepository;
 import org.atlas.domain.user.service.CartService;
-import org.atlas.framework.context.Contexts;
+import org.atlas.domain.user.usecase.front.model.FrontGetCartInput;
+import org.atlas.framework.cache.Cache;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.internalapi.product.ProductApiPort;
 import org.atlas.framework.internalapi.product.model.ListProductRequest;
@@ -26,11 +27,10 @@ public class FrontGetCartUseCaseHandler {
   private final CartService cartService;
   private final ProductApiPort productApiPort;
 
-  public CartEntity handle(Void input) throws Exception {
-    Integer userId = Contexts.getUserId();
-
+  @Cache(cacheName = "cart", key = "#input.userId")
+  public CartEntity handle(FrontGetCartInput input) throws Exception {
     // Get or create cart for user
-    CartEntity cart = cartService.getOrCreateCart(userId);
+    CartEntity cart = cartService.getOrCreateCart(input.getUserId());
 
     // Fetch products
     List<Integer> productIds = cart.getProductIds();
