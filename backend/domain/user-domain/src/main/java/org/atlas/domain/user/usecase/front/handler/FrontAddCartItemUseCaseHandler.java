@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.domain.user.entity.CartEntity;
 import org.atlas.domain.user.repository.CartRepository;
 import org.atlas.domain.user.usecase.front.model.FrontAddCartItemInput;
+import org.atlas.framework.cache.CachePort;
+import org.atlas.framework.cache.Caches;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
 
 @UseCaseHandler
@@ -11,6 +13,7 @@ import org.atlas.framework.domain.usecase.UseCaseHandler;
 public class FrontAddCartItemUseCaseHandler {
 
   private final CartRepository cartRepository;
+  private final CachePort cachePort;
 
   public CartEntity handle(FrontAddCartItemInput input) throws Exception {
     // Get or create cart for user
@@ -25,6 +28,10 @@ public class FrontAddCartItemUseCaseHandler {
     // Update cart
     cart.putCartItem(input.getProductId(), input.getQuantity());
     cartRepository.update(cart);
+
+    // Invalidate cache
+    cachePort.invalidate(Caches.CART, String.valueOf(input.getUserId()));
+
     return cart;
   }
 }

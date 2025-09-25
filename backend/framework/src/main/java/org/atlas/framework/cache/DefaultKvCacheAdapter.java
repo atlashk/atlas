@@ -19,4 +19,9 @@ public class DefaultKvCacheAdapter implements CachePort {
   public Optional<Object> get(String cacheName, String key) {
     return kvPort.get(cacheName, key);
   }
+
+  @Override
+  public boolean invalidate(String cacheName, String key) {
+    return kvPort.delete(cacheName, key);
+  }
 }

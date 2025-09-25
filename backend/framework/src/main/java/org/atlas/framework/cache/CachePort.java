@@ -7,4 +7,6 @@ public interface CachePort {
   void put(String cacheName, String key, Object value, long ttl);
 
   Optional<Object> get(String cacheName, String key);
+
+  boolean invalidate(String cacheName, String key);
 }

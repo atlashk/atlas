@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.domain.user.entity.CartEntity;
 import org.atlas.domain.user.repository.CartRepository;
 import org.atlas.domain.user.usecase.front.model.FrontUpdateCartItemInput;
+import org.atlas.framework.cache.CachePort;
+import org.atlas.framework.cache.Caches;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
@@ -13,8 +15,9 @@ import org.atlas.framework.domain.usecase.UseCaseHandler;
 public class FrontUpdateCartItemUseCaseHandler {
 
   private final CartRepository cartRepository;
+  private final CachePort cachePort;
 
-  public CartEntity handle(FrontUpdateCartItemInput input) throws Exception {
+  public void handle(FrontUpdateCartItemInput input) throws Exception {
     // Find cart
     CartEntity cart = cartRepository.findByUserId(input.getUserId())
         .orElseThrow(() -> new DomainException(DomainError.CART_NOT_FOUND));
@@ -22,6 +25,8 @@ public class FrontUpdateCartItemUseCaseHandler {
     // Update cart
     cart.putCartItem(input.getProductId(), input.getQuantity());
     cartRepository.update(cart);
-    return cart;
+
+    // Invalidate cache
+    cachePort.invalidate(Caches.CART, String.valueOf(input.getUserId()));
   }
 }
