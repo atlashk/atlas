@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 import org.atlas.domain.user.shared.Role;
 import org.atlas.framework.paging.PagingRequest;
 
-@Getter
-@Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@Getter
+@Setter
 public class AdminListUserInput {
 
   private Integer id;

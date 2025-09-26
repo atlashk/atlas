@@ -13,7 +13,7 @@ import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
-import org.atlas.infrastructure.api.server.rest.impl.user.model.UserResponse;
+import org.atlas.infrastructure.api.server.rest.impl.user.common.model.UserResponse;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/admin/users")
+@RequestMapping("/api/admin/user")
 @Validated
 @RequiredArgsConstructor
 public class AdminUserManagementController {

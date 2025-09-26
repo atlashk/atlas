@@ -29,6 +29,25 @@ dependencies {
     api project(':domain.product')
 
     // Infrastructure
+    switch (rootProject.ext.appStack['api-client']) {
+        case 'grpc-netdevh':
+            api project(':infrastructure.internal-api.product.grpc.netdevh')
+            break
+        case 'rest-apachehttpclient':
+            api project(':infrastructure.internal-api.product.rest.apachehttpclient')
+            break
+        case 'rest-feign':
+            api project(':infrastructure.internal-api.product.rest.feign')
+            break
+        case 'rest-restclient':
+            api project(':infrastructure.internal-api.product.rest.restclient')
+            break
+        case 'rest-resttemplate':
+            api project(':infrastructure.internal-api.product.rest.resttemplate')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-client']}")
+    }
     switch (rootProject.ext.appStack['api-server']) {
         case 'rest':
             api project(':infrastructure.api-server.rest.impl.product')

@@ -1,5 +1,6 @@
 package org.atlas.domain.user.entity;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -26,11 +27,11 @@ public class CartEntity extends DomainEntity {
     this.cartItems = new ArrayList<>();
   }
 
+  // Helper methods
   public boolean isEmpty() {
     return CollectionUtil.isEmpty(cartItems);
   }
 
-  // Helper methods
   public synchronized void putCartItem(Integer productId, Integer quantity) {
     if (isEmpty()) {
       cartItems = new ArrayList<>();
@@ -65,8 +66,8 @@ public class CartEntity extends DomainEntity {
     }
   }
 
-  public void clearItems() {
-    if (cartItems != null) {
+  public void clearCart() {
+    if (!isEmpty()) {
       cartItems.clear();
     }
   }
@@ -76,5 +77,11 @@ public class CartEntity extends DomainEntity {
         .map(cartItemEntity -> cartItemEntity.getProduct().getId())
         .distinct()
         .toList();
+  }
+
+  public BigDecimal getTotalAmount() {
+    return cartItems.stream()
+        .map(CartItemEntity::getAmount)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 }

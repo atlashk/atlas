@@ -11,7 +11,6 @@ import org.atlas.domain.order.entity.OrderEntity;
 import org.atlas.domain.order.entity.PaymentEntity;
 import org.atlas.domain.order.entity.ProductEntity;
 import org.atlas.domain.order.entity.UserEntity;
-import org.atlas.framework.domain.service.DomainService;
 import org.atlas.framework.internalapi.payment.PaymentApiPort;
 import org.atlas.framework.internalapi.payment.model.ListPaymentRequest;
 import org.atlas.framework.internalapi.payment.model.PaymentResponse;
@@ -24,8 +23,9 @@ import org.atlas.framework.internalapi.user.model.UserResponse;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.util.ArrayUtil;
 import org.atlas.framework.util.CollectionUtil;
+import org.springframework.stereotype.Service;
 
-@DomainService
+@Service
 @RequiredArgsConstructor
 public class OrderAggregator {
 
@@ -36,11 +36,11 @@ public class OrderAggregator {
   /**
    * Aggregate specific data types for a single order entity
    */
-  public void aggregate(OrderEntity orderEntity, AggregationOptions... options) {
-    if (orderEntity == null) {
-      return;
+  public void aggregate(OrderEntity order, AggregationOptions... options) {
+    if (order == null) {
+      throw new IllegalArgumentException("Order must be provided");
     }
-    aggregate(List.of(orderEntity), options);
+    aggregate(List.of(order), options);
   }
 
   /**
@@ -48,7 +48,7 @@ public class OrderAggregator {
    */
   public void aggregate(List<OrderEntity> orderEntities, AggregationOptions... options) {
     if (CollectionUtil.isEmpty(orderEntities) || ArrayUtil.isEmpty(options)) {
-      return;
+      throw new IllegalArgumentException("Orders must be provided");
     }
 
     if (options[0].isLoadUsers()) {

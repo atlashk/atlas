@@ -10,11 +10,11 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import org.atlas.framework.constant.Patterns;
 
-@Getter
-@Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@Getter
+@Setter
 public class RegisterInput {
 
   @NotBlank
