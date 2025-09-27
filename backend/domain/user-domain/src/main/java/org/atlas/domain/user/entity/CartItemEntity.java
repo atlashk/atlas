@@ -1,5 +1,6 @@
 package org.atlas.domain.user.entity;
 
+import java.math.BigDecimal;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,4 +15,8 @@ public class CartItemEntity extends DomainEntity {
   private Integer id;
   private ProductEntity product;
   private Integer quantity;
+
+  public BigDecimal getAmount() {
+    return product.getPrice().multiply(BigDecimal.valueOf(quantity));
+  }
 }

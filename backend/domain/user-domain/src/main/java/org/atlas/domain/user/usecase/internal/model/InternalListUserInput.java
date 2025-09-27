@@ -5,18 +5,15 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.atlas.framework.domain.usecase.input.InternalInput;
+import lombok.Setter;
 
-@Getter
-@Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class InternalListUserInput extends InternalInput {
+@Builder
+@Getter
+@Setter
+public class InternalListUserInput {
 
   @NotEmpty
   private List<Integer> ids;

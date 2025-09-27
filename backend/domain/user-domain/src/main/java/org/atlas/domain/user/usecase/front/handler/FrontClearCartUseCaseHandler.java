@@ -17,16 +17,18 @@ public class FrontClearCartUseCaseHandler {
   private final CartRepository cartRepository;
   private final CachePort cachePort;
 
-  public void handle(FrontClearCartInput input) throws Exception {
+  public CartEntity handle(FrontClearCartInput input) throws Exception {
     // Find cart
     CartEntity cart = cartRepository.findByUserId(input.getUserId())
         .orElseThrow(() -> new DomainException(DomainError.CART_NOT_FOUND));
 
-    // Update cart
-    cart.clearItems();
+    // Update DB
+    cart.clearCart();
     cartRepository.update(cart);
 
-    // Invalidate cache
-    cachePort.invalidate(Caches.CART, String.valueOf(input.getUserId()));
+    // Update cache
+    cachePort.put(Caches.CART, String.valueOf(cart.getUserId()), cart);
+
+    return cart;
   }
 }

@@ -11,7 +11,7 @@ import org.atlas.domain.user.usecase.internal.model.InternalListUserInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.infrastructure.api.server.rest.impl.user.internal.model.InternalListUserRequest;
-import org.atlas.infrastructure.api.server.rest.impl.user.model.UserResponse;
+import org.atlas.infrastructure.api.server.rest.impl.user.common.model.UserResponse;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("api/internal/users")
+@RequestMapping("/api/internal/user")
 @Validated
 @RequiredArgsConstructor
 public class InternalUserController {

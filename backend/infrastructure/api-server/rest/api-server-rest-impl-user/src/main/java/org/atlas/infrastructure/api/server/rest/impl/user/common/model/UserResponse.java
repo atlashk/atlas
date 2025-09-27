@@ -1,4 +1,4 @@
-package org.atlas.infrastructure.api.server.rest.impl.user.model;
+package org.atlas.infrastructure.api.server.rest.impl.user.common.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;

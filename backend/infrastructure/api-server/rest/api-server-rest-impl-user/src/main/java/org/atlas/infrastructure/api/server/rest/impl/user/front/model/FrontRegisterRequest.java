@@ -1,4 +1,4 @@
-package org.atlas.infrastructure.api.server.rest.impl.user.model;
+package org.atlas.infrastructure.api.server.rest.impl.user.front.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
@@ -12,7 +12,7 @@ import org.atlas.framework.constant.Patterns;
 @Schema(description = "Request object for user registration containing required data")
 @Getter
 @Setter
-public class RegisterRequest {
+public class FrontRegisterRequest {
 
   @NotBlank
   @Schema(description = "Username for the new user", example = "john_doe", requiredMode = RequiredMode.REQUIRED)
