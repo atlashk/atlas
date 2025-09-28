@@ -36,7 +36,7 @@ public class CacheAspect {
     String cacheKey = spelParser.parse(cache.key(), method, joinPoint.getArgs());
 
     // Cache-aside pattern
-    Optional<Object> cachedValue = cachePort.get(cacheKey);
+    Optional<Object> cachedValue = cachePort.get(cache.cacheName(), cacheKey);
     if (cachedValue.isPresent()) {
       return cachedValue.get();
     }
@@ -44,7 +44,7 @@ public class CacheAspect {
     Object result = joinPoint.proceed();
 
     if (result != null) {
-      cachePort.put(cacheKey, result, cache.ttl());
+      cachePort.put(cache.cacheName(), cacheKey, result, cache.ttl());
     }
 
     return result;

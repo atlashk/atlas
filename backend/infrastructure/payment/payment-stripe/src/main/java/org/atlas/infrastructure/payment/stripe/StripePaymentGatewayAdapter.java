@@ -122,7 +122,8 @@ public class StripePaymentGatewayAdapter implements PaymentGatewayPort {
           if (object.has("last_payment_error")) {
             JsonObject lastPaymentError = object.getAsJsonObject("last_payment_error");
             paymentResult.setErrorCode(lastPaymentError.get("code").getAsString());
-            paymentResult.setErrorMessage(lastPaymentError.get("message").getAsString());
+            paymentResult.setErrorMessage(
+                StringUtil.sanitizeErrorMessage(lastPaymentError.get("message").getAsString()));
           }
         }
         case "payment_intent.canceled" -> {

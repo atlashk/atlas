@@ -7,6 +7,7 @@ import org.atlas.domain.payment.repository.PaymentRepository;
 import org.atlas.domain.payment.service.PaymentRoutingService;
 import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.framework.config.ApplicationConfigPort;
+import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.constant.Application;
 import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.domain.event.DomainEventType;
@@ -19,6 +20,7 @@ import org.atlas.framework.messaging.ExternalMessagePublisherPort;
 import org.atlas.framework.payment.PaymentGatewayPort;
 import org.atlas.framework.payment.model.CreatePaymentRequest;
 import org.atlas.framework.payment.model.CreatePaymentResponse;
+import org.atlas.framework.util.StringUtil;
 
 @DomainEventHandler(type = DomainEventType.PRODUCT_RESERVATION_SUCCEEDED)
 @RequiredArgsConstructor
@@ -27,7 +29,7 @@ public class ProductReservationSucceededEventHandler {
 
   private final PaymentRepository paymentRepository;
   private final PaymentRoutingService paymentRoutingService;
-  private final ApplicationConfigPort applicationConfigPort;
+  private final ApplicationConfigService applicationConfigService;
   private final ExternalMessagePublisherPort externalMessagePublisherPort;
 
   public void handle(ProductReservationSucceededEvent productReservationSucceededEvent) {
@@ -43,7 +45,7 @@ public class ProductReservationSucceededEventHandler {
       paymentEntity.setOrderId(order.getId());
       paymentEntity.setUserId(order.getUserId());
       paymentEntity.setAmount(order.getAmount());
-      paymentEntity.setCurrency(applicationConfigPort.getConfig(
+      paymentEntity.setCurrency(applicationConfigService.getConfig(
           Application.PAYMENT_SERVICE, "currency", CommonConstant.DEFAULT_CURRENCY));
       paymentEntity.setMethod(order.getPaymentMethod());
       paymentEntity.setGateway(paymentGatewayPort.supports());
@@ -84,7 +86,7 @@ public class ProductReservationSucceededEventHandler {
         // Update payment entity
         paymentEntity.setStatus(PaymentStatus.FAILED);
         paymentEntity.setErrorCode(response.getErrorCode());
-        paymentEntity.setErrorMessage(response.getErrorMessage());
+        paymentEntity.setErrorMessage(StringUtil.sanitizeErrorMessage(response.getErrorMessage()));
         paymentRepository.update(paymentEntity);
 
         // Publish PAYMENT_FAILED event

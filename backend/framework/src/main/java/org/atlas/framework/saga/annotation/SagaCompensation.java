@@ -1,4 +1,4 @@
-package org.atlas.framework.saga.orchestrator;
+package org.atlas.framework.saga.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,9 +7,13 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface SagaStep {
+public @interface SagaCompensation {
 
   String name();
-  int order() default 0;
-  String compensation() default "";
+
+  int maxRetries() default 3;
+
+  long retryDelayMs() default 1000;
+
+  String description() default "";
 }
