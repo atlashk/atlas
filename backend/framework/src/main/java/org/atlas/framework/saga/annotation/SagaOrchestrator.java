@@ -10,4 +10,10 @@ import java.lang.annotation.Target;
 public @interface SagaOrchestrator {
 
   String name();
+
+  String description() default "";
+
+  String completionHandler() default "";
+
+  String failureHandler() default "";
 }

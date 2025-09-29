@@ -7,23 +7,15 @@ import org.atlas.framework.saga.entity.SagaStepStatus;
 
 public interface SagaStepRepository {
 
+  List<SagaStepEntity> findCompleted(Long sagaId);
+
   Optional<SagaStepEntity> findById(Long stepId);
 
-  List<SagaStepEntity> findBySagaId(Long sagaId);
-
-  List<SagaStepEntity> findBySagaIdOrderByStepOrder(Long sagaId);
-
-  List<SagaStepEntity> findByStatus(SagaStepStatus status);
-
-  List<SagaStepEntity> findBySagaIdAndStatus(Long sagaId, SagaStepStatus status);
-
-  Optional<SagaStepEntity> findBySagaIdAndStepName(Long sagaId, String stepName);
+  Optional<SagaStepEntity> findLastStep(Long sagaId);
 
   void insert(SagaStepEntity step);
 
   void update(SagaStepEntity step);
 
   void delete(Long stepId);
-
-  boolean existsById(Long stepId);
 }

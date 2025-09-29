@@ -11,17 +11,9 @@ public @interface SagaStep {
 
   String name();
 
+  String description() default "";
+
   int order() default 0;
 
   String compensation() default "";
-
-  boolean required() default true;
-
-  long timeoutMs() default 30000; // 30 seconds default
-
-  int maxRetries() default 0;
-
-  long retryDelayMs() default 5000; // 5 seconds default
-
-  String description() default "";
 }

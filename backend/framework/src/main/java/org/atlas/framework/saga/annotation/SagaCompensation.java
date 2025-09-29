@@ -11,9 +11,5 @@ public @interface SagaCompensation {
 
   String name();
 
-  int maxRetries() default 3;
-
-  long retryDelayMs() default 1000;
-
   String description() default "";
 }
