@@ -136,10 +136,25 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.tracing']}")
     }
-    if (rootProject.ext.appStack['outbox'] == 'true') {
-        api project(':infrastructure.messaging.outbox.parent')
-    }
     api project(':infrastructure.payment.parent')
+    switch (rootProject.ext.appStack['persistence']) {
+        case 'jpa':
+            api project(':infrastructure.persistence.jpa.impl.payment')
+            api project(':infrastructure.persistence.jpa.impl.outbox')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['persistence']}")
+    }
+    switch (rootProject.ext.appStack['scheduler']) {
+        case 'spring':
+            api project(':infrastructure.scheduler.spring.impl.outbox')
+            break
+        case 'quartz':
+            api project(':infrastructure.scheduler.quartz.impl.outbox')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['scheduler']}")
+    }
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

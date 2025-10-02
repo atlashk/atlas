@@ -1,8 +1,9 @@
-package org.atlas.domain.order.usecase.front.handler;
+package org.atlas.domain.order.service;
 
 import java.time.Duration;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.order.entity.OrderEntity;
@@ -10,41 +11,40 @@ import org.atlas.domain.order.entity.OrderItemEntity;
 import org.atlas.domain.order.entity.PaymentEntity;
 import org.atlas.domain.order.entity.ProductEntity;
 import org.atlas.domain.order.entity.UserEntity;
-import org.atlas.domain.order.mapper.OrderEventMapper;
 import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.shared.OrderStatus;
-import org.atlas.domain.order.usecase.front.model.FrontPlaceOrderInput;
-import org.atlas.framework.config.ApplicationConfigPort;
+import org.atlas.domain.order.usecase.front.model.FrontCheckoutInput;
 import org.atlas.framework.context.Contexts;
 import org.atlas.framework.cryptography.HashingUtil;
-import org.atlas.framework.domain.event.contract.order.OrderCreatedEvent;
-import org.atlas.framework.domain.exception.DomainException;
-import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.domain.error.DomainError;
+import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.lock.LockAcquisitionException;
 import org.atlas.framework.lock.LockPort;
-import org.atlas.framework.messaging.ExternalMessagePublisherPort;
+import org.atlas.framework.saga.annotation.SagaCompensation;
+import org.atlas.framework.saga.annotation.SagaOrchestrator;
+import org.atlas.framework.saga.annotation.SagaStep;
 import org.atlas.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.framework.sequencegenerator.SequenceType;
 
-@UseCaseHandler
+@SagaOrchestrator(
+    name = "checkout",
+    description = "Orchestrates the checkout process",
+    completionHandler = "completionHandler"
+)
 @RequiredArgsConstructor
 @Slf4j
-public class FrontPlaceOrderUseCaseHandler {
+public class CheckoutOrchestrator {
 
   private final OrderRepository orderRepository;
-  private final ApplicationConfigPort applicationConfigPort;
-  private final ExternalMessagePublisherPort externalMessagePublisherPort;
   private final LockPort lockPort;
   private final SequenceGenerator sequenceGenerator;
 
-  public OrderEntity handle(FrontPlaceOrderInput input) {
-    OrderEntity[] result = new OrderEntity[1];
-
-    final Integer userId = Contexts.getUserId();
+  @SagaStep(name = "createOrder", order = 1, compensation = "cancelOrder")
+  public void createOrder(Map<String, Object> data) {
+    // Fetch cart items
 
     // Payment idempotence guarantee
-    String lockKey = obtainLockKey(input, userId);
+    String lockKey = obtainLockKey(input);
     Duration waitTime = Duration.ofSeconds(30);
     Duration leaseTime = Duration.ofMinutes(15);
 
@@ -54,13 +54,6 @@ public class FrontPlaceOrderUseCaseHandler {
         OrderEntity orderEntity = newOrderEntity(input);
         orderRepository.insert(orderEntity);
 
-        // Publish event
-        OrderCreatedEvent event = new OrderCreatedEvent(
-            applicationConfigPort.getApplicationName(),
-            OrderEventMapper.fromOrderEntity(orderEntity)
-        );
-        externalMessagePublisherPort.publish(event);
-
         // Return the inserted order
         result[0] = orderEntity;
       }, lockKey, waitTime, leaseTime, true);
@@ -69,16 +62,14 @@ public class FrontPlaceOrderUseCaseHandler {
           userId, input, e);
       throw new DomainException(DomainError.CONFLICT, e);
     }
-
-    return result[0];
   }
 
-  private String obtainLockKey(FrontPlaceOrderInput input, Integer userId) {
+  private String obtainLockKey(FrontCheckoutInput input) {
     // Create a deterministic signature based on order items
     StringBuilder signature = new StringBuilder();
     input.getOrderItems().stream()
         .sorted(Comparator.comparingLong(
-            FrontPlaceOrderInput.OrderItem::getProductId)) // Sort for consistency
+            FrontCheckoutInput.OrderItem::getProductId)) // Sort for consistency
         .forEach(item -> signature.append(item.getProductId())
             .append(":")
             .append(item.getQuantity())
@@ -87,7 +78,7 @@ public class FrontPlaceOrderUseCaseHandler {
     return String.format("place-order:%d:%s", userId, hash);
   }
 
-  private OrderEntity newOrderEntity(FrontPlaceOrderInput input) {
+  private OrderEntity newOrderEntity(FrontCheckoutInput input) {
     // Order
     OrderEntity orderEntity = new OrderEntity();
     orderEntity.setCode(sequenceGenerator.generate(SequenceType.ORDER));
@@ -101,7 +92,7 @@ public class FrontPlaceOrderUseCaseHandler {
     orderEntity.setUser(userEntity);
 
     // Order Items
-    for (FrontPlaceOrderInput.OrderItem orderItemInput : input.getOrderItems()) {
+    for (FrontCheckoutInput.OrderItem orderItemInput : input.getOrderItems()) {
       OrderItemEntity orderItemEntity = new OrderItemEntity();
       orderItemEntity.setQuantity(orderItemInput.getQuantity());
 
@@ -124,4 +115,14 @@ public class FrontPlaceOrderUseCaseHandler {
 
     return orderEntity;
   }
+
+  @SagaCompensation(name = "cancelOrder")
+  public void cancelOrder() {
+
+  }
+
+  public void completionHandler() {
+
+  }
+
 }

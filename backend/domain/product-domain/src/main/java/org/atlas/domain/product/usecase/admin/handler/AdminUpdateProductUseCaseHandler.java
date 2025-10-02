@@ -10,7 +10,7 @@ import org.atlas.framework.domain.event.contract.product.model.Product;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.domain.error.DomainError;
-import org.atlas.framework.messaging.ExternalMessagePublisherPort;
+import org.atlas.framework.messaging.publisher.MessagePublisherPort;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.util.StringUtil;
 
@@ -21,7 +21,7 @@ public class AdminUpdateProductUseCaseHandler {
   private final ProductRepository productRepository;
   private final ProductImageService productImageService;
   private final ApplicationConfigPort applicationConfigPort;
-  private final ExternalMessagePublisherPort externalMessagePublisherPort;
+  private final MessagePublisherPort messagePublisherPort;
 
   public Void handle(ProductEntity productEntity) throws Exception {
     // Find product
@@ -47,6 +47,6 @@ public class AdminUpdateProductUseCaseHandler {
     Product product = ObjectMapperUtil.getInstance().map(productEntity, Product.class);
     ProductUpdatedEvent event = new ProductUpdatedEvent(applicationConfigPort.getApplicationName(),
         product);
-    externalMessagePublisherPort.publish(event);
+    messagePublisherPort.publish(event);
   }
 }

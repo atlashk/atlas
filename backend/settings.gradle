@@ -254,12 +254,6 @@ project(':infrastructure.messaging.sns.impl.product').projectDir = file('infrast
 include(':infrastructure.messaging.sns.impl.user')
 project(':infrastructure.messaging.sns.impl.user').projectDir = file('infrastructure/messaging/sns/messaging-sns-impl-user')
 
-// Messaging::External::Outbox
-include(':infrastructure.messaging.outbox.core')
-project(':infrastructure.messaging.outbox.core').projectDir = file('infrastructure/messaging/outbox/messaging-outbox-core')
-include(':infrastructure.messaging.outbox.parent')
-project(':infrastructure.messaging.outbox.parent').projectDir = file('infrastructure/messaging/outbox/messaging-outbox-parent')
-
 // Migration
 
 // Migration::Flyway

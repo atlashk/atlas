@@ -16,7 +16,7 @@ import org.atlas.framework.domain.event.contract.order.PaymentFailedEvent;
 import org.atlas.framework.domain.event.contract.order.ProductReservationSucceededEvent;
 import org.atlas.framework.domain.event.contract.order.model.Order;
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
-import org.atlas.framework.messaging.ExternalMessagePublisherPort;
+import org.atlas.framework.messaging.publisher.MessagePublisherPort;
 import org.atlas.framework.payment.PaymentGatewayPort;
 import org.atlas.framework.payment.model.CreatePaymentRequest;
 import org.atlas.framework.payment.model.CreatePaymentResponse;
@@ -30,7 +30,7 @@ public class ProductReservationSucceededEventHandler {
   private final PaymentRepository paymentRepository;
   private final PaymentRoutingService paymentRoutingService;
   private final ApplicationConfigService applicationConfigService;
-  private final ExternalMessagePublisherPort externalMessagePublisherPort;
+  private final MessagePublisherPort messagePublisherPort;
 
   public void handle(ProductReservationSucceededEvent productReservationSucceededEvent) {
     final Order order = productReservationSucceededEvent.getOrder();
@@ -76,7 +76,7 @@ public class ProductReservationSucceededEventHandler {
         PaymentCreatedEvent paymentCreatedEvent = new PaymentCreatedEvent(
             applicationConfigPort.getApplicationName(), order);
         paymentCreatedEvent.setNextAction(response.getNextAction());
-        externalMessagePublisherPort.publish(paymentCreatedEvent);
+        messagePublisherPort.publish(paymentCreatedEvent);
       } else {
         log.error(
             "Failed to create payment via payment gateway: orderId={}, userId={}, paymentId={}, errorCode={}, errorMessage={}",
@@ -94,7 +94,7 @@ public class ProductReservationSucceededEventHandler {
             applicationConfigPort.getApplicationName(), order);
         paymentFailedEvent.setErrorCode(response.getErrorCode());
         paymentFailedEvent.setErrorMessage(response.getErrorMessage());
-        externalMessagePublisherPort.publish(paymentFailedEvent);
+        messagePublisherPort.publish(paymentFailedEvent);
       }
     } catch (Exception e) {
       log.error("Error create payment: orderId={}, userId={}, error={}",
@@ -104,7 +104,7 @@ public class ProductReservationSucceededEventHandler {
       PaymentFailedEvent paymentFailedEvent = new PaymentFailedEvent(
           applicationConfigPort.getApplicationName(), order);
       paymentFailedEvent.setErrorMessage(e.getMessage());
-      externalMessagePublisherPort.publish(paymentFailedEvent);
+      messagePublisherPort.publish(paymentFailedEvent);
     }
   }
 }

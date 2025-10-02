@@ -1,4 +1,4 @@
-package org.atlas.infrastructure.messaging.outbox.core;
+package org.atlas.framework.messaging.outbox;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ public class OutboxAspect {
   private final OutboxMessageRepository outboxMessageRepository;
 
   // Intercept all MessagePublisher.publish() calls
-  @Around("execution(* org.atlas.framework.messaging.ExternalMessagePublisherPort.doPublish(..))")
+  @Around("execution(* org.atlas.framework.messaging.publisher.MessagePublisherPort.doPublish(..))")
   public Object aroundPublishMessage(ProceedingJoinPoint joinPoint) throws Throwable {
     Object[] args = joinPoint.getArgs();
     Object messagePayload = args[0];

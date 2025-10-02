@@ -22,6 +22,7 @@ public class SagaStepEntity extends DomainEntity {
   private Long sagaId;
   private String stepName;
   private Integer stepOrder;
+  private String applicationName;
   private SagaStepStatus stepStatus;
   private Date completedAt;
   private String errorMessage;

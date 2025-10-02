@@ -182,15 +182,23 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.tracing']}")
     }
-    if (rootProject.ext.appStack['outbox'] == 'true') {
-        api project(':infrastructure.messaging.outbox.parent')
-    }
     switch (rootProject.ext.appStack['persistence']) {
         case 'jpa':
             api project(':infrastructure.persistence.jpa.impl.product')
+            api project(':infrastructure.persistence.jpa.impl.outbox')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['persistence']}")
+    }
+    switch (rootProject.ext.appStack['scheduler']) {
+        case 'spring':
+            api project(':infrastructure.scheduler.spring.impl.outbox')
+            break
+        case 'quartz':
+            api project(':infrastructure.scheduler.quartz.impl.outbox')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['scheduler']}")
     }
     switch (rootProject.ext.appStack['storage']) {
         case 'filesystem':

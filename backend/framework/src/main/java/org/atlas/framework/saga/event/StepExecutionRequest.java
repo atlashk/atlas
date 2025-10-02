@@ -13,5 +13,6 @@ import lombok.Setter;
 @Builder
 public class StepExecutionRequest {
 
+  private String applicationName;
   private Long stepId;
 }

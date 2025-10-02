@@ -18,7 +18,7 @@ import org.atlas.framework.domain.event.contract.order.model.Order;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.domain.error.DomainError;
-import org.atlas.framework.messaging.ExternalMessagePublisherPort;
+import org.atlas.framework.messaging.publisher.MessagePublisherPort;
 import org.atlas.framework.payment.PaymentGatewayPort;
 import org.atlas.framework.payment.model.PaymentResult;
 import org.atlas.framework.payment.model.WebhookResponse;
@@ -31,7 +31,7 @@ public class WebhookHandler {
   private final PaymentRepository paymentRepository;
   private final ApplicationConfigPort applicationConfigPort;
   private final DependencyPort dependencyPort;
-  private final ExternalMessagePublisherPort externalMessagePublisherPort;
+  private final MessagePublisherPort messagePublisherPort;
 
   public WebhookResponse handle(PaymentGateway paymentGateway,
       Map<String, Object> payload, Map<String, String> headers) {
@@ -80,20 +80,20 @@ public class WebhookHandler {
           case SUCCEEDED -> {
             PaymentSucceededEvent paymentSucceededEvent = new PaymentSucceededEvent(
                 applicationConfigPort.getApplicationName(), order);
-            externalMessagePublisherPort.publish(paymentSucceededEvent);
+            messagePublisherPort.publish(paymentSucceededEvent);
           }
           case FAILED -> {
             PaymentFailedEvent paymentFailedEvent = new PaymentFailedEvent(
                 applicationConfigPort.getApplicationName(), order);
             paymentFailedEvent.setErrorCode(paymentResult.getErrorCode());
             paymentFailedEvent.setErrorMessage(paymentResult.getErrorMessage());
-            externalMessagePublisherPort.publish(paymentFailedEvent);
+            messagePublisherPort.publish(paymentFailedEvent);
           }
           case CANCELED -> {
             PaymentCanceledEvent paymentCanceledEvent = new PaymentCanceledEvent(
                 applicationConfigPort.getApplicationName(), order);
             paymentCanceledEvent.setCancellationReason(paymentResult.getCancellationReason());
-            externalMessagePublisherPort.publish(paymentCanceledEvent);
+            messagePublisherPort.publish(paymentCanceledEvent);
           }
         }
       }

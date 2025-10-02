@@ -1,10 +1,10 @@
-package org.atlas.framework.messaging;
+package org.atlas.framework.messaging.publisher;
 
 import org.atlas.framework.domain.event.contract.order.BaseOrderEvent;
 import org.atlas.framework.domain.event.contract.product.BaseProductEvent;
 import org.atlas.framework.domain.event.contract.user.BaseUserEvent;
 
-public interface ExternalMessagePublisherPort {
+public interface MessagePublisherPort {
 
   void publish(BaseOrderEvent event);
 

@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.saga.entity.SagaEntity;
 import org.atlas.framework.saga.entity.SagaStatus;
 import org.atlas.framework.saga.entity.SagaStepEntity;
@@ -16,6 +17,7 @@ import org.atlas.framework.saga.event.StepCompensationReply;
 import org.atlas.framework.saga.event.StepCompensationRequest;
 import org.atlas.framework.saga.event.StepExecutionReply;
 import org.atlas.framework.saga.event.StepExecutionRequest;
+import org.atlas.framework.saga.exception.SagaConfigException;
 import org.atlas.framework.saga.exception.SagaNotFoundException;
 import org.atlas.framework.saga.exception.SagaStepNotFoundException;
 import org.atlas.framework.saga.repository.SagaRepository;
@@ -39,6 +41,7 @@ public class SagaOrchestratorManager {
   private final SagaEventPublisher eventPublisher;
   private final SagaRepository sagaRepository;
   private final SagaStepRepository sagaStepRepository;
+  private final ApplicationConfigService applicationConfigService;
 
   /**
    * Start a new saga with comprehensive validation and error handling
@@ -162,11 +165,27 @@ public class SagaOrchestratorManager {
         // Execute next step
         requestNextStepExecution(sagaEntity);
       } else {
-        // No more steps, mark saga as COMPLETED
+        // Final step completed
+        // Mark saga as COMPLETED
         sagaEntity.setSagaStatus(SagaStatus.COMPLETED);
         sagaEntity.setCompletedAt(DateUtil.now());
         sagaRepository.update(sagaEntity);
         log.info("Saga completed successfully: {}", sagaEntity.getSagaId());
+
+        // Invoke completion handler if defined
+        SagaOrchestratorMetadata orchestratorMetadata = orchestratorRegistry.getOrchestrator(
+            sagaEntity.getOrchestratorName())
+            .orElseThrow(() -> new SagaConfigException(
+                "Orchestrator metadata not found: " + sagaEntity.getOrchestratorName()));
+        if (orchestratorMetadata.getSagaCompletionHandler() != null) {
+          try {
+            orchestratorMetadata.getSagaCompletionHandler()
+                .invoke(orchestratorMetadata.getOrchestratorInstance());
+          } catch (Exception e) {
+            log.error("Saga completion handler invocation failed for saga: {}, error: {}",
+                sagaEntity.getSagaId(), e.getMessage(), e);
+          }
+        }
       }
     } else {
       log.warn("No last step found for saga: {}", sagaEntity.getSagaId());
@@ -251,12 +270,14 @@ public class SagaOrchestratorManager {
         .sagaId(sagaEntity.getSagaId())
         .stepName(stepMetadata.getStepName())
         .stepOrder(1)
+        .applicationName(applicationConfigService.getApplicationName())
         .stepStatus(SagaStepStatus.STARTED)
         .build();
     sagaStepRepository.insert(stepEntity);
 
     // Publish request
     StepExecutionRequest request = StepExecutionRequest.builder()
+        .applicationName(applicationConfigService.getApplicationName())
         .stepId(stepEntity.getStepId())
         .build();
     eventPublisher.publish(request);

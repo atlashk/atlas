@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
@@ -43,8 +44,12 @@ public class SagaOrchestratorRegistry implements InitializingBean {
     log.info("Registered {} saga orchestrators successfully", orchestrators.size());
   }
 
-  public boolean hasOrchestrator(String name) {
-    return orchestrators.containsKey(name);
+  public Optional<SagaOrchestratorMetadata> getOrchestrator(String orchestratorName) {
+    return Optional.ofNullable(orchestrators.get(orchestratorName));
+  }
+
+  public boolean hasOrchestrator(String orchestratorName) {
+    return orchestrators.containsKey(orchestratorName);
   }
 
   @Nonnull
@@ -127,14 +132,10 @@ public class SagaOrchestratorRegistry implements InitializingBean {
             .orchestratorInstance(orchestratorBean)
             .steps(obtainSteps(orchestratorBean));
 
-    // Register succeeded and failed handlers if specified
+    // Register completion handler if specified
     if (StringUtil.isNotBlank(sagaOrchestratorAnnotation.completionHandler())) {
       sagaOrchestratorMetadataBuilder.sagaCompletionHandler(
           obtainMethod(orchestratorBean, sagaOrchestratorAnnotation.completionHandler()));
-    }
-    if (StringUtil.isNotBlank(sagaOrchestratorAnnotation.failureHandler())) {
-      sagaOrchestratorMetadataBuilder.sagaFailureHandler(
-          obtainMethod(orchestratorBean, sagaOrchestratorAnnotation.failureHandler()));
     }
 
     orchestrators.put(orchestratorName, sagaOrchestratorMetadataBuilder.build());

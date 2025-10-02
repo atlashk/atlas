@@ -10,9 +10,9 @@ import lombok.Setter;
 public class DomainEntity implements Serializable {
 
   private Date createdAt;
-  private String createdBy;
+  private Integer createdBy;
   private Date updatedAt;
-  private String updatedBy;
+  private Integer updatedBy;
   private Boolean deleted = false;
   private Long version;
 }

@@ -4,9 +4,11 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.springframework.stereotype.Service;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
+@Service
 public @interface SagaOrchestrator {
 
   String name();
@@ -14,6 +16,4 @@ public @interface SagaOrchestrator {
   String description() default "";
 
   String completionHandler() default "";
-
-  String failureHandler() default "";
 }

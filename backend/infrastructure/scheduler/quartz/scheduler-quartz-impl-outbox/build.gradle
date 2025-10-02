@@ -25,17 +25,15 @@ repositories {
 }
 
 dependencies {
+    // Framework
+    api project(':framework')
+
     // Infrastructure
-    api project(':infrastructure.messaging.outbox.core')
     api project(':infrastructure.scheduler.quartz.core')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-
-    // Testing
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 bootJar {

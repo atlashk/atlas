@@ -14,7 +14,6 @@ import org.atlas.framework.domain.event.contract.order.PaymentFailedEvent;
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.error.DomainError;
-import org.atlas.framework.messaging.InternalMessagePublisherPort;
 
 @DomainEventHandler(type = DomainEventType.PAYMENT_FAILED)
 @RequiredArgsConstructor

@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.domain.event.contract.order.BaseOrderEvent;
 import org.atlas.framework.domain.event.contract.product.BaseProductEvent;
 import org.atlas.framework.domain.event.contract.user.BaseUserEvent;
-import org.atlas.framework.messaging.ExternalMessagePublisherPort;
+import org.atlas.framework.messaging.publisher.MessagePublisherPort;
 import org.atlas.framework.util.StringUtil;
 import org.atlas.infrastructure.messaging.rabbitmq.core.common.RabbitmqConstant;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class RabbitmqMessagePublisherAdapter implements ExternalMessagePublisherPort {
+public class RabbitmqMessagePublisherAdapter implements MessagePublisherPort {
 
   private final RabbitTemplate rabbitTemplate;
 

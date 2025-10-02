@@ -15,7 +15,7 @@ import org.atlas.framework.domain.event.contract.user.model.User;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.domain.error.DomainError;
-import org.atlas.framework.messaging.ExternalMessagePublisherPort;
+import org.atlas.framework.messaging.publisher.MessagePublisherPort;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 
 @UseCaseHandler
@@ -26,7 +26,7 @@ public class FrontRegisterUseCaseHandler {
   private final UserRepository userRepository;
   private final @Nullable AuthClientPort authClientPort;
   private final ApplicationConfigPort applicationConfigPort;
-  private final ExternalMessagePublisherPort externalMessagePublisherPort;
+  private final MessagePublisherPort messagePublisherPort;
 
   public Void handle(RegisterInput input) throws Exception {
     checkValidity(input);
@@ -69,6 +69,6 @@ public class FrontRegisterUseCaseHandler {
     User user = ObjectMapperUtil.getInstance().map(userEntity, User.class);
     UserRegisteredEvent event = new UserRegisteredEvent(applicationConfigPort.getApplicationName(),
         user);
-    externalMessagePublisherPort.publish(event);
+    messagePublisherPort.publish(event);
   }
 }

@@ -10,10 +10,10 @@ import org.atlas.domain.order.entity.OrderEntity;
 import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.domain.order.usecase.front.handler.FrontGetOrderStatusUseCaseHandler;
 import org.atlas.domain.order.usecase.front.handler.FrontListOrderUseCaseHandler;
-import org.atlas.domain.order.usecase.front.handler.FrontPlaceOrderUseCaseHandler;
+import org.atlas.domain.order.usecase.front.handler.FrontCheckoutUseCaseHandler;
 import org.atlas.domain.order.usecase.front.model.FrontGetOrderStatusOutput;
 import org.atlas.domain.order.usecase.front.model.FrontListOrderInput;
-import org.atlas.domain.order.usecase.front.model.FrontPlaceOrderInput;
+import org.atlas.domain.order.usecase.front.model.FrontCheckoutInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
@@ -45,7 +45,7 @@ public class OrderController {
 
   private final FrontListOrderUseCaseHandler frontListOrderUseCaseHandler;
   private final FrontGetOrderStatusUseCaseHandler frontGetOrderStatusUseCaseHandler;
-  private final FrontPlaceOrderUseCaseHandler frontPlaceOrderUseCaseHandler;
+  private final FrontCheckoutUseCaseHandler frontCheckoutUseCaseHandler;
 
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "List orders")
@@ -95,10 +95,10 @@ public class OrderController {
   public ApiResponseWrapper<PlaceOrderResponse> placeOrder(
       @Parameter(description = "Order details to create a new order.", required = true)
       @Valid @RequestBody PlaceOrderRequest request) throws Exception {
-    FrontPlaceOrderInput input = ObjectMapperUtil.getInstance()
-        .map(request, FrontPlaceOrderInput.class);
+    FrontCheckoutInput input = ObjectMapperUtil.getInstance()
+        .map(request, FrontCheckoutInput.class);
 
-    OrderEntity order = frontPlaceOrderUseCaseHandler.handle(input);
+    OrderEntity order = frontCheckoutUseCaseHandler.handle(input);
 
     PlaceOrderResponse response = PlaceOrderResponse.builder()
         .orderId(order.getId())

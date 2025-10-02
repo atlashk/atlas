@@ -30,16 +30,10 @@ dependencies {
 
     // Lib
     api 'io.github.resilience4j:resilience4j-spring-boot3:2.3.0'
-    api 'org.springframework.boot:spring-boot-starter-actuator'
-    api 'org.springframework.boot:spring-boot-starter-aop'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-
-    // Testing
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 bootJar {

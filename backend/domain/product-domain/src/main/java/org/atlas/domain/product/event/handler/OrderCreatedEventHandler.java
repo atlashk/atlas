@@ -16,7 +16,7 @@ import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.lock.LockPort;
-import org.atlas.framework.messaging.ExternalMessagePublisherPort;
+import org.atlas.framework.messaging.publisher.MessagePublisherPort;
 
 @DomainEventHandler(type = DomainEventType.ORDER_CREATED)
 @RequiredArgsConstructor
@@ -26,7 +26,7 @@ public class OrderCreatedEventHandler {
   private final ProductRepository productRepository;
   private final ApplicationConfigPort applicationConfigPort;
   private final LockPort lockPort;
-  private final ExternalMessagePublisherPort externalMessagePublisherPort;
+  private final MessagePublisherPort messagePublisherPort;
 
   public void handle(OrderCreatedEvent orderCreatedEvent) {
     try {
@@ -43,7 +43,7 @@ public class OrderCreatedEventHandler {
       ProductReservationSucceededEvent productReservationSucceededEvent =
           new ProductReservationSucceededEvent(applicationConfigPort.getApplicationName(),
               orderCreatedEvent.getOrder());
-      externalMessagePublisherPort.publish(productReservationSucceededEvent);
+      messagePublisherPort.publish(productReservationSucceededEvent);
     } catch (Exception e) {
       log.error("Failed to reserve products: eventId={}, orderId={}, error={}",
           orderCreatedEvent.getEventId(), orderCreatedEvent.getOrder().getId(), e.getMessage(), e);
@@ -53,7 +53,7 @@ public class OrderCreatedEventHandler {
           new ProductReservationFailedEvent(applicationConfigPort.getApplicationName(),
               orderCreatedEvent.getOrder());
       productReservationFailedEvent.setErrorMessage(e.getMessage());
-      externalMessagePublisherPort.publish(productReservationFailedEvent);
+      messagePublisherPort.publish(productReservationFailedEvent);
     }
   }
 

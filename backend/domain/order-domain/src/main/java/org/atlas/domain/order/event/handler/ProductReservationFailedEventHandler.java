@@ -13,7 +13,6 @@ import org.atlas.framework.domain.event.contract.order.ProductReservationFailedE
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.error.DomainError;
-import org.atlas.framework.messaging.InternalMessagePublisherPort;
 
 @DomainEventHandler(type = DomainEventType.PRODUCT_RESERVATION_FAILED)
 @RequiredArgsConstructor

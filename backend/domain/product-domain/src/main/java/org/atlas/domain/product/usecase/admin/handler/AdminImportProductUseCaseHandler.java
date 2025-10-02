@@ -19,7 +19,7 @@ import org.atlas.framework.domain.event.contract.product.model.Product;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.domain.error.DomainError;
-import org.atlas.framework.messaging.ExternalMessagePublisherPort;
+import org.atlas.framework.messaging.publisher.MessagePublisherPort;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.util.CollectionUtil;
 
@@ -30,7 +30,7 @@ public class AdminImportProductUseCaseHandler {
 
   private final ProductRepository productRepository;
   private final ApplicationConfigPort applicationConfigPort;
-  private final ExternalMessagePublisherPort externalMessagePublisherPort;
+  private final MessagePublisherPort messagePublisherPort;
   private final ProductCsvReaderPort productCsvReaderPort;
   private final ProductExcelReaderPort productExcelReaderPort;
 
@@ -57,7 +57,7 @@ public class AdminImportProductUseCaseHandler {
         Product product = ObjectMapperUtil.getInstance().map(productEntity, Product.class);
         ProductCreatedEvent event = new ProductCreatedEvent(
             applicationConfigPort.getApplicationName(), product);
-        externalMessagePublisherPort.publish(event);
+        messagePublisherPort.publish(event);
       });
       log.info("Imported {} products", rows.size());
       return null;

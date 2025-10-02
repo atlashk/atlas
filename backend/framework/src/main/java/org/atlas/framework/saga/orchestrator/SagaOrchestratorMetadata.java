@@ -20,5 +20,4 @@ public class SagaOrchestratorMetadata {
   private Object orchestratorInstance;
   private List<SagaStepMetadata> steps = new ArrayList<>();
   private Method sagaCompletionHandler;
-  private Method sagaFailureHandler;
 }

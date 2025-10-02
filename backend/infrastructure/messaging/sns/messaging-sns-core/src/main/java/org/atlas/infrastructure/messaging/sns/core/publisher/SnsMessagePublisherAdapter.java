@@ -6,7 +6,7 @@ import org.atlas.framework.domain.event.contract.order.BaseOrderEvent;
 import org.atlas.framework.domain.event.contract.product.BaseProductEvent;
 import org.atlas.framework.domain.event.contract.user.BaseUserEvent;
 import org.atlas.framework.json.JsonUtil;
-import org.atlas.framework.messaging.ExternalMessagePublisherPort;
+import org.atlas.framework.messaging.publisher.MessagePublisherPort;
 import org.atlas.infrastructure.messaging.sns.core.common.SnsConstant;
 import org.atlas.infrastructure.messaging.sns.core.common.SnsProps;
 import org.springframework.stereotype.Component;
@@ -17,7 +17,7 @@ import software.amazon.awssdk.services.sns.model.PublishResponse;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class SnsMessagePublisherAdapter implements ExternalMessagePublisherPort {
+public class SnsMessagePublisherAdapter implements MessagePublisherPort {
 
   private final SnsClient snsClient;
   private final SnsProps snsProps;

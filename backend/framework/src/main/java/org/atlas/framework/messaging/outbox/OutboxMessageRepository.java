@@ -1,4 +1,4 @@
-package org.atlas.infrastructure.messaging.outbox.core;
+package org.atlas.framework.messaging.outbox;
 
 import java.util.List;
 
