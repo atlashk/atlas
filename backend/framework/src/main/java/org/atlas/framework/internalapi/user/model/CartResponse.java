@@ -1,5 +1,6 @@
-package org.atlas.framework.saga.event;
+package org.atlas.framework.internalapi.user.model;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,10 +9,10 @@ import lombok.Setter;
 
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Getter
 @Setter
-@Builder
-public class StepCompensationRequest {
+public class CartResponse {
 
-  private Long stepId;
+  private List<CartItemResponse> items;
 }

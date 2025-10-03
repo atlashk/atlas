@@ -18,30 +18,29 @@ public class RedissonLockAdapter implements LockPort {
   private final RedissonClient redissonClient;
 
   @Override
-  public void doWithLock(Runnable task, String key, Duration waitTime, Duration leaseTime,
-      boolean unlockOnCompletion)
-      throws LockAcquisitionException {
+  public boolean acquireLock(String key, Duration waitTime, Duration leaseTime) {
+    RLock lock = redissonClient.getLock(key);
     try {
-      // Try acquiring the lock
-      RLock lock = redissonClient.getLock(key);
-      boolean acquired = lock.tryLock(waitTime.toMillis(), leaseTime.toMillis(),
+      boolean acquiredLock = lock.tryLock(waitTime.toMillis(), leaseTime.toMillis(),
           TimeUnit.MILLISECONDS);
-      if (!acquired) {
-        throw new LockAcquisitionException("Failed to acquire lock for key " + key);
-      }
-      log.info("Acquired lock for key {}", key);
-
-      // Execute the task within the lock
-      task.run();
-
-      // Release the lock if specified
-      if (unlockOnCompletion && lock.isHeldByCurrentThread()) {
-        lock.unlock();
-        log.info("Released lock for key {}", key);
+      if (acquiredLock) {
+        log.info("Acquired lock for key {}", key);
+        return true;
+      } else {
+        log.warn("Failed to acquire lock for key {}", key);
+        return false;
       }
     } catch (InterruptedException e) {
+      log.error("Interrupted while acquiring lock for key {}", key);
       Thread.currentThread().interrupt();
-      throw new LockAcquisitionException("Interrupted while acquiring lock for key " + key, e);
+      return false;
     }
+  }
+
+  @Override
+  public void releaseLock(String key) {
+    RLock lock = redissonClient.getLock(key);
+    lock.unlock();
+    log.info("Released lock for key {}", key);
   }
 }

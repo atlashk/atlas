@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.user.entity.CartEntity;
 import org.atlas.domain.user.repository.CartRepository;
-import org.atlas.domain.user.service.CartAggregator;
+import org.atlas.domain.user.aggregator.CartAggregator;
 import org.atlas.domain.user.usecase.front.model.FrontGetCartInput;
 import org.atlas.framework.cache.Cache;
 import org.atlas.framework.domain.usecase.UseCaseHandler;

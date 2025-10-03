@@ -1,6 +1,5 @@
 package org.atlas.framework.saga.event;
 
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,13 +8,14 @@ import lombok.Setter;
 
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Getter
 @Setter
-@Builder
-public class StepCompensationReply {
+public class SagaCommandReplyEvent {
 
-  private Long stepId;
+  private Long sagaId;
+  private String commandName;
   private boolean success;
+  private String metadata;
   private String errorMessage;
-  private Map<String, Object> metadata;
 }

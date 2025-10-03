@@ -19,9 +19,10 @@ import org.atlas.framework.domain.entity.DomainEntity;
 public class SagaEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
-  private Long sagaId;
-  private String orchestratorName;
-  private Map<String, Object> sagaData;
-  private SagaStatus sagaStatus;
+  private Long id;
+  private String name;
+  private String context;
+  private SagaStatus status;
   private Date completedAt;
+  private String errorMessage;
 }

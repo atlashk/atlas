@@ -1,6 +1,6 @@
 package org.atlas.framework.saga.entity;
 
-public enum SagaStepStatus {
+public enum SagaCommandStatus {
 
   STARTED,
   COMPLETED,

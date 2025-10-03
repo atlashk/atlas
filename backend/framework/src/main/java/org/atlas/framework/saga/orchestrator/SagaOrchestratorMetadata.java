@@ -1,7 +1,6 @@
 package org.atlas.framework.saga.orchestrator;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,8 +15,8 @@ import lombok.Setter;
 @Setter
 public class SagaOrchestratorMetadata {
 
-  private String orchestratorName;
+  private String sagaName;
   private Object orchestratorInstance;
-  private List<SagaStepMetadata> steps = new ArrayList<>();
-  private Method sagaCompletionHandler;
+  private Method startSagaMethod;
+  private List<Method> sagaCommandReplyHandlerMethods;
 }

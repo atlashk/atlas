@@ -4,13 +4,9 @@ public interface SagaEventPublisher {
 
   // ========== Step Events ==========
 
-  void publish(StepExecutionRequest request);
+  void publish(SagaCommandEvent event);
 
-  void publish(StepExecutionReply reply);
+  void publish(SagaCommandReplyEvent event);
 
   // ========== Compensation Events ==========
-
-  void publish(StepCompensationRequest request);
-
-  void publish(StepCompensationReply reply);
 }

@@ -15,15 +15,13 @@ import org.atlas.framework.domain.entity.DomainEntity;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
-public class SagaStepEntity extends DomainEntity {
+public class SagaCommandEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
-  private Long stepId;
+  private Long id;
   private Long sagaId;
-  private String stepName;
-  private Integer stepOrder;
-  private String applicationName;
-  private SagaStepStatus stepStatus;
+  private String name;
+  private SagaCommandStatus status;
   private Date completedAt;
   private String errorMessage;
   private String compensationErrorMessage;

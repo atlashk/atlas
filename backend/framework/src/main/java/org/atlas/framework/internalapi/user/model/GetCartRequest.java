@@ -1,6 +1,5 @@
-package org.atlas.domain.order.entity;
+package org.atlas.framework.internalapi.user.model;
 
-import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,9 +11,7 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-public class ProductEntity {
+public class GetCartRequest {
 
-  private Integer id;
-  private String name;
-  private BigDecimal price;
+  private Integer userId;
 }

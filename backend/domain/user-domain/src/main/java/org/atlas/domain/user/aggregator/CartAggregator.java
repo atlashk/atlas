@@ -1,4 +1,4 @@
-package org.atlas.domain.user.service;
+package org.atlas.domain.user.aggregator;
 
 import java.util.List;
 import java.util.Map;

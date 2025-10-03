@@ -1,4 +1,4 @@
-package org.atlas.framework.saga.event;
+package org.atlas.framework.internalapi.user.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,11 +8,11 @@ import lombok.Setter;
 
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Getter
 @Setter
-@Builder
-public class StepExecutionRequest {
+public class CartItemResponse {
 
-  private String applicationName;
-  private Long stepId;
+  private Integer productId;
+  private Integer quantity;
 }

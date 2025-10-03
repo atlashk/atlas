@@ -3,7 +3,7 @@ package org.atlas.domain.user.usecase.front.handler;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.user.entity.CartEntity;
 import org.atlas.domain.user.repository.CartRepository;
-import org.atlas.domain.user.service.CartAggregator;
+import org.atlas.domain.user.aggregator.CartAggregator;
 import org.atlas.domain.user.usecase.front.model.FrontUpdateCartItemInput;
 import org.atlas.framework.cache.CachePort;
 import org.atlas.framework.cache.Caches;

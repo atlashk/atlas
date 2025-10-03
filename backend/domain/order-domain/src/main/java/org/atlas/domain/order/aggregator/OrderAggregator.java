@@ -1,4 +1,4 @@
-package org.atlas.domain.order.service;
+package org.atlas.domain.order.aggregator;
 
 import java.util.List;
 import java.util.Map;
