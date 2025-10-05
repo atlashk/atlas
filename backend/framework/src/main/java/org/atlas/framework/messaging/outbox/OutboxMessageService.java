@@ -25,9 +25,8 @@ public class OutboxMessageService {
       Object messagePayload = JsonUtil.getInstance()
           .toObject(outboxMessage.getMessagePayload(), messageClass);
 
-      messagePublisherPort.doPublish(messagePayload,
-          outboxMessage.getMessageKey(),
-          outboxMessage.getDestination());
+      messagePublisherPort.publish(outboxMessage.getDestination(), outboxMessage.getMessageKey(),
+          messagePayload);
 
       outboxMessage.markAsProcessed();
     } catch (Exception e) {

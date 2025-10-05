@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.type.MapType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.json.JsonService;
 import org.atlas.framework.util.StringUtil;
@@ -58,6 +60,17 @@ public class JacksonService implements JsonService {
     try {
       return OBJECT_MAPPER.readValue(source,
           OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, type));
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public Map<String, Object> toMap(String source) {
+    try {
+      MapType mapType = OBJECT_MAPPER.getTypeFactory()
+          .constructMapType(Map.class, String.class, Object.class);
+      return OBJECT_MAPPER.readValue(source, mapType);
     } catch (JsonProcessingException e) {
       throw new RuntimeException(e);
     }

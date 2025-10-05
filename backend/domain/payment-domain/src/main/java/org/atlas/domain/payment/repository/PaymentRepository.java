@@ -6,11 +6,11 @@ import org.atlas.domain.payment.entity.PaymentEntity;
 
 public interface PaymentRepository {
 
-  List<PaymentEntity> findByIdIn(List<Integer> ids);
+  List<PaymentEntity> findByOrderIdIn(List<Integer> orderIds);
 
   Optional<PaymentEntity> findById(Integer id);
 
-  void insert(PaymentEntity paymentEntity);
+  void insert(PaymentEntity entity);
 
-  void update(PaymentEntity paymentEntity);
+  void update(PaymentEntity entity);
 }

@@ -1,7 +1,6 @@
 package org.atlas.framework.saga.entity;
 
 import java.util.Date;
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;

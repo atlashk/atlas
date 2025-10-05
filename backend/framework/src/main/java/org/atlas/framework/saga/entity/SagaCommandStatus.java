@@ -7,13 +7,5 @@ public enum SagaCommandStatus {
   FAILED,
   COMPENSATING,
   COMPENSATED,
-  COMPENSATION_FAILED;
-
-  public boolean allowsExecution() {
-    return this != COMPLETED && this != FAILED;
-  }
-
-  public boolean allowsCompensation() {
-    return this == FAILED;
-  }
+  COMPENSATION_FAILED
 }

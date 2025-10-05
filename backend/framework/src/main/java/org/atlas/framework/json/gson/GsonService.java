@@ -10,6 +10,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.json.JsonService;
 
@@ -46,6 +47,13 @@ public class GsonService implements JsonService {
     Type listType = new TypeToken<ArrayList<T>>() {
     }.getType();
     return gson.fromJson(source, listType);
+  }
+
+  @Override
+  public Map<String, Object> toMap(String source) {
+    Type mapType = new TypeToken<Map<String, Object>>() {
+    }.getType();
+    return gson.fromJson(source, mapType);
   }
 
   @Override

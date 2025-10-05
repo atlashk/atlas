@@ -1,5 +1,5 @@
 plugins {
-    id 'java-library'
+    id 'java'
     id 'org.springframework.boot' version "${springBootPluginVersion}"
     id 'io.spring.dependency-management' version "${springDependencyManagementPluginVersion}"
     id 'idea'
@@ -26,7 +26,7 @@ repositories {
 
 dependencies {
     // Framework
-    api project(':framework')
+    implementation project(':framework')
 
     // Lib
     implementation 'org.springframework.cloud:spring-cloud-starter-gateway-server-webflux'
@@ -39,36 +39,36 @@ dependencies {
         case 'none':
             break
         case 'eureka':
-            api project(':infrastructure.discovery-client.eureka')
+            implementation project(':infrastructure.discovery-client.eureka')
             break
         case 'kubernetes':
-            api project(':infrastructure.discovery-client.kubernetes')
+            implementation project(':infrastructure.discovery-client.kubernetes')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['discovery-client']}")
     }
-    api project(':infrastructure.kv.redis.parent')
-    api project(':infrastructure.observability.actuator')
+    implementation project(':infrastructure.kv.redis.parent')
+    implementation project(':infrastructure.observability.actuator')
     switch (rootProject.ext.appStack['observability.logging.framework']) {
         case 'logback':
-            api project(':infrastructure.observability.logging.logback')
+            implementation project(':infrastructure.observability.logging.logback')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.logging.framework']}")
     }
     switch (rootProject.ext.appStack['observability.metrics']) {
         case 'prometheus':
-            api project(':infrastructure.observability.metrics.prometheus')
+            implementation project(':infrastructure.observability.metrics.prometheus')
             break
         case 'cloudwatch':
-            api project(':infrastructure.observability.metrics.cloudwatch')
+            implementation project(':infrastructure.observability.metrics.cloudwatch')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.metrics']}")
     }
     switch (rootProject.ext.appStack['observability.tracing']) {
         case 'zipkin':
-            api project(':infrastructure.observability.tracing.zipkin')
+            implementation project(':infrastructure.observability.tracing.zipkin')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.tracing']}")

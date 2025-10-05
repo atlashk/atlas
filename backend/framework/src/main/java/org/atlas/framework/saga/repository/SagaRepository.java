@@ -7,9 +7,7 @@ public interface SagaRepository {
 
   Optional<SagaEntity> findById(Long sagaId);
 
-  void insert(SagaEntity saga);
+  void insert(SagaEntity entity);
 
-  void update(SagaEntity saga);
-
-  void delete(Long sagaId);
+  void update(SagaEntity entity);
 }

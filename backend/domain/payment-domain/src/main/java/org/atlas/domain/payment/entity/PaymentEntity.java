@@ -15,9 +15,10 @@ import org.atlas.framework.domain.entity.DomainEntity;
 public class PaymentEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
-  private Integer id;
-  private Integer userId;
-  private Integer orderId;
+  private Long id;
+  private Long sagaId;
+  private Long userId;
+  private Long orderId;
   private BigDecimal amount;
   private String currency;
   private PaymentMethod method;

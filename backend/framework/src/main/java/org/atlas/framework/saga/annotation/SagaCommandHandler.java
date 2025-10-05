@@ -4,7 +4,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import org.atlas.framework.saga.command.SagaCommandType;
 import org.springframework.transaction.annotation.Transactional;
 
 @Retention(RetentionPolicy.RUNTIME)
@@ -12,5 +11,5 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public @interface SagaCommandHandler {
 
-  SagaCommandType command();
+  String command();
 }

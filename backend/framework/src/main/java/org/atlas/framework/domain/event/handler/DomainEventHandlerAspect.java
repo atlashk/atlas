@@ -46,16 +46,17 @@ public class DomainEventHandlerAspect {
     Duration leaseTime = Duration.ofDays(7);
 
     try {
-      lockPort.doWithLock(() -> {
-        try {
-          // Handle event
-          result[0] = joinPoint.proceed();
-          event.markAsProcessed();
-        } catch (Throwable e) {
-          exception[0] = e;
-        }
-      }, lockKey, waitTime, leaseTime, false);
-    } catch (LockAcquisitionException e) {
+      // Try to acquire the lock
+      boolean lockAcquired = lockPort.acquireLock(lockKey, waitTime, leaseTime);
+      if (!lockAcquired) {
+        throw new LockAcquisitionException(
+            "Failed to acquire lock for event: " + event.getEventId());
+      }
+
+      // Handle event within the lock
+      result[0] = joinPoint.proceed();
+      event.markAsProcessed();
+    } catch (Exception e) {
       exception[0] = e;
     }
 

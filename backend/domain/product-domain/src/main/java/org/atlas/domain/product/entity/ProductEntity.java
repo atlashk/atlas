@@ -1,21 +1,16 @@
 package org.atlas.domain.product.entity;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.atlas.domain.product.shared.ProductStatus;
 import org.atlas.framework.domain.entity.DomainEntity;
 
@@ -30,24 +25,17 @@ public class ProductEntity extends DomainEntity {
   @EqualsAndHashCode.Include
   private Integer id;
 
-  @NotBlank
   private String name;
 
-  @NotNull
-  @DecimalMin(value = "0.0")
   @Builder.Default
   private BigDecimal price = BigDecimal.ZERO;
 
   private String image;
 
-  @NotNull
-  @PositiveOrZero
   private Integer quantity;
 
-  @NotNull
   private ProductStatus status;
 
-  @NotNull
   private Date availableFrom;
 
   private Boolean isActive;
@@ -55,7 +43,6 @@ public class ProductEntity extends DomainEntity {
   // Associations
 
   // One-To-One
-  @NotNull
   @Valid
   private ProductDetailsEntity details;
 
@@ -64,11 +51,9 @@ public class ProductEntity extends DomainEntity {
   private List<ProductAttributeEntity> attributes;
 
   // Many-To-One
-  @NotNull
   private BrandEntity brand;
 
   // Many-To-Many
-  @NotEmpty
   private List<CategoryEntity> categories;
 
   public void addAttribute(ProductAttributeEntity attribute) {

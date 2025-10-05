@@ -1,6 +1,5 @@
 package org.atlas.domain.product.entity;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,9 +21,7 @@ public class ProductAttributeEntity extends DomainEntity {
 
   private Integer productId;
 
-  @NotBlank
   private String name;
 
-  @NotBlank
   private String value;
 }

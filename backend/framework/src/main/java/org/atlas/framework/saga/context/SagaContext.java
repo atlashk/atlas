@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
 import lombok.Setter;
 import org.atlas.framework.json.JsonUtil;
+import org.atlas.framework.saga.exception.SagaExecutionException;
 
 public class SagaContext {
 
@@ -24,8 +25,23 @@ public class SagaContext {
     data.put(key, value);
   }
 
-  public Object get(String key) {
-    return data.get(key);
+  public <T> T get(String key, Class<T> clazz) {
+    Object value = data.get(key);
+    if (value == null) {
+      return null;
+    }
+
+    if (clazz.isInstance(value)) {
+      return clazz.cast(value);
+    }
+
+    throw new SagaExecutionException(
+        String.format("Value for key '%s' is of type %s, but expected type %s",
+            key, value.getClass().getSimpleName(), clazz.getSimpleName()));
+  }
+
+  public void remove(String key) {
+    data.remove(key);
   }
 
   public void clear() {
@@ -34,5 +50,16 @@ public class SagaContext {
 
   public String serialize() {
     return JsonUtil.getInstance().toJson(data);
+  }
+
+  public static SagaContext deserialize(String serializedContext) {
+    try {
+      Map<String, Object> data = JsonUtil.getInstance().toMap(serializedContext);
+      SagaContext sagaContext = new SagaContext();
+      data.forEach(sagaContext::put);
+      return sagaContext;
+    } catch (Exception e) {
+      throw new SagaExecutionException("Failed to deserialize saga context", e);
+    }
   }
 }

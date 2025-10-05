@@ -1,5 +1,5 @@
 plugins {
-    id 'java-library'
+    id 'java'
     id 'org.springframework.boot' version "${springBootPluginVersion}"
     id 'io.spring.dependency-management' version "${springDependencyManagementPluginVersion}"
     id 'idea'
@@ -26,51 +26,51 @@ repositories {
 
 dependencies {
     // Domain
-    api project(':domain.product')
+    implementation project(':domain.product')
 
     // Infrastructure
     switch (rootProject.ext.appStack['api-client']) {
         case 'grpc-netdevh':
-            api project(':infrastructure.internal-api.product.grpc.netdevh')
+            implementation project(':infrastructure.internal-api.product.grpc.netdevh')
             break
         case 'rest-apachehttpclient':
-            api project(':infrastructure.internal-api.product.rest.apachehttpclient')
+            implementation project(':infrastructure.internal-api.product.rest.apachehttpclient')
             break
         case 'rest-feign':
-            api project(':infrastructure.internal-api.product.rest.feign')
+            implementation project(':infrastructure.internal-api.product.rest.feign')
             break
         case 'rest-restclient':
-            api project(':infrastructure.internal-api.product.rest.restclient')
+            implementation project(':infrastructure.internal-api.product.rest.restclient')
             break
         case 'rest-resttemplate':
-            api project(':infrastructure.internal-api.product.rest.resttemplate')
+            implementation project(':infrastructure.internal-api.product.rest.resttemplate')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-client']}")
     }
     switch (rootProject.ext.appStack['api-server']) {
         case 'rest':
-            api project(':infrastructure.api-server.rest.impl.product')
+            implementation project(':infrastructure.api-server.rest.impl.product')
             break
         case 'grpc':
-            api project(':infrastructure.api-server.grpc.netdevh.impl.product')
+            implementation project(':infrastructure.api-server.grpc.netdevh.impl.product')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
     }
     switch (rootProject.ext.appStack['cache']) {
         case 'redis':
-            api project(':infrastructure.cache.redis')
+            implementation project(':infrastructure.cache.redis')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['cache']}")
     }
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
-            api project(':infrastructure.datasource.mysql.impl.product')
+            implementation project(':infrastructure.datasource.mysql.impl.product')
             break
         case 'postgres':
-            api project(':infrastructure.datasource.postgres.impl.product')
+            implementation project(':infrastructure.datasource.postgres.impl.product')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
@@ -79,64 +79,64 @@ dependencies {
         case 'none':
             break
         case 'eureka':
-            api project(':infrastructure.discovery-client.eureka')
+            implementation project(':infrastructure.discovery-client.eureka')
             break
         case 'kubernetes':
-            api project(':infrastructure.discovery-client.kubernetes')
+            implementation project(':infrastructure.discovery-client.kubernetes')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['discovery-client']}")
     }
     switch (rootProject.ext.appStack['file.csv']) {
         case 'opencsv':
-            api project(':infrastructure.file.csv.opencsv.impl.product')
+            implementation project(':infrastructure.file.csv.opencsv.impl.product')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['file.csv']}")
     }
     switch (rootProject.ext.appStack['file.excel']) {
         case 'easyexcel':
-            api project(':infrastructure.file.excel.easyexcel.impl.product')
+            implementation project(':infrastructure.file.excel.easyexcel.impl.product')
             break
         case 'poi':
-            api project(':infrastructure.file.excel.poi.impl.product')
+            implementation project(':infrastructure.file.excel.poi.impl.product')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['file.excel']}")
     }
     switch (rootProject.ext.appStack['file.pdf']) {
         case 'pdfbox':
-            api project(':infrastructure.file.pdf.pdfbox.impl.product')
+            implementation project(':infrastructure.file.pdf.pdfbox.impl.product')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['file.pdf']}")
     }
     switch (rootProject.ext.appStack['kv']) {
         case 'redis':
-            api project(':infrastructure.kv.redis.parent')
+            implementation project(':infrastructure.kv.redis.parent')
             break
         case 'dynamodb':
-            api project(':infrastructure.kv.dynamodb')
+            implementation project(':infrastructure.kv.dynamodb')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['kv']}")
     }
     switch (rootProject.ext.appStack['lock']) {
         case 'redisson':
-            api project(':infrastructure.lock.redisson')
+            implementation project(':infrastructure.lock.redisson')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['lock']}")
     }
     switch (rootProject.ext.appStack['messaging']) {
         case 'kafka':
-            api project(':infrastructure.messaging.kafka.impl.product')
+            implementation project(':infrastructure.messaging.kafka.impl.product')
             break
         case 'rabbitmq':
-            api project(':infrastructure.messaging.rabbitmq.impl.product')
+            implementation project(':infrastructure.messaging.rabbitmq.impl.product')
             break
         case 'sns':
-            api project(':infrastructure.messaging.sns.impl.product')
+            implementation project(':infrastructure.messaging.sns.impl.product')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['messaging']}")
@@ -145,10 +145,10 @@ dependencies {
         case 'flyway':
             switch (rootProject.ext.appStack['datasource']) {
                 case 'mysql':
-                    api project(':infrastructure.migration.flyway.mysql.impl.product')
+                    implementation project(':infrastructure.migration.flyway.mysql.impl.product')
                     break
                 case 'postgres':
-                    api project(':infrastructure.migration.flyway.postgres.impl.product')
+                    implementation project(':infrastructure.migration.flyway.postgres.impl.product')
                     break
                 default:
                     throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
@@ -157,55 +157,55 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['migration']}")
     }
-    api project(':infrastructure.observability.actuator')
+    implementation project(':infrastructure.observability.actuator')
     switch (rootProject.ext.appStack['observability.logging.framework']) {
         case 'logback':
-            api project(':infrastructure.observability.logging.logback')
+            implementation project(':infrastructure.observability.logging.logback')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.logging.framework']}")
     }
     switch (rootProject.ext.appStack['observability.metrics']) {
         case 'prometheus':
-            api project(':infrastructure.observability.metrics.prometheus')
+            implementation project(':infrastructure.observability.metrics.prometheus')
             break
         case 'cloudwatch':
-            api project(':infrastructure.observability.metrics.cloudwatch')
+            implementation project(':infrastructure.observability.metrics.cloudwatch')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.metrics']}")
     }
     switch (rootProject.ext.appStack['observability.tracing']) {
         case 'zipkin':
-            api project(':infrastructure.observability.tracing.zipkin')
+            implementation project(':infrastructure.observability.tracing.zipkin')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.tracing']}")
     }
     switch (rootProject.ext.appStack['persistence']) {
         case 'jpa':
-            api project(':infrastructure.persistence.jpa.impl.product')
-            api project(':infrastructure.persistence.jpa.impl.outbox')
+            implementation project(':infrastructure.persistence.jpa.impl.product')
+            implementation project(':infrastructure.persistence.jpa.impl.outbox')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['persistence']}")
     }
     switch (rootProject.ext.appStack['scheduler']) {
         case 'spring':
-            api project(':infrastructure.scheduler.spring.impl.outbox')
+            implementation project(':infrastructure.scheduler.spring.impl.outbox')
             break
         case 'quartz':
-            api project(':infrastructure.scheduler.quartz.impl.outbox')
+            implementation project(':infrastructure.scheduler.quartz.impl.outbox')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['scheduler']}")
     }
     switch (rootProject.ext.appStack['storage']) {
         case 'filesystem':
-            api project(':infrastructure.storage.filesystem')
+            implementation project(':infrastructure.storage.filesystem')
             break
         case 's3':
-            api project(':infrastructure.storage.s3')
+            implementation project(':infrastructure.storage.s3')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['storage']}")

@@ -1,12 +1,37 @@
 package org.atlas.framework.saga.event;
 
-public interface SagaEventPublisher {
+import lombok.RequiredArgsConstructor;
+import org.atlas.framework.messaging.publisher.MessagePublisherPort;
+import org.springframework.stereotype.Component;
 
-  // ========== Step Events ==========
+@Component
+@RequiredArgsConstructor
+public class SagaEventPublisher {
 
-  void publish(SagaCommandEvent event);
+  private final MessagePublisherPort messagePublisherPort;
 
-  void publish(SagaCommandReplyEvent event);
+  public void publish(SagaCommandEvent event) {
+    final String destination = String.format("saga.%s.command", event.getSagaName())
+        .toLowerCase();
+    messagePublisherPort.publish(destination, String.valueOf(event.getSagaId()), event);
+  }
 
-  // ========== Compensation Events ==========
+  public void publish(SagaCommandReplyEvent event) {
+    final String destination = String.format("saga.%s.command.reply", event.getSagaName())
+        .toLowerCase();
+    messagePublisherPort.publish(destination, String.valueOf(event.getSagaId()), event);
+  }
+
+  public void publish(SagaCommandCompensationEvent event) {
+    final String destination = String.format("saga.%s.command.compensation", event.getSagaName())
+        .toLowerCase();
+    messagePublisherPort.publish(destination, String.valueOf(event.getSagaId()), event);
+  }
+
+  public void publish(SagaCommandCompensationReplyEvent event) {
+    final String destination = String.format("saga.%s.command.compensation.reply",
+            event.getSagaName())
+        .toLowerCase();
+    messagePublisherPort.publish(destination, String.valueOf(event.getSagaId()), event);
+  }
 }

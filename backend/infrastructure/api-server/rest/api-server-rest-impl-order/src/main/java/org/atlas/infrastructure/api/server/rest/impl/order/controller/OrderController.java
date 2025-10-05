@@ -8,22 +8,22 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.order.entity.OrderEntity;
 import org.atlas.domain.order.shared.OrderStatus;
+import org.atlas.domain.order.usecase.front.handler.FrontCheckoutUseCaseHandler;
 import org.atlas.domain.order.usecase.front.handler.FrontGetOrderStatusUseCaseHandler;
 import org.atlas.domain.order.usecase.front.handler.FrontListOrderUseCaseHandler;
-import org.atlas.domain.order.usecase.front.handler.FrontCheckoutUseCaseHandler;
+import org.atlas.domain.order.usecase.front.model.FrontCheckoutInput;
 import org.atlas.domain.order.usecase.front.model.FrontGetOrderStatusOutput;
 import org.atlas.domain.order.usecase.front.model.FrontListOrderInput;
-import org.atlas.domain.order.usecase.front.model.FrontCheckoutInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingRequest.SortOrder;
 import org.atlas.framework.paging.PagingResult;
+import org.atlas.infrastructure.api.server.rest.impl.order.model.CheckoutRequest;
+import org.atlas.infrastructure.api.server.rest.impl.order.model.CheckoutResponse;
 import org.atlas.infrastructure.api.server.rest.impl.order.model.GetOrderStatusResponse;
 import org.atlas.infrastructure.api.server.rest.impl.order.model.OrderResponse;
-import org.atlas.infrastructure.api.server.rest.impl.order.model.PlaceOrderRequest;
-import org.atlas.infrastructure.api.server.rest.impl.order.model.PlaceOrderResponse;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -80,7 +80,7 @@ public class OrderController {
   @GetMapping(value = "/{orderId}/status", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Get order status")
   public ApiResponseWrapper<GetOrderStatusResponse> getOrderStatus(
-      @Parameter(name = "orderId", description = "ID of the order to retrieve the status for.", example = "123")
+      @Parameter(name = "orderId", description = "ID of the order to retrieve the status for", example = "123")
       @PathVariable("orderId") Integer orderId) throws Exception {
     FrontGetOrderStatusOutput output = frontGetOrderStatusUseCaseHandler.handle(orderId);
 
@@ -89,20 +89,19 @@ public class OrderController {
     return ApiResponseWrapper.success(response);
   }
 
-  @PostMapping(value = "/place", produces = MediaType.APPLICATION_JSON_VALUE)
-  @Operation(summary = "Place order")
+  @PostMapping(value = "/checkout", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Checkout")
   @ResponseStatus(HttpStatus.CREATED)
-  public ApiResponseWrapper<PlaceOrderResponse> placeOrder(
-      @Parameter(description = "Order details to create a new order.", required = true)
-      @Valid @RequestBody PlaceOrderRequest request) throws Exception {
+  public ApiResponseWrapper<CheckoutResponse> checkout(
+      @Parameter(description = "Checkout request", required = true)
+      @Valid @RequestBody CheckoutRequest request) throws Exception {
     FrontCheckoutInput input = ObjectMapperUtil.getInstance()
         .map(request, FrontCheckoutInput.class);
 
-    OrderEntity order = frontCheckoutUseCaseHandler.handle(input);
+    Long sagaId = frontCheckoutUseCaseHandler.handle(input);
 
-    PlaceOrderResponse response = PlaceOrderResponse.builder()
-        .orderId(order.getId())
-        .orderCode(order.getCode())
+    CheckoutResponse response = CheckoutResponse.builder()
+        .sagaId(sagaId)
         .build();
     return ApiResponseWrapper.success(response);
   }

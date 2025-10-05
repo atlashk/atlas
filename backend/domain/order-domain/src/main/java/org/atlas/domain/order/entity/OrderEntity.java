@@ -22,7 +22,8 @@ import org.atlas.framework.util.CollectionUtil;
 public class OrderEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
-  private Integer id;
+  private Long id;
+  private Long sagaId;
   private String code;
   private UserEntity user;
   private List<OrderItemEntity> orderItems;

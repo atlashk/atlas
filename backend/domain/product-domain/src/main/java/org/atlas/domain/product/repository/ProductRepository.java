@@ -20,6 +20,8 @@ public interface ProductRepository {
 
   void insert(ProductEntity productEntity);
 
+  void insertBatch(List<ProductEntity> productEntities);
+
   void update(ProductEntity productEntity);
 
   void decreaseQuantityWithConstraint(Integer id, Integer decrement);
@@ -28,7 +30,7 @@ public interface ProductRepository {
 
   void decreaseQuantityWithOptimisticLock(Integer id, Integer decrement);
 
-  void insertBatch(List<ProductEntity> productEntities);
+  void increaseQuantity(Integer id, Integer increment);
 
   void delete(Integer id);
 }

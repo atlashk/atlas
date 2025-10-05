@@ -3,7 +3,6 @@ package org.atlas.domain.product.service;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.domain.service.DomainService;
 import org.atlas.framework.storage.StorageConfig;
 import org.atlas.framework.storage.StoragePort;
 import org.atlas.framework.storage.model.DeleteFileRequest;
@@ -12,8 +11,9 @@ import org.atlas.framework.storage.model.UploadFileRequest;
 import org.atlas.framework.util.ArrayUtil;
 import org.atlas.framework.util.ImageUtil;
 import org.atlas.framework.util.StringUtil;
+import org.springframework.stereotype.Service;
 
-@DomainService
+@Service
 @RequiredArgsConstructor
 @Slf4j
 public class ProductImageService {

@@ -22,16 +22,24 @@ public class LockAspect {
     Duration waitTime = Duration.of(lock.waitTime(), lock.timeUnit().toChronoUnit());
     Duration leaseTime = Duration.of(lock.leaseTime(), lock.timeUnit().toChronoUnit());
 
-    final Object[] result = new Object[1];
+    // Try to acquire the lock
+    boolean lockAcquired = lockPort.acquireLock(key, waitTime, leaseTime);
+    if (!lockAcquired) {
+      throw new RuntimeException("Failed to acquire lock for key: " + key);
+    }
 
-    lockPort.doWithLock(() -> {
-      try {
-        result[0] = joinPoint.proceed();
-      } catch (Throwable ex) {
-        throw new RuntimeException(ex); // will be unwrapped in AOP
+    try {
+      // Execute the method within the lock
+      return joinPoint.proceed();
+    } finally {
+      // Release the lock if unlockOnCompletion is true
+      if (lock.unlockOnCompletion()) {
+        try {
+          lockPort.releaseLock(key);
+        } catch (Exception e) {
+          log.warn("Failed to release lock for key: {}", key, e);
+        }
       }
-    }, key, waitTime, leaseTime, lock.unlockOnCompletion());
-
-    return result[0];
+    }
   }
 }

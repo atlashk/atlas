@@ -22,6 +22,9 @@ import org.atlas.framework.messaging.publisher.MessagePublisherPort;
 import org.atlas.framework.payment.PaymentGatewayPort;
 import org.atlas.framework.payment.model.PaymentResult;
 import org.atlas.framework.payment.model.WebhookResponse;
+import org.atlas.framework.saga.event.SagaCommandReplyEvent;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.context.ApplicationContext;
 
 @UseCaseHandler
 @RequiredArgsConstructor
@@ -29,8 +32,7 @@ import org.atlas.framework.payment.model.WebhookResponse;
 public class WebhookHandler {
 
   private final PaymentRepository paymentRepository;
-  private final ApplicationConfigPort applicationConfigPort;
-  private final DependencyPort dependencyPort;
+  private final ApplicationContext applicationContext;
   private final MessagePublisherPort messagePublisherPort;
 
   public WebhookResponse handle(PaymentGateway paymentGateway,
@@ -41,18 +43,23 @@ public class WebhookHandler {
     // Find payment gateway port implementation
     String paymentGatewayInstanceName = String.format("%sPaymentGatewayAdapter",
         paymentGateway.name().toLowerCase());
-    PaymentGatewayPort paymentGatewayPort = dependencyPort.getInstanceByName(
-            paymentGatewayInstanceName, PaymentGatewayPort.class)
-        .orElseThrow(() -> new DomainException(DomainError.PAYMENT_GATEWAY_NOT_SUPPORTED));
+    PaymentGatewayPort paymentGatewayPort;
+    try {
+      paymentGatewayPort = applicationContext.getBean(
+          paymentGatewayInstanceName, PaymentGatewayPort.class);
+    } catch (NoSuchBeanDefinitionException e) {
+      throw new DomainException(DomainError.PAYMENT_GATEWAY_NOT_SUPPORTED);
+    }
 
     WebhookResponse response = paymentGatewayPort.handleWebhook(payload, headers);
+    PaymentResult paymentResult = response.getPaymentResult();
+    assert paymentResult != null;
 
     // Execute the remaining tasks asynchronously to be quickly respond the external payment gateway
     AsyncUtil.executeAsync(new AsyncTask() {
       @Override
       public void run() {
         // Update payment entity
-        PaymentResult paymentResult = new PaymentResult();
         PaymentEntity paymentEntity = paymentRepository.findById(paymentResult.getPaymentId())
             .orElseThrow(() -> new DomainException(DomainError.PAYMENT_NOT_FOUND));
         switch (paymentResult.getStatus()) {
@@ -69,33 +76,10 @@ public class WebhookHandler {
         }
         paymentRepository.update(paymentEntity);
 
-        // Publish event
-        Order order = new Order();
-        order.setId(paymentEntity.getOrderId());
-        order.setUserId(paymentEntity.getUserId());
-        order.setAmount(paymentEntity.getAmount());
-        order.setPaymentId(paymentEntity.getId());
-        order.setPaymentMethod(paymentEntity.getMethod());
-        switch (paymentResult.getStatus()) {
-          case SUCCEEDED -> {
-            PaymentSucceededEvent paymentSucceededEvent = new PaymentSucceededEvent(
-                applicationConfigPort.getApplicationName(), order);
-            messagePublisherPort.publish(paymentSucceededEvent);
-          }
-          case FAILED -> {
-            PaymentFailedEvent paymentFailedEvent = new PaymentFailedEvent(
-                applicationConfigPort.getApplicationName(), order);
-            paymentFailedEvent.setErrorCode(paymentResult.getErrorCode());
-            paymentFailedEvent.setErrorMessage(paymentResult.getErrorMessage());
-            messagePublisherPort.publish(paymentFailedEvent);
-          }
-          case CANCELED -> {
-            PaymentCanceledEvent paymentCanceledEvent = new PaymentCanceledEvent(
-                applicationConfigPort.getApplicationName(), order);
-            paymentCanceledEvent.setCancellationReason(paymentResult.getCancellationReason());
-            messagePublisherPort.publish(paymentCanceledEvent);
-          }
-        }
+        // Publish saga command reply event
+        SagaCommandReplyEvent event = SagaCommandReplyEvent.builder()
+            .
+            .build();
       }
 
       @Override

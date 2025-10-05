@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.lock.LockAcquisitionException;
 import org.atlas.framework.lock.LockPort;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;

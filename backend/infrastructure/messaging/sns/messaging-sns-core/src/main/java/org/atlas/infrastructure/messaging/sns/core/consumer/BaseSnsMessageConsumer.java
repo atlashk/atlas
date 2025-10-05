@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.util.CollectionUtil;
 import org.atlas.framework.util.ConcurrentUtil;
-import org.atlas.infrastructure.domain.event.handler.DomainEventDispatcher;
 import org.atlas.infrastructure.messaging.sns.core.common.SnsProps;
 import org.springframework.beans.factory.DisposableBean;
 import software.amazon.awssdk.services.sqs.SqsClient;
@@ -23,7 +22,6 @@ import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 public abstract class BaseSnsMessageConsumer implements DisposableBean {
 
   protected final SnsProps snsProps;
-  private final DomainEventDispatcher domainEventDispatcher;
   private final SqsClient sqsClient;
 
   private final AtomicBoolean isRunning = new AtomicBoolean(true);
@@ -35,6 +33,8 @@ public abstract class BaseSnsMessageConsumer implements DisposableBean {
     isRunning.set(false);
     ConcurrentUtil.gracefulShutdown(executorService);
   }
+
+  protected abstract void handleMessage(Object messagePayload);
 
   protected void consumeMessages(String queueName, String queueUrl) {
     executorService = Executors.newSingleThreadExecutor(r -> {
@@ -65,7 +65,7 @@ public abstract class BaseSnsMessageConsumer implements DisposableBean {
                         .toObject(message.body(), Object.class);
 
                     // Handle message
-                    domainEventDispatcher.dispatch(messagePayload);
+                    handleMessage(messagePayload);
 
                     // Delete message after handling done
                     deleteMessage(message, queueUrl);

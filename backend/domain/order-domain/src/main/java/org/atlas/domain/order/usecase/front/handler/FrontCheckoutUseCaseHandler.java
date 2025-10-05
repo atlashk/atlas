@@ -5,17 +5,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.order.usecase.front.model.FrontCheckoutInput;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.saga.context.SagaContext;
-import org.atlas.framework.saga.lifecycle.DefaultSagaLifecycle;
+import org.atlas.framework.saga.orchestrator.DefaultSagaOrchestrator;
 
 @UseCaseHandler
 @RequiredArgsConstructor
 @Slf4j
 public class FrontCheckoutUseCaseHandler {
 
-  private final DefaultSagaLifecycle sagaOrchestratorManager;
+  private final DefaultSagaOrchestrator sagaOrchestratorManager;
 
-  public void handle(FrontCheckoutInput input) {
-    sagaOrchestratorManager.startSaga("checkout", SagaContext.of("input", input));
-    log.info("Checkout saga started for userId: {}", input.getUserId());
+  public Long handle(FrontCheckoutInput input) {
+    return sagaOrchestratorManager.startSaga("checkout", SagaContext.of("input", input));
   }
 }

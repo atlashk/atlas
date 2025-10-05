@@ -20,6 +20,5 @@ public class ProductDetailsEntity extends DomainEntity {
   @EqualsAndHashCode.Include
   private Integer productId;
 
-  @NotBlank
   private String description;
 }

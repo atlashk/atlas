@@ -2,6 +2,7 @@ package org.atlas.framework.json;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public interface JsonService {
 
@@ -12,6 +13,8 @@ public interface JsonService {
   <T> T toObject(LinkedHashMap<?, ?> source, Class<T> type);
 
   <T> List<T> toList(String source, Class<T> type);
+
+  Map<String, Object> toMap(String source);
 
   String toJson(Object source);
 
