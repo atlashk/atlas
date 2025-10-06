@@ -3,16 +3,15 @@ package org.atlas.infrastructure.messaging.rabbitmq.core.consumer;
 import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.infrastructure.domain.event.handler.DomainEventDispatcher;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 
 @RequiredArgsConstructor
 @Slf4j
-public class BaseRabbitmqMessageConsumer {
+public abstract class BaseRabbitmqMessageConsumer {
 
-  private final DomainEventDispatcher domainEventDispatcher;
+  protected abstract void handleMessage(Object messagePayload);
 
   protected void consumeMessage(@Payload Object messagePayload,
       @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag,
@@ -24,7 +23,7 @@ public class BaseRabbitmqMessageConsumer {
 
     try {
       // Handle message
-      domainEventDispatcher.dispatch(messagePayload);
+      handleMessage(messagePayload);
 
       // Manually acknowledge the message after successful processing
       channel.basicAck(deliveryTag, false);

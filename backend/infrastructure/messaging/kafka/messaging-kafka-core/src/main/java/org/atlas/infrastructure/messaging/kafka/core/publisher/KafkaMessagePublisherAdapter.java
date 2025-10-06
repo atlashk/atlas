@@ -2,12 +2,8 @@ package org.atlas.infrastructure.messaging.kafka.core.publisher;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.domain.event.contract.order.BaseOrderEvent;
-import org.atlas.framework.domain.event.contract.product.BaseProductEvent;
-import org.atlas.framework.domain.event.contract.user.BaseUserEvent;
 import org.atlas.framework.messaging.publisher.MessagePublisherPort;
 import org.atlas.framework.util.StringUtil;
-import org.atlas.infrastructure.messaging.kafka.core.common.KafkaConstant;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
@@ -20,34 +16,7 @@ public class KafkaMessagePublisherAdapter implements MessagePublisherPort {
   private final KafkaTemplate<String, Object> kafkaTemplate;
 
   @Override
-  public void publish(BaseOrderEvent event) {
-    this.doPublish(
-        event,
-        String.valueOf(event.getOrder().getId()),
-        KafkaConstant.TOPIC_ORDER_EVENT
-    );
-  }
-
-  @Override
-  public void publish(BaseProductEvent event) {
-    this.doPublish(
-        event,
-        String.valueOf(event.getProduct().getId()),
-        KafkaConstant.TOPIC_PRODUCT_EVENT
-    );
-  }
-
-  @Override
-  public void publish(BaseUserEvent event) {
-    this.doPublish(
-        event,
-        String.valueOf(event.getUser().getId()),
-        KafkaConstant.TOPIC_USER_EVENT
-    );
-  }
-
-  @Override
-  public void doPublish(Object messagePayload, String messageKey, String topic) {
+  public void publish(String topic, String messageKey, Object messagePayload) {
     if (StringUtil.isBlank(topic)) {
       throw new IllegalArgumentException("Topic must be specified");
     }

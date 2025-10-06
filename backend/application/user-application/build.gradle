@@ -86,19 +86,6 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['lock']}")
     }
-    switch (rootProject.ext.appStack['messaging']) {
-        case 'kafka':
-            implementation project(':infrastructure.messaging.kafka.impl.user')
-            break
-        case 'rabbitmq':
-            implementation project(':infrastructure.messaging.rabbitmq.impl.user')
-            break
-        case 'sns':
-            implementation project(':infrastructure.messaging.sns.impl.user')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['messaging']}")
-    }
     switch (rootProject.ext.appStack['migration']) {
         case 'flyway':
             switch (rootProject.ext.appStack['datasource']) {

@@ -3,19 +3,21 @@ package org.atlas.framework.saga.orchestrator;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.saga.annotation.SagaCommandReplyHandler;
 import org.atlas.framework.saga.context.SagaContext;
 import org.atlas.framework.saga.entity.SagaCommandEntity;
 import org.atlas.framework.saga.entity.SagaCommandStatus;
 import org.atlas.framework.saga.entity.SagaEntity;
 import org.atlas.framework.saga.entity.SagaStatus;
-import org.atlas.framework.saga.event.SagaCommandCompensationEvent;
-import org.atlas.framework.saga.event.SagaCommandCompensationReplyEvent;
 import org.atlas.framework.saga.event.SagaCommandEvent;
 import org.atlas.framework.saga.event.SagaCommandReplyEvent;
-import org.atlas.framework.saga.event.SagaEventPublisher;
+import org.atlas.framework.saga.event.SagaCompensationEvent;
+import org.atlas.framework.saga.event.SagaCompensationReplyEvent;
+import org.atlas.framework.saga.event.SagaEventPublisherPort;
 import org.atlas.framework.saga.exception.SagaCommandNotFoundException;
 import org.atlas.framework.saga.exception.SagaConfigException;
 import org.atlas.framework.saga.exception.SagaExecutionException;
@@ -41,7 +43,8 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
   private final SagaRegistry sagaRegistry;
   private final SagaRepository sagaRepository;
   private final SagaCommandRepository sagaCommandRepository;
-  private final SagaEventPublisher sagaEventPublisher;
+  private final SagaEventPublisherPort sagaEventPublisherPort;
+  private final ApplicationConfigService applicationConfigService;
 
   // Starting saga
   // -----------------------------------------------------------------------------------------------
@@ -50,12 +53,12 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   @Override
   public Long startSaga(String sagaName, SagaContext sagaContext) {
-    log.info("[SAGA_START] Starting saga execution - sagaName={}, context={}", sagaName,
+    log.info("[SAGA_START] Starting saga execution: sagaName={}, context={}", sagaName,
         sagaContext);
 
     // Validate orchestrator exists
-    if (!sagaRegistry.hasOrchestrator(sagaName)) {
-      throw new IllegalArgumentException("Unknown orchestrator for saga: " + sagaName);
+    if (!sagaRegistry.hasSagaMetadata(sagaName)) {
+      throw new IllegalArgumentException("Unknown saga: " + sagaName);
     }
 
     // Create saga entity
@@ -67,19 +70,18 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
     sagaRepository.insert(sagaEntity);
 
     // Execute start saga method
-    SagaMetadata orchestratorMetadata = sagaRegistry.getOrchestrator(
-            sagaName)
+    SagaMetadata sagaMetadata = sagaRegistry.getSagaMetadata(sagaName)
         .orElseThrow(
             () -> new SagaConfigException("Orchestrator metadata not found for saga: " + sagaName));
-    Method startSagaMethod = orchestratorMetadata.getStartSagaMethod();
+    Method startSagaMethod = sagaMetadata.getStartSagaMethod();
     try {
-      startSagaMethod.invoke(orchestratorMetadata.getOrchestratorInstance(), sagaContext);
+      startSagaMethod.invoke(sagaMetadata.getSagaBean(), sagaContext);
     } catch (IllegalAccessException | InvocationTargetException e) {
       sagaEntity.setStatus(SagaStatus.FAILED);
       throw new SagaExecutionException("Failed to start saga: " + sagaName, e);
     }
 
-    log.info("[SAGA_START] Saga started successfully - sagaId={}, sagaName={}", sagaEntity.getId(),
+    log.info("[SAGA_START] Saga started successfully: sagaId={}, sagaName={}", sagaEntity.getId(),
         sagaName);
 
     return sagaEntity.getId();
@@ -91,7 +93,7 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
     SagaEntity sagaEntity = sagaRepository.findById(sagaId)
         .orElseThrow(() -> new SagaNotFoundException("Saga not found: " + sagaId));
 
-    log.debug("[COMMAND_SEND] Sending command - sagaId={}, sagaName={}, sagaCommandName={}",
+    log.debug("[COMMAND_SEND] Sending command: sagaId={}, sagaName={}, sagaCommandName={}",
         sagaId, sagaEntity.getName(), sagaCommandName);
 
     // Persist command
@@ -103,15 +105,14 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
     sagaCommandRepository.insert(sagaCommandEntity);
 
     // Publish command
-    SagaCommandEvent event = SagaCommandEvent.builder()
-        .sagaId(sagaId)
-        .sagaCommandName(sagaCommandEntity.getName())
-        .sagaContext(sagaEntity.getContext())
-        .build();
-    sagaEventPublisher.publish(event);
+    SagaCommandEvent event = new SagaCommandEvent(applicationConfigService.getApplicationName());
+    event.setSagaId(sagaId);
+    event.setSagaCommandName(sagaCommandEntity.getName());
+    event.setSagaContext(sagaEntity.getContext());
+    sagaEventPublisherPort.publish(event);
 
     log.info(
-        "[COMMAND_SEND] Command sent successfully - sagaId={}, sagaName={}, sagaCommandId={}, sagaCommandName={}",
+        "[COMMAND_SEND] Command sent successfully: sagaId={}, sagaName={}, sagaCommandId={}, sagaCommandName={}",
         sagaId, sagaEntity.getName(), sagaCommandEntity.getId(), sagaCommandEntity.getName());
   }
 
@@ -120,17 +121,17 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
     SagaEntity sagaEntity = sagaRepository.findById(sagaId)
         .orElseThrow(() -> new SagaNotFoundException("Saga not found: " + sagaId));
 
-    log.info("[SAGA_END] Ending saga - sagaId={}, sagaName={}, previousStatus={}",
+    log.info("[SAGA_END] Ending saga: sagaId={}, sagaName={}, previousStatus={}",
         sagaId, sagaEntity.getName(), sagaEntity.getStatus());
 
     sagaEntity.setStatus(SagaStatus.COMPLETED);
     sagaRepository.update(sagaEntity);
 
-    log.info("[SAGA_END] Saga completed successfully - sagaId={}, sagaName={}",
+    log.info("[SAGA_END] Saga completed successfully: sagaId={}, sagaName={}",
         sagaId, sagaEntity.getName());
   }
 
-  // Command reply handlers
+  // Command reply handling
   // -----------------------------------------------------------------------------------------------
 
   @Override
@@ -139,6 +140,11 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
     log.debug(
         "[COMMAND_REPLY] Processing command reply: sagaId={}, sagaName={}, sagaCommandName={}, success={}",
         event.getSagaId(), event.getSagaName(), event.getSagaCommandName(), event.isSuccess());
+
+    Optional<SagaMetadata> sagaMetadataOpt = sagaRegistry.getSagaMetadata(event.getSagaName());
+    if (sagaMetadataOpt.isEmpty()) {
+      throw new SagaConfigException("Saga metadata not found for saga: " + event.getSagaName());
+    }
 
     SagaEntity sagaEntity = sagaRepository.findById(event.getSagaId())
         .orElseThrow(() -> new SagaNotFoundException("Saga not found: " + event.getSagaId()));
@@ -156,7 +162,8 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
       sagaCommandRepository.update(sagaCommandEntity);
 
       // Trigger command reply handler
-      triggerSagaCommandReplyHandler(sagaEntity, sagaCommandEntity, event.getResult());
+      triggerSagaCommandReplyHandler(sagaEntity, sagaCommandEntity, sagaMetadataOpt.get(),
+          event.getResult());
     } else {
       // Mark command as FAILED
       sagaCommandEntity.setStatus(SagaCommandStatus.FAILED);
@@ -174,16 +181,9 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
   }
 
   private void triggerSagaCommandReplyHandler(SagaEntity sagaEntity,
-      SagaCommandEntity sagaCommandEntity, Object result) {
-    SagaMetadata sagaMetadata = sagaRegistry.getOrchestrator(
-            sagaEntity.getName())
-        .orElseThrow(
-            () -> new SagaConfigException(
-                "Saga metadata not found for saga: " + sagaEntity.getName()));
-
+      SagaCommandEntity sagaCommandEntity, SagaMetadata sagaMetadata, Object result) {
     // Deserialize saga context
     SagaContext sagaContext = SagaContext.deserialize(sagaEntity.getContext());
-    sagaContext.setSagaId(sagaEntity.getId());
 
     // Find saga command reply handler method
     Method sagaCommandReplyHandlerMethod = sagaMetadata.getSagaCommandReplyHandlerMethods()
@@ -198,11 +198,10 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
             sagaCommandEntity.getName(), sagaEntity.getName())));
 
     try {
-      sagaCommandReplyHandlerMethod.invoke(
-          sagaMetadata.getOrchestratorInstance(), sagaContext, result);
+      sagaCommandReplyHandlerMethod.invoke(sagaMetadata.getSagaBean(), sagaContext, result);
     } catch (IllegalAccessException | InvocationTargetException e) {
       throw new SagaExecutionException(String.format(
-          "Failed to execute command reply handler - sagaId=%d, sagaName=%s, sagaCommandId=%d, sagaCommandName=%s",
+          "Failed to execute command reply handler: sagaId=%d, sagaName=%s, sagaCommandId=%d, sagaCommandName=%s",
           sagaEntity.getId(), sagaEntity.getName(), sagaCommandEntity.getId(),
           sagaCommandEntity.getName()), e);
     }
@@ -214,12 +213,6 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
   private void compensateSaga(SagaEntity sagaEntity) {
     log.info("[SAGA_COMPENSATION] Starting compensation process: sagaId={}, sagaName={}",
         sagaEntity.getId(), sagaEntity.getName());
-
-    SagaMetadata sagaMetadata = sagaRegistry.getOrchestrator(
-            sagaEntity.getName())
-        .orElseThrow(
-            () -> new SagaConfigException(
-                "Orchestrator metadata not found for saga: " + sagaEntity.getName()));
 
     // Get all completed commands for this saga that need compensation
     List<SagaCommandEntity> completedCommands = sagaCommandRepository.findBySagaId(
@@ -257,13 +250,13 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
     sagaCommandRepository.update(sagaCommandEntity);
 
     // Publish compensation as event
-    SagaCommandCompensationEvent event = SagaCommandCompensationEvent.builder()
-        .sagaId(sagaEntity.getId())
-        .sagaName(sagaEntity.getName())
-        .sagaCommandName(sagaCommandEntity.getName())
-        .sagaContext(sagaContext.serialize())
-        .build();
-    sagaEventPublisher.publish(event);
+    SagaCompensationEvent event = new SagaCompensationEvent(
+        applicationConfigService.getApplicationName());
+    event.setSagaId(sagaEntity.getId());
+    event.setSagaName(sagaEntity.getName());
+    event.setSagaCommandName(sagaCommandEntity.getName());
+    event.setSagaContext(sagaContext.serialize());
+    sagaEventPublisherPort.publish(event);
 
     log.info(
         "[COMMAND_COMPENSATION] Compensation event published: sagaId={}, sagaName={}, sagaCommandId={}, sagaCommandName={}",
@@ -271,12 +264,19 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
         sagaCommandEntity.getName());
   }
 
+  // Compensation reply handling
+  // -----------------------------------------------------------------------------------------------
+
   @Override
   @Transactional
-  public void handleSagaCommandCompensationReplyEvent(SagaCommandCompensationReplyEvent event) {
+  public void handleSagaCompensationReplyEvent(SagaCompensationReplyEvent event) {
     log.debug(
         "[COMPENSATION_REPLY] Processing compensation reply: sagaId={}, sagaName={}, sagaCommandName={}, success={}",
         event.getSagaId(), event.getSagaName(), event.getSagaCommandName(), event.isSuccess());
+
+    if (!sagaRegistry.hasSagaMetadata(event.getSagaName())) {
+      throw new SagaConfigException("Saga metadata not found for saga: " + event.getSagaName());
+    }
 
     sagaRepository.findById(event.getSagaId())
         .orElseThrow(() -> new SagaNotFoundException("Saga not found: " + event.getSagaId()));

@@ -1,12 +1,10 @@
 package org.atlas.edge.gateway.springcloudgateway;
 
-import org.atlas.infrastructure.application.context.YamlConfigLoader;
+import org.atlas.framework.bootstrap.YamlConfigLoader;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
-@SpringBootApplication(scanBasePackages = {
-    "org.atlas"
-})
+@SpringBootApplication(scanBasePackages = "org.atlas")
 public class ApiGatewayApplication {
 
   public static void main(String[] args) {

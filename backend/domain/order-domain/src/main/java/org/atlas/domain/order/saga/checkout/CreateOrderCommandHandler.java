@@ -21,12 +21,12 @@ import org.atlas.framework.internalapi.user.model.CartItemResponse;
 import org.atlas.framework.internalapi.user.model.CartResponse;
 import org.atlas.framework.internalapi.user.model.GetCartRequest;
 import org.atlas.framework.lock.LockPort;
-import org.atlas.framework.saga.annotation.SagaCommandCompensationHandler;
+import org.atlas.framework.saga.annotation.SagaCompensationHandler;
 import org.atlas.framework.saga.annotation.SagaCommandHandler;
 import org.atlas.framework.saga.command.CheckoutCommand;
 import org.atlas.framework.saga.context.CheckoutSagaData;
 import org.atlas.framework.saga.context.SagaContext;
-import org.atlas.framework.saga.event.SagaCommandCompensationEvent;
+import org.atlas.framework.saga.event.SagaCompensationEvent;
 import org.atlas.framework.saga.event.SagaCommandEvent;
 import org.atlas.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.framework.sequencegenerator.SequenceType;
@@ -128,8 +128,8 @@ public class CreateOrderCommandHandler {
     return order;
   }
 
-  @SagaCommandCompensationHandler(command = CheckoutCommand.CREATE_ORDER)
-  public void compensateCreateOrder(SagaCommandCompensationEvent event) {
+  @SagaCompensationHandler(command = CheckoutCommand.CREATE_ORDER)
+  public void compensateCreateOrder(SagaCompensationEvent event) {
     SagaContext sagaContext = SagaContext.deserialize(event.getSagaContext());
     OrderEntity order = sagaContext.get("order", OrderEntity.class);
     if (order == null) {

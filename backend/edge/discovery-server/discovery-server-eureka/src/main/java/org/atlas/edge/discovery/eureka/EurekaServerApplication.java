@@ -1,6 +1,6 @@
 package org.atlas.edge.discovery.eureka;
 
-import org.atlas.infrastructure.application.context.YamlConfigLoader;
+import org.atlas.framework.bootstrap.YamlConfigLoader;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;

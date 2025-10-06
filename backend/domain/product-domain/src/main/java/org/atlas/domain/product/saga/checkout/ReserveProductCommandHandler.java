@@ -13,12 +13,12 @@ import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.lock.LockAcquisitionException;
 import org.atlas.framework.lock.LockPort;
-import org.atlas.framework.saga.annotation.SagaCommandCompensationHandler;
+import org.atlas.framework.saga.annotation.SagaCompensationHandler;
 import org.atlas.framework.saga.annotation.SagaCommandHandler;
 import org.atlas.framework.saga.command.CheckoutCommand;
 import org.atlas.framework.saga.context.CheckoutSagaData;
 import org.atlas.framework.saga.context.SagaContext;
-import org.atlas.framework.saga.event.SagaCommandCompensationEvent;
+import org.atlas.framework.saga.event.SagaCompensationEvent;
 import org.atlas.framework.saga.event.SagaCommandEvent;
 import org.springframework.stereotype.Component;
 
@@ -92,8 +92,8 @@ public class ReserveProductCommandHandler {
     }
   }
 
-  @SagaCommandCompensationHandler(command = CheckoutCommand.RESERVE_PRODUCT)
-  public void compensateReserveProduct(SagaCommandCompensationEvent event) {
+  @SagaCompensationHandler(command = CheckoutCommand.RESERVE_PRODUCT)
+  public void compensateReserveProduct(SagaCompensationEvent event) {
     SagaContext sagaContext = SagaContext.deserialize(event.getSagaContext());
     CheckoutSagaData checkoutSagaData = sagaContext.get("data", CheckoutSagaData.class);
     if (checkoutSagaData == null) {

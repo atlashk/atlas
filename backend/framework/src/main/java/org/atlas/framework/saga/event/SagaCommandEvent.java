@@ -1,23 +1,22 @@
 package org.atlas.framework.saga.event;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.framework.saga.command.CheckoutCommand;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Getter
 @Setter
-public class SagaCommandEvent {
+public class SagaCommandEvent extends SagaEvent {
 
-  private Long sagaId;
-  private String sagaName;
   private String sagaCommandName;
   private String sagaContext;
+
+  public SagaCommandEvent(String eventSource) {
+    super(eventSource, SagaEventType.SAGA_COMMAND.name());
+  }
 
   @Override
   public String toString() {

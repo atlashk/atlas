@@ -16,7 +16,7 @@ import lombok.Setter;
 public class SagaMetadata {
 
   private String sagaName;
-  private Object orchestratorInstance;
+  private Object sagaBean;
   private Method startSagaMethod;
   private List<Method> sagaCommandReplyHandlerMethods;
 }

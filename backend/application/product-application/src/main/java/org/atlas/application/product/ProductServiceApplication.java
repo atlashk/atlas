@@ -1,30 +1,10 @@
 package org.atlas.application.product;
 
-import org.atlas.framework.domain.event.handler.DomainEventHandler;
-import org.atlas.framework.domain.service.DomainService;
-import org.atlas.framework.domain.usecase.UseCaseHandler;
-import org.atlas.infrastructure.application.context.YamlConfigLoader;
+import org.atlas.framework.bootstrap.YamlConfigLoader;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 
-@SpringBootApplication
-@ComponentScan(
-    basePackages = {
-        "org.atlas",
-    },
-    includeFilters = {
-        @ComponentScan.Filter(
-            type = FilterType.ANNOTATION,
-            classes = {
-                DomainService.class,
-                UseCaseHandler.class,
-                DomainEventHandler.class
-            }
-        )
-    }
-)
+@SpringBootApplication(scanBasePackages = "org.atlas")
 public class ProductServiceApplication {
 
   public static void main(String[] args) {

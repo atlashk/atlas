@@ -6,13 +6,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.saga.annotation.SagaCommandReplyHandler;
 import org.atlas.framework.saga.annotation.Saga;
+import org.atlas.framework.saga.annotation.SagaCommandReplyHandler;
 import org.atlas.framework.saga.annotation.StartSaga;
 import org.atlas.framework.saga.context.SagaContext;
 import org.atlas.framework.saga.exception.SagaConfigException;
@@ -22,7 +21,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 /**
- * Enhanced registry for saga orchestrators and their steps. Provides efficient caching and
+ * Enhanced registry for sagas. Provides efficient caching and
  * validation of saga configurations with optimized reflection operations.
  */
 @Component
@@ -32,120 +31,96 @@ public class SagaRegistry implements InitializingBean {
 
   private final ApplicationContext applicationContext;
 
-  // Thread-safe caches for saga orchestrator metadata
-  private final Map<String, SagaMetadata> orchestrators = new ConcurrentHashMap<>();
+  // Thread-safe caches for saga metadata
+  private final Map<String, SagaMetadata> sagaMetadataMap = new ConcurrentHashMap<>();
 
   // Cache for reflection results to avoid repeated scanning
   private final Map<Class<?>, List<Method>> methodCache = new ConcurrentHashMap<>();
 
   /**
-   * Initialize the registry by discovering and registering all saga orchestrators
+   * Initialize the registry by discovering and registering all sagas in the application context
    */
   @Override
   public void afterPropertiesSet() throws Exception {
-    registerOrchestrators();
-    log.info("Registered {} saga orchestrators successfully", orchestrators.size());
+    registerSagas();
+    log.info("Registered {} saga metadata successfully", sagaMetadataMap.size());
   }
 
   /**
-   * Get orchestrator metadata by saga name
+   * Get saga metadata by saga name
    *
    * @param sagaName the name of the saga
-   * @return Optional containing the orchestrator metadata if found
+   * @return Optional containing the saga metadata if found
    */
-  public Optional<SagaMetadata> getOrchestrator(String sagaName) {
+  public Optional<SagaMetadata> getSagaMetadata(String sagaName) {
     if (StringUtil.isBlank(sagaName)) {
       return Optional.empty();
     }
-    return Optional.ofNullable(orchestrators.get(sagaName));
+    return Optional.ofNullable(sagaMetadataMap.get(sagaName));
   }
 
   /**
-   * Check if an orchestrator exists for the given saga name
+   * Check if a saga exists for the given saga name
    *
    * @param sagaName the name of the saga
-   * @return true if orchestrator exists, false otherwise
+   * @return true if saga exists, false otherwise
    */
-  public boolean hasOrchestrator(String sagaName) {
-    return StringUtil.isNotBlank(sagaName) && orchestrators.containsKey(sagaName);
+  public boolean hasSagaMetadata(String sagaName) {
+    return StringUtil.isNotBlank(sagaName) && sagaMetadataMap.containsKey(sagaName);
   }
 
   /**
-   * Get all registered saga names for monitoring and debugging
-   *
-   * @return Set of all registered saga names
+   * Register all sagas from the application context
    */
-  public Set<String> getAllSagaNames() {
-    return Set.copyOf(orchestrators.keySet());
-  }
-
-  /**
-   * Get the total number of registered orchestrators
-   *
-   * @return number of registered orchestrators
-   */
-  public int getOrchestratorCount() {
-    return orchestrators.size();
-  }
-
-  /**
-   * Register all saga orchestrators from the application context
-   */
-  private void registerOrchestrators() {
-    Map<String, Object> orchestratorBeans = applicationContext.getBeansWithAnnotation(
+  private void registerSagas() {
+    Map<String, Object> sagaBeans = applicationContext.getBeansWithAnnotation(
         Saga.class);
-    log.debug("Found {} potential saga orchestrator beans", orchestratorBeans.size());
+    log.debug("Found {} potential saga beans", sagaBeans.size());
 
-    if (orchestratorBeans.isEmpty()) {
-      log.warn("No saga orchestrator beans found in application context");
+    if (sagaBeans.isEmpty()) {
+      log.warn("No saga beans found in application context");
       return;
     }
 
-    orchestratorBeans.forEach((beanName, bean) -> {
+    sagaBeans.forEach((sagaBeanName, sagaBean) -> {
       try {
-        registerOrchestrator(bean, beanName);
+        registerSaga(sagaBean, sagaBeanName);
       } catch (Exception e) {
         throw new SagaConfigException(
-            String.format("Failed to register saga orchestrator for bean '%s': %s",
-                beanName, e.getMessage()), e);
+            String.format("Failed to register saga for bean '%s': %s", sagaBeanName,
+                e.getMessage()), e);
       }
     });
   }
 
-  /**
-   * Register a single orchestrator and its steps
-   */
-  private void registerOrchestrator(Object orchestratorBean, String beanName) {
-    if (orchestratorBean == null) {
-      throw new SagaConfigException("Orchestrator bean cannot be null for bean: " + beanName);
+  private void registerSaga(Object sagaBean, String beanName) {
+    if (sagaBean == null) {
+      throw new SagaConfigException("Saga bean cannot be null for bean: " + beanName);
     }
 
-    Class<?> orchestratorClass = orchestratorBean.getClass();
-    Saga sagaAnnotation = orchestratorClass.getAnnotation(
-        Saga.class);
+    Class<?> sagaClass = sagaBean.getClass();
+    Saga sagaAnnotation = sagaClass.getAnnotation(Saga.class);
 
     if (sagaAnnotation == null) {
       throw new SagaConfigException(
-          String.format("Bean '%s' is missing @SagaOrchestrator annotation", beanName));
+          String.format("Bean '%s' is missing @Saga annotation", beanName));
     }
 
     String sagaName = sagaAnnotation.sagaName();
     if (StringUtil.isBlank(sagaName)) {
       throw new SagaConfigException(
-          String.format("Saga name cannot be empty for orchestrator bean '%s'", beanName));
+          String.format("Saga name cannot be empty for saga bean '%s'", beanName));
     }
 
-    // Check for duplicate orchestrator names
-    if (orchestrators.containsKey(sagaName)) {
+    // Check for duplicate saga names
+    if (sagaMetadataMap.containsKey(sagaName)) {
       throw new SagaConfigException(
-          String.format("Duplicate saga orchestrator name '%s' found in bean '%s'", sagaName,
-              beanName));
+          String.format("Duplicate saga name '%s' found in bean '%s'", sagaName, beanName));
     }
 
     // Discover and validate annotated methods
-    Method startSagaMethod = findStartSagaMethod(orchestratorClass);
-    List<Method> sagaCommandReplyHandlerMethods = findSagaCommandReplyHandlerMethods(
-        orchestratorClass);
+    Method startSagaMethod = findStartSagaMethod(sagaClass);
+    List<Method> sagaCommandReplyHandlerMethods = findSagaCommandReplyHandlerMethods(sagaClass);
 
     // Validate method signatures
     validateStartSagaMethod(startSagaMethod, sagaName);
@@ -153,25 +128,25 @@ public class SagaRegistry implements InitializingBean {
       validateSagaCommandReplyHandlerMethod(sagaCommandReplyHandlerMethod, sagaName);
     }
 
-    // Register orchestrator instance
+    // Register saga metadata instance
     SagaMetadata sagaMetadata = SagaMetadata.builder()
         .sagaName(sagaName)
-        .orchestratorInstance(orchestratorBean)
+        .sagaBean(sagaBean)
         .startSagaMethod(startSagaMethod)
         .sagaCommandReplyHandlerMethods(sagaCommandReplyHandlerMethods)
         .build();
 
-    orchestrators.put(sagaName, sagaMetadata);
+    sagaMetadataMap.put(sagaName, sagaMetadata);
 
-    log.debug("Registered orchestrator for saga '{}' with {} reply handlers from bean '{}'",
+    log.debug("Registered metadata for saga '{}' with {} reply handlers from bean '{}'",
         sagaName, sagaCommandReplyHandlerMethods.size(), beanName);
   }
 
   /**
    * Find the @StartSaga annotated method using cached reflection results
    */
-  private Method findStartSagaMethod(Class<?> orchestratorClass) {
-    List<Method> methods = getCachedMethods(orchestratorClass);
+  private Method findStartSagaMethod(Class<?> sagaClass) {
+    List<Method> methods = getCachedMethods(sagaClass);
 
     List<Method> startSagaMethods = methods.stream()
         .filter(method -> method.isAnnotationPresent(StartSaga.class))
@@ -179,15 +154,14 @@ public class SagaRegistry implements InitializingBean {
 
     if (startSagaMethods.isEmpty()) {
       throw new SagaConfigException(
-          String.format("No @StartSaga method found in orchestrator: %s",
-              orchestratorClass.getName()));
+          String.format("No @StartSaga method found in saga bean: %s", sagaClass.getName()));
     }
 
     if (startSagaMethods.size() > 1) {
       throw new SagaConfigException(
           String.format(
-              "Multiple @StartSaga methods found in orchestrator: %s. Only one is allowed.",
-              orchestratorClass.getName()));
+              "Multiple @StartSaga methods found in saga bean: %s. Only one is allowed.",
+              sagaClass.getName()));
     }
 
     return startSagaMethods.get(0);
@@ -196,9 +170,8 @@ public class SagaRegistry implements InitializingBean {
   /**
    * Find all @SagaCommandReplyHandler annotated methods using cached reflection results
    */
-  private List<Method> findSagaCommandReplyHandlerMethods(Class<?> orchestratorClass) {
-    List<Method> methods = getCachedMethods(orchestratorClass);
-
+  private List<Method> findSagaCommandReplyHandlerMethods(Class<?> sagaClass) {
+    List<Method> methods = getCachedMethods(sagaClass);
     return methods.stream()
         .filter(method -> method.isAnnotationPresent(SagaCommandReplyHandler.class))
         .collect(Collectors.toList());
@@ -207,8 +180,8 @@ public class SagaRegistry implements InitializingBean {
   /**
    * Get cached methods for a class to avoid repeated reflection operations
    */
-  private List<Method> getCachedMethods(Class<?> clazz) {
-    return methodCache.computeIfAbsent(clazz, k -> Arrays.asList(k.getDeclaredMethods()));
+  private List<Method> getCachedMethods(Class<?> sagaClass) {
+    return methodCache.computeIfAbsent(sagaClass, k -> Arrays.asList(k.getDeclaredMethods()));
   }
 
   /**

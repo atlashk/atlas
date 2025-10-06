@@ -7,12 +7,13 @@ import java.util.Map;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.saga.annotation.SagaCommandHandler;
 import org.atlas.framework.saga.context.SagaContext;
 import org.atlas.framework.saga.entity.SagaEntity;
 import org.atlas.framework.saga.event.SagaCommandEvent;
 import org.atlas.framework.saga.event.SagaCommandReplyEvent;
-import org.atlas.framework.saga.event.SagaEventPublisher;
+import org.atlas.framework.saga.event.SagaEventPublisherPort;
 import org.atlas.framework.saga.exception.SagaConfigException;
 import org.atlas.framework.saga.exception.SagaNotFoundException;
 import org.atlas.framework.saga.repository.SagaRepository;
@@ -47,8 +48,9 @@ import org.springframework.stereotype.Component;
 public class SagaCommandHandlerDispatcher implements InitializingBean {
 
   private final SagaRepository sagaRepository;
+  private final SagaEventPublisherPort sagaEventPublisherPort;
   private final ApplicationContext applicationContext;
-  private final SagaEventPublisher sagaEventPublisher;
+  private final ApplicationConfigService applicationConfigService;
 
   // One handler per command
   private final Map<String, CachedHandlerMethod> cachedHandlerMethods = new HashMap<>();
@@ -128,13 +130,15 @@ public class SagaCommandHandlerDispatcher implements InitializingBean {
       Object result, Exception exception) {
     SagaCommandReplyEvent replyEvent;
     if (exception != null) {
-      replyEvent = SagaCommandReplyEvent.failure(sagaEntity, sagaCommandType, exception);
+      replyEvent = SagaCommandReplyEvent.failure(
+          applicationConfigService.getApplicationName(), sagaEntity, sagaCommandType, exception);
       log.debug("Publishing event for saga command failure reply: {}", replyEvent);
     } else {
-      replyEvent = SagaCommandReplyEvent.success(sagaEntity, sagaCommandType, result);
+      replyEvent = SagaCommandReplyEvent.success(
+          applicationConfigService.getApplicationName(), sagaEntity, sagaCommandType, result);
       log.debug("Publishing event for saga command success reply: {}", replyEvent);
     }
-    sagaEventPublisher.publish(replyEvent);
+    sagaEventPublisherPort.publish(replyEvent);
   }
 
   /**

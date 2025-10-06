@@ -9,32 +9,45 @@ app:
   messaging:
     rabbitmq:
       exchanges:
-        - name: user_event
-          type: TOPIC
-        - name: product_event
-          type: TOPIC
-        - name: order_event
+        - name: saga.checkout
           type: TOPIC
       queues:
-        # Product service
-        - name: product_svc.order_event
         # Order service
-        - name: order_svc.order_event
+        - name: order_svc.saga.checkout.command
+        - name: order_svc.saga.checkout.compensation
+        - name: order_svc.saga.checkout.command.reply
+        - name: order_svc.saga.checkout.compensation.reply
+        # Product service
+        - name: product_svc.saga.checkout.command
+        - name: product_svc.saga.checkout.compensation
         # Payment service
-        - name: payment_svc.order_event
+        - name: payment_svc.saga.checkout.command
+        - name: payment_svc.saga.checkout.compensation
       bindings:
-        # Product service
-        - exchange: order_event
-          queue: product_svc.order_event
-          routing-key: ORDER_CREATED
         # Order service
-        - exchange: order_event
-          queue: order_svc.order_event
-          routing-key: PRODUCT_RESERVATION_*
-        - exchange: order_event
-          queue: order_svc.order_event
-          routing-key: PAYMENT_*
+        - exchange: saga.checkout
+          queue: order_svc.saga.checkout.command
+          routing-key: saga.checkout.command
+        - exchange: saga.checkout
+          queue: order_svc.saga.checkout.compensation
+          routing-key: saga.checkout.compensation
+        - exchange: saga.checkout
+          queue: order_svc.saga.checkout.command.reply
+          routing-key: saga.checkout.command.reply
+        - exchange: saga.checkout
+          queue: order_svc.saga.checkout.compensation.reply
+          routing-key: saga.checkout.compensation.reply
+        # Product service
+        - exchange: saga.checkout
+          queue: product_svc.saga.checkout.command
+          routing-key: saga.checkout.command
+        - exchange: saga.checkout
+          queue: product_svc.saga.checkout.compensation
+          routing-key: saga.checkout.compensation
         # Payment service
-        - exchange: order_event
-          queue: payment_svc.order_event
-          routing-key: PRODUCT_RESERVATION_SUCCEEDED
+        - exchange: saga.checkout
+          queue: payment_svc.saga.checkout.command
+          routing-key: saga.checkout.command
+        - exchange: saga.checkout
+          queue: payment_svc.saga.checkout.compensation
+          routing-key: saga.checkout.compensation

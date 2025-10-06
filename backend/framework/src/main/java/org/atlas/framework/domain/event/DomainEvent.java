@@ -11,32 +11,20 @@ import org.atlas.framework.util.UUIDGenerator;
 @NoArgsConstructor
 @Getter
 @Setter
-public abstract class DomainEvent implements Serializable {
+public class DomainEvent implements Serializable {
 
-  private String eventId;
-  private String eventSource;
-  private Long timestamp;
-  private Date processedAt;
-  private Long version;
+  protected String eventId;
+  protected String eventType;
+  protected String eventSource;
+  protected Long timestamp;
+  protected Date processedAt;
+  protected Long version;
 
-  public DomainEvent(String eventSource) {
+  public DomainEvent(String eventSource, String eventType) {
     this.eventId = UUIDGenerator.generate();
+    this.eventType = eventType;
     this.eventSource = eventSource;
     this.timestamp = Instant.now().toEpochMilli();
     this.version = 0L;
-  }
-
-  public abstract DomainEventType getDomainEventType();
-
-  public void markAsProcessed() {
-    this.processedAt = new Date();
-  }
-
-  public boolean isProcessed() {
-    return processedAt != null;
-  }
-
-  public void incrementVersion() {
-    this.version++;
   }
 }
