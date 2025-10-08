@@ -59,7 +59,7 @@ public class JpaOptimisticProductEntity extends JpaBaseEntity {
   private JpaBrandEntity brand;
 
   @Version
-  private long version;
+  private Integer version;
 
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   @JoinColumn(name = "id", referencedColumnName = "product_id")

@@ -19,8 +19,8 @@ public class JpaPaymentRepositoryAdapter implements PaymentRepository {
   private final JpaPaymentRepository jpaPaymentRepository;
 
   @Override
-  public List<PaymentEntity> findByIdIn(List<Integer> ids) {
-    List<JpaPaymentEntity> jpaPaymentEntities = jpaPaymentRepository.findAllById(ids);
+  public List<PaymentEntity> findByOrderIdIn(List<Integer> orderIds) {
+    List<JpaPaymentEntity> jpaPaymentEntities = jpaPaymentRepository.findByOrderIdIn(orderIds);
     return ObjectMapperUtil.getInstance()
         .mapList(jpaPaymentEntities, PaymentEntity.class);
   }

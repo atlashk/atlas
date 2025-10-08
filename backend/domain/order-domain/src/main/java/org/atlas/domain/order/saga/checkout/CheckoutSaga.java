@@ -15,7 +15,7 @@ import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.framework.async.AsyncTask;
 import org.atlas.framework.async.AsyncUtil;
 import org.atlas.framework.config.ApplicationConfigService;
-import org.atlas.framework.constant.Application;
+import org.atlas.framework.constant.Services;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.notification.email.Attachment;
@@ -49,7 +49,8 @@ public class CheckoutSaga {
 
   @StartSaga
   public void startSaga(SagaContext context) {
-    sagaOrchestrator.sendCommand(context.getSagaId(), CheckoutCommand.CREATE_ORDER);
+    sagaOrchestrator.sendCommand(
+        context.getSagaId(), CheckoutCommand.CREATE_ORDER, Services.ORDER_SERVICE);
   }
 
   @SagaCommandReplyHandler(command = CheckoutCommand.CREATE_ORDER)
@@ -58,7 +59,8 @@ public class CheckoutSaga {
     sagaContext.remove("input");
     sagaContext.put("data", result);
 
-    sagaOrchestrator.sendCommand(sagaContext.getSagaId(), CheckoutCommand.RESERVE_PRODUCT);
+    sagaOrchestrator.sendCommand(
+        sagaContext.getSagaId(), CheckoutCommand.RESERVE_PRODUCT, Services.PRODUCT_SERVICE);
   }
 
   @SagaCommandReplyHandler(command = CheckoutCommand.RESERVE_PRODUCT)
@@ -70,7 +72,16 @@ public class CheckoutSaga {
     order.setStatus(OrderStatus.AWAITING_PAYMENT);
     orderRepository.update(order);
 
-    sagaOrchestrator.sendCommand(sagaContext.getSagaId(), CheckoutCommand.INITIALIZE_PAYMENT);
+    sagaOrchestrator.sendCommand(
+        sagaContext.getSagaId(), CheckoutCommand.INITIALIZE_PAYMENT, Services.PAYMENT_SERVICE);
+  }
+
+  @SagaCommandReplyHandler(command = CheckoutCommand.INITIALIZE_PAYMENT)
+  public void handleInitializePaymentReply(SagaContext sagaContext) {
+    // Explicitly create command for processing payment
+    sagaOrchestrator.createCommand(
+        sagaContext.getSagaId(), CheckoutCommand.PROCESS_PAYMENT,
+        Services.EXTERNAL_PAYMENT_SERVICE);
   }
 
   @SagaCommandReplyHandler(command = CheckoutCommand.PROCESS_PAYMENT)
@@ -96,7 +107,7 @@ public class CheckoutSaga {
   }
 
   private CheckoutSagaData getCheckoutSagaData(SagaContext sagaContext) {
-    CheckoutSagaData checkoutSagaData = sagaContext.get("data", CheckoutSagaData.class);
+    CheckoutSagaData checkoutSagaData = sagaContext.get("order", CheckoutSagaData.class);
     if (checkoutSagaData == null) {
       throw new IllegalArgumentException("Checkout data is required in the saga context");
     }
@@ -138,7 +149,7 @@ public class CheckoutSaga {
         attachment = new Attachment(attachmentFile.getName(), attachmentFile);
 
         String sender = Optional.ofNullable(
-                applicationConfigService.getConfig(Application.SYSTEM, "email.sender"))
+                applicationConfigService.getConfig("email.sender", null))
             .orElseThrow(() -> new IllegalStateException("email.sender is not configured"));
 
         EmailNotification notification = new EmailNotification.Builder()

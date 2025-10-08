@@ -3,6 +3,7 @@ package org.atlas.infrastructure.messaging.kafka.core.publisher;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.atlas.framework.messaging.publisher.MessagePublisherPort;
+import org.atlas.framework.messaging.publisher.PublishRequest;
 import org.atlas.framework.saga.messaging.SagaMessagePublisherPort;
 import org.atlas.framework.saga.messaging.payload.SagaCommand;
 import org.atlas.framework.saga.messaging.payload.SagaCommandReply;
@@ -17,40 +18,44 @@ public class KafkaSagaMessagePublisherAdapter implements SagaMessagePublisherPor
   private final MessagePublisherPort messagePublisherPort;
 
   @Override
-  public void publish(SagaCommand message) {
-    MessageDestination destination = MessageDestination.builder()
+  public void publish(SagaCommand command) {
+    PublishRequest request = PublishRequest.builder()
         .destination(String.format("saga.%s.command.%s",
-            message.getSagaName(), message.getTargetServiceName()))
-        .routingAttributes(Map.of("messageKey", message.getSagaId()))
+            command.getSagaName(), command.getTargetServiceName()))
+        .routingAttributes(Map.of("messageKey", command.getSagaId()))
+        .messagePayload(command)
         .build();
-    messagePublisherPort.publish(destination, message);
+    messagePublisherPort.publish(request);
   }
 
   @Override
-  public void publish(SagaCommandReply message) {
-    MessageDestination destination = MessageDestination.builder()
-        .destination(String.format("saga.%s.commandreply", message.getSagaName()))
-        .routingAttributes(Map.of("messageKey", message.getSagaId()))
+  public void publish(SagaCommandReply reply) {
+    PublishRequest request = PublishRequest.builder()
+        .destination(String.format("saga.%s.commandreply", reply.getSagaName()))
+        .routingAttributes(Map.of("messageKey", reply.getSagaId()))
+        .messagePayload(reply)
         .build();
-    messagePublisherPort.publish(destination, message);
+    messagePublisherPort.publish(request);
   }
 
   @Override
-  public void publish(SagaCompensation message) {
-    MessageDestination destination = MessageDestination.builder()
+  public void publish(SagaCompensation compensation) {
+    PublishRequest request = PublishRequest.builder()
         .destination(String.format("saga.%s.compensation.%s",
-            message.getSagaName(), message.getTargetServiceName()))
-        .routingAttributes(Map.of("messageKey", message.getSagaId()))
+            compensation.getSagaName(), compensation.getTargetServiceName()))
+        .routingAttributes(Map.of("messageKey", compensation.getSagaId()))
+        .messagePayload(compensation)
         .build();
-    messagePublisherPort.publish(destination, message);
+    messagePublisherPort.publish(request);
   }
 
   @Override
-  public void publish(SagaCompensationReply message) {
-    MessageDestination destination = MessageDestination.builder()
-        .destination(String.format("saga.%s.compensationreply", message.getSagaName()))
-        .routingAttributes(Map.of("messageKey", message.getSagaId()))
+  public void publish(SagaCompensationReply reply) {
+    PublishRequest request = PublishRequest.builder()
+        .destination(String.format("saga.%s.compensationreply", reply.getSagaName()))
+        .routingAttributes(Map.of("messageKey", reply.getSagaId()))
+        .messagePayload(reply)
         .build();
-    messagePublisherPort.publish(destination, message);
+    messagePublisherPort.publish(request);
   }
 }

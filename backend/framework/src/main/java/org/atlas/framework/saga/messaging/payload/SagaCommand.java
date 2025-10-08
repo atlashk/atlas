@@ -1,5 +1,6 @@
 package org.atlas.framework.saga.messaging.payload;
 
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,9 +12,9 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-public class SagaCommand {
+public class SagaCommand implements Serializable {
 
-  private Long sagaId;
+  private Integer sagaId;
   private String sagaName;
   private String sagaCommandName;
   private String targetServiceName;

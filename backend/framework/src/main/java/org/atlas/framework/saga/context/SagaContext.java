@@ -11,7 +11,7 @@ public class SagaContext {
 
   @Getter
   @Setter
-  private Long sagaId;
+  private Integer sagaId;
 
   private final Map<String, Object> data = new ConcurrentHashMap<>();
 

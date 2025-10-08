@@ -16,5 +16,5 @@ import lombok.Setter;
 public class CheckoutResponse {
 
   @Schema(description = "The identifier of saga")
-  private Long sagaId;
+  private Integer sagaId;
 }

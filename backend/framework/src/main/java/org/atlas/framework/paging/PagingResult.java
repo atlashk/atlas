@@ -44,7 +44,7 @@ public class PagingResult<T> {
   }
 
   @Getter
-@Setter
+  @Setter
   public static class Pagination {
 
     private int currentPage;

@@ -9,20 +9,16 @@ import org.atlas.domain.payment.shared.PaymentGateway;
 import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.framework.async.AsyncTask;
 import org.atlas.framework.async.AsyncUtil;
-import org.atlas.framework.config.ApplicationConfigPort;
-import org.atlas.framework.dependency.DependencyPort;
-import org.atlas.framework.domain.event.contract.order.PaymentCanceledEvent;
-import org.atlas.framework.domain.event.contract.order.PaymentFailedEvent;
-import org.atlas.framework.domain.event.contract.order.PaymentSucceededEvent;
-import org.atlas.framework.domain.event.contract.order.model.Order;
+import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
-import org.atlas.framework.domain.error.DomainError;
-import org.atlas.framework.messaging.publisher.MessagePublisherPort;
 import org.atlas.framework.payment.PaymentGatewayPort;
 import org.atlas.framework.payment.model.PaymentResult;
 import org.atlas.framework.payment.model.WebhookResponse;
-import org.atlas.framework.saga.event.SagaCommandReplyEvent;
+import org.atlas.framework.saga.command.CheckoutCommand;
+import org.atlas.framework.saga.command.SagaCommandResult;
+import org.atlas.framework.saga.messaging.SagaMessagePublisherPort;
+import org.atlas.framework.saga.messaging.payload.SagaCommandReply;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 
@@ -33,7 +29,7 @@ public class WebhookHandler {
 
   private final PaymentRepository paymentRepository;
   private final ApplicationContext applicationContext;
-  private final MessagePublisherPort messagePublisherPort;
+  private final SagaMessagePublisherPort sagaMessagePublisherPort;
 
   public WebhookResponse handle(PaymentGateway paymentGateway,
       Map<String, Object> payload, Map<String, String> headers) {
@@ -76,10 +72,20 @@ public class WebhookHandler {
         }
         paymentRepository.update(paymentEntity);
 
-        // Publish saga command reply event
-        SagaCommandReplyEvent event = SagaCommandReplyEvent.builder()
-            .
-            .build();
+        // Publish saga command reply message
+        SagaCommandReply.SagaCommandReplyBuilder replyBuilder = SagaCommandReply.builder()
+            .sagaId(paymentEntity.getSagaId())
+            .sagaName("checkout")
+            .sagaCommandName(CheckoutCommand.PROCESS_PAYMENT);
+        SagaCommandResult commandResult = null;
+        switch (paymentResult.getStatus()) {
+          case SUCCEEDED -> commandResult = SagaCommandResult.success(null);
+          case FAILED -> commandResult = SagaCommandResult.failure(paymentEntity.getErrorMessage());
+          case CANCELED ->
+              commandResult = SagaCommandResult.failure(paymentEntity.getCancellationReason());
+        }
+        replyBuilder.result(commandResult);
+        sagaMessagePublisherPort.publish(replyBuilder.build());
       }
 
       @Override

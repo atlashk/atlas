@@ -13,6 +13,7 @@ import org.atlas.framework.payment.model.CreatePaymentRequest;
 import org.atlas.framework.payment.model.CreatePaymentResponse;
 import org.atlas.framework.saga.annotation.SagaCommandHandler;
 import org.atlas.framework.saga.command.CheckoutCommand;
+import org.atlas.framework.saga.command.SagaCommandResult;
 import org.atlas.framework.saga.context.CheckoutSagaData;
 import org.atlas.framework.saga.context.SagaContext;
 import org.atlas.framework.saga.messaging.payload.SagaCommand;
@@ -29,7 +30,7 @@ public class InitializePaymentCommandHandler {
   private final ApplicationConfigService applicationConfigService;
 
   @SagaCommandHandler(command = CheckoutCommand.INITIALIZE_PAYMENT)
-  public void initializePayment(SagaCommand event) {
+  public SagaCommandResult initializePayment(SagaCommand event) {
     SagaContext sagaContext = SagaContext.deserialize(event.getSagaContext());
     CheckoutSagaData checkoutSagaData = sagaContext.get("data", CheckoutSagaData.class);
     if (checkoutSagaData == null) {
@@ -70,6 +71,8 @@ public class InitializePaymentCommandHandler {
       paymentEntity.setTransactionId(response.getTransactionId());
       paymentEntity.setStatus(PaymentStatus.CREATED);
       paymentRepository.update(paymentEntity);
+
+      return SagaCommandResult.success(null);
     } else {
       log.error(
           "Failed to create payment via payment gateway: orderId={}, userId={}, paymentId={}, errorCode={}, errorMessage={}",
@@ -81,6 +84,8 @@ public class InitializePaymentCommandHandler {
       paymentEntity.setErrorCode(response.getErrorCode());
       paymentEntity.setErrorMessage(StringUtil.sanitizeErrorMessage(response.getErrorMessage()));
       paymentRepository.update(paymentEntity);
+
+      return SagaCommandResult.failure(paymentEntity.getErrorMessage());
     }
   }
 }

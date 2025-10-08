@@ -18,7 +18,7 @@ import org.atlas.framework.domain.entity.DomainEntity;
 public class OutboxMessageEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
-  private Long id;
+  private Integer id;
   private String publishRequest;
   private OutboxMessageStatus status;
   private Date processedAt;

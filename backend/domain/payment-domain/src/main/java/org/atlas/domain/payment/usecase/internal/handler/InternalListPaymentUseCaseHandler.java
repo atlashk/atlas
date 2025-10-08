@@ -16,7 +16,7 @@ public class InternalListPaymentUseCaseHandler {
   private final PaymentRepository paymentRepository;
 
   public List<PaymentEntity> handle(InternalListPaymentInput input) throws Exception {
-    List<PaymentEntity> paymentEntities = paymentRepository.findByIdIn(input.getIds());
+    List<PaymentEntity> paymentEntities = paymentRepository.findByOrderIdIn(input.getOrderIds());
     if (CollectionUtil.isEmpty(paymentEntities)) {
       return Collections.emptyList();
     }

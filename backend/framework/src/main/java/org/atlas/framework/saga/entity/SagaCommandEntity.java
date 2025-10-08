@@ -18,8 +18,8 @@ import org.atlas.framework.domain.entity.DomainEntity;
 public class SagaCommandEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
-  private Long id;
-  private Long sagaId;
+  private Integer id;
+  private Integer sagaId;
   private String name;
   private String targetServiceName;
   private SagaCommandStatus status;

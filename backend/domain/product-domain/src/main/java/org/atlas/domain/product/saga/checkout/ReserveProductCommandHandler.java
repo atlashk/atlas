@@ -16,6 +16,7 @@ import org.atlas.framework.lock.LockPort;
 import org.atlas.framework.saga.annotation.SagaCompensationHandler;
 import org.atlas.framework.saga.annotation.SagaCommandHandler;
 import org.atlas.framework.saga.command.CheckoutCommand;
+import org.atlas.framework.saga.command.SagaCommandResult;
 import org.atlas.framework.saga.context.CheckoutSagaData;
 import org.atlas.framework.saga.context.SagaContext;
 import org.atlas.framework.saga.messaging.payload.SagaCompensation;
@@ -33,7 +34,7 @@ public class ReserveProductCommandHandler {
   private final LockPort lockPort;
 
   @SagaCommandHandler(command = CheckoutCommand.RESERVE_PRODUCT)
-  public void reserveProduct(SagaCommand event) {
+  public SagaCommandResult reserveProduct(SagaCommand event) {
     SagaContext sagaContext = SagaContext.deserialize(event.getSagaContext());
     CheckoutSagaData checkoutSagaData = sagaContext.get("data", CheckoutSagaData.class);
     if (checkoutSagaData == null) {
@@ -53,8 +54,10 @@ public class ReserveProductCommandHandler {
               .build();
           reservationRepository.insert(reservation);
         });
+
     log.info("Successfully reserved products: sagaId={}, orderId={}",
         sagaContext.getSagaId(), checkoutSagaData.getOrderId());
+    return SagaCommandResult.success(null);
   }
 
   private void decreaseQuantity(Integer productId, Integer quantity) {

@@ -24,6 +24,7 @@ import org.atlas.framework.lock.LockPort;
 import org.atlas.framework.saga.annotation.SagaCompensationHandler;
 import org.atlas.framework.saga.annotation.SagaCommandHandler;
 import org.atlas.framework.saga.command.CheckoutCommand;
+import org.atlas.framework.saga.command.SagaCommandResult;
 import org.atlas.framework.saga.context.CheckoutSagaData;
 import org.atlas.framework.saga.context.SagaContext;
 import org.atlas.framework.saga.messaging.payload.SagaCompensation;
@@ -44,7 +45,7 @@ public class CreateOrderCommandHandler {
   private final SequenceGenerator sequenceGenerator;
 
   @SagaCommandHandler(command = CheckoutCommand.CREATE_ORDER)
-  public CheckoutSagaData createOrder(SagaCommand event) {
+  public SagaCommandResult createOrder(SagaCommand event) {
     SagaContext sagaContext = SagaContext.deserialize(event.getSagaContext());
     FrontCheckoutInput input = sagaContext.get("input", FrontCheckoutInput.class);
     if (input == null) {
@@ -67,16 +68,22 @@ public class CreateOrderCommandHandler {
           "Another checkout operation is already in progress.");
     }
 
+    CheckoutSagaData checkoutSagaData;
     try {
       // Insert new order into DB
       OrderEntity order = newOrder(input, cart);
       orderRepository.insert(order);
       log.info("Order created successfully for user {}", input.getUserId());
 
-      return OrderMapper.toCheckoutSagaData(order);
+      checkoutSagaData = OrderMapper.toCheckoutSagaData(order);
     } finally {
       lockPort.releaseLock(lockKey);
     }
+
+    return SagaCommandResult.builder()
+        .success(true)
+        .result(checkoutSagaData)
+        .build();
   }
 
   private CartResponse getCart(Integer userId) {

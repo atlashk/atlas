@@ -14,7 +14,7 @@ public class FrontCheckoutUseCaseHandler {
 
   private final DefaultSagaOrchestrator sagaOrchestratorManager;
 
-  public Long handle(FrontCheckoutInput input) {
+  public Integer handle(FrontCheckoutInput input) {
     return sagaOrchestratorManager.startSaga("checkout", SagaContext.of("input", input));
   }
 }

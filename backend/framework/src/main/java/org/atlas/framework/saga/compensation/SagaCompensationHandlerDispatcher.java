@@ -79,51 +79,44 @@ public class SagaCompensationHandlerDispatcher implements InitializingBean {
    * Dispatches a {@link SagaCompensation} to the appropriate compensation handler method and
    * publishes reply event.
    */
-  public void dispatch(SagaCompensation event) {
-    CachedHandlerMethod cachedHandlerMethod = cachedHandlerMethods.get(event.getSagaCommandName());
+  public void dispatch(SagaCompensation compensation) {
+    CachedHandlerMethod cachedHandlerMethod = cachedHandlerMethods.get(
+        compensation.getSagaCommandName());
     if (cachedHandlerMethod == null) {
-      log.warn("No compensation handler found for saga command {}", event.getSagaCommandName());
+      log.warn("No compensation handler found for saga command {}",
+          compensation.getSagaCommandName());
       return;
     }
 
-    SagaEntity sagaEntity = sagaRepository.findById(event.getSagaId())
-        .orElseThrow(() -> new SagaNotFoundException("Saga not found: " + event.getSagaId()));
+    SagaEntity sagaEntity = sagaRepository.findById(compensation.getSagaId())
+        .orElseThrow(
+            () -> new SagaNotFoundException("Saga not found: " + compensation.getSagaId()));
 
-    log.debug("Dispatching saga command compensation {} to handler {}", event.getSagaCommandName(),
-        cachedHandlerMethod.methodSignature);
+    SagaContext sagaContext = SagaContext.deserialize(compensation.getSagaContext());
 
-    SagaContext sagaContext = SagaContext.deserialize(event.getSagaContext());
-    Exception exception = null;
-
+    SagaCompensationResult result;
     try {
-      // Not handle method result here
-      cachedHandlerMethod.invoke(sagaContext);
-      log.debug("Successfully executed compensation handler {}",
+      log.debug("Dispatching saga compensation {} to handler {}", compensation.getSagaCommandName(),
           cachedHandlerMethod.methodSignature);
+      result = (SagaCompensationResult) cachedHandlerMethod.invoke(sagaContext);
     } catch (Exception e) {
-      exception = e;
-      log.error("Failed to execute compensation handler {}", cachedHandlerMethod.methodSignature,
-          e);
+      result = SagaCompensationResult.failure(e);
     }
-
-    // Publish compensation reply event
-    publishSagaCompensationReplyEvent(sagaEntity, event.getSagaCommandName(), exception);
-  }
-
-  /**
-   * Publishes {@link SagaCompensationReply} with the result or exception.
-   */
-  private void publishSagaCompensationReplyEvent(SagaEntity sagaEntity,
-      String sagaCommandName, Exception exception) {
-    SagaCompensationReply replyEvent;
-    if (exception != null) {
-      replyEvent = SagaCompensationReply.failure(sagaEntity, sagaCommandName, exception);
-      log.debug("Publishing event for saga command compensation failure reply: {}", replyEvent);
+    if (result.isSuccess()) {
+      log.info("Successfully executed handler {}", cachedHandlerMethod.methodSignature);
     } else {
-      replyEvent = SagaCompensationReply.success(sagaEntity, sagaCommandName);
-      log.debug("Publishing event for saga command compensation success reply: {}", replyEvent);
+      log.error("Failed to execute handler {}: {}", cachedHandlerMethod.methodSignature,
+          result.getErrorMessage());
     }
-    sagaMessagePublisherPort.publish(replyEvent);
+
+    // Publish compensation reply
+    SagaCompensationReply reply = SagaCompensationReply.builder()
+        .sagaId(sagaEntity.getId())
+        .sagaName(sagaEntity.getName())
+        .sagaCommandName(compensation.getSagaCommandName())
+        .result(result)
+        .build();
+    sagaMessagePublisherPort.publish(reply);
   }
 
   /**

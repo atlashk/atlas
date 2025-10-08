@@ -24,7 +24,7 @@ public class JpaOutboxMessageEntity extends JpaBaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  private Integer id;
 
   @Column(name = "message_payload")
   private String messagePayload;

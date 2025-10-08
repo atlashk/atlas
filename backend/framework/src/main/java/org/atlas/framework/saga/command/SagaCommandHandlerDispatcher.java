@@ -16,6 +16,7 @@ import org.atlas.framework.saga.messaging.SagaMessagePublisherPort;
 import org.atlas.framework.saga.messaging.payload.SagaCommand;
 import org.atlas.framework.saga.messaging.payload.SagaCommandReply;
 import org.atlas.framework.saga.repository.SagaRepository;
+import org.atlas.framework.util.StringUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -90,50 +91,43 @@ public class SagaCommandHandlerDispatcher implements InitializingBean {
   }
 
   /**
-   * Dispatches a SagaCommandEvent to the appropriate handler method and publishes reply event.
+   * Dispatches a SagaCommandEvent to the appropriate handler method and publishes reply.
    */
-  public void dispatch(SagaCommand event) {
-    CachedHandlerMethod cachedHandlerMethod = cachedHandlerMethods.get(event.getSagaCommandName());
+  public void dispatch(SagaCommand command) {
+    CachedHandlerMethod cachedHandlerMethod = cachedHandlerMethods.get(
+        command.getSagaCommandName());
     if (cachedHandlerMethod == null) {
-      log.warn("No cached handler found for saga command {}", event.getSagaCommandName());
+      log.warn("No cached handler found for saga command {}", command.getSagaCommandName());
       return;
     }
 
-    SagaEntity sagaEntity = sagaRepository.findById(event.getSagaId())
-        .orElseThrow(() -> new SagaNotFoundException("Saga not found: " + event.getSagaId()));
+    SagaEntity sagaEntity = sagaRepository.findById(command.getSagaId())
+        .orElseThrow(() -> new SagaNotFoundException("Saga not found: " + command.getSagaId()));
 
-    log.debug("Dispatching saga command {} to handler {}", event.getSagaCommandName(),
-        cachedHandlerMethod.methodSignature);
+    SagaContext sagaContext = SagaContext.deserialize(command.getSagaContext());
 
-    SagaContext sagaContext = SagaContext.deserialize(event.getSagaContext());
-    Object result = null;
-    Exception exception = null;
-
+    SagaCommandResult result;
     try {
-      result = cachedHandlerMethod.invoke(sagaContext);
-      log.debug("Successfully executed handler {}", cachedHandlerMethod.methodSignature);
+      log.debug("Dispatching saga command {} to handler {}", command.getSagaCommandName(),
+          cachedHandlerMethod.methodSignature);
+      result = (SagaCommandResult) cachedHandlerMethod.invoke(sagaContext);
     } catch (Exception e) {
-      exception = e;
-      log.error("Failed to execute handler {}", cachedHandlerMethod.methodSignature, e);
+      result = SagaCommandResult.failure(StringUtil.sanitizeErrorMessage(e.getMessage()));
+    }
+    if (result.isSuccess()) {
+      log.info("Successfully executed handler {}", cachedHandlerMethod.methodSignature);
+    } else {
+      log.error("Failed to execute handler {}: {}", cachedHandlerMethod.methodSignature,
+          result.getErrorMessage());
     }
 
     // Publish command reply
-    publishSagaCommandReply(sagaEntity, event.getSagaCommandName(), result, exception);
-  }
-
-  /**
-   * Publishes SagaCommandReplyEvent with the result or exception.
-   */
-  private void publishSagaCommandReply(SagaEntity sagaEntity, String sagaCommandType,
-      Object result, Exception exception) {
-    SagaCommandReply reply;
-    if (exception != null) {
-      reply = SagaCommandReply.failure(sagaEntity, sagaCommandType, exception);
-      log.debug("Publishing event for saga command failure reply: {}", reply);
-    } else {
-      reply = SagaCommandReply.success(sagaEntity, sagaCommandType, result);
-      log.debug("Publishing event for saga command success reply: {}", reply);
-    }
+    SagaCommandReply reply = SagaCommandReply.builder()
+        .sagaId(sagaEntity.getId())
+        .sagaName(sagaEntity.getName())
+        .sagaCommandName(command.getSagaCommandName())
+        .result(result)
+        .build();
     sagaMessagePublisherPort.publish(reply);
   }
 

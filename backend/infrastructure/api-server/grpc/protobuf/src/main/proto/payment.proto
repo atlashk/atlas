@@ -12,7 +12,7 @@ service PaymentService {
 }
 
 message ListPaymentRequestProto {
-  repeated int32 id = 1;
+  repeated int32 order_id = 1;
 }
 
 message PaymentProto {

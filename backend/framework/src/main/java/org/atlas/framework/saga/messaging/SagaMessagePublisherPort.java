@@ -7,11 +7,11 @@ import org.atlas.framework.saga.messaging.payload.SagaCompensationReply;
 
 public interface SagaMessagePublisherPort {
 
-  void publish(SagaCommand message);
+  void publish(SagaCommand command);
 
-  void publish(SagaCommandReply message);
+  void publish(SagaCommandReply reply);
 
-  void publish(SagaCompensation message);
+  void publish(SagaCompensation compensation);
 
-  void publish(SagaCompensationReply message);
+  void publish(SagaCompensationReply reply);
 }

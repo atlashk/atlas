@@ -98,7 +98,7 @@ public class OrderController {
     FrontCheckoutInput input = ObjectMapperUtil.getInstance()
         .map(request, FrontCheckoutInput.class);
 
-    Long sagaId = frontCheckoutUseCaseHandler.handle(input);
+    Integer sagaId = frontCheckoutUseCaseHandler.handle(input);
 
     CheckoutResponse response = CheckoutResponse.builder()
         .sagaId(sagaId)

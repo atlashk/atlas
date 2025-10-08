@@ -5,7 +5,7 @@ import org.atlas.framework.saga.entity.SagaEntity;
 
 public interface SagaRepository {
 
-  Optional<SagaEntity> findById(Long sagaId);
+  Optional<SagaEntity> findById(Integer sagaId);
 
   void insert(SagaEntity entity);
 

@@ -23,7 +23,7 @@ public class CartItemResponse {
   @Setter
   @Schema(description = "Product information")
   public static class ProductResponse {
-    
+
     @Schema(description = "Product ID", example = "1")
     private Integer id;
 

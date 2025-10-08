@@ -3,8 +3,7 @@ package org.atlas.infrastructure.persistence.jpa.core.converter;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import lombok.RequiredArgsConstructor;
-import org.atlas.framework.config.ApplicationConfigPort;
-import org.atlas.framework.constant.Application;
+import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.cryptography.EncryptionUtil;
 import org.atlas.framework.util.StringUtil;
 import org.springframework.beans.factory.InitializingBean;
@@ -23,7 +22,7 @@ import org.springframework.beans.factory.InitializingBean;
 @RequiredArgsConstructor
 public class StringCryptoConverter implements AttributeConverter<String, String>, InitializingBean {
 
-  private final ApplicationConfigPort applicationConfigPort;
+  private final ApplicationConfigService applicationConfigService;
 
   private String encryptionKey;
 
@@ -59,7 +58,7 @@ public class StringCryptoConverter implements AttributeConverter<String, String>
 
   @Override
   public void afterPropertiesSet() throws Exception {
-    encryptionKey = applicationConfigPort.getConfig(Application.SYSTEM, "encryption-key");
+    encryptionKey = applicationConfigService.getConfig("encryption-key", null);
     if (StringUtil.isBlank(encryptionKey)) {
       throw new RuntimeException("encryptionKey not found");
     }

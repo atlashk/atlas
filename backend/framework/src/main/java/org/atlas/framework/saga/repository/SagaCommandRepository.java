@@ -7,9 +7,9 @@ import org.atlas.framework.saga.command.CheckoutCommand;
 
 public interface SagaCommandRepository {
 
-  List<SagaCommandEntity> findBySagaId(Long sagaId);
+  List<SagaCommandEntity> findBySagaId(Integer sagaId);
 
-  Optional<SagaCommandEntity> findBySagaIdAndName(Long sagaId, String name);
+  Optional<SagaCommandEntity> findBySagaIdAndName(Integer sagaId, String name);
 
   void insert(SagaCommandEntity entity);
 

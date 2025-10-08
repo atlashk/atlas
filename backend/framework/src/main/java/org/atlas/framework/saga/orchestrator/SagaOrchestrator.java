@@ -9,13 +9,15 @@ public interface SagaOrchestrator {
   /**
    * @return saga ID
    */
-  Long startSaga(String sagaName, SagaContext sagaContext);
+  Integer startSaga(String sagaName, SagaContext sagaContext);
 
-  void sendCommand(Long sagaId, String sagaCommandName, String targetServiceName);
+  void sendCommand(Integer sagaId, String sagaCommandName, String targetServiceName);
+
+  void createCommand(Integer sagaId, String sagaCommandName, String targetServiceName);
 
   void handleSagaCommandReply(SagaCommandReply reply);
 
   void handleSagaCompensationReply(SagaCompensationReply reply);
 
-  void endSaga(Long sagaId);
+  void endSaga(Integer sagaId);
 }

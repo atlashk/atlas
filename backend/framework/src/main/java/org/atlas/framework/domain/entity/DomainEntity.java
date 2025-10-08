@@ -14,5 +14,5 @@ public class DomainEntity implements Serializable {
   private Date updatedAt;
   private Integer updatedBy;
   private Boolean deleted = false;
-  private Long version;
+  private Integer version;
 }

@@ -11,9 +11,6 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class GetProfileInput {
 
   private Integer userId;
