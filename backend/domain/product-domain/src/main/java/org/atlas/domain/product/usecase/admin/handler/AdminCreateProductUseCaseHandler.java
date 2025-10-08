@@ -2,13 +2,15 @@ package org.atlas.domain.product.usecase.admin.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.ProductEntity;
+import org.atlas.domain.product.port.messaging.ProductMessagePublisherPort;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.service.ProductImageService;
-import org.atlas.framework.config.ApplicationConfigPort;
+import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.domain.event.contract.product.ProductCreatedEvent;
 import org.atlas.framework.domain.event.contract.product.model.Product;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.messaging.publisher.MessagePublisherPort;
+import org.atlas.framework.messaging.publisher.PublishRequest;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 
 @UseCaseHandler
@@ -17,8 +19,8 @@ public class AdminCreateProductUseCaseHandler {
 
   private final ProductRepository productRepository;
   private final ProductImageService productImageService;
-  private final ApplicationConfigPort applicationConfigPort;
-  private final MessagePublisherPort messagePublisherPort;
+  private final ApplicationConfigService applicationConfigService;
+  private final ProductMessagePublisherPort productMessagePublisherPort;
 
   public Integer handle(ProductEntity productEntity) throws Exception {
     // Insert product into DB
@@ -36,8 +38,7 @@ public class AdminCreateProductUseCaseHandler {
 
   private void publishEvent(ProductEntity productEntity) {
     Product product = ObjectMapperUtil.getInstance().map(productEntity, Product.class);
-    ProductCreatedEvent event = new ProductCreatedEvent(applicationConfigPort.getApplicationName(),
-        product);
-    messagePublisherPort.publish(event);
+    ProductCreatedEvent event = new ProductCreatedEvent(product);
+    productMessagePublisherPort.publish(event);
   }
 }

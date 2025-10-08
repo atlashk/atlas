@@ -1,8 +1,8 @@
 package org.atlas.framework.saga.orchestrator;
 
 import org.atlas.framework.saga.context.SagaContext;
-import org.atlas.framework.saga.event.SagaCompensationReplyEvent;
-import org.atlas.framework.saga.event.SagaCommandReplyEvent;
+import org.atlas.framework.saga.messaging.payload.SagaCommandReply;
+import org.atlas.framework.saga.messaging.payload.SagaCompensationReply;
 
 public interface SagaOrchestrator {
 
@@ -11,11 +11,11 @@ public interface SagaOrchestrator {
    */
   Long startSaga(String sagaName, SagaContext sagaContext);
 
-  void sendCommand(Long sagaId, String sagaCommandName);
+  void sendCommand(Long sagaId, String sagaCommandName, String targetServiceName);
 
-  void handleSagaCommandReplyEvent(SagaCommandReplyEvent event);
+  void handleSagaCommandReply(SagaCommandReply reply);
 
-  void handleSagaCompensationReplyEvent(SagaCompensationReplyEvent event);
+  void handleSagaCompensationReply(SagaCompensationReply reply);
 
   void endSaga(Long sagaId);
 }

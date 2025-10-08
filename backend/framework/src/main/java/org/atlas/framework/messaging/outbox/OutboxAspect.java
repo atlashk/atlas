@@ -6,6 +6,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.atlas.framework.json.JsonUtil;
+import org.atlas.framework.messaging.publisher.PublishRequest;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,32 +17,24 @@ public class OutboxAspect {
 
   private final OutboxMessageRepository outboxMessageRepository;
 
-  // Intercept all MessagePublisher.publish() calls
-  @Around("execution(* org.atlas.framework.messaging.publisher.MessagePublisherPort.doPublish(..))")
+  /**
+   * Intercept all MessagePublisherPort.publish() calls. Instead of calling the actual publish
+   * method, save to outbox first.
+   */
+  @Around("execution(* org.atlas.framework.messaging.publisher.MessagePublisherPort.publish(..))")
   public Object aroundPublishMessage(ProceedingJoinPoint joinPoint) throws Throwable {
     Object[] args = joinPoint.getArgs();
-    Object messagePayload = args[0];
-    String messageKey = (String) args[1];
-    String destination = (String) args[2];
+    PublishRequest request = (PublishRequest) args[0];
 
-    // Instead of calling the actual publish method, save to outbox
-    OutboxMessageEntity outboxMessage = newOutboxMessage(messagePayload, messageKey, destination);
+    OutboxMessageEntity outboxMessage = OutboxMessageEntity.builder()
+        .publishRequest(JsonUtil.getInstance().toJson(request))
+        .status(OutboxMessageStatus.PENDING)
+        .retries(0)
+        .build();
     outboxMessageRepository.insert(outboxMessage);
     log.info("Inserted outbox message: {}", outboxMessage);
 
     // Return null or some success indicator instead of proceeding with actual publish
     return null;
-  }
-
-  private OutboxMessageEntity newOutboxMessage(Object messagePayload, String messageKey,
-      String destination) {
-    OutboxMessageEntity outboxMessage = new OutboxMessageEntity();
-    outboxMessage.setMessagePayload(JsonUtil.getInstance().toJson(messagePayload));
-    outboxMessage.setMessageClass(messagePayload.getClass().getName());
-    outboxMessage.setMessageKey(messageKey);
-    outboxMessage.setDestination(destination);
-    outboxMessage.setStatus(OutboxMessageStatus.PENDING);
-    outboxMessage.setRetries(0);
-    return outboxMessage;
   }
 }

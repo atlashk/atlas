@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.messaging.publisher.MessagePublisherPort;
+import org.atlas.framework.messaging.publisher.PublishRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,12 +22,9 @@ public class OutboxMessageService {
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void processOutboxMessage(OutboxMessageEntity outboxMessage) {
     try {
-      Class<?> messageClass = Class.forName(outboxMessage.getMessageClass());
-      Object messagePayload = JsonUtil.getInstance()
-          .toObject(outboxMessage.getMessagePayload(), messageClass);
-
-      messagePublisherPort.publish(outboxMessage.getDestination(), outboxMessage.getMessageKey(),
-          messagePayload);
+      PublishRequest publishRequest = JsonUtil.getInstance()
+          .toObject(outboxMessage.getPublishRequest(), PublishRequest.class);
+      messagePublisherPort.publish(publishRequest);
 
       outboxMessage.markAsProcessed();
     } catch (Exception e) {

@@ -36,6 +36,10 @@ public class StringUtil {
     return str == null ? StringUtil.EMPTY : str;
   }
 
+  public static String nvl(Object str) {
+    return str == null ? StringUtil.EMPTY : str.toString();
+  }
+
   /**
    * Limits the length of a string to the specified maximum length. If the string exceeds the
    * maximum length, it is truncated.

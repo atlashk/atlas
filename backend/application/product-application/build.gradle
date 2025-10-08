@@ -130,13 +130,13 @@ dependencies {
     }
     switch (rootProject.ext.appStack['messaging']) {
         case 'kafka':
-            implementation project(':infrastructure.messaging.kafka.impl.saga')
+            implementation project(':infrastructure.messaging.kafka.impl.product')
             break
         case 'rabbitmq':
-            implementation project(':infrastructure.messaging.rabbitmq.impl.saga')
+            implementation project(':infrastructure.messaging.rabbitmq.impl.product')
             break
         case 'sns':
-            implementation project(':infrastructure.messaging.sns.impl.saga')
+            implementation project(':infrastructure.messaging.sns.impl.product')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['messaging']}")

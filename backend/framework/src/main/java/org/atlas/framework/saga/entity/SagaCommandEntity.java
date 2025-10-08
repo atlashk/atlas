@@ -21,6 +21,7 @@ public class SagaCommandEntity extends DomainEntity {
   private Long id;
   private Long sagaId;
   private String name;
+  private String targetServiceName;
   private SagaCommandStatus status;
   private Date completedAt;
   private String errorMessage;

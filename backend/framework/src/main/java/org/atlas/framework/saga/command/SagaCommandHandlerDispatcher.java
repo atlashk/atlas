@@ -7,15 +7,14 @@ import java.util.Map;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.saga.annotation.SagaCommandHandler;
 import org.atlas.framework.saga.context.SagaContext;
 import org.atlas.framework.saga.entity.SagaEntity;
-import org.atlas.framework.saga.event.SagaCommandEvent;
-import org.atlas.framework.saga.event.SagaCommandReplyEvent;
-import org.atlas.framework.saga.event.SagaEventPublisherPort;
 import org.atlas.framework.saga.exception.SagaConfigException;
 import org.atlas.framework.saga.exception.SagaNotFoundException;
+import org.atlas.framework.saga.messaging.SagaMessagePublisherPort;
+import org.atlas.framework.saga.messaging.payload.SagaCommand;
+import org.atlas.framework.saga.messaging.payload.SagaCommandReply;
 import org.atlas.framework.saga.repository.SagaRepository;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -48,9 +47,8 @@ import org.springframework.stereotype.Component;
 public class SagaCommandHandlerDispatcher implements InitializingBean {
 
   private final SagaRepository sagaRepository;
-  private final SagaEventPublisherPort sagaEventPublisherPort;
+  private final SagaMessagePublisherPort sagaMessagePublisherPort;
   private final ApplicationContext applicationContext;
-  private final ApplicationConfigService applicationConfigService;
 
   // One handler per command
   private final Map<String, CachedHandlerMethod> cachedHandlerMethods = new HashMap<>();
@@ -94,7 +92,7 @@ public class SagaCommandHandlerDispatcher implements InitializingBean {
   /**
    * Dispatches a SagaCommandEvent to the appropriate handler method and publishes reply event.
    */
-  public void dispatch(SagaCommandEvent event) {
+  public void dispatch(SagaCommand event) {
     CachedHandlerMethod cachedHandlerMethod = cachedHandlerMethods.get(event.getSagaCommandName());
     if (cachedHandlerMethod == null) {
       log.warn("No cached handler found for saga command {}", event.getSagaCommandName());
@@ -119,26 +117,24 @@ public class SagaCommandHandlerDispatcher implements InitializingBean {
       log.error("Failed to execute handler {}", cachedHandlerMethod.methodSignature, e);
     }
 
-    // Publish reply event
-    publishSagaCommandReplyEvent(sagaEntity, event.getSagaCommandName(), result, exception);
+    // Publish command reply
+    publishSagaCommandReply(sagaEntity, event.getSagaCommandName(), result, exception);
   }
 
   /**
    * Publishes SagaCommandReplyEvent with the result or exception.
    */
-  private void publishSagaCommandReplyEvent(SagaEntity sagaEntity, String sagaCommandType,
+  private void publishSagaCommandReply(SagaEntity sagaEntity, String sagaCommandType,
       Object result, Exception exception) {
-    SagaCommandReplyEvent replyEvent;
+    SagaCommandReply reply;
     if (exception != null) {
-      replyEvent = SagaCommandReplyEvent.failure(
-          applicationConfigService.getApplicationName(), sagaEntity, sagaCommandType, exception);
-      log.debug("Publishing event for saga command failure reply: {}", replyEvent);
+      reply = SagaCommandReply.failure(sagaEntity, sagaCommandType, exception);
+      log.debug("Publishing event for saga command failure reply: {}", reply);
     } else {
-      replyEvent = SagaCommandReplyEvent.success(
-          applicationConfigService.getApplicationName(), sagaEntity, sagaCommandType, result);
-      log.debug("Publishing event for saga command success reply: {}", replyEvent);
+      reply = SagaCommandReply.success(sagaEntity, sagaCommandType, result);
+      log.debug("Publishing event for saga command success reply: {}", reply);
     }
-    sagaEventPublisherPort.publish(replyEvent);
+    sagaMessagePublisherPort.publish(reply);
   }
 
   /**

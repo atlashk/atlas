@@ -26,8 +26,8 @@ import org.atlas.framework.saga.annotation.SagaCommandHandler;
 import org.atlas.framework.saga.command.CheckoutCommand;
 import org.atlas.framework.saga.context.CheckoutSagaData;
 import org.atlas.framework.saga.context.SagaContext;
-import org.atlas.framework.saga.event.SagaCompensationEvent;
-import org.atlas.framework.saga.event.SagaCommandEvent;
+import org.atlas.framework.saga.messaging.payload.SagaCompensation;
+import org.atlas.framework.saga.messaging.payload.SagaCommand;
 import org.atlas.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.framework.sequencegenerator.SequenceType;
 import org.atlas.framework.util.CollectionUtil;
@@ -44,7 +44,7 @@ public class CreateOrderCommandHandler {
   private final SequenceGenerator sequenceGenerator;
 
   @SagaCommandHandler(command = CheckoutCommand.CREATE_ORDER)
-  public CheckoutSagaData createOrder(SagaCommandEvent event) {
+  public CheckoutSagaData createOrder(SagaCommand event) {
     SagaContext sagaContext = SagaContext.deserialize(event.getSagaContext());
     FrontCheckoutInput input = sagaContext.get("input", FrontCheckoutInput.class);
     if (input == null) {
@@ -129,7 +129,7 @@ public class CreateOrderCommandHandler {
   }
 
   @SagaCompensationHandler(command = CheckoutCommand.CREATE_ORDER)
-  public void compensateCreateOrder(SagaCompensationEvent event) {
+  public void compensateCreateOrder(SagaCompensation event) {
     SagaContext sagaContext = SagaContext.deserialize(event.getSagaContext());
     OrderEntity order = sagaContext.get("order", OrderEntity.class);
     if (order == null) {

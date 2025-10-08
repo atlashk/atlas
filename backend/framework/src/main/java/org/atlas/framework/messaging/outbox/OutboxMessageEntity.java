@@ -19,10 +19,7 @@ public class OutboxMessageEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
   private Long id;
-  private String messagePayload;
-  private String messageClass;
-  private String messageKey;
-  private String destination;
+  private String publishRequest;
   private OutboxMessageStatus status;
   private Date processedAt;
   private String error;
@@ -35,13 +32,5 @@ public class OutboxMessageEntity extends DomainEntity {
 
   public void incRetries() {
     retries++;
-  }
-
-  @Override
-  public String toString() {
-    return "{" +
-        "id=" + id +
-        ", payload='" + messagePayload + '\'' +
-        '}';
   }
 }

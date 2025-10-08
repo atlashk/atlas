@@ -7,23 +7,23 @@ import java.util.Map;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.saga.annotation.SagaCompensationHandler;
 import org.atlas.framework.saga.context.SagaContext;
 import org.atlas.framework.saga.entity.SagaEntity;
-import org.atlas.framework.saga.event.SagaCompensationEvent;
-import org.atlas.framework.saga.event.SagaCompensationReplyEvent;
-import org.atlas.framework.saga.event.SagaEventPublisherPort;
 import org.atlas.framework.saga.exception.SagaConfigException;
 import org.atlas.framework.saga.exception.SagaNotFoundException;
+import org.atlas.framework.saga.messaging.SagaMessagePublisherPort;
+import org.atlas.framework.saga.messaging.payload.SagaCompensation;
+import org.atlas.framework.saga.messaging.payload.SagaCompensationReply;
 import org.atlas.framework.saga.repository.SagaRepository;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 /**
- * Unified dispatcher for {@link SagaCompensationEvent} that routes events to
- * @{@link SagaCompensationHandler} methods and publishes {@link SagaCompensationReplyEvent} after
+ * Unified dispatcher for {@link SagaCompensation} that routes events to
+ *
+ * @{@link SagaCompensationHandler} methods and publishes {@link SagaCompensationReply} after
  * execution.
  */
 @Component
@@ -32,9 +32,8 @@ import org.springframework.stereotype.Component;
 public class SagaCompensationHandlerDispatcher implements InitializingBean {
 
   private final SagaRepository sagaRepository;
-  private final SagaEventPublisherPort sagaEventPublisherPort;
+  private final SagaMessagePublisherPort sagaMessagePublisherPort;
   private final ApplicationContext applicationContext;
-  private final ApplicationConfigService applicationConfigService;
 
   // One compensation handler per command
   private final Map<String, CachedHandlerMethod> cachedHandlerMethods = new HashMap<>();
@@ -77,10 +76,10 @@ public class SagaCompensationHandlerDispatcher implements InitializingBean {
   }
 
   /**
-   * Dispatches a {@link SagaCompensationEvent} to the appropriate compensation handler method and
+   * Dispatches a {@link SagaCompensation} to the appropriate compensation handler method and
    * publishes reply event.
    */
-  public void dispatch(SagaCompensationEvent event) {
+  public void dispatch(SagaCompensation event) {
     CachedHandlerMethod cachedHandlerMethod = cachedHandlerMethods.get(event.getSagaCommandName());
     if (cachedHandlerMethod == null) {
       log.warn("No compensation handler found for saga command {}", event.getSagaCommandName());
@@ -112,23 +111,19 @@ public class SagaCompensationHandlerDispatcher implements InitializingBean {
   }
 
   /**
-   * Publishes {@link SagaCompensationReplyEvent} with the result or exception.
+   * Publishes {@link SagaCompensationReply} with the result or exception.
    */
   private void publishSagaCompensationReplyEvent(SagaEntity sagaEntity,
       String sagaCommandName, Exception exception) {
-    SagaCompensationReplyEvent replyEvent;
-
+    SagaCompensationReply replyEvent;
     if (exception != null) {
-      replyEvent = SagaCompensationReplyEvent.failure(
-          applicationConfigService.getApplicationName(), sagaEntity, sagaCommandName, exception);
+      replyEvent = SagaCompensationReply.failure(sagaEntity, sagaCommandName, exception);
       log.debug("Publishing event for saga command compensation failure reply: {}", replyEvent);
     } else {
-      replyEvent = SagaCompensationReplyEvent.success(
-          applicationConfigService.getApplicationName(), sagaEntity, sagaCommandName);
+      replyEvent = SagaCompensationReply.success(sagaEntity, sagaCommandName);
       log.debug("Publishing event for saga command compensation success reply: {}", replyEvent);
     }
-
-    sagaEventPublisherPort.publish(replyEvent);
+    sagaMessagePublisherPort.publish(replyEvent);
   }
 
   /**

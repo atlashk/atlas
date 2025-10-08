@@ -221,20 +221,32 @@ project(':infrastructure.lock.redisson').projectDir = file('infrastructure/lock/
 // Messaging::Kafka
 include(':infrastructure.messaging.kafka.core')
 project(':infrastructure.messaging.kafka.core').projectDir = file('infrastructure/messaging/kafka/messaging-kafka-core')
-include(':infrastructure.messaging.kafka.impl.saga')
-project(':infrastructure.messaging.kafka.impl.saga').projectDir = file('infrastructure/messaging/kafka/messaging-kafka-impl-saga')
+include(':infrastructure.messaging.kafka.impl.order')
+project(':infrastructure.messaging.kafka.impl.order').projectDir = file('infrastructure/messaging/kafka/messaging-kafka-impl-order')
+include(':infrastructure.messaging.kafka.impl.product')
+project(':infrastructure.messaging.kafka.impl.product').projectDir = file('infrastructure/messaging/kafka/messaging-kafka-impl-product')
+include(':infrastructure.messaging.kafka.impl.payment')
+project(':infrastructure.messaging.kafka.impl.payment').projectDir = file('infrastructure/messaging/kafka/messaging-kafka-impl-payment')
 
 // Messaging::RabbitMQ
 include(':infrastructure.messaging.rabbitmq.core')
 project(':infrastructure.messaging.rabbitmq.core').projectDir = file('infrastructure/messaging/rabbitmq/messaging-rabbitmq-core')
-include(':infrastructure.messaging.rabbitmq.impl.saga')
-project(':infrastructure.messaging.rabbitmq.impl.saga').projectDir = file('infrastructure/messaging/rabbitmq/messaging-rabbitmq-impl-saga')
+include(':infrastructure.messaging.rabbitmq.impl.order')
+project(':infrastructure.messaging.rabbitmq.impl.order').projectDir = file('infrastructure/messaging/rabbitmq/messaging-rabbitmq-impl-order')
+include(':infrastructure.messaging.rabbitmq.impl.product')
+project(':infrastructure.messaging.rabbitmq.impl.product').projectDir = file('infrastructure/messaging/rabbitmq/messaging-rabbitmq-impl-product')
+include(':infrastructure.messaging.rabbitmq.impl.payment')
+project(':infrastructure.messaging.rabbitmq.impl.payment').projectDir = file('infrastructure/messaging/rabbitmq/messaging-rabbitmq-impl-payment')
 
 // Messaging::SNS
 include(':infrastructure.messaging.sns.core')
 project(':infrastructure.messaging.sns.core').projectDir = file('infrastructure/messaging/sns/messaging-sns-core')
-include(':infrastructure.messaging.sns.impl.saga')
-project(':infrastructure.messaging.sns.impl.saga').projectDir = file('infrastructure/messaging/sns/messaging-sns-impl-saga')
+include(':infrastructure.messaging.sns.impl.order')
+project(':infrastructure.messaging.sns.impl.order').projectDir = file('infrastructure/messaging/sns/messaging-sns-impl-order')
+include(':infrastructure.messaging.sns.impl.product')
+project(':infrastructure.messaging.sns.impl.product').projectDir = file('infrastructure/messaging/sns/messaging-sns-impl-product')
+include(':infrastructure.messaging.sns.impl.payment')
+project(':infrastructure.messaging.sns.impl.payment').projectDir = file('infrastructure/messaging/sns/messaging-sns-impl-payment')
 
 // Migration
 

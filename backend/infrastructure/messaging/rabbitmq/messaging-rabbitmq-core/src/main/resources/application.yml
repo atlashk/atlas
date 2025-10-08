@@ -9,45 +9,62 @@ app:
   messaging:
     rabbitmq:
       exchanges:
-        - name: saga.checkout
+        # Order service
+        - name: saga.checkout.command.order
+          type: TOPIC
+        - name: saga.checkout.commandreply
+          type: TOPIC
+        - name: saga.checkout.compensation.order
+          type: TOPIC
+        - name: saga.checkout.compensationreply
+          type: TOPIC
+        # Product service
+        - name: saga.checkout.command.product
+          type: TOPIC
+        - name: saga.checkout.compensation.product
+          type: TOPIC
+        # Product service
+        - name: saga.checkout.command.payment
+          type: TOPIC
+        - name: saga.checkout.compensation.payment
           type: TOPIC
       queues:
         # Order service
-        - name: order_svc.saga.checkout.command
-        - name: order_svc.saga.checkout.compensation
-        - name: order_svc.saga.checkout.command.reply
-        - name: order_svc.saga.checkout.compensation.reply
+        - name: saga.checkout.command.order
+        - name: saga.checkout.commandreply
+        - name: saga.checkout.compensation.order
+        - name: saga.checkout.compensationreply
         # Product service
-        - name: product_svc.saga.checkout.command
-        - name: product_svc.saga.checkout.compensation
+        - name: saga.checkout.command.product
+        - name: saga.checkout.compensation.product
         # Payment service
-        - name: payment_svc.saga.checkout.command
-        - name: payment_svc.saga.checkout.compensation
+        - name: saga.checkout.command.payment
+        - name: saga.checkout.compensation.payment
       bindings:
         # Order service
-        - exchange: saga.checkout
-          queue: order_svc.saga.checkout.command
-          routing-key: saga.checkout.command
-        - exchange: saga.checkout
-          queue: order_svc.saga.checkout.compensation
-          routing-key: saga.checkout.compensation
-        - exchange: saga.checkout
-          queue: order_svc.saga.checkout.command.reply
-          routing-key: saga.checkout.command.reply
-        - exchange: saga.checkout
-          queue: order_svc.saga.checkout.compensation.reply
-          routing-key: saga.checkout.compensation.reply
+        - exchange: saga.checkout.command.order
+          queue: saga.checkout.command.order
+          routing-key: saga.checkout.command.order
+        - exchange: saga.checkout.commandreply
+          queue: saga.checkout.commandreply
+          routing-key: saga.checkout.commandreply
+        - exchange: saga.checkout.compensation.order
+          queue: saga.checkout.compensation.order
+          routing-key: saga.checkout.compensation.order
+        - exchange: saga.checkout.compensationreply
+          queue: saga.checkout.compensationreply
+          routing-key: saga.checkout.compensationreply
         # Product service
-        - exchange: saga.checkout
-          queue: product_svc.saga.checkout.command
-          routing-key: saga.checkout.command
-        - exchange: saga.checkout
-          queue: product_svc.saga.checkout.compensation
-          routing-key: saga.checkout.compensation
+        - exchange: saga.checkout.command.product
+          queue: saga.checkout.command.product
+          routing-key: saga.checkout.command.product
+        - exchange: saga.checkout.compensation.product
+          queue: saga.checkout.compensation.product
+          routing-key: saga.checkout.compensation.product
         # Payment service
-        - exchange: saga.checkout
-          queue: payment_svc.saga.checkout.command
-          routing-key: saga.checkout.command
-        - exchange: saga.checkout
-          queue: payment_svc.saga.checkout.compensation
-          routing-key: saga.checkout.compensation
+        - exchange: saga.checkout.command.payment
+          queue: saga.checkout.command.payment
+          routing-key: saga.checkout.command.payment
+        - exchange: saga.checkout.compensation.payment
+          queue: saga.checkout.compensation.payment
+          routing-key: saga.checkout.compensation.payment

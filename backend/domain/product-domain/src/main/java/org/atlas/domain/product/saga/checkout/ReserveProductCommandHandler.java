@@ -18,8 +18,8 @@ import org.atlas.framework.saga.annotation.SagaCommandHandler;
 import org.atlas.framework.saga.command.CheckoutCommand;
 import org.atlas.framework.saga.context.CheckoutSagaData;
 import org.atlas.framework.saga.context.SagaContext;
-import org.atlas.framework.saga.event.SagaCompensationEvent;
-import org.atlas.framework.saga.event.SagaCommandEvent;
+import org.atlas.framework.saga.messaging.payload.SagaCompensation;
+import org.atlas.framework.saga.messaging.payload.SagaCommand;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -33,7 +33,7 @@ public class ReserveProductCommandHandler {
   private final LockPort lockPort;
 
   @SagaCommandHandler(command = CheckoutCommand.RESERVE_PRODUCT)
-  public void reserveProduct(SagaCommandEvent event) {
+  public void reserveProduct(SagaCommand event) {
     SagaContext sagaContext = SagaContext.deserialize(event.getSagaContext());
     CheckoutSagaData checkoutSagaData = sagaContext.get("data", CheckoutSagaData.class);
     if (checkoutSagaData == null) {
@@ -93,7 +93,7 @@ public class ReserveProductCommandHandler {
   }
 
   @SagaCompensationHandler(command = CheckoutCommand.RESERVE_PRODUCT)
-  public void compensateReserveProduct(SagaCompensationEvent event) {
+  public void compensateReserveProduct(SagaCompensation event) {
     SagaContext sagaContext = SagaContext.deserialize(event.getSagaContext());
     CheckoutSagaData checkoutSagaData = sagaContext.get("data", CheckoutSagaData.class);
     if (checkoutSagaData == null) {

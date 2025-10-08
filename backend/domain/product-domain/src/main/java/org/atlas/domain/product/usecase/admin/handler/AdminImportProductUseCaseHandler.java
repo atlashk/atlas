@@ -11,15 +11,14 @@ import org.atlas.domain.product.entity.ProductEntity;
 import org.atlas.domain.product.port.file.csv.ProductCsvReaderPort;
 import org.atlas.domain.product.port.file.excel.ProductExcelReaderPort;
 import org.atlas.domain.product.port.file.model.read.ProductRow;
+import org.atlas.domain.product.port.messaging.ProductMessagePublisherPort;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.usecase.admin.model.AdminImportProductInput;
-import org.atlas.framework.config.ApplicationConfigPort;
+import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.event.contract.product.ProductCreatedEvent;
 import org.atlas.framework.domain.event.contract.product.model.Product;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
-import org.atlas.framework.domain.error.DomainError;
-import org.atlas.framework.messaging.publisher.MessagePublisherPort;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.util.CollectionUtil;
 
@@ -29,10 +28,9 @@ import org.atlas.framework.util.CollectionUtil;
 public class AdminImportProductUseCaseHandler {
 
   private final ProductRepository productRepository;
-  private final ApplicationConfigPort applicationConfigPort;
-  private final MessagePublisherPort messagePublisherPort;
   private final ProductCsvReaderPort productCsvReaderPort;
   private final ProductExcelReaderPort productExcelReaderPort;
+  private final ProductMessagePublisherPort productMessagePublisherPort;
 
   public Void handle(AdminImportProductInput input) throws Exception {
     // Read rows from file content
@@ -55,9 +53,8 @@ public class AdminImportProductUseCaseHandler {
       productRepository.insertBatch(productEntities);
       productEntities.forEach(productEntity -> {
         Product product = ObjectMapperUtil.getInstance().map(productEntity, Product.class);
-        ProductCreatedEvent event = new ProductCreatedEvent(
-            applicationConfigPort.getApplicationName(), product);
-        messagePublisherPort.publish(event);
+        ProductCreatedEvent event = new ProductCreatedEvent(product);
+        productMessagePublisherPort.publish(event);
       });
       log.info("Imported {} products", rows.size());
       return null;
