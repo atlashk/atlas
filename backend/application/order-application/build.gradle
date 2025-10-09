@@ -182,6 +182,7 @@ dependencies {
         case 'jpa':
             implementation project(':infrastructure.persistence.jpa.impl.order')
             implementation project(':infrastructure.persistence.jpa.impl.outbox')
+            implementation project(':infrastructure.persistence.jpa.impl.saga')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['persistence']}")

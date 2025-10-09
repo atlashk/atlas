@@ -22,7 +22,7 @@ public class OutboxMessageEntity extends DomainEntity {
   private String publishRequest;
   private OutboxMessageStatus status;
   private Date processedAt;
-  private String error;
+  private String errorMessage;
   private Integer retries = 0;
 
   public void markAsProcessed() {

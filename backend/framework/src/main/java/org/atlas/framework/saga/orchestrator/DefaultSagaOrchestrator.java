@@ -316,7 +316,7 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
     } else {
       // Mark command as COMPENSATION_FAILED
       sagaCommandEntity.setStatus(SagaCommandStatus.COMPENSATION_FAILED);
-      sagaCommandEntity.setErrorMessage(reply.getResult().getErrorMessage());
+      sagaCommandEntity.setCompensationErrorMessage(reply.getResult().getErrorMessage());
     }
     sagaCommandEntity.setCompletedAt(DateUtil.now());
     sagaCommandRepository.update(sagaCommandEntity);
