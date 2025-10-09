@@ -22,7 +22,7 @@ public class CartEntity extends DomainEntity {
 
   private List<CartItemEntity> cartItems;
 
-  public CartEntity(Long userId) {
+  public CartEntity(Integer userId) {
     this.userId = userId;
     this.cartItems = new ArrayList<>();
   }
@@ -32,7 +32,14 @@ public class CartEntity extends DomainEntity {
     return CollectionUtil.isEmpty(cartItems);
   }
 
-  public synchronized void putCartItem(Long productId, Integer quantity) {
+  public void addCartItem(CartItemEntity cartItem) {
+    if (cartItems == null) {
+      cartItems = new ArrayList<>();
+    }
+    cartItems.add(cartItem);
+  }
+
+  public synchronized void putCartItem(Integer productId, Integer quantity) {
     if (isEmpty()) {
       cartItems = new ArrayList<>();
     }
@@ -66,13 +73,13 @@ public class CartEntity extends DomainEntity {
     }
   }
 
-  public void clearCart() {
+  public void clear() {
     if (!isEmpty()) {
       cartItems.clear();
     }
   }
 
-  public List<Long> getProductIds() {
+  public List<Integer> getProductIds() {
     return cartItems.stream()
         .map(cartItemEntity -> cartItemEntity.getProduct().getId())
         .distinct()

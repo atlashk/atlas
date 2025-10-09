@@ -5,7 +5,7 @@ import org.atlas.domain.user.entity.CartEntity;
 import org.atlas.domain.user.repository.CartRepository;
 import org.atlas.domain.user.aggregator.CartAggregator;
 import org.atlas.domain.user.usecase.front.model.FrontAddCartItemInput;
-import org.atlas.framework.cache.CachePort;
+import org.atlas.framework.cache.CacheService;
 import org.atlas.framework.cache.Caches;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
 
@@ -15,7 +15,7 @@ public class FrontAddCartItemUseCaseHandler {
 
   private final CartRepository cartRepository;
   private final CartAggregator cartAggregator;
-  private final CachePort cachePort;
+  private final CacheService cacheService;
 
   public CartEntity handle(FrontAddCartItemInput input) throws Exception {
     // Get or create cart for user
@@ -33,7 +33,7 @@ public class FrontAddCartItemUseCaseHandler {
 
     // Update cache
     cartAggregator.aggregate(cart);
-    cachePort.put(Caches.CART, String.valueOf(cart.getUserId()), cart);
+    cacheService.put(Caches.CART, String.valueOf(cart.getUserId()), cart);
 
     return cart;
   }

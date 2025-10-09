@@ -8,7 +8,7 @@ import org.atlas.domain.payment.service.PaymentRoutingService;
 import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.constant.CommonConstant;
-import org.atlas.framework.payment.PaymentGatewayPort;
+import org.atlas.framework.payment.PaymentGatewayService;
 import org.atlas.framework.payment.model.CreatePaymentRequest;
 import org.atlas.framework.payment.model.CreatePaymentResponse;
 import org.atlas.framework.saga.annotation.SagaCommandHandler;
@@ -38,7 +38,7 @@ public class InitializePaymentCommandHandler {
     }
 
     // Find the relevant payment gateway
-    PaymentGatewayPort paymentGatewayPort = paymentRoutingService.getPaymentGateway(
+    PaymentGatewayService paymentGatewayService = paymentRoutingService.getPaymentGateway(
         checkoutSagaData.getPaymentMethod());
 
     // Insert new payment entity
@@ -49,7 +49,7 @@ public class InitializePaymentCommandHandler {
     paymentEntity.setCurrency(
         applicationConfigService.getConfig("currency", CommonConstant.DEFAULT_CURRENCY));
     paymentEntity.setMethod(checkoutSagaData.getPaymentMethod());
-    paymentEntity.setGateway(paymentGatewayPort.supports());
+    paymentEntity.setGateway(paymentGatewayService.supports());
     paymentRepository.insert(paymentEntity);
 
     // Create external payment
@@ -59,7 +59,7 @@ public class InitializePaymentCommandHandler {
         .currency(paymentEntity.getCurrency())
         .method(paymentEntity.getMethod())
         .build();
-    CreatePaymentResponse response = paymentGatewayPort.createPayment(createPaymentRequest);
+    CreatePaymentResponse response = paymentGatewayService.createPayment(createPaymentRequest);
 
     if (response.isSuccess()) {
       log.info(

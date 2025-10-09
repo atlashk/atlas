@@ -15,11 +15,11 @@ public class FrontGetOrderStatusUseCaseHandler {
   private final OrderRepository orderRepository;
 
   public FrontGetOrderStatusOutput handle(Integer orderId) throws Exception {
-    OrderEntity orderEntity = orderRepository.findById(orderId)
+    OrderEntity order = orderRepository.findById(orderId)
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
     return FrontGetOrderStatusOutput.builder()
-        .status(orderEntity.getStatus())
-        .cancellationReason(orderEntity.getCancellationReason())
+        .status(order.getStatus())
+        .cancellationReason(order.getCancellationReason())
         .build();
   }
 }

@@ -12,7 +12,7 @@ import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.lock.LockAcquisitionException;
-import org.atlas.framework.lock.LockPort;
+import org.atlas.framework.lock.LockService;
 import org.atlas.framework.saga.annotation.SagaCompensationHandler;
 import org.atlas.framework.saga.annotation.SagaCommandHandler;
 import org.atlas.framework.saga.command.CheckoutCommand;
@@ -31,7 +31,7 @@ public class ReserveProductCommandHandler {
   private final ProductRepository productRepository;
   private final ReservationRepository reservationRepository;
   private final ApplicationConfigService applicationConfigService;
-  private final LockPort lockPort;
+  private final LockService lockService;
 
   @SagaCommandHandler(command = CheckoutCommand.RESERVE_PRODUCT)
   public SagaCommandResult reserveProduct(SagaCommand event) {
@@ -75,19 +75,19 @@ public class ReserveProductCommandHandler {
         final Duration waitTime = Duration.ofSeconds(5);
         final Duration leaseTime = Duration.ofSeconds(15);
         try {
-          boolean acquiredLock = lockPort.acquireLock(lockKey, waitTime, leaseTime);
+          boolean acquiredLock = lockService.acquireLock(lockKey, waitTime, leaseTime);
           if (!acquiredLock) {
             throw new LockAcquisitionException("Failed to acquire lock: " + lockKey);
           }
-          ProductEntity productEntity = productRepository.findById(productId)
+          ProductEntity product = productRepository.findById(productId)
               .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
-          if (productEntity.getQuantity() < quantity) {
+          if (product.getQuantity() < quantity) {
             throw new DomainException(DomainError.PRODUCT_INSUFFICIENT_QUANTITY);
           }
-          productEntity.setQuantity(productEntity.getQuantity() - quantity);
-          productRepository.update(productEntity);
+          product.setQuantity(product.getQuantity() - quantity);
+          productRepository.update(product);
         } finally {
-          lockPort.releaseLock(lockKey);
+          lockService.releaseLock(lockKey);
         }
       }
       default -> throw new UnsupportedOperationException(

@@ -12,12 +12,12 @@ import org.atlas.framework.async.AsyncUtil;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
-import org.atlas.framework.payment.PaymentGatewayPort;
+import org.atlas.framework.payment.PaymentGatewayService;
 import org.atlas.framework.payment.model.PaymentResult;
 import org.atlas.framework.payment.model.WebhookResponse;
 import org.atlas.framework.saga.command.CheckoutCommand;
 import org.atlas.framework.saga.command.SagaCommandResult;
-import org.atlas.framework.saga.messaging.SagaMessagePublisherPort;
+import org.atlas.framework.saga.messaging.SagaMessagePublisher;
 import org.atlas.framework.saga.messaging.payload.SagaCommandReply;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
@@ -29,7 +29,7 @@ public class WebhookHandler {
 
   private final PaymentRepository paymentRepository;
   private final ApplicationContext applicationContext;
-  private final SagaMessagePublisherPort sagaMessagePublisherPort;
+  private final SagaMessagePublisher sagaMessagePublisher;
 
   public WebhookResponse handle(PaymentGateway paymentGateway,
       Map<String, Object> payload, Map<String, String> headers) {
@@ -39,15 +39,15 @@ public class WebhookHandler {
     // Find payment gateway port implementation
     String paymentGatewayInstanceName = String.format("%sPaymentGatewayAdapter",
         paymentGateway.name().toLowerCase());
-    PaymentGatewayPort paymentGatewayPort;
+    PaymentGatewayService paymentGatewayService;
     try {
-      paymentGatewayPort = applicationContext.getBean(
-          paymentGatewayInstanceName, PaymentGatewayPort.class);
+      paymentGatewayService = applicationContext.getBean(
+          paymentGatewayInstanceName, PaymentGatewayService.class);
     } catch (NoSuchBeanDefinitionException e) {
       throw new DomainException(DomainError.PAYMENT_GATEWAY_NOT_SUPPORTED);
     }
 
-    WebhookResponse response = paymentGatewayPort.handleWebhook(payload, headers);
+    WebhookResponse response = paymentGatewayService.handleWebhook(payload, headers);
     PaymentResult paymentResult = response.getPaymentResult();
     assert paymentResult != null;
 
@@ -85,7 +85,7 @@ public class WebhookHandler {
               commandResult = SagaCommandResult.failure(paymentEntity.getCancellationReason());
         }
         replyBuilder.result(commandResult);
-        sagaMessagePublisherPort.publish(replyBuilder.build());
+        sagaMessagePublisher.publish(replyBuilder.build());
       }
 
       @Override

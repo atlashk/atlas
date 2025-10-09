@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.config.ApplicationConfigPort;
+import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.observability.metrics.ApiLatencyMetricsCollector;
 import org.springframework.core.annotation.Order;
 import org.springframework.lang.Nullable;
@@ -24,7 +24,7 @@ public class ApiLatencyFilter extends OncePerRequestFilter {
 
   private static final Pattern FILTERED_PATHS = Pattern.compile("^/api(?!/actuator).*");
 
-  private final ApplicationConfigPort applicationConfigPort;
+  private final ApplicationConfigService applicationConfigService;
   private final @Nullable ApiLatencyMetricsCollector apiLatencyMetricsCollector;
 
   @Override
@@ -35,7 +35,7 @@ public class ApiLatencyFilter extends OncePerRequestFilter {
       filterChain.doFilter(request, response);
     } finally {
       long elapsedTimeMs = System.currentTimeMillis() - start;
-      String service = applicationConfigPort.getApplicationName();
+      String service = applicationConfigService.getApplicationName();
       String endpoint = request.getRequestURI();
       String method = request.getMethod();
       int httpStatus = response.getStatus();

@@ -59,21 +59,21 @@ public class ProductController {
         .pagingRequest(PagingRequest.of(page - 1, size))
         .build();
 
-    PagingResult<ProductEntity> productEntityPage = frontSearchProductUseCaseHandler.handle(input);
+    PagingResult<ProductEntity> productPage = frontSearchProductUseCaseHandler.handle(input);
 
-    List<ProductResponse> productResponses = productEntityPage.getData()
+    List<ProductResponse> productResponses = productPage.getData()
         .stream()
-        .map(productEntity -> {
+        .map(product -> {
           ProductResponse productResponse = new ProductResponse();
-          productResponse.setId(productEntity.getId());
-          productResponse.setName(productEntity.getName());
-          productResponse.setPrice(productEntity.getPrice());
-          productResponse.setImage(productEntity.getImage());
+          productResponse.setId(product.getId());
+          productResponse.setName(product.getName());
+          productResponse.setPrice(product.getPrice());
+          productResponse.setImage(product.getImage());
           return productResponse;
         })
         .toList();
     PagingResult<ProductResponse> productResponsePage = PagingResult.of(productResponses,
-        productEntityPage.getPagination());
+        productPage.getPagination());
     return ApiResponseWrapper.successPage(productResponsePage);
   }
 
@@ -82,9 +82,9 @@ public class ProductController {
   public ApiResponseWrapper<ProductResponse> getProduct(
       @Parameter(name = "productId", description = "The unique identifier of the product.", example = "1", required = true)
       @PathVariable("productId") Integer productId) throws Exception {
-    ProductEntity productEntity = frontGetProductUseCaseHandler.handle(productId);
+    ProductEntity product = frontGetProductUseCaseHandler.handle(productId);
     ProductResponse response = ObjectMapperUtil.getInstance()
-        .map(productEntity, ProductResponse.class);
+        .map(product, ProductResponse.class);
     return ApiResponseWrapper.success(response);
   }
 }

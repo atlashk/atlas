@@ -9,7 +9,7 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.atlas.framework.config.ApplicationConfigPort;
+import org.atlas.framework.config.ApplicationConfigService;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,13 +25,13 @@ public class OpenApiConfig {
       "500",
       "{ \"success\": false, \"code\": \"1000\", \"message\": \"An unexpected error occurred\"}"
   );
-  private final ApplicationConfigPort applicationConfigPort;
+  private final ApplicationConfigService applicationConfigService;
 
   @Bean
   public OpenAPI openAPI() {
     return new OpenAPI()
         .info(new Info()
-            .title(applicationConfigPort.getApplicationName() + " API Docs")
+            .title(applicationConfigService.getApplicationName() + " API Docs")
             .version("1.0")
             .contact(new Contact()
                 .name("Your Name")

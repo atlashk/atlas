@@ -16,11 +16,11 @@ import org.atlas.domain.order.usecase.front.model.FrontCheckoutInput;
 import org.atlas.framework.cryptography.HashingUtil;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
-import org.atlas.framework.internalapi.user.CartApiPort;
+import org.atlas.framework.internalapi.user.CartApiClient;
 import org.atlas.framework.internalapi.user.model.CartItemResponse;
 import org.atlas.framework.internalapi.user.model.CartResponse;
 import org.atlas.framework.internalapi.user.model.GetCartRequest;
-import org.atlas.framework.lock.LockPort;
+import org.atlas.framework.lock.LockService;
 import org.atlas.framework.saga.annotation.SagaCompensationHandler;
 import org.atlas.framework.saga.annotation.SagaCommandHandler;
 import org.atlas.framework.saga.command.CheckoutCommand;
@@ -40,8 +40,8 @@ import org.springframework.stereotype.Component;
 public class CreateOrderCommandHandler {
 
   private final OrderRepository orderRepository;
-  private final CartApiPort cartApiPort;
-  private final LockPort lockPort;
+  private final CartApiClient cartApiClient;
+  private final LockService lockService;
   private final SequenceGenerator sequenceGenerator;
 
   @SagaCommandHandler(command = CheckoutCommand.CREATE_ORDER)
@@ -62,7 +62,7 @@ public class CreateOrderCommandHandler {
     String lockKey = obtainLockKey(input, cart);
     Duration waitTime = Duration.ofSeconds(30);
     Duration leaseTime = Duration.ofMinutes(15);
-    boolean lockAcquired = lockPort.acquireLock(lockKey, waitTime, leaseTime);
+    boolean lockAcquired = lockService.acquireLock(lockKey, waitTime, leaseTime);
     if (!lockAcquired) {
       throw new DomainException(DomainError.CONFLICT,
           "Another checkout operation is already in progress.");
@@ -77,7 +77,7 @@ public class CreateOrderCommandHandler {
 
       checkoutSagaData = OrderMapper.toCheckoutSagaData(order);
     } finally {
-      lockPort.releaseLock(lockKey);
+      lockService.releaseLock(lockKey);
     }
 
     return SagaCommandResult.builder()
@@ -88,7 +88,7 @@ public class CreateOrderCommandHandler {
 
   private CartResponse getCart(Integer userId) {
     GetCartRequest request = GetCartRequest.builder().userId(userId).build();
-    return cartApiPort.call(request);
+    return cartApiClient.call(request);
   }
 
   private String obtainLockKey(FrontCheckoutInput input, CartResponse cart) {

@@ -11,7 +11,7 @@ import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.domain.event.DomainEvent;
 import org.atlas.framework.domain.event.handler.interceptor.EventHandlerInterceptor;
 import org.atlas.framework.lock.LockAcquisitionException;
-import org.atlas.framework.lock.LockPort;
+import org.atlas.framework.lock.LockService;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -26,7 +26,7 @@ public class DomainEventHandlerAspect {
 
   private final List<EventHandlerInterceptor> interceptors;
   private final ApplicationConfigService applicationConfigService;
-  private final LockPort lockPort;
+  private final LockService lockService;
 
   @Around("@within(org.atlas.framework.domain.event.handler.DomainEventHandler) && execution(* handle(..))")
   public Object aroundHandle(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -44,7 +44,7 @@ public class DomainEventHandlerAspect {
     Duration waitTime = Duration.ofSeconds(30);
     Duration leaseTime = Duration.ofDays(7);
     try {
-      boolean acquiredLock = lockPort.acquireLock(lockKey, waitTime, leaseTime);
+      boolean acquiredLock = lockService.acquireLock(lockKey, waitTime, leaseTime);
       if (!acquiredLock) {
         throw new LockAcquisitionException("Could not acquire lock for key: " + lockKey);
       }
@@ -52,7 +52,7 @@ public class DomainEventHandlerAspect {
       result = joinPoint.proceed();
       event.markAsProcessed();
     } finally {
-      lockPort.releaseLock(lockKey);
+      lockService.releaseLock(lockKey);
     }
 
     // Execute post-handle interceptors (outside locked section)

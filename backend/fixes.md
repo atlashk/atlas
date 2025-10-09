@@ -162,13 +162,13 @@ public WebhookResponse handle(PaymentGateway paymentGateway,
         String paymentGatewayInstanceName = String.format
         ("%sPaymentGatewayAdapter",
             paymentGateway.name().toLowerCase());
-        PaymentGatewayPort paymentGatewayPort = dependencyPort.
+        PaymentGatewayPort paymentGatewayService = dependencyPort.
         getInstanceByName(
                 paymentGatewayInstanceName, PaymentGatewayPort.class)
             .orElseThrow(() -> new DomainException(DomainError.
             PAYMENT_GATEWAY_NOT_SUPPORTED));
 
-        WebhookResponse response = paymentGatewayPort.handleWebhook
+        WebhookResponse response = paymentGatewayService.handleWebhook
         (payload, headers);
         
         if (response.getResponseStatus() == 200 && response.

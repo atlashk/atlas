@@ -1,7 +1,7 @@
 package org.atlas.infrastructure.schedule.quartz.impl.outbox.config;
 
 import lombok.RequiredArgsConstructor;
-import org.atlas.framework.config.ApplicationConfigPort;
+import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.infrastructure.schedule.quartz.impl.outbox.job.RelayOutboxMessageJob;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
@@ -15,14 +15,14 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class QuartzJobConfig {
 
-  private final ApplicationConfigPort applicationConfigPort;
+  private final ApplicationConfigService applicationConfigService;
 
   @Bean
   public JobDetail relayOutboxMessageJobDetail() {
     return JobBuilder.newJob()
         .ofType(RelayOutboxMessageJob.class)
         .withIdentity(RelayOutboxMessageJob.class.getSimpleName(),
-            applicationConfigPort.getApplicationName())
+            applicationConfigService.getApplicationName())
         .storeDurably()
         .build();
   }
@@ -32,7 +32,7 @@ public class QuartzJobConfig {
     return TriggerBuilder.newTrigger()
         .forJob(relayOutboxMessageJobDetail)
         .withIdentity(RelayOutboxMessageJob.class.getSimpleName(),
-            applicationConfigPort.getApplicationName())
+            applicationConfigService.getApplicationName())
         // Run every 5 seconds
         .withSchedule(CronScheduleBuilder.cronSchedule("*/5 * * * * ?")
             .withMisfireHandlingInstructionFireAndProceed()) // Handle misfires

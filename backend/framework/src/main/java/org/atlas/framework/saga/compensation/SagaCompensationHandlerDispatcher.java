@@ -12,7 +12,7 @@ import org.atlas.framework.saga.context.SagaContext;
 import org.atlas.framework.saga.entity.SagaEntity;
 import org.atlas.framework.saga.exception.SagaConfigException;
 import org.atlas.framework.saga.exception.SagaNotFoundException;
-import org.atlas.framework.saga.messaging.SagaMessagePublisherPort;
+import org.atlas.framework.saga.messaging.SagaMessagePublisher;
 import org.atlas.framework.saga.messaging.payload.SagaCompensation;
 import org.atlas.framework.saga.messaging.payload.SagaCompensationReply;
 import org.atlas.framework.saga.repository.SagaRepository;
@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 public class SagaCompensationHandlerDispatcher implements InitializingBean {
 
   private final SagaRepository sagaRepository;
-  private final SagaMessagePublisherPort sagaMessagePublisherPort;
+  private final SagaMessagePublisher sagaMessagePublisher;
   private final ApplicationContext applicationContext;
 
   // One compensation handler per command
@@ -116,7 +116,7 @@ public class SagaCompensationHandlerDispatcher implements InitializingBean {
         .sagaCommandName(compensation.getSagaCommandName())
         .result(result)
         .build();
-    sagaMessagePublisherPort.publish(reply);
+    sagaMessagePublisher.publish(reply);
   }
 
   /**

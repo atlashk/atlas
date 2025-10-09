@@ -19,12 +19,12 @@ public class UserDetailsImpl implements UserDetails {
   private String password;
   private Collection<? extends GrantedAuthority> authorities;
 
-  public UserDetailsImpl(UserEntity userEntity) {
-    this.userId = userEntity.getId();
-    this.username = userEntity.getUsername();
-    this.password = userEntity.getPassword();
+  public UserDetailsImpl(UserEntity user) {
+    this.userId = user.getId();
+    this.username = user.getUsername();
+    this.password = user.getPassword();
     this.authorities = Collections.singletonList(
-        new SimpleGrantedAuthority(userEntity.getRole().name()));
+        new SimpleGrantedAuthority(user.getRole().name()));
   }
 
   @Override

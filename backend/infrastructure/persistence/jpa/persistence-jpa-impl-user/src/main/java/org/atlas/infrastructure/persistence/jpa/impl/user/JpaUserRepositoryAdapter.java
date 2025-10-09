@@ -30,9 +30,9 @@ public class JpaUserRepositoryAdapter implements UserRepository {
     }
     List<JpaUserEntity> jpaUserEntities = customJpaUserRepository.findByCriteria(criteria,
         pagingRequest);
-    List<UserEntity> userEntities = ObjectMapperUtil.getInstance()
+    List<UserEntity> users = ObjectMapperUtil.getInstance()
         .mapList(jpaUserEntities, UserEntity.class);
-    return PagingResult.of(userEntities, totalCount, pagingRequest);
+    return PagingResult.of(users, totalCount, pagingRequest);
   }
 
   @Override
@@ -76,10 +76,10 @@ public class JpaUserRepositoryAdapter implements UserRepository {
   }
 
   @Override
-  public void insert(UserEntity userEntity) {
+  public void insert(UserEntity user) {
     JpaUserEntity jpaUserEntity = ObjectMapperUtil.getInstance()
-        .map(userEntity, JpaUserEntity.class);
+        .map(user, JpaUserEntity.class);
     jpaUserRepository.save(jpaUserEntity);
-    userEntity.setId(jpaUserEntity.getId());
+    user.setId(jpaUserEntity.getId());
   }
 }

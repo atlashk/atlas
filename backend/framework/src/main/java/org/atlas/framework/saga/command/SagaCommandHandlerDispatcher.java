@@ -12,7 +12,7 @@ import org.atlas.framework.saga.context.SagaContext;
 import org.atlas.framework.saga.entity.SagaEntity;
 import org.atlas.framework.saga.exception.SagaConfigException;
 import org.atlas.framework.saga.exception.SagaNotFoundException;
-import org.atlas.framework.saga.messaging.SagaMessagePublisherPort;
+import org.atlas.framework.saga.messaging.SagaMessagePublisher;
 import org.atlas.framework.saga.messaging.payload.SagaCommand;
 import org.atlas.framework.saga.messaging.payload.SagaCommandReply;
 import org.atlas.framework.saga.repository.SagaRepository;
@@ -48,7 +48,7 @@ import org.springframework.stereotype.Component;
 public class SagaCommandHandlerDispatcher implements InitializingBean {
 
   private final SagaRepository sagaRepository;
-  private final SagaMessagePublisherPort sagaMessagePublisherPort;
+  private final SagaMessagePublisher sagaMessagePublisher;
   private final ApplicationContext applicationContext;
 
   // One handler per command
@@ -128,7 +128,7 @@ public class SagaCommandHandlerDispatcher implements InitializingBean {
         .sagaCommandName(command.getSagaCommandName())
         .result(result)
         .build();
-    sagaMessagePublisherPort.publish(reply);
+    sagaMessagePublisher.publish(reply);
   }
 
   /**

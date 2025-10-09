@@ -22,15 +22,15 @@ public class AdminListOrderUseCaseHandler {
     // Find orders
     FindOrderCriteria criteria = ObjectMapperUtil.getInstance()
         .map(input, FindOrderCriteria.class);
-    PagingResult<OrderEntity> orderEntityPage = orderRepository.findByCriteria(criteria,
+    PagingResult<OrderEntity> orderPage = orderRepository.findByCriteria(criteria,
         input.getPagingRequest());
-    if (orderEntityPage.checkEmpty()) {
+    if (orderPage.checkEmpty()) {
       return PagingResult.empty();
     }
 
     // Aggregate orders
     orderAggregator.aggregate(
-        orderEntityPage.getData(),
+        orderPage.getData(),
         AggregationOptions.builder()
             .loadUsers(true)
             .loadProducts(true)
@@ -38,6 +38,6 @@ public class AdminListOrderUseCaseHandler {
             .build()
     );
 
-    return orderEntityPage;
+    return orderPage;
   }
 }

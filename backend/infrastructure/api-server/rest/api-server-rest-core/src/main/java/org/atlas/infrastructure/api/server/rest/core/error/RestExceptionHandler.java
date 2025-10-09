@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
-import org.atlas.framework.i18n.I18nPort;
+import org.atlas.framework.i18n.I18nService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -20,13 +20,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 public class RestExceptionHandler {
 
-  private final I18nPort i18nPort;
+  private final I18nService i18nService;
 
   @ExceptionHandler(DomainException.class)
   public ResponseEntity<ApiResponseWrapper<Void>> handle(DomainException e) {
     log.error("Occurred business exception", e);
     String errorMessage = e.getMessage() != null ? e.getMessage() :
-        i18nPort.getMessage(e.getMessageCode(), "Unknown error");
+        i18nService.getMessage(e.getMessageCode(), "Unknown error");
     ApiResponseWrapper<Void> body = ApiResponseWrapper.error(e.getErrorCode(), errorMessage);
     int status = e.getErrorCode() < 1000 ? e.getErrorCode() :
         HttpStatus.INTERNAL_SERVER_ERROR.value();

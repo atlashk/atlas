@@ -24,8 +24,8 @@ public class ProductGrpcService extends ProductServiceGrpc.ProductServiceImplBas
       StreamObserver<ListProductResponseProto> responseObserver) {
     InternalListProductInput input = map(requestProto);
     try {
-      List<ProductEntity> productEntities = internalListProductUseCaseHandler.handle(input);
-      ListProductResponseProto productResponseProtoList = map(productEntities);
+      List<ProductEntity> products = internalListProductUseCaseHandler.handle(input);
+      ListProductResponseProto productResponseProtoList = map(products);
       responseObserver.onNext(productResponseProtoList);
       responseObserver.onCompleted();
     } catch (Exception e) {
@@ -37,20 +37,20 @@ public class ProductGrpcService extends ProductServiceGrpc.ProductServiceImplBas
     return new InternalListProductInput(requestProto.getIdList());
   }
 
-  private ListProductResponseProto map(List<ProductEntity> productEntities) {
-    if (CollectionUtil.isEmpty(productEntities)) {
+  private ListProductResponseProto map(List<ProductEntity> products) {
+    if (CollectionUtil.isEmpty(products)) {
       return ListProductResponseProto.getDefaultInstance();
     }
     ListProductResponseProto.Builder builder = ListProductResponseProto.newBuilder();
-    productEntities.forEach(productEntity -> builder.addProduct(map(productEntity)));
+    products.forEach(product -> builder.addProduct(map(product)));
     return builder.build();
   }
 
-  private ProductProto map(ProductEntity productEntity) {
+  private ProductProto map(ProductEntity product) {
     return ProductProto.newBuilder()
-        .setId(productEntity.getId())
-        .setName(productEntity.getName())
-        .setPrice(productEntity.getPrice().doubleValue())
+        .setId(product.getId())
+        .setName(product.getName())
+        .setPrice(product.getPrice().doubleValue())
         .build();
   }
 }

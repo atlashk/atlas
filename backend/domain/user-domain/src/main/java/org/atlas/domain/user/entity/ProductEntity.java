@@ -16,7 +16,7 @@ public class ProductEntity {
   private BigDecimal price;
   private String image;
 
-  public ProductEntity(Long id) {
+  public ProductEntity(Integer id) {
     this.id = id;
   }
 }

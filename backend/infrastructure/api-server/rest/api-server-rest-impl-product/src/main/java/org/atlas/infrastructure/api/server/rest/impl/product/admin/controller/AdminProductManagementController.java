@@ -103,10 +103,10 @@ public class AdminProductManagementController {
         .pagingRequest(PagingRequest.of(page - 1, size))
         .build();
 
-    PagingResult<ProductEntity> productEntityPage = adminListProductUseCaseHandler.handle(input);
+    PagingResult<ProductEntity> productPage = adminListProductUseCaseHandler.handle(input);
 
     PagingResult<ProductResponse> productResponsePage = ObjectMapperUtil.getInstance()
-        .mapPage(productEntityPage, ProductResponse.class);
+        .mapPage(productPage, ProductResponse.class);
     return ApiResponseWrapper.successPage(productResponsePage);
   }
 
@@ -115,9 +115,9 @@ public class AdminProductManagementController {
   public ApiResponseWrapper<ProductResponse> getProduct(
       @Parameter(name = "productId", description = "The unique identifier of the product", example = "1")
       @PathVariable("productId") Integer productId) throws Exception {
-    ProductEntity productEntity = adminGetProductUseCaseHandler.handle(productId);
+    ProductEntity product = adminGetProductUseCaseHandler.handle(productId);
     ProductResponse productResponse = ObjectMapperUtil.getInstance()
-        .map(productEntity, ProductResponse.class);
+        .map(product, ProductResponse.class);
     return ApiResponseWrapper.success(productResponse);
   }
 
@@ -127,8 +127,8 @@ public class AdminProductManagementController {
   public ApiResponseWrapper<Integer> createProduct(
       @Parameter(description = "Request object containing the details of the product to create", required = true)
       @Valid @RequestBody AdminCreateProductRequest request) throws Exception {
-    ProductEntity productEntity = AdminProductMapper.toProductEntity(request);
-    Integer productId = adminCreateProductUseCaseHandler.handle(productEntity);
+    ProductEntity product = AdminProductMapper.toProductEntity(request);
+    Integer productId = adminCreateProductUseCaseHandler.handle(product);
     return ApiResponseWrapper.success(productId);
   }
 
@@ -139,9 +139,9 @@ public class AdminProductManagementController {
       @PathVariable("productId") Integer productId,
       @Parameter(description = "Request object containing the new details for the product", required = true)
       @Valid @RequestBody AdminUpdateProductRequest request) throws Exception {
-    ProductEntity productEntity = AdminProductMapper.toProductEntity(request);
-    productEntity.setId(productId);
-    adminUpdateProductUseCaseHandler.handle(productEntity);
+    ProductEntity product = AdminProductMapper.toProductEntity(request);
+    product.setId(productId);
+    adminUpdateProductUseCaseHandler.handle(product);
     return ApiResponseWrapper.success();
   }
 

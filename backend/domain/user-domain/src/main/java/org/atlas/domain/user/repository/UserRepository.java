@@ -23,5 +23,5 @@ public interface UserRepository {
 
   Long countAll();
 
-  void insert(UserEntity userEntity);
+  void insert(UserEntity user);
 }

@@ -33,9 +33,9 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
     }
     List<JpaOrderEntity> jpaOrderEntities = customJpaOrderRepository.findByCriteria(criteria,
         pagingRequest);
-    List<OrderEntity> orderEntities = ObjectMapperUtil.getInstance()
+    List<OrderEntity> orders = ObjectMapperUtil.getInstance()
         .mapList(jpaOrderEntities, JpaOrderEntityMapper::toOrderEntity);
-    return PagingResult.of(orderEntities, totalCount, pagingRequest);
+    return PagingResult.of(orders, totalCount, pagingRequest);
   }
 
   @Override
@@ -55,15 +55,15 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
   }
 
   @Override
-  public void insert(OrderEntity orderEntity) {
-    JpaOrderEntity jpaOrderEntity = JpaOrderEntityMapper.toJpaOrderEntity(orderEntity);
+  public void insert(OrderEntity order) {
+    JpaOrderEntity jpaOrderEntity = JpaOrderEntityMapper.toJpaOrderEntity(order);
     jpaOrderRepository.insert(jpaOrderEntity);
-    orderEntity.setId(jpaOrderEntity.getId());
+    order.setId(jpaOrderEntity.getId());
   }
 
   @Override
-  public void update(OrderEntity orderEntity) {
-    JpaOrderEntity jpaOrderEntity = JpaOrderEntityMapper.toJpaOrderEntity(orderEntity);
+  public void update(OrderEntity order) {
+    JpaOrderEntity jpaOrderEntity = JpaOrderEntityMapper.toJpaOrderEntity(order);
     jpaOrderRepository.save(jpaOrderEntity);
   }
 }

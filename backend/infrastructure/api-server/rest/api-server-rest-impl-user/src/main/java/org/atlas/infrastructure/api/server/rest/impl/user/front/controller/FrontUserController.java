@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:backend/infrastructure/api-server/rest/api-server-rest-impl-user/src/main/java/org/atlas/infrastructure/api/server/rest/impl/user/common/controller/CommonUserController.java
-package org.atlas.infrastructure.api.server.rest.impl.user.common.controller;
-========
 package org.atlas.infrastructure.api.server.rest.impl.user.front.controller;
->>>>>>>> 6eb937f1a05c7fa83208d5ad3451dcd4c6024e8a:backend/infrastructure/api-server/rest/api-server-rest-impl-user/src/main/java/org/atlas/infrastructure/api/server/rest/impl/user/front/controller/FrontUserController.java
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -24,20 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/front/user")
 @Validated
 @RequiredArgsConstructor
-<<<<<<<< HEAD:backend/infrastructure/api-server/rest/api-server-rest-impl-user/src/main/java/org/atlas/infrastructure/api/server/rest/impl/user/common/controller/CommonUserController.java
-public class CommonUserController {
-
-  private final GetProfileUseCaseHandler getProfileUseCaseHandler;
-
-  @GetMapping(value = "/profile", produces = MediaType.APPLICATION_JSON_VALUE)
-  @Operation(summary = "Get user profile")
-  public ApiResponseWrapper<UserResponse> getProfile() throws Exception {
-
-    UserEntity userEntity = getProfileUseCaseHandler.handle(null);
-    UserResponse userResponse = ObjectMapperUtil.getInstance()
-        .map(userEntity, UserResponse.class);
-    return ApiResponseWrapper.success(userResponse);
-========
 public class FrontUserController {
 
   private final FrontRegisterUseCaseHandler frontRegisterUseCaseHandler;
@@ -51,6 +33,5 @@ public class FrontUserController {
         .map(request, RegisterInput.class);
     frontRegisterUseCaseHandler.handle(input);
     return ApiResponseWrapper.success();
->>>>>>>> 6eb937f1a05c7fa83208d5ad3451dcd4c6024e8a:backend/infrastructure/api-server/rest/api-server-rest-impl-user/src/main/java/org/atlas/infrastructure/api/server/rest/impl/user/front/controller/FrontUserController.java
   }
 }

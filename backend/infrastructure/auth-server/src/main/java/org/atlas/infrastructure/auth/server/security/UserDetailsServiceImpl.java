@@ -17,16 +17,16 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    Optional<UserEntity> userEntityOpt = userRepository.findByUsername(username);
-    if (userEntityOpt.isEmpty()) {
-      userEntityOpt = userRepository.findByEmail(username);
-      if (userEntityOpt.isEmpty()) {
-        userEntityOpt = userRepository.findByPhoneNumber(username);
-        if (userEntityOpt.isEmpty()) {
+    Optional<UserEntity> userOpt = userRepository.findByUsername(username);
+    if (userOpt.isEmpty()) {
+      userOpt = userRepository.findByEmail(username);
+      if (userOpt.isEmpty()) {
+        userOpt = userRepository.findByPhoneNumber(username);
+        if (userOpt.isEmpty()) {
           throw new UsernameNotFoundException(username);
         }
       }
     }
-    return userEntityOpt.map(UserDetailsImpl::new).get();
+    return userOpt.map(UserDetailsImpl::new).get();
   }
 }

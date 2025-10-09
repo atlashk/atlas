@@ -12,21 +12,21 @@ import org.atlas.infrastructure.persistence.jpa.impl.order.entity.JpaOrderItemEn
 @UtilityClass
 public class JpaOrderEntityMapper {
 
-  public static JpaOrderEntity toJpaOrderEntity(final OrderEntity orderEntity) {
+  public static JpaOrderEntity toJpaOrderEntity(final OrderEntity order) {
     // Order
     final JpaOrderEntity jpaOrderEntity = new JpaOrderEntity();
-    jpaOrderEntity.setId(orderEntity.getId());
-    jpaOrderEntity.setCode(orderEntity.getCode());
-    jpaOrderEntity.setUserId(orderEntity.getUser().getId());
-    jpaOrderEntity.setAmount(orderEntity.getAmount());
-    jpaOrderEntity.setPaymentId(orderEntity.getPayment().getId());
-    jpaOrderEntity.setPaymentMethod(orderEntity.getPayment().getMethod());
-    jpaOrderEntity.setStatus(orderEntity.getStatus());
-    jpaOrderEntity.setCancellationReason(orderEntity.getCancellationReason());
-    jpaOrderEntity.setCreatedAt(orderEntity.getCreatedAt());
+    jpaOrderEntity.setId(order.getId());
+    jpaOrderEntity.setCode(order.getCode());
+    jpaOrderEntity.setUserId(order.getUser().getId());
+    jpaOrderEntity.setAmount(order.getAmount());
+    jpaOrderEntity.setPaymentId(order.getPayment().getId());
+    jpaOrderEntity.setPaymentMethod(order.getPayment().getMethod());
+    jpaOrderEntity.setStatus(order.getStatus());
+    jpaOrderEntity.setCancellationReason(order.getCancellationReason());
+    jpaOrderEntity.setCreatedAt(order.getCreatedAt());
 
     // Order items
-    orderEntity.getOrderItems().forEach(orderItemEntity -> {
+    order.getOrderItems().forEach(orderItemEntity -> {
       JpaOrderItemEntity jpaOrderItemEntity = new JpaOrderItemEntity();
       jpaOrderItemEntity.setProductId(orderItemEntity.getProduct().getId());
       jpaOrderItemEntity.setProductPrice(orderItemEntity.getProduct().getPrice());
@@ -39,18 +39,18 @@ public class JpaOrderEntityMapper {
 
   public static OrderEntity toOrderEntity(final JpaOrderEntity jpaOrderEntity) {
     // Order
-    final OrderEntity orderEntity = new OrderEntity();
-    orderEntity.setId(jpaOrderEntity.getId());
-    orderEntity.setCode(jpaOrderEntity.getCode());
-    orderEntity.setAmount(jpaOrderEntity.getAmount());
-    orderEntity.setStatus(jpaOrderEntity.getStatus());
-    orderEntity.setCancellationReason(jpaOrderEntity.getCancellationReason());
-    orderEntity.setCreatedAt(jpaOrderEntity.getCreatedAt());
+    final OrderEntity order = new OrderEntity();
+    order.setId(jpaOrderEntity.getId());
+    order.setCode(jpaOrderEntity.getCode());
+    order.setAmount(jpaOrderEntity.getAmount());
+    order.setStatus(jpaOrderEntity.getStatus());
+    order.setCancellationReason(jpaOrderEntity.getCancellationReason());
+    order.setCreatedAt(jpaOrderEntity.getCreatedAt());
 
     // User
-    UserEntity userEntity = new UserEntity();
-    userEntity.setId(jpaOrderEntity.getUserId());
-    orderEntity.setUser(userEntity);
+    UserEntity user = new UserEntity();
+    user.setId(jpaOrderEntity.getUserId());
+    order.setUser(user);
 
     // Order items
     if (jpaOrderEntity.getOrderItems() != null) {
@@ -61,12 +61,12 @@ public class JpaOrderEntityMapper {
         orderItemEntity.setQuantity(jpaOrderItemEntity.getQuantity());
 
         // Product
-        ProductEntity productEntity = new ProductEntity();
-        productEntity.setId(jpaOrderItemEntity.getProductId());
-        productEntity.setPrice(jpaOrderItemEntity.getProductPrice());
-        orderItemEntity.setProduct(productEntity);
+        ProductEntity product = new ProductEntity();
+        product.setId(jpaOrderItemEntity.getProductId());
+        product.setPrice(jpaOrderItemEntity.getProductPrice());
+        orderItemEntity.setProduct(product);
 
-        orderEntity.addOrderItem(orderItemEntity);
+        order.addOrderItem(orderItemEntity);
       });
     }
 
@@ -74,8 +74,8 @@ public class JpaOrderEntityMapper {
     PaymentEntity paymentEntity = new PaymentEntity();
     paymentEntity.setId(jpaOrderEntity.getPaymentId());
     paymentEntity.setMethod(jpaOrderEntity.getPaymentMethod());
-    orderEntity.setPayment(paymentEntity);
+    order.setPayment(paymentEntity);
 
-    return orderEntity;
+    return order;
   }
 }

@@ -49,9 +49,9 @@ public class AdminUserManagementController {
         .role(role)
         .pagingRequest(PagingRequest.of(page - 1, size))
         .build();
-    PagingResult<UserEntity> userEntityPage = adminListUserUseCaseHandler.handle(input);
+    PagingResult<UserEntity> userPage = adminListUserUseCaseHandler.handle(input);
     PagingResult<UserResponse> userResponsePage = ObjectMapperUtil.getInstance()
-        .mapPage(userEntityPage, UserResponse.class);
+        .mapPage(userPage, UserResponse.class);
     return ApiResponseWrapper.successPage(userResponsePage);
   }
 }

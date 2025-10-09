@@ -1,21 +1,20 @@
 package org.atlas.domain.user.usecase.front.handler;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.user.entity.UserEntity;
+import org.atlas.domain.user.port.messaging.UserMessagePublisherPort;
 import org.atlas.domain.user.repository.UserRepository;
 import org.atlas.domain.user.shared.Role;
 import org.atlas.domain.user.usecase.front.model.RegisterInput;
-import org.atlas.framework.auth.client.AuthClientPort;
+import org.atlas.framework.auth.client.AuthClient;
 import org.atlas.framework.auth.client.model.CreateAuthUserRequest;
-import org.atlas.framework.config.ApplicationConfigPort;
+import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.event.contract.user.UserRegisteredEvent;
 import org.atlas.framework.domain.event.contract.user.model.User;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
-import org.atlas.framework.domain.error.DomainError;
-import org.atlas.framework.messaging.publisher.MessagePublisherPort;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 
 @UseCaseHandler
@@ -24,15 +23,14 @@ import org.atlas.framework.objectmapper.ObjectMapperUtil;
 public class FrontRegisterUseCaseHandler {
 
   private final UserRepository userRepository;
-  private final @Nullable AuthClientPort authClientPort;
-  private final ApplicationConfigPort applicationConfigPort;
-  private final MessagePublisherPort messagePublisherPort;
+  private final @Nullable AuthClient authClient;
+  private final UserMessagePublisherPort userMessagePublisherPort;
 
   public Void handle(RegisterInput input) throws Exception {
     checkValidity(input);
-    UserEntity userEntity = createUser(input);
-    syncUser(userEntity);
-    publishEvent(userEntity);
+    UserEntity user = createUser(input);
+    syncUser(user);
+    publishEvent(user);
     return null;
   }
 
@@ -49,26 +47,25 @@ public class FrontRegisterUseCaseHandler {
   }
 
   private UserEntity createUser(RegisterInput input) {
-    UserEntity userEntity = ObjectMapperUtil.getInstance().map(input, UserEntity.class);
-    userEntity.setRole(Role.USER);
-    userRepository.insert(userEntity);
-    return userEntity;
+    UserEntity user = ObjectMapperUtil.getInstance().map(input, UserEntity.class);
+    user.setRole(Role.USER);
+    userRepository.insert(user);
+    return user;
   }
 
-  private void syncUser(UserEntity userEntity) {
-    if (authClientPort != null) {
+  private void syncUser(UserEntity user) {
+    if (authClient != null) {
       CreateAuthUserRequest request = ObjectMapperUtil.getInstance()
-          .map(userEntity, CreateAuthUserRequest.class);
-      authClientPort.createAuthUser(request);
+          .map(user, CreateAuthUserRequest.class);
+      authClient.createAuthUser(request);
       log.info("Created auth user: userId={}, username={}",
-          userEntity.getId(), userEntity.getUsername());
+          user.getId(), user.getUsername());
     }
   }
 
-  private void publishEvent(UserEntity userEntity) {
-    User user = ObjectMapperUtil.getInstance().map(userEntity, User.class);
-    UserRegisteredEvent event = new UserRegisteredEvent(applicationConfigPort.getApplicationName(),
-        user);
-    messagePublisherPort.publish(event);
+  private void publishEvent(UserEntity user) {
+    User userPayload = ObjectMapperUtil.getInstance().map(user, User.class);
+    UserRegisteredEvent event = new UserRegisteredEvent(userPayload);
+    userMessagePublisherPort.publish(event);
   }
 }

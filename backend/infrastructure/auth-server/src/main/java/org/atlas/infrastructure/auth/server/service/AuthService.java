@@ -74,9 +74,9 @@ public class AuthService {
     }
 
     // Reissue tokens
-    UserEntity userEntity = userRepository.findById(refreshTokenJwt.getUserId())
+    UserEntity user = userRepository.findById(refreshTokenJwt.getUserId())
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
-    UserDetailsImpl userDetails = new UserDetailsImpl(userEntity);
+    UserDetailsImpl userDetails = new UserDetailsImpl(user);
 
     // Issue new access token
     Date now = new Date();

@@ -58,7 +58,7 @@ public class StringCryptoConverter implements AttributeConverter<String, String>
 
   @Override
   public void afterPropertiesSet() throws Exception {
-    encryptionKey = applicationConfigService.getConfig("encryption-key", null);
+    encryptionKey = applicationConfigService.getConfig("encryption-key");
     if (StringUtil.isBlank(encryptionKey)) {
       throw new RuntimeException("encryptionKey not found");
     }

@@ -18,11 +18,11 @@ public interface ProductRepository {
 
   Optional<ProductEntity> findById(Integer id);
 
-  void insert(ProductEntity productEntity);
+  void insert(ProductEntity product);
 
-  void insertBatch(List<ProductEntity> productEntities);
+  void insertBatch(List<ProductEntity> products);
 
-  void update(ProductEntity productEntity);
+  void update(ProductEntity product);
 
   void decreaseQuantityWithConstraint(Integer id, Integer decrement);
 

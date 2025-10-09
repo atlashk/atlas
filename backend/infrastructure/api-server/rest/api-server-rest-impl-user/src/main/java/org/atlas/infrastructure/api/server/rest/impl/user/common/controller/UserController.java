@@ -29,9 +29,9 @@ public class UserController {
     GetProfileInput input = GetProfileInput.builder()
         .userId(Contexts.getUserId())
         .build();
-    UserEntity userEntity = getProfileUseCaseHandler.handle(input);
+    UserEntity user = getProfileUseCaseHandler.handle(input);
     UserResponse userResponse = ObjectMapperUtil.getInstance()
-        .map(userEntity, UserResponse.class);
+        .map(user, UserResponse.class);
     return ApiResponseWrapper.success(userResponse);
   }
 }

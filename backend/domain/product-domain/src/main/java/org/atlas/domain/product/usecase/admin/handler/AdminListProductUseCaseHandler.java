@@ -20,14 +20,14 @@ public class AdminListProductUseCaseHandler {
   public PagingResult<ProductEntity> handle(AdminListProductInput input) throws Exception {
     FindProductCriteria criteria = ObjectMapperUtil.getInstance()
         .map(input, FindProductCriteria.class);
-    PagingResult<ProductEntity> productEntityPage = productRepository.findByCriteria(criteria,
+    PagingResult<ProductEntity> productPage = productRepository.findByCriteria(criteria,
         input.getPagingRequest());
 
     // Set image
-    productEntityPage.getData()
+    productPage.getData()
         .forEach(product ->
             product.setImage(productImageService.getImage(product.getId())));
 
-    return productEntityPage;
+    return productPage;
   }
 }

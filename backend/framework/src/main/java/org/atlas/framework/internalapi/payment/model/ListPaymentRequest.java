@@ -14,5 +14,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ListPaymentRequest {
 
-  private List<Integer> paymentIds;
+  private List<Integer> orderIds;
 }

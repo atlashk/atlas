@@ -6,7 +6,7 @@ import org.atlas.domain.payment.shared.PaymentMethod;
 import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
-import org.atlas.framework.payment.PaymentGatewayPort;
+import org.atlas.framework.payment.PaymentGatewayService;
 import org.atlas.framework.util.StringUtil;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
@@ -20,7 +20,7 @@ public class PaymentRoutingService {
   private final ApplicationContext applicationContext;
   private final ApplicationConfigService applicationConfigService;
 
-  public PaymentGatewayPort getPaymentGateway(PaymentMethod paymentMethod) {
+  public PaymentGatewayService getPaymentGateway(PaymentMethod paymentMethod) {
     // Find the relevant payment gateway from the application config
     String paymentGatewayName = applicationConfigService.getConfig(
         "routing." + paymentMethod.getType(), "stripe");
@@ -32,7 +32,7 @@ public class PaymentRoutingService {
     // Load payment gateway instance
     String paymentGatewayPortName = String.format("%sPaymentGatewayAdapter", paymentGatewayName);
     try {
-      return applicationContext.getBean(paymentGatewayPortName, PaymentGatewayPort.class);
+      return applicationContext.getBean(paymentGatewayPortName, PaymentGatewayService.class);
     } catch (NoSuchBeanDefinitionException e) {
       throw new DomainException(DomainError.PAYMENT_GATEWAY_NOT_SUPPORTED);
     }

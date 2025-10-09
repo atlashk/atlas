@@ -20,7 +20,7 @@ import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.notification.email.Attachment;
 import org.atlas.framework.notification.email.EmailNotification;
-import org.atlas.framework.notification.email.EmailPort;
+import org.atlas.framework.notification.email.EmailService;
 import org.atlas.framework.saga.annotation.Saga;
 import org.atlas.framework.saga.annotation.SagaCommandReplyHandler;
 import org.atlas.framework.saga.annotation.StartSaga;
@@ -29,7 +29,7 @@ import org.atlas.framework.saga.context.CheckoutSagaData;
 import org.atlas.framework.saga.context.SagaContext;
 import org.atlas.framework.saga.orchestrator.SagaOrchestrator;
 import org.atlas.framework.template.ResolveTemplateException;
-import org.atlas.framework.template.TemplatePort;
+import org.atlas.framework.template.TemplateService;
 import org.atlas.framework.util.FileUtil;
 
 @Saga(
@@ -44,8 +44,8 @@ public class CheckoutSaga {
   private final OrderAggregator orderAggregator;
   private final ApplicationConfigService applicationConfigService;
   private final SagaOrchestrator sagaOrchestrator;
-  private final EmailPort emailPort;
-  private final TemplatePort templatePort;
+  private final EmailService emailService;
+  private final TemplateService templateService;
 
   @StartSaga
   public void startSaga(SagaContext context) {
@@ -114,18 +114,18 @@ public class CheckoutSaga {
     return checkoutSagaData;
   }
 
-  private AsyncTask notifyEmail(OrderEntity orderEntity) {
+  private AsyncTask notifyEmail(OrderEntity order) {
     return new AsyncTask() {
       @Override
       public void run() {
         // Model
         Map<String, Object> model = new HashMap<>();
-        model.put("order", orderEntity);
+        model.put("order", order);
 
         // Subject
         String subject;
         try {
-          subject = templatePort.resolveEmailSubject("order_fulfilled", model);
+          subject = templateService.resolveEmailSubject("order_fulfilled", model);
         } catch (Exception e) {
           throw new ResolveTemplateException("Could not resolve subject template", e);
         }
@@ -133,7 +133,7 @@ public class CheckoutSaga {
         // Body
         String body;
         try {
-          body = templatePort.resolveEmailBody("order_fulfilled", model);
+          body = templateService.resolveEmailBody("order_fulfilled", model);
         } catch (Exception e) {
           throw new ResolveTemplateException("Could not resolve body template", e);
         }
@@ -148,31 +148,30 @@ public class CheckoutSaga {
         }
         attachment = new Attachment(attachmentFile.getName(), attachmentFile);
 
-        String sender = Optional.ofNullable(
-                applicationConfigService.getConfig("email.sender", null))
+        String sender = Optional.ofNullable(applicationConfigService.getConfig("email.sender"))
             .orElseThrow(() -> new IllegalStateException("email.sender is not configured"));
 
         EmailNotification notification = new EmailNotification.Builder()
             .setSender(sender)
-            .addRecipient(orderEntity.getUser().getEmail())
+            .addRecipient(order.getUser().getEmail())
             .setSubject(subject)
             .setBody(body)
             .addAttachment(attachment)
             .setHtml(true)
             .build();
-        emailPort.notify(notification);
+        emailService.notify(notification);
       }
 
       @Override
       public void onSuccess() {
         log.info("Email notification for order fulfilled succeeded: orderId={}",
-            orderEntity.getId());
+            order.getId());
       }
 
       @Override
       public void onError(Throwable ex) {
         log.error("Email notification for order fulfilled failed: orderId={}, error={}",
-            orderEntity.getId(), ex.getMessage(), ex);
+            order.getId(), ex.getMessage(), ex);
       }
     };
   }

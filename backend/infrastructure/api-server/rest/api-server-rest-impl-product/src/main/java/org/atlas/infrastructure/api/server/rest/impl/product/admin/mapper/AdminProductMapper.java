@@ -16,24 +16,24 @@ public class AdminProductMapper {
 
   public static ProductEntity toProductEntity(AdminCreateProductRequest request) {
     // Product
-    ProductEntity productEntity = ObjectMapperUtil.getInstance()
+    ProductEntity product = ObjectMapperUtil.getInstance()
         .map(request, ProductEntity.class);
 
     // Brand
     BrandEntity brandEntity = BrandEntity.builder()
         .id(request.getBrandId())
         .build();
-    productEntity.setBrand(brandEntity);
+    product.setBrand(brandEntity);
 
     // Details
     ProductDetailsEntity detailsEntity = ObjectMapperUtil.getInstance()
         .map(request.getDetails(), ProductDetailsEntity.class);
-    productEntity.setDetails(detailsEntity);
+    product.setDetails(detailsEntity);
 
     // Attributes
     List<ProductAttributeEntity> attributeEntities = ObjectMapperUtil.getInstance()
         .mapList(request.getAttributes(), ProductAttributeEntity.class);
-    productEntity.setAttributes(attributeEntities);
+    product.setAttributes(attributeEntities);
 
     // Categories
     List<CategoryEntity> categoryEntities = request.getCategoryIds()
@@ -42,31 +42,31 @@ public class AdminProductMapper {
             .id(id)
             .build())
         .toList();
-    productEntity.setCategories(categoryEntities);
+    product.setCategories(categoryEntities);
 
-    return productEntity;
+    return product;
   }
 
   public static ProductEntity toProductEntity(AdminUpdateProductRequest request) {
     // Product
-    ProductEntity productEntity = ObjectMapperUtil.getInstance()
+    ProductEntity product = ObjectMapperUtil.getInstance()
         .map(request, ProductEntity.class);
 
     // Brand
     BrandEntity brandEntity = BrandEntity.builder()
         .id(request.getBrandId())
         .build();
-    productEntity.setBrand(brandEntity);
+    product.setBrand(brandEntity);
 
     // Details
     ProductDetailsEntity detailsEntity = ObjectMapperUtil.getInstance()
         .map(request.getDetails(), ProductDetailsEntity.class);
-    productEntity.setDetails(detailsEntity);
+    product.setDetails(detailsEntity);
 
     // Attributes
     List<ProductAttributeEntity> attributeEntities = ObjectMapperUtil.getInstance()
         .mapList(request.getAttributes(), ProductAttributeEntity.class);
-    productEntity.setAttributes(attributeEntities);
+    product.setAttributes(attributeEntities);
 
     // Categories
     List<CategoryEntity> categoryEntities = request.getCategoryIds()
@@ -75,8 +75,8 @@ public class AdminProductMapper {
             .id(id)
             .build())
         .toList();
-    productEntity.setCategories(categoryEntities);
+    product.setCategories(categoryEntities);
 
-    return productEntity;
+    return product;
   }
 }

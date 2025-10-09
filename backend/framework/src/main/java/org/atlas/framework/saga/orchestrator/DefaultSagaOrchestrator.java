@@ -16,7 +16,7 @@ import org.atlas.framework.saga.exception.SagaCommandNotFoundException;
 import org.atlas.framework.saga.exception.SagaConfigException;
 import org.atlas.framework.saga.exception.SagaExecutionException;
 import org.atlas.framework.saga.exception.SagaNotFoundException;
-import org.atlas.framework.saga.messaging.SagaMessagePublisherPort;
+import org.atlas.framework.saga.messaging.SagaMessagePublisher;
 import org.atlas.framework.saga.messaging.payload.SagaCommand;
 import org.atlas.framework.saga.messaging.payload.SagaCommandReply;
 import org.atlas.framework.saga.messaging.payload.SagaCompensation;
@@ -40,7 +40,7 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
   private final SagaRegistry sagaRegistry;
   private final SagaRepository sagaRepository;
   private final SagaCommandRepository sagaCommandRepository;
-  private final SagaMessagePublisherPort sagaMessagePublisherPort;
+  private final SagaMessagePublisher sagaMessagePublisher;
 
   // Starting saga
   // -----------------------------------------------------------------------------------------------
@@ -109,7 +109,7 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
         .targetServiceName(targetServiceName)
         .sagaContext(sagaEntity.getContext())
         .build();
-    sagaMessagePublisherPort.publish(command);
+    sagaMessagePublisher.publish(command);
 
     log.info(
         "[COMMAND_SEND] Command sent successfully: sagaId={}, sagaName={}, sagaCommandId={}, sagaCommandName={}",
@@ -278,7 +278,7 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
         .targetServiceName(sagaCommandEntity.getTargetServiceName())
         .sagaContext(sagaContext.serialize())
         .build();
-    sagaMessagePublisherPort.publish(message);
+    sagaMessagePublisher.publish(message);
 
     log.info(
         "[COMMAND_COMPENSATION] Compensation event published: sagaId={}, sagaName={}, sagaCommandId={}, sagaCommandName={}",

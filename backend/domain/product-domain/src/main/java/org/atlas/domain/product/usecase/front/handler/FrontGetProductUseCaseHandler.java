@@ -9,7 +9,7 @@ import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.kv.KvConfig;
-import org.atlas.framework.kv.KvPort;
+import org.atlas.framework.kv.KvService;
 
 @UseCaseHandler
 @RequiredArgsConstructor
@@ -17,26 +17,26 @@ public class FrontGetProductUseCaseHandler {
 
   private final ProductRepository productRepository;
   private final ProductImageService productImageService;
-  private final KvPort kvPort;
+  private final KvService kvService;
   private final KvConfig kvConfig;
 
   public ProductEntity handle(Integer productId) throws Exception {
     // Get from cache first
-    return kvPort.get(kvConfig.getProductStoreName(), String.valueOf(productId))
+    return kvService.get(kvConfig.getProductStoreName(), String.valueOf(productId))
         .map(ProductEntity.class::cast)
         .orElseGet(() -> {
           // Get from DB
-          ProductEntity productEntity = productRepository.findById(productId)
+          ProductEntity product = productRepository.findById(productId)
               .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
 
           // Set image
-          productEntity.setImage(productImageService.getImage(productEntity.getId()));
+          product.setImage(productImageService.getImage(product.getId()));
 
           // Update cache
-          kvPort.put(kvConfig.getProductStoreName(), String.valueOf(productId), productEntity,
+          kvService.put(kvConfig.getProductStoreName(), String.valueOf(productId), product,
               Duration.ofHours(1));
 
-          return productEntity;
+          return product;
         });
   }
 }

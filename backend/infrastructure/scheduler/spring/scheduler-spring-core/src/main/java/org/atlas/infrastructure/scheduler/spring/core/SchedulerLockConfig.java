@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.provider.redis.spring.RedisLockProvider;
 import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock;
-import org.atlas.framework.config.ApplicationConfigPort;
+import org.atlas.framework.config.ApplicationConfigService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -19,12 +19,12 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 @RequiredArgsConstructor
 public class SchedulerLockConfig {
 
-  private final ApplicationConfigPort applicationConfigPort;
+  private final ApplicationConfigService applicationConfigService;
 
   @Bean
   public LockProvider lockProvider(RedisConnectionFactory redisConnectionFactory) {
-    String environment = applicationConfigPort.getActiveProfile();
-    String prefix = applicationConfigPort.getApplicationName();
+    String environment = applicationConfigService.getActiveProfile();
+    String prefix = applicationConfigService.getApplicationName();
     return new RedisLockProvider(redisConnectionFactory, environment, prefix);
   }
 }

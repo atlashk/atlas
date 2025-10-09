@@ -18,16 +18,16 @@ public class InternalListProductUseCaseHandler {
   private final ProductImageService productImageService;
 
   public List<ProductEntity> handle(InternalListProductInput input) throws Exception {
-    List<ProductEntity> productEntities = productRepository.findByIdIn(input.getIds());
-    if (CollectionUtil.isEmpty(productEntities)) {
+    List<ProductEntity> products = productRepository.findByIdIn(input.getIds());
+    if (CollectionUtil.isEmpty(products)) {
       return Collections.emptyList();
     }
 
     // Update image
-    productEntities.forEach(productEntity -> {
-      productEntity.setImage(productImageService.getImage(productEntity.getId()));
+    products.forEach(product -> {
+      product.setImage(productImageService.getImage(product.getId()));
     });
 
-    return productEntities;
+    return products;
   }
 }

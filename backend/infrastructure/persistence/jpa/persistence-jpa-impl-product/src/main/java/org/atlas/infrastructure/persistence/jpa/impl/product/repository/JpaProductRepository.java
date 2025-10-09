@@ -41,4 +41,12 @@ public interface JpaProductRepository extends JpaBaseRepository<JpaProductEntity
       """)
   int decreaseQuantityWithConstraint(@Param("id") Integer id,
       @Param("decrement") Integer decrement);
+
+  @Modifying
+  @Query("""
+      update JpaProductEntity p
+      set p.quantity = p.quantity + :increment
+      where p.id = :id
+      """)
+  int increaseQuantity(@Param("id") Integer id, @Param("increment") Integer increment);
 }

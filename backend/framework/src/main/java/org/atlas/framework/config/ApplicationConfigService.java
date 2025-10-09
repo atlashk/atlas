@@ -1,5 +1,6 @@
 package org.atlas.framework.config;
 
+import jakarta.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,24 +29,53 @@ public class ApplicationConfigService {
     return filteredProfiles.length > 0 ? filteredProfiles[0] : "default";
   }
 
+  @Nullable
+  public String getConfig(String key) {
+    return getConfig(key, null);
+  }
+
   public String getConfig(String key, String defaultValue) {
     return environment.getProperty(obtainFullKey(key), defaultValue);
+  }
+
+  @Nullable
+  public Integer getConfigAsInteger(String key) {
+    return getConfigAsInteger(key, null);
   }
 
   public Integer getConfigAsInteger(String key, Integer defaultValue) {
     return environment.getProperty(obtainFullKey(key), Integer.class, defaultValue);
   }
 
+  @Nullable
+  public Long getConfigAsLong(String key) {
+    return getConfigAsLong(key, null);
+  }
+
   public Long getConfigAsLong(String key, Long defaultValue) {
     return environment.getProperty(obtainFullKey(key), Long.class, defaultValue);
+  }
+
+  @Nullable
+  public Double getConfigAsDouble(String key) {
+    return getConfigAsDouble(key, null);
   }
 
   public Double getConfigAsDouble(String key, Double defaultValue) {
     return environment.getProperty(obtainFullKey(key), Double.class, defaultValue);
   }
 
+  @Nullable
+  public BigDecimal getConfigAsBigDecimal(String key) {
+    return getConfigAsBigDecimal(key, null);
+  }
+
   public BigDecimal getConfigAsBigDecimal(String key, BigDecimal defaultValue) {
     return environment.getProperty(obtainFullKey(key), BigDecimal.class, defaultValue);
+  }
+
+  public boolean getConfigAsBoolean(String key) {
+    return getConfigAsBoolean(key, false);
   }
 
   public boolean getConfigAsBoolean(String key, boolean defaultValue) {
@@ -59,6 +89,11 @@ public class ApplicationConfigService {
         .stream()
         .map(value -> value.replaceAll("^\\[|]$", "")) // remove leading '[' or trailing ']'
         .toList();
+  }
+
+  @Nullable
+  public <T> T getConfigAsClass(String key, Class<T> clazz) {
+    return environment.getProperty(obtainFullKey(key), clazz, null);
   }
 
   public <T> T getConfigAsClass(String key, Class<T> clazz, T defaultValue) {

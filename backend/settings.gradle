@@ -286,14 +286,6 @@ project(':infrastructure.notification.email.ses').projectDir = file('infrastruct
 include(':infrastructure.notification.email.sendgrid')
 project(':infrastructure.notification.email.sendgrid').projectDir = file('infrastructure/notification/email/email-sendgrid')
 
-// Notification::SSE
-include(':infrastructure.notification.sse')
-project(':infrastructure.notification.sse').projectDir = file('infrastructure/notification/sse')
-
-// Notification::WebSocket
-include(':infrastructure.notification.websocket')
-project(':infrastructure.notification.websocket').projectDir = file('infrastructure/notification/websocket')
-
 // Observability
 
 // Observability::Actuator
@@ -337,6 +329,16 @@ include(':infrastructure.persistence.jpa.impl.product')
 project(':infrastructure.persistence.jpa.impl.product').projectDir = file('infrastructure/persistence/jpa/persistence-jpa-impl-product')
 include(':infrastructure.persistence.jpa.impl.user')
 project(':infrastructure.persistence.jpa.impl.user').projectDir = file('infrastructure/persistence/jpa/persistence-jpa-impl-user')
+
+// Realtime
+
+// Realtime::SSE
+include(':infrastructure.realtime.sse')
+project(':infrastructure.realtime.sse').projectDir = file('infrastructure/realtime/sse')
+
+// Realtime::WebSocket
+include(':infrastructure.realtime.websocket')
+project(':infrastructure.realtime.websocket').projectDir = file('infrastructure/realtime/websocket')
 
 // Resilience
 include(':infrastructure.resilience.resilience4j')

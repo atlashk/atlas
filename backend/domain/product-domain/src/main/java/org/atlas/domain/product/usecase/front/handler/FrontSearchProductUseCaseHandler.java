@@ -1,6 +1,6 @@
 package org.atlas.domain.product.usecase.front.handler;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.ProductEntity;
 import org.atlas.domain.product.repository.ProductRepository;
@@ -11,41 +11,41 @@ import org.atlas.domain.product.usecase.front.model.FrontSearchProductInput;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingResult;
-import org.atlas.framework.search.SearchPort;
+import org.atlas.framework.search.SearchService;
 
 @UseCaseHandler
 @RequiredArgsConstructor
 public class FrontSearchProductUseCaseHandler {
 
-  private final @Nullable SearchPort searchPort;
+  private final @Nullable SearchService searchService;
   private final ProductRepository productRepository;
   private final ProductImageService productImageService;
 
   public PagingResult<ProductEntity> handle(FrontSearchProductInput input) throws Exception {
-    PagingResult<ProductEntity> productEntityPage = null;
-    if (searchPort != null) {
+    PagingResult<ProductEntity> productPage = null;
+    if (searchService != null) {
       // Using search engine
 //      SearchCriteria criteria = ObjectMapperUtil.getInstance()
 //          .map(input, SearchCriteria.class);
-//      productEntityPage = searchPort.search(criteria, input.getPagingRequest());
+//      productPage = searchPort.search(criteria, input.getPagingRequest());
     } else {
       // Using DB
       FindProductCriteria criteria = ObjectMapperUtil.getInstance()
           .map(input, FindProductCriteria.class);
       criteria.setStatus(ProductStatus.IN_STOCK);
       criteria.setIsActive(true);
-      productEntityPage = productRepository.findByCriteria(criteria, input.getPagingRequest());
+      productPage = productRepository.findByCriteria(criteria, input.getPagingRequest());
     }
 
-    if (productEntityPage == null) {
+    if (productPage == null) {
       return PagingResult.empty();
     }
 
     // Set image
-    productEntityPage.getData()
+    productPage.getData()
         .forEach(product ->
             product.setImage(productImageService.getImage(product.getId())));
 
-    return productEntityPage;
+    return productPage;
   }
 }

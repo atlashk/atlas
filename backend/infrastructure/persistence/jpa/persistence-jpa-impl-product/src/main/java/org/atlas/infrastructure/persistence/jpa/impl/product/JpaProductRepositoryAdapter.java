@@ -41,9 +41,9 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
     }
     List<JpaProductEntity> jpaProductEntities = customJpaProductRepository.findByCriteria(criteria,
         pagingRequest);
-    List<ProductEntity> productEntities = ObjectMapperUtil.getInstance()
+    List<ProductEntity> products = ObjectMapperUtil.getInstance()
         .mapList(jpaProductEntities, JpaProductEntityMapper::toProductEntity);
-    return PagingResult.of(productEntities, totalCount, pagingRequest);
+    return PagingResult.of(products, totalCount, pagingRequest);
   }
 
   @Override
@@ -66,25 +66,25 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
   }
 
   @Override
-  public void insert(ProductEntity productEntity) {
-    JpaProductEntity jpaProductEntity = JpaProductEntityMapper.toJpaProductEntity(productEntity);
+  public void insert(ProductEntity product) {
+    JpaProductEntity jpaProductEntity = JpaProductEntityMapper.toJpaProductEntity(product);
     jpaProductRepository.save(jpaProductEntity);
-    productEntity.setId(jpaProductEntity.getId());
+    product.setId(jpaProductEntity.getId());
   }
 
   @Override
-  public void insertBatch(List<ProductEntity> productEntities) {
+  public void insertBatch(List<ProductEntity> products) {
     List<JpaProductEntity> jpaProductEntities = ObjectMapperUtil.getInstance()
-        .mapList(productEntities, JpaProductEntityMapper::toJpaProductEntity);
+        .mapList(products, JpaProductEntityMapper::toJpaProductEntity);
     jpaProductRepository.saveAll(jpaProductEntities);
   }
 
   @Override
-  public void update(ProductEntity productEntity) {
+  public void update(ProductEntity product) {
     JpaProductEntity jpaProductEntity = jpaProductRepository.findByIdWithAssociations(
-            productEntity.getId())
+            product.getId())
         .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
-    JpaProductEntityMapper.merge(productEntity, jpaProductEntity);
+    JpaProductEntityMapper.merge(product, jpaProductEntity);
     jpaProductRepository.save(jpaProductEntity);
   }
 
@@ -112,15 +112,20 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
   @Override
   public void decreaseQuantityWithOptimisticLock(Integer id, Integer decrement) {
     RetryUtil.retryOn(() -> {
-      JpaOptimisticProductEntity jpaOptimisticProductEntity = jpaOptimisticProductRepository.findById(
-              id)
-          .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
+      JpaOptimisticProductEntity jpaOptimisticProductEntity =
+          jpaOptimisticProductRepository.findById(id)
+              .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
       if (jpaOptimisticProductEntity.getQuantity() < decrement) {
         throw new DomainException(DomainError.PRODUCT_INSUFFICIENT_QUANTITY);
       }
       jpaOptimisticProductEntity.setQuantity(jpaOptimisticProductEntity.getQuantity() - decrement);
       jpaOptimisticProductRepository.save(jpaOptimisticProductEntity);
     }, OptimisticLockingFailureException.class);
+  }
+
+  @Override
+  public void increaseQuantity(Integer id, Integer increment) {
+    jpaProductRepository.increaseQuantity(id, increment);
   }
 
   @Override

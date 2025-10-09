@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class LockAspect {
 
-  private final LockPort lockPort;
+  private final LockService lockService;
 
   @Around("@annotation(lock)")
   public Object applyLock(ProceedingJoinPoint joinPoint, Lock lock) throws Throwable {
@@ -23,7 +23,7 @@ public class LockAspect {
     Duration leaseTime = Duration.of(lock.leaseTime(), lock.timeUnit().toChronoUnit());
 
     // Try to acquire the lock
-    boolean lockAcquired = lockPort.acquireLock(key, waitTime, leaseTime);
+    boolean lockAcquired = lockService.acquireLock(key, waitTime, leaseTime);
     if (!lockAcquired) {
       throw new RuntimeException("Failed to acquire lock for key: " + key);
     }
@@ -35,7 +35,7 @@ public class LockAspect {
       // Release the lock if unlockOnCompletion is true
       if (lock.unlockOnCompletion()) {
         try {
-          lockPort.releaseLock(key);
+          lockService.releaseLock(key);
         } catch (Exception e) {
           log.warn("Failed to release lock for key: {}", key, e);
         }

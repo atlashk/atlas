@@ -2,7 +2,7 @@ package org.atlas.domain.product.usecase.admin.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.ProductEntity;
-import org.atlas.domain.product.port.messaging.ProductMessagePublisherPort;
+import org.atlas.domain.product.port.messaging.ProductMessagePublisher;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.service.ProductImageService;
 import org.atlas.framework.domain.error.DomainError;
@@ -18,26 +18,26 @@ public class AdminDeleteProductUseCaseHandler {
 
   private final ProductRepository productRepository;
   private final ProductImageService productImageService;
-  private final ProductMessagePublisherPort productMessagePublisherPort;
+  private final ProductMessagePublisher productMessagePublisher;
 
   public Void handle(Integer productId) throws Exception {
     // Delete product from DB
-    ProductEntity productEntity = productRepository.findById(productId)
+    ProductEntity product = productRepository.findById(productId)
         .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
-    productRepository.delete(productEntity.getId());
+    productRepository.delete(product.getId());
 
     // Delete image
-    productImageService.deleteImage(productEntity.getId());
+    productImageService.deleteImage(product.getId());
 
     // Publish event
-    publishEvent(productEntity);
+    publishEvent(product);
 
     return null;
   }
 
-  private void publishEvent(ProductEntity productEntity) {
-    Product product = ObjectMapperUtil.getInstance().map(productEntity, Product.class);
-    ProductDeletedEvent event = new ProductDeletedEvent(product);
-    productMessagePublisherPort.publish(event);
+  private void publishEvent(ProductEntity product) {
+    Product productPayload = ObjectMapperUtil.getInstance().map(product, Product.class);
+    ProductDeletedEvent event = new ProductDeletedEvent(productPayload);
+    productMessagePublisher.publish(event);
   }
 }

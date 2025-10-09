@@ -3,8 +3,8 @@ package org.atlas.domain.product.service;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.storage.StorageConfig;
-import org.atlas.framework.storage.StoragePort;
+import org.atlas.framework.storage.config.StorageConfig;
+import org.atlas.framework.storage.StorageService;
 import org.atlas.framework.storage.model.DeleteFileRequest;
 import org.atlas.framework.storage.model.GetFileRequest;
 import org.atlas.framework.storage.model.UploadFileRequest;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class ProductImageService {
 
-  private final StoragePort storagePort;
+  private final StorageService storageService;
   private final StorageConfig storageConfig;
 
   public void uploadImage(Integer productId, String base64St) {
@@ -27,7 +27,7 @@ public class ProductImageService {
     byte[] fileContent = ImageUtil.fromBase64(base64St);
     UploadFileRequest storageRequest = new UploadFileRequest(bucket, objectKey, fileContent);
     try {
-      storagePort.uploadFile(storageRequest);
+      storageService.uploadFile(storageRequest);
     } catch (IOException e) {
       log.error("Failed to upload image for product {}", productId, e);
     }
@@ -38,7 +38,7 @@ public class ProductImageService {
     String objectKey = getObjectKey(productId);
     GetFileRequest storageRequest = new GetFileRequest(bucket, objectKey);
     try {
-      byte[] fileContent = storagePort.getFile(storageRequest);
+      byte[] fileContent = storageService.getFile(storageRequest);
       if (ArrayUtil.isEmpty(fileContent)) {
         return StringUtil.EMPTY;
       }
@@ -53,7 +53,7 @@ public class ProductImageService {
     String objectKey = getObjectKey(productId);
     DeleteFileRequest storageRequest = new DeleteFileRequest(bucket, objectKey);
     try {
-      storagePort.deleteFile(storageRequest);
+      storageService.deleteFile(storageRequest);
     } catch (IOException e) {
       log.error("Failed to delete image for product {}", productId, e);
     }

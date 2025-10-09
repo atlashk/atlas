@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CacheAspect {
 
-  private final CachePort cachePort;
+  private final CacheService cacheService;
   private final SpelParser spelParser;
 
   /**
@@ -36,7 +36,7 @@ public class CacheAspect {
     String cacheKey = spelParser.parse(cache.key(), method, joinPoint.getArgs());
 
     // Cache-aside pattern
-    Optional<Object> cachedValue = cachePort.get(cache.cacheName(), cacheKey);
+    Optional<Object> cachedValue = cacheService.get(cache.cacheName(), cacheKey);
     if (cachedValue.isPresent()) {
       return cachedValue.get();
     }
@@ -44,7 +44,7 @@ public class CacheAspect {
     Object result = joinPoint.proceed();
 
     if (result != null) {
-      cachePort.put(cache.cacheName(), cacheKey, result, cache.ttl());
+      cacheService.put(cache.cacheName(), cacheKey, result, cache.ttl());
     }
 
     return result;

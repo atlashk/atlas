@@ -21,7 +21,7 @@ public class OutboxAspect {
    * Intercept all MessagePublisherPort.publish() calls. Instead of calling the actual publish
    * method, save to outbox first.
    */
-  @Around("execution(* org.atlas.framework.messaging.publisher.MessagePublisherPort.publish(..))")
+  @Around("execution(* org.atlas.framework.messaging.publisher.MessagePublisher.publish(..))")
   public Object aroundPublishMessage(ProceedingJoinPoint joinPoint) throws Throwable {
     Object[] args = joinPoint.getArgs();
     PublishRequest request = (PublishRequest) args[0];

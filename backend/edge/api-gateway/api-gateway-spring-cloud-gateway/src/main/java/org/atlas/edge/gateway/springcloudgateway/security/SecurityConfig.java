@@ -5,8 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.user.shared.Role;
 import org.atlas.edge.gateway.springcloudgateway.security.jwt.JwtExtractor;
-import org.atlas.framework.config.ApplicationConfigPort;
-import org.atlas.framework.constant.Application;
+import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.util.CollectionUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +23,7 @@ import reactor.core.publisher.Flux;
 @Slf4j
 public class SecurityConfig {
 
-  private final ApplicationConfigPort applicationConfigPort;
+  private final ApplicationConfigService applicationConfigService;
   private final CustomServerAuthenticationEntryPoint serverAuthenticationEntryPoint;
   private final CustomAccessDeniedHandler accessDeniedHandler;
   private final JwtExtractor jwtExtractor;
@@ -38,31 +37,30 @@ public class SecurityConfig {
 
           // Configure allowed origins (domains/URLs that can send requests)
           corsConfig.setAllowedOrigins(
-              applicationConfigPort.getConfigAsList(Application.SYSTEM, "cors.allowed-origins"));
+              applicationConfigService.getConfigAsList("cors.allowed-origins"));
 
           // Configure allowed HTTP methods
           corsConfig.setAllowedMethods(
-              applicationConfigPort.getConfigAsList(Application.SYSTEM, "cors.allowed-methods"));
+              applicationConfigService.getConfigAsList("cors.allowed-methods"));
 
           // Configure allowed headers that can be sent from client
           corsConfig.setAllowedHeaders(
-              applicationConfigPort.getConfigAsList(Application.SYSTEM, "cors.allowed-headers"));
+              applicationConfigService.getConfigAsList("cors.allowed-headers"));
 
           // Configure headers that are exposed from server to client
-          List<String> exposedHeaders = applicationConfigPort.getConfigAsList(Application.SYSTEM,
-              "cors.exposed-headers");
+          List<String> exposedHeaders =
+              applicationConfigService.getConfigAsList("cors.exposed-headers");
           if (CollectionUtil.isNotEmpty(exposedHeaders)) {
             exposedHeaders.forEach(corsConfig::addExposedHeader);
           }
 
           // Allow sending credentials (cookies, authorization headers) in CORS requests
           corsConfig.setAllowCredentials(
-              applicationConfigPort.getConfigAsBoolean(Application.SYSTEM, "cors.allow-credentials",
-                  true));
+              applicationConfigService.getConfigAsBoolean("cors.allow-credentials", true));
 
           // Cache time for preflight requests (seconds), 0 = no cache
           corsConfig.setMaxAge(
-              applicationConfigPort.getConfigAsLong(Application.SYSTEM, "cors.max-age", 0L));
+              applicationConfigService.getConfigAsLong("cors.max-age", 0L));
 
           log.debug(
               "CORS Configuration - Allowed Origins: {}, Allowed Methods: {}, Allowed Headers: {}, Exposed Headers: {}, Allow Credentials: {}, Max Age: {}",

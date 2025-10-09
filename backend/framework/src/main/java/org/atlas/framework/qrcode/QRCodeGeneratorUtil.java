@@ -1,6 +1,6 @@
 package org.atlas.framework.qrcode;
 
-import org.atlas.framework.qrcode.zxing.ZxingAdapter;
+import org.atlas.framework.qrcode.zxing.ZxingQRCodeGenerator;
 
 /**
  * Implement Singleton pattern with Bill Pugh solution
@@ -13,6 +13,6 @@ public class QRCodeGeneratorUtil {
 
   private static class JsonHolder {
 
-    private static final QRCodeGenerator INSTANCE = new ZxingAdapter();
+    private static final QRCodeGenerator INSTANCE = new ZxingQRCodeGenerator();
   }
 }

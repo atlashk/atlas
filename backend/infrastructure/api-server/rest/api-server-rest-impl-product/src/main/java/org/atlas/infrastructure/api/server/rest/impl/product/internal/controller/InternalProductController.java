@@ -34,9 +34,9 @@ public class InternalProductController {
       @Valid @RequestBody InternalListProductRequest request) throws Exception {
     InternalListProductInput input = ObjectMapperUtil.getInstance()
         .map(request, InternalListProductInput.class);
-    List<ProductEntity> productEntities = internalListProductUseCaseHandler.handle(input);
+    List<ProductEntity> products = internalListProductUseCaseHandler.handle(input);
     List<ProductResponse> productResponses = ObjectMapperUtil.getInstance()
-        .mapList(productEntities, ProductResponse.class);
+        .mapList(products, ProductResponse.class);
     return ApiResponseWrapper.success(productResponses);
   }
 }

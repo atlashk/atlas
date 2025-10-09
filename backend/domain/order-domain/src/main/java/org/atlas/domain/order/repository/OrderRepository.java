@@ -18,7 +18,7 @@ public interface OrderRepository {
 
   Optional<OrderEntity> findById(Integer id);
 
-  void insert(OrderEntity orderEntity);
+  void insert(OrderEntity order);
 
-  void update(OrderEntity orderEntity);
+  void update(OrderEntity order);
 }

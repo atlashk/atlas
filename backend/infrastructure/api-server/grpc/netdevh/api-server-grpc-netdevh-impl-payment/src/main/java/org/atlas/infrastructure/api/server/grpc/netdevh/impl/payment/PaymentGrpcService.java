@@ -35,7 +35,7 @@ public class PaymentGrpcService extends PaymentServiceGrpc.PaymentServiceImplBas
   }
 
   private InternalListPaymentInput map(ListPaymentRequestProto requestProto) {
-    return new InternalListPaymentInput(requestProto.getIdList());
+    return new InternalListPaymentInput(requestProto.getOrderIdList());
   }
 
   private ListPaymentResponseProto map(List<PaymentEntity> paymentEntities) {

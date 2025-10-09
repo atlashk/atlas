@@ -35,9 +35,9 @@ public class InternalUserController {
       throws Exception {
     InternalListUserInput input = ObjectMapperUtil.getInstance()
         .map(request, InternalListUserInput.class);
-    List<UserEntity> userEntities = internalListUserUseCaseHandler.handle(input);
+    List<UserEntity> users = internalListUserUseCaseHandler.handle(input);
     List<UserResponse> userResponses = ObjectMapperUtil.getInstance()
-        .mapList(userEntities, UserResponse.class);
+        .mapList(users, UserResponse.class);
     return ApiResponseWrapper.success(userResponses);
   }
 }

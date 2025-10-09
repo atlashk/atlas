@@ -8,10 +8,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.atlas.domain.product.entity.BrandEntity;
 import org.atlas.domain.product.entity.CategoryEntity;
 import org.atlas.domain.product.entity.ProductEntity;
-import org.atlas.domain.product.port.file.csv.ProductCsvReaderPort;
-import org.atlas.domain.product.port.file.excel.ProductExcelReaderPort;
+import org.atlas.domain.product.port.file.csv.ProductCsvReader;
+import org.atlas.domain.product.port.file.excel.ProductExcelReader;
 import org.atlas.domain.product.port.file.model.read.ProductRow;
-import org.atlas.domain.product.port.messaging.ProductMessagePublisherPort;
+import org.atlas.domain.product.port.messaging.ProductMessagePublisher;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.usecase.admin.model.AdminImportProductInput;
 import org.atlas.framework.domain.error.DomainError;
@@ -28,16 +28,16 @@ import org.atlas.framework.util.CollectionUtil;
 public class AdminImportProductUseCaseHandler {
 
   private final ProductRepository productRepository;
-  private final ProductCsvReaderPort productCsvReaderPort;
-  private final ProductExcelReaderPort productExcelReaderPort;
-  private final ProductMessagePublisherPort productMessagePublisherPort;
+  private final ProductCsvReader productCsvReader;
+  private final ProductExcelReader productExcelReader;
+  private final ProductMessagePublisher productMessagePublisher;
 
   public Void handle(AdminImportProductInput input) throws Exception {
     // Read rows from file content
     List<ProductRow> rows;
     switch (input.getFileType()) {
-      case CSV -> rows = productCsvReaderPort.read(input.getFileContent());
-      case EXCEL -> rows = productExcelReaderPort.read(input.getFileContent());
+      case CSV -> rows = productCsvReader.read(input.getFileContent());
+      case EXCEL -> rows = productExcelReader.read(input.getFileContent());
       default -> throw new UnsupportedOperationException(
           "Unsupported file type: " + input.getFileType());
     }
@@ -47,15 +47,11 @@ public class AdminImportProductUseCaseHandler {
 
     // Sync into DB and publish events
     try {
-      List<ProductEntity> productEntities = rows.stream()
+      List<ProductEntity> products = rows.stream()
           .map(this::toProductEntity)
           .toList();
-      productRepository.insertBatch(productEntities);
-      productEntities.forEach(productEntity -> {
-        Product product = ObjectMapperUtil.getInstance().map(productEntity, Product.class);
-        ProductCreatedEvent event = new ProductCreatedEvent(product);
-        productMessagePublisherPort.publish(event);
-      });
+      productRepository.insertBatch(products);
+      products.forEach(this::publishEvent);
       log.info("Imported {} products", rows.size());
       return null;
     } catch (Exception e) {
@@ -65,12 +61,12 @@ public class AdminImportProductUseCaseHandler {
 
   private ProductEntity toProductEntity(ProductRow row) {
     // Product
-    ProductEntity productEntity = ObjectMapperUtil.getInstance().map(row, ProductEntity.class);
+    ProductEntity product = ObjectMapperUtil.getInstance().map(row, ProductEntity.class);
 
     // Brand
     BrandEntity brandEntity = new BrandEntity();
     brandEntity.setId(row.getBrandId());
-    productEntity.setBrand(brandEntity);
+    product.setBrand(brandEntity);
 
     // Categories
     List<CategoryEntity> categoryEntities = Arrays.stream(row.getCategoryIds().split("\\|"))
@@ -81,8 +77,14 @@ public class AdminImportProductUseCaseHandler {
           return categoryEntity;
         })
         .toList();
-    productEntity.setCategories(categoryEntities);
+    product.setCategories(categoryEntities);
 
-    return productEntity;
+    return product;
+  }
+
+  private void publishEvent(ProductEntity product) {
+    Product productPayload = ObjectMapperUtil.getInstance().map(product, Product.class);
+    ProductCreatedEvent event = new ProductCreatedEvent(productPayload);
+    productMessagePublisher.publish(event);
   }
 }

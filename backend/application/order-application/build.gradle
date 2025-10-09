@@ -153,8 +153,6 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['notification.email']}")
     }
-    implementation project(':infrastructure.notification.sse')
-    implementation project(':infrastructure.notification.websocket')
     implementation project(':infrastructure.observability.actuator')
     switch (rootProject.ext.appStack['observability.logging.framework']) {
         case 'logback':

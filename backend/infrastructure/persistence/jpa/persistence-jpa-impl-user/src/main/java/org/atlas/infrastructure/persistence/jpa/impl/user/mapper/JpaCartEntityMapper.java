@@ -4,50 +4,51 @@ import lombok.experimental.UtilityClass;
 import org.atlas.domain.user.entity.CartEntity;
 import org.atlas.domain.user.entity.CartItemEntity;
 import org.atlas.domain.user.entity.ProductEntity;
+import org.atlas.framework.util.CollectionUtil;
 import org.atlas.infrastructure.persistence.jpa.impl.user.entity.JpaCartEntity;
 import org.atlas.infrastructure.persistence.jpa.impl.user.entity.JpaCartItemEntity;
 
 @UtilityClass
 public class JpaCartEntityMapper {
 
-  public static JpaCartEntity toJpaCartEntity(final CartEntity cartEntity) {
+  public static JpaCartEntity toJpaCartEntity(final CartEntity cart) {
     // Cart
-    final JpaCartEntity jpaCartEntity = new JpaCartEntity();
-    jpaCartEntity.setId(cartEntity.getId());
-    jpaCartEntity.setUserId(cartEntity.getUserId());
+    final JpaCartEntity jpaCart = new JpaCartEntity();
+    jpaCart.setId(cart.getId());
+    jpaCart.setUserId(cart.getUserId());
 
     // Cart items
-    cartEntity.getCartItems().forEach(cartItemEntity -> {
-      JpaCartItemEntity jpaCartItemEntity = new JpaCartItemEntity();
-      jpaCartItemEntity.setProductId(cartItemEntity.getProduct().getId());
-      jpaCartItemEntity.setQuantity(cartItemEntity.getQuantity());
-      jpaCartEntity.addCartItem(jpaCartItemEntity);
+    cart.getCartItems().forEach(cartItem -> {
+      JpaCartItemEntity jpaCartItem = new JpaCartItemEntity();
+      jpaCartItem.setProductId(cartItem.getProduct().getId());
+      jpaCartItem.setQuantity(cartItem.getQuantity());
+      jpaCart.addCartItem(jpaCartItem);
     });
 
-    return jpaCartEntity;
+    return jpaCart;
   }
 
-  public static CartEntity toCartEntity(final JpaCartEntity jpaCartEntity) {
+  public static CartEntity toCartEntity(final JpaCartEntity jpaCart) {
     // Cart
-    final CartEntity cartEntity = new CartEntity(jpaCartEntity.getUserId());
-    cartEntity.setId(jpaCartEntity.getId());
+    final CartEntity cart = new CartEntity(jpaCart.getUserId());
+    cart.setId(jpaCart.getId());
 
     // Cart items
-    if (jpaCartEntity.getCartItems() != null) {
-      jpaCartEntity.getCartItems().forEach(jpaCartItemEntity -> {
-        CartItemEntity cartItemEntity = new CartItemEntity();
-        cartItemEntity.setId(jpaCartItemEntity.getId());
-        cartItemEntity.setQuantity(jpaCartItemEntity.getQuantity());
+    if (CollectionUtil.isNotEmpty(jpaCart.getCartItems())) {
+      jpaCart.getCartItems().forEach(jpaCartItem -> {
+        CartItemEntity cartItem = new CartItemEntity();
+        cartItem.setId(jpaCartItem.getId());
+        cartItem.setQuantity(jpaCartItem.getQuantity());
 
         // Product
-        ProductEntity productEntity = new ProductEntity();
-        productEntity.setId(jpaCartItemEntity.getProductId());
-        cartItemEntity.setProduct(productEntity);
+        ProductEntity product = new ProductEntity();
+        product.setId(jpaCartItem.getProductId());
+        cartItem.setProduct(product);
 
-        cartEntity.addCartItem(cartItemEntity);
+        cart.addCartItem(cartItem);
       });
     }
 
-    return cartEntity;
+    return cart;
   }
 }

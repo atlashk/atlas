@@ -2,15 +2,12 @@ package org.atlas.domain.product.usecase.admin.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.ProductEntity;
-import org.atlas.domain.product.port.messaging.ProductMessagePublisherPort;
+import org.atlas.domain.product.port.messaging.ProductMessagePublisher;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.service.ProductImageService;
-import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.domain.event.contract.product.ProductCreatedEvent;
 import org.atlas.framework.domain.event.contract.product.model.Product;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
-import org.atlas.framework.messaging.publisher.MessagePublisherPort;
-import org.atlas.framework.messaging.publisher.PublishRequest;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 
 @UseCaseHandler
@@ -19,26 +16,25 @@ public class AdminCreateProductUseCaseHandler {
 
   private final ProductRepository productRepository;
   private final ProductImageService productImageService;
-  private final ApplicationConfigService applicationConfigService;
-  private final ProductMessagePublisherPort productMessagePublisherPort;
+  private final ProductMessagePublisher productMessagePublisher;
 
-  public Integer handle(ProductEntity productEntity) throws Exception {
+  public Integer handle(ProductEntity product) throws Exception {
     // Insert product into DB
-    productRepository.insert(productEntity);
+    productRepository.insert(product);
 
     // Upload image
-    productImageService.uploadImage(productEntity.getId(), productEntity.getImage());
+    productImageService.uploadImage(product.getId(), product.getImage());
 
     // Publish event
-    publishEvent(productEntity);
+    publishEvent(product);
 
     // Return inserted ID
-    return productEntity.getId();
+    return product.getId();
   }
 
-  private void publishEvent(ProductEntity productEntity) {
-    Product product = ObjectMapperUtil.getInstance().map(productEntity, Product.class);
-    ProductCreatedEvent event = new ProductCreatedEvent(product);
-    productMessagePublisherPort.publish(event);
+  private void publishEvent(ProductEntity product) {
+    Product productPayload = ObjectMapperUtil.getInstance().map(product, Product.class);
+    ProductCreatedEvent event = new ProductCreatedEvent(productPayload);
+    productMessagePublisher.publish(event);
   }
 }

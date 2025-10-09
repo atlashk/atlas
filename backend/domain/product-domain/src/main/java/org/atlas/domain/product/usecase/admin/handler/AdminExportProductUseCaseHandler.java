@@ -5,10 +5,10 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.CategoryEntity;
 import org.atlas.domain.product.entity.ProductEntity;
-import org.atlas.domain.product.port.file.csv.ProductCsvWriterPort;
-import org.atlas.domain.product.port.file.excel.ProductExcelWriterPort;
+import org.atlas.domain.product.port.file.csv.ProductCsvWriter;
+import org.atlas.domain.product.port.file.excel.ProductExcelWriter;
 import org.atlas.domain.product.port.file.model.write.ProductRow;
-import org.atlas.domain.product.port.file.pdf.ProductPdfWriterPort;
+import org.atlas.domain.product.port.file.pdf.ProductPdfWriter;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.repository.criteria.FindProductCriteria;
 import org.atlas.domain.product.usecase.admin.model.AdminExportProductInput;
@@ -23,25 +23,25 @@ import org.atlas.framework.util.CollectionUtil;
 public class AdminExportProductUseCaseHandler {
 
   private final ProductRepository productRepository;
-  private final ProductCsvWriterPort productCsvWriterPort;
-  private final ProductExcelWriterPort productExcelWriterPort;
-  private final ProductPdfWriterPort productPdfWriterPort;
+  private final ProductCsvWriter productCsvWriter;
+  private final ProductExcelWriter productExcelWriter;
+  private final ProductPdfWriter productPdfWriter;
 
   public byte[] handle(AdminExportProductInput input) throws Exception {
     FindProductCriteria criteria = ObjectMapperUtil.getInstance()
         .map(input, FindProductCriteria.class);
-    PagingResult<ProductEntity> productEntities = productRepository.findByCriteria(criteria,
+    PagingResult<ProductEntity> products = productRepository.findByCriteria(criteria,
         PagingRequest.unpaged());
 
     // Use custom mapping method for complex attribute mapping
     List<ProductRow> productRows = ObjectMapperUtil.getInstance()
-        .mapList(productEntities.getData(), this::toProductRow);
+        .mapList(products.getData(), this::toProductRow);
 
     byte[] fileContent;
     switch (input.getFileType()) {
-      case CSV -> fileContent = productCsvWriterPort.write(productRows);
-      case EXCEL -> fileContent = productExcelWriterPort.write(productRows);
-      case PDF -> fileContent = productPdfWriterPort.write(productRows);
+      case CSV -> fileContent = productCsvWriter.write(productRows);
+      case EXCEL -> fileContent = productExcelWriter.write(productRows);
+      case PDF -> fileContent = productPdfWriter.write(productRows);
       default -> throw new UnsupportedOperationException(
           "Unsupported file type: " + input.getFileType());
     }

@@ -70,10 +70,10 @@ public class OrderController {
         .pagingRequest(PagingRequest.of(page - 1, size, "createdAt", SortOrder.DESC))
         .build();
 
-    PagingResult<OrderEntity> orderEntityPage = frontListOrderUseCaseHandler.handle(input);
+    PagingResult<OrderEntity> orderPage = frontListOrderUseCaseHandler.handle(input);
 
     PagingResult<OrderResponse> orderResponsePage = ObjectMapperUtil.getInstance()
-        .mapPage(orderEntityPage, OrderResponse.class);
+        .mapPage(orderPage, OrderResponse.class);
     return ApiResponseWrapper.successPage(orderResponsePage);
   }
 

@@ -24,8 +24,8 @@ public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
       StreamObserver<ListUserResponseProto> responseObserver) {
     InternalListUserInput input = map(requestProto);
     try {
-      List<UserEntity> userEntities = internalListUserUseCaseHandler.handle(input);
-      ListUserResponseProto responseProto = map(userEntities);
+      List<UserEntity> users = internalListUserUseCaseHandler.handle(input);
+      ListUserResponseProto responseProto = map(users);
       responseObserver.onNext(responseProto);
       responseObserver.onCompleted();
     } catch (Exception e) {
@@ -37,12 +37,12 @@ public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
     return new InternalListUserInput(requestProto.getIdList());
   }
 
-  private ListUserResponseProto map(List<UserEntity> userEntities) {
-    if (CollectionUtil.isEmpty(userEntities)) {
+  private ListUserResponseProto map(List<UserEntity> users) {
+    if (CollectionUtil.isEmpty(users)) {
       return ListUserResponseProto.getDefaultInstance();
     }
     ListUserResponseProto.Builder builder = ListUserResponseProto.newBuilder();
-    userEntities.forEach(user -> builder.addUser(map(user)));
+    users.forEach(user -> builder.addUser(map(user)));
     return builder.build();
   }
 

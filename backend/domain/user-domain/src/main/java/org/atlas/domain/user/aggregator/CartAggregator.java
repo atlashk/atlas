@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.user.entity.CartEntity;
 import org.atlas.domain.user.entity.CartItemEntity;
 import org.atlas.domain.user.entity.ProductEntity;
-import org.atlas.framework.internalapi.product.ProductApiPort;
+import org.atlas.framework.internalapi.product.ProductApiClient;
 import org.atlas.framework.internalapi.product.model.ListProductRequest;
 import org.atlas.framework.internalapi.product.model.ProductResponse;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class CartAggregator {
 
-  private final ProductApiPort productApiPort;
+  private final ProductApiClient productApiClient;
 
   public boolean aggregate(CartEntity cart) {
     if (cart == null) {
@@ -36,11 +36,11 @@ public class CartAggregator {
   private boolean loadProducts(CartEntity cart) {
     List<Integer> productIds = cart.getProductIds();
     ListProductRequest request = new ListProductRequest(productIds);
-    List<ProductResponse> productResponses = productApiPort.call(request);
+    List<ProductResponse> productResponses = productApiClient.call(request);
 
     if (CollectionUtil.isEmpty(productResponses)) {
       log.error("All products are no longer available, clearing cart {}", cart.getId());
-      cart.clearItems();
+      cart.clear();
       return false;
     }
 

@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.atlas.framework.domain.usecase.input.InternalInput;
 
 @Getter
 @Setter
@@ -16,7 +15,7 @@ import org.atlas.framework.domain.usecase.input.InternalInput;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class InternalListProductInput extends InternalInput {
+public class InternalListProductInput {
 
   @NotEmpty
   private List<Integer> ids;

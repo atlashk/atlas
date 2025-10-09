@@ -1,6 +1,6 @@
 package org.atlas.infrastructure.storage.s3;
 
-import org.atlas.framework.storage.StorageConfig;
+import org.atlas.framework.storage.config.StorageConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
