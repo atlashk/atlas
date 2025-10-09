@@ -21,29 +21,29 @@ public class JpaProductEntityMapper {
 
   public static JpaProductEntity toJpaProductEntity(ProductEntity product) {
     // Product
-    JpaProductEntity jpaProductEntity = new JpaProductEntity();
-    jpaProductEntity.setId(product.getId());
-    jpaProductEntity.setName(product.getName());
-    jpaProductEntity.setPrice(product.getPrice());
-    jpaProductEntity.setQuantity(product.getQuantity());
-    jpaProductEntity.setStatus(product.getStatus());
-    jpaProductEntity.setAvailableFrom(product.getAvailableFrom());
-    jpaProductEntity.setIsActive(product.getIsActive());
+    JpaProductEntity jpaProduct = new JpaProductEntity();
+    jpaProduct.setId(product.getId());
+    jpaProduct.setName(product.getName());
+    jpaProduct.setPrice(product.getPrice());
+    jpaProduct.setQuantity(product.getQuantity());
+    jpaProduct.setStatus(product.getStatus());
+    jpaProduct.setAvailableFrom(product.getAvailableFrom());
+    jpaProduct.setIsActive(product.getIsActive());
 
     // Set brand reference by ID only
     if (product.getBrand() != null && product.getBrand().getId() != null) {
       JpaBrandEntity jpaBrandEntity = new JpaBrandEntity();
       jpaBrandEntity.setId(product.getBrand().getId());
-      jpaProductEntity.setBrand(jpaBrandEntity);
+      jpaProduct.setBrand(jpaBrandEntity);
     }
 
     // Set details (with back-reference)
     if (product.getDetails() != null) {
-      JpaProductDetailsEntity jpaProductDetailsEntity = jpaProductEntity.getDetails();
+      JpaProductDetailsEntity jpaProductDetailsEntity = jpaProduct.getDetails();
       if (jpaProductDetailsEntity == null) {
         jpaProductDetailsEntity = new JpaProductDetailsEntity();
-        jpaProductDetailsEntity.setProduct(jpaProductEntity);
-        jpaProductEntity.setDetails(jpaProductDetailsEntity);
+        jpaProductDetailsEntity.setProduct(jpaProduct);
+        jpaProduct.setDetails(jpaProductDetailsEntity);
       }
       jpaProductDetailsEntity.setDescription(product.getDetails().getDescription());
     }
@@ -55,7 +55,7 @@ public class JpaProductEntityMapper {
         jpaProductAttributeEntity.setId(productAttributeEntity.getId());
         jpaProductAttributeEntity.setName(productAttributeEntity.getName());
         jpaProductAttributeEntity.setValue(productAttributeEntity.getValue());
-        jpaProductEntity.addAttribute(jpaProductAttributeEntity);
+        jpaProduct.addAttribute(jpaProductAttributeEntity);
       }
     }
 
@@ -65,53 +65,53 @@ public class JpaProductEntityMapper {
         if (categoryEntity.getId() != null) {
           JpaCategoryEntity jpaCategoryEntity = new JpaCategoryEntity();
           jpaCategoryEntity.setId(categoryEntity.getId());
-          jpaProductEntity.addCategory(jpaCategoryEntity);
+          jpaProduct.addCategory(jpaCategoryEntity);
         }
       }
     }
 
-    return jpaProductEntity;
+    return jpaProduct;
   }
 
-  public static void merge(ProductEntity product, JpaProductEntity jpaProductEntity) {
+  public static void merge(ProductEntity product, JpaProductEntity jpaProduct) {
     // Update basic fields
-    jpaProductEntity.setId(product.getId());
-    jpaProductEntity.setName(product.getName());
-    jpaProductEntity.setPrice(product.getPrice());
-    jpaProductEntity.setQuantity(product.getQuantity());
-    jpaProductEntity.setStatus(product.getStatus());
-    jpaProductEntity.setAvailableFrom(product.getAvailableFrom());
-    jpaProductEntity.setIsActive(product.getIsActive());
+    jpaProduct.setId(product.getId());
+    jpaProduct.setName(product.getName());
+    jpaProduct.setPrice(product.getPrice());
+    jpaProduct.setQuantity(product.getQuantity());
+    jpaProduct.setStatus(product.getStatus());
+    jpaProduct.setAvailableFrom(product.getAvailableFrom());
+    jpaProduct.setIsActive(product.getIsActive());
 
     // Update brand reference
     if (product.getBrand() != null && product.getBrand().getId() != null) {
       JpaBrandEntity jpaBrandEntity = new JpaBrandEntity();
       jpaBrandEntity.setId(product.getBrand().getId());
-      jpaProductEntity.setBrand(jpaBrandEntity);
+      jpaProduct.setBrand(jpaBrandEntity);
     } else {
-      jpaProductEntity.setBrand(null);
+      jpaProduct.setBrand(null);
     }
 
     // Update details
     if (product.getDetails() != null) {
-      JpaProductDetailsEntity jpaDetailsEntity = jpaProductEntity.getDetails();
+      JpaProductDetailsEntity jpaDetailsEntity = jpaProduct.getDetails();
       if (jpaDetailsEntity == null) {
         jpaDetailsEntity = new JpaProductDetailsEntity();
-        jpaDetailsEntity.setProduct(jpaProductEntity);
-        jpaProductEntity.setDetails(jpaDetailsEntity);
+        jpaDetailsEntity.setProduct(jpaProduct);
+        jpaProduct.setDetails(jpaDetailsEntity);
       }
       jpaDetailsEntity.setDescription(product.getDetails().getDescription());
     } else {
-      jpaProductEntity.setDetails(null);
+      jpaProduct.setDetails(null);
     }
 
     // Update attributes (update by name, add new, delete unmatched)
     List<JpaProductAttributeEntity> existingJpaAttributeEntities =
-        jpaProductEntity.getAttributes() != null
-            ? new ArrayList<>(jpaProductEntity.getAttributes())
+        jpaProduct.getAttributes() != null
+            ? new ArrayList<>(jpaProduct.getAttributes())
             : new ArrayList<>();
     // Clear the attributes list to rebuild it
-    jpaProductEntity.getAttributes().clear();
+    jpaProduct.getAttributes().clear();
     // Process attributes from product
     if (CollectionUtil.isNotEmpty(product.getAttributes())) {
       for (ProductAttributeEntity attributeEntity : product.getAttributes()) {
@@ -124,59 +124,59 @@ public class JpaProductEntityMapper {
           // Update existing attribute
           JpaProductAttributeEntity jpaAttributeEntity = existingJpaAttributeEntityOpt.get();
           jpaAttributeEntity.setValue(attributeEntity.getValue());
-          jpaProductEntity.addAttribute(jpaAttributeEntity);
+          jpaProduct.addAttribute(jpaAttributeEntity);
         } else {
           // Add new attribute
           JpaProductAttributeEntity jpaAttributeEntity = new JpaProductAttributeEntity();
           jpaAttributeEntity.setName(attributeEntity.getName());
           jpaAttributeEntity.setValue(attributeEntity.getValue());
-          jpaProductEntity.addAttribute(jpaAttributeEntity);
+          jpaProduct.addAttribute(jpaAttributeEntity);
         }
       }
     }
 
     // Update categories
-    jpaProductEntity.getCategories().clear();
+    jpaProduct.getCategories().clear();
     if (CollectionUtil.isNotEmpty(product.getCategories())) {
       for (CategoryEntity categoryEntity : product.getCategories()) {
         if (categoryEntity.getId() != null) {
           JpaCategoryEntity jpaCategoryEntity = new JpaCategoryEntity();
           jpaCategoryEntity.setId(categoryEntity.getId());
-          jpaProductEntity.addCategory(jpaCategoryEntity);
+          jpaProduct.addCategory(jpaCategoryEntity);
         }
       }
     }
   }
 
-  public static ProductEntity toProductEntity(JpaProductEntity jpaProductEntity) {
+  public static ProductEntity toProductEntity(JpaProductEntity jpaProduct) {
     // Product
     ProductEntity product = new ProductEntity();
-    product.setId(jpaProductEntity.getId());
-    product.setName(jpaProductEntity.getName());
-    product.setPrice(jpaProductEntity.getPrice());
-    product.setQuantity(jpaProductEntity.getQuantity());
-    product.setStatus(jpaProductEntity.getStatus());
-    product.setAvailableFrom(jpaProductEntity.getAvailableFrom());
-    product.setIsActive(jpaProductEntity.getIsActive());
+    product.setId(jpaProduct.getId());
+    product.setName(jpaProduct.getName());
+    product.setPrice(jpaProduct.getPrice());
+    product.setQuantity(jpaProduct.getQuantity());
+    product.setStatus(jpaProduct.getStatus());
+    product.setAvailableFrom(jpaProduct.getAvailableFrom());
+    product.setIsActive(jpaProduct.getIsActive());
 
     // Brand
-    if (jpaProductEntity.getBrand() != null) {
+    if (jpaProduct.getBrand() != null) {
       BrandEntity brandEntity = new BrandEntity();
-      brandEntity.setId(jpaProductEntity.getBrand().getId());
-      brandEntity.setName(jpaProductEntity.getBrand().getName());
+      brandEntity.setId(jpaProduct.getBrand().getId());
+      brandEntity.setName(jpaProduct.getBrand().getName());
       product.setBrand(brandEntity);
     }
 
     // Details
-    if (jpaProductEntity.getDetails() != null) {
+    if (jpaProduct.getDetails() != null) {
       ProductDetailsEntity productDetailsEntity = new ProductDetailsEntity();
-      productDetailsEntity.setDescription(jpaProductEntity.getDetails().getDescription());
+      productDetailsEntity.setDescription(jpaProduct.getDetails().getDescription());
       product.setDetails(productDetailsEntity);
     }
 
     // Attributes
-    if (CollectionUtil.isNotEmpty(jpaProductEntity.getAttributes())) {
-      for (JpaProductAttributeEntity jpaProductAttributeEntity : jpaProductEntity.getAttributes()) {
+    if (CollectionUtil.isNotEmpty(jpaProduct.getAttributes())) {
+      for (JpaProductAttributeEntity jpaProductAttributeEntity : jpaProduct.getAttributes()) {
         ProductAttributeEntity productAttributeEntity = new ProductAttributeEntity();
         productAttributeEntity.setId(jpaProductAttributeEntity.getId());
         productAttributeEntity.setName(jpaProductAttributeEntity.getName());
@@ -186,8 +186,8 @@ public class JpaProductEntityMapper {
     }
 
     // Categories
-    if (CollectionUtil.isNotEmpty(jpaProductEntity.getCategories())) {
-      for (JpaCategoryEntity jpaCategoryEntity : jpaProductEntity.getCategories()) {
+    if (CollectionUtil.isNotEmpty(jpaProduct.getCategories())) {
+      for (JpaCategoryEntity jpaCategoryEntity : jpaProduct.getCategories()) {
         CategoryEntity categoryEntity = new CategoryEntity();
         categoryEntity.setId(jpaCategoryEntity.getId());
         categoryEntity.setName(jpaCategoryEntity.getName());

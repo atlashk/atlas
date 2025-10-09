@@ -18,11 +18,11 @@ public class OrderMapper {
 
     // Map order items
     if (order.getOrderItems() != null) {
-      for (OrderItemEntity orderItemEntity : order.getOrderItems()) {
-        CheckoutSagaData.OrderItem orderItem = new CheckoutSagaData.OrderItem();
-        orderItem.setProductId(orderItemEntity.getProduct().getId());
-        orderItem.setQuantity(orderItemEntity.getQuantity());
-        data.addOrderItem(orderItem);
+      for (OrderItemEntity orderItem : order.getOrderItems()) {
+        CheckoutSagaData.OrderItem orderItemData = new CheckoutSagaData.OrderItem();
+        orderItemData.setProductId(orderItem.getProduct().getId());
+        orderItemData.setQuantity(orderItem.getQuantity());
+        data.addOrderItem(orderItemData);
       }
     }
 

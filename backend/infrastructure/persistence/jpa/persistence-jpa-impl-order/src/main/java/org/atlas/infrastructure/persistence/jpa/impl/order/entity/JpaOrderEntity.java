@@ -31,6 +31,7 @@ public class JpaOrderEntity extends JpaBaseEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
 
+  @Column(name = "code")
   private String code;
 
   @Column(name = "user_id")
@@ -39,15 +40,14 @@ public class JpaOrderEntity extends JpaBaseEntity {
   @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<JpaOrderItemEntity> orderItems;
 
+  @Column(name = "amount")
   private BigDecimal amount;
-
-  @Column(name = "payment_id")
-  private Integer paymentId;
 
   @Column(name = "payment_method")
   @Enumerated(EnumType.STRING)
   private PaymentMethod paymentMethod;
 
+  @Column(name = "status")
   @Enumerated(EnumType.STRING)
   private OrderStatus status;
 

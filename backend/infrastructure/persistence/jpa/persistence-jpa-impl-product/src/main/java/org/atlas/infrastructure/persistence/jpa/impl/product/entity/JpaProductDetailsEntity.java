@@ -1,5 +1,6 @@
 package org.atlas.infrastructure.persistence.jpa.impl.product.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -26,5 +27,6 @@ public class JpaProductDetailsEntity extends JpaBaseEntity {
   @JoinColumn(name = "product_id", referencedColumnName = "id")
   private JpaProductEntity product;
 
+  @Column(name = "description")
   private String description;
 }

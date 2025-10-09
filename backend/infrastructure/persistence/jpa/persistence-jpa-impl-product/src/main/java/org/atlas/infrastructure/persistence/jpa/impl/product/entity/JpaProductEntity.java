@@ -38,23 +38,27 @@ public class JpaProductEntity extends JpaBaseEntity {
   @EqualsAndHashCode.Include
   private Integer id;
 
+  @Column(name = "name")
   private String name;
 
+  @Column(name = "price")
   private BigDecimal price;
 
+  @Column(name = "quantity")
   private Integer quantity;
 
+  @Column(name = "status")
   @Enumerated(EnumType.STRING)
   private ProductStatus status;
 
-  @Column(name = "availableFrom")
+  @Column(name = "available_from")
   private Date availableFrom;
 
-  @Column(name = "isActive")
+  @Column(name = "is_active")
   private Boolean isActive;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "brandId")
+  @JoinColumn(name = "brand_id")
   private JpaBrandEntity brand;
 
   @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)

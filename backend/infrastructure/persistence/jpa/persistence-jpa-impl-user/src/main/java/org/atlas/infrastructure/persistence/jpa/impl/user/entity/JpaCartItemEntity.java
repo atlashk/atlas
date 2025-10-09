@@ -32,5 +32,6 @@ public class JpaCartItemEntity extends JpaBaseEntity {
   @Column(name = "product_id")
   private Integer productId;
 
+  @Column(name = "quantity")
   private Integer quantity;
 }

@@ -22,15 +22,15 @@ public class JpaCartRepositoryAdapter implements CartRepository {
   }
 
   @Override
-  public void insert(CartEntity cartEntity) {
-    JpaCartEntity jpaCartEntity = JpaCartEntityMapper.toJpaCartEntity(cartEntity);
-    jpaCartRepository.insert(jpaCartEntity);
-    cartEntity.setId(jpaCartEntity.getId());
+  public void insert(CartEntity cart) {
+    JpaCartEntity jpaCart = JpaCartEntityMapper.toJpaCartEntity(cart);
+    jpaCartRepository.insert(jpaCart);
+    cart.setId(jpaCart.getId());
   }
 
   @Override
-  public void update(CartEntity cartEntity) {
-    JpaCartEntity jpaCartEntity = JpaCartEntityMapper.toJpaCartEntity(cartEntity);
-    jpaCartRepository.save(jpaCartEntity);
+  public void update(CartEntity cart) {
+    JpaCartEntity jpaCart = JpaCartEntityMapper.toJpaCartEntity(cart);
+    jpaCartRepository.save(jpaCart);
   }
 }

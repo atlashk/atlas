@@ -1,5 +1,6 @@
 package org.atlas.infrastructure.persistence.jpa.impl.product.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,5 +23,6 @@ public class JpaCategoryEntity extends JpaBaseEntity {
   @EqualsAndHashCode.Include
   private Integer id;
 
+  @Column(name = "name")
   private String name;
 }

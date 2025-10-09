@@ -45,29 +45,29 @@ public class JpaUserRepositoryAdapter implements UserRepository {
   @Override
   public Optional<UserEntity> findById(Integer id) {
     return jpaUserRepository.findById(id)
-        .map(jpaUserEntity -> ObjectMapperUtil.getInstance()
-            .map(jpaUserEntity, UserEntity.class));
+        .map(jpaUser -> ObjectMapperUtil.getInstance()
+            .map(jpaUser, UserEntity.class));
   }
 
   @Override
   public Optional<UserEntity> findByUsername(String username) {
     return jpaUserRepository.findByUsername(username)
-        .map(jpaUserEntity -> ObjectMapperUtil.getInstance()
-            .map(jpaUserEntity, UserEntity.class));
+        .map(jpaUser -> ObjectMapperUtil.getInstance()
+            .map(jpaUser, UserEntity.class));
   }
 
   @Override
   public Optional<UserEntity> findByEmail(String email) {
     return jpaUserRepository.findByEmail(email)
-        .map(jpaUserEntity -> ObjectMapperUtil.getInstance()
-            .map(jpaUserEntity, UserEntity.class));
+        .map(jpaUser -> ObjectMapperUtil.getInstance()
+            .map(jpaUser, UserEntity.class));
   }
 
   @Override
   public Optional<UserEntity> findByPhoneNumber(String phoneNumber) {
     return jpaUserRepository.findByPhoneNumber(phoneNumber)
-        .map(jpaUserEntity -> ObjectMapperUtil.getInstance()
-            .map(jpaUserEntity, UserEntity.class));
+        .map(jpaUser -> ObjectMapperUtil.getInstance()
+            .map(jpaUser, UserEntity.class));
   }
 
   @Override
@@ -77,9 +77,9 @@ public class JpaUserRepositoryAdapter implements UserRepository {
 
   @Override
   public void insert(UserEntity user) {
-    JpaUserEntity jpaUserEntity = ObjectMapperUtil.getInstance()
+    JpaUserEntity jpaUser = ObjectMapperUtil.getInstance()
         .map(user, JpaUserEntity.class);
-    jpaUserRepository.save(jpaUserEntity);
-    user.setId(jpaUserEntity.getId());
+    jpaUserRepository.save(jpaUser);
+    user.setId(jpaUser.getId());
   }
 }

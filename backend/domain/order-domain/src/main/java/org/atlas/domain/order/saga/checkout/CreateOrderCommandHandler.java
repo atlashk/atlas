@@ -116,10 +116,14 @@ public class CreateOrderCommandHandler {
     // Order Items
     for (CartItemResponse cartItem : cart.getItems()) {
       // Product
-      ProductEntity product = ProductEntity.builder().id(cartItem.getProductId()).build();
+      ProductEntity product = ProductEntity.builder()
+          .id(cartItem.getProductId())
+          .build();
 
-      OrderItemEntity orderItem = OrderItemEntity.builder().product(product)
-          .quantity(cartItem.getQuantity()).build();
+      OrderItemEntity orderItem = OrderItemEntity.builder()
+          .product(product)
+          .quantity(cartItem.getQuantity())
+          .build();
 
       order.addOrderItem(orderItem);
     }

@@ -1,5 +1,6 @@
 package org.atlas.infrastructure.persistence.jpa.impl.product.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -25,8 +26,10 @@ public class JpaProductAttributeEntity extends JpaBaseEntity {
   @EqualsAndHashCode.Include
   private Integer id;
 
+  @Column(name = "name")
   private String name;
 
+  @Column(name = "value")
   private String value;
 
   @ManyToOne(fetch = FetchType.LAZY)

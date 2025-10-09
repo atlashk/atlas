@@ -7,7 +7,7 @@ public interface CartRepository {
 
   Optional<CartEntity> findByUserId(Integer userId);
 
-  void insert(CartEntity cartEntity);
+  void insert(CartEntity cart);
 
-  void update(CartEntity cartEntity);
+  void update(CartEntity cart);
 }

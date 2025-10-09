@@ -4,7 +4,6 @@ CREATE TABLE IF NOT EXISTS orders
     code            CHAR(7)        NOT NULL,
     user_id         INT            NOT NULL,
     amount          DECIMAL(11, 2) NOT NULL,
-    payment_id      INT,
     payment_method  VARCHAR(50)    NOT NULL,
     status          VARCHAR(20)    NOT NULL,
     canceled_reason VARCHAR(255),

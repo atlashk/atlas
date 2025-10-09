@@ -25,17 +25,17 @@ public class JpaOutboxMessageRepositoryAdapter implements OutboxMessageRepositor
   }
 
   @Override
-  public void insert(OutboxMessageEntity outboxMessageEntity) {
-    JpaOutboxMessageEntity jpaOutboxMessageEntity = ObjectMapperUtil.getInstance()
-        .map(outboxMessageEntity, JpaOutboxMessageEntity.class);
-    jpaOutboxMessageRepository.save(jpaOutboxMessageEntity);
-    outboxMessageEntity.setId(jpaOutboxMessageEntity.getId());
+  public void insert(OutboxMessageEntity outboxMessage) {
+    JpaOutboxMessageEntity jpaOutboxMessage = ObjectMapperUtil.getInstance()
+        .map(outboxMessage, JpaOutboxMessageEntity.class);
+    jpaOutboxMessageRepository.insert(jpaOutboxMessage);
+    outboxMessage.setId(jpaOutboxMessage.getId());
   }
 
   @Override
-  public void update(OutboxMessageEntity outboxMessageEntity) {
-    JpaOutboxMessageEntity jpaOutboxMessageEntity = ObjectMapperUtil.getInstance()
-        .map(outboxMessageEntity, JpaOutboxMessageEntity.class);
-    jpaOutboxMessageRepository.save(jpaOutboxMessageEntity);
+  public void update(OutboxMessageEntity outboxMessage) {
+    JpaOutboxMessageEntity jpaOutboxMessage = ObjectMapperUtil.getInstance()
+        .map(outboxMessage, JpaOutboxMessageEntity.class);
+    jpaOutboxMessageRepository.save(jpaOutboxMessage);
   }
 }

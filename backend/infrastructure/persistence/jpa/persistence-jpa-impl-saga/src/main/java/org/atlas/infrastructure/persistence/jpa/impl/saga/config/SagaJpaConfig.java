@@ -1,4 +1,4 @@
-package org.atlas.infrastructure.persistence.jpa.impl.outbox.config;
+package org.atlas.infrastructure.persistence.jpa.impl.saga.config;
 
 import org.atlas.infrastructure.persistence.jpa.core.repository.JpaBaseRepositoryImpl;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -10,11 +10,11 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  * project.
  */
 @Configuration
-@EntityScan(basePackages = "org.atlas.infrastructure.persistence.jpa.impl.outbox.entity")
+@EntityScan(basePackages = "org.atlas.infrastructure.persistence.jpa.impl.saga.entity")
 @EnableJpaRepositories(
-    basePackages = "org.atlas.infrastructure.persistence.jpa.impl.outbox.repository",
+    basePackages = "org.atlas.infrastructure.persistence.jpa.impl.saga.repository",
     repositoryBaseClass = JpaBaseRepositoryImpl.class
 )
-public class OutboxJpaConfig {
+public class SagaJpaConfig {
 
 }

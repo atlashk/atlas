@@ -29,7 +29,7 @@ public class OutboxMessageService {
       outboxMessage.markAsProcessed();
     } catch (Exception e) {
       log.error("Failed to process outbox message {}", outboxMessage, e);
-      outboxMessage.setError(e.getMessage());
+      outboxMessage.setErrorMessage(e.getMessage());
 
       if (outboxMessage.getRetries() >= MAX_RETRIES) {
         outboxMessage.setStatus(OutboxMessageStatus.FAILED);

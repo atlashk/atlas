@@ -14,66 +14,64 @@ public class JpaOrderEntityMapper {
 
   public static JpaOrderEntity toJpaOrderEntity(final OrderEntity order) {
     // Order
-    final JpaOrderEntity jpaOrderEntity = new JpaOrderEntity();
-    jpaOrderEntity.setId(order.getId());
-    jpaOrderEntity.setCode(order.getCode());
-    jpaOrderEntity.setUserId(order.getUser().getId());
-    jpaOrderEntity.setAmount(order.getAmount());
-    jpaOrderEntity.setPaymentId(order.getPayment().getId());
-    jpaOrderEntity.setPaymentMethod(order.getPayment().getMethod());
-    jpaOrderEntity.setStatus(order.getStatus());
-    jpaOrderEntity.setCancellationReason(order.getCancellationReason());
-    jpaOrderEntity.setCreatedAt(order.getCreatedAt());
+    final JpaOrderEntity jpaOrder = new JpaOrderEntity();
+    jpaOrder.setId(order.getId());
+    jpaOrder.setCode(order.getCode());
+    jpaOrder.setUserId(order.getUser().getId());
+    jpaOrder.setAmount(order.getAmount());
+    jpaOrder.setPaymentMethod(order.getPayment().getMethod());
+    jpaOrder.setStatus(order.getStatus());
+    jpaOrder.setCancellationReason(order.getCancellationReason());
+    jpaOrder.setCreatedAt(order.getCreatedAt());
 
     // Order items
-    order.getOrderItems().forEach(orderItemEntity -> {
-      JpaOrderItemEntity jpaOrderItemEntity = new JpaOrderItemEntity();
-      jpaOrderItemEntity.setProductId(orderItemEntity.getProduct().getId());
-      jpaOrderItemEntity.setProductPrice(orderItemEntity.getProduct().getPrice());
-      jpaOrderItemEntity.setQuantity(orderItemEntity.getQuantity());
-      jpaOrderEntity.addOrderItem(jpaOrderItemEntity);
+    order.getOrderItems().forEach(orderItem -> {
+      JpaOrderItemEntity jpaOrderItem = new JpaOrderItemEntity();
+      jpaOrderItem.setProductId(orderItem.getProduct().getId());
+      jpaOrderItem.setProductPrice(orderItem.getProduct().getPrice());
+      jpaOrderItem.setQuantity(orderItem.getQuantity());
+      jpaOrder.addOrderItem(jpaOrderItem);
     });
 
-    return jpaOrderEntity;
+    return jpaOrder;
   }
 
-  public static OrderEntity toOrderEntity(final JpaOrderEntity jpaOrderEntity) {
+  public static OrderEntity toOrderEntity(final JpaOrderEntity jpaOrder) {
     // Order
     final OrderEntity order = new OrderEntity();
-    order.setId(jpaOrderEntity.getId());
-    order.setCode(jpaOrderEntity.getCode());
-    order.setAmount(jpaOrderEntity.getAmount());
-    order.setStatus(jpaOrderEntity.getStatus());
-    order.setCancellationReason(jpaOrderEntity.getCancellationReason());
-    order.setCreatedAt(jpaOrderEntity.getCreatedAt());
+    order.setId(jpaOrder.getId());
+    order.setCode(jpaOrder.getCode());
+    order.setAmount(jpaOrder.getAmount());
+    order.setStatus(jpaOrder.getStatus());
+    order.setCancellationReason(jpaOrder.getCancellationReason());
+    order.setCreatedAt(jpaOrder.getCreatedAt());
 
     // User
     UserEntity user = new UserEntity();
-    user.setId(jpaOrderEntity.getUserId());
+    user.setId(jpaOrder.getUserId());
     order.setUser(user);
 
     // Order items
-    if (jpaOrderEntity.getOrderItems() != null) {
-      jpaOrderEntity.getOrderItems().forEach(jpaOrderItemEntity -> {
-        OrderItemEntity orderItemEntity = new OrderItemEntity();
-        orderItemEntity.setId(jpaOrderItemEntity.getId());
-        orderItemEntity.setOrderId(jpaOrderEntity.getId());
-        orderItemEntity.setQuantity(jpaOrderItemEntity.getQuantity());
+    if (jpaOrder.getOrderItems() != null) {
+      jpaOrder.getOrderItems().forEach(jpaOrderItem -> {
+        OrderItemEntity orderItem = new OrderItemEntity();
+        orderItem.setId(jpaOrderItem.getId());
+        orderItem.setOrderId(jpaOrder.getId());
+        orderItem.setQuantity(jpaOrderItem.getQuantity());
 
         // Product
         ProductEntity product = new ProductEntity();
-        product.setId(jpaOrderItemEntity.getProductId());
-        product.setPrice(jpaOrderItemEntity.getProductPrice());
-        orderItemEntity.setProduct(product);
+        product.setId(jpaOrderItem.getProductId());
+        product.setPrice(jpaOrderItem.getProductPrice());
+        orderItem.setProduct(product);
 
-        order.addOrderItem(orderItemEntity);
+        order.addOrderItem(orderItem);
       });
     }
 
     // Payment
     PaymentEntity paymentEntity = new PaymentEntity();
-    paymentEntity.setId(jpaOrderEntity.getPaymentId());
-    paymentEntity.setMethod(jpaOrderEntity.getPaymentMethod());
+    paymentEntity.setMethod(jpaOrder.getPaymentMethod());
     order.setPayment(paymentEntity);
 
     return order;

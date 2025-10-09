@@ -29,6 +29,7 @@ public class JpaOutboxMessageEntity extends JpaBaseEntity {
   @Column(name = "publish_request")
   private String publishRequest;
 
+  @Column(name = "status")
   @Enumerated(EnumType.STRING)
   private OutboxMessageStatus status;
 
@@ -38,5 +39,6 @@ public class JpaOutboxMessageEntity extends JpaBaseEntity {
   @Column(name = "error_message")
   private String errorMessage;
 
+  @Column(name = "retries")
   private Integer retries = 0;
 }

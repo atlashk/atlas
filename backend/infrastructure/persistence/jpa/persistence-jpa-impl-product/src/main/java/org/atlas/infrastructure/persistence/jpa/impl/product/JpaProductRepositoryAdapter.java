@@ -39,10 +39,10 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
     if (totalCount == 0L) {
       return PagingResult.empty();
     }
-    List<JpaProductEntity> jpaProductEntities = customJpaProductRepository.findByCriteria(criteria,
+    List<JpaProductEntity> jpaProducts = customJpaProductRepository.findByCriteria(criteria,
         pagingRequest);
     List<ProductEntity> products = ObjectMapperUtil.getInstance()
-        .mapList(jpaProductEntities, JpaProductEntityMapper::toProductEntity);
+        .mapList(jpaProducts, JpaProductEntityMapper::toProductEntity);
     return PagingResult.of(products, totalCount, pagingRequest);
   }
 
@@ -67,25 +67,24 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
 
   @Override
   public void insert(ProductEntity product) {
-    JpaProductEntity jpaProductEntity = JpaProductEntityMapper.toJpaProductEntity(product);
-    jpaProductRepository.save(jpaProductEntity);
-    product.setId(jpaProductEntity.getId());
+    JpaProductEntity jpaProduct = JpaProductEntityMapper.toJpaProductEntity(product);
+    jpaProductRepository.insert(jpaProduct);
+    product.setId(jpaProduct.getId());
   }
 
   @Override
   public void insertBatch(List<ProductEntity> products) {
-    List<JpaProductEntity> jpaProductEntities = ObjectMapperUtil.getInstance()
+    List<JpaProductEntity> jpaProducts = ObjectMapperUtil.getInstance()
         .mapList(products, JpaProductEntityMapper::toJpaProductEntity);
-    jpaProductRepository.saveAll(jpaProductEntities);
+    jpaProductRepository.saveAll(jpaProducts);
   }
 
   @Override
   public void update(ProductEntity product) {
-    JpaProductEntity jpaProductEntity = jpaProductRepository.findByIdWithAssociations(
-            product.getId())
+    JpaProductEntity jpaProduct = jpaProductRepository.findByIdWithAssociations(product.getId())
         .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
-    JpaProductEntityMapper.merge(product, jpaProductEntity);
-    jpaProductRepository.save(jpaProductEntity);
+    JpaProductEntityMapper.merge(product, jpaProduct);
+    jpaProductRepository.save(jpaProduct);
   }
 
   @Override

@@ -98,7 +98,7 @@ public class OrderAggregator {
     List<Integer> productIds = orders.stream()
         .flatMap(order -> order.getOrderItems()
             .stream()
-            .map(orderItemEntity -> orderItemEntity.getProduct().getId()))
+            .map(orderItem -> orderItem.getProduct().getId()))
         .distinct()
         .toList();
     if (CollectionUtil.isEmpty(productIds)) {
@@ -116,13 +116,13 @@ public class OrderAggregator {
     Map<Integer, ProductResponse> productResponseMap = productResponses.stream()
         .collect(Collectors.toMap(ProductResponse::getId, Function.identity()));
     orders.forEach(order -> {
-      order.getOrderItems().forEach(orderItemEntity -> {
+      order.getOrderItems().forEach(orderItem -> {
         ProductResponse productResponse = productResponseMap.get(
-            orderItemEntity.getProduct().getId());
+            orderItem.getProduct().getId());
         if (productResponse != null) {
           ProductEntity product = ObjectMapperUtil.getInstance()
               .map(productResponse, ProductEntity.class);
-          orderItemEntity.setProduct(product);
+          orderItem.setProduct(product);
         }
         // Skip if product not found instead of throwing exception
       });
