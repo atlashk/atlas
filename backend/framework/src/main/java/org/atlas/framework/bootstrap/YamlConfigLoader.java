@@ -70,7 +70,7 @@ public class YamlConfigLoader implements
       parseYaml(resource, sourceName)
           .ifPresent(propertySource -> {
             propertySources.addLast(propertySource);
-            log.info("Loaded base config: {}", sourceName);
+            log.debug("Loaded config: {}", sourceName);
           });
     }
   }
@@ -112,7 +112,7 @@ public class YamlConfigLoader implements
           .ifPresent(propertySource -> {
             // Add profile-specific properties with higher precedence (addFirst instead of addLast)
             propertySources.addFirst(propertySource);
-            log.info("Loaded profile config for '{}': {}", profile, sourceName);
+            log.debug("Loaded profile config for '{}': {}", profile, sourceName);
           });
     }
   }

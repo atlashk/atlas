@@ -12,11 +12,13 @@ import org.atlas.framework.domain.event.DomainEvent;
 import org.atlas.framework.domain.event.handler.interceptor.EventHandlerInterceptor;
 import org.atlas.framework.lock.LockAcquisitionException;
 import org.atlas.framework.lock.LockService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnBean(LockService.class)
 @Aspect
 @Order(Ordered.HIGHEST_PRECEDENCE)
 // Highest priority to run before @Transactional (which has LOWEST_PRECEDENCE)

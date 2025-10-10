@@ -1,7 +1,6 @@
 package org.atlas.domain.user.entity;
 
 import java.math.BigDecimal;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

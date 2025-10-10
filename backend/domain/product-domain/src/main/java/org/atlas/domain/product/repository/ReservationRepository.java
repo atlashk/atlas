@@ -7,7 +7,7 @@ public interface ReservationRepository {
 
   Optional<ReservationEntity> findByOrderIdAndProductId(Integer orderId, Integer productId);
 
-  void insert(ReservationEntity reservationEntity);
+  void insert(ReservationEntity reservation);
 
-  void delete(ReservationEntity reservationEntity);
+  void delete(ReservationEntity reservation);
 }

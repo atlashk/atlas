@@ -9,6 +9,7 @@ import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.internalapi.user.UserApiClient;
 import org.atlas.framework.internalapi.user.model.ListUserRequest;
 import org.atlas.framework.internalapi.user.model.UserResponse;
+import org.atlas.infrastructure.internalapi.user.rest.feign.client.UserFeignClient;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -24,6 +24,7 @@ import org.atlas.framework.saga.messaging.payload.SagaCompensationReply;
 import org.atlas.framework.saga.repository.SagaCommandRepository;
 import org.atlas.framework.saga.repository.SagaRepository;
 import org.atlas.framework.util.DateUtil;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
  * event-driven approach without maintaining in-memory state.
  */
 @Component
+@ConditionalOnBean(SagaRepository.class)
 @RequiredArgsConstructor
 @Slf4j
 public class DefaultSagaOrchestrator implements SagaOrchestrator {

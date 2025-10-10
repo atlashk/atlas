@@ -2,8 +2,8 @@ package org.atlas.framework.context;
 
 import jakarta.annotation.Nullable;
 import org.atlas.domain.user.shared.Role;
-import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.error.DomainError;
+import org.atlas.framework.domain.exception.DomainException;
 
 /**
  * Manages session info context for the current thread.

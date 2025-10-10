@@ -29,7 +29,7 @@ import org.atlas.framework.util.DateUtil;
 import org.atlas.infrastructure.api.server.rest.impl.product.admin.mapper.AdminProductMapper;
 import org.atlas.infrastructure.api.server.rest.impl.product.admin.model.AdminCreateProductRequest;
 import org.atlas.infrastructure.api.server.rest.impl.product.admin.model.AdminUpdateProductRequest;
-import org.atlas.infrastructure.api.server.rest.impl.product.model.ProductResponse;
+import org.atlas.infrastructure.api.server.rest.impl.product.front.model.ProductResponse;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -64,7 +64,7 @@ public class AdminProductManagementController {
   private final AdminExportProductUseCaseHandler adminExportProductUseCaseHandler;
 
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-  @Operation(summary = "List products with optional filters and pagination")
+  @Operation(summary = "Retrieve a list of products with optional filtering and pagination")
   public ApiResponseWrapper<List<ProductResponse>> listProduct(
       @Parameter(name = "id", description = "The unique identifier of the product", example = "1")
       @RequestParam(name = "id", required = false) Integer id,

@@ -23,17 +23,17 @@ public class JpaSagaRepositoryAdapter implements SagaRepository {
   }
 
   @Override
-  public void insert(SagaEntity entity) {
+  public void insert(SagaEntity saga) {
     JpaSagaEntity jpaSaga = ObjectMapperUtil.getInstance()
-        .map(entity, JpaSagaEntity.class);
+        .map(saga, JpaSagaEntity.class);
     jpaSagaRepository.insert(jpaSaga);
-    entity.setId(jpaSaga.getId());
+    saga.setId(jpaSaga.getId());
   }
 
   @Override
-  public void update(SagaEntity entity) {
+  public void update(SagaEntity saga) {
     JpaSagaEntity jpaSaga = ObjectMapperUtil.getInstance()
-        .map(entity, JpaSagaEntity.class);
+        .map(saga, JpaSagaEntity.class);
     jpaSagaRepository.save(jpaSaga);
   }
 }

@@ -27,7 +27,9 @@ public class UseCaseHandlerAspect {
 
   private final List<UseCaseInterceptor> useCaseInterceptors;
 
-  @Around("@within(org.atlas.framework.domain.usecase.UseCaseHandler) && execution(* handle(..))")
+  @Around("(@within(org.atlas.framework.domain.usecase.UseCaseHandler) || " +
+         "@within(org.atlas.framework.domain.usecase.ReadOnlyUseCaseHandler)) && " +
+         "execution(* handle(..))")
   public Object aroundHandle(ProceedingJoinPoint joinPoint) throws Throwable {
     // Extract class and method details
     Class<?> useCaseHandlerClass = joinPoint.getTarget().getClass();

@@ -12,7 +12,7 @@ import org.atlas.domain.order.entity.UserEntity;
 import org.atlas.domain.order.mapper.OrderMapper;
 import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.shared.OrderStatus;
-import org.atlas.domain.order.usecase.front.model.FrontCheckoutInput;
+import org.atlas.domain.order.usecase.front.model.CheckoutInput;
 import org.atlas.framework.cryptography.HashingUtil;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
@@ -21,14 +21,14 @@ import org.atlas.framework.internalapi.user.model.CartItemResponse;
 import org.atlas.framework.internalapi.user.model.CartResponse;
 import org.atlas.framework.internalapi.user.model.GetCartRequest;
 import org.atlas.framework.lock.LockService;
-import org.atlas.framework.saga.annotation.SagaCompensationHandler;
 import org.atlas.framework.saga.annotation.SagaCommandHandler;
+import org.atlas.framework.saga.annotation.SagaCompensationHandler;
 import org.atlas.framework.saga.command.CheckoutCommand;
 import org.atlas.framework.saga.command.SagaCommandResult;
 import org.atlas.framework.saga.context.CheckoutSagaData;
 import org.atlas.framework.saga.context.SagaContext;
-import org.atlas.framework.saga.messaging.payload.SagaCompensation;
 import org.atlas.framework.saga.messaging.payload.SagaCommand;
+import org.atlas.framework.saga.messaging.payload.SagaCompensation;
 import org.atlas.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.framework.sequencegenerator.SequenceType;
 import org.atlas.framework.util.CollectionUtil;
@@ -47,7 +47,7 @@ public class CreateOrderCommandHandler {
   @SagaCommandHandler(command = CheckoutCommand.CREATE_ORDER)
   public SagaCommandResult createOrder(SagaCommand event) {
     SagaContext sagaContext = SagaContext.deserialize(event.getSagaContext());
-    FrontCheckoutInput input = sagaContext.get("input", FrontCheckoutInput.class);
+    CheckoutInput input = sagaContext.get("input", CheckoutInput.class);
     if (input == null) {
       throw new IllegalArgumentException("Checkout input is required");
     }
@@ -91,7 +91,7 @@ public class CreateOrderCommandHandler {
     return cartApiClient.call(request);
   }
 
-  private String obtainLockKey(FrontCheckoutInput input, CartResponse cart) {
+  private String obtainLockKey(CheckoutInput input, CartResponse cart) {
     // Create a deterministic signature based on order items
     StringBuilder signature = new StringBuilder();
     cart.getItems().stream()
@@ -103,7 +103,7 @@ public class CreateOrderCommandHandler {
     return String.format("checkout:%d:%s", input.getUserId(), hash);
   }
 
-  private OrderEntity newOrder(FrontCheckoutInput input, CartResponse cart) {
+  private OrderEntity newOrder(CheckoutInput input, CartResponse cart) {
     // Order
     OrderEntity order = new OrderEntity();
     order.setCode(sequenceGenerator.generate(SequenceType.ORDER));

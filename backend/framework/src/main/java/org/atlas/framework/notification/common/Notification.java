@@ -1,8 +1,8 @@
 package org.atlas.framework.notification.common;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.atlas.framework.util.UUIDGenerator;
 
 @Getter

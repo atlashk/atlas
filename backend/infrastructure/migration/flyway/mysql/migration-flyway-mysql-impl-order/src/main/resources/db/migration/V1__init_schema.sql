@@ -56,10 +56,11 @@ CREATE TABLE IF NOT EXISTS saga_command
     target_service_name        VARCHAR(50) NOT NULL,
     status                     VARCHAR(20) NOT NULL,
     completed_at               DATETIME,
+    error_message              TEXT,
     compensation_error_message TEXT,
     created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at    DATETIME              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_saga_id (saga_id),
+    INDEX idx_saga_id (saga_id)
 ) ENGINE = InnoDB;
 
 -- Outbox tables

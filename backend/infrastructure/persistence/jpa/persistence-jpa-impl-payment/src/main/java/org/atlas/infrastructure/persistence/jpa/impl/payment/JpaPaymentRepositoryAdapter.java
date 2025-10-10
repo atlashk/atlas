@@ -8,6 +8,7 @@ import org.atlas.domain.payment.entity.PaymentEntity;
 import org.atlas.domain.payment.repository.PaymentRepository;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.infrastructure.persistence.jpa.impl.payment.entity.JpaPaymentEntity;
+import org.atlas.infrastructure.persistence.jpa.impl.payment.mapper.JpaPaymentEntityMapper;
 import org.atlas.infrastructure.persistence.jpa.impl.payment.repository.JpaPaymentRepository;
 import org.springframework.stereotype.Component;
 
@@ -22,28 +23,31 @@ public class JpaPaymentRepositoryAdapter implements PaymentRepository {
   public List<PaymentEntity> findByOrderIdIn(List<Integer> orderIds) {
     List<JpaPaymentEntity> jpaPaymentEntities = jpaPaymentRepository.findByOrderIdIn(orderIds);
     return ObjectMapperUtil.getInstance()
-        .mapList(jpaPaymentEntities, PaymentEntity.class);
+        .mapList(jpaPaymentEntities, JpaPaymentEntityMapper::toPaymentEntity);
   }
 
   @Override
   public Optional<PaymentEntity> findById(Integer id) {
     return jpaPaymentRepository.findById(id)
-        .map(jpaPaymentEntity -> ObjectMapperUtil.getInstance()
-            .map(jpaPaymentEntity, PaymentEntity.class));
+        .map(JpaPaymentEntityMapper::toPaymentEntity);
   }
 
   @Override
-  public void insert(PaymentEntity paymentEntity) {
-    JpaPaymentEntity jpaPaymentEntity = ObjectMapperUtil.getInstance()
-        .map(paymentEntity, JpaPaymentEntity.class);
-    jpaPaymentRepository.save(jpaPaymentEntity);
-    paymentEntity.setId(jpaPaymentEntity.getId());
+  public Optional<PaymentEntity> findBySagaId(Integer sagaId) {
+    return jpaPaymentRepository.findBySagaId(sagaId)
+        .map(JpaPaymentEntityMapper::toPaymentEntity);
   }
 
   @Override
-  public void update(PaymentEntity paymentEntity) {
-    JpaPaymentEntity jpaPaymentEntity = ObjectMapperUtil.getInstance()
-        .map(paymentEntity, JpaPaymentEntity.class);
-    jpaPaymentRepository.save(jpaPaymentEntity);
+  public void insert(PaymentEntity payment) {
+    JpaPaymentEntity jpaPayment = JpaPaymentEntityMapper.toJpaPaymentEntity(payment);
+    jpaPaymentRepository.save(jpaPayment);
+    payment.setId(jpaPayment.getId());
+  }
+
+  @Override
+  public void update(PaymentEntity payment) {
+    JpaPaymentEntity jpaPayment = JpaPaymentEntityMapper.toJpaPaymentEntity(payment);
+    jpaPaymentRepository.save(jpaPayment);
   }
 }

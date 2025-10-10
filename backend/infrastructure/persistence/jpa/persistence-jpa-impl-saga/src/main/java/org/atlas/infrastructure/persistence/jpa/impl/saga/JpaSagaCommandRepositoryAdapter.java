@@ -31,17 +31,17 @@ public class JpaSagaCommandRepositoryAdapter implements SagaCommandRepository {
   }
 
   @Override
-  public void insert(SagaCommandEntity entity) {
+  public void insert(SagaCommandEntity sagaCommand) {
     JpaSagaCommandEntity jpaSagaCommand = ObjectMapperUtil.getInstance()
-        .map(entity, JpaSagaCommandEntity.class);
+        .map(sagaCommand, JpaSagaCommandEntity.class);
     jpaSagaCommandRepository.insert(jpaSagaCommand);
-    entity.setId(jpaSagaCommand.getId());
+    sagaCommand.setId(jpaSagaCommand.getId());
   }
 
   @Override
-  public void update(SagaCommandEntity entity) {
+  public void update(SagaCommandEntity sagaCommand) {
     JpaSagaCommandEntity jpaSagaCommand = ObjectMapperUtil.getInstance()
-        .map(entity, JpaSagaCommandEntity.class);
+        .map(sagaCommand, JpaSagaCommandEntity.class);
     jpaSagaCommandRepository.save(jpaSagaCommand);
   }
 }

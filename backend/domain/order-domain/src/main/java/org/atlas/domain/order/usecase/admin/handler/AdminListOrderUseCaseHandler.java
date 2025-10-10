@@ -1,17 +1,17 @@
 package org.atlas.domain.order.usecase.admin.handler;
 
 import lombok.RequiredArgsConstructor;
+import org.atlas.domain.order.aggregator.OrderAggregator;
+import org.atlas.domain.order.aggregator.OrderAggregator.AggregationOptions;
 import org.atlas.domain.order.entity.OrderEntity;
 import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.repository.criteria.FindOrderCriteria;
-import org.atlas.domain.order.aggregator.OrderAggregator;
-import org.atlas.domain.order.aggregator.OrderAggregator.AggregationOptions;
 import org.atlas.domain.order.usecase.admin.model.AdminListOrderInput;
-import org.atlas.framework.domain.usecase.UseCaseHandler;
+import org.atlas.framework.domain.usecase.ReadOnlyUseCaseHandler;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingResult;
 
-@UseCaseHandler
+@ReadOnlyUseCaseHandler
 @RequiredArgsConstructor
 public class AdminListOrderUseCaseHandler {
 

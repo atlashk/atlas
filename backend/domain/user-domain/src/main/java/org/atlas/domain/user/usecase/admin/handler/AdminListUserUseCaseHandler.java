@@ -5,11 +5,11 @@ import org.atlas.domain.user.entity.UserEntity;
 import org.atlas.domain.user.repository.UserRepository;
 import org.atlas.domain.user.repository.criteria.FindUserCriteria;
 import org.atlas.domain.user.usecase.admin.model.AdminListUserInput;
-import org.atlas.framework.domain.usecase.UseCaseHandler;
+import org.atlas.framework.domain.usecase.ReadOnlyUseCaseHandler;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingResult;
 
-@UseCaseHandler
+@ReadOnlyUseCaseHandler
 @RequiredArgsConstructor
 public class AdminListUserUseCaseHandler {
 

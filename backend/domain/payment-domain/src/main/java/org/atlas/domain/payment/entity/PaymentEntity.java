@@ -8,6 +8,7 @@ import org.atlas.domain.payment.shared.PaymentGateway;
 import org.atlas.domain.payment.shared.PaymentMethod;
 import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.framework.domain.entity.DomainEntity;
+import org.atlas.framework.paymentgateway.model.nextaction.NextAction;
 
 @Getter
 @Setter
@@ -27,6 +28,7 @@ public class PaymentEntity extends DomainEntity {
 
   // External payment gateway information
   private String transactionId;
+  private NextAction nextAction;
   private String errorCode;
   private String errorMessage;
   private String cancellationReason;

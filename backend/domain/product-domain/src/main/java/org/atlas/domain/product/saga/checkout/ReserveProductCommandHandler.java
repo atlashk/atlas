@@ -13,14 +13,14 @@ import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.lock.LockAcquisitionException;
 import org.atlas.framework.lock.LockService;
-import org.atlas.framework.saga.annotation.SagaCompensationHandler;
 import org.atlas.framework.saga.annotation.SagaCommandHandler;
+import org.atlas.framework.saga.annotation.SagaCompensationHandler;
 import org.atlas.framework.saga.command.CheckoutCommand;
 import org.atlas.framework.saga.command.SagaCommandResult;
 import org.atlas.framework.saga.context.CheckoutSagaData;
 import org.atlas.framework.saga.context.SagaContext;
-import org.atlas.framework.saga.messaging.payload.SagaCompensation;
 import org.atlas.framework.saga.messaging.payload.SagaCommand;
+import org.atlas.framework.saga.messaging.payload.SagaCompensation;
 import org.springframework.stereotype.Component;
 
 @Component

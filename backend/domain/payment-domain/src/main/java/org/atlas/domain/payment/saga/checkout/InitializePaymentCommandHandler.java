@@ -8,9 +8,9 @@ import org.atlas.domain.payment.service.PaymentRoutingService;
 import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.constant.CommonConstant;
-import org.atlas.framework.payment.PaymentGatewayService;
-import org.atlas.framework.payment.model.CreatePaymentRequest;
-import org.atlas.framework.payment.model.CreatePaymentResponse;
+import org.atlas.framework.paymentgateway.PaymentGatewayService;
+import org.atlas.framework.paymentgateway.model.CreatePaymentRequest;
+import org.atlas.framework.paymentgateway.model.CreatePaymentResponse;
 import org.atlas.framework.saga.annotation.SagaCommandHandler;
 import org.atlas.framework.saga.command.CheckoutCommand;
 import org.atlas.framework.saga.command.SagaCommandResult;
@@ -50,6 +50,7 @@ public class InitializePaymentCommandHandler {
         applicationConfigService.getConfig("currency", CommonConstant.DEFAULT_CURRENCY));
     paymentEntity.setMethod(checkoutSagaData.getPaymentMethod());
     paymentEntity.setGateway(paymentGatewayService.supports());
+    paymentEntity.setStatus(PaymentStatus.PENDING);
     paymentRepository.insert(paymentEntity);
 
     // Create external payment
@@ -69,6 +70,7 @@ public class InitializePaymentCommandHandler {
 
       // Update payment entity
       paymentEntity.setTransactionId(response.getTransactionId());
+      paymentEntity.setNextAction(response.getNextAction());
       paymentEntity.setStatus(PaymentStatus.CREATED);
       paymentRepository.update(paymentEntity);
 

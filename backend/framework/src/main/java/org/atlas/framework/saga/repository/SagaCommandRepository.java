@@ -3,7 +3,6 @@ package org.atlas.framework.saga.repository;
 import java.util.List;
 import java.util.Optional;
 import org.atlas.framework.saga.entity.SagaCommandEntity;
-import org.atlas.framework.saga.command.CheckoutCommand;
 
 public interface SagaCommandRepository {
 
@@ -11,7 +10,7 @@ public interface SagaCommandRepository {
 
   Optional<SagaCommandEntity> findBySagaIdAndName(Integer sagaId, String name);
 
-  void insert(SagaCommandEntity entity);
+  void insert(SagaCommandEntity sagaCommand);
 
-  void update(SagaCommandEntity entity);
+  void update(SagaCommandEntity sagaCommand);
 }

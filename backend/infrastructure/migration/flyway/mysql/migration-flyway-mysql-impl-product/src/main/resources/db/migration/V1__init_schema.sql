@@ -62,6 +62,17 @@ CREATE TABLE IF NOT EXISTS product_category
     PRIMARY KEY (`product_id`, `category_id`)
 ) ENGINE = InnoDB;
 
+CREATE TABLE IF NOT EXISTS reservation
+(
+    `id`         INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `order_id`   INT          NOT NULL,
+    `product_id` INT          NOT NULL,
+    `quantity`   INT          NOT NULL,
+    `created_at` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE INDEX idx_order_id_product_id (order_id, product_id)
+) ENGINE = InnoDB;
+
 -- Outbox tables
 
 CREATE TABLE IF NOT EXISTS outbox_message

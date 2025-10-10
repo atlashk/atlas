@@ -5,20 +5,20 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.CategoryEntity;
 import org.atlas.domain.product.entity.ProductEntity;
-import org.atlas.domain.product.port.file.csv.ProductCsvWriter;
-import org.atlas.domain.product.port.file.excel.ProductExcelWriter;
-import org.atlas.domain.product.port.file.model.write.ProductRow;
-import org.atlas.domain.product.port.file.pdf.ProductPdfWriter;
+import org.atlas.domain.product.infrastructure.file.csv.ProductCsvWriter;
+import org.atlas.domain.product.infrastructure.file.excel.ProductExcelWriter;
+import org.atlas.domain.product.infrastructure.file.model.write.ProductRow;
+import org.atlas.domain.product.infrastructure.file.pdf.ProductPdfWriter;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.repository.criteria.FindProductCriteria;
 import org.atlas.domain.product.usecase.admin.model.AdminExportProductInput;
-import org.atlas.framework.domain.usecase.UseCaseHandler;
+import org.atlas.framework.domain.usecase.ReadOnlyUseCaseHandler;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
 import org.atlas.framework.util.CollectionUtil;
 
-@UseCaseHandler
+@ReadOnlyUseCaseHandler
 @RequiredArgsConstructor
 public class AdminExportProductUseCaseHandler {
 

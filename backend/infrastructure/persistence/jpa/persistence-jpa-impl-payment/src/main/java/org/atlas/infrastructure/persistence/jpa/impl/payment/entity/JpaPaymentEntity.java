@@ -29,36 +29,39 @@ public class JpaPaymentEntity extends JpaBaseEntity {
   @EqualsAndHashCode.Include
   private Integer id;
 
-  @Column(name = "saga_id", nullable = false)
+  @Column(name = "saga_id")
   private Integer sagaId;
 
-  @Column(name = "user_id", nullable = false)
+  @Column(name = "user_id")
   private Integer userId;
 
-  @Column(name = "order_id", nullable = false)
+  @Column(name = "order_id")
   private Integer orderId;
 
-  @Column(name = "amount", nullable = false, precision = 19, scale = 2)
+  @Column(name = "amount")
   private BigDecimal amount;
 
-  @Column(name = "currency", nullable = false, length = 3)
+  @Column(name = "currency")
   private String currency;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "method", nullable = false)
+  @Column(name = "method")
   private PaymentMethod method;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "gateway", nullable = false)
+  @Column(name = "gateway")
   private PaymentGateway gateway;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "status", nullable = false)
+  @Column(name = "status")
   private PaymentStatus status;
 
   // External payment gateway information
   @Column(name = "transaction_id")
   private String transactionId;
+
+  @Column(name = "next_action")
+  private String nextAction;
 
   @Column(name = "error_code")
   private String errorCode;

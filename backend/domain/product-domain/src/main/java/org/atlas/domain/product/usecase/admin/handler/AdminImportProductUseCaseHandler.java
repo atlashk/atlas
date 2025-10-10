@@ -8,10 +8,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.atlas.domain.product.entity.BrandEntity;
 import org.atlas.domain.product.entity.CategoryEntity;
 import org.atlas.domain.product.entity.ProductEntity;
-import org.atlas.domain.product.port.file.csv.ProductCsvReader;
-import org.atlas.domain.product.port.file.excel.ProductExcelReader;
-import org.atlas.domain.product.port.file.model.read.ProductRow;
-import org.atlas.domain.product.port.messaging.ProductMessagePublisher;
+import org.atlas.domain.product.infrastructure.file.csv.ProductCsvReader;
+import org.atlas.domain.product.infrastructure.file.excel.ProductExcelReader;
+import org.atlas.domain.product.infrastructure.file.model.read.ProductRow;
+import org.atlas.domain.product.infrastructure.messaging.ProductEventMessagePublisher;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.usecase.admin.model.AdminImportProductInput;
 import org.atlas.framework.domain.error.DomainError;
@@ -30,7 +30,7 @@ public class AdminImportProductUseCaseHandler {
   private final ProductRepository productRepository;
   private final ProductCsvReader productCsvReader;
   private final ProductExcelReader productExcelReader;
-  private final ProductMessagePublisher productMessagePublisher;
+  private final ProductEventMessagePublisher productEventMessagePublisher;
 
   public Void handle(AdminImportProductInput input) throws Exception {
     // Read rows from file content
@@ -85,6 +85,6 @@ public class AdminImportProductUseCaseHandler {
   private void publishEvent(ProductEntity product) {
     Product productPayload = ObjectMapperUtil.getInstance().map(product, Product.class);
     ProductCreatedEvent event = new ProductCreatedEvent(productPayload);
-    productMessagePublisher.publish(event);
+    productEventMessagePublisher.publish(event);
   }
 }

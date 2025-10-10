@@ -9,29 +9,26 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.saga.annotation.SagaCompensationHandler;
 import org.atlas.framework.saga.context.SagaContext;
-import org.atlas.framework.saga.entity.SagaEntity;
 import org.atlas.framework.saga.exception.SagaConfigException;
-import org.atlas.framework.saga.exception.SagaNotFoundException;
 import org.atlas.framework.saga.messaging.SagaMessagePublisher;
 import org.atlas.framework.saga.messaging.payload.SagaCompensation;
 import org.atlas.framework.saga.messaging.payload.SagaCompensationReply;
-import org.atlas.framework.saga.repository.SagaRepository;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 /**
  * Unified dispatcher for {@link SagaCompensation} that routes events to
- *
- * @{@link SagaCompensationHandler} methods and publishes {@link SagaCompensationReply} after
+ * {@link SagaCompensationHandler} methods and publishes {@link SagaCompensationReply} after
  * execution.
  */
 @Component
+@ConditionalOnBean(SagaMessagePublisher.class)
 @RequiredArgsConstructor
 @Slf4j
 public class SagaCompensationHandlerDispatcher implements InitializingBean {
 
-  private final SagaRepository sagaRepository;
   private final SagaMessagePublisher sagaMessagePublisher;
   private final ApplicationContext applicationContext;
 
@@ -88,10 +85,6 @@ public class SagaCompensationHandlerDispatcher implements InitializingBean {
       return;
     }
 
-    SagaEntity sagaEntity = sagaRepository.findById(compensation.getSagaId())
-        .orElseThrow(
-            () -> new SagaNotFoundException("Saga not found: " + compensation.getSagaId()));
-
     SagaContext sagaContext = SagaContext.deserialize(compensation.getSagaContext());
 
     SagaCompensationResult result;
@@ -111,8 +104,8 @@ public class SagaCompensationHandlerDispatcher implements InitializingBean {
 
     // Publish compensation reply
     SagaCompensationReply reply = SagaCompensationReply.builder()
-        .sagaId(sagaEntity.getId())
-        .sagaName(sagaEntity.getName())
+        .sagaId(compensation.getSagaId())
+        .sagaName(compensation.getSagaName())
         .sagaCommandName(compensation.getSagaCommandName())
         .result(result)
         .build();

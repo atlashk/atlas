@@ -2,9 +2,9 @@ package org.atlas.domain.user.usecase.admin.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.user.repository.UserRepository;
-import org.atlas.framework.domain.usecase.UseCaseHandler;
+import org.atlas.framework.domain.usecase.ReadOnlyUseCaseHandler;
 
-@UseCaseHandler
+@ReadOnlyUseCaseHandler
 @RequiredArgsConstructor
 public class AdminCountUserUseCaseHandler {
 

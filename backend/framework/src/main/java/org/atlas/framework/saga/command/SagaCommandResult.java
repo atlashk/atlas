@@ -4,7 +4,6 @@ import java.io.Serializable;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.atlas.framework.util.StringUtil;
 
 @Builder
 @Getter

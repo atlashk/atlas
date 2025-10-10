@@ -1,0 +1,24 @@
+package org.atlas.framework.paymentgateway.model.nextaction;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+/**
+ * The payment gateway should return the QR code as a string, e.g., a Base64 string. FE will render
+ * the QR code for the user to scan with mobile application.
+ */
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class QRCode implements NextAction {
+
+  private String content;
+
+  @Override
+  public NextActionType getType() {
+    return NextActionType.QR_CODE;
+  }
+}

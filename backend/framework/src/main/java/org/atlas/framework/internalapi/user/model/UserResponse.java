@@ -3,8 +3,8 @@ package org.atlas.framework.internalapi.user.model;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.atlas.domain.user.shared.Role;
 
 @Getter

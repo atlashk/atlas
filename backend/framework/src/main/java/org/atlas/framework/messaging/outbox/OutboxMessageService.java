@@ -5,11 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.messaging.publisher.MessagePublisher;
 import org.atlas.framework.messaging.publisher.PublishRequest;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@ConditionalOnBean(OutboxMessageRepository.class)
 @RequiredArgsConstructor
 @Slf4j
 public class OutboxMessageService {

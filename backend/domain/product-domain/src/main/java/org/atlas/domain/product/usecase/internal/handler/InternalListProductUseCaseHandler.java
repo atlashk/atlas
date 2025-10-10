@@ -7,10 +7,10 @@ import org.atlas.domain.product.entity.ProductEntity;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.service.ProductImageService;
 import org.atlas.domain.product.usecase.internal.model.InternalListProductInput;
-import org.atlas.framework.domain.usecase.UseCaseHandler;
+import org.atlas.framework.domain.usecase.ReadOnlyUseCaseHandler;
 import org.atlas.framework.util.CollectionUtil;
 
-@UseCaseHandler
+@ReadOnlyUseCaseHandler
 @RequiredArgsConstructor
 public class InternalListProductUseCaseHandler {
 

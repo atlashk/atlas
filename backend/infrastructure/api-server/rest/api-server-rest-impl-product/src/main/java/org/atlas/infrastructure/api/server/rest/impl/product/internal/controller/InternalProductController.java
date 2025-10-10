@@ -10,8 +10,8 @@ import org.atlas.domain.product.usecase.internal.handler.InternalListProductUseC
 import org.atlas.domain.product.usecase.internal.model.InternalListProductInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.infrastructure.api.server.rest.impl.product.front.model.ProductResponse;
 import org.atlas.infrastructure.api.server.rest.impl.product.internal.model.InternalListProductRequest;
-import org.atlas.infrastructure.api.server.rest.impl.product.model.ProductResponse;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,9 +28,9 @@ public class InternalProductController {
   private final InternalListProductUseCaseHandler internalListProductUseCaseHandler;
 
   @PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
-  @Operation(summary = "List products")
+  @Operation(summary = "Retrieve a list of products based on specified criteria")
   public ApiResponseWrapper<List<ProductResponse>> listProduct(
-      @Parameter(description = "Request object containing the criteria for listing products.", required = true)
+      @Parameter(description = "Request object containing the criteria for listing products", required = true)
       @Valid @RequestBody InternalListProductRequest request) throws Exception {
     InternalListProductInput input = ObjectMapperUtil.getInstance()
         .map(request, InternalListProductInput.class);

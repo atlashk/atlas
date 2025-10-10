@@ -6,10 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
-@Aspect
 @Component
+@ConditionalOnBean(LockService.class)
+@Aspect
 @RequiredArgsConstructor
 @Slf4j
 public class LockAspect {

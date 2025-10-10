@@ -3,11 +3,11 @@ package org.atlas.domain.product.usecase.admin.handler;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.ProductEntity;
 import org.atlas.domain.product.repository.ProductRepository;
-import org.atlas.framework.domain.exception.DomainException;
-import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.domain.error.DomainError;
+import org.atlas.framework.domain.exception.DomainException;
+import org.atlas.framework.domain.usecase.ReadOnlyUseCaseHandler;
 
-@UseCaseHandler
+@ReadOnlyUseCaseHandler
 @RequiredArgsConstructor
 public class AdminGetProductUseCaseHandler {
 

@@ -13,7 +13,7 @@ import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
-import org.atlas.infrastructure.api.server.rest.impl.user.common.model.UserResponse;
+import org.atlas.infrastructure.api.server.rest.impl.user.front.model.ProfileResponse;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/admin/user")
+@RequestMapping("/api/admin/users")
 @Validated
 @RequiredArgsConstructor
 public class AdminUserManagementController {
@@ -30,8 +30,8 @@ public class AdminUserManagementController {
   private final AdminListUserUseCaseHandler adminListUserUseCaseHandler;
 
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-  @Operation(summary = "List users")
-  public ApiResponseWrapper<List<UserResponse>> listUser(
+  @Operation(summary = "Retrieve a paginated list of users with optional filtering and pagination")
+  public ApiResponseWrapper<List<ProfileResponse>> listUser(
       @Parameter(name = "id", description = "User ID", example = "1")
       @RequestParam(name = "id", required = false) Integer id,
       @Parameter(name = "keyword", description = "Username, first name, last name, email, phone number", example = "john.doe")
@@ -50,8 +50,8 @@ public class AdminUserManagementController {
         .pagingRequest(PagingRequest.of(page - 1, size))
         .build();
     PagingResult<UserEntity> userPage = adminListUserUseCaseHandler.handle(input);
-    PagingResult<UserResponse> userResponsePage = ObjectMapperUtil.getInstance()
-        .mapPage(userPage, UserResponse.class);
+    PagingResult<ProfileResponse> userResponsePage = ObjectMapperUtil.getInstance()
+        .mapPage(userPage, ProfileResponse.class);
     return ApiResponseWrapper.successPage(userResponsePage);
   }
 }

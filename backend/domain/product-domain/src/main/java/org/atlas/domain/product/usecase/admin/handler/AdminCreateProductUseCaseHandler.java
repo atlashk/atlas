@@ -2,7 +2,7 @@ package org.atlas.domain.product.usecase.admin.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.ProductEntity;
-import org.atlas.domain.product.port.messaging.ProductMessagePublisher;
+import org.atlas.domain.product.infrastructure.messaging.ProductEventMessagePublisher;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.service.ProductImageService;
 import org.atlas.framework.domain.event.contract.product.ProductCreatedEvent;
@@ -16,7 +16,7 @@ public class AdminCreateProductUseCaseHandler {
 
   private final ProductRepository productRepository;
   private final ProductImageService productImageService;
-  private final ProductMessagePublisher productMessagePublisher;
+  private final ProductEventMessagePublisher productEventMessagePublisher;
 
   public Integer handle(ProductEntity product) throws Exception {
     // Insert product into DB
@@ -35,6 +35,6 @@ public class AdminCreateProductUseCaseHandler {
   private void publishEvent(ProductEntity product) {
     Product productPayload = ObjectMapperUtil.getInstance().map(product, Product.class);
     ProductCreatedEvent event = new ProductCreatedEvent(productPayload);
-    productMessagePublisher.publish(event);
+    productEventMessagePublisher.publish(event);
   }
 }

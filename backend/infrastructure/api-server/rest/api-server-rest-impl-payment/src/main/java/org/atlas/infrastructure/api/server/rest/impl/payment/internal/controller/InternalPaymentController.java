@@ -28,7 +28,7 @@ public class InternalPaymentController {
   private final InternalListPaymentUseCaseHandler internalListPaymentUseCaseHandler;
 
   @PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
-  @Operation(summary = "List payments")
+  @Operation(summary = "Retrieve a list of payments based on specified criteria")
   public ApiResponseWrapper<List<PaymentResponse>> listPayment(
       @Parameter(description = "Request object containing the criteria for listing payments", required = true)
       @Valid @RequestBody InternalListPaymentRequest request) throws Exception {

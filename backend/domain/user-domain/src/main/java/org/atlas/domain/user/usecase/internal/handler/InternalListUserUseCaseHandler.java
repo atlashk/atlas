@@ -5,9 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.domain.user.entity.UserEntity;
 import org.atlas.domain.user.repository.UserRepository;
 import org.atlas.domain.user.usecase.internal.model.InternalListUserInput;
-import org.atlas.framework.domain.usecase.UseCaseHandler;
+import org.atlas.framework.domain.usecase.ReadOnlyUseCaseHandler;
 
-@UseCaseHandler
+@ReadOnlyUseCaseHandler
 @RequiredArgsConstructor
 public class InternalListUserUseCaseHandler {
 

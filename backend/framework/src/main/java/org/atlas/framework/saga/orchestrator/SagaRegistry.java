@@ -76,9 +76,7 @@ public class SagaRegistry implements InitializingBean {
     Map<String, Object> sagaBeans = applicationContext.getBeansWithAnnotation(
         Saga.class);
     log.debug("Found {} potential saga beans", sagaBeans.size());
-
     if (sagaBeans.isEmpty()) {
-      log.warn("No saga beans found in application context");
       return;
     }
 

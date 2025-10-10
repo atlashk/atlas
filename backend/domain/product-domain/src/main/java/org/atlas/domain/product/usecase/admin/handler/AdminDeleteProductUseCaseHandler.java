@@ -2,7 +2,7 @@ package org.atlas.domain.product.usecase.admin.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.ProductEntity;
-import org.atlas.domain.product.port.messaging.ProductMessagePublisher;
+import org.atlas.domain.product.infrastructure.messaging.ProductEventMessagePublisher;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.service.ProductImageService;
 import org.atlas.framework.domain.error.DomainError;
@@ -18,7 +18,7 @@ public class AdminDeleteProductUseCaseHandler {
 
   private final ProductRepository productRepository;
   private final ProductImageService productImageService;
-  private final ProductMessagePublisher productMessagePublisher;
+  private final ProductEventMessagePublisher productEventMessagePublisher;
 
   public Void handle(Integer productId) throws Exception {
     // Delete product from DB
@@ -38,6 +38,6 @@ public class AdminDeleteProductUseCaseHandler {
   private void publishEvent(ProductEntity product) {
     Product productPayload = ObjectMapperUtil.getInstance().map(product, Product.class);
     ProductDeletedEvent event = new ProductDeletedEvent(productPayload);
-    productMessagePublisher.publish(event);
+    productEventMessagePublisher.publish(event);
   }
 }

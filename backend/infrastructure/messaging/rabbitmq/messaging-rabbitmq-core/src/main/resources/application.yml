@@ -24,9 +24,14 @@ app:
         - name: saga.checkout.compensation.product
           type: TOPIC
         # Product service
+        - name: product_events
+          type: TOPIC
         - name: saga.checkout.command.payment
           type: TOPIC
         - name: saga.checkout.compensation.payment
+          type: TOPIC
+        # User service
+        - name: user_events
           type: TOPIC
       queues:
         # Order service
@@ -34,12 +39,12 @@ app:
         - name: saga.checkout.commandreply
         - name: saga.checkout.compensation.order
         - name: saga.checkout.compensationreply
-        # Product service
-        - name: saga.checkout.command.product
-        - name: saga.checkout.compensation.product
         # Payment service
         - name: saga.checkout.command.payment
         - name: saga.checkout.compensation.payment
+        # Product service
+        - name: saga.checkout.command.product
+        - name: saga.checkout.compensation.product
       bindings:
         # Order service
         - exchange: saga.checkout.command.order
@@ -54,13 +59,6 @@ app:
         - exchange: saga.checkout.compensationreply
           queue: saga.checkout.compensationreply
           routing-key: saga.checkout.compensationreply
-        # Product service
-        - exchange: saga.checkout.command.product
-          queue: saga.checkout.command.product
-          routing-key: saga.checkout.command.product
-        - exchange: saga.checkout.compensation.product
-          queue: saga.checkout.compensation.product
-          routing-key: saga.checkout.compensation.product
         # Payment service
         - exchange: saga.checkout.command.payment
           queue: saga.checkout.command.payment
@@ -68,3 +66,10 @@ app:
         - exchange: saga.checkout.compensation.payment
           queue: saga.checkout.compensation.payment
           routing-key: saga.checkout.compensation.payment
+        # Product service
+        - exchange: saga.checkout.command.product
+          queue: saga.checkout.command.product
+          routing-key: saga.checkout.command.product
+        - exchange: saga.checkout.compensation.product
+          queue: saga.checkout.compensation.product
+          routing-key: saga.checkout.compensation.product

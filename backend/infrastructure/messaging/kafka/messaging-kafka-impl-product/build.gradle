@@ -26,7 +26,7 @@ repositories {
 
 dependencies {
     // Domain
-    api project(':domain.payment')
+    api project(':domain.product')
 
     // Infrastructure
     api project(':infrastructure.messaging.kafka.core')

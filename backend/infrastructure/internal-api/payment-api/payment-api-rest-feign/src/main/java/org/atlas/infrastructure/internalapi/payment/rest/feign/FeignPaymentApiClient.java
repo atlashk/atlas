@@ -9,6 +9,7 @@ import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.internalapi.payment.PaymentApiClient;
 import org.atlas.framework.internalapi.payment.model.ListPaymentRequest;
 import org.atlas.framework.internalapi.payment.model.PaymentResponse;
+import org.atlas.infrastructure.internalapi.payment.rest.feign.client.PaymentFeignClient;
 import org.springframework.stereotype.Component;
 
 @Component

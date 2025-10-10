@@ -8,6 +8,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.atlas.framework.spel.SpelParser;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
 /**
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
  * the result
  */
 @Component
+@ConditionalOnBean(CacheService.class)
 @Aspect
 @RequiredArgsConstructor
 public class CacheAspect {

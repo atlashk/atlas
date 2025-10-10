@@ -9,15 +9,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.saga.annotation.SagaCommandHandler;
 import org.atlas.framework.saga.context.SagaContext;
-import org.atlas.framework.saga.entity.SagaEntity;
 import org.atlas.framework.saga.exception.SagaConfigException;
-import org.atlas.framework.saga.exception.SagaNotFoundException;
 import org.atlas.framework.saga.messaging.SagaMessagePublisher;
 import org.atlas.framework.saga.messaging.payload.SagaCommand;
 import org.atlas.framework.saga.messaging.payload.SagaCommandReply;
-import org.atlas.framework.saga.repository.SagaRepository;
 import org.atlas.framework.util.StringUtil;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -40,14 +38,14 @@ import org.springframework.stereotype.Component;
  *   <li>Methods with no parameters are also supported</li>
  * </ul>
  *
- * @see org.atlas.framework.saga.annotation.SagaCommandHandler
+ * @see SagaCommandHandler
  */
 @Component
+@ConditionalOnBean(SagaMessagePublisher.class)
 @RequiredArgsConstructor
 @Slf4j
 public class SagaCommandHandlerDispatcher implements InitializingBean {
 
-  private final SagaRepository sagaRepository;
   private final SagaMessagePublisher sagaMessagePublisher;
   private final ApplicationContext applicationContext;
 
@@ -101,9 +99,6 @@ public class SagaCommandHandlerDispatcher implements InitializingBean {
       return;
     }
 
-    SagaEntity sagaEntity = sagaRepository.findById(command.getSagaId())
-        .orElseThrow(() -> new SagaNotFoundException("Saga not found: " + command.getSagaId()));
-
     SagaContext sagaContext = SagaContext.deserialize(command.getSagaContext());
 
     SagaCommandResult result;
@@ -123,8 +118,8 @@ public class SagaCommandHandlerDispatcher implements InitializingBean {
 
     // Publish command reply
     SagaCommandReply reply = SagaCommandReply.builder()
-        .sagaId(sagaEntity.getId())
-        .sagaName(sagaEntity.getName())
+        .sagaId(command.getSagaId())
+        .sagaName(command.getSagaName())
         .sagaCommandName(command.getSagaCommandName())
         .result(result)
         .build();

@@ -7,9 +7,11 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.messaging.publisher.PublishRequest;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnBean(OutboxMessageRepository.class)
 @Aspect
 @RequiredArgsConstructor
 @Slf4j

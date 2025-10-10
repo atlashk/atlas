@@ -15,7 +15,7 @@ import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingRequest.SortOrder;
 import org.atlas.framework.paging.PagingResult;
-import org.atlas.infrastructure.api.server.rest.impl.order.model.OrderResponse;
+import org.atlas.infrastructure.api.server.rest.impl.order.front.model.OrderResponse;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -33,7 +33,7 @@ public class AdminOrderManagementController {
   private final AdminListOrderUseCaseHandler adminListOrderUseCaseHandler;
 
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-  @Operation(summary = "List orders")
+  @Operation(summary = "Retrieve a list of orders with optional filtering and pagination")
   public ApiResponseWrapper<List<OrderResponse>> listOrder(
       @Parameter(name = "orderId", description = "Order ID", example = "1")
       @RequestParam(name = "orderId", required = false) Integer orderId,
