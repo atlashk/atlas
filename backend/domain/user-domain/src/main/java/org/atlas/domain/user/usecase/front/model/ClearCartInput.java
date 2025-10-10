@@ -11,7 +11,7 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-public class FrontGetCartInput {
+public class ClearCartInput {
 
   private Integer userId;
 }
