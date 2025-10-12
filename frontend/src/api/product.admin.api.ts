@@ -7,7 +7,7 @@ import {
   type UpdateProductRequest,
 } from "@/interfaces/product.interface";
 import apiClient, { ApiResponse } from "./apiClient";
-import { BaseApi } from "./baseApi";
+import { BaseApi } from "./base.api";
 
 export class ProductAdminApi extends BaseApi {
   constructor() {

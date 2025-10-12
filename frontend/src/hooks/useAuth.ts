@@ -1,6 +1,6 @@
 "use client";
 
-import { authApi, userApi } from '@/api';
+import { authApi, userApi } from '@/api/index.api';
 import type { LoginRequest } from '@/interfaces/auth.interface';
 import type { RegisterRequest, User } from '@/interfaces/user.interface';
 import { getCookie, setCookie, clearAuthCookies, isValidToken } from '@/utils/cookies';

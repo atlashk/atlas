@@ -1,6 +1,6 @@
 "use client";
 
-import { productApi, productAdminApi } from "@/api";
+import { productApi, productAdminApi } from "@/api/index.api";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

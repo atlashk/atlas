@@ -1,6 +1,5 @@
 package org.atlas.domain.product.usecase.admin.model;
 
-import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +27,5 @@ public class AdminListProductInput {
   private Boolean isActive;
   private Integer brandId;
   private List<Integer> categoryIds;
-  @Valid
   private PagingRequest pagingRequest;
 }

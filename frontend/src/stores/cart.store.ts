@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { cartApi } from "@/api";
+import { cartApi } from "@/api/index.api";
 import type { CartResponse } from "@/interfaces/cart.interface";
 import { useUserStore } from "./user.store";
 

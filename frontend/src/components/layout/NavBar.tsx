@@ -33,7 +33,7 @@ export default function NavBar() {
     };
 
     loadCartData();
-  }, [isHydrated, accessToken, profile, cart, isLoading, loadCart]);
+  }, [isHydrated, accessToken, profile, cart, isLoading, loadCart, isAuthenticated, isAdmin]);
 
   const getBrandHref = () => {
     // Always return default during hydration to prevent mismatch

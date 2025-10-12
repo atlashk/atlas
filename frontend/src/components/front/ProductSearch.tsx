@@ -1,4 +1,4 @@
-import { productApi } from "@/api";
+import { productApi } from "@/api/index.api";
 import { Metadata } from "@/api/apiClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

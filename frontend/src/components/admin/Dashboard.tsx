@@ -1,6 +1,6 @@
 "use client";
 
-import { orderAdminApi, productAdminApi, userAdminApi } from "@/api";
+import { orderAdminApi, productAdminApi, userAdminApi } from "@/api/index.api";
 import {
   Card,
   CardContent,

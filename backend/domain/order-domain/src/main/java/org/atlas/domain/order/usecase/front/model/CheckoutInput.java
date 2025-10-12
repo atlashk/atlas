@@ -1,6 +1,5 @@
 package org.atlas.domain.order.usecase.front.model;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,9 +14,6 @@ import org.atlas.domain.payment.shared.PaymentMethod;
 @Setter
 public class CheckoutInput {
 
-  @NotNull
   private Integer userId;
-
-  @NotNull
   private PaymentMethod paymentMethod;
 }

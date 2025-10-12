@@ -1,6 +1,6 @@
 import type { ListOrderFilters, Order } from "@/interfaces/order.interface";
 import { ApiResponse } from "./apiClient";
-import { BaseApi } from "./baseApi";
+import { BaseApi } from "./base.api";
 
 export class OrderAdminApi extends BaseApi {
   constructor() {

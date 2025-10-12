@@ -1,12 +1,11 @@
 import type {
   CheckoutRequest,
   CheckoutResponse,
-  GetOrderStatusResponse,
   ListOrderFilters,
   Order
 } from "@/interfaces/order.interface";
 import { ApiResponse } from "./apiClient";
-import { BaseApi } from "./baseApi";
+import { BaseApi } from "./base.api";
 
 export class OrderApi extends BaseApi {
   constructor() {
@@ -37,12 +36,6 @@ export class OrderApi extends BaseApi {
     data: CheckoutRequest
   ): Promise<ApiResponse<CheckoutResponse>> {
     return this.post<CheckoutResponse>("/orders/checkout", data);
-  }
-
-  async getOrderStatus(
-    orderId: number
-  ): Promise<ApiResponse<GetOrderStatusResponse>> {
-    return this.get<GetOrderStatusResponse>(`/orders/${orderId}/status`);
   }
 }
 

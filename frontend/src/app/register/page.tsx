@@ -1,6 +1,6 @@
 "use client";
 
-import { userApi } from "@/api";
+import { userApi } from "@/api/index.api";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

@@ -14,6 +14,7 @@ import org.atlas.domain.order.usecase.front.model.CheckoutInput;
 import org.atlas.domain.order.usecase.front.model.ListOrderInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.constant.CommonConstant;
+import org.atlas.framework.context.Contexts;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingRequest.SortOrder;
@@ -80,6 +81,7 @@ public class OrderController {
       @Valid @RequestBody CheckoutRequest request) throws Exception {
     CheckoutInput input = ObjectMapperUtil.getInstance()
         .map(request, CheckoutInput.class);
+    input.setUserId(Contexts.getUserId());
 
     Integer sagaId = checkoutUseCaseHandler.handle(input);
 

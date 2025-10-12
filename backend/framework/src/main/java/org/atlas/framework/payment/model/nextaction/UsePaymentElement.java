@@ -15,12 +15,16 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UsePaymentElement implements NextAction {
 
-  private String provider;
+  private Provider provider;
   private String clientSecret;
   private String publishableKey;
 
   @Override
   public NextActionType getType() {
     return NextActionType.USE_PAYMENT_ELEMENT;
+  }
+
+  public enum Provider {
+    STRIPE,
   }
 }

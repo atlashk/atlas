@@ -1,6 +1,6 @@
 import type { RegisterRequest, User } from "@/interfaces/user.interface";
 import { ApiResponse } from "./apiClient";
-import { BaseApi } from "./baseApi";
+import { BaseApi } from "./base.api";
 
 export class UserApi extends BaseApi {
   constructor() {

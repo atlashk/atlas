@@ -1,6 +1,6 @@
 import type { LoginRequest, LoginResponse } from "@/interfaces/auth.interface";
-import { BaseApi } from "./baseApi";
 import { ApiResponse } from "./apiClient";
+import { BaseApi } from "./base.api";
 
 export class AuthApi extends BaseApi {
   constructor() {

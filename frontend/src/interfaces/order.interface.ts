@@ -1,7 +1,7 @@
-import {OrderStatus} from "@/constants";
-import type {PaymentMethod} from "@/constants/payment.constants";
-import type {Product} from "./product.interface";
-import type {User} from "./user.interface";
+import { OrderStatus, PaymentMethod } from "@/constants";
+import type { PaymentStatus } from "./payment.interface";
+import type { Product } from "./product.interface";
+import type { User } from "./user.interface";
 
 export interface Order {
   id: number;
@@ -22,18 +22,10 @@ export interface Payment {
   currency: string;
   method: string;
   gateway: string;
-  status: OrderPaymentStatus;
+  status: PaymentStatus;
   errorCode?: string;
   errorMessage?: string;
   cancellationReason?: string;
-}
-
-export enum OrderPaymentStatus {
-  CREATED = "CREATED",
-  SUCCEEDED = "SUCCEEDED",
-  CANCELED = "CANCELED",
-  FAILED = "FAILED",
-  UNKNOWN = "UNKNOWN"
 }
 
 export interface OrderItem {
@@ -58,9 +50,4 @@ export interface ListOrderFilters {
   endDate?: string;
   page: number
   size: number
-}
-
-export interface GetOrderStatusResponse {
-  status: string;
-  cancellationReason: string;
 }

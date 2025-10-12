@@ -1,5 +1,5 @@
+import { clearAuthCookies, getCookie, isValidToken, setCookie } from '@/utils/cookies';
 import axios, { AxiosError } from "axios";
-import { getCookie, isValidToken, clearAuthCookies, setCookie } from '@/utils/cookies';
 
 export interface ApiResponse<T> {
   success: boolean;

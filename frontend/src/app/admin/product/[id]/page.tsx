@@ -1,6 +1,6 @@
 "use client";
 
-import { productAdminApi } from "@/api";
+import { productAdminApi } from "@/api/index.api";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

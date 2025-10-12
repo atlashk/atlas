@@ -10,9 +10,7 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = false)
 public class InvalidInputException extends RuntimeException {
 
-  private final List<String> errorMessages;
-
   public InvalidInputException(List<String> errorMessages) {
-    this.errorMessages = errorMessages;
+    super(String.join("; ", errorMessages));
   }
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import { productApi } from "@/api";
-import { productAdminApi } from "@/api/product.admin";
+import { productApi } from "@/api/index.api";
+import { productAdminApi } from "@/api/product.admin.api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";

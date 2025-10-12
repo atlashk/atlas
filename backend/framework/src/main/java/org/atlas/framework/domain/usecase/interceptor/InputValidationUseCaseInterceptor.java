@@ -2,11 +2,14 @@ package org.atlas.framework.domain.usecase.interceptor;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.domain.usecase.InvalidInputException;
+import org.atlas.framework.util.CollectionUtil;
+import org.atlas.framework.validation.ValidationService;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -16,18 +19,18 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class InputValidationUseCaseInterceptor implements UseCaseInterceptor {
 
-  private final Validator validator;
+  private final ValidationService validationService;
 
   @Override
   public void preHandle(Class<?> useCaseClass, Object input) {
     if (input == null) {
       return;
     }
-    Set<ConstraintViolation<Object>> violations = validator.validate(input);
-    if (!violations.isEmpty()) {
-      List<String> errorMessages = violations.stream()
-          .map(ConstraintViolation::getMessage)
-          .toList();
+
+    List<String> errorMessages = validationService.validate(input);
+    if (CollectionUtil.isNotEmpty(errorMessages)) {
+      log.error("Validation failed for use case {}: {}",
+          useCaseClass.getSimpleName(), errorMessages);
       throw new InvalidInputException(errorMessages);
     }
   }

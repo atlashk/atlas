@@ -4,7 +4,7 @@ import type {
   UpdateCartItemRequest,
 } from "@/interfaces/cart.interface";
 import { ApiResponse } from "./apiClient";
-import { BaseApi } from "./baseApi";
+import { BaseApi } from "./base.api";
 
 export class CartApi extends BaseApi {
   constructor() {

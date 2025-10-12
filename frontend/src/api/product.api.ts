@@ -5,7 +5,7 @@ import {
   type SearchProductFilters,
 } from "@/interfaces/product.interface";
 import { ApiResponse } from "./apiClient";
-import { BaseApi } from "./baseApi";
+import { BaseApi } from "./base.api";
 
 export class ProductApi extends BaseApi {
   constructor() {

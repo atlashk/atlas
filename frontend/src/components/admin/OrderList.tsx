@@ -1,12 +1,12 @@
 "use client";
 
-import {orderAdminApi} from "@/api/order.admin";
-import {Metadata} from "@/api/apiClient";
-import {Alert, AlertDescription} from "@/components/ui/alert";
-import {Button} from "@/components/ui/button";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Input} from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
+import { Metadata } from "@/api/apiClient";
+import { orderAdminApi } from "@/api/order.admin.api";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Pagination,
   PaginationContent,
@@ -30,7 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {ORDER_STATUSES} from "@/constants";
+import { ORDER_STATUSES } from "@/constants";
 import {
   type ListOrderFilters,
   type Order,
@@ -47,8 +47,8 @@ import {
   RotateCcw,
   Search,
 } from "lucide-react";
-import React, {useCallback, useEffect, useState, useRef} from "react";
-import {toast} from "sonner";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 const OrderList: React.FC = () => {
   const isInitialized = useRef(false);
