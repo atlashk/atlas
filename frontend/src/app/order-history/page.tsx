@@ -4,7 +4,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useUserStore } from '../../stores/user.store';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Clock, ChevronDown, ChevronUp, RotateCcw, Search } from 'lucide-react';
+import { Clock, ChevronDown, ChevronUp, RotateCcw, Search } from 'lucide-react';
 import { orderApi } from "@/api";
 import { Metadata } from "@/api/apiClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

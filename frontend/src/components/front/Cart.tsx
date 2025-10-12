@@ -1,12 +1,7 @@
-import { orderApi } from "@/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PaymentNextAction } from "@/interfaces";
-import { PaymentMethod } from "@/constants/payment.constants";
-import { CartResponse, CartItemResponse } from "@/interfaces/cart.interface";
-import { PaymentFormProps, PaymentResult, paymentService } from "@/services/paymentService";
+import { CartItemResponse } from "@/interfaces/cart.interface";
 import { useCartStore, useUserStore } from "@/stores";
 import { formatCurrency } from "@/utils/formatter.util";
 import { Minus, Plus, X } from "lucide-react";
@@ -16,18 +11,7 @@ import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 const Cart: React.FC = () => {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>("CARD");
-  const [paymentMethods, setPaymentMethods] = useState<string[]>([]);
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [currentSagaId, setCurrentSagaId] = useState<string | null>(null);
-  const [PaymentFormComponent, setPaymentFormComponent] = useState<React.ComponentType<PaymentFormProps> | null>(null);
-  const [paymentNextAction, setPaymentNextAction] = useState<PaymentNextAction | null>(null);
-  const [paymentStatusModal, setPaymentStatusModal] = useState({
-    isOpen: false,
-    isSuccess: false,
-    message: '',
-  });
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const {
     cart,
     loadCart,
@@ -35,7 +19,6 @@ const Cart: React.FC = () => {
     getItemTotal,
     removeFromCart,
     updateQuantity,
-    clearCart,
     isLoading,
     error,
   } = useCartStore();
@@ -44,27 +27,15 @@ const Cart: React.FC = () => {
 
   const total = getCartTotal();
 
-  // Load cart data and payment methods on component mount
+  // Load cart data on component mount
   useEffect(() => {
     const loadData = async () => {
       if (!isAuthenticated()) return;
 
       try {
         await loadCart();
-        
-        // Load payment methods
-        const response = await fetch('/api/payment-methods');
-        if (response.ok) {
-          const result = await response.json();
-          if (result.success && result.data) {
-            setPaymentMethods(result.data);
-            if (result.data.length > 0) {
-              setSelectedPaymentMethod(result.data[0]);
-            }
-          }
-        }
       } catch (error) {
-        console.error('Failed to load data:', error);
+        console.error('Failed to load cart data:', error);
         toast.error('Failed to load cart data');
       }
     };
@@ -72,58 +43,7 @@ const Cart: React.FC = () => {
     loadData();
   }, [isAuthenticated, loadCart]);
 
-  // Poll payment status when we have a sagaId
-  useEffect(() => {
-    if (!currentSagaId) return;
 
-    const pollPaymentStatus = async () => {
-      try {
-        const response = await fetch(`/api/payments/${currentSagaId}/tracking`);
-        if (response.ok) {
-          const result = await response.json();
-          if (result.success && result.data) {
-            const { status, nextAction } = result.data;
-            
-            if (status === 'AWAITING_PAYMENT' && nextAction) {
-              setPaymentNextAction(nextAction);
-              
-              // Initialize payment handler and get payment form component
-              await paymentService.initializeHandler(nextAction);
-              const PaymentForm = await paymentService.createPaymentForm(nextAction);
-              setPaymentFormComponent(() => PaymentForm);
-              setShowPaymentForm(true);
-            } else if (status === 'PAYMENT_SUCCEEDED') {
-              setShowPaymentForm(false);
-              setPaymentStatusModal({
-                isOpen: true,
-                isSuccess: true,
-                message: 'Payment completed successfully! Your order is being processed.',
-              });
-              setCurrentSagaId(null); // Stop polling
-            } else if (status === 'PAYMENT_FAILED') {
-              setShowPaymentForm(false);
-              setPaymentStatusModal({
-                isOpen: true,
-                isSuccess: false,
-                message: 'Payment failed. Please try again.',
-              });
-              setCurrentSagaId(null); // Stop polling
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error polling payment status:', error);
-      }
-    };
-
-    // Poll every 2 seconds
-    const interval = setInterval(pollPaymentStatus, 2000);
-    
-    // Initial poll
-    pollPaymentStatus();
-
-    return () => clearInterval(interval);
-  }, [currentSagaId]);
 
   const handleRemoveFromCart = async (productId: number) => {
     const success = await removeFromCart(productId);
@@ -153,7 +73,7 @@ const Cart: React.FC = () => {
   };
 
   const handleCheckout = async () => {
-    if (!cart?.cartItems.length || isProcessing) {
+    if (!cart?.cartItems.length || isCheckingOut) {
       return;
     }
 
@@ -163,65 +83,15 @@ const Cart: React.FC = () => {
     }
 
     try {
-      setIsProcessing(true);
-
-      const response = await orderApi.checkout({ 
-        paymentMethod: selectedPaymentMethod as PaymentMethod
-      });
-
-      if (response.success && response.data) {
-        setCurrentSagaId(response.data.sagaId.toString());
-        
-        // Clear cart via API
-        await clearCart();
-        
-        toast.success("Order placed successfully! Preparing payment...");
-      } else {
-        toast.error(response.errorMessage || "Failed to place order");
-      }
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error";
-      toast.error("Failed to place order: " + errorMessage);
+      setIsCheckingOut(true);
+      
+      // Redirect to checkout page
+      router.push("/checkout");
+    } catch (error) {
+      console.error("Checkout failed:", error);
+      toast.error("Failed to proceed to checkout. Please try again.");
     } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handlePaymentResult = (result: PaymentResult) => {
-    if (result.success) {
-      setShowPaymentForm(false);
-      setPaymentStatusModal({
-        isOpen: true,
-        isSuccess: true,
-        message: 'Payment completed successfully! Your order is being processed.',
-      });
-    } else {
-      setPaymentStatusModal({
-        isOpen: true,
-        isSuccess: false,
-        message: result.error?.message || 'Payment failed. Please try again.',
-      });
-    }
-  };
-
-  const handleCancelPayment = () => {
-    setShowPaymentForm(false);
-    setPaymentNextAction(null);
-    setCurrentSagaId(null);
-  };
-
-  const handleCloseStatusModal = () => {
-    setPaymentStatusModal({
-      isOpen: false,
-      isSuccess: false,
-      message: '',
-    });
-    
-    // Redirect to payment success/failed page or home
-    if (paymentStatusModal.isSuccess) {
-      router.push('/payment-success');
-    } else {
-      router.push('/');
+      setIsCheckingOut(false);
     }
   };
 
@@ -261,7 +131,7 @@ const Cart: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     className="text-red-500 hover:text-red-700 p-1 h-auto"
-                    disabled={isProcessing || isLoading}
+                    disabled={isCheckingOut || isLoading}
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -291,7 +161,7 @@ const Cart: React.FC = () => {
                       variant="outline"
                       size="sm"
                       className="h-8 w-8 p-0"
-                      disabled={isProcessing || isLoading}
+                      disabled={isCheckingOut || isLoading}
                     >
                       <Minus className="h-3 w-3" />
                     </Button>
@@ -307,14 +177,14 @@ const Cart: React.FC = () => {
                       }}
                       className="w-12 h-8 text-center text-sm"
                       min="1"
-                      disabled={isProcessing || isLoading}
+                      disabled={isCheckingOut || isLoading}
                     />
                     <Button
                       onClick={() => handleIncreaseQuantity(item)}
                       variant="outline"
                       size="sm"
                       className="h-8 w-8 p-0"
-                      disabled={isProcessing || isLoading}
+                      disabled={isCheckingOut || isLoading}
                     >
                       <Plus className="h-3 w-3" />
                     </Button>
@@ -339,92 +209,16 @@ const Cart: React.FC = () => {
               <span className="font-bold text-lg">{formatCurrency(total)}</span>
             </div>
 
-            {/* Payment Method Selection */}
-            <div className="mt-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Payment Method
-              </label>
-              <Select value={selectedPaymentMethod} onValueChange={(value) => setSelectedPaymentMethod(value as PaymentMethod)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select payment method" />
-                </SelectTrigger>
-                <SelectContent>
-                  {paymentMethods.map((method) => (
-                    <SelectItem key={method} value={method}>
-                      {method.charAt(0).toUpperCase() + method.slice(1).toLowerCase()}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
             <Button
               onClick={handleCheckout}
               className="w-full mt-6"
-              disabled={!cart?.cartItems.length || isProcessing || isLoading}
+              disabled={!cart?.cartItems.length || isCheckingOut || isLoading}
             >
-              {isProcessing ? "Processing..." : "Place Order"}
+              {isCheckingOut ? "Redirecting..." : "Proceed to Checkout"}
             </Button>
           </>
         )}
       </CardContent>
-
-      {/* Dynamic Payment Form Modal */}
-      {showPaymentForm && paymentNextAction && PaymentFormComponent && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="max-w-md w-full">
-            <PaymentFormComponent
-              clientSecret={paymentNextAction.client_secret || ''}
-              orderId={currentSagaId || ''}
-              onPaymentResult={handlePaymentResult}
-              onCancel={handleCancelPayment}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Payment Status Modal */}
-      {paymentStatusModal.isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <div className="text-center">
-              <div className={`mx-auto flex items-center justify-center h-12 w-12 rounded-full ${
-                paymentStatusModal.isSuccess ? 'bg-green-100' : 'bg-red-100'
-              }`}>
-                {paymentStatusModal.isSuccess ? (
-                  <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                ) : (
-                  <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                )}
-              </div>
-              <div className="mt-3">
-                <h3 className={`text-lg font-medium ${
-                  paymentStatusModal.isSuccess ? 'text-green-900' : 'text-red-900'
-                }`}>
-                  {paymentStatusModal.isSuccess ? 'Payment Successful' : 'Payment Failed'}
-                </h3>
-                <div className="mt-2">
-                  <p className="text-sm text-gray-500">
-                    {paymentStatusModal.message}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="mt-5">
-              <Button
-                onClick={handleCloseStatusModal}
-                className="w-full"
-              >
-                Continue
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </Card>
   );
 };

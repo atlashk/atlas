@@ -5,6 +5,7 @@ import type { RegisterRequest, User } from "@/interfaces/user.interface";
 import { clearAuthCookies, setCookie, getCookie, isValidToken } from "@/utils/cookies";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { useCartStore } from "./cart.store";
 
 interface UserState {
   profile: User | null;
@@ -211,14 +212,13 @@ export const useUserStore = create<UserStore>()(
         set({ accessToken, refreshToken });
       },
 
-      logout: () => {
+      logout: async () => {
         console.log('Logout initiated');
         authApi.logout();
         clearAuthTokens();
         
         // Clear cart state
         try {
-          const { useCartStore } = require('./cart.store');
           const { clearCartState } = useCartStore.getState();
           clearCartState();
         } catch (error) {

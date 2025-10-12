@@ -74,9 +74,7 @@ export function usePayment(options: UsePaymentOptions = {}): UsePaymentReturn {
   }, [updateState]);
 
   const initializePayment = useCallback(async (
-    method: PaymentMethod,
-    amount: number,
-    currency: string
+    method: PaymentMethod
   ) => {
     try {
       updateState({ isLoading: true, error: null });
