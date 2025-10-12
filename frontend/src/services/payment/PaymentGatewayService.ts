@@ -1,10 +1,10 @@
 import { loadStripe, Stripe, StripeElements, ConfirmPaymentData } from '@stripe/stripe-js';
-import StripePaymentForm from '@/components/payment/methods/StripePaymentForm';
+// import StripePaymentForm from '@/components/payment/methods/StripePaymentForm';
 import { PaymentNextAction } from '@/interfaces/payment.interface';
 
 export interface PaymentGatewayHandler {
   initialize(paymentNextAction: PaymentNextAction): Promise<void>;
-  createPaymentForm(): React.ComponentType<PaymentFormProps>;
+  createPaymentForm(): React.ComponentType<PaymentFormProps> | null;
   processPayment(paymentData: PaymentData): Promise<PaymentResult>;
 }
 
@@ -53,8 +53,9 @@ class StripePaymentHandler implements PaymentGatewayHandler {
     }
   }
 
-  createPaymentForm(): React.ComponentType<PaymentFormProps> {
-    return StripePaymentForm;
+  createPaymentForm(): React.ComponentType<PaymentFormProps> | null {
+    // return StripePaymentForm;
+    return null; // Temporarily disabled
   }
 
   async processPayment(paymentData: PaymentData): Promise<PaymentResult> {
@@ -135,7 +136,7 @@ export class PaymentGatewayService {
 
   async createPaymentForm(
     paymentNextAction: PaymentNextAction
-  ): Promise<React.ComponentType<PaymentFormProps>> {
+  ): Promise<React.ComponentType<PaymentFormProps> | null> {
     const handler = await this.initializeHandler(paymentNextAction);
     return handler.createPaymentForm();
   }

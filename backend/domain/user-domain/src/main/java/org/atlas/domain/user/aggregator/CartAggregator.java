@@ -34,7 +34,7 @@ public class CartAggregator {
    * @return false if at least one product is no longer available
    */
   private boolean loadProducts(CartEntity cart) {
-    List<Integer> productIds = cart.getProductIds();
+    List<Integer> productIds = cart.collectProductIds();
     ListProductRequest request = new ListProductRequest(productIds);
     List<ProductResponse> productResponses = productApiClient.call(request);
 

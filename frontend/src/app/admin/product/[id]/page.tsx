@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { withRequireAdmin } from "@/hoc/withAuth";
 import { Product } from "@/interfaces/product.interface";
-import { getProductStatusBadge } from "@/utils/formatter.util";
+import { getProductStatusBadge, formatCurrency } from "@/utils/formatter.util";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
@@ -158,7 +158,7 @@ function AdminProductDetailsPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Price:</span>
                     <span className="font-bold text-primary">
-                      ${(product as Product).price.toFixed(2)}
+                      {formatCurrency((product as Product).price)}
                     </span>
                   </div>
 

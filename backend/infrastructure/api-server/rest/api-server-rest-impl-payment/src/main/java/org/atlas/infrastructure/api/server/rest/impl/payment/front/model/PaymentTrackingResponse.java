@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.domain.payment.shared.PaymentStatus;
-import org.atlas.framework.paymentgateway.model.nextaction.NextAction;
+import org.atlas.framework.payment.model.nextaction.NextAction;
 
 @Schema(description = "Response object for payment tracking information")
 @Getter

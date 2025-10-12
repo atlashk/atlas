@@ -6,7 +6,7 @@ import org.atlas.domain.payment.shared.PaymentMethod;
 import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
-import org.atlas.framework.paymentgateway.PaymentGatewayService;
+import org.atlas.framework.payment.PaymentGatewayService;
 import org.atlas.framework.util.StringUtil;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;

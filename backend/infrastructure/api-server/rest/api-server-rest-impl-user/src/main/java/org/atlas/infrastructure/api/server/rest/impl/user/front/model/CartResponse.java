@@ -14,9 +14,6 @@ public class CartResponse {
   @Schema(description = "Cart ID", example = "1")
   private Integer id;
 
-  @Schema(description = "User ID who owns the cart", example = "123")
-  private Integer userId;
-
   @Schema(description = "List of items in the cart")
   private List<CartItemResponse> cartItems;
 

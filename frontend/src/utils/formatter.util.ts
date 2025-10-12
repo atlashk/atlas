@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { PaymentStatus } from "@/interfaces/order.interface";
+import { OrderPaymentStatus } from "@/interfaces/order.interface";
 import React from "react";
 
 export const formatDate = (dateString: string) => {
@@ -14,6 +14,8 @@ export const formatDate = (dateString: string) => {
 
 export const formatCurrency = (value: number): string => {
   return value.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
@@ -72,17 +74,17 @@ export const getOrderStatusBadge = (status: string): React.ReactElement => {
   }
 };
 
-export const getPaymentStatusBadge = (status: PaymentStatus): React.ReactElement => {
+export const getPaymentStatusBadge = (status: OrderPaymentStatus): React.ReactElement => {
   switch (status) {
-    case PaymentStatus.SUCCEEDED:
+    case OrderPaymentStatus.SUCCEEDED:
       return React.createElement(Badge, { variant: "default", className: "bg-green-500 text-white" }, "Succeeded");
-    case PaymentStatus.CREATED:
+    case OrderPaymentStatus.CREATED:
       return React.createElement(Badge, { variant: "outline", className: "bg-blue-500 text-white" }, "Created");
-    case PaymentStatus.CANCELED:
+    case OrderPaymentStatus.CANCELED:
       return React.createElement(Badge, { variant: "destructive" }, "Canceled");
-    case PaymentStatus.FAILED:
+    case OrderPaymentStatus.FAILED:
       return React.createElement(Badge, { variant: "destructive", className: "bg-red-600 text-white" }, "Failed");
-    case PaymentStatus.UNKNOWN:
+    case OrderPaymentStatus.UNKNOWN:
     default:
       return React.createElement(Badge, { variant: "outline" }, "Unknown");
   }

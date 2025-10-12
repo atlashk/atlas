@@ -13,6 +13,6 @@ public class DomainEntity implements Serializable {
   private Integer createdBy;
   private Date updatedAt;
   private Integer updatedBy;
-  private Boolean deleted = false;
+  private boolean deleted;
   private Integer version;
 }

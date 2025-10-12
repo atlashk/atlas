@@ -7,7 +7,7 @@ export { useLoadingState } from './useLoadingState';
 
 // Existing hooks
 export { useAuth } from './useAuth';
-export { useMobile } from './use-mobile';
+export { useIsMobile } from './use-mobile';
 
 // Re-export types
 export type {

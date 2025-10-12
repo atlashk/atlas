@@ -12,5 +12,5 @@ public interface CacheService {
 
   Optional<Object> get(String cacheName, String key);
 
-  boolean invalidate(String cacheName, String key);
+  boolean evict(String cacheName, String key);
 }

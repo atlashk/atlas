@@ -4,7 +4,7 @@ import lombok.experimental.UtilityClass;
 import org.atlas.domain.payment.entity.PaymentEntity;
 import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
-import org.atlas.framework.paymentgateway.model.nextaction.NextAction;
+import org.atlas.framework.payment.model.nextaction.NextAction;
 import org.atlas.infrastructure.persistence.jpa.impl.payment.entity.JpaPaymentEntity;
 
 @UtilityClass

@@ -20,6 +20,9 @@ public class InputValidationUseCaseInterceptor implements UseCaseInterceptor {
 
   @Override
   public void preHandle(Class<?> useCaseClass, Object input) {
+    if (input == null) {
+      return;
+    }
     Set<ConstraintViolation<Object>> violations = validator.validate(input);
     if (!violations.isEmpty()) {
       List<String> errorMessages = violations.stream()

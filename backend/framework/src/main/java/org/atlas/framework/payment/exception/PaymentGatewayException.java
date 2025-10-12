@@ -1,4 +1,4 @@
-package org.atlas.framework.paymentgateway.exception;
+package org.atlas.framework.payment.exception;
 
 public class PaymentGatewayException extends RuntimeException {
 

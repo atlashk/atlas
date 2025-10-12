@@ -1,15 +1,15 @@
 import { PaymentNextAction } from '@/interfaces/payment.interface';
-import QRCodePayment from '@/components/payment/actions/QRCodePayment';
-import RedirectPayment from '@/components/payment/actions/RedirectPayment';
-import DeepLinkPayment from '@/components/payment/actions/DeepLinkPayment';
-import StripePaymentForm from '@/components/payment/methods/StripePaymentForm';
+// import QRCodePayment from '@/components/payment/actions/QRCodePayment';
+// import RedirectPayment from '@/components/payment/actions/RedirectPayment';
+// import DeepLinkPayment from '@/components/payment/actions/DeepLinkPayment';
+// import StripePaymentForm from '@/components/payment/methods/StripePaymentForm';
 
 export type NextActionType = 'use_payment_element' | 'qr_code' | 'redirect_url' | 'deeplink' | 'none';
 
 export interface NextActionComponentProps {
   onPaymentComplete?: () => void;
   onPaymentError?: (error: string) => void;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export class PaymentNextActionService {
@@ -24,23 +24,27 @@ export class PaymentNextActionService {
   /**
    * Get the appropriate component for handling different next action types
    */
-  getNextActionComponent(paymentNextAction: PaymentNextAction): React.ComponentType<any> | null {
+  getNextActionComponent(paymentNextAction: PaymentNextAction): React.ComponentType<Record<string, unknown>> | null {
     switch (paymentNextAction.type) {
       case 'use_payment_element':
         // Return the payment form component for the specific provider
         if (paymentNextAction.provider === 'stripe') {
-          return StripePaymentForm;
+          // return StripePaymentForm;
+          return null; // Temporarily disabled
         }
         return null;
 
       case 'qr_code':
-        return QRCodePayment;
+        // return QRCodePayment;
+        return null; // Temporarily disabled
 
       case 'redirect_url':
-        return RedirectPayment;
+        // return RedirectPayment;
+        return null; // Temporarily disabled
 
       case 'deeplink':
-        return DeepLinkPayment;
+        // return DeepLinkPayment;
+        return null; // Temporarily disabled
 
       default:
         console.warn(`Unsupported next action type: ${paymentNextAction.type}`);
@@ -54,7 +58,7 @@ export class PaymentNextActionService {
   getNextActionProps(
     paymentNextAction: PaymentNextAction, 
     additionalProps: NextActionComponentProps = {}
-  ): any {
+  ): Record<string, unknown> {
     const baseProps = {
       onPaymentComplete: additionalProps.onPaymentComplete,
       onPaymentError: additionalProps.onPaymentError,

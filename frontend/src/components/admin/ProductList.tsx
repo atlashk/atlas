@@ -711,7 +711,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                             className="rounded object-cover"
                           />
                         </TableCell>
-                        <TableCell>${formatCurrency(product.price)}</TableCell>
+                        <TableCell>{formatCurrency(product.price)}</TableCell>
                         <TableCell>{product.quantity}</TableCell>
                         <TableCell>
                           {getProductStatusBadge(product.status)}

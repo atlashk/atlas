@@ -5,6 +5,7 @@ import org.atlas.domain.product.entity.ProductEntity;
 import org.atlas.domain.product.infrastructure.messaging.ProductEventMessagePublisher;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.service.ProductImageService;
+import org.atlas.framework.cache.CacheService;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.event.contract.product.ProductUpdatedEvent;
 import org.atlas.framework.domain.event.contract.product.model.Product;
@@ -19,6 +20,7 @@ public class AdminUpdateProductUseCaseHandler {
 
   private final ProductRepository productRepository;
   private final ProductImageService productImageService;
+  private final CacheService cacheService;
   private final ProductEventMessagePublisher productEventMessagePublisher;
 
   public Void handle(ProductEntity product) throws Exception {
@@ -34,6 +36,9 @@ public class AdminUpdateProductUseCaseHandler {
     if (StringUtil.isBlank(product.getImage())) {
       productImageService.uploadImage(product.getId(), product.getImage());
     }
+
+    // Evict cache
+    cacheService.evict("product", String.valueOf(product.getId()));
 
     // Publish event
     publishEvent(product);

@@ -15,16 +15,16 @@ export interface PaymentStatusState {
   error: string | null;
   isPolling: boolean;
   lastUpdated: Date | null;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface UsePaymentStatusOptions {
   paymentId?: string;
   pollInterval?: number;
   maxPollAttempts?: number;
-  onStatusChange?: (status: PaymentStatus, metadata?: Record<string, any>) => void;
-  onSuccess?: (metadata?: Record<string, any>) => void;
-  onFailure?: (error: string, metadata?: Record<string, any>) => void;
+  onStatusChange?: (status: PaymentStatus, metadata?: Record<string, unknown>) => void;
+  onSuccess?: (metadata?: Record<string, unknown>) => void;
+  onFailure?: (error: string, metadata?: Record<string, unknown>) => void;
   autoStartPolling?: boolean;
 }
 
@@ -33,7 +33,7 @@ export interface UsePaymentStatusReturn {
   actions: {
     startPolling: (paymentId: string) => void;
     stopPolling: () => void;
-    updateStatus: (status: PaymentStatus, metadata?: Record<string, any>) => void;
+    updateStatus: (status: PaymentStatus, metadata?: Record<string, unknown>) => void;
     checkStatus: (paymentId: string) => Promise<void>;
     reset: () => void;
   };
@@ -203,7 +203,7 @@ export function usePaymentStatus(options: UsePaymentStatusOptions = {}): UsePaym
     pollAttemptsRef.current = 0;
   }, [updateState]);
 
-  const updateStatus = useCallback((status: PaymentStatus, metadata?: Record<string, any>) => {
+  const updateStatus = useCallback((status: PaymentStatus, metadata?: Record<string, unknown>) => {
     updateState({ status, metadata });
     onStatusChange?.(status, metadata);
     

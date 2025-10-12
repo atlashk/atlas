@@ -33,7 +33,7 @@ public class GrpcNetdevhProductApiClient implements ProductApiClient {
 
   private ListProductRequestProto map(ListProductRequest request) {
     return ListProductRequestProto.newBuilder()
-        .addAllId(request.getProductIds())
+        .addAllId(request.getIds())
         .build();
   }
 

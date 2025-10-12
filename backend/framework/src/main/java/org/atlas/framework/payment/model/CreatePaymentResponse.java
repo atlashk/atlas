@@ -1,8 +1,8 @@
-package org.atlas.framework.paymentgateway.model;
+package org.atlas.framework.payment.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.atlas.framework.paymentgateway.model.nextaction.NextAction;
+import org.atlas.framework.payment.model.nextaction.NextAction;
 
 @Getter
 @Setter

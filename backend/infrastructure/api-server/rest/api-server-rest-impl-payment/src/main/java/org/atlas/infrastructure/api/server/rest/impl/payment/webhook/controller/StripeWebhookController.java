@@ -6,7 +6,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.payment.shared.PaymentGateway;
 import org.atlas.domain.payment.usecase.webhook.handler.WebhookHandler;
-import org.atlas.framework.paymentgateway.model.WebhookResponse;
+import org.atlas.framework.payment.model.WebhookResponse;
 import org.atlas.infrastructure.api.server.rest.impl.payment.webhook.util.WebhookResponseUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;

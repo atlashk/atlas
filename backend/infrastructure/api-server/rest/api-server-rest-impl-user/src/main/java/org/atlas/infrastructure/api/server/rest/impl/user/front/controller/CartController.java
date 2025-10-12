@@ -2,7 +2,6 @@ package org.atlas.infrastructure.api.server.rest.impl.user.front.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.user.entity.CartEntity;
@@ -32,10 +31,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/front/carts")
+@RequestMapping("/api/carts")
 @Validated
 @RequiredArgsConstructor
-@Tag(name = "Frontend Cart", description = "Cart operations for frontend users")
 public class CartController {
 
   private final GetCartUseCaseHandler getCartUseCaseHandler;

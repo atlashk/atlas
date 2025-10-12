@@ -21,7 +21,7 @@ public class DefaultKvCacheService implements CacheService {
   }
 
   @Override
-  public boolean invalidate(String cacheName, String key) {
+  public boolean evict(String cacheName, String key) {
     return kvService.delete(cacheName, key);
   }
 }

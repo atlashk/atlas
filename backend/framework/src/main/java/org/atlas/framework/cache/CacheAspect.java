@@ -1,12 +1,15 @@
 package org.atlas.framework.cache;
 
 import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.spel.SpelParser;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
@@ -19,9 +22,10 @@ import org.springframework.stereotype.Component;
  * the result
  */
 @Component
-@ConditionalOnBean(CacheService.class)
 @Aspect
+@ConditionalOnBean(CacheService.class)
 @RequiredArgsConstructor
+@Slf4j
 public class CacheAspect {
 
   private final CacheService cacheService;
@@ -40,7 +44,17 @@ public class CacheAspect {
     // Cache-aside pattern
     Optional<Object> cachedValue = cacheService.get(cache.cacheName(), cacheKey);
     if (cachedValue.isPresent()) {
-      return cachedValue.get();
+      Object value = cachedValue.get();
+
+      // Get the return type of the method
+      Class<?> returnType = signature.getReturnType();
+
+      // If cached value is a LinkedHashMap (from JSON deserialization), convert it to the expected type
+      if (value instanceof LinkedHashMap<?, ?> && !returnType.equals(LinkedHashMap.class)) {
+        return JsonUtil.getInstance().toObject((LinkedHashMap<?, ?>) value, returnType);
+      } else {
+        return value;
+      }
     }
 
     Object result = joinPoint.proceed();

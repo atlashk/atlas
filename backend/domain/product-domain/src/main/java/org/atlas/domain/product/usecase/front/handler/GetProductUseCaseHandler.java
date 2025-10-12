@@ -16,7 +16,7 @@ public class GetProductUseCaseHandler {
   private final ProductRepository productRepository;
   private final ProductImageService productImageService;
 
-  @Cache(cacheName = "product", key = "#input.userId", ttl = 3600)
+  @Cache(cacheName = "product", key = "#productId", ttl = 3600)
   public ProductEntity handle(Integer productId) throws Exception {
     // Get from DB
     ProductEntity product = productRepository.findById(productId)

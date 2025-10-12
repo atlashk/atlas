@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
-import { paymentGatewayService, paymentNextActionService, paymentComponentService } from '@/services/payment';
-import type { PaymentMethod, PaymentResult, PaymentNextAction } from '@/services/payment';
+import { paymentGatewayService, paymentNextActionService } from '@/services/payment';
+import type { PaymentResult, PaymentData, PaymentFormProps } from '@/services/payment';
+import type { PaymentMethod, PaymentNextAction } from '@/interfaces/payment.interface';
 
 export interface PaymentState {
   isLoading: boolean;
@@ -21,14 +22,14 @@ export interface UsePaymentReturn {
   state: PaymentState;
   actions: {
     initializePayment: (method: PaymentMethod, amount: number, currency: string) => Promise<void>;
-    processPayment: (paymentData: any) => Promise<void>;
+    processPayment: (paymentData: PaymentData) => Promise<void>;
     handleNextAction: (action: PaymentNextAction) => Promise<void>;
     resetPayment: () => void;
     setPaymentMethod: (method: PaymentMethod) => void;
   };
   components: {
-    getPaymentForm: () => React.ComponentType<any> | null;
-    getNextActionComponent: () => React.ComponentType<any> | null;
+    getPaymentForm: () => Promise<React.ComponentType<PaymentFormProps> | null>;
+    getNextActionComponent: () => React.ComponentType<Record<string, unknown>> | null;
     canRenderPaymentForm: () => boolean;
     canRenderNextAction: () => boolean;
   };
@@ -82,7 +83,7 @@ export function usePayment(options: UsePaymentOptions = {}): UsePaymentReturn {
       
       abortControllerRef.current = new AbortController();
       
-      await paymentGatewayService.initializeHandler(method);
+      // Just set the payment method - handler initialization happens when processing payment
       updateState({ paymentMethod: method, isLoading: false });
       
     } catch (error) {
@@ -92,9 +93,9 @@ export function usePayment(options: UsePaymentOptions = {}): UsePaymentReturn {
     }
   }, [updateState, onError]);
 
-  const processPayment = useCallback(async (paymentData: any) => {
-    if (!state.paymentMethod) {
-      const error = 'No payment method selected';
+  const processPayment = useCallback(async (paymentData: PaymentData) => {
+    if (!state.nextAction) {
+      const error = 'No payment next action available';
       updateState({ error });
       onError?.(error);
       return;
@@ -103,21 +104,16 @@ export function usePayment(options: UsePaymentOptions = {}): UsePaymentReturn {
     try {
       updateState({ isProcessing: true, error: null });
       
-      const result = await paymentGatewayService.processPayment(state.paymentMethod, paymentData);
+      const result = await paymentGatewayService.processPayment(paymentData, state.nextAction);
       
       if (result.success) {
         updateState({ 
           paymentResult: result, 
-          isProcessing: false,
-          nextAction: result.nextAction || null
+          isProcessing: false
         });
         onSuccess?.(result);
-        
-        if (result.nextAction) {
-          onNextAction?.(result.nextAction);
-        }
       } else {
-        const errorMessage = result.error || 'Payment processing failed';
+        const errorMessage = result.error?.message || 'Payment processing failed';
         updateState({ error: errorMessage, isProcessing: false });
         onError?.(errorMessage);
       }
@@ -127,13 +123,13 @@ export function usePayment(options: UsePaymentOptions = {}): UsePaymentReturn {
       updateState({ error: errorMessage, isProcessing: false });
       onError?.(errorMessage);
     }
-  }, [state.paymentMethod, updateState, onSuccess, onError, onNextAction]);
+  }, [state.nextAction, updateState, onSuccess, onError]);
 
   const handleNextAction = useCallback(async (action: PaymentNextAction) => {
     try {
       updateState({ isLoading: true, error: null });
       
-      const isSupported = paymentNextActionService.isActionSupported(action.type);
+      const isSupported = paymentNextActionService.isNextActionSupported(action.type);
       if (!isSupported) {
         throw new Error(`Unsupported next action type: ${action.type}`);
       }
@@ -152,27 +148,31 @@ export function usePayment(options: UsePaymentOptions = {}): UsePaymentReturn {
     }
   }, [updateState, onError, onNextAction]);
 
-  const getPaymentForm = useCallback(() => {
-    if (!state.paymentMethod) return null;
+  const getPaymentForm = useCallback(async () => {
+    if (!state.nextAction) return null;
     
-    const config = paymentComponentService.getComponentConfig(state.paymentMethod);
-    return config?.component || null;
-  }, [state.paymentMethod]);
+    try {
+      return await paymentGatewayService.createPaymentForm(state.nextAction);
+    } catch (error) {
+      console.error('Failed to create payment form:', error);
+      return null;
+    }
+  }, [state.nextAction]);
 
   const getNextActionComponent = useCallback(() => {
     if (!state.nextAction) return null;
     
-    return paymentNextActionService.getComponent(state.nextAction.type);
+    return paymentNextActionService.getNextActionComponent(state.nextAction);
   }, [state.nextAction]);
 
   const canRenderPaymentForm = useCallback(() => {
-    if (!state.paymentMethod) return false;
-    return paymentComponentService.canRenderComponent(state.paymentMethod);
-  }, [state.paymentMethod]);
+    if (!state.nextAction) return false;
+    return paymentNextActionService.isNextActionSupported(state.nextAction.type);
+  }, [state.nextAction]);
 
   const canRenderNextAction = useCallback(() => {
     if (!state.nextAction) return false;
-    return paymentNextActionService.isActionSupported(state.nextAction.type);
+    return paymentNextActionService.isNextActionSupported(state.nextAction.type);
   }, [state.nextAction]);
 
   return {

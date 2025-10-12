@@ -325,7 +325,7 @@ const OrderList: React.FC = () => {
                                         ? `${order.user.firstName} ${order.user.lastName}`
                                         : "N/A"}
                                   </TableCell>
-                                  <TableCell>${formatCurrency(order.amount)}</TableCell>
+                                  <TableCell>{formatCurrency(order.amount)}</TableCell>
                                   <TableCell>
                                     {getOrderStatusBadge(order.status)}
                                   </TableCell>
@@ -425,7 +425,6 @@ const OrderList: React.FC = () => {
                                                             {item.product.name}
                                                           </TableCell>
                                                           <TableCell>
-                                                            $
                                                             {formatCurrency(
                                                                 item.product.price
                                                             )}
@@ -434,7 +433,6 @@ const OrderList: React.FC = () => {
                                                             {item.quantity}
                                                           </TableCell>
                                                           <TableCell>
-                                                            $
                                                             {formatCurrency(
                                                                 item.product.price *
                                                                 item.quantity

@@ -3,8 +3,8 @@ import { PaymentNextAction } from '@/interfaces/payment.interface';
 import { paymentNextActionService, NextActionComponentProps } from './PaymentNextActionService';
 
 export interface PaymentComponentConfig {
-  component: React.ComponentType<any>;
-  props: any;
+  component: React.ComponentType<Record<string, unknown>>;
+  props: Record<string, unknown>;
   isSupported: boolean;
   errors?: string[];
 }
@@ -22,7 +22,7 @@ export class PaymentComponentService {
     
     if (!validation.isValid) {
       return {
-        component: this.getErrorComponent(),
+        component: this.getErrorComponent() as React.ComponentType<Record<string, unknown>>,
         props: { errors: validation.errors },
         isSupported: false,
         errors: validation.errors
@@ -34,7 +34,7 @@ export class PaymentComponentService {
     
     if (!component) {
       return {
-        component: this.getUnavailableComponent(),
+        component: this.getUnavailableComponent() as React.ComponentType<Record<string, unknown>>,
         props: { type: paymentNextAction.type },
         isSupported: false,
         errors: [`Component not available for type: ${paymentNextAction.type}`]
@@ -77,7 +77,7 @@ export class PaymentComponentService {
    * Get error component for unsupported payment methods
    */
   private getErrorComponent(): React.ComponentType<{ errors: string[] }> {
-    return ({ errors }) => React.createElement(
+    const ErrorComponent = ({ errors }: { errors: string[] }) => React.createElement(
       'div',
       {
         className: 'flex flex-col items-center space-y-4 p-6 bg-red-50 rounded-lg border border-red-200'
@@ -99,13 +99,15 @@ export class PaymentComponentService {
         )
       )
     );
+    ErrorComponent.displayName = 'PaymentErrorComponent';
+    return ErrorComponent;
   }
 
   /**
    * Get success component for completed payments
    */
   private getSuccessComponent(): React.ComponentType<{ message: string }> {
-    return ({ message }) => React.createElement(
+    const SuccessComponent = ({ message }: { message: string }) => React.createElement(
       'div',
       {
         className: 'flex flex-col items-center space-y-4 p-6 bg-green-50 rounded-lg border border-green-200'
@@ -125,13 +127,15 @@ export class PaymentComponentService {
         )
       )
     );
+    SuccessComponent.displayName = 'PaymentSuccessComponent';
+    return SuccessComponent;
   }
 
   /**
    * Get unavailable component for unsupported types
    */
   private getUnavailableComponent(): React.ComponentType<{ type: string }> {
-    return ({ type }) => React.createElement(
+    const UnavailableComponent = ({ type }: { type: string }) => React.createElement(
       'div',
       {
         className: 'flex flex-col items-center space-y-4 p-6 bg-yellow-50 rounded-lg border border-yellow-200'
@@ -151,6 +155,8 @@ export class PaymentComponentService {
         )
       )
     );
+    UnavailableComponent.displayName = 'PaymentUnavailableComponent';
+    return UnavailableComponent;
   }
 }
 

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { loadStripe, Stripe, StripeElements, ConfirmPaymentData } from '@stripe/stripe-js';
+import { loadStripe, Stripe, StripeElements, ConfirmPaymentData, StripeElementLocale } from '@stripe/stripe-js';
 
 export interface StripeElementsState {
   stripe: Stripe | null;
@@ -12,8 +12,8 @@ export interface StripeElementsState {
 export interface UseStripeElementsOptions {
   publishableKey: string;
   options?: {
-    locale?: string;
-    appearance?: any;
+    locale?: StripeElementLocale;
+    appearance?: Record<string, unknown>;
     clientSecret?: string;
   };
   onReady?: (stripe: Stripe, elements: StripeElements) => void;
@@ -23,9 +23,9 @@ export interface UseStripeElementsOptions {
 export interface UseStripeElementsReturn {
   state: StripeElementsState;
   actions: {
-    confirmPayment: (data: ConfirmPaymentData) => Promise<any>;
-    createPaymentMethod: (data: any) => Promise<any>;
-    retrievePaymentIntent: (clientSecret: string) => Promise<any>;
+    confirmPayment: (data: ConfirmPaymentData) => Promise<unknown>;
+    createPaymentMethod: (data: Record<string, unknown>) => Promise<unknown>;
+    retrievePaymentIntent: (clientSecret: string) => Promise<unknown>;
     reset: () => void;
   };
   helpers: {
@@ -72,7 +72,7 @@ export function useStripeElements(options: UseStripeElementsOptions): UseStripeE
 
       // Create elements instance
       const elements = stripe.elements({
-        locale: stripeOptions?.locale || 'en',
+        locale: stripeOptions?.locale || 'en' as StripeElementLocale,
         appearance: stripeOptions?.appearance,
         clientSecret: stripeOptions?.clientSecret,
       });
@@ -108,7 +108,8 @@ export function useStripeElements(options: UseStripeElementsOptions): UseStripeE
     try {
       const result = await state.stripe.confirmPayment({
         elements: state.elements,
-        ...data,
+        confirmParams: data,
+        redirect: 'if_required',
       });
 
       if (result.error) {
@@ -123,7 +124,7 @@ export function useStripeElements(options: UseStripeElementsOptions): UseStripeE
     }
   }, [state.stripe, state.elements, updateState]);
 
-  const createPaymentMethod = useCallback(async (data: any) => {
+  const createPaymentMethod = useCallback(async (data: Record<string, unknown>) => {
     if (!state.stripe || !state.elements) {
       throw new Error('Stripe not initialized');
     }

@@ -22,7 +22,7 @@ class PaymentService {
 
   async createPaymentForm(
     paymentNextAction: PaymentNextAction
-  ): Promise<React.ComponentType<PaymentFormProps>> {
+  ): Promise<React.ComponentType<PaymentFormProps> | null> {
     return paymentGatewayService.createPaymentForm(paymentNextAction);
   }
 
@@ -42,11 +42,11 @@ class PaymentService {
   }
 
   // Delegate to PaymentNextActionService
-  getNextActionComponent(paymentNextAction: PaymentNextAction): React.ComponentType<any> | null {
+  getNextActionComponent(paymentNextAction: PaymentNextAction): React.ComponentType<Record<string, unknown>> | null {
     return paymentNextActionService.getNextActionComponent(paymentNextAction);
   }
 
-  getNextActionProps(paymentNextAction: PaymentNextAction, additionalProps: NextActionComponentProps = {}): any {
+  getNextActionProps(paymentNextAction: PaymentNextAction, additionalProps: NextActionComponentProps = {}): Record<string, unknown> {
     return paymentNextActionService.getNextActionProps(paymentNextAction, additionalProps);
   }
 
@@ -69,3 +69,6 @@ class PaymentService {
 }
 
 export const paymentService = new PaymentService();
+
+// Re-export types for backward compatibility
+export type { PaymentFormProps, PaymentResult } from './payment';

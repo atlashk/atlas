@@ -1,4 +1,4 @@
-package org.atlas.framework.paymentgateway.model.nextaction;
+package org.atlas.framework.payment.model.nextaction;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

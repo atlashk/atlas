@@ -14,11 +14,11 @@ import lombok.Setter;
 import org.atlas.domain.product.shared.ProductStatus;
 import org.atlas.framework.domain.entity.DomainEntity;
 
-@Getter
-@Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
 public class ProductEntity extends DomainEntity {
 

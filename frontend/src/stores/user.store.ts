@@ -215,6 +215,16 @@ export const useUserStore = create<UserStore>()(
         console.log('Logout initiated');
         authApi.logout();
         clearAuthTokens();
+        
+        // Clear cart state
+        try {
+          const { useCartStore } = require('./cart.store');
+          const { clearCartState } = useCartStore.getState();
+          clearCartState();
+        } catch (error) {
+          console.warn('Failed to clear cart state during logout:', error);
+        }
+        
         set({
           profile: null,
           accessToken: null,

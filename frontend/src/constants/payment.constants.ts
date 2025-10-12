@@ -1,12 +1,20 @@
-// Payment method constants
-export const PAYMENT_METHODS = [
+// Payment provider constants (for frontend payment processing)
+export const PAYMENT_PROVIDERS = [
   'stripe',
   'qr_code',
   'redirect',
   'deep_link'
 ] as const;
 
-export type PaymentMethod = typeof PAYMENT_METHODS[number];
+export type PaymentProvider = typeof PAYMENT_PROVIDERS[number];
+
+// Backend payment method constants (matching backend enum)
+export const BACKEND_PAYMENT_METHODS = [
+  'CARD',
+  'PAYPAL'
+] as const;
+
+export type PaymentMethod = typeof BACKEND_PAYMENT_METHODS[number];
 
 // Payment status constants
 export const PAYMENT_STATUSES = [
@@ -105,11 +113,16 @@ export const PAYMENT_CONFIG = {
 } as const;
 
 // Payment method display names
-export const PAYMENT_METHOD_NAMES: Record<PaymentMethod, string> = {
+export const PAYMENT_PROVIDER_NAMES: Record<PaymentProvider, string> = {
   stripe: 'Credit/Debit Card',
   qr_code: 'QR Code Payment',
   redirect: 'Bank Transfer',
   deep_link: 'Mobile App Payment',
+} as const;
+
+export const PAYMENT_METHOD_NAMES: Record<PaymentMethod, string> = {
+  CARD: 'Credit/Debit Card',
+  PAYPAL: 'PayPal',
 } as const;
 
 // Payment status display names

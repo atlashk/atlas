@@ -8,7 +8,7 @@ import org.atlas.domain.payment.shared.PaymentGateway;
 import org.atlas.domain.payment.shared.PaymentMethod;
 import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.framework.domain.entity.DomainEntity;
-import org.atlas.framework.paymentgateway.model.nextaction.NextAction;
+import org.atlas.framework.payment.model.nextaction.NextAction;
 
 @Getter
 @Setter

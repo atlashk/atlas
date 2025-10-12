@@ -14,7 +14,7 @@ public interface JpaCartRepository extends JpaBaseRepository<JpaCartEntity, Inte
       select c
       from JpaCartEntity c
       left join fetch c.cartItems
-      where c.userId = :id
+      where c.userId = :userId
       """)
   Optional<JpaCartEntity> findByUserIdAndFetch(@Param("userId") Integer userId);
 }

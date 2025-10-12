@@ -1,9 +1,9 @@
 import type {
+  CheckoutRequest,
+  CheckoutResponse,
   GetOrderStatusResponse,
   ListOrderFilters,
-  Order,
-  PlaceOrderRequest,
-  PlaceOrderResponse,
+  Order
 } from "@/interfaces/order.interface";
 import { ApiResponse } from "./apiClient";
 import { BaseApi } from "./baseApi";
@@ -33,10 +33,10 @@ export class OrderApi extends BaseApi {
     return this.get<Order[]>(`/orders?${queryParams.toString()}`);
   }
 
-  async placeOrder(
-    data: PlaceOrderRequest
-  ): Promise<ApiResponse<PlaceOrderResponse>> {
-    return this.post<PlaceOrderResponse>("/orders/place", data);
+  async checkout(
+    data: CheckoutRequest
+  ): Promise<ApiResponse<CheckoutResponse>> {
+    return this.post<CheckoutResponse>("/orders/checkout", data);
   }
 
   async getOrderStatus(

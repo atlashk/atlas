@@ -1,11 +1,11 @@
-package org.atlas.framework.paymentgateway;
+package org.atlas.framework.payment;
 
 import java.util.Map;
 import org.atlas.domain.payment.shared.PaymentGateway;
-import org.atlas.framework.paymentgateway.exception.PaymentGatewayException;
-import org.atlas.framework.paymentgateway.model.CreatePaymentRequest;
-import org.atlas.framework.paymentgateway.model.CreatePaymentResponse;
-import org.atlas.framework.paymentgateway.model.WebhookResponse;
+import org.atlas.framework.payment.exception.PaymentGatewayException;
+import org.atlas.framework.payment.model.CreatePaymentRequest;
+import org.atlas.framework.payment.model.CreatePaymentResponse;
+import org.atlas.framework.payment.model.WebhookResponse;
 
 public interface PaymentGatewayService {
 

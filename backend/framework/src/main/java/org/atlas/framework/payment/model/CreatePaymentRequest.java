@@ -1,4 +1,4 @@
-package org.atlas.framework.paymentgateway.model;
+package org.atlas.framework.payment.model;
 
 import java.math.BigDecimal;
 import lombok.Builder;

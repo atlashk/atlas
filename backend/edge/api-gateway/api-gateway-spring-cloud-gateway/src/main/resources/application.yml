@@ -130,6 +130,26 @@ spring:
                 - Path=/api-docs/order-svc
               filters:
                 - RewritePath=/api-docs/order-svc, /api-docs
+            # Payment service
+            - id: payment-service
+              uri: ${PAYMENT_SERVICE_URI:lb://payment-service}
+              predicates:
+                - Path=/api/payment-svc/**
+              filters:
+                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+                - RewritePath=/api/payment-svc/(?<segment>.*), /api/${segment}
+            - id: payment-service-webhook
+              uri: ${PAYMENT_SERVICE_URI:lb://payment-service}
+              predicates:
+                - Path=/api/payment-svc/webhook/**
+              filters:
+                - RewritePath=/api/payment-svc/webhook/(?<segment>.*), /api/webhook/${segment}
+            - id: payment-service-api-docs
+              uri: ${PAYMENT_SERVICE_URI:lb://payment-service}
+              predicates:
+                - Path=/api-docs/payment-svc
+              filters:
+                - RewritePath=/api-docs/payment-svc, /api-docs
           discovery:
             locator:
               enabled: true

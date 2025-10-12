@@ -12,7 +12,7 @@ export interface PaymentMethodResponse {
 
 class PaymentApi extends BaseApi {
   constructor() {
-    super('/api/payment-service');
+    super('/api/payment-svc');
   }
 
   async getPaymentMethods(): Promise<ApiResponse<PaymentMethodResponse[]>> {

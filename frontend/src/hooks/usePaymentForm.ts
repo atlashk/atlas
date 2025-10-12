@@ -1,9 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
-import { paymentGatewayService } from '@/services/payment';
-import type { PaymentMethod } from '@/services/payment';
+import type { PaymentMethod } from '@/interfaces/payment.interface';
 
 export interface PaymentFormData {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface PaymentFormState {
@@ -23,7 +22,7 @@ export interface UsePaymentFormOptions {
 export interface UsePaymentFormReturn {
   state: PaymentFormState;
   actions: {
-    updateField: (field: string, value: any) => void;
+    updateField: (field: string, value: unknown) => void;
     updateData: (data: Partial<PaymentFormData>) => void;
     validateForm: () => boolean;
     submitForm: () => Promise<void>;
@@ -52,31 +51,31 @@ export function usePaymentForm(options: UsePaymentFormOptions): UsePaymentFormRe
     setState(prev => ({ ...prev, ...updates }));
   }, []);
 
-  const validateField = useCallback((field: string, value: any): string | null => {
+  const validateField = useCallback((field: string, value: unknown): string | null => {
     // Basic validation rules - can be extended based on payment method
     switch (field) {
       case 'cardNumber':
-        if (!value || value.length < 13) {
+        if (!value || typeof value !== 'string' || value.length < 13) {
           return 'Card number must be at least 13 digits';
         }
         break;
       case 'expiryDate':
-        if (!value || !/^\d{2}\/\d{2}$/.test(value)) {
+        if (!value || typeof value !== 'string' || !/^\d{2}\/\d{2}$/.test(value)) {
           return 'Expiry date must be in MM/YY format';
         }
         break;
       case 'cvv':
-        if (!value || value.length < 3) {
+        if (!value || typeof value !== 'string' || value.length < 3) {
           return 'CVV must be at least 3 digits';
         }
         break;
       case 'email':
-        if (!value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        if (!value || typeof value !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
           return 'Please enter a valid email address';
         }
         break;
       case 'amount':
-        if (!value || value <= 0) {
+        if (!value || typeof value !== 'number' || value <= 0) {
           return 'Amount must be greater than 0';
         }
         break;
@@ -131,9 +130,9 @@ export function usePaymentForm(options: UsePaymentFormOptions): UsePaymentFormRe
     }
   }, []);
 
-  const updateField = useCallback((field: string, value: any) => {
+  const updateField = useCallback((field: string, value: unknown) => {
     const newData = { ...state.data, [field]: value };
-    let newErrors = { ...state.errors };
+    const newErrors = { ...state.errors };
 
     // Validate field if validateOnChange is enabled
     if (validateOnChange) {

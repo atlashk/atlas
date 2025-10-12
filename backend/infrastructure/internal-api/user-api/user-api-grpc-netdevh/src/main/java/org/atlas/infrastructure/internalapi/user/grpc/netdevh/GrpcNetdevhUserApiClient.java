@@ -34,7 +34,7 @@ public class GrpcNetdevhUserApiClient implements UserApiClient {
 
   private ListUserRequestProto map(ListUserRequest request) {
     return ListUserRequestProto.newBuilder()
-        .addAllId(request.getUserIds())
+        .addAllId(request.getIds())
         .build();
   }
 

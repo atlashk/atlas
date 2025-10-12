@@ -8,12 +8,14 @@ import {
 } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Product } from "@/interfaces";
-import { useCartStore } from "@/stores";
+import { useCartStore, useUserStore } from "@/stores";
 import { getProductImageUrl } from "@/utils/productImage.util";
+import { formatCurrency } from "@/utils/formatter.util";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface ProductDetailsModalProps {
   isOpen: boolean;
@@ -29,18 +31,28 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
   onClose,
 }) => {
   const { addToCart } = useCartStore();
+  const { isAuthenticated } = useUserStore();
+  const router = useRouter();
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      toast.info("Please login to add items to cart");
+      router.push("/login");
+      onClose();
+      return;
+    }
+
     if (product) {
       try {
-        addToCart({
-          productId: product.id,
-          name: product.name,
-          price: product.price,
-          imageUrl: getProductImageUrl(product.image),
-        });
-        toast.success(`${product.name} added to cart`);
-        onClose();
+        const success = await addToCart(product.id, 1);
+        
+        if (success) {
+          toast.success(`${product.name} added to cart`);
+          onClose();
+        } else {
+          toast.error("Failed to add product to cart");
+        }
       } catch (error) {
         toast.error("Failed to add product to cart");
         console.error(error);
@@ -50,7 +62,10 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent 
+        className="max-h-[90vh] overflow-y-auto" 
+        style={{ maxWidth: '45vw', width: '45vw' }}
+      >
         <DialogHeader>
           <DialogTitle>Product Details</DialogTitle>
         </DialogHeader>
@@ -60,8 +75,8 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
               <Loader2 className="h-8 w-8 animate-spin" />
             </div>
           ) : product ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+              <div className="md:col-span-2">
                 <Image
                   src={getProductImageUrl(product.image)}
                   className="w-full h-96 object-cover object-center rounded-lg"
@@ -70,10 +85,10 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                   height={384}
                 />
               </div>
-              <div className="space-y-4">
+              <div className="space-y-4 md:col-span-3">
                 <h3 className="text-2xl font-bold">{product.name}</h3>
-                <p className="text-3xl font-semibold text-primary">
-                  ${product.price.toFixed(2)}
+                <p className="text-2xl font-semibold text-primary">
+                  {formatCurrency(product.price)}
                 </p>
 
                 <div>

@@ -4,12 +4,17 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.framework.domain.entity.DomainEntity;
 import org.atlas.framework.util.CollectionUtil;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
@@ -20,16 +25,21 @@ public class CartEntity extends DomainEntity {
 
   private Integer userId;
 
-  private List<CartItemEntity> cartItems;
+  private List<CartItemEntity> cartItems = new ArrayList<>();
 
   public CartEntity(Integer userId) {
     this.userId = userId;
-    this.cartItems = new ArrayList<>();
+  }
+
+  public BigDecimal getTotalAmount() {
+    return cartItems.stream()
+        .map(CartItemEntity::getAmount)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 
   // Helper methods
-  public boolean isEmpty() {
-    return CollectionUtil.isEmpty(cartItems);
+  public boolean hasItems() {
+    return CollectionUtil.isNotEmpty(cartItems);
   }
 
   public void addCartItem(CartItemEntity cartItem) {
@@ -40,14 +50,14 @@ public class CartEntity extends DomainEntity {
   }
 
   public synchronized void putCartItem(Integer productId, Integer quantity) {
-    if (isEmpty()) {
+    if (!hasItems()) {
       cartItems = new ArrayList<>();
     }
     cartItems.stream()
         .filter(it -> it.getProduct().getId().equals(productId))
         .findFirst()
         .ifPresentOrElse(
-            it -> it.setQuantity(quantity),
+            it -> it.setQuantity(it.getQuantity() + quantity),
             () -> {
               // Add new cart item
               CartItemEntity cartItem = new CartItemEntity();
@@ -61,7 +71,7 @@ public class CartEntity extends DomainEntity {
   }
 
   public void removeCartItem(Integer productId) {
-    if (!isEmpty()) {
+    if (hasItems()) {
       Iterator<CartItemEntity> iterator = cartItems.iterator();
       while (iterator.hasNext()) {
         CartItemEntity cartItemEntity = iterator.next();
@@ -74,21 +84,15 @@ public class CartEntity extends DomainEntity {
   }
 
   public void clear() {
-    if (!isEmpty()) {
+    if (hasItems()) {
       cartItems.clear();
     }
   }
 
-  public List<Integer> getProductIds() {
+  public List<Integer> collectProductIds() {
     return cartItems.stream()
         .map(cartItemEntity -> cartItemEntity.getProduct().getId())
         .distinct()
         .toList();
-  }
-
-  public BigDecimal getTotalAmount() {
-    return cartItems.stream()
-        .map(CartItemEntity::getAmount)
-        .reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 }

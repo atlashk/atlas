@@ -16,18 +16,17 @@ import org.atlas.framework.saga.annotation.StartSaga;
 import org.atlas.framework.saga.context.SagaContext;
 import org.atlas.framework.saga.exception.SagaConfigException;
 import org.atlas.framework.util.StringUtil;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 /**
- * Enhanced registry for sagas. Provides efficient caching and
- * validation of saga configurations with optimized reflection operations.
+ * Enhanced registry for sagas. Provides efficient caching and validation of saga configurations
+ * with optimized reflection operations. Uses lazy initialization to avoid circular dependencies.
  */
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class SagaRegistry implements InitializingBean {
+public class SagaRegistry {
 
   private final ApplicationContext applicationContext;
 
@@ -37,17 +36,11 @@ public class SagaRegistry implements InitializingBean {
   // Cache for reflection results to avoid repeated scanning
   private final Map<Class<?>, List<Method>> methodCache = new ConcurrentHashMap<>();
 
-  /**
-   * Initialize the registry by discovering and registering all sagas in the application context
-   */
-  @Override
-  public void afterPropertiesSet() throws Exception {
-    registerSagas();
-    log.info("Registered {} saga metadata successfully", sagaMetadataMap.size());
-  }
+  // Flag to track if sagas have been initialized
+  private volatile boolean initialized = false;
 
   /**
-   * Get saga metadata by saga name
+   * Get saga metadata by saga name. Performs lazy initialization if needed.
    *
    * @param sagaName the name of the saga
    * @return Optional containing the saga metadata if found
@@ -56,25 +49,44 @@ public class SagaRegistry implements InitializingBean {
     if (StringUtil.isBlank(sagaName)) {
       return Optional.empty();
     }
+    ensureInitialized();
     return Optional.ofNullable(sagaMetadataMap.get(sagaName));
   }
 
   /**
-   * Check if a saga exists for the given saga name
+   * Check if a saga exists for the given saga name. Performs lazy initialization if needed.
    *
    * @param sagaName the name of the saga
    * @return true if saga exists, false otherwise
    */
   public boolean hasSagaMetadata(String sagaName) {
-    return StringUtil.isNotBlank(sagaName) && sagaMetadataMap.containsKey(sagaName);
+    if (StringUtil.isBlank(sagaName)) {
+      return false;
+    }
+    ensureInitialized();
+    return sagaMetadataMap.containsKey(sagaName);
+  }
+
+  /**
+   * Ensure sagas are initialized using double-checked locking pattern
+   */
+  private void ensureInitialized() {
+    if (!initialized) {
+      synchronized (this) {
+        if (!initialized) {
+          registerSagas();
+          initialized = true;
+          log.info("Registered {} saga metadata successfully", sagaMetadataMap.size());
+        }
+      }
+    }
   }
 
   /**
    * Register all sagas from the application context
    */
   private void registerSagas() {
-    Map<String, Object> sagaBeans = applicationContext.getBeansWithAnnotation(
-        Saga.class);
+    Map<String, Object> sagaBeans = applicationContext.getBeansWithAnnotation(Saga.class);
     log.debug("Found {} potential saga beans", sagaBeans.size());
     if (sagaBeans.isEmpty()) {
       return;

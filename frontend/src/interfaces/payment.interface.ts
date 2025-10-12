@@ -77,7 +77,7 @@ export interface PaymentError {
 }
 
 // Stripe specific interfaces
-export interface StripePaymentResult extends PaymentResult {
+export interface StripePaymentResult extends Omit<PaymentResult, 'error'> {
   paymentIntent?: {
     id: string;
     status: string;
@@ -103,16 +103,7 @@ export interface StripePaymentResult extends PaymentResult {
   };
 }
 
-// Order tracking payload
-export interface OrderTrackingPayload {
-  orderId: number;
-  orderStatus: string;
-  paymentNextAction?: PaymentNextAction;
-  cancellationReason?: string;
-  payment_intent_id?: string;
-  amount?: number;
-  currency?: PaymentCurrency;
-}
+
 
 // Payment form data interfaces
 export interface BasePaymentFormData {
@@ -161,10 +152,10 @@ export interface PaymentConfig {
 // Payment handler interfaces
 export interface PaymentHandler {
   method: PaymentMethod;
-  initialize(config: any): Promise<void>;
-  createPaymentForm(data: BasePaymentFormData): Promise<React.ComponentType<any>>;
-  processPayment(data: any): Promise<PaymentResult>;
-  validatePaymentData(data: any): boolean;
+  initialize(config: Record<string, unknown>): Promise<void>;
+  createPaymentForm(data: BasePaymentFormData): Promise<React.ComponentType<Record<string, unknown>>>;
+  processPayment(data: BasePaymentFormData): Promise<PaymentResult>;
+  validatePaymentData(data: BasePaymentFormData): boolean;
   isSupported(): boolean;
 }
 

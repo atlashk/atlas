@@ -1,115 +1,219 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
-
-export interface CartItem {
-  productId: number;
-  name: string;
-  price: number;
-  quantity: number;
-  imageUrl?: string;
-}
+import { cartApi } from "@/api";
+import type { CartResponse } from "@/interfaces/cart.interface";
+import { useUserStore } from "./user.store";
 
 interface CartState {
-  cart: CartItem[];
-  currentOrderId: number | null;
+  cart: CartResponse | null;
+  isLoading: boolean;
+  error: string | null;
 }
 
 interface CartActions {
-  loadCart: () => void;
-  saveCart: () => void;
-  addToCart: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
-  removeFromCart: (productId: number) => void;
-  updateQuantity: (productId: number, quantity: number) => void;
-  clearCart: () => void;
+  // Core cart operations
+  loadCart: () => Promise<void>;
+  addToCart: (productId: number, quantity?: number) => Promise<boolean>;
+  removeFromCart: (productId: number) => Promise<boolean>;
+  updateQuantity: (productId: number, quantity: number) => Promise<boolean>;
+  clearCart: () => Promise<boolean>;
+  
+  // Computed values
+  getCartItemCount: () => number;
+  getCartTotal: () => number;
   getItemTotal: (productId: number) => number;
-  getTotal: () => number;
-  setCurrentOrderId: (orderId: number | null) => void;
+  
+  // Internal state management
+  setCart: (cart: CartResponse | null) => void;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+  clearCartState: () => void;
 }
 
 type CartStore = CartState & CartActions;
 
-export const useCartStore = create<CartStore>()(
-  persist(
-    (set, get) => ({
-      // Initial state
-      cart: [],
-      currentOrderId: null,
+const isUserAuthenticated = () => {
+  const { isAuthenticated } = useUserStore.getState();
+  return isAuthenticated();
+};
 
-      // Actions
-      loadCart: () => {
-        // Cart is automatically loaded from localStorage via persist middleware
-        // This method is kept for compatibility but doesn't need implementation
-      },
+export const useCartStore = create<CartStore>()((set, get) => ({
+  // Initial state
+  cart: null,
+  isLoading: false,
+  error: null,
 
-      saveCart: () => {
-        // Cart is automatically saved to localStorage via persist middleware
-        // This method is kept for compatibility but doesn't need implementation
-      },
-
-      addToCart: (item: Omit<CartItem, "quantity">, quantity = 1) => {
-        const { cart } = get();
-        const existingItemIndex = cart.findIndex(
-          (cartItem) => cartItem.productId === item.productId
-        );
-
-        if (existingItemIndex >= 0) {
-          // Update quantity of existing item
-          const updatedCart = [...cart];
-          updatedCart[existingItemIndex].quantity += quantity;
-          set({ cart: updatedCart });
-        } else {
-          // Add new item to cart
-          const newItem: CartItem = {
-            ...item,
-            quantity,
-          };
-          set({ cart: [...cart, newItem] });
-        }
-      },
-
-      removeFromCart: (productId: number) => {
-        const { cart } = get();
-        const updatedCart = cart.filter((item) => item.productId !== productId);
-        set({ cart: updatedCart });
-      },
-
-      updateQuantity: (productId: number, quantity: number) => {
-        const { cart } = get();
-        if (quantity <= 0) {
-          get().removeFromCart(productId);
-          return;
-        }
-
-        const updatedCart = cart.map((item) =>
-          item.productId === productId ? { ...item, quantity } : item
-        );
-        set({ cart: updatedCart });
-      },
-
-      clearCart: () => {
-        set({ cart: [] });
-      },
-
-      getItemTotal: (productId: number) => {
-        const { cart } = get();
-        const item = cart.find((cartItem) => cartItem.productId === productId);
-        return item ? item.price * item.quantity : 0;
-      },
-
-      getTotal: () => {
-        const { cart } = get();
-        return cart.reduce(
-          (total, item) => total + item.price * item.quantity,
-          0
-        );
-      },
-
-      setCurrentOrderId: (orderId: number | null) => {
-        set({ currentOrderId: orderId });
-      },
-    }),
-    {
-      name: "cart-store",
+  // Core cart operations
+  loadCart: async () => {
+    if (!isUserAuthenticated()) {
+      set({ cart: null, error: null });
+      return;
     }
-  )
-);
+
+    // Prevent duplicate API calls
+    const { isLoading } = get();
+    if (isLoading) {
+      return;
+    }
+
+    try {
+      set({ isLoading: true, error: null });
+      const response = await cartApi.getCart();
+      
+      if (response.success && response.data) {
+        set({ cart: response.data });
+      } else {
+        set({ cart: null, error: response.errorMessage || "Failed to load cart" });
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      set({ cart: null, error: errorMessage });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  addToCart: async (productId: number, quantity = 1) => {
+    if (!isUserAuthenticated()) {
+      set({ error: "Please login to add items to cart" });
+      return false;
+    }
+
+    try {
+      set({ isLoading: true, error: null });
+      const response = await cartApi.addCartItem({ productId, quantity });
+      
+      if (response.success && response.data) {
+        set({ cart: response.data });
+        return true;
+      } else {
+        set({ error: response.errorMessage || "Failed to add item to cart" });
+        return false;
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      set({ error: errorMessage });
+      return false;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  removeFromCart: async (productId: number) => {
+    if (!isUserAuthenticated()) {
+      set({ error: "Please login to manage cart items" });
+      return false;
+    }
+
+    try {
+      set({ isLoading: true, error: null });
+      const response = await cartApi.removeCartItem(productId);
+      
+      if (response.success && response.data) {
+        set({ cart: response.data });
+        return true;
+      } else {
+        set({ error: response.errorMessage || "Failed to remove item from cart" });
+        return false;
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      set({ error: errorMessage });
+      return false;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  updateQuantity: async (productId: number, quantity: number) => {
+    if (!isUserAuthenticated()) {
+      set({ error: "Please login to manage cart items" });
+      return false;
+    }
+
+    if (quantity <= 0) {
+      return await get().removeFromCart(productId);
+    }
+
+    try {
+      set({ isLoading: true, error: null });
+      const response = await cartApi.updateCartItem(productId, { quantity });
+      
+      if (response.success && response.data) {
+        set({ cart: response.data });
+        return true;
+      } else {
+        set({ error: response.errorMessage || "Failed to update item quantity" });
+        return false;
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      set({ error: errorMessage });
+      return false;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  clearCart: async () => {
+    if (!isUserAuthenticated()) {
+      set({ error: "Please login to manage cart" });
+      return false;
+    }
+
+    try {
+      set({ isLoading: true, error: null });
+      const response = await cartApi.clearCart();
+      
+      if (response.success && response.data) {
+        set({ cart: response.data });
+        return true;
+      } else {
+        set({ error: response.errorMessage || "Failed to clear cart" });
+        return false;
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      set({ error: errorMessage });
+      return false;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  // Computed values
+  getCartItemCount: () => {
+    const { cart } = get();
+    return cart?.cartItems.length || 0;
+  },
+
+  getCartTotal: () => {
+    const { cart } = get();
+    if (!cart) return 0;
+    return cart.totalAmount;
+  },
+
+  getItemTotal: (productId: number) => {
+    const { cart } = get();
+    if (!cart) return 0;
+    const item = cart.cartItems.find((cartItem) => cartItem.product.id === productId);
+    return item ? item.product.price * item.quantity : 0;
+  },
+
+  // Internal state management
+  setCart: (cart: CartResponse | null) => {
+    set({ cart });
+  },
+
+  setLoading: (loading: boolean) => {
+    set({ isLoading: loading });
+  },
+
+  setError: (error: string | null) => {
+    set({ error });
+  },
+
+  // Clear cart state locally (for logout)
+  clearCartState: () => {
+    set({ cart: null, error: null, isLoading: false });
+  },
+}));

@@ -14,5 +14,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ListProductRequest {
 
-  private List<Integer> productIds;
+  private List<Integer> ids;
 }

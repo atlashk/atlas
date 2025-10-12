@@ -12,6 +12,6 @@ import lombok.Setter;
 public class InternalListUserRequest {
 
   @NotEmpty
-  @Schema(description = "List of user IDs to retrieve", example = "[1,2,3,4]")
+  @Schema(description = "List of unique identifiers for the users to be retrieved", example = "[1,2,3,4]")
   private List<Integer> ids;
 }
