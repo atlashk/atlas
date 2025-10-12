@@ -16,6 +16,7 @@ import org.atlas.framework.saga.annotation.StartSaga;
 import org.atlas.framework.saga.context.SagaContext;
 import org.atlas.framework.saga.exception.SagaConfigException;
 import org.atlas.framework.util.StringUtil;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -108,9 +109,13 @@ public class SagaRegistry {
       throw new SagaConfigException("Saga bean cannot be null for bean: " + beanName);
     }
 
-    Class<?> sagaClass = sagaBean.getClass();
-    Saga sagaAnnotation = sagaClass.getAnnotation(Saga.class);
+    // Get the target class to handle CGLIB proxies
+    Class<?> sagaClass = AopUtils.isAopProxy(sagaBean)
+        ? AopUtils.getTargetClass(sagaBean)
+        : sagaBean.getClass();
 
+    // Read Saga annotation
+    Saga sagaAnnotation = sagaClass.getAnnotation(Saga.class);
     if (sagaAnnotation == null) {
       throw new SagaConfigException(
           String.format("Bean '%s' is missing @Saga annotation", beanName));
