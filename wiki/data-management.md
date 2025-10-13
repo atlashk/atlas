@@ -32,7 +32,7 @@ There are two primary ways to implement the Saga Pattern:
 
 1. Choreography-Based Saga (Event-Driven)
    In this approach, each service listens to domain events from other services and executes its local transaction accordingly.
-   Services communicate through an event broker (e.g., Kafka, RabbitMQ, or AWS SNS/SQS).
+   Services communicate through an event broker (e.g., Kafka, RabbitMQ, or AWS MSK).
    No central orchestrator controls the workflow.
    ✔ Advantages:
     - Reduces coupling between services.

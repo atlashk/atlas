@@ -33,8 +33,10 @@ dependencies {
 
     // Infrastructure
     switch (rootProject.ext.appStack['observability.tracing']) {
+        case 'none':
+            break
         case 'zipkin':
-            api project(':infrastructure.observability.tracing.zipkin')
+            implementation project(':infrastructure.observability.tracing.zipkin')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.tracing']}")

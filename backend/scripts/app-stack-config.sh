@@ -13,7 +13,42 @@ BOLD='\033[1m'
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-APP_STACK_CONFIG="$PROJECT_ROOT/backend/app-stack.cfg"
+
+# Default values
+APP_STACK_FILE="app-stack.cfg"
+
+# Usage function
+usage() {
+    echo "Usage: $0 [OPTIONS]"
+    echo "Options:"
+    echo "  --app-stack-file=FILE   App stack config file name (default: app-stack.cfg)"
+    echo "  -h, --help              Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  $0                                    # Generate app-stack.cfg with interactive configuration"
+    echo "  $0 --app-stack-file=app-stack.dev.cfg # Generate custom config file"
+}
+
+# Parse command line arguments
+for arg in "$@"; do
+    case $arg in
+        --app-stack-file=*)
+            APP_STACK_FILE="${arg#*=}"
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            echo "Unknown parameter: $arg" >&2
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+# Set the full path for the config file
+APP_STACK_FILE_PATH="$PROJECT_ROOT/backend/$APP_STACK_FILE"
 
 # Function to select option using arrow keys
 select_option() {
@@ -100,7 +135,7 @@ echo
 # PLATFORM CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Platform Configuration${NC}"
-select_option "On-Premise (Docker Compose) ${YELLOW}(default)${NC}" "On-Premise (Kubernetes)" "AWS (ECS)" "AWS (Lambda)"
+select_option "On-Premise (Docker Compose) ${YELLOW}(default)${NC}" "On-Premise (Kubernetes)" "AWS (ECS)"
 platform_choice=$((1 + $?))
 case $platform_choice in
     2)
@@ -108,9 +143,6 @@ case $platform_choice in
         ;;
     3)
         platform="aws-ecs"
-        ;;
-    4)
-        platform="aws-lambda"
         ;;
     *)
         platform="onprem-compose"
@@ -183,9 +215,9 @@ echo
 # DISCOVERY CLIENT CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Discovery Client Configuration${NC}"
-if [[ "$platform" == "aws-"* ]]; then
+if [[ "$platform" == "aws-ecs" ]]; then
     discovery_client="none"
-    echo -e "  ${CYAN}▶ ${GREEN}1${NC}) None ${YELLOW}(default)${NC}"
+    echo -e "  ${CYAN}▶ ${GREEN}1${NC}) AWS Built-in Service Discovery ${YELLOW}(default)${NC}"
 elif [[ "$platform" == "onprem-k8s" ]]; then
     discovery_client="kubernetes"
     echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Kubernetes Built-in DNS ${YELLOW}(default)${NC}"
@@ -273,8 +305,8 @@ echo
 # =============================================================================
 echo -e "${BLUE}${BOLD}Messaging Configuration${NC}"
 if [[ "$platform" == aws-* ]]; then
-    echo -e "  ${CYAN}▶ ${GREEN}1${NC}) SNS+SQS ${YELLOW}(default)${NC}"
-    messaging="sns"
+    echo -e "  ${CYAN}▶ ${GREEN}1${NC}) AWS MSK ${YELLOW}(default)${NC}"
+    messaging="kafka"
 else
     select_option "Apache Kafka ${YELLOW}(default)${NC}" "RabbitMQ"
     messaging_choice=$((1 + $?))
@@ -288,6 +320,14 @@ else
             ;;
     esac
 fi
+echo
+
+# =============================================================================
+# MIGRATION CONFIGURATION
+# =============================================================================
+echo -e "${BLUE}${BOLD}Migration Configuration${NC}"
+echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Flyway ${YELLOW}(default)${NC}"
+migration="flyway"
 echo
 
 # =============================================================================
@@ -325,8 +365,21 @@ echo
 # OBSERVABILITY LOGGING STACK CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Observability Logging Stack Configuration${NC}"
-echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Loki ${YELLOW}(default)${NC}"
-logging_stack="loki"
+if [[ "$platform" == aws-* ]]; then
+    echo -e "  ${CYAN}▶ ${GREEN}AWS CloudWatch Logs${NC} ${YELLOW}(default)${NC}"
+    logging_stack="none"
+else
+    select_option "Loki ${YELLOW}(default)${NC}" "None"
+    logging_choice=$((1 + $?))
+    case $logging_choice in
+        2)
+            logging_stack="none"
+            ;;
+        *)
+            logging_stack="loki"
+            ;;
+    esac
+fi
 echo
 
 # =============================================================================
@@ -354,24 +407,42 @@ echo
 # OBSERVABILITY TRACING CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Observability Tracing Configuration${NC}"
-echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Zipkin ${YELLOW}(default)${NC}"
-tracing="zipkin"
+if [[ "$platform" == aws-* ]]; then
+    echo -e "  ${CYAN}▶ ${GREEN}1${NC}) AWS X-Ray ${YELLOW}(default)${NC}"
+    tracing="none"
+else
+    echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Zipkin ${YELLOW}(default)${NC}"
+    tracing="zipkin"
+fi
 echo
 
 # =============================================================================
-# REDIS CONFIGURATION (conditional)
+# REDIS CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Redis Deployment Configuration${NC}"
-select_option "Standalone ${YELLOW}(default)${NC}" "Cluster"
-redis_choice=$((1 + $?))
-case $redis_choice in
-    2)
-        redis="cluster"
-        ;;
-    *)
-        redis="standalone"
-        ;;
-esac
+if [[ "$platform" == aws-* ]]; then
+    select_option "Standalone" "Cluster ${YELLOW}(default)${NC}"
+    redis_choice=$((1 + $?))
+    case $redis_choice in
+        1)
+            redis="standalone"
+            ;;
+        *)
+            redis="cluster"
+            ;;
+    esac
+else
+    select_option "Standalone ${YELLOW}(default)${NC}" "Cluster"
+    redis_choice=$((1 + $?))
+    case $redis_choice in
+        2)
+            redis="cluster"
+            ;;
+        *)
+            redis="standalone"
+            ;;
+    esac
+fi
 echo
 
 # =============================================================================
@@ -414,14 +485,6 @@ fi
 echo
 
 # =============================================================================
-# MIGRATION CONFIGURATION
-# =============================================================================
-echo -e "${BLUE}${BOLD}Migration Configuration${NC}"
-echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Flyway ${YELLOW}(default)${NC}"
-migration="flyway"
-echo
-
-# =============================================================================
 # TEMPLATE ENGINE CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Template Engine Configuration${NC}"
@@ -437,27 +500,11 @@ case $template_choice in
 esac
 echo
 
-# =============================================================================
-# OUTBOX CONFIGURATION
-# =============================================================================
-echo -e "${BLUE}${BOLD}Outbox Configuration${NC}"
-select_option "True ${YELLOW}(default)${NC}" "False"
-outbox_choice=$((1 + $?))
-case $outbox_choice in
-    2)
-        outbox="false"
-        ;;
-    *)
-        outbox="true"
-        ;;
-esac
-echo
-
-echo -e "${PURPLE}${BOLD}Generating ${APP_STACK_CONFIG} file...${NC}"
+echo -e "${PURPLE}${BOLD}Generating ${APP_STACK_FILE} file...${NC}"
 sleep 2
 
 # Create the configuration file
-cat > "$APP_STACK_CONFIG" << EOF
+cat > "$APP_STACK_FILE_PATH" << EOF
 api-server=$api_server
 api-client=$api_client
 kv=$kv
@@ -475,7 +522,6 @@ observability.logging.stack=$logging_stack
 observability.logging.framework=$logging_framework
 observability.metrics=$metrics
 observability.tracing=$tracing
-outbox=$outbox
 persistence=jpa
 platform=$platform
 redis=$redis
@@ -485,8 +531,8 @@ template=$template
 EOF
 
 # Check if file creation was successful
-if [ $? -ne 0 ] || [ ! -f "$APP_STACK_CONFIG" ]; then
-    echo -e "${RED}${BOLD}Error: Failed to create configuration file at ${APP_STACK_CONFIG}${NC}"
+if [ $? -ne 0 ] || [ ! -f "$APP_STACK_FILE_PATH" ]; then
+    echo -e "${RED}${BOLD}Error: Failed to create configuration file at ${APP_STACK_FILE_PATH}${NC}"
     echo -e "${RED}Please check if the directory exists and you have write permissions.${NC}"
     exit 1
 fi
@@ -511,7 +557,6 @@ echo -e "  ${BLUE}Observability - Logging Stack:${NC} ${logging_stack}"
 echo -e "  ${BLUE}Observability - Logging Framework:${NC} ${logging_framework}"
 echo -e "  ${BLUE}Observability - Metrics:${NC} ${metrics}"
 echo -e "  ${BLUE}Observability - Tracing:${NC} ${tracing}"
-echo -e "  ${BLUE}Outbox:${NC} ${outbox}"
 echo -e "  ${BLUE}Redis:${NC} ${redis}"
 echo -e "  ${BLUE}Scheduler:${NC} ${scheduler}"
 echo -e "  ${BLUE}Storage:${NC} ${storage}"

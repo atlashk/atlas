@@ -67,6 +67,8 @@ dependencies {
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.metrics']}")
     }
     switch (rootProject.ext.appStack['observability.tracing']) {
+        case 'none':
+            break
         case 'zipkin':
             implementation project(':infrastructure.observability.tracing.zipkin')
             break

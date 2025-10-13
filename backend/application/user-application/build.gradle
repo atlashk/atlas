@@ -112,9 +112,6 @@ dependencies {
         case 'rabbitmq':
             implementation project(':infrastructure.messaging.rabbitmq.impl.user')
             break
-        case 'sns':
-            implementation project(':infrastructure.messaging.sns.impl.user')
-            break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['messaging']}")
     }
@@ -153,6 +150,8 @@ dependencies {
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.metrics']}")
     }
     switch (rootProject.ext.appStack['observability.tracing']) {
+        case 'none':
+            break
         case 'zipkin':
             implementation project(':infrastructure.observability.tracing.zipkin')
             break

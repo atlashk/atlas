@@ -1,0 +1,44 @@
+# AWS Configuration
+aws_region = "us-west-2"
+
+# Project Configuration
+project_name = "atlas"
+environment  = "dev"
+
+# VPC Configuration
+vpc_cidr = "10.0.0.0/16"
+
+# Database Configuration
+# Main database name (additional service databases will be created automatically)
+# Service-specific databases: db_user, db_product, db_order, db_payment
+db_name     = "atlas_main"
+db_username = "atlas_user"
+db_password = "your-secure-password-here"  # Change this!
+
+# Database Instance Configuration
+db_instance_class     = "db.t3.micro"
+db_allocated_storage  = 20
+
+# Database Engine Configuration (auto-generated from app-stack.aws.cfg)
+# These values will be automatically set based on the datasource in app-stack.aws.cfg
+# db_engine                  = "mysql"     # or "postgres"
+# db_engine_version         = "8.0"       # or "15.4" for postgres
+# db_port                   = 3306        # or 5432 for postgres
+# db_parameter_group_family = "mysql8.0"  # or "postgres15" for postgres
+
+# ElastiCache Configuration
+elasticache_node_type        = "cache.t3.micro"
+elasticache_num_cache_nodes  = 2
+
+# ECS Configuration
+ecs_task_cpu       = 256
+ecs_task_memory    = 512
+ecs_desired_count  = 1
+
+# Application Configuration
+app_port           = 8080
+health_check_path  = "/actuator/health"
+
+# Docker Configuration
+docker_image_tag         = "latest"
+ecr_repository_prefix    = "atlas"

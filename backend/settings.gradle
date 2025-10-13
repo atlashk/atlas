@@ -242,18 +242,6 @@ project(':infrastructure.messaging.rabbitmq.impl.product').projectDir = file('in
 include(':infrastructure.messaging.rabbitmq.impl.user')
 project(':infrastructure.messaging.rabbitmq.impl.user').projectDir = file('infrastructure/messaging/rabbitmq/messaging-rabbitmq-impl-user')
 
-// Messaging::SNS
-include(':infrastructure.messaging.sns.core')
-project(':infrastructure.messaging.sns.core').projectDir = file('infrastructure/messaging/sns/messaging-sns-core')
-include(':infrastructure.messaging.sns.impl.order')
-project(':infrastructure.messaging.sns.impl.order').projectDir = file('infrastructure/messaging/sns/messaging-sns-impl-order')
-include(':infrastructure.messaging.sns.impl.payment')
-project(':infrastructure.messaging.sns.impl.payment').projectDir = file('infrastructure/messaging/sns/messaging-sns-impl-payment')
-include(':infrastructure.messaging.sns.impl.product')
-project(':infrastructure.messaging.sns.impl.product').projectDir = file('infrastructure/messaging/sns/messaging-sns-impl-product')
-include(':infrastructure.messaging.sns.impl.user')
-project(':infrastructure.messaging.sns.impl.user').projectDir = file('infrastructure/messaging/sns/messaging-sns-impl-user')
-
 // Migration
 
 // Migration::Flyway

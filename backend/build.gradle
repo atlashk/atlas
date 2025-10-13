@@ -1,23 +1,24 @@
-// Load app stack configuration from app-stack.cfg
+// Load app stack configs
 def loadAppStack() {
-    def configFile = new File(rootDir, "app-stack.cfg")
-    if (!configFile.exists()) {
-        throw new GradleException("Config file not found: ${configFile.absolutePath}")
+    def appStackFileName = project.findProperty('appStackFile') ?: System.getProperty('appStackFile')
+    def appStackFile = appStackFileName ? new File(rootDir, appStackFileName) : new File(rootDir, "app-stack.cfg")
+    if (!appStackFile.exists()) {
+        throw new GradleException("App stack config file not found: ${appStackFile.absolutePath}")
     }
 
-    def config = [:]
-    configFile.eachLine('UTF-8') { line ->
+    def appStack = [:]
+    appStackFile.eachLine('UTF-8') { line ->
         line = line.trim()
         if (line && !line.startsWith('#')) {
             def parts = line.split('=', 2).collect { it.trim() }
             if (parts.size() == 2 && parts[1]) {
-                config[parts[0]] = parts[1]
+                appStack[parts[0]] = parts[1]
             } else {
-                throw new GradleException("Invalid config line in ${configFile.name}: '${line}'")
+                throw new GradleException("Invalid line in ${appStackFile.name}: '${line}'")
             }
         }
     }
-    return config
+    return appStack
 }
 
 ext {

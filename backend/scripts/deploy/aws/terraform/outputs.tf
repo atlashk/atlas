@@ -1,0 +1,122 @@
+# VPC Outputs
+output "vpc_id" {
+  description = "ID of the VPC"
+  value       = module.vpc.vpc_id
+}
+
+output "public_subnet_ids" {
+  description = "IDs of the public subnets"
+  value       = module.vpc.public_subnet_ids
+}
+
+output "private_subnet_ids" {
+  description = "IDs of the private subnets"
+  value       = module.vpc.private_subnet_ids
+}
+
+# Database Outputs
+output "rds_endpoint" {
+  description = "RDS instance endpoint"
+  value       = module.rds.db_endpoint
+  sensitive   = true
+}
+
+output "rds_port" {
+  description = "RDS instance port"
+  value       = module.rds.db_port
+}
+
+# ElastiCache Outputs
+output "elasticache_endpoint" {
+  description = "ElastiCache cluster endpoint"
+  value       = module.elasticache.elasticache_endpoint
+  sensitive   = true
+}
+
+output "elasticache_port" {
+  description = "ElastiCache cluster port"
+  value       = module.elasticache.elasticache_port
+}
+
+# S3 Outputs
+output "s3_bucket_name" {
+  description = "Name of the S3 bucket"
+  value       = module.s3.bucket_name
+}
+
+output "s3_bucket_arn" {
+  description = "ARN of the S3 bucket"
+  value       = module.s3.bucket_arn
+}
+
+# MSK Cluster Outputs
+output "msk_cluster_arn" {
+  description = "ARN of the MSK cluster"
+  value       = module.msk.cluster_arn
+}
+
+output "msk_cluster_name" {
+  description = "Name of the MSK cluster"
+  value       = module.msk.cluster_name
+}
+
+output "msk_bootstrap_brokers" {
+  description = "Bootstrap brokers for the MSK cluster"
+  value       = module.msk.bootstrap_brokers
+  sensitive   = true
+}
+
+output "msk_bootstrap_brokers_sasl_iam" {
+  description = "Bootstrap brokers for SASL/IAM authentication"
+  value       = module.msk.bootstrap_brokers_sasl_iam
+  sensitive   = true
+}
+
+output "msk_bootstrap_brokers_tls" {
+  description = "Bootstrap brokers for TLS authentication"
+  value       = module.msk.bootstrap_brokers_tls
+  sensitive   = true
+}
+
+output "msk_zookeeper_connect_string" {
+  description = "Zookeeper connection string"
+  value       = module.msk.zookeeper_connect_string
+  sensitive   = true
+}
+
+output "msk_client_role_arn" {
+  description = "ARN of the IAM role for MSK client access"
+  value       = module.msk.msk_client_role_arn
+}
+
+output "kafka_topics" {
+  description = "Kafka topic names for different event types"
+  value       = module.msk.kafka_topics
+}
+
+# ECS Outputs
+output "ecs_cluster_name" {
+  description = "Name of the ECS cluster"
+  value       = module.ecs.cluster_name
+}
+
+output "ecs_cluster_arn" {
+  description = "ARN of the ECS cluster"
+  value       = module.ecs.cluster_arn
+}
+
+output "load_balancer_dns" {
+  description = "DNS name of the load balancer"
+  value       = module.ecs.load_balancer_dns
+}
+
+output "load_balancer_zone_id" {
+  description = "Zone ID of the load balancer"
+  value       = module.ecs.load_balancer_zone_id
+}
+
+# Service URLs
+output "api_gateway_url" {
+  description = "URL for API Gateway - Single entry point for all services"
+  value       = "http://${module.ecs.load_balancer_dns}/api"
+}
