@@ -2,16 +2,10 @@ package org.atlas.framework.saga.context;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import lombok.Getter;
-import lombok.Setter;
 import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.saga.exception.SagaExecutionException;
 
 public class SagaContext {
-
-  @Getter
-  @Setter
-  private Integer sagaId;
 
   private final Map<String, Object> data = new ConcurrentHashMap<>();
 

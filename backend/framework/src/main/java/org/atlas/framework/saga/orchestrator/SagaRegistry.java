@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.saga.annotation.Saga;
 import org.atlas.framework.saga.annotation.SagaCommandReplyHandler;
 import org.atlas.framework.saga.annotation.StartSaga;
-import org.atlas.framework.saga.context.SagaContext;
+import org.atlas.framework.saga.entity.SagaEntity;
 import org.atlas.framework.saga.exception.SagaConfigException;
 import org.atlas.framework.util.StringUtil;
 import org.springframework.aop.support.AopUtils;
@@ -205,24 +205,17 @@ public class SagaRegistry {
   private void validateStartSagaMethod(Method method, String sagaName) {
     Parameter[] parameters = method.getParameters();
 
-    if (parameters.length != 1) {
-      throw new SagaConfigException(
-          String.format(
-              "@StartSaga method in saga '%s' must have exactly one parameter of type SagaContext, but found %d parameters",
-              sagaName, parameters.length));
+    boolean existSagaEntityParameter = false;
+    for (Parameter parameter : parameters) {
+      if (SagaEntity.class.isAssignableFrom(parameter.getType())) {
+        existSagaEntityParameter = true;
+      }
     }
 
-    if (!SagaContext.class.isAssignableFrom(parameters[0].getType())) {
+    if (!existSagaEntityParameter) {
       throw new SagaConfigException(
-          String.format(
-              "@StartSaga method in saga '%s' must have a parameter of type SagaContext, but found: %s",
-              sagaName, parameters[0].getType().getName()));
-    }
-
-    if (method.getReturnType() != void.class) {
-      throw new SagaConfigException(
-          String.format("@StartSaga method in saga '%s' must return void, but returns: %s",
-              sagaName, method.getReturnType().getName()));
+          String.format("@StartSaga method in saga '%s' must have a parameter of type SagaEntity",
+              sagaName));
     }
   }
 
@@ -232,33 +225,18 @@ public class SagaRegistry {
   private void validateSagaCommandReplyHandlerMethod(Method method, String sagaName) {
     Parameter[] parameters = method.getParameters();
 
-    if (parameters.length != 1) {
-      throw new SagaConfigException(
-          String.format(
-              "@SagaCommandReplyHandler method '%s' in saga '%s' must have exactly one parameter of type SagaContext, but found %d parameters",
-              method.getName(), sagaName, parameters.length));
+    boolean existSagaEntityParameter = false;
+    for (Parameter parameter : parameters) {
+      if (SagaEntity.class.isAssignableFrom(parameter.getType())) {
+        existSagaEntityParameter = true;
+      }
     }
 
-    if (!SagaContext.class.isAssignableFrom(parameters[0].getType())) {
+    if (!existSagaEntityParameter) {
       throw new SagaConfigException(
           String.format(
-              "@SagaCommandReplyHandler method '%s' in saga '%s' must have a parameter of type SagaContext, but found: %s",
-              method.getName(), sagaName, parameters[0].getType().getName()));
-    }
-
-    if (method.getReturnType() != void.class) {
-      throw new SagaConfigException(
-          String.format(
-              "@SagaCommandReplyHandler method '%s' in saga '%s' must return void, but returns: %s",
-              method.getName(), sagaName, method.getReturnType().getName()));
-    }
-
-    // Validate that the annotation has a command specified
-    SagaCommandReplyHandler annotation = method.getAnnotation(SagaCommandReplyHandler.class);
-    if (annotation.command() == null) {
-      throw new SagaConfigException(
-          String.format("@SagaCommandReplyHandler method '%s' in saga '%s' must specify a command",
-              method.getName(), sagaName));
+              "@SagaCommandReplyHandler method in saga '%s' must have a parameter of type SagaEntity",
+              sagaName));
     }
   }
 }

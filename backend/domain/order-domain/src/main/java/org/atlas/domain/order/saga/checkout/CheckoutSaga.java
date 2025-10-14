@@ -27,6 +27,7 @@ import org.atlas.framework.saga.annotation.StartSaga;
 import org.atlas.framework.saga.command.CheckoutCommand;
 import org.atlas.framework.saga.context.CheckoutSagaData;
 import org.atlas.framework.saga.context.SagaContext;
+import org.atlas.framework.saga.entity.SagaEntity;
 import org.atlas.framework.saga.orchestrator.SagaOrchestrator;
 import org.atlas.framework.template.ResolveTemplateException;
 import org.atlas.framework.template.TemplateService;
@@ -48,24 +49,27 @@ public class CheckoutSaga {
   private final TemplateService templateService;
 
   @StartSaga
-  public void startSaga(SagaContext context) {
+  public void startSaga(SagaEntity sagaEntity) {
     sagaOrchestrator.sendCommand(
-        context.getSagaId(), CheckoutCommand.CREATE_ORDER, Services.ORDER_SERVICE);
+        sagaEntity, CheckoutCommand.CREATE_ORDER, Services.ORDER_SERVICE);
   }
 
   @SagaCommandReplyHandler(command = CheckoutCommand.CREATE_ORDER)
-  public void handleCreateOrderReply(SagaContext sagaContext, Object result) {
+  public void handleCreateOrderReply(SagaEntity sagaEntity, Object result) {
     // Update context
+    SagaContext sagaContext = SagaContext.deserialize(sagaEntity.getContext());
     sagaContext.remove("input");
     sagaContext.put("data", result);
+    sagaOrchestrator.syncSagaContext(sagaEntity.getId(), sagaContext);
 
     sagaOrchestrator.sendCommand(
-        sagaContext.getSagaId(), CheckoutCommand.RESERVE_PRODUCT, Services.PRODUCT_SERVICE);
+        sagaEntity, CheckoutCommand.RESERVE_PRODUCT, Services.PRODUCT_SERVICE);
   }
 
   @SagaCommandReplyHandler(command = CheckoutCommand.RESERVE_PRODUCT)
-  public void handleReserveProductReply(SagaContext sagaContext) {
+  public void handleReserveProductReply(SagaEntity sagaEntity) {
     // Update order status
+    SagaContext sagaContext = SagaContext.deserialize(sagaEntity.getContext());
     CheckoutSagaData checkoutSagaData = getCheckoutSagaData(sagaContext);
     OrderEntity order = orderRepository.findById(checkoutSagaData.getOrderId())
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
@@ -73,20 +77,20 @@ public class CheckoutSaga {
     orderRepository.update(order);
 
     sagaOrchestrator.sendCommand(
-        sagaContext.getSagaId(), CheckoutCommand.INITIALIZE_PAYMENT, Services.PAYMENT_SERVICE);
+        sagaEntity, CheckoutCommand.INITIALIZE_PAYMENT, Services.PAYMENT_SERVICE);
   }
 
   @SagaCommandReplyHandler(command = CheckoutCommand.INITIALIZE_PAYMENT)
-  public void handleInitializePaymentReply(SagaContext sagaContext) {
+  public void handleInitializePaymentReply(SagaEntity sagaEntity) {
     // Explicitly create command for processing payment
     sagaOrchestrator.createCommand(
-        sagaContext.getSagaId(), CheckoutCommand.PROCESS_PAYMENT,
-        Services.EXTERNAL_PAYMENT_SERVICE);
+        sagaEntity.getId(), CheckoutCommand.PROCESS_PAYMENT, Services.EXTERNAL_PAYMENT_SERVICE);
   }
 
   @SagaCommandReplyHandler(command = CheckoutCommand.PROCESS_PAYMENT)
-  public void handleProcessPaymentReply(SagaContext sagaContext) {
+  public void handleProcessPaymentReply(SagaEntity sagaEntity) {
     // Update order status
+    SagaContext sagaContext = SagaContext.deserialize(sagaEntity.getContext());
     CheckoutSagaData checkoutSagaData = getCheckoutSagaData(sagaContext);
     OrderEntity order = orderRepository.findById(checkoutSagaData.getOrderId())
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
@@ -103,7 +107,7 @@ public class CheckoutSaga {
     );
     AsyncUtil.executeAsync(notifyEmail(order));
 
-    sagaOrchestrator.endSaga(sagaContext.getSagaId());
+    sagaOrchestrator.endSaga(sagaEntity.getId());
   }
 
   private CheckoutSagaData getCheckoutSagaData(SagaContext sagaContext) {

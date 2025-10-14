@@ -22,6 +22,7 @@ import org.atlas.framework.payment.model.CreatePaymentResponse;
 import org.atlas.framework.payment.model.PaymentResult;
 import org.atlas.framework.payment.model.WebhookResponse;
 import org.atlas.framework.payment.model.nextaction.UsePaymentElement;
+import org.atlas.framework.payment.model.nextaction.UsePaymentElement.Provider;
 import org.atlas.framework.util.StringUtil;
 import org.springframework.stereotype.Component;
 
@@ -60,7 +61,7 @@ public class StripePaymentGatewayService implements PaymentGatewayService {
 
       // Build next action
       UsePaymentElement nextAction = new UsePaymentElement();
-      nextAction.setProvider("stripe");
+      nextAction.setProvider(Provider.STRIPE);
       nextAction.setClientSecret(paymentIntent.getClientSecret());
       nextAction.setPublishableKey(stripeProps.getPublishableKey());
 

@@ -16,9 +16,9 @@ public class SagaCommand implements Serializable {
 
   private Integer sagaId;
   private String sagaName;
+  private String sagaContext;
   private String sagaCommandName;
   private String targetServiceName;
-  private String sagaContext;
 
   @Override
   public String toString() {
