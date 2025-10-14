@@ -1,5 +1,5 @@
 # AWS Configuration
-aws_region = "us-west-2"
+aws_region = "us-east-1"
 
 # Project Configuration
 project_name = "atlas"
@@ -42,3 +42,12 @@ health_check_path  = "/actuator/health"
 # Docker Configuration
 docker_image_tag         = "latest"
 ecr_repository_prefix    = "atlas"
+
+# SES Configuration
+ses_domain_name      = "yourdomain.com"  # Change this to your actual domain
+ses_route53_zone_id  = null              # Set to your Route53 zone ID if using Route53
+ses_from_addresses   = [
+  "noreply@yourdomain.com",
+  "support@yourdomain.com",
+  "notifications@yourdomain.com"
+]

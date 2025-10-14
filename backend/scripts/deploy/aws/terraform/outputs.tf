@@ -120,3 +120,46 @@ output "api_gateway_url" {
   description = "URL for API Gateway - Single entry point for all services"
   value       = "http://${module.ecs.load_balancer_dns}/api"
 }
+
+# SES Outputs
+output "ses_domain_identity_arn" {
+  description = "ARN of the SES domain identity"
+  value       = module.ses.domain_identity_arn
+}
+
+output "ses_domain_verification_token" {
+  description = "SES domain verification token (add this as TXT record to your DNS)"
+  value       = module.ses.domain_identity_verification_token
+  sensitive   = true
+}
+
+output "ses_dkim_tokens" {
+  description = "DKIM tokens for email authentication (add these as CNAME records to your DNS)"
+  value       = module.ses.dkim_tokens
+  sensitive   = true
+}
+
+output "ses_mail_from_domain" {
+  description = "Mail from domain for SES"
+  value       = module.ses.mail_from_domain
+}
+
+output "ses_configuration_set_name" {
+  description = "Name of the SES configuration set"
+  value       = module.ses.configuration_set_name
+}
+
+output "ses_sending_role_arn" {
+  description = "ARN of the IAM role for SES email sending"
+  value       = module.ses.sending_role_arn
+}
+
+output "ses_smtp_endpoint" {
+  description = "SMTP endpoint for sending emails via SES"
+  value       = module.ses.smtp_endpoint
+}
+
+output "ses_smtp_port" {
+  description = "SMTP port for TLS connection"
+  value       = module.ses.smtp_port
+}

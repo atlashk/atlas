@@ -50,7 +50,6 @@ declare -A SERVICE_DATABASES=(
 # Define service-specific configurations
 declare -A SERVICE_SPECIFIC_CONFIGS=(
     ["api-gateway"]="jwt_config"
-    ["order-service"]="api_client_config"
     ["order-service"]="email_config"
 )
 
@@ -335,6 +334,8 @@ generate_api_client_config() {
 # REST API Configuration
 API_CLIENT_REST_USER_SERVICE_BASE_URL=http://user-service:8081
 API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL=http://product-service:8082
+API_CLIENT_REST_ORDER_SERVICE_BASE_URL=http://order-service:8083
+API_CLIENT_REST_PAYMENT_SERVICE_BASE_URL=http://payment-service:8084
 EOF
     elif [[ "$api_client_prefix" == "grpc" ]]; then
         cat << EOF
@@ -342,6 +343,8 @@ EOF
 # gRPC Configuration
 GRPC_CLIENT_USER_ADDRESS=static://user-service:50051
 GRPC_CLIENT_PRODUCT_ADDRESS=static://product-service:50052
+GRPC_CLIENT_ORDER_ADDRESS=static://order-service:50053
+GRPC_CLIENT_PAYMENT_ADDRESS=static://payment-service:50054
 EOF
     fi
 }
@@ -384,18 +387,17 @@ generate_service_env() {
         generate_database_config "$service_name"
         generate_messaging_config
         generate_common_infrastructure_config
-        
+        generate_api_client_config "${API_CLIENT%%-*}"
+
         # Add service-specific configurations
         local specific_config="${SERVICE_SPECIFIC_CONFIGS[$service_name]:-}"
         if [[ -n "$specific_config" ]]; then
-            case "$specific_config" in
-                "api_client_config") 
-                    # Extract prefix from API_CLIENT configuration (e.g., "rest-restclient" -> "rest")
-                    local api_client_prefix="${API_CLIENT%%-*}"
-                    generate_api_client_config "$api_client_prefix" 
-                    ;;
-                "email_config") generate_email_config ;;
-            esac
+            # Handle multiple configs separated by space
+            for config in $specific_config; do
+                case "$config" in
+                    "email_config") generate_email_config ;;
+                esac
+            done
         fi
         
         generate_observability_config

@@ -1,8 +1,8 @@
-# Payment Service - Isolated Infrastructure
+# Order Service - Isolated Infrastructure
 
-# ECS Cluster for Payment Service
-resource "aws_ecs_cluster" "payment_service" {
-  name = "${var.name_prefix}-payment-service-cluster"
+# ECS Cluster for Order Service
+resource "aws_ecs_cluster" "order_service" {
+  name = "${var.name_prefix}-order-service-cluster"
 
   setting {
     name  = "containerInsights"
@@ -12,9 +12,9 @@ resource "aws_ecs_cluster" "payment_service" {
   tags = var.tags
 }
 
-# Application Load Balancer for Payment Service
-resource "aws_lb" "payment_service" {
-  name               = "${var.name_prefix}-payment-service-alb"
+# Application Load Balancer for Order Service
+resource "aws_lb" "order_service" {
+  name               = "${var.name_prefix}-order-service-alb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb.id]
@@ -27,8 +27,8 @@ resource "aws_lb" "payment_service" {
 
 # ALB Security Group
 resource "aws_security_group" "alb" {
-  name        = "${var.name_prefix}-payment-service-alb-sg"
-  description = "Security group for Payment Service ALB"
+  name        = "${var.name_prefix}-order-service-alb-sg"
+  description = "Security group for Order Service ALB"
   vpc_id      = var.vpc_id
 
   ingress {
@@ -55,14 +55,14 @@ resource "aws_security_group" "alb" {
   }
 
   tags = merge(var.tags, {
-    Name = "${var.name_prefix}-payment-service-alb-sg"
+    Name = "${var.name_prefix}-order-service-alb-sg"
   })
 }
 
 # ECS Security Group
 resource "aws_security_group" "ecs" {
-  name        = "${var.name_prefix}-payment-service-ecs-sg"
-  description = "Security group for Payment Service ECS tasks"
+  name        = "${var.name_prefix}-order-service-ecs-sg"
+  description = "Security group for Order Service ECS tasks"
   vpc_id      = var.vpc_id
 
   ingress {
@@ -81,13 +81,13 @@ resource "aws_security_group" "ecs" {
   }
 
   tags = merge(var.tags, {
-    Name = "${var.name_prefix}-payment-service-ecs-sg"
+    Name = "${var.name_prefix}-order-service-ecs-sg"
   })
 }
 
 # ECS Task Execution Role
 resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "${var.name_prefix}-payment-service-ecs-task-execution-role"
+  name = "${var.name_prefix}-order-service-ecs-task-execution-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -112,7 +112,7 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
 
 # ECS Task Role
 resource "aws_iam_role" "ecs_task_role" {
-  name = "${var.name_prefix}-payment-service-ecs-task-role"
+  name = "${var.name_prefix}-order-service-ecs-task-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -131,16 +131,16 @@ resource "aws_iam_role" "ecs_task_role" {
 }
 
 # CloudWatch Log Group
-resource "aws_cloudwatch_log_group" "payment_service" {
-  name              = "/ecs/${var.name_prefix}-payment-service"
+resource "aws_cloudwatch_log_group" "order_service" {
+  name              = "/ecs/${var.name_prefix}-order-service"
   retention_in_days = 7
 
   tags = var.tags
 }
 
 # Target Group
-resource "aws_lb_target_group" "payment_service" {
-  name        = "${var.name_prefix}-payment-service-tg"
+resource "aws_lb_target_group" "order_service" {
+  name        = "${var.name_prefix}-order-service-tg"
   port        = var.container_port
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
@@ -162,32 +162,32 @@ resource "aws_lb_target_group" "payment_service" {
 }
 
 # ALB Listener
-resource "aws_lb_listener" "payment_service" {
-  load_balancer_arn = aws_lb.payment_service.arn
+resource "aws_lb_listener" "order_service" {
+  load_balancer_arn = aws_lb.order_service.arn
   port              = "80"
   protocol          = "HTTP"
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.payment_service.arn
+    target_group_arn = aws_lb_target_group.order_service.arn
   }
 
   tags = var.tags
 }
 
 # ECS Task Definition
-resource "aws_ecs_task_definition" "payment_service" {
-  family                   = "${var.name_prefix}-payment-service"
+resource "aws_ecs_task_definition" "order_service" {
+  family                   = "${var.name_prefix}-order-service"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.cpu
   memory                   = var.memory
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-  task_role_arn           = aws_iam_role.ecs_task_role.arn
+  task_role_arn            = aws_iam_role.ecs_task_role.arn
 
   container_definitions = jsonencode([
     {
-      name  = "payment-service"
+      name  = "order-service"
       image = "${var.container_image}:${var.container_image_tag}"
       
       portMappings = [
@@ -200,14 +200,23 @@ resource "aws_ecs_task_definition" "payment_service" {
       environment = [
         for key, value in merge(
           {
-            DB_HOST     = var.db_host
-            DB_PORT     = var.db_port
-            DB_NAME     = var.database_name
-            DB_USER     = var.db_user
-            DB_PASSWORD = var.db_password
-            REDIS_HOST  = var.redis_host
-            REDIS_PORT  = var.redis_port
-            AWS_REGION  = var.aws_region
+            DB_URL                  = "jdbc:mysql://${var.db_host}:${var.db_port}/${var.db_name}?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
+            DB_USERNAME             = var.db_username
+            DB_PASSWORD             = var.db_password
+            DB_QUARTZ_URL           = "jdbc:mysql://${var.db_host}:${var.db_port}/${var.db_name}?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
+            DB_QUARTZ_USERNAME      = var.db_username
+            DB_QUARTZ_PASSWORD      = var.db_password
+            REDIS_CLUSTER_NODES     = var.redis_cluster_nodes
+            REDIS_PASSWORD          = var.redis_password
+            KAFKA_BOOTSTRAP_SERVERS = var.msk_bootstrap_brokers
+            AWS_REGION              = var.aws_region
+            # API Client Configuration
+            API_CLIENT_REST_USER_SERVICE_BASE_URL    = var.api_client_type == "rest" ? var.user_service_endpoint : null
+            API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL = var.api_client_type == "rest" ? var.product_service_endpoint : null
+            API_CLIENT_REST_PAYMENT_SERVICE_BASE_URL = var.api_client_type == "rest" ? var.payment_service_endpoint : null
+            GRPC_CLIENT_USER_ADDRESS                 = var.api_client_type == "grpc" ? var.user_service_endpoint : null
+            GRPC_CLIENT_PRODUCT_ADDRESS              = var.api_client_type == "grpc" ? var.product_service_endpoint : null
+            GRPC_CLIENT_PAYMENT_ADDRESS              = var.api_client_type == "grpc" ? var.payment_service_endpoint : null
           },
           var.environment_vars
         ) : {
@@ -219,7 +228,7 @@ resource "aws_ecs_task_definition" "payment_service" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group         = aws_cloudwatch_log_group.payment_service.name
+          awslogs-group         = aws_cloudwatch_log_group.order_service.name
           awslogs-region        = var.aws_region
           awslogs-stream-prefix = "ecs"
         }
@@ -233,10 +242,10 @@ resource "aws_ecs_task_definition" "payment_service" {
 }
 
 # ECS Service
-resource "aws_ecs_service" "payment_service" {
-  name            = "${var.name_prefix}-payment-service-service"
-  cluster         = aws_ecs_cluster.payment_service.id
-  task_definition = aws_ecs_task_definition.payment_service.arn
+resource "aws_ecs_service" "order_service" {
+  name            = "${var.name_prefix}-order-service-service"
+  cluster         = aws_ecs_cluster.order_service.id
+  task_definition = aws_ecs_task_definition.order_service.arn
   desired_count   = var.desired_count
   launch_type     = "FARGATE"
 
@@ -247,12 +256,16 @@ resource "aws_ecs_service" "payment_service" {
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.payment_service.arn
-    container_name   = "payment-service"
+    target_group_arn = aws_lb_target_group.order_service.arn
+    container_name   = "order-service"
     container_port   = var.container_port
   }
 
-  depends_on = [aws_lb_listener.payment_service]
+  service_registries {
+    registry_arn = var.service_discovery_arn
+  }
+
+  depends_on = [aws_lb_listener.order_service]
 
   tags = var.tags
 }

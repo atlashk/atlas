@@ -1,4 +1,4 @@
-# Product Service Module Variables
+# API Gateway Module Variables
 
 # Basic Configuration
 variable "name_prefix" {
@@ -16,7 +16,7 @@ variable "environment" {
 variable "aws_region" {
   description = "AWS region"
   type        = string
-  default     = "us-west-2"
+  default     = "us-east-1"
 }
 
 # Network Configuration
@@ -31,16 +31,10 @@ variable "subnet_ids" {
 }
 
 # Service Configuration
-variable "database_name" {
-  description = "Database name for Product Service"
-  type        = string
-  default     = "atlas_product_service"
-}
-
 variable "container_port" {
   description = "Port on which the container listens"
   type        = number
-  default     = 8082
+  default     = 8080
 }
 
 variable "health_check_path" {
@@ -80,49 +74,27 @@ variable "container_image_tag" {
   default     = "latest"
 }
 
-# Database Configuration
-variable "db_host" {
-  description = "Database host"
+# Redis Cluster Configuration
+variable "redis_cluster_nodes" {
+  description = "Redis cluster nodes connection string"
   type        = string
 }
 
-variable "db_port" {
-  description = "Database port"
-  type        = string
-  default     = "5432"
-}
-
-variable "db_user" {
-  description = "Database username"
-  type        = string
-}
-
-variable "db_password" {
-  description = "Database password"
+variable "redis_password" {
+  description = "Redis cluster password"
   type        = string
   sensitive   = true
 }
 
-# Redis Configuration
-variable "redis_host" {
-  description = "Redis host"
+# JWT Configuration
+variable "user_service_dns" {
+  description = "User service DNS name from Cloud Map for JWK Set URI"
   type        = string
 }
 
-variable "redis_port" {
-  description = "Redis port"
-  type        = string
-  default     = "6379"
-}
-
-# S3 Configuration
-variable "s3_product_image_bucket_name" {
-  description = "Name of the S3 bucket for product images"
-  type        = string
-}
-
-variable "s3_product_image_policy_arn" {
-  description = "ARN of the S3 policy for product image bucket access"
+# Service Discovery Configuration
+variable "service_discovery_arn" {
+  description = "ARN of the Cloud Map service discovery service for API Gateway"
   type        = string
 }
 
@@ -139,7 +111,7 @@ variable "tags" {
   type        = map(string)
   default = {
     Project     = "Atlas"
-    Service     = "Product-Service"
+    Service     = "API-Gateway"
     Environment = "dev"
     ManagedBy   = "Terraform"
   }

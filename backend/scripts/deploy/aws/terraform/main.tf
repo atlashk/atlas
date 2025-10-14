@@ -40,7 +40,7 @@ locals {
 
 # VPC and Networking
 module "vpc" {
-  source = "./modules/vpc"
+  source = "./modules/infrastructure/vpc"
   
   name_prefix         = local.name_prefix
   vpc_cidr           = var.vpc_cidr
@@ -51,7 +51,7 @@ module "vpc" {
 
 # Security Groups
 module "security_groups" {
-  source = "./modules/security"
+  source = "./modules/infrastructure/security"
   
   name_prefix = local.name_prefix
   vpc_id      = module.vpc.vpc_id
@@ -61,7 +61,7 @@ module "security_groups" {
 
 # RDS Database (MySQL or PostgreSQL)
 module "rds" {
-  source = "./modules/rds"
+  source = "./modules/infrastructure/rds"
   
   name_prefix           = local.name_prefix
   vpc_id               = module.vpc.vpc_id
@@ -86,7 +86,7 @@ module "rds" {
 
 # ElastiCache Cluster
 module "elasticache" {
-  source = "./modules/elasticache"
+  source = "./modules/infrastructure/elasticache"
   
   name_prefix                    = local.name_prefix
   vpc_id                        = module.vpc.vpc_id
@@ -100,16 +100,38 @@ module "elasticache" {
 
 # S3 Bucket
 module "s3" {
-  source = "./modules/s3"
+  source = "./modules/infrastructure/s3"
   
   name_prefix = local.name_prefix
   
   tags = local.common_tags
 }
 
+# SES (Simple Email Service)
+module "ses" {
+  source = "./modules/infrastructure/ses"
+  
+  name_prefix     = local.name_prefix
+  domain_name     = var.ses_domain_name
+  route53_zone_id = var.ses_route53_zone_id
+  
+  from_addresses = var.ses_from_addresses
+  allowed_senders = [
+    data.aws_caller_identity.current.account_id
+  ]
+  
+  trusted_services = [
+    "ec2.amazonaws.com",
+    "ecs-tasks.amazonaws.com",
+    "lambda.amazonaws.com"
+  ]
+  
+  tags = local.common_tags
+}
+
 # MSK (Managed Streaming for Apache Kafka)
 module "msk" {
-  source = "./modules/msk"
+  source = "./modules/infrastructure/msk"
   
   name_prefix           = local.name_prefix
   private_subnet_ids    = module.vpc.private_subnet_ids
@@ -123,45 +145,186 @@ module "msk" {
   tags = local.common_tags
 }
 
-# ECS Cluster
-module "ecs" {
-  source = "./modules/ecs"
+# Cloud Map Service Discovery
+module "cloudmap" {
+  source = "./modules/infrastructure/cloudmap"
   
-  name_prefix           = local.name_prefix
-  vpc_id               = module.vpc.vpc_id
-  public_subnet_ids    = module.vpc.public_subnet_ids
-  private_subnet_ids   = module.vpc.private_subnet_ids
+  name_prefix = local.name_prefix
+  environment = var.environment
+  vpc_id      = module.vpc.vpc_id
   
-  # Security groups
-  alb_security_group_id = module.security_groups.alb_security_group_id
-  ecs_security_group_id = module.security_groups.ecs_security_group_id
+  tags = local.common_tags
+}
+
+# User Service
+module "user_service" {
+  source = "./modules/application/user-service"
   
-  # Database and cache endpoints
-  db_endpoint        = module.rds.db_endpoint
-  elasticache_endpoint = module.elasticache.elasticache_endpoint
-  s3_bucket_name  = module.s3.bucket_name
-  
-  # MSK Configuration
-  msk_cluster_arn                = module.msk.cluster_arn
-  msk_bootstrap_brokers          = module.msk.bootstrap_brokers_sasl_iam
-  msk_client_role_arn           = module.msk.msk_client_role_arn
-  kafka_topics                  = module.msk.kafka_topics
-  
-  # Services configuration
-  services = local.services
-  
-  # Environment variables
+  name_prefix = local.name_prefix
+  vpc_id      = module.vpc.vpc_id
+  subnet_ids  = module.vpc.private_subnet_ids
+
+  # Database configuration
+  db_host     = module.rds.db_endpoint
+  db_port     = var.db_port
   db_name     = var.db_name
   db_username = var.db_username
   db_password = var.db_password
+  
+  # Redis configuration
+  redis_cluster_nodes = module.elasticache.elasticache_endpoint
+  redis_password      = var.redis_password
+  
+  # MSK Configuration
+  msk_bootstrap_brokers = module.msk.bootstrap_brokers_sasl_iam
+
+  # Service Discovery
+  service_discovery_arn = module.cloudmap.user_service_discovery_arn
+  
+  # API Client Configuration
+  api_client_type           = var.api_client_type
+  product_service_endpoint  = var.product_service_endpoint
+  order_service_endpoint    = var.order_service_endpoint
+  payment_service_endpoint  = var.payment_service_endpoint
+  
+  tags = local.common_tags
+}
+
+# Product Service
+module "product_service" {
+  source = "./modules/application/product-service"
+  
+  name_prefix = local.name_prefix
+  vpc_id      = module.vpc.vpc_id
+  subnet_ids  = module.vpc.private_subnet_ids
+
+  # Database configuration
+  db_host     = module.rds.db_endpoint
   db_port     = var.db_port
+  db_name     = var.db_name
+  db_username = var.db_username
+  db_password = var.db_password
+  
+  # Redis configuration
+  redis_cluster_nodes = module.elasticache.elasticache_endpoint
+  redis_password      = var.redis_password
+  
+  # MSK Configuration
+  msk_bootstrap_brokers = module.msk.bootstrap_brokers_sasl_iam
+  
+  # S3 configuration
+  s3_product_image_bucket_name = module.s3.bucket_name
+  s3_product_image_policy_arn  = module.s3.policy_arn
+  
+  # Service Discovery
+  service_discovery_arn = module.cloudmap.product_service_discovery_arn
+  
+  # API Client Configuration
+  api_client_type          = var.api_client_type
+  user_service_endpoint    = var.user_service_endpoint
+  order_service_endpoint   = var.order_service_endpoint
+  payment_service_endpoint = var.payment_service_endpoint
+  
+  tags = local.common_tags
+}
+
+# Order Service
+module "order_service" {
+  source = "./modules/application/order-service"
+  
+  name_prefix = local.name_prefix
+  vpc_id      = module.vpc.vpc_id
+  subnet_ids  = module.vpc.private_subnet_ids
+  
+  # Database configuration
+  db_host     = module.rds.db_endpoint
+  db_port     = var.db_port
+  db_name     = var.db_name
+  db_username = var.db_username
+  db_password = var.db_password
+
+  # Redis configuration
+  redis_cluster_nodes = module.elasticache.elasticache_endpoint
+  redis_password      = var.redis_password
+  
+  # MSK Configuration
+  msk_bootstrap_brokers = module.msk.bootstrap_brokers_sasl_iam
+  
+  # Service Discovery
+  service_discovery_arn = module.cloudmap.order_service_discovery_arn
+  
+  # API Client Configuration
+  api_client_type           = var.api_client_type
+  user_service_endpoint     = var.user_service_endpoint
+  product_service_endpoint  = var.product_service_endpoint
+  payment_service_endpoint  = var.payment_service_endpoint
+  
+  tags = local.common_tags
+}
+
+# Payment Service
+module "payment_service" {
+  source = "./modules/application/payment-service"
+  
+  name_prefix = local.name_prefix
+  vpc_id      = module.vpc.vpc_id
+  subnet_ids  = module.vpc.private_subnet_ids
+
+  # Database configuration
+  db_host     = module.rds.db_endpoint
+  db_port     = var.db_port
+  db_name     = var.db_name
+  db_username = var.db_username
+  db_password = var.db_password
+
+  # Redis configuration
+  redis_cluster_nodes = module.elasticache.elasticache_endpoint
+  redis_password      = var.redis_password
+  
+  # MSK Configuration
+  msk_bootstrap_brokers = module.msk.bootstrap_brokers_sasl_iam
+  
+  # Service Discovery
+  service_discovery_arn = module.cloudmap.payment_service_discovery_arn
+  
+  # API Client Configuration
+  api_client_type          = var.api_client_type
+  user_service_endpoint    = var.user_service_endpoint
+  product_service_endpoint = var.product_service_endpoint
+  order_service_endpoint   = var.order_service_endpoint
+  
+  tags = local.common_tags
+}
+
+# API Gateway
+module "api_gateway" {
+  source = "./modules/application/api-gateway"
+  
+  name_prefix = local.name_prefix
+  vpc_id      = module.vpc.vpc_id
+  subnet_ids  = module.vpc.private_subnet_ids
+  
+
+  
+  # Redis configuration
+  redis_cluster_nodes = module.elasticache.elasticache_endpoint
+  redis_password      = var.redis_password
+  
+  # User service DNS for JWK Set URI
+  user_service_dns = module.cloudmap.user_service_dns
+  
+  # AWS Region
+  aws_region = var.aws_region
+  
+  # Service Discovery
+  service_discovery_arn = module.cloudmap.api_gateway_discovery_arn
   
   tags = local.common_tags
 }
 
 # CloudWatch Log Groups
-module "cloudwatch" {
-  source = "./modules/cloudwatch"
+module "cloudwatch_log_groups" {
+  source = "./modules/observability/cloudwatch"
   
   name_prefix = local.name_prefix
   services    = local.services

@@ -2,7 +2,7 @@
 variable "aws_region" {
   description = "AWS region for resources"
   type        = string
-  default     = "us-west-2"
+  default     = "us-east-1"
 }
 
 variable "project_name" {
@@ -141,6 +141,13 @@ variable "ecr_repository_prefix" {
   default     = "atlas"
 }
 
+# Redis Configuration
+variable "redis_password" {
+  description = "Redis cluster password"
+  type        = string
+  sensitive   = true
+}
+
 # MSK Configuration
 variable "msk_number_of_broker_nodes" {
   description = "Number of broker nodes in the MSK cluster"
@@ -158,4 +165,62 @@ variable "msk_broker_volume_size" {
   description = "Size of EBS volume for each broker (in GB)"
   type        = number
   default     = 100
+}
+
+# API Client Configuration
+variable "api_client_type" {
+  description = "Type of API client (rest or grpc)"
+  type        = string
+  default     = "rest"
+  validation {
+    condition     = contains(["rest", "grpc"], var.api_client_type)
+    error_message = "API client type must be either 'rest' or 'grpc'."
+  }
+}
+
+variable "user_service_endpoint" {
+  description = "User service endpoint"
+  type        = string
+  default     = "http://user-service.atlas.local:8081"
+}
+
+variable "product_service_endpoint" {
+  description = "Product service endpoint"
+  type        = string
+  default     = "http://product-service.atlas.local:8082"
+}
+
+variable "order_service_endpoint" {
+  description = "Order service endpoint"
+  type        = string
+  default     = "http://order-service.atlas.local:8083"
+}
+
+variable "payment_service_endpoint" {
+  description = "Payment service endpoint"
+  type        = string
+  default     = "http://payment-service.atlas.local:8084"
+}
+
+# SES Configuration
+variable "ses_domain_name" {
+  description = "Domain name for SES email sending"
+  type        = string
+  default     = "example.com"
+}
+
+variable "ses_route53_zone_id" {
+  description = "Route53 hosted zone ID for SES domain verification (optional)"
+  type        = string
+  default     = null
+}
+
+variable "ses_from_addresses" {
+  description = "List of allowed from email addresses for SES"
+  type        = list(string)
+  default     = [
+    "noreply@example.com",
+    "support@example.com",
+    "notifications@example.com"
+  ]
 }

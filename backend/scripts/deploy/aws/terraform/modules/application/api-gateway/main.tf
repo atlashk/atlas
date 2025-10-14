@@ -1,8 +1,8 @@
-# User Service - Isolated Infrastructure
+# API Gateway Service - Isolated Infrastructure
 
-# ECS Cluster for User Service
-resource "aws_ecs_cluster" "user_service" {
-  name = "${var.name_prefix}-user-service-cluster"
+# ECS Cluster for API Gateway
+resource "aws_ecs_cluster" "api_gateway" {
+  name = "${var.name_prefix}-api-gateway-cluster"
 
   setting {
     name  = "containerInsights"
@@ -12,9 +12,9 @@ resource "aws_ecs_cluster" "user_service" {
   tags = var.tags
 }
 
-# Application Load Balancer for User Service
-resource "aws_lb" "user_service" {
-  name               = "${var.name_prefix}-user-service-alb"
+# Application Load Balancer for API Gateway
+resource "aws_lb" "api_gateway" {
+  name               = "${var.name_prefix}-api-gateway-alb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb.id]
@@ -27,8 +27,8 @@ resource "aws_lb" "user_service" {
 
 # ALB Security Group
 resource "aws_security_group" "alb" {
-  name        = "${var.name_prefix}-user-service-alb-sg"
-  description = "Security group for User Service ALB"
+  name        = "${var.name_prefix}-api-gateway-alb-sg"
+  description = "Security group for API Gateway ALB"
   vpc_id      = var.vpc_id
 
   ingress {
@@ -55,14 +55,14 @@ resource "aws_security_group" "alb" {
   }
 
   tags = merge(var.tags, {
-    Name = "${var.name_prefix}-user-service-alb-sg"
+    Name = "${var.name_prefix}-api-gateway-alb-sg"
   })
 }
 
 # ECS Security Group
 resource "aws_security_group" "ecs" {
-  name        = "${var.name_prefix}-user-service-ecs-sg"
-  description = "Security group for User Service ECS tasks"
+  name        = "${var.name_prefix}-api-gateway-ecs-sg"
+  description = "Security group for API Gateway ECS tasks"
   vpc_id      = var.vpc_id
 
   ingress {
@@ -81,13 +81,13 @@ resource "aws_security_group" "ecs" {
   }
 
   tags = merge(var.tags, {
-    Name = "${var.name_prefix}-user-service-ecs-sg"
+    Name = "${var.name_prefix}-api-gateway-ecs-sg"
   })
 }
 
 # ECS Task Execution Role
 resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "${var.name_prefix}-user-service-ecs-task-execution-role"
+  name = "${var.name_prefix}-api-gateway-ecs-task-execution-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -112,7 +112,7 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
 
 # ECS Task Role
 resource "aws_iam_role" "ecs_task_role" {
-  name = "${var.name_prefix}-user-service-ecs-task-role"
+  name = "${var.name_prefix}-api-gateway-ecs-task-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -131,16 +131,16 @@ resource "aws_iam_role" "ecs_task_role" {
 }
 
 # CloudWatch Log Group
-resource "aws_cloudwatch_log_group" "user_service" {
-  name              = "/ecs/${var.name_prefix}-user-service"
+resource "aws_cloudwatch_log_group" "api_gateway" {
+  name              = "/ecs/${var.name_prefix}-api-gateway"
   retention_in_days = 7
 
   tags = var.tags
 }
 
 # Target Group
-resource "aws_lb_target_group" "user_service" {
-  name        = "${var.name_prefix}-user-service-tg"
+resource "aws_lb_target_group" "api_gateway" {
+  name        = "${var.name_prefix}-api-gateway-tg"
   port        = var.container_port
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
@@ -162,22 +162,22 @@ resource "aws_lb_target_group" "user_service" {
 }
 
 # ALB Listener
-resource "aws_lb_listener" "user_service" {
-  load_balancer_arn = aws_lb.user_service.arn
+resource "aws_lb_listener" "api_gateway" {
+  load_balancer_arn = aws_lb.api_gateway.arn
   port              = "80"
   protocol          = "HTTP"
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.user_service.arn
+    target_group_arn = aws_lb_target_group.api_gateway.arn
   }
 
   tags = var.tags
 }
 
 # ECS Task Definition
-resource "aws_ecs_task_definition" "user_service" {
-  family                   = "${var.name_prefix}-user-service"
+resource "aws_ecs_task_definition" "api_gateway" {
+  family                   = "${var.name_prefix}-api-gateway"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.cpu
@@ -187,7 +187,7 @@ resource "aws_ecs_task_definition" "user_service" {
 
   container_definitions = jsonencode([
     {
-      name  = "user-service"
+      name  = "api-gateway"
       image = "${var.container_image}:${var.container_image_tag}"
       
       portMappings = [
@@ -200,13 +200,9 @@ resource "aws_ecs_task_definition" "user_service" {
       environment = [
         for key, value in merge(
           {
-            DB_HOST     = var.db_host
-            DB_PORT     = var.db_port
-            DB_NAME     = var.database_name
-            DB_USER     = var.db_user
-            DB_PASSWORD = var.db_password
-            REDIS_HOST  = var.redis_host
-            REDIS_PORT  = var.redis_port
+            REDIS_CLUSTER_NODES = var.redis_cluster_nodes
+            REDIS_PASSWORD      = var.redis_password
+            JWK_SET_URI = "http://${var.user_service_dns}:8081/.well-known/jwks.json"
             AWS_REGION  = var.aws_region
           },
           var.environment_vars
@@ -219,7 +215,7 @@ resource "aws_ecs_task_definition" "user_service" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group         = aws_cloudwatch_log_group.user_service.name
+          awslogs-group         = aws_cloudwatch_log_group.api_gateway.name
           awslogs-region        = var.aws_region
           awslogs-stream-prefix = "ecs"
         }
@@ -233,10 +229,10 @@ resource "aws_ecs_task_definition" "user_service" {
 }
 
 # ECS Service
-resource "aws_ecs_service" "user_service" {
-  name            = "${var.name_prefix}-user-service-service"
-  cluster         = aws_ecs_cluster.user_service.id
-  task_definition = aws_ecs_task_definition.user_service.arn
+resource "aws_ecs_service" "api_gateway" {
+  name            = "${var.name_prefix}-api-gateway-service"
+  cluster         = aws_ecs_cluster.api_gateway.id
+  task_definition = aws_ecs_task_definition.api_gateway.arn
   desired_count   = var.desired_count
   launch_type     = "FARGATE"
 
@@ -247,12 +243,16 @@ resource "aws_ecs_service" "user_service" {
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.user_service.arn
-    container_name   = "user-service"
+    target_group_arn = aws_lb_target_group.api_gateway.arn
+    container_name   = "api-gateway"
     container_port   = var.container_port
   }
 
-  depends_on = [aws_lb_listener.user_service]
+  service_registries {
+    registry_arn = var.service_discovery_arn
+  }
+
+  depends_on = [aws_lb_listener.api_gateway]
 
   tags = var.tags
 }

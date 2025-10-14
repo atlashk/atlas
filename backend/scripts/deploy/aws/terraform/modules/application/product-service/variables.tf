@@ -1,4 +1,4 @@
-# User Service Module Variables
+# Product Service Module Variables
 
 # Basic Configuration
 variable "name_prefix" {
@@ -16,7 +16,7 @@ variable "environment" {
 variable "aws_region" {
   description = "AWS region"
   type        = string
-  default     = "us-west-2"
+  default     = "us-east-1"
 }
 
 # Network Configuration
@@ -31,16 +31,10 @@ variable "subnet_ids" {
 }
 
 # Service Configuration
-variable "database_name" {
-  description = "Database name for User Service"
-  type        = string
-  default     = "atlas_user_service"
-}
-
 variable "container_port" {
   description = "Port on which the container listens"
   type        = number
-  default     = 8081
+  default     = 8082
 }
 
 variable "health_check_path" {
@@ -81,6 +75,12 @@ variable "container_image_tag" {
 }
 
 # Database Configuration
+variable "db_name" {
+  description = "Database name for Product Service"
+  type        = string
+  default     = "atlas_product_service"
+}
+
 variable "db_host" {
   description = "Database host"
   type        = string
@@ -92,7 +92,7 @@ variable "db_port" {
   default     = "5432"
 }
 
-variable "db_user" {
+variable "db_username" {
   description = "Database username"
   type        = string
 }
@@ -103,16 +103,65 @@ variable "db_password" {
   sensitive   = true
 }
 
-# Redis Configuration
-variable "redis_host" {
-  description = "Redis host"
+# Redis Cluster Configuration
+variable "redis_cluster_nodes" {
+  description = "Redis cluster nodes connection string"
   type        = string
 }
 
-variable "redis_port" {
-  description = "Redis port"
+variable "redis_password" {
+  description = "Redis cluster password"
   type        = string
-  default     = "6379"
+  sensitive   = true
+}
+
+# S3 Configuration
+variable "s3_product_image_bucket_name" {
+  description = "Name of the S3 bucket for product images"
+  type        = string
+}
+
+variable "s3_product_image_policy_arn" {
+  description = "ARN of the S3 policy for product image bucket access"
+  type        = string
+}
+
+# MSK Configuration
+variable "msk_bootstrap_brokers" {
+  description = "MSK cluster bootstrap brokers"
+  type        = string
+}
+
+# API Client Configuration
+variable "api_client_type" {
+  description = "Type of API client (rest or grpc)"
+  type        = string
+  default     = "rest"
+  validation {
+    condition     = contains(["rest", "grpc"], var.api_client_type)
+    error_message = "API client type must be either 'rest' or 'grpc'."
+  }
+}
+
+variable "user_service_endpoint" {
+  description = "User service endpoint"
+  type        = string
+}
+
+variable "order_service_endpoint" {
+  description = "Order service endpoint"
+  type        = string
+}
+
+variable "payment_service_endpoint" {
+  description = "Payment service endpoint"
+  type        = string
+}
+
+# Service Discovery Configuration
+variable "service_discovery_arn" {
+  description = "ARN of the Cloud Map service discovery service"
+  type        = string
 }
 
 # Environment Variables
@@ -128,7 +177,7 @@ variable "tags" {
   type        = map(string)
   default = {
     Project     = "Atlas"
-    Service     = "User-Service"
+    Service     = "Product-Service"
     Environment = "dev"
     ManagedBy   = "Terraform"
   }

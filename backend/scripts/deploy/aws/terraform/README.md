@@ -43,10 +43,10 @@ aws ecr create-repository --repository-name atlas/order-service
 aws ecr create-repository --repository-name atlas/payment-service
 
 # Build and push images (example for user-service)
-aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin <account-id>.dkr.ecr.us-west-2.amazonaws.com
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <account-id>.dkr.ecr.us-east-1.amazonaws.com
 docker build -t atlas/user-service .
-docker tag atlas/user-service:latest <account-id>.dkr.ecr.us-west-2.amazonaws.com/atlas/user-service:latest
-docker push <account-id>.dkr.ecr.us-west-2.amazonaws.com/atlas/user-service:latest
+docker tag atlas/user-service:latest <account-id>.dkr.ecr.us-east-1.amazonaws.com/atlas/user-service:latest
+docker push <account-id>.dkr.ecr.us-east-1.amazonaws.com/atlas/user-service:latest
 ```
 
 ## Deployment
