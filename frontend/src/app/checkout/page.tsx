@@ -49,7 +49,7 @@ export default function CheckoutPage() {
     };
 
     fetchPaymentMethods();
-  }, [selectedPaymentMethod]);
+  }, []); // Empty dependency array - only run once on mount
 
   const handleCheckout = async () => {
     try {

@@ -18,10 +18,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class KafkaMessagePublisher implements MessagePublisher {
 
-  private final KafkaTemplate<String, Object> kafkaTemplate;
+  private final KafkaTemplate<String, String> kafkaTemplate;
 
   @Override
-  public final void publish(PublishRequest request) {
+  public void publish(PublishRequest request) {
     // Extract topic name
     final String topic = request.getDestination();
     if (StringUtil.isBlank(topic)) {
@@ -39,7 +39,7 @@ public class KafkaMessagePublisher implements MessagePublisher {
     }
 
     // Create ProducerRecord with headers
-    ProducerRecord<String, Object> record =
+    ProducerRecord<String, String> record =
         new ProducerRecord<>(topic, null, messageKey, request.getMessagePayload(), kafkaHeaders);
 
     // Asynchronous send

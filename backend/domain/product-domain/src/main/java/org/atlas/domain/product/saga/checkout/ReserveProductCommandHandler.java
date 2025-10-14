@@ -34,8 +34,8 @@ public class ReserveProductCommandHandler {
   private final LockService lockService;
 
   @SagaCommandHandler(command = CheckoutCommand.RESERVE_PRODUCT)
-  public SagaCommandResult reserveProduct(SagaCommand event) {
-    SagaContext sagaContext = SagaContext.deserialize(event.getSagaContext());
+  public SagaCommandResult reserveProduct(SagaCommand sagaCommand) {
+    SagaContext sagaContext = SagaContext.deserialize(sagaCommand.getSagaContext());
     CheckoutSagaData checkoutSagaData = sagaContext.get("data", CheckoutSagaData.class);
     if (checkoutSagaData == null) {
       throw new IllegalArgumentException("Checkout data is required in the saga context");
@@ -56,7 +56,7 @@ public class ReserveProductCommandHandler {
         });
 
     log.info("Successfully reserved products: sagaId={}, orderId={}",
-        sagaContext.getSagaId(), checkoutSagaData.getOrderId());
+        sagaCommand.getSagaId(), checkoutSagaData.getOrderId());
     return SagaCommandResult.success(null);
   }
 

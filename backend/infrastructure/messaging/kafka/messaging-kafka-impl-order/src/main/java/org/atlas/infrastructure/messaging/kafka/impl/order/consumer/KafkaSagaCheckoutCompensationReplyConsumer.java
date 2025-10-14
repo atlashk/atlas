@@ -27,6 +27,7 @@ public class KafkaSagaCheckoutCompensationReplyConsumer extends BaseKafkaMessage
   // Non-blocking retry
   @RetryableTopic(
       attempts = "4", // max retries is 3
+      exclude = {ClassCastException.class},
       topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE,
       backoff = @Backoff(delay = 1000, multiplier = 2, random = true)
   )

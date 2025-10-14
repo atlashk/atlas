@@ -74,7 +74,7 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
     Method startSagaMethod = sagaMetadata.getStartSagaMethod();
     try {
       startSagaMethod.invoke(sagaMetadata.getSagaBean(), sagaEntity);
-    } catch (IllegalAccessException | InvocationTargetException e) {
+    } catch (Exception e) {
       sagaEntity.setStatus(SagaStatus.FAILED);
       throw new SagaExecutionException(String.format("Failed to start saga '%s'", sagaName), e);
     }
@@ -220,7 +220,7 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
 
     try {
       sagaCommandReplyHandlerMethod.invoke(sagaMetadata.getSagaBean(), sagaEntity, result);
-    } catch (IllegalAccessException | InvocationTargetException e) {
+    } catch (Exception e) {
       throw new SagaExecutionException(String.format(
           "Failed to execute command reply handler: sagaId=%d, sagaName=%s, sagaCommandId=%d, sagaCommandName=%s",
           sagaEntity.getId(), sagaEntity.getName(), sagaCommandEntity.getId(),

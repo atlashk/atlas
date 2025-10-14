@@ -2,9 +2,9 @@ package org.atlas.framework.messaging.outbox;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.messaging.publisher.PublishRequest;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -23,8 +23,8 @@ public class OutboxAspect {
    * Intercept all MessagePublisherPort.publish() calls. Instead of calling the actual publish
    * method, save to outbox first.
    */
-  @Around("execution(* org.atlas.framework.messaging.publisher.MessagePublisher.publish(..))")
-  public Object aroundPublishMessage(ProceedingJoinPoint joinPoint) throws Throwable {
+  @Before("execution(* org.atlas.framework.messaging.publisher.MessagePublisher.publish(..))")
+  public void beforePublishMessage(JoinPoint joinPoint) {
     Object[] args = joinPoint.getArgs();
     PublishRequest request = (PublishRequest) args[0];
 
@@ -35,8 +35,5 @@ public class OutboxAspect {
         .build();
     outboxMessageRepository.insert(outboxMessage);
     log.info("Inserted outbox message: {}", outboxMessage);
-
-    // Return null or some success indicator instead of proceeding with actual publish
-    return null;
   }
 }

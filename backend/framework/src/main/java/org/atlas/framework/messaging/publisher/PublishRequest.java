@@ -16,6 +16,6 @@ public class PublishRequest {
 
   private String destination;
   private Map<String, Object> routingAttributes;
-  private Object messagePayload;
+  private String messagePayload;
   private Map<String, Object> headers;
 }
