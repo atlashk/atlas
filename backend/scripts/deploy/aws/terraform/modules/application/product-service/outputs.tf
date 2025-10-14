@@ -72,14 +72,14 @@ output "task_definition_arn" {
 }
 
 # IAM Role Outputs
-output "task_execution_role_arn" {
+output "ecs_task_execution_role_arn" {
   description = "ARN of the ECS task execution role"
-  value       = aws_iam_role.ecs_task_execution_role.arn
+  value       = module.product_service_iam.ecs_task_execution_role_arn
 }
 
-output "task_role_arn" {
+output "ecs_task_role_arn" {
   description = "ARN of the ECS task role"
-  value       = aws_iam_role.ecs_task_role.arn
+  value       = module.product_service_iam.ecs_task_role_arn
 }
 
 # CloudWatch Log Group Output

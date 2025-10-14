@@ -85,55 +85,25 @@ resource "aws_security_group" "ecs" {
   })
 }
 
-# ECS Task Execution Role
-resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "${var.name_prefix}-product-service-ecs-task-execution-role"
+# IAM roles for Product Service using comprehensive IAM module
+module "product_service_iam" {
+  source = "../../infrastructure/iam"
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "ecs-tasks.amazonaws.com"
-        }
-      }
-    ]
-  })
-
-  tags = var.tags
-}
-
-resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
-  role       = aws_iam_role.ecs_task_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
-
-# ECS Task Role
-resource "aws_iam_role" "ecs_task_role" {
-  name = "${var.name_prefix}-product-service-ecs-task-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "ecs-tasks.amazonaws.com"
-        }
-      }
-    ]
-  })
+  name_prefix    = var.name_prefix
+  service_name   = "product"
+  msk_cluster_arn = var.msk_cluster_arn
+  s3_bucket_arn   = var.s3_bucket_arn
+  
+  # Product service needs access to MSK for event publishing/consuming
+  enable_msk_access    = true
+  # Product service needs S3 access for product image storage
+  enable_s3_access     = true
+  # Product service may need SES for notifications
+  enable_ses_access    = var.enable_ses_access
+  # Enable X-Ray tracing for observability
+  enable_xray_tracing  = true
 
   tags = var.tags
-}
-
-# Attach S3 Product Image Policy to ECS Task Role
-resource "aws_iam_role_policy_attachment" "ecs_task_role_s3_policy" {
-  role       = aws_iam_role.ecs_task_role.name
-  policy_arn = var.s3_product_image_policy_arn
 }
 
 # CloudWatch Log Group
@@ -188,8 +158,8 @@ resource "aws_ecs_task_definition" "product_service" {
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.cpu
   memory                   = var.memory
-  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-  task_role_arn           = aws_iam_role.ecs_task_role.arn
+  execution_role_arn       = module.product_service_iam.ecs_task_execution_role_arn
+  task_role_arn           = module.product_service_iam.ecs_task_role_arn
 
   container_definitions = jsonencode([
     {

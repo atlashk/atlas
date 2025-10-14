@@ -121,6 +121,30 @@ variable "msk_bootstrap_brokers" {
   type        = string
 }
 
+variable "msk_cluster_arn" {
+  description = "ARN of the MSK cluster for IAM permissions"
+  type        = string
+}
+
+# S3 Configuration
+variable "s3_bucket_arn" {
+  description = "ARN of the S3 bucket for file storage"
+  type        = string
+  default     = ""
+}
+
+variable "enable_s3_access" {
+  description = "Enable S3 access for this service"
+  type        = bool
+  default     = false
+}
+
+variable "enable_ses_access" {
+  description = "Enable SES (email) access for this service"
+  type        = bool
+  default     = true
+}
+
 # API Client Configuration
 variable "api_client_type" {
   description = "Type of API client (rest or grpc)"

@@ -86,46 +86,23 @@ resource "aws_security_group" "ecs" {
 }
 
 # ECS Task Execution Role
-resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "${var.name_prefix}-user-service-ecs-task-execution-role"
+# IAM roles for User Service using comprehensive IAM module
+module "user_service_iam" {
+  source = "../../infrastructure/iam"
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "ecs-tasks.amazonaws.com"
-        }
-      }
-    ]
-  })
-
-  tags = var.tags
-}
-
-resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
-  role       = aws_iam_role.ecs_task_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
-
-# ECS Task Role
-resource "aws_iam_role" "ecs_task_role" {
-  name = "${var.name_prefix}-user-service-ecs-task-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "ecs-tasks.amazonaws.com"
-        }
-      }
-    ]
-  })
+  name_prefix    = var.name_prefix
+  service_name   = "user"
+  msk_cluster_arn = var.msk_cluster_arn
+  s3_bucket_arn   = var.s3_bucket_arn
+  
+  # User service needs access to MSK for event publishing/consuming
+  enable_msk_access    = true
+  # User service may need S3 access for profile images
+  enable_s3_access     = var.enable_s3_access
+  # User service needs SES for user notifications and emails
+  enable_ses_access    = true
+  # Enable X-Ray tracing for observability
+  enable_xray_tracing  = true
 
   tags = var.tags
 }
@@ -182,8 +159,8 @@ resource "aws_ecs_task_definition" "user_service" {
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.cpu
   memory                   = var.memory
-  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-  task_role_arn           = aws_iam_role.ecs_task_role.arn
+  execution_role_arn       = module.user_service_iam.ecs_task_execution_role_arn
+  task_role_arn           = module.user_service_iam.ecs_task_role_arn
 
   container_definitions = jsonencode([
     {

@@ -73,13 +73,13 @@ output "task_definition_arn" {
 
 # IAM Roles
 output "ecs_task_execution_role_arn" {
-  description = "ECS Task Execution Role ARN"
-  value       = aws_iam_role.ecs_task_execution_role.arn
+  description = "ARN of the ECS task execution role"
+  value       = module.user_service_iam.ecs_task_execution_role_arn
 }
 
 output "ecs_task_role_arn" {
-  description = "ECS Task Role ARN"
-  value       = aws_iam_role.ecs_task_role.arn
+  description = "ARN of the ECS task role"
+  value       = module.user_service_iam.ecs_task_role_arn
 }
 
 # CloudWatch Log Group

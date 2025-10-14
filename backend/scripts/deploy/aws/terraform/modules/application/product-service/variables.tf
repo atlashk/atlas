@@ -164,6 +164,23 @@ variable "service_discovery_arn" {
   type        = string
 }
 
+# IAM Configuration
+variable "msk_cluster_arn" {
+  description = "ARN of the MSK cluster for IAM policy configuration"
+  type        = string
+}
+
+variable "s3_bucket_arn" {
+  description = "ARN of the S3 bucket for IAM policy configuration"
+  type        = string
+}
+
+variable "enable_ses_access" {
+  description = "Enable SES access for the service"
+  type        = bool
+  default     = false
+}
+
 # Environment Variables
 variable "environment_vars" {
   description = "Additional environment variables for the container"

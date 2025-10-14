@@ -187,6 +187,11 @@ module "user_service" {
   order_service_endpoint    = var.order_service_endpoint
   payment_service_endpoint  = var.payment_service_endpoint
   
+  # IAM Configuration
+  msk_cluster_arn   = module.msk.cluster_arn
+  s3_bucket_arn     = module.s3.bucket_arn
+  enable_s3_access  = false  # User service doesn't need S3 access by default
+  
   tags = local.common_tags
 }
 
@@ -225,6 +230,11 @@ module "product_service" {
   order_service_endpoint   = var.order_service_endpoint
   payment_service_endpoint = var.payment_service_endpoint
   
+  # IAM Configuration
+  msk_cluster_arn   = module.msk.cluster_arn
+  s3_bucket_arn     = module.s3.bucket_arn
+  enable_ses_access = false  # Product service doesn't need SES access by default
+  
   tags = local.common_tags
 }
 
@@ -259,6 +269,12 @@ module "order_service" {
   product_service_endpoint  = var.product_service_endpoint
   payment_service_endpoint  = var.payment_service_endpoint
   
+  # IAM Configuration
+  msk_cluster_arn   = module.msk.cluster_arn
+  s3_bucket_arn     = module.s3.bucket_arn
+  enable_s3_access  = false  # Order service doesn't need S3 access by default
+  enable_ses_access = true   # Order service needs SES for order notifications
+  
   tags = local.common_tags
 }
 
@@ -292,6 +308,12 @@ module "payment_service" {
   user_service_endpoint    = var.user_service_endpoint
   product_service_endpoint = var.product_service_endpoint
   order_service_endpoint   = var.order_service_endpoint
+  
+  # IAM Configuration
+  msk_cluster_arn   = module.msk.cluster_arn
+  s3_bucket_arn     = module.s3.bucket_arn
+  enable_s3_access  = false  # Payment service doesn't need S3 access by default
+  enable_ses_access = true   # Payment service needs SES for payment notifications
   
   tags = local.common_tags
 }
