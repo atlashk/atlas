@@ -59,18 +59,6 @@ variable "db_name" {
   default     = "atlas_main"
 }
 
-variable "db_username" {
-  description = "Username for the database"
-  type        = string
-  default     = "atlas_user"
-}
-
-variable "db_password" {
-  description = "Password for the database"
-  type        = string
-  sensitive   = true
-}
-
 variable "db_instance_class" {
   description = "RDS instance class"
   type        = string
@@ -94,58 +82,6 @@ variable "elasticache_num_cache_nodes" {
   description = "Number of cache nodes in ElastiCache cluster"
   type        = number
   default     = 2
-}
-
-# ECS Configuration
-variable "ecs_task_cpu" {
-  description = "CPU units for ECS tasks"
-  type        = number
-  default     = 256
-}
-
-variable "ecs_task_memory" {
-  description = "Memory for ECS tasks (MB)"
-  type        = number
-  default     = 512
-}
-
-variable "ecs_desired_count" {
-  description = "Desired number of ECS tasks"
-  type        = number
-  default     = 1
-}
-
-# Application Configuration
-variable "app_port" {
-  description = "Port on which the application runs"
-  type        = number
-  default     = 8080
-}
-
-variable "health_check_path" {
-  description = "Health check path for load balancer"
-  type        = string
-  default     = "/actuator/health"
-}
-
-# Docker Configuration
-variable "docker_image_tag" {
-  description = "Docker image tag for services"
-  type        = string
-  default     = "latest"
-}
-
-variable "ecr_repository_prefix" {
-  description = "Prefix for ECR repository names"
-  type        = string
-  default     = "atlas"
-}
-
-# Redis Configuration
-variable "redis_password" {
-  description = "Redis cluster password"
-  type        = string
-  sensitive   = true
 }
 
 # MSK Configuration

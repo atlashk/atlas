@@ -44,6 +44,24 @@ variable "enable_xray_tracing" {
   default     = true
 }
 
+variable "enable_secrets_access" {
+  description = "Enable AWS Secrets Manager access for this service"
+  type        = bool
+  default     = false
+}
+
+variable "secrets_arns" {
+  description = "List of secret ARNs that this service needs access to"
+  type        = list(string)
+  default     = []
+}
+
+variable "secrets_kms_key_ids" {
+  description = "List of KMS key IDs used to encrypt the secrets"
+  type        = list(string)
+  default     = []
+}
+
 variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)

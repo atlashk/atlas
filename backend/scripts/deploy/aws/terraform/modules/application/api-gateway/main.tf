@@ -110,6 +110,37 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+# IAM policy for secrets access
+resource "aws_iam_role_policy" "secrets_access" {
+  name = "${var.name_prefix}-api-gateway-secrets-access"
+  role = aws_iam_role.ecs_task_execution_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ]
+        Resource = [
+          var.redis_secret_arn
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt"
+        ]
+        Resource = [
+          "arn:aws:kms:*:*:key/${var.redis_secret_kms_key_id}"
+        ]
+      }
+    ]
+  })
+}
+
 # ECS Task Role
 resource "aws_iam_role" "ecs_task_role" {
   name = "${var.name_prefix}-api-gateway-ecs-task-role"
@@ -197,11 +228,11 @@ resource "aws_ecs_task_definition" "api_gateway" {
         }
       ]
 
+      # Separate sensitive data into secrets
       environment = [
         for key, value in merge(
           {
             REDIS_CLUSTER_NODES = var.redis_cluster_nodes
-            REDIS_PASSWORD      = var.redis_password
             JWK_SET_URI = "http://${var.user_service_dns}:8081/.well-known/jwks.json"
             AWS_REGION  = var.aws_region
           },
@@ -209,6 +240,14 @@ resource "aws_ecs_task_definition" "api_gateway" {
         ) : {
           name  = key
           value = tostring(value)
+        }
+      ]
+
+      # Use AWS Secrets Manager for sensitive data
+      secrets = [
+        {
+          name      = "REDIS_PASSWORD"
+          valueFrom = var.redis_secret_arn
         }
       ]
 

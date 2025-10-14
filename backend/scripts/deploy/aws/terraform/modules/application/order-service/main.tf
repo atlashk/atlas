@@ -102,6 +102,17 @@ module "order_service_iam" {
   enable_ses_access    = var.enable_ses_access
   # Enable X-Ray tracing for observability
   enable_xray_tracing  = true
+  
+  # Enable access to AWS Secrets Manager
+  enable_secrets_access = true
+  secrets_arns = [
+    var.db_secret_arn,
+    var.redis_secret_arn
+  ]
+  secrets_kms_key_ids = [
+    var.db_secret_kms_key_id,
+    var.redis_secret_kms_key_id
+  ]
 
   tags = var.tags
 }
@@ -173,17 +184,15 @@ resource "aws_ecs_task_definition" "order_service" {
         }
       ]
 
+      # Separate sensitive data into secrets
       environment = [
         for key, value in merge(
           {
             DB_URL                  = "jdbc:mysql://${var.db_host}:${var.db_port}/${var.db_name}?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
             DB_USERNAME             = var.db_username
-            DB_PASSWORD             = var.db_password
             DB_QUARTZ_URL           = "jdbc:mysql://${var.db_host}:${var.db_port}/${var.db_name}?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
             DB_QUARTZ_USERNAME      = var.db_username
-            DB_QUARTZ_PASSWORD      = var.db_password
             REDIS_CLUSTER_NODES     = var.redis_cluster_nodes
-            REDIS_PASSWORD          = var.redis_password
             KAFKA_BOOTSTRAP_SERVERS = var.msk_bootstrap_brokers
             AWS_REGION              = var.aws_region
             # API Client Configuration
@@ -198,6 +207,22 @@ resource "aws_ecs_task_definition" "order_service" {
         ) : {
           name  = key
           value = tostring(value)
+        }
+      ]
+
+      # Use AWS Secrets Manager for sensitive data
+      secrets = [
+        {
+          name      = "DB_PASSWORD"
+          valueFrom = var.db_secret_arn
+        },
+        {
+          name      = "DB_QUARTZ_PASSWORD"
+          valueFrom = var.db_secret_arn
+        },
+        {
+          name      = "REDIS_PASSWORD"
+          valueFrom = var.redis_secret_arn
         }
       ]
 

@@ -46,7 +46,22 @@ resource "aws_db_parameter_group" "main" {
   }
 }
 
-# RDS Instance
+# KMS Key for RDS Secrets
+resource "aws_kms_key" "rds_secrets" {
+  description             = "KMS key for RDS secrets encryption"
+  deletion_window_in_days = 7
+
+  tags = merge(var.tags, {
+    Name = "${var.name_prefix}-rds-secrets-key"
+  })
+}
+
+resource "aws_kms_alias" "rds_secrets" {
+  name          = "alias/${var.name_prefix}-rds-secrets"
+  target_key_id = aws_kms_key.rds_secrets.key_id
+}
+
+# RDS Instance with AWS Managed Passwords
 resource "aws_db_instance" "main" {
   identifier = "${var.name_prefix}-${var.db_engine}"
 
@@ -63,9 +78,11 @@ resource "aws_db_instance" "main" {
 
   # Database
   db_name  = var.db_name
-  username = var.db_username
-  password = var.db_password
-  port     = var.db_port
+  username = var.db_username != null ? var.db_username : null  # AWS uses default if null
+  # Use AWS managed password instead of manual password
+  manage_master_user_password   = true
+  master_user_secret_kms_key_id = aws_kms_key.rds_secrets.key_id
+  port                         = var.db_port
 
   # Network
   db_subnet_group_name   = aws_db_subnet_group.main.name
@@ -122,6 +139,35 @@ resource "aws_iam_role_policy_attachment" "rds_monitoring" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
 }
 
+# IAM Policy for ECS tasks to access RDS secrets
+resource "aws_iam_policy" "rds_secrets_access" {
+  name        = "${var.name_prefix}-rds-secrets-access"
+  description = "Policy for ECS tasks to access RDS secrets"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ]
+        Resource = aws_db_instance.main.master_user_secret[0].secret_arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt"
+        ]
+        Resource = aws_kms_key.rds_secrets.arn
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
 # Database initialization - Creates service-specific databases
 # This resource runs after RDS instance is created to initialize separate databases
 # for each microservice following the "Database per Service" pattern
@@ -129,10 +175,9 @@ resource "null_resource" "db_initialization" {
   depends_on = [aws_db_instance.main]
 
   provisioner "local-exec" {
+    # Get password from AWS Secrets Manager
     # Run appropriate SQL script based on database engine
-    # MySQL: Uses mysql client to execute init-databases.sql
-    # PostgreSQL: Uses psql client to execute init-databases-postgres.sql
-    command = var.db_engine == "mysql" ? "mysql -h ${aws_db_instance.main.endpoint} -P ${var.db_port} -u ${var.db_username} -p${var.db_password} < ${path.module}/mysql/scripts/init_db.sql" : "PGPASSWORD=${var.db_password} psql -h ${aws_db_instance.main.endpoint} -p ${var.db_port} -U ${var.db_username} -d ${var.db_name} -f ${path.module}/postgres/scripts/init_db.sql"
+    command = var.db_engine == "mysql" ? "DB_PASSWORD=$(aws secretsmanager get-secret-value --secret-id ${aws_db_instance.main.master_user_secret[0].secret_arn} --query SecretString --output text | jq -r .password) && mysql -h ${aws_db_instance.main.endpoint} -P ${var.db_port} -u ${var.db_username} -p$DB_PASSWORD < ${path.module}/mysql/scripts/init_db.sql" : "DB_PASSWORD=$(aws secretsmanager get-secret-value --secret-id ${aws_db_instance.main.master_user_secret[0].secret_arn} --query SecretString --output text | jq -r .password) && PGPASSWORD=$DB_PASSWORD psql -h ${aws_db_instance.main.endpoint} -p ${var.db_port} -U ${var.db_username} -d ${var.db_name} -f ${path.module}/postgres/scripts/init_db.sql"
   }
 
   # Triggers ensure the script runs when:

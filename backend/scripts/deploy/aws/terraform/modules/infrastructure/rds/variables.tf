@@ -48,14 +48,15 @@ variable "db_name" {
 }
 
 variable "db_username" {
-  description = "Username for the database"
+  description = "Username for the database (optional - AWS will use default if not provided)"
   type        = string
+  default     = null
 }
 
-variable "db_password" {
-  description = "Password for the database"
-  type        = string
-  sensitive   = true
+variable "manage_master_user_password" {
+  description = "Set to true to allow RDS to manage the master user password in Secrets Manager"
+  type        = bool
+  default     = true
 }
 
 variable "db_instance_class" {

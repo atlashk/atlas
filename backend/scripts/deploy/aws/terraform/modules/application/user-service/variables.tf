@@ -97,13 +97,17 @@ variable "db_username" {
   type        = string
 }
 
-variable "db_password" {
-  description = "Database password"
+# Use secret ARN instead of plain password
+variable "db_secret_arn" {
+  description = "ARN of the secret containing database password"
   type        = string
   sensitive   = true
 }
 
-
+variable "db_secret_kms_key_id" {
+  description = "KMS key ID used to encrypt the database secret"
+  type        = string
+}
 
 # Redis Cluster Configuration
 variable "redis_cluster_nodes" {
@@ -111,10 +115,16 @@ variable "redis_cluster_nodes" {
   type        = string
 }
 
-variable "redis_password" {
-  description = "Redis cluster password"
+# Use secret ARN instead of plain password
+variable "redis_secret_arn" {
+  description = "ARN of the secret containing Redis auth token"
   type        = string
   sensitive   = true
+}
+
+variable "redis_secret_kms_key_id" {
+  description = "KMS key ID used to encrypt the Redis secret"
+  type        = string
 }
 
 # MSK Configuration

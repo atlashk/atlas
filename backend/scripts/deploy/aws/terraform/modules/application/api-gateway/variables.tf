@@ -80,10 +80,16 @@ variable "redis_cluster_nodes" {
   type        = string
 }
 
-variable "redis_password" {
-  description = "Redis cluster password"
+# Use secret ARN instead of plain password
+variable "redis_secret_arn" {
+  description = "ARN of the secret containing Redis auth token"
   type        = string
   sensitive   = true
+}
+
+variable "redis_secret_kms_key_id" {
+  description = "KMS key ID used to encrypt the Redis secret"
+  type        = string
 }
 
 # JWT Configuration

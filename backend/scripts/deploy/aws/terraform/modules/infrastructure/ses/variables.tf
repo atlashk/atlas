@@ -36,41 +36,7 @@ variable "trusted_services" {
   ]
 }
 
-variable "enable_bounce_notifications" {
-  description = "Enable bounce notifications"
-  type        = bool
-  default     = true
-}
 
-variable "enable_complaint_notifications" {
-  description = "Enable complaint notifications"
-  type        = bool
-  default     = true
-}
-
-variable "enable_delivery_notifications" {
-  description = "Enable delivery notifications"
-  type        = bool
-  default     = false
-}
-
-variable "bounce_topic_arn" {
-  description = "SNS topic ARN for bounce notifications"
-  type        = string
-  default     = null
-}
-
-variable "complaint_topic_arn" {
-  description = "SNS topic ARN for complaint notifications"
-  type        = string
-  default     = null
-}
-
-variable "delivery_topic_arn" {
-  description = "SNS topic ARN for delivery notifications"
-  type        = string
-  default     = null
-}
 
 variable "tags" {
   description = "Tags to apply to all resources"

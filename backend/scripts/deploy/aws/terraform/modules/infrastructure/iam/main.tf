@@ -173,8 +173,42 @@ resource "aws_iam_policy" "parameter_store_access" {
 
 # IAM Policy for Secrets Manager Access
 resource "aws_iam_policy" "secrets_manager_access" {
-  name        = "${var.name_prefix}-ecs-secrets-manager-access"
-  description = "Policy for ECS services to access Secrets Manager"
+  count       = var.enable_secrets_access && length(var.secrets_arns) > 0 ? 1 : 0
+  name        = "${var.name_prefix}-${var.service_name}-secrets-manager-access"
+  description = "Policy for ECS services to access specific Secrets Manager secrets"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = concat([
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ]
+        Resource = var.secrets_arns
+      }
+    ], length(var.secrets_kms_key_ids) > 0 ? [
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt"
+        ]
+        Resource = [
+          for key_id in var.secrets_kms_key_ids : "arn:aws:kms:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:key/${key_id}"
+        ]
+      }
+    ] : [])
+  })
+
+  tags = var.tags
+}
+
+# Generic IAM Policy for Secrets Manager Access (fallback)
+resource "aws_iam_policy" "secrets_manager_access_generic" {
+  count       = var.enable_secrets_access && length(var.secrets_arns) == 0 ? 1 : 0
+  name        = "${var.name_prefix}-${var.service_name}-secrets-manager-access-generic"
+  description = "Generic policy for ECS services to access Secrets Manager"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -270,8 +304,15 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_cloudwatch_logs" {
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_task_execution_secrets_manager" {
+  count      = var.enable_secrets_access && length(var.secrets_arns) > 0 ? 1 : 0
   role       = aws_iam_role.ecs_task_execution_role.name
-  policy_arn = aws_iam_policy.secrets_manager_access.arn
+  policy_arn = aws_iam_policy.secrets_manager_access[0].arn
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_secrets_manager_generic" {
+  count      = var.enable_secrets_access && length(var.secrets_arns) == 0 ? 1 : 0
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = aws_iam_policy.secrets_manager_access_generic[0].arn
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_task_execution_parameter_store" {
@@ -314,8 +355,15 @@ resource "aws_iam_role_policy_attachment" "ecs_task_parameter_store" {
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_task_secrets_manager" {
+  count      = var.enable_secrets_access && length(var.secrets_arns) > 0 ? 1 : 0
   role       = aws_iam_role.ecs_task_role.name
-  policy_arn = aws_iam_policy.secrets_manager_access.arn
+  policy_arn = aws_iam_policy.secrets_manager_access[0].arn
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_task_secrets_manager_generic" {
+  count      = var.enable_secrets_access && length(var.secrets_arns) == 0 ? 1 : 0
+  role       = aws_iam_role.ecs_task_role.name
+  policy_arn = aws_iam_policy.secrets_manager_access_generic[0].arn
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_task_xray_access" {

@@ -1,3 +1,43 @@
+# Random auth token for ElastiCache
+resource "random_password" "elasticache_auth_token" {
+  length  = 32
+  special = true
+}
+
+# KMS Key for ElastiCache Secrets
+resource "aws_kms_key" "elasticache_secrets" {
+  description             = "KMS key for ElastiCache secrets encryption"
+  deletion_window_in_days = 7
+
+  tags = merge(var.tags, {
+    Name = "${var.name_prefix}-elasticache-secrets-key"
+  })
+}
+
+resource "aws_kms_alias" "elasticache_secrets" {
+  name          = "alias/${var.name_prefix}-elasticache-secrets"
+  target_key_id = aws_kms_key.elasticache_secrets.key_id
+}
+
+# Store auth token in Secrets Manager
+resource "aws_secretsmanager_secret" "elasticache_auth_token" {
+  name                    = "${var.name_prefix}-elasticache-auth-token"
+  description             = "ElastiCache auth token for ${var.name_prefix}"
+  kms_key_id             = aws_kms_key.elasticache_secrets.key_id
+  recovery_window_in_days = 7
+
+  tags = merge(var.tags, {
+    Name = "${var.name_prefix}-elasticache-auth-token"
+  })
+}
+
+resource "aws_secretsmanager_secret_version" "elasticache_auth_token" {
+  secret_id     = aws_secretsmanager_secret.elasticache_auth_token.id
+  secret_string = jsonencode({
+    auth_token = random_password.elasticache_auth_token.result
+  })
+}
+
 # ElastiCache Subnet Group
 resource "aws_elasticache_subnet_group" "main" {
   name       = "${var.name_prefix}-elasticache-subnet-group"
@@ -52,7 +92,8 @@ resource "aws_elasticache_replication_group" "main" {
   # Security
   at_rest_encryption_enabled = true
   transit_encryption_enabled = true
-  auth_token                = var.elasticache_auth_token
+  # Use auto-generated auth token instead of manual variable
+  auth_token                = random_password.elasticache_auth_token.result
   
   # Automatic failover
   automatic_failover_enabled = var.elasticache_num_cache_nodes > 1
@@ -61,4 +102,33 @@ resource "aws_elasticache_replication_group" "main" {
   tags = merge(var.tags, {
     Name = "${var.name_prefix}-elasticache"
   })
+}
+
+# IAM Policy for ECS tasks to access ElastiCache secrets
+resource "aws_iam_policy" "elasticache_secrets_access" {
+  name        = "${var.name_prefix}-elasticache-secrets-access"
+  description = "Policy for ECS tasks to access ElastiCache secrets"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ]
+        Resource = aws_secretsmanager_secret.elasticache_auth_token.arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt"
+        ]
+        Resource = aws_kms_key.elasticache_secrets.arn
+      }
+    ]
+  })
+
+  tags = var.tags
 }

@@ -23,3 +23,21 @@ output "db_username" {
   value       = aws_db_instance.main.username
   sensitive   = true
 }
+
+# Output secret ARN instead of plain text password
+output "db_secret_arn" {
+  description = "ARN of the secret containing database password"
+  value       = aws_db_instance.main.master_user_secret[0].secret_arn
+  sensitive   = true
+}
+
+output "db_secret_kms_key_id" {
+  description = "KMS key ID used to encrypt the database secret"
+  value       = aws_kms_key.rds_secrets.key_id
+}
+
+# IAM policy ARN for ECS tasks to access secrets
+output "rds_secrets_policy_arn" {
+  description = "IAM policy ARN for accessing RDS secrets"
+  value       = aws_iam_policy.rds_secrets_access.arn
+}

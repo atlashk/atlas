@@ -59,7 +59,7 @@ module "security_groups" {
   tags = local.common_tags
 }
 
-# RDS Database (MySQL or PostgreSQL)
+# RDS Database with AWS managed passwords
 module "rds" {
   source = "./modules/infrastructure/rds"
   
@@ -75,16 +75,16 @@ module "rds" {
   db_parameter_group_family = var.db_parameter_group_family
   
   # Database instance configuration
-  db_name              = var.db_name
-  db_username          = var.db_username
-  db_password          = var.db_password
-  db_instance_class    = var.db_instance_class
-  db_allocated_storage = var.db_allocated_storage
+  db_name                     = var.db_name
+  # ✅ db_username removed - AWS will use default username (admin for MySQL)
+  manage_master_user_password = true  # ✅ AWS manages password in Secrets Manager
+  db_instance_class           = var.db_instance_class
+  db_allocated_storage        = var.db_allocated_storage
   
   tags = local.common_tags
 }
 
-# ElastiCache Cluster
+# ElastiCache Cluster with auto-generated auth token
 module "elasticache" {
   source = "./modules/infrastructure/elasticache"
   
@@ -94,6 +94,7 @@ module "elasticache" {
   security_group_ids            = [module.security_groups.elasticache_security_group_id]
   elasticache_node_type         = var.elasticache_node_type
   elasticache_num_cache_nodes   = var.elasticache_num_cache_nodes
+  # REMOVED: redis_password - now auto-generated and stored in Secrets Manager
   
   tags = local.common_tags
 }
@@ -156,7 +157,7 @@ module "cloudmap" {
   tags = local.common_tags
 }
 
-# User Service
+# User Service with Secrets Manager integration
 module "user_service" {
   source = "./modules/application/user-service"
   
@@ -168,12 +169,16 @@ module "user_service" {
   db_host     = module.rds.db_endpoint
   db_port     = var.db_port
   db_name     = var.db_name
-  db_username = var.db_username
-  db_password = var.db_password
+  db_username = module.rds.db_username  # ✅ Use AWS-managed username
+  # Use secret ARN instead of plain password
+  db_secret_arn        = module.rds.db_secret_arn
+  db_secret_kms_key_id = module.rds.db_secret_kms_key_id
   
   # Redis configuration
   redis_cluster_nodes = module.elasticache.elasticache_endpoint
-  redis_password      = var.redis_password
+  # Use secret ARN instead of plain password
+  redis_secret_arn        = module.elasticache.elasticache_secret_arn
+  redis_secret_kms_key_id = module.elasticache.elasticache_secret_kms_key_id
   
   # MSK Configuration
   msk_bootstrap_brokers = module.msk.bootstrap_brokers_sasl_iam
@@ -207,12 +212,16 @@ module "product_service" {
   db_host     = module.rds.db_endpoint
   db_port     = var.db_port
   db_name     = var.db_name
-  db_username = var.db_username
-  db_password = var.db_password
+  db_username = module.rds.db_username  # ✅ Use AWS-managed username
+  # Use secret ARN instead of plain password
+  db_secret_arn        = module.rds.db_secret_arn
+  db_secret_kms_key_id = module.rds.db_secret_kms_key_id
   
   # Redis configuration
   redis_cluster_nodes = module.elasticache.elasticache_endpoint
-  redis_password      = var.redis_password
+  # Use secret ARN instead of plain password
+  redis_secret_arn        = module.elasticache.elasticache_secret_arn
+  redis_secret_kms_key_id = module.elasticache.elasticache_secret_kms_key_id
   
   # MSK Configuration
   msk_bootstrap_brokers = module.msk.bootstrap_brokers_sasl_iam
@@ -250,12 +259,16 @@ module "order_service" {
   db_host     = module.rds.db_endpoint
   db_port     = var.db_port
   db_name     = var.db_name
-  db_username = var.db_username
-  db_password = var.db_password
+  db_username = module.rds.db_username  # ✅ Use AWS-managed username
+  # Use secret ARN instead of plain password
+  db_secret_arn        = module.rds.db_secret_arn
+  db_secret_kms_key_id = module.rds.db_secret_kms_key_id
 
   # Redis configuration
   redis_cluster_nodes = module.elasticache.elasticache_endpoint
-  redis_password      = var.redis_password
+  # Use secret ARN instead of plain password
+  redis_secret_arn        = module.elasticache.elasticache_secret_arn
+  redis_secret_kms_key_id = module.elasticache.elasticache_secret_kms_key_id
   
   # MSK Configuration
   msk_bootstrap_brokers = module.msk.bootstrap_brokers_sasl_iam
@@ -290,12 +303,16 @@ module "payment_service" {
   db_host     = module.rds.db_endpoint
   db_port     = var.db_port
   db_name     = var.db_name
-  db_username = var.db_username
-  db_password = var.db_password
+  db_username = module.rds.db_username  # ✅ Use AWS-managed username
+  # Use secret ARN instead of plain password
+  db_secret_arn        = module.rds.db_secret_arn
+  db_secret_kms_key_id = module.rds.db_secret_kms_key_id
 
   # Redis configuration
   redis_cluster_nodes = module.elasticache.elasticache_endpoint
-  redis_password      = var.redis_password
+  # Use secret ARN instead of plain password
+  redis_secret_arn        = module.elasticache.elasticache_secret_arn
+  redis_secret_kms_key_id = module.elasticache.elasticache_secret_kms_key_id
   
   # MSK Configuration
   msk_bootstrap_brokers = module.msk.bootstrap_brokers_sasl_iam
@@ -330,7 +347,9 @@ module "api_gateway" {
   
   # Redis configuration
   redis_cluster_nodes = module.elasticache.elasticache_endpoint
-  redis_password      = var.redis_password
+  # Use secret ARN instead of plain password
+  redis_secret_arn        = module.elasticache.elasticache_secret_arn
+  redis_secret_kms_key_id = module.elasticache.elasticache_secret_kms_key_id
   
   # User service DNS for JWK Set URI
   user_service_dns = module.cloudmap.user_service_dns
