@@ -17,6 +17,15 @@ app:
     max-age: 0 # always fetch the latest data
   encryption-key: 123456
   locale: en-US
+  messaging:
+    gateway: outbox
   notification:
     email:
       sender: admin@atlas.org
+  payment:
+    currency: USD
+    routing:
+      card: stripe
+      paypal: paypal
+  product:
+    decrease-quantity-strategy: DISTRIBUTED_LOCK

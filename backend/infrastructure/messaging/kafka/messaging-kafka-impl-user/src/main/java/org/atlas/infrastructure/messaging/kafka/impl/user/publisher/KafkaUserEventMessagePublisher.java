@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.domain.user.infrastructure.messaging.UserEventMessagePublisher;
 import org.atlas.framework.domain.event.contract.user.BaseUserEvent;
 import org.atlas.framework.messaging.publisher.MessagePublisher;
-import org.atlas.framework.messaging.publisher.PublishRequest;
+import org.atlas.framework.messaging.publisher.MessageRequest;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,7 +16,7 @@ public class KafkaUserEventMessagePublisher implements UserEventMessagePublisher
 
   @Override
   public void publish(BaseUserEvent event) {
-    PublishRequest request = PublishRequest.builder()
+    MessageRequest request = MessageRequest.builder()
         .destination("user_events")
         .routingAttributes(Map.of("messageKey", event.getUser().getId()))
         .messagePayload(event)

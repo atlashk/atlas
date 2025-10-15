@@ -3,19 +3,14 @@ variable "name_prefix" {
   type        = string
 }
 
-variable "vpc_id" {
-  description = "ID of the VPC"
+variable "alarm_notification_email" {
+  description = "Email address for alarm notifications"
   type        = string
+  default     = ""
 }
 
 variable "tags" {
   description = "Tags to apply to resources"
   type        = map(string)
   default     = {}
-}
-
-variable "allowed_cidr_blocks" {
-  description = "List of CIDR blocks allowed to access the application"
-  type        = list(string)
-  default     = ["0.0.0.0/0"]
 }

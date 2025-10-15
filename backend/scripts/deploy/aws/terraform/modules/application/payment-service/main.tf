@@ -92,14 +92,9 @@ module "payment_service_iam" {
   name_prefix    = var.name_prefix
   service_name   = "payment"
   msk_cluster_arn = var.msk_cluster_arn
-  s3_bucket_arn   = var.s3_bucket_arn
   
   # Payment service needs access to MSK for event publishing/consuming
   enable_msk_access    = true
-  # Payment service may need S3 access for receipt storage
-  enable_s3_access     = var.enable_s3_access
-  # Payment service needs SES for payment confirmation emails
-  enable_ses_access    = var.enable_ses_access
   # Enable X-Ray tracing for observability
   enable_xray_tracing  = true
   
@@ -107,11 +102,15 @@ module "payment_service_iam" {
   enable_secrets_access = true
   secrets_arns = [
     var.db_secret_arn,
-    var.redis_secret_arn
+    var.redis_secret_arn,
+    var.stripe_secret_key_arn,
+    var.stripe_publishable_key_arn,
+    var.stripe_webhook_endpoint_secret_arn
   ]
   secrets_kms_key_ids = [
     var.db_secret_kms_key_id,
-    var.redis_secret_kms_key_id
+    var.redis_secret_kms_key_id,
+    var.stripe_secrets_kms_key_id
   ]
 
   tags = var.tags
@@ -223,6 +222,18 @@ resource "aws_ecs_task_definition" "payment_service" {
         {
           name      = "REDIS_PASSWORD"
           valueFrom = var.redis_secret_arn
+        },
+        {
+          name      = "STRIPE_SECRET_KEY"
+          valueFrom = var.stripe_secret_key_arn
+        },
+        {
+          name      = "STRIPE_PUBLISHABLE_KEY"
+          valueFrom = var.stripe_publishable_key_arn
+        },
+        {
+          name      = "STRIPE_WEBHOOK_ENDPOINT_SECRET"
+          valueFrom = var.stripe_webhook_endpoint_secret_arn
         }
       ]
 

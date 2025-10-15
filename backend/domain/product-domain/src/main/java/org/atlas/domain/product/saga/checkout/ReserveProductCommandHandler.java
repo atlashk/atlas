@@ -62,7 +62,7 @@ public class ReserveProductCommandHandler {
 
   private void decreaseQuantity(Integer productId, Integer quantity) {
     DecreaseQuantityStrategy decreaseQuantityStrategy =
-        applicationConfigService.getConfigAsClass("decrease-quantity-strategy",
+        applicationConfigService.getConfigAsClass("product.decrease-quantity-strategy",
             DecreaseQuantityStrategy.class, DecreaseQuantityStrategy.CONSTRAINT);
     switch (decreaseQuantityStrategy) {
       case CONSTRAINT -> productRepository.decreaseQuantityWithConstraint(productId, quantity);

@@ -4,6 +4,3 @@ server:
 spring:
   application:
     name: product-service
-
-app:
-  decrease-quantity-strategy: DISTRIBUTED_LOCK

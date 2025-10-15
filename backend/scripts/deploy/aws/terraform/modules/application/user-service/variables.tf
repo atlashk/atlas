@@ -171,17 +171,6 @@ variable "msk_cluster_arn" {
   type        = string
 }
 
-variable "s3_bucket_arn" {
-  description = "ARN of the S3 bucket for IAM policy configuration"
-  type        = string
-}
-
-variable "enable_s3_access" {
-  description = "Enable S3 access for the service"
-  type        = bool
-  default     = false
-}
-
 # Environment Variables
 variable "environment_vars" {
   description = "Additional environment variables for the container"
@@ -194,9 +183,9 @@ variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
   default = {
-    Project     = "Atlas"
-    Service     = "User-Service"
+    Project     = "atlas"
+    Service     = "user-service"
     Environment = "dev"
-    ManagedBy   = "Terraform"
+    ManagedBy   = "terraform"
   }
 }

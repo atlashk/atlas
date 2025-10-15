@@ -4,7 +4,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.messaging.publisher.MessagePublisher;
-import org.atlas.framework.messaging.publisher.PublishRequest;
+import org.atlas.framework.messaging.publisher.MessageRequest;
 import org.atlas.framework.util.MapUtil;
 import org.atlas.framework.util.StringUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -18,7 +18,7 @@ public class RabbitmqMessagePublisher implements MessagePublisher {
   private final RabbitTemplate rabbitTemplate;
 
   @Override
-  public void publish(PublishRequest request) {
+  public void publish(MessageRequest request) {
     // Extract exchange name
     final String exchange = request.getDestination();
     if (StringUtil.isBlank(exchange)) {

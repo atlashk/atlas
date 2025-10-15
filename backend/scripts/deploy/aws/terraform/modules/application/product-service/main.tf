@@ -93,13 +93,11 @@ module "product_service_iam" {
   service_name   = "product"
   msk_cluster_arn = var.msk_cluster_arn
   s3_bucket_arn   = var.s3_bucket_arn
-  
+
   # Product service needs access to MSK for event publishing/consuming
   enable_msk_access    = true
   # Product service needs S3 access for product image storage
   enable_s3_access     = true
-  # Product service may need SES for notifications
-  enable_ses_access    = var.enable_ses_access
   # Enable X-Ray tracing for observability
   enable_xray_tracing  = true
   

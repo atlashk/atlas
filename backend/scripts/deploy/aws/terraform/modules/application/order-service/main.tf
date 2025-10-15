@@ -92,12 +92,9 @@ module "order_service_iam" {
   name_prefix    = var.name_prefix
   service_name   = "order"
   msk_cluster_arn = var.msk_cluster_arn
-  s3_bucket_arn   = var.s3_bucket_arn
   
   # Order service needs access to MSK for event publishing/consuming
   enable_msk_access    = true
-  # Order service may need S3 access for file uploads
-  enable_s3_access     = var.enable_s3_access
   # Order service may need SES for order confirmation emails
   enable_ses_access    = var.enable_ses_access
   # Enable X-Ray tracing for observability

@@ -25,3 +25,15 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "alb_arn_suffix" {
+  description = "ALB ARN suffix for CloudWatch alarms"
+  type        = string
+  default     = ""
+}
+
+variable "enable_msk_monitoring" {
+  description = "Enable MSK monitoring alarms"
+  type        = bool
+  default     = false
+}

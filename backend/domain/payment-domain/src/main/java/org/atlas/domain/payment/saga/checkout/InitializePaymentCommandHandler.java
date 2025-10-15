@@ -47,7 +47,7 @@ public class InitializePaymentCommandHandler {
     paymentEntity.setUserId(checkoutSagaData.getUserId());
     paymentEntity.setAmount(checkoutSagaData.getAmount());
     paymentEntity.setCurrency(
-        applicationConfigService.getConfig("currency", CommonConstant.DEFAULT_CURRENCY));
+        applicationConfigService.getConfig("payment.currency", CommonConstant.DEFAULT_CURRENCY));
     paymentEntity.setMethod(checkoutSagaData.getPaymentMethod());
     paymentEntity.setGateway(paymentGatewayService.supports());
     paymentEntity.setStatus(PaymentStatus.PENDING);

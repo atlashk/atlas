@@ -12,7 +12,7 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-public class PublishRequest {
+public class MessageRequest {
 
   private String destination;
   private Map<String, Object> routingAttributes;

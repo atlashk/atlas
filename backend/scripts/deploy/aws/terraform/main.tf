@@ -6,6 +6,20 @@ terraform {
       version = "~> 5.0"
     }
   }
+  
+  # Remote state backend configuration
+  # Note: Run bootstrap module first to create these resources
+  # Then uncomment and configure with actual values from bootstrap output
+  /*
+  backend "s3" {
+    bucket         = "atlas-terraform-state-dev-xxxxxxxx"  # Replace with actual bucket name from bootstrap
+    key            = "infrastructure/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    dynamodb_table = "atlas-terraform-locks-dev"          # Replace with actual table name from bootstrap
+    kms_key_id     = "arn:aws:kms:us-east-1:xxxxxxxxxxxx:key/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  # Replace with actual KMS key ARN
+  }
+  */
 }
 
 provider "aws" {
@@ -53,8 +67,9 @@ module "vpc" {
 module "security_groups" {
   source = "./modules/infrastructure/security"
   
-  name_prefix = local.name_prefix
-  vpc_id      = module.vpc.vpc_id
+  name_prefix         = local.name_prefix
+  vpc_id              = module.vpc.vpc_id
+  allowed_cidr_blocks = var.allowed_cidr_blocks
   
   tags = local.common_tags
 }
@@ -130,6 +145,18 @@ module "ses" {
   tags = local.common_tags
 }
 
+# Stripe Secrets
+module "stripe_secrets" {
+  source = "./modules/infrastructure/stripe-secrets"
+  
+  name_prefix                     = local.name_prefix
+  stripe_secret_key              = var.stripe_secret_key
+  stripe_publishable_key         = var.stripe_publishable_key
+  stripe_webhook_endpoint_secret = var.stripe_webhook_endpoint_secret
+  
+  tags = local.common_tags
+}
+
 # MSK (Managed Streaming for Apache Kafka)
 module "msk" {
   source = "./modules/infrastructure/msk"
@@ -194,8 +221,6 @@ module "user_service" {
   
   # IAM Configuration
   msk_cluster_arn   = module.msk.cluster_arn
-  s3_bucket_arn     = module.s3.bucket_arn
-  enable_s3_access  = false  # User service doesn't need S3 access by default
   
   tags = local.common_tags
 }
@@ -242,7 +267,6 @@ module "product_service" {
   # IAM Configuration
   msk_cluster_arn   = module.msk.cluster_arn
   s3_bucket_arn     = module.s3.bucket_arn
-  enable_ses_access = false  # Product service doesn't need SES access by default
   
   tags = local.common_tags
 }
@@ -259,7 +283,7 @@ module "order_service" {
   db_host     = module.rds.db_endpoint
   db_port     = var.db_port
   db_name     = var.db_name
-  db_username = module.rds.db_username  # ✅ Use AWS-managed username
+  db_username = module.rds.db_username  # Use AWS-managed username
   # Use secret ARN instead of plain password
   db_secret_arn        = module.rds.db_secret_arn
   db_secret_kms_key_id = module.rds.db_secret_kms_key_id
@@ -284,8 +308,6 @@ module "order_service" {
   
   # IAM Configuration
   msk_cluster_arn   = module.msk.cluster_arn
-  s3_bucket_arn     = module.s3.bucket_arn
-  enable_s3_access  = false  # Order service doesn't need S3 access by default
   enable_ses_access = true   # Order service needs SES for order notifications
   
   tags = local.common_tags
@@ -320,6 +342,12 @@ module "payment_service" {
   # Service Discovery
   service_discovery_arn = module.cloudmap.payment_service_discovery_arn
   
+  # Stripe Configuration
+  stripe_secret_key_arn              = module.stripe_secrets.stripe_secret_key_arn
+  stripe_publishable_key_arn         = module.stripe_secrets.stripe_publishable_key_arn
+  stripe_webhook_endpoint_secret_arn = module.stripe_secrets.stripe_webhook_endpoint_secret_arn
+  stripe_secrets_kms_key_id          = module.stripe_secrets.stripe_secrets_kms_key_id
+  
   # API Client Configuration
   api_client_type          = var.api_client_type
   user_service_endpoint    = var.user_service_endpoint
@@ -328,9 +356,6 @@ module "payment_service" {
   
   # IAM Configuration
   msk_cluster_arn   = module.msk.cluster_arn
-  s3_bucket_arn     = module.s3.bucket_arn
-  enable_s3_access  = false  # Payment service doesn't need S3 access by default
-  enable_ses_access = true   # Payment service needs SES for payment notifications
   
   tags = local.common_tags
 }
@@ -363,12 +388,120 @@ module "api_gateway" {
   tags = local.common_tags
 }
 
-# CloudWatch Log Groups
+# SNS Topic for CloudWatch Alarms
+module "sns_alarms" {
+  source = "./modules/observability/sns"
+  
+  name_prefix               = local.name_prefix
+  alarm_notification_email  = var.alarm_notification_email
+  
+  tags = local.common_tags
+}
+
+# CloudWatch Log Groups and Alarms
 module "cloudwatch_log_groups" {
   source = "./modules/observability/cloudwatch"
   
-  name_prefix = local.name_prefix
-  services    = local.services
+  name_prefix           = local.name_prefix
+  services              = local.services
+  alarm_actions         = [module.sns_alarms.sns_topic_arn]
+  alb_arn_suffix        = try(split("/", module.api_gateway.alb_arn)[1], "")
+  enable_msk_monitoring = true
+  
+  tags = local.common_tags
+}
+
+# Auto Scaling for User Service
+module "user_service_autoscaling" {
+  source = "./modules/infrastructure/autoscaling"
+  
+  name_prefix                    = local.name_prefix
+  service_name                   = "user-service"
+  cluster_name                   = module.user_service.cluster_name
+  min_capacity                   = var.ecs_min_capacity
+  max_capacity                   = var.ecs_max_capacity
+  target_cpu_utilization         = var.ecs_target_cpu_utilization
+  target_memory_utilization      = var.ecs_target_memory_utilization
+  alb_target_group_arn          = module.user_service.target_group_arn
+  alb_full_name                 = module.user_service.alb_dns_name
+  alb_target_group_name         = module.user_service.target_group_name
+  enable_scheduled_scaling       = var.environment == "prod"
+  
+  tags = local.common_tags
+}
+
+# Auto Scaling for Product Service
+module "product_service_autoscaling" {
+  source = "./modules/infrastructure/autoscaling"
+  
+  name_prefix                    = local.name_prefix
+  service_name                   = "product-service"
+  cluster_name                   = module.product_service.cluster_name
+  min_capacity                   = var.ecs_min_capacity
+  max_capacity                   = var.ecs_max_capacity
+  target_cpu_utilization         = var.ecs_target_cpu_utilization
+  target_memory_utilization      = var.ecs_target_memory_utilization
+  alb_target_group_arn          = module.product_service.target_group_arn
+  alb_full_name                 = module.product_service.alb_dns_name
+  alb_target_group_name         = module.product_service.target_group_name
+  enable_scheduled_scaling       = var.environment == "prod"
+  
+  tags = local.common_tags
+}
+
+# Auto Scaling for Order Service
+module "order_service_autoscaling" {
+  source = "./modules/infrastructure/autoscaling"
+  
+  name_prefix                    = local.name_prefix
+  service_name                   = "order-service"
+  cluster_name                   = module.order_service.cluster_name
+  min_capacity                   = var.ecs_min_capacity
+  max_capacity                   = var.ecs_max_capacity
+  target_cpu_utilization         = var.ecs_target_cpu_utilization
+  target_memory_utilization      = var.ecs_target_memory_utilization
+  alb_target_group_arn          = module.order_service.target_group_arn
+  alb_full_name                 = module.order_service.alb_dns_name
+  alb_target_group_name         = module.order_service.target_group_name
+  enable_scheduled_scaling       = var.environment == "prod"
+  
+  tags = local.common_tags
+}
+
+# Auto Scaling for Payment Service
+module "payment_service_autoscaling" {
+  source = "./modules/infrastructure/autoscaling"
+  
+  name_prefix                    = local.name_prefix
+  service_name                   = "payment-service"
+  cluster_name                   = module.payment_service.cluster_name
+  min_capacity                   = var.ecs_min_capacity
+  max_capacity                   = var.ecs_max_capacity
+  target_cpu_utilization         = var.ecs_target_cpu_utilization
+  target_memory_utilization      = var.ecs_target_memory_utilization
+  alb_target_group_arn          = module.payment_service.target_group_arn
+  alb_full_name                 = module.payment_service.alb_dns_name
+  alb_target_group_name         = module.payment_service.target_group_name
+  enable_scheduled_scaling       = var.environment == "prod"
+  
+  tags = local.common_tags
+}
+
+# Auto Scaling for API Gateway
+module "api_gateway_autoscaling" {
+  source = "./modules/infrastructure/autoscaling"
+  
+  name_prefix                    = local.name_prefix
+  service_name                   = "api-gateway"
+  cluster_name                   = module.api_gateway.ecs_cluster_name
+  min_capacity                   = var.ecs_min_capacity
+  max_capacity                   = var.ecs_max_capacity
+  target_cpu_utilization         = var.ecs_target_cpu_utilization
+  target_memory_utilization      = var.ecs_target_memory_utilization
+  alb_target_group_arn          = module.api_gateway.target_group_arn
+  alb_full_name                 = module.api_gateway.alb_dns_name
+  alb_target_group_name         = module.api_gateway.target_group_name
+  enable_scheduled_scaling       = var.environment == "prod"
   
   tags = local.common_tags
 }

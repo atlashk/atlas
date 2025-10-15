@@ -2,5 +2,5 @@ package org.atlas.framework.messaging.publisher;
 
 public interface MessagePublisher {
 
-  void publish(PublishRequest request);
+  void publish(MessageRequest request);
 }

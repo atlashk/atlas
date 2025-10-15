@@ -138,23 +138,28 @@ variable "msk_cluster_arn" {
   type        = string
 }
 
-# S3 Configuration
-variable "s3_bucket_arn" {
-  description = "ARN of the S3 bucket for file storage"
+# Stripe Configuration
+variable "stripe_secret_key_arn" {
+  description = "ARN of the secret containing Stripe secret key"
   type        = string
-  default     = ""
+  sensitive   = true
 }
 
-variable "enable_s3_access" {
-  description = "Enable S3 access for this service"
-  type        = bool
-  default     = false
+variable "stripe_publishable_key_arn" {
+  description = "ARN of the secret containing Stripe publishable key"
+  type        = string
+  sensitive   = true
 }
 
-variable "enable_ses_access" {
-  description = "Enable SES (email) access for this service"
-  type        = bool
-  default     = true
+variable "stripe_webhook_endpoint_secret_arn" {
+  description = "ARN of the secret containing Stripe webhook endpoint secret"
+  type        = string
+  sensitive   = true
+}
+
+variable "stripe_secrets_kms_key_id" {
+  description = "KMS key ID used to encrypt the Stripe secrets"
+  type        = string
 }
 
 # API Client Configuration
@@ -201,9 +206,9 @@ variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
   default = {
-    Project     = "Atlas"
-    Service     = "Payment-Service"
+    Project     = "atlas"
+    Service     = "payment-service"
     Environment = "dev"
-    ManagedBy   = "Terraform"
+    ManagedBy   = "terraform"
   }
 }

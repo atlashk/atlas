@@ -4,7 +4,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.messaging.publisher.MessagePublisher;
-import org.atlas.framework.messaging.publisher.PublishRequest;
+import org.atlas.framework.messaging.publisher.MessageRequest;
 import org.atlas.framework.saga.messaging.SagaMessagePublisher;
 import org.atlas.framework.saga.messaging.payload.SagaCommand;
 import org.atlas.framework.saga.messaging.payload.SagaCommandReply;
@@ -27,7 +27,7 @@ public class RabbitmqSagaMessagePublisher implements SagaMessagePublisher {
     final String routingKey = String.format("saga.%s.command.%s",
             command.getSagaName(), command.getTargetServiceName())
         .toLowerCase();
-    PublishRequest request = PublishRequest.builder()
+    MessageRequest request = MessageRequest.builder()
         .destination(exchange)
         .routingAttributes(Map.of("routingKey", routingKey))
         .messagePayload(command)
@@ -41,7 +41,7 @@ public class RabbitmqSagaMessagePublisher implements SagaMessagePublisher {
         .toLowerCase();
     final String routingKey = String.format("saga.%s.commandreply", reply.getSagaName())
         .toLowerCase();
-    PublishRequest request = PublishRequest.builder()
+    MessageRequest request = MessageRequest.builder()
         .destination(exchange)
         .routingAttributes(Map.of("routingKey", routingKey))
         .messagePayload(reply)
@@ -57,7 +57,7 @@ public class RabbitmqSagaMessagePublisher implements SagaMessagePublisher {
     final String routingKey = String.format("saga.%s.compensation.%s",
             compensation.getSagaName(), compensation.getTargetServiceName())
         .toLowerCase();
-    PublishRequest request = PublishRequest.builder()
+    MessageRequest request = MessageRequest.builder()
         .destination(exchange)
         .routingAttributes(Map.of("routingKey", routingKey))
         .messagePayload(compensation)
@@ -71,7 +71,7 @@ public class RabbitmqSagaMessagePublisher implements SagaMessagePublisher {
         .toLowerCase();
     final String routingKey = String.format("saga.%s.compensationreply", reply.getSagaName())
         .toLowerCase();
-    PublishRequest request = PublishRequest.builder()
+    MessageRequest request = MessageRequest.builder()
         .destination(exchange)
         .routingAttributes(Map.of("routingKey", routingKey))
         .messagePayload(reply)

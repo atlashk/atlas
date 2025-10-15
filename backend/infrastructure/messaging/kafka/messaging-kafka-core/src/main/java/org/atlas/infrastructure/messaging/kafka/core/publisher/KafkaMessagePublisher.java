@@ -6,7 +6,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.atlas.framework.messaging.publisher.MessagePublisher;
-import org.atlas.framework.messaging.publisher.PublishRequest;
+import org.atlas.framework.messaging.publisher.MessageRequest;
 import org.atlas.framework.util.MapUtil;
 import org.atlas.framework.util.StringUtil;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -21,7 +21,7 @@ public class KafkaMessagePublisher implements MessagePublisher {
   private final KafkaTemplate<String, String> kafkaTemplate;
 
   @Override
-  public void publish(PublishRequest request) {
+  public void publish(MessageRequest request) {
     // Extract topic name
     final String topic = request.getDestination();
     if (StringUtil.isBlank(topic)) {

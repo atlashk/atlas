@@ -93,14 +93,9 @@ module "user_service_iam" {
   name_prefix    = var.name_prefix
   service_name   = "user"
   msk_cluster_arn = var.msk_cluster_arn
-  s3_bucket_arn   = var.s3_bucket_arn
   
   # User service needs access to MSK for event publishing/consuming
   enable_msk_access    = true
-  # User service may need S3 access for profile images
-  enable_s3_access     = var.enable_s3_access
-  # User service needs SES for user notifications and emails
-  enable_ses_access    = true
   # Enable X-Ray tracing for observability
   enable_xray_tracing  = true
   

@@ -23,7 +23,8 @@ public class PaymentRoutingService {
   public PaymentGatewayService getPaymentGateway(PaymentMethod paymentMethod) {
     // Find the relevant payment gateway from the application config
     String paymentGatewayName = applicationConfigService.getConfig(
-        "routing." + paymentMethod.getType(), "stripe");
+        String.format("payment.routing.%s", paymentMethod.getType()),
+        "stripe");
     if (StringUtil.isBlank(paymentGatewayName)) {
       log.error("Payment method {} has not routed yet", paymentMethod);
       throw new DomainException(DomainError.PAYMENT_METHOD_NOT_SUPPORTED);

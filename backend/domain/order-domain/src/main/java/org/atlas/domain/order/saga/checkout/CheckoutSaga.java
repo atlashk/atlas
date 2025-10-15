@@ -152,7 +152,7 @@ public class CheckoutSaga {
         }
         attachment = new Attachment(attachmentFile.getName(), attachmentFile);
 
-        String sender = Optional.ofNullable(applicationConfigService.getConfig("email.sender"))
+        String sender = Optional.ofNullable(applicationConfigService.getConfig("notification.email.sender"))
             .orElseThrow(() -> new IllegalStateException("email.sender is not configured"));
 
         EmailNotification notification = new EmailNotification.Builder()

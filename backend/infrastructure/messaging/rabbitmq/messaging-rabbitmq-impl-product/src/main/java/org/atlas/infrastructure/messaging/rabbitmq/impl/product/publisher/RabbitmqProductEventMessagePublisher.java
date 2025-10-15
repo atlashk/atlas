@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.product.infrastructure.messaging.ProductEventMessagePublisher;
 import org.atlas.framework.domain.event.contract.product.BaseProductEvent;
 import org.atlas.framework.messaging.publisher.MessagePublisher;
-import org.atlas.framework.messaging.publisher.PublishRequest;
+import org.atlas.framework.messaging.publisher.MessageRequest;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,7 +20,7 @@ public class RabbitmqProductEventMessagePublisher implements ProductEventMessage
   public void publish(BaseProductEvent event) {
     final String exchange = "product_events";
     final String routingKey = "product_events";
-    PublishRequest request = PublishRequest.builder()
+    MessageRequest request = MessageRequest.builder()
         .destination(exchange)
         .routingAttributes(Map.of("routingKey", routingKey))
         .messagePayload(event)

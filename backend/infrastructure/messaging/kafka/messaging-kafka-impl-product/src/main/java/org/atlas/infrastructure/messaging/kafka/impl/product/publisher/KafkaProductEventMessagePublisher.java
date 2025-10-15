@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.infrastructure.messaging.ProductEventMessagePublisher;
 import org.atlas.framework.domain.event.contract.product.BaseProductEvent;
 import org.atlas.framework.messaging.publisher.MessagePublisher;
-import org.atlas.framework.messaging.publisher.PublishRequest;
+import org.atlas.framework.messaging.publisher.MessageRequest;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,7 +16,7 @@ public class KafkaProductEventMessagePublisher implements ProductEventMessagePub
 
   @Override
   public void publish(BaseProductEvent event) {
-    PublishRequest request = PublishRequest.builder()
+    MessageRequest request = MessageRequest.builder()
         .destination("product_events")
         .routingAttributes(Map.of("messageKey", event.getProduct().getId()))
         .messagePayload(event)

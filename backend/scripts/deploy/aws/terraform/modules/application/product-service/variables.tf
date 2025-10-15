@@ -187,12 +187,6 @@ variable "s3_bucket_arn" {
   type        = string
 }
 
-variable "enable_ses_access" {
-  description = "Enable SES access for the service"
-  type        = bool
-  default     = false
-}
-
 # Environment Variables
 variable "environment_vars" {
   description = "Additional environment variables for the container"
@@ -205,9 +199,9 @@ variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
   default = {
-    Project     = "Atlas"
-    Service     = "Product-Service"
+    Project     = "atlas"
+    Service     = "product-service"
     Environment = "dev"
-    ManagedBy   = "Terraform"
+    ManagedBy   = "terraform"
   }
 }

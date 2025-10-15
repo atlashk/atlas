@@ -116,9 +116,9 @@ variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
   default = {
-    Project     = "Atlas"
-    Service     = "API-Gateway"
+    Project     = "atlas"
+    Service     = "api-gateway"
     Environment = "dev"
-    ManagedBy   = "Terraform"
+    ManagedBy   = "terraform"
   }
 }
