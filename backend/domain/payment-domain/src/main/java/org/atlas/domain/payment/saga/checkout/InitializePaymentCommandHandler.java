@@ -30,8 +30,8 @@ public class InitializePaymentCommandHandler {
   private final ApplicationConfigService applicationConfigService;
 
   @SagaCommandHandler(command = CheckoutCommand.INITIALIZE_PAYMENT)
-  public SagaCommandResult initializePayment(SagaCommand event) {
-    SagaContext sagaContext = SagaContext.deserialize(event.getSagaContext());
+  public SagaCommandResult initializePayment(SagaCommand sagaCommand) {
+    SagaContext sagaContext = SagaContext.deserialize(sagaCommand.getSagaContext());
     CheckoutSagaData checkoutSagaData = sagaContext.get("data", CheckoutSagaData.class);
     if (checkoutSagaData == null) {
       throw new IllegalArgumentException("Checkout data is required in the saga context");
@@ -43,8 +43,9 @@ public class InitializePaymentCommandHandler {
 
     // Insert new payment entity
     PaymentEntity paymentEntity = new PaymentEntity();
-    paymentEntity.setOrderId(checkoutSagaData.getOrderId());
     paymentEntity.setUserId(checkoutSagaData.getUserId());
+    paymentEntity.setOrderId(checkoutSagaData.getOrderId());
+    paymentEntity.setSagaId(sagaCommand.getSagaId());
     paymentEntity.setAmount(checkoutSagaData.getAmount());
     paymentEntity.setCurrency(
         applicationConfigService.getConfig("payment.currency", CommonConstant.DEFAULT_CURRENCY));

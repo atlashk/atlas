@@ -19,6 +19,7 @@ public class PaymentEntity extends DomainEntity {
   private Integer id;
   private Integer userId;
   private Integer orderId;
+  private Integer sagaId;
   private BigDecimal amount;
   private String currency;
   private PaymentMethod method;

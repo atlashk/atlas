@@ -35,6 +35,9 @@ public class JpaPaymentEntity extends JpaBaseEntity {
   @Column(name = "order_id")
   private Integer orderId;
 
+  @Column(name = "saga_id")
+  private Integer sagaId;
+
   @Column(name = "amount")
   private BigDecimal amount;
 

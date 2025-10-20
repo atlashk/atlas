@@ -19,7 +19,7 @@ public class GetPaymentNextActionUseCaseHandler {
   private final PaymentRepository paymentRepository;
 
   public GetPaymentNextActionOutput handle(GetPaymentNextActionInput input) throws Exception {
-    PaymentEntity payment = paymentRepository.findBySagaId(input.getOrderId())
+    PaymentEntity payment = paymentRepository.findByOrderId(input.getOrderId())
         .orElseThrow(() -> new DomainException(DomainError.PAYMENT_NOT_FOUND));
 
     if (!PaymentStatus.CREATED.equals(payment.getStatus())) {
