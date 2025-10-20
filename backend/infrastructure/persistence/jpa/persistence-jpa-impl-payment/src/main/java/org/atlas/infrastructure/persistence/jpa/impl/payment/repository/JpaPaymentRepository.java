@@ -11,5 +11,5 @@ public interface JpaPaymentRepository extends JpaBaseRepository<JpaPaymentEntity
 
   List<JpaPaymentEntity> findByOrderIdIn(List<Integer> orderIds);
 
-  Optional<JpaPaymentEntity> findBySagaId(Integer sagaId);
+  Optional<JpaPaymentEntity> findByOrderId(Integer orderId);
 }

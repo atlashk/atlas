@@ -26,8 +26,8 @@ public class JpaOutboxMessageEntity extends JpaBaseEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
 
-  @Column(name = "publish_request")
-  private String publishRequest;
+  @Column(name = "message")
+  private String message;
 
   @Column(name = "status")
   @Enumerated(EnumType.STRING)
@@ -36,8 +36,8 @@ public class JpaOutboxMessageEntity extends JpaBaseEntity {
   @Column(name = "processed_at")
   private Date processedAt;
 
-  @Column(name = "error_message")
-  private String errorMessage;
+  @Column(name = "error")
+  private String error;
 
   @Column(name = "retries")
   private Integer retries = 0;

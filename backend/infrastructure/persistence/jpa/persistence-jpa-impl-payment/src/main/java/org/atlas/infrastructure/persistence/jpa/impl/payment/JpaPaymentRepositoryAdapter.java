@@ -33,8 +33,8 @@ public class JpaPaymentRepositoryAdapter implements PaymentRepository {
   }
 
   @Override
-  public Optional<PaymentEntity> findBySagaId(Integer sagaId) {
-    return jpaPaymentRepository.findBySagaId(sagaId)
+  public Optional<PaymentEntity> findByOrderId(Integer orderId) {
+    return jpaPaymentRepository.findByOrderId(orderId)
         .map(JpaPaymentEntityMapper::toPaymentEntity);
   }
 

@@ -5,14 +5,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.domain.order.shared.OrderStatus;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Getter
 @Setter
-public class GetOrderStatusOutput {
+public class GetOrderStatusInput {
 
-  private OrderStatus status;
+  private Integer orderId;
 }

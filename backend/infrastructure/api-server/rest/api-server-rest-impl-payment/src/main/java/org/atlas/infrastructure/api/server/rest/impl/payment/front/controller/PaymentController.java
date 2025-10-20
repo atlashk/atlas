@@ -3,12 +3,12 @@ package org.atlas.infrastructure.api.server.rest.impl.payment.front.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
-import org.atlas.domain.payment.usecase.front.handler.GetPaymentTrackingUseCaseHandler;
-import org.atlas.domain.payment.usecase.front.model.GetPaymentTrackingInput;
-import org.atlas.domain.payment.usecase.front.model.GetPaymentTrackingOutput;
+import org.atlas.domain.payment.usecase.front.handler.GetPaymentNextActionUseCaseHandler;
+import org.atlas.domain.payment.usecase.front.model.GetPaymentNextActionInput;
+import org.atlas.domain.payment.usecase.front.model.GetPaymentNextActionOutput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
-import org.atlas.infrastructure.api.server.rest.impl.payment.front.model.PaymentTrackingResponse;
+import org.atlas.infrastructure.api.server.rest.impl.payment.front.model.GetPaymentNextActionResponse;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,17 +22,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class PaymentController {
 
-  private final GetPaymentTrackingUseCaseHandler getPaymentTrackingUseCaseHandler;
+  private final GetPaymentNextActionUseCaseHandler getPaymentNextActionUseCaseHandler;
 
-  @GetMapping(value = "/{sagaId}/tracking", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/{orderId}/next-action", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Get order status")
-  public ApiResponseWrapper<PaymentTrackingResponse> getPaymentTracking(
-      @Parameter(name = "sagaId", description = "Saga ID associated with the payment", example = "1")
-      @PathVariable("sagaId") Integer sagaId) throws Exception {
-    GetPaymentTrackingInput input = new GetPaymentTrackingInput(sagaId);
-    GetPaymentTrackingOutput output = getPaymentTrackingUseCaseHandler.handle(input);
-    PaymentTrackingResponse response = ObjectMapperUtil.getInstance()
-        .map(output, PaymentTrackingResponse.class);
+  public ApiResponseWrapper<GetPaymentNextActionResponse> getPaymentNextAction(
+      @Parameter(name = "orderId", description = "Order ID associated with the payment", example = "1")
+      @PathVariable("orderId") Integer orderId) throws Exception {
+    GetPaymentNextActionInput input = new GetPaymentNextActionInput(orderId);
+    GetPaymentNextActionOutput output = getPaymentNextActionUseCaseHandler.handle(input);
+    GetPaymentNextActionResponse response = ObjectMapperUtil.getInstance()
+        .map(output, GetPaymentNextActionResponse.class);
     return ApiResponseWrapper.success(response);
   }
 }

@@ -2,8 +2,9 @@ package org.atlas.infrastructure.messaging.kafka.core.publisher;
 
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.atlas.framework.json.JsonUtil;
+import org.atlas.framework.messaging.publisher.Message;
 import org.atlas.framework.messaging.publisher.MessagePublisher;
-import org.atlas.framework.messaging.publisher.MessageRequest;
 import org.atlas.framework.saga.messaging.SagaMessagePublisher;
 import org.atlas.framework.saga.messaging.payload.SagaCommand;
 import org.atlas.framework.saga.messaging.payload.SagaCommandReply;
@@ -18,44 +19,45 @@ public class KafkaSagaMessagePublisher implements SagaMessagePublisher {
   private final MessagePublisher messagePublisher;
 
   @Override
-  public void publish(SagaCommand command) {
-    MessageRequest request = MessageRequest.builder()
+  public void publish(SagaCommand sagaCommand) {
+    Message message = Message.builder()
         .destination(String.format("saga.%s.command.%s",
-            command.getSagaName(), command.getTargetServiceName()))
-        .routingAttributes(Map.of("messageKey", command.getSagaId()))
-        .messagePayload(command)
+            sagaCommand.getSagaName(), sagaCommand.getTargetServiceName()))
+        .routingAttributes(Map.of("messageKey", sagaCommand.getSagaId()))
+        .payload(JsonUtil.getInstance().toJson(sagaCommand))
         .build();
-    messagePublisher.publish(request);
+    messagePublisher.publish(message);
   }
 
   @Override
-  public void publish(SagaCommandReply reply) {
-    MessageRequest request = MessageRequest.builder()
-        .destination(String.format("saga.%s.commandreply", reply.getSagaName()))
-        .routingAttributes(Map.of("messageKey", reply.getSagaId()))
-        .messagePayload(reply)
+  public void publish(SagaCommandReply sagaCommandReply) {
+    Message message = Message.builder()
+        .destination(String.format("saga.%s.commandreply", sagaCommandReply.getSagaName()))
+        .routingAttributes(Map.of("messageKey", sagaCommandReply.getSagaId()))
+        .payload(JsonUtil.getInstance().toJson(sagaCommandReply))
         .build();
-    messagePublisher.publish(request);
+    messagePublisher.publish(message);
   }
 
   @Override
-  public void publish(SagaCompensation compensation) {
-    MessageRequest request = MessageRequest.builder()
+  public void publish(SagaCompensation sagaCompensation) {
+    Message message = Message.builder()
         .destination(String.format("saga.%s.compensation.%s",
-            compensation.getSagaName(), compensation.getTargetServiceName()))
-        .routingAttributes(Map.of("messageKey", compensation.getSagaId()))
-        .messagePayload(compensation)
+            sagaCompensation.getSagaName(), sagaCompensation.getTargetServiceName()))
+        .routingAttributes(Map.of("messageKey", sagaCompensation.getSagaId()))
+        .payload(JsonUtil.getInstance().toJson(sagaCompensation))
         .build();
-    messagePublisher.publish(request);
+    messagePublisher.publish(message);
   }
 
   @Override
-  public void publish(SagaCompensationReply reply) {
-    MessageRequest request = MessageRequest.builder()
-        .destination(String.format("saga.%s.compensationreply", reply.getSagaName()))
-        .routingAttributes(Map.of("messageKey", reply.getSagaId()))
-        .messagePayload(reply)
+  public void publish(SagaCompensationReply sagaCompensationReply) {
+    Message message = Message.builder()
+        .destination(
+            String.format("saga.%s.compensationreply", sagaCompensationReply.getSagaName()))
+        .routingAttributes(Map.of("messageKey", sagaCompensationReply.getSagaId()))
+        .payload(JsonUtil.getInstance().toJson(sagaCompensationReply))
         .build();
-    messagePublisher.publish(request);
+    messagePublisher.publish(message);
   }
 }

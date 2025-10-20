@@ -12,10 +12,10 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-public class MessageRequest {
+public class Message {
 
   private String destination;
   private Map<String, Object> routingAttributes;
-  private String messagePayload;
+  private String payload;
   private Map<String, Object> headers;
 }

@@ -17,7 +17,6 @@ public class PaymentEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
   private Integer id;
-  private Integer sagaId;
   private Integer userId;
   private Integer orderId;
   private BigDecimal amount;

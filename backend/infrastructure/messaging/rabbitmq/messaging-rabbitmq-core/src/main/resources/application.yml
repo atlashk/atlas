@@ -10,11 +10,7 @@ app:
     rabbitmq:
       exchanges:
         # Order service
-        - name: saga.checkout.command.order
-          type: TOPIC
         - name: saga.checkout.commandreply
-          type: TOPIC
-        - name: saga.checkout.compensation.order
           type: TOPIC
         - name: saga.checkout.compensationreply
           type: TOPIC
@@ -35,9 +31,7 @@ app:
           type: TOPIC
       queues:
         # Order service
-        - name: saga.checkout.command.order
         - name: saga.checkout.commandreply
-        - name: saga.checkout.compensation.order
         - name: saga.checkout.compensationreply
         # Payment service
         - name: saga.checkout.command.payment
@@ -47,15 +41,9 @@ app:
         - name: saga.checkout.compensation.product
       bindings:
         # Order service
-        - exchange: saga.checkout.command.order
-          queue: saga.checkout.command.order
-          routing-key: saga.checkout.command.order
         - exchange: saga.checkout.commandreply
           queue: saga.checkout.commandreply
           routing-key: saga.checkout.commandreply
-        - exchange: saga.checkout.compensation.order
-          queue: saga.checkout.compensation.order
-          routing-key: saga.checkout.compensation.order
         - exchange: saga.checkout.compensationreply
           queue: saga.checkout.compensationreply
           routing-key: saga.checkout.compensationreply

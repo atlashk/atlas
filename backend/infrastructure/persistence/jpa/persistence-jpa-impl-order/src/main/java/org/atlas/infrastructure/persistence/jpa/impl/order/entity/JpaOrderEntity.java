@@ -31,6 +31,9 @@ public class JpaOrderEntity extends JpaBaseEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
 
+  @Column(name = "saga_id")
+  private Integer sagaId;
+
   @Column(name = "code")
   private String code;
 

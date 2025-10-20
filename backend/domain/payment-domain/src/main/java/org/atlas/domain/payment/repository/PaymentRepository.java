@@ -10,7 +10,7 @@ public interface PaymentRepository {
 
   Optional<PaymentEntity> findById(Integer id);
 
-  Optional<PaymentEntity> findBySagaId(Integer sagaId);
+  Optional<PaymentEntity> findByOrderId(Integer orderId);
 
   void insert(PaymentEntity payment);
 

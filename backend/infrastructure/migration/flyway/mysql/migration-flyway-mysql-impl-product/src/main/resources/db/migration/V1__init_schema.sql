@@ -64,12 +64,12 @@ CREATE TABLE IF NOT EXISTS product_category
 
 CREATE TABLE IF NOT EXISTS reservation
 (
-    `id`         INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `order_id`   INT          NOT NULL,
-    `product_id` INT          NOT NULL,
-    `quantity`   INT          NOT NULL,
-    `created_at` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `id`         INT      NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `order_id`   INT      NOT NULL,
+    `product_id` INT      NOT NULL,
+    `quantity`   INT      NOT NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME          DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE INDEX idx_order_id_product_id (order_id, product_id)
 ) ENGINE = InnoDB;
 
@@ -77,12 +77,12 @@ CREATE TABLE IF NOT EXISTS reservation
 
 CREATE TABLE IF NOT EXISTS outbox_message
 (
-    id              INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    publish_request TEXT         NOT NULL,
-    status          VARCHAR(20)  NOT NULL,
-    processed_at    DATETIME,
-    error_message   TEXT,
-    retries         INT                   DEFAULT 0,
-    created_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      DATETIME              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    id           INT         NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    message      TEXT        NOT NULL,
+    status       VARCHAR(20) NOT NULL,
+    processed_at DATETIME,
+    error        TEXT,
+    retries      INT                  DEFAULT 0,
+    created_at   DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at   DATETIME             DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB;

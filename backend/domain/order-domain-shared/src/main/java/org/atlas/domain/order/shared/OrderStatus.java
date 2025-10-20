@@ -3,7 +3,8 @@ package org.atlas.domain.order.shared;
 public enum OrderStatus {
 
   AWAITING_PRODUCT_RESERVATION,
-  AWAITING_PAYMENT,
+  AWAITING_PAYMENT_INITIALIZED,
+  AWAITING_PAYMENT_PROCESSED,
   FULFILLED,
   CANCELED,
 }

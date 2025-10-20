@@ -11,7 +11,7 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-public class GetPaymentTrackingInput {
+public class GetPaymentNextActionInput {
 
-  private Integer sagaId;
+  private Integer orderId;
 }

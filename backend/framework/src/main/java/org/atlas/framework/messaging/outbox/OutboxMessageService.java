@@ -3,8 +3,8 @@ package org.atlas.framework.messaging.outbox;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.json.JsonUtil;
+import org.atlas.framework.messaging.publisher.Message;
 import org.atlas.framework.messaging.publisher.MessagePublisher;
-import org.atlas.framework.messaging.publisher.MessageRequest;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -24,14 +24,14 @@ public class OutboxMessageService {
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void processOutboxMessage(OutboxMessageEntity outboxMessage) {
     try {
-      MessageRequest messageRequest = JsonUtil.getInstance()
-          .toObject(outboxMessage.getPublishRequest(), MessageRequest.class);
-      messagePublisher.publish(messageRequest);
+      Message message = JsonUtil.getInstance()
+          .toObject(outboxMessage.getMessage(), Message.class);
+      messagePublisher.publish(message);
 
       outboxMessage.markAsProcessed();
     } catch (Exception e) {
       log.error("Failed to process outbox message {}", outboxMessage, e);
-      outboxMessage.setErrorMessage(e.getMessage());
+      outboxMessage.setError(e.getMessage());
 
       if (outboxMessage.getRetries() >= MAX_RETRIES) {
         outboxMessage.setStatus(OutboxMessageStatus.FAILED);

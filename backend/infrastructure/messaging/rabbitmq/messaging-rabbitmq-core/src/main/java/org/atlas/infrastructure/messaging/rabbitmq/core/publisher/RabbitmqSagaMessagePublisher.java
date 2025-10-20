@@ -3,8 +3,9 @@ package org.atlas.infrastructure.messaging.rabbitmq.core.publisher;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.atlas.framework.json.JsonUtil;
+import org.atlas.framework.messaging.publisher.Message;
 import org.atlas.framework.messaging.publisher.MessagePublisher;
-import org.atlas.framework.messaging.publisher.MessageRequest;
 import org.atlas.framework.saga.messaging.SagaMessagePublisher;
 import org.atlas.framework.saga.messaging.payload.SagaCommand;
 import org.atlas.framework.saga.messaging.payload.SagaCommandReply;
@@ -20,62 +21,64 @@ public class RabbitmqSagaMessagePublisher implements SagaMessagePublisher {
   private final MessagePublisher messagePublisher;
 
   @Override
-  public void publish(SagaCommand command) {
+  public void publish(SagaCommand sagaCommand) {
     final String exchange = String.format("saga.%s.command.%s",
-            command.getSagaName(), command.getTargetServiceName())
+            sagaCommand.getSagaName(), sagaCommand.getTargetServiceName())
         .toLowerCase();
     final String routingKey = String.format("saga.%s.command.%s",
-            command.getSagaName(), command.getTargetServiceName())
+            sagaCommand.getSagaName(), sagaCommand.getTargetServiceName())
         .toLowerCase();
-    MessageRequest request = MessageRequest.builder()
+    Message message = Message.builder()
         .destination(exchange)
         .routingAttributes(Map.of("routingKey", routingKey))
-        .messagePayload(command)
+        .payload(JsonUtil.getInstance().toJson(sagaCommand))
         .build();
-    messagePublisher.publish(request);
+    messagePublisher.publish(message);
   }
 
   @Override
-  public void publish(SagaCommandReply reply) {
-    final String exchange = String.format("saga.%s.commandreply", reply.getSagaName())
+  public void publish(SagaCommandReply sagaCommandReply) {
+    final String exchange = String.format("saga.%s.commandreply", sagaCommandReply.getSagaName())
         .toLowerCase();
-    final String routingKey = String.format("saga.%s.commandreply", reply.getSagaName())
+    final String routingKey = String.format("saga.%s.commandreply", sagaCommandReply.getSagaName())
         .toLowerCase();
-    MessageRequest request = MessageRequest.builder()
+    Message message = Message.builder()
         .destination(exchange)
         .routingAttributes(Map.of("routingKey", routingKey))
-        .messagePayload(reply)
+        .payload(JsonUtil.getInstance().toJson(sagaCommandReply))
         .build();
-    messagePublisher.publish(request);
+    messagePublisher.publish(message);
   }
 
   @Override
-  public void publish(SagaCompensation compensation) {
+  public void publish(SagaCompensation sagaCompensation) {
     final String exchange = String.format("saga.%s.compensation.%s",
-            compensation.getSagaName(), compensation.getTargetServiceName())
+            sagaCompensation.getSagaName(), sagaCompensation.getTargetServiceName())
         .toLowerCase();
     final String routingKey = String.format("saga.%s.compensation.%s",
-            compensation.getSagaName(), compensation.getTargetServiceName())
+            sagaCompensation.getSagaName(), sagaCompensation.getTargetServiceName())
         .toLowerCase();
-    MessageRequest request = MessageRequest.builder()
+    Message message = Message.builder()
         .destination(exchange)
         .routingAttributes(Map.of("routingKey", routingKey))
-        .messagePayload(compensation)
+        .payload(JsonUtil.getInstance().toJson(sagaCompensation))
         .build();
-    messagePublisher.publish(request);
+    messagePublisher.publish(message);
   }
 
   @Override
-  public void publish(SagaCompensationReply reply) {
-    final String exchange = String.format("saga.%s.compensationreply", reply.getSagaName())
+  public void publish(SagaCompensationReply sagaCompensationReply) {
+    final String exchange = String.format("saga.%s.compensationreply",
+            sagaCompensationReply.getSagaName())
         .toLowerCase();
-    final String routingKey = String.format("saga.%s.compensationreply", reply.getSagaName())
+    final String routingKey = String.format("saga.%s.compensationreply",
+            sagaCompensationReply.getSagaName())
         .toLowerCase();
-    MessageRequest request = MessageRequest.builder()
+    Message message = Message.builder()
         .destination(exchange)
         .routingAttributes(Map.of("routingKey", routingKey))
-        .messagePayload(reply)
+        .payload(JsonUtil.getInstance().toJson(sagaCompensationReply))
         .build();
-    messagePublisher.publish(request);
+    messagePublisher.publish(message);
   }
 }

@@ -45,6 +45,12 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
   }
 
   @Override
+  public Optional<OrderEntity> findBySagaId(Integer sagaId) {
+    return jpaOrderRepository.findBySagaIdAndFetch(sagaId)
+        .map(JpaOrderEntityMapper::toOrderEntity);
+  }
+
+  @Override
   public Long countAll() {
     return jpaOrderRepository.count();
   }

@@ -4,8 +4,9 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.user.infrastructure.messaging.UserEventMessagePublisher;
 import org.atlas.framework.domain.event.contract.user.BaseUserEvent;
+import org.atlas.framework.json.JsonUtil;
+import org.atlas.framework.messaging.publisher.Message;
 import org.atlas.framework.messaging.publisher.MessagePublisher;
-import org.atlas.framework.messaging.publisher.MessageRequest;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,11 +17,11 @@ public class KafkaUserEventMessagePublisher implements UserEventMessagePublisher
 
   @Override
   public void publish(BaseUserEvent event) {
-    MessageRequest request = MessageRequest.builder()
+    Message message = Message.builder()
         .destination("user_events")
         .routingAttributes(Map.of("messageKey", event.getUser().getId()))
-        .messagePayload(event)
+        .payload(JsonUtil.getInstance().toJson(event))
         .build();
-    messagePublisher.publish(request);
+    messagePublisher.publish(message);
   }
 }

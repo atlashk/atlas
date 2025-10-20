@@ -29,9 +29,6 @@ public class JpaPaymentEntity extends JpaBaseEntity {
   @EqualsAndHashCode.Include
   private Integer id;
 
-  @Column(name = "saga_id")
-  private Integer sagaId;
-
   @Column(name = "user_id")
   private Integer userId;
 

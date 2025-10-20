@@ -18,5 +18,5 @@ public class SagaCommandReply implements Serializable {
   private Integer sagaId;
   private String sagaName;
   private String sagaCommandName;
-  private SagaCommandResult result;
+  private SagaCommandResult sagaCommandResult;
 }

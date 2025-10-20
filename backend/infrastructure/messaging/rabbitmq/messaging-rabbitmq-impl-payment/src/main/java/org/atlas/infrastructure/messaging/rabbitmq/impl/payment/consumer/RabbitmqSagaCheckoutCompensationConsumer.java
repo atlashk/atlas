@@ -3,6 +3,7 @@ package org.atlas.infrastructure.messaging.rabbitmq.impl.payment.consumer;
 import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.saga.compensation.SagaCompensationHandlerDispatcher;
 import org.atlas.framework.saga.messaging.payload.SagaCompensation;
 import org.atlas.infrastructure.messaging.rabbitmq.core.consumer.BaseRabbitmqMessageConsumer;
@@ -23,16 +24,18 @@ public class RabbitmqSagaCheckoutCompensationConsumer extends BaseRabbitmqMessag
       queues = "saga.checkout.compensation.payment",
       containerFactory = "customContainerFactory"
   )
-  public void consumeCheckoutCompensation(@Payload Object messagePayload,
+  public void consumeCheckoutCompensation(@Payload Object payload,
       @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag,
       @Header(AmqpHeaders.RECEIVED_ROUTING_KEY) String routingKey,
       @Header(AmqpHeaders.RECEIVED_EXCHANGE) String exchange,
       Channel channel) {
-    super.consumeMessage(messagePayload, deliveryTag, routingKey, exchange, channel);
+    super.consumeMessage(payload, deliveryTag, routingKey, exchange, channel);
   }
 
   @Override
-  protected void handleMessage(Object messagePayload) {
-    dispatcher.dispatch((SagaCompensation) messagePayload);
+  protected void handleMessage(Object payload) {
+    SagaCompensation sagaCompensation =
+        JsonUtil.getInstance().toObject((String) payload, SagaCompensation.class);
+    dispatcher.dispatch(sagaCompensation);
   }
 }

@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.framework.payment.model.nextaction.NextAction;
 
 @NoArgsConstructor
@@ -13,12 +12,7 @@ import org.atlas.framework.payment.model.nextaction.NextAction;
 @Builder
 @Getter
 @Setter
-public class GetPaymentTrackingOutput {
+public class GetPaymentNextActionOutput {
 
-  private PaymentStatus status;
-  private String transactionId;
   private NextAction nextAction;
-  private String errorCode;
-  private String errorMessage;
-  private String cancellationReason;
 }

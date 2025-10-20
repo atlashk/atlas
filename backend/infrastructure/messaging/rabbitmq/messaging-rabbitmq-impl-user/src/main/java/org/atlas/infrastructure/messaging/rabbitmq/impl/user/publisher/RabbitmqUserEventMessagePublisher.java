@@ -5,8 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.user.infrastructure.messaging.UserEventMessagePublisher;
 import org.atlas.framework.domain.event.contract.user.BaseUserEvent;
+import org.atlas.framework.json.JsonUtil;
+import org.atlas.framework.messaging.publisher.Message;
 import org.atlas.framework.messaging.publisher.MessagePublisher;
-import org.atlas.framework.messaging.publisher.MessageRequest;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,11 +21,11 @@ public class RabbitmqUserEventMessagePublisher implements UserEventMessagePublis
   public void publish(BaseUserEvent event) {
     final String exchange = "user_events";
     final String routingKey = "user_events";
-    MessageRequest request = MessageRequest.builder()
+    Message message = Message.builder()
         .destination(exchange)
         .routingAttributes(Map.of("routingKey", routingKey))
-        .messagePayload(event)
+        .payload(JsonUtil.getInstance().toJson(event))
         .build();
-    messagePublisher.publish(request);
+    messagePublisher.publish(message);
   }
 }

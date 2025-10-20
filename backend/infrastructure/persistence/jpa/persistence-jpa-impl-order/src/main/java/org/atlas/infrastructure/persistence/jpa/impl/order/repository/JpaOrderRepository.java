@@ -21,6 +21,14 @@ public interface JpaOrderRepository extends JpaBaseRepository<JpaOrderEntity, In
   Optional<JpaOrderEntity> findByIdAndFetch(@Param("id") Integer id);
 
   @Query("""
+      select o
+      from JpaOrderEntity o
+      left join fetch o.orderItems
+      where o.sagaId = :sagaId
+      """)
+  Optional<JpaOrderEntity> findBySagaIdAndFetch(@Param("sagaId") Integer sagaId);
+
+  @Query("""
         select coalesce(sum(o.amount), 0)
         from JpaOrderEntity o
         where o.status = :status

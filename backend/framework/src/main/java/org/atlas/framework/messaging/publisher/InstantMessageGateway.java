@@ -14,7 +14,7 @@ public class InstantMessageGateway implements MessageGateway {
   private final MessagePublisher messagePublisher;
 
   @Override
-  public void sendMessage(MessageRequest request) {
-    messagePublisher.publish(request);
+  public void sendMessage(Message message) {
+    messagePublisher.publish(message);
   }
 }

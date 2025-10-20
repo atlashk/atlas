@@ -1,4 +1,4 @@
-package org.atlas.framework.saga.command;
+package org.atlas.framework.saga.command.model;
 
 public class CheckoutCommand {
 

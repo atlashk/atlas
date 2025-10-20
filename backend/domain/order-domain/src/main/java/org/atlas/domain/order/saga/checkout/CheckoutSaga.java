@@ -24,9 +24,10 @@ import org.atlas.framework.notification.email.EmailService;
 import org.atlas.framework.saga.annotation.Saga;
 import org.atlas.framework.saga.annotation.SagaCommandReplyHandler;
 import org.atlas.framework.saga.annotation.StartSaga;
-import org.atlas.framework.saga.command.CheckoutCommand;
-import org.atlas.framework.saga.context.CheckoutSagaData;
+import org.atlas.framework.saga.command.SagaCommandResult;
+import org.atlas.framework.saga.command.model.CheckoutCommand;
 import org.atlas.framework.saga.context.SagaContext;
+import org.atlas.framework.saga.context.model.CheckoutSagaData;
 import org.atlas.framework.saga.entity.SagaEntity;
 import org.atlas.framework.saga.orchestrator.SagaOrchestrator;
 import org.atlas.framework.template.ResolveTemplateException;
@@ -55,11 +56,11 @@ public class CheckoutSaga {
   }
 
   @SagaCommandReplyHandler(command = CheckoutCommand.CREATE_ORDER)
-  public void handleCreateOrderReply(SagaEntity sagaEntity, Object result) {
+  public void handleCreateOrderReply(SagaEntity sagaEntity, SagaCommandResult sagaCommandResult) {
     // Update context
     SagaContext sagaContext = SagaContext.deserialize(sagaEntity.getContext());
     sagaContext.remove("input");
-    sagaContext.put("data", result);
+    sagaContext.put("data", sagaCommandResult.getResult());
     sagaOrchestrator.syncSagaContext(sagaEntity.getId(), sagaContext);
 
     sagaOrchestrator.sendCommand(
@@ -67,13 +68,17 @@ public class CheckoutSaga {
   }
 
   @SagaCommandReplyHandler(command = CheckoutCommand.RESERVE_PRODUCT)
-  public void handleReserveProductReply(SagaEntity sagaEntity) {
-    // Update order status
-    SagaContext sagaContext = SagaContext.deserialize(sagaEntity.getContext());
-    CheckoutSagaData checkoutSagaData = getCheckoutSagaData(sagaContext);
-    OrderEntity order = orderRepository.findById(checkoutSagaData.getOrderId())
+  public void handleReserveProductReply(SagaEntity sagaEntity,
+      SagaCommandResult sagaCommandResult) {
+    // Update order
+    OrderEntity order = orderRepository.findBySagaId(sagaEntity.getId())
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
-    order.setStatus(OrderStatus.AWAITING_PAYMENT);
+    if (sagaCommandResult.isSuccess()) {
+      order.setStatus(OrderStatus.AWAITING_PAYMENT_INITIALIZED);
+    } else {
+      order.setStatus(OrderStatus.CANCELED);
+      order.setCancellationReason(sagaCommandResult.getErrorMessage());
+    }
     orderRepository.update(order);
 
     sagaOrchestrator.sendCommand(
@@ -81,10 +86,23 @@ public class CheckoutSaga {
   }
 
   @SagaCommandReplyHandler(command = CheckoutCommand.INITIALIZE_PAYMENT)
-  public void handleInitializePaymentReply(SagaEntity sagaEntity) {
-    // Explicitly create command for processing payment
-    sagaOrchestrator.createCommand(
-        sagaEntity.getId(), CheckoutCommand.PROCESS_PAYMENT, Services.EXTERNAL_PAYMENT_SERVICE);
+  public void handleInitializePaymentReply(SagaEntity sagaEntity,
+      SagaCommandResult sagaCommandResult) {
+    // Update order
+    OrderEntity order = orderRepository.findBySagaId(sagaEntity.getId())
+        .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
+    if (sagaCommandResult.isSuccess()) {
+      order.setStatus(OrderStatus.AWAITING_PAYMENT_PROCESSED);
+      orderRepository.update(order);
+
+      // Explicitly create command for processing payment
+      sagaOrchestrator.createCommand(
+          sagaEntity.getId(), CheckoutCommand.PROCESS_PAYMENT, Services.EXTERNAL_PAYMENT_SERVICE);
+    } else {
+      order.setStatus(OrderStatus.CANCELED);
+      order.setCancellationReason(sagaCommandResult.getErrorMessage());
+      orderRepository.update(order);
+    }
   }
 
   @SagaCommandReplyHandler(command = CheckoutCommand.PROCESS_PAYMENT)
@@ -152,7 +170,8 @@ public class CheckoutSaga {
         }
         attachment = new Attachment(attachmentFile.getName(), attachmentFile);
 
-        String sender = Optional.ofNullable(applicationConfigService.getConfig("notification.email.sender"))
+        String sender = Optional.ofNullable(
+                applicationConfigService.getConfig("notification.email.sender"))
             .orElseThrow(() -> new IllegalStateException("email.sender is not configured"));
 
         EmailNotification notification = new EmailNotification.Builder()

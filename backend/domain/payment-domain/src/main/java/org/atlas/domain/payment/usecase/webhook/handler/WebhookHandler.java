@@ -15,7 +15,7 @@ import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.payment.PaymentGatewayService;
 import org.atlas.framework.payment.model.PaymentResult;
 import org.atlas.framework.payment.model.WebhookResponse;
-import org.atlas.framework.saga.command.CheckoutCommand;
+import org.atlas.framework.saga.command.model.CheckoutCommand;
 import org.atlas.framework.saga.command.SagaCommandResult;
 import org.atlas.framework.saga.messaging.SagaMessagePublisher;
 import org.atlas.framework.saga.messaging.payload.SagaCommandReply;
@@ -73,19 +73,20 @@ public class WebhookHandler {
         paymentRepository.update(paymentEntity);
 
         // Publish saga command reply message
-        SagaCommandReply.SagaCommandReplyBuilder replyBuilder = SagaCommandReply.builder()
+        SagaCommandReply.SagaCommandReplyBuilder sagaCommandReplyBuilder = SagaCommandReply.builder()
             .sagaId(paymentEntity.getSagaId())
             .sagaName("checkout")
             .sagaCommandName(CheckoutCommand.PROCESS_PAYMENT);
-        SagaCommandResult commandResult = null;
+        SagaCommandResult sagaCommandResult = null;
         switch (paymentResult.getStatus()) {
-          case SUCCEEDED -> commandResult = SagaCommandResult.success(null);
-          case FAILED -> commandResult = SagaCommandResult.failure(paymentEntity.getErrorMessage());
+          case SUCCEEDED -> sagaCommandResult = SagaCommandResult.success(null);
+          case FAILED ->
+              sagaCommandResult = SagaCommandResult.failure(paymentEntity.getErrorMessage());
           case CANCELED ->
-              commandResult = SagaCommandResult.failure(paymentEntity.getCancellationReason());
+              sagaCommandResult = SagaCommandResult.failure(paymentEntity.getCancellationReason());
         }
-        replyBuilder.result(commandResult);
-        sagaMessagePublisher.publish(replyBuilder.build());
+        sagaCommandReplyBuilder.sagaCommandResult(sagaCommandResult);
+        sagaMessagePublisher.publish(sagaCommandReplyBuilder.build());
       }
 
       @Override

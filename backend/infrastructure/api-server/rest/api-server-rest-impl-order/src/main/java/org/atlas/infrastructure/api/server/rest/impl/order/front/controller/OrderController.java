@@ -9,8 +9,11 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.domain.order.entity.OrderEntity;
 import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.domain.order.usecase.front.handler.CheckoutUseCaseHandler;
+import org.atlas.domain.order.usecase.front.handler.GetOrderStatusUseCaseHandler;
 import org.atlas.domain.order.usecase.front.handler.ListOrderUseCaseHandler;
 import org.atlas.domain.order.usecase.front.model.CheckoutInput;
+import org.atlas.domain.order.usecase.front.model.GetOrderStatusInput;
+import org.atlas.domain.order.usecase.front.model.GetOrderStatusOutput;
 import org.atlas.domain.order.usecase.front.model.ListOrderInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.constant.CommonConstant;
@@ -21,12 +24,14 @@ import org.atlas.framework.paging.PagingRequest.SortOrder;
 import org.atlas.framework.paging.PagingResult;
 import org.atlas.infrastructure.api.server.rest.impl.order.front.model.CheckoutRequest;
 import org.atlas.infrastructure.api.server.rest.impl.order.front.model.CheckoutResponse;
+import org.atlas.infrastructure.api.server.rest.impl.order.front.model.GetOrderStatusResponse;
 import org.atlas.infrastructure.api.server.rest.impl.order.front.model.OrderResponse;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,6 +47,7 @@ public class OrderController {
 
   private final ListOrderUseCaseHandler listOrderUseCaseHandler;
   private final CheckoutUseCaseHandler checkoutUseCaseHandler;
+  private final GetOrderStatusUseCaseHandler getOrderStatusUseCaseHandler;
 
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve a list of orders with optional filtering and pagination")
@@ -88,6 +94,20 @@ public class OrderController {
     CheckoutResponse response = CheckoutResponse.builder()
         .sagaId(sagaId)
         .build();
+    return ApiResponseWrapper.success(response);
+  }
+
+  @GetMapping(value = "/{orderId}/status", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Get order status")
+  public ApiResponseWrapper<GetOrderStatusResponse> getOrderStatus(
+      @Parameter(name = "orderId", description = "ID of the order to retrieve the status for", example = "123")
+      @PathVariable("orderId") Integer orderId) throws Exception {
+    GetOrderStatusInput input = new GetOrderStatusInput(orderId);
+
+    GetOrderStatusOutput output = getOrderStatusUseCaseHandler.handle(input);
+
+    GetOrderStatusResponse response = ObjectMapperUtil.getInstance()
+        .map(output, GetOrderStatusResponse.class);
     return ApiResponseWrapper.success(response);
   }
 }

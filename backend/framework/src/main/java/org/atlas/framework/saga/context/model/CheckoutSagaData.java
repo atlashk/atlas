@@ -1,4 +1,4 @@
-package org.atlas.framework.saga.context;
+package org.atlas.framework.saga.context.model;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

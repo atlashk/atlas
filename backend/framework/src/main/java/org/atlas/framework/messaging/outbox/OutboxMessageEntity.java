@@ -19,10 +19,10 @@ public class OutboxMessageEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
   private Integer id;
-  private String publishRequest;
+  private String message;
   private OutboxMessageStatus status;
   private Date processedAt;
-  private String errorMessage;
+  private String error;
   private Integer retries = 0;
 
   public void markAsProcessed() {

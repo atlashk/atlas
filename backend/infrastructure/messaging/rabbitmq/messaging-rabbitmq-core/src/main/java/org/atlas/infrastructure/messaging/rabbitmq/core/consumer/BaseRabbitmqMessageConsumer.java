@@ -11,25 +11,25 @@ import org.springframework.messaging.handler.annotation.Payload;
 @Slf4j
 public abstract class BaseRabbitmqMessageConsumer {
 
-  protected abstract void handleMessage(Object messagePayload);
+  protected abstract void handleMessage(Object payload);
 
-  protected void consumeMessage(@Payload Object messagePayload,
+  protected void consumeMessage(@Payload Object payload,
       @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag,
       @Header(AmqpHeaders.RECEIVED_ROUTING_KEY) String routingKey,
       @Header(AmqpHeaders.RECEIVED_EXCHANGE) String exchange,
       Channel channel) {
     log.info("Consumed message: payload={}, exchange={}, routingKey={}, deliveryTag={}",
-        messagePayload, exchange, routingKey, deliveryTag);
+        payload, exchange, routingKey, deliveryTag);
 
     try {
       // Handle message
-      handleMessage(messagePayload);
+      handleMessage(payload);
 
       // Manually acknowledge the message after successful processing
       channel.basicAck(deliveryTag, false);
       log.debug("Message acknowledged: deliveryTag={}", deliveryTag);
     } catch (Exception e) {
-      log.error("Failed to process message: payload={}, error={}", messagePayload, e.getMessage(),
+      log.error("Failed to process message: payload={}, error={}", payload, e.getMessage(),
           e);
       try {
         // Reject the message and requeue it for retry

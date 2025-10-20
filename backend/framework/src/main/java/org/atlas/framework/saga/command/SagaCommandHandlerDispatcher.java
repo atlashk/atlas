@@ -101,19 +101,20 @@ public class SagaCommandHandlerDispatcher implements InitializingBean {
 
     SagaContext sagaContext = SagaContext.deserialize(command.getSagaContext());
 
-    SagaCommandResult result;
+    SagaCommandResult sagaCommandResult;
     try {
       log.debug("Dispatching saga command {} to handler {}", command.getSagaCommandName(),
           cachedHandlerMethod.methodSignature);
-      result = (SagaCommandResult) cachedHandlerMethod.invoke(sagaContext);
+      sagaCommandResult = (SagaCommandResult) cachedHandlerMethod.invoke(sagaContext);
     } catch (Exception e) {
-      result = SagaCommandResult.failure(StringUtil.sanitizeErrorMessage(e.getMessage()));
+      sagaCommandResult = SagaCommandResult.failure(
+          StringUtil.sanitizeErrorMessage(e.getMessage()));
     }
-    if (result.isSuccess()) {
+    if (sagaCommandResult.isSuccess()) {
       log.info("Successfully executed handler {}", cachedHandlerMethod.methodSignature);
     } else {
       log.error("Failed to execute handler {}: {}", cachedHandlerMethod.methodSignature,
-          result.getErrorMessage());
+          sagaCommandResult.getErrorMessage());
     }
 
     // Publish command reply
@@ -121,7 +122,7 @@ public class SagaCommandHandlerDispatcher implements InitializingBean {
         .sagaId(command.getSagaId())
         .sagaName(command.getSagaName())
         .sagaCommandName(command.getSagaCommandName())
-        .result(result)
+        .sagaCommandResult(sagaCommandResult)
         .build();
     sagaMessagePublisher.publish(reply);
   }

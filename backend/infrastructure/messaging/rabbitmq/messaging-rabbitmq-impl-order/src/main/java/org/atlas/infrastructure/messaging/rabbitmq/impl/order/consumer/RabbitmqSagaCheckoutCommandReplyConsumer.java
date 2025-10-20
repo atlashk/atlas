@@ -3,6 +3,7 @@ package org.atlas.infrastructure.messaging.rabbitmq.impl.order.consumer;
 import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.saga.messaging.payload.SagaCommandReply;
 import org.atlas.framework.saga.orchestrator.SagaOrchestrator;
 import org.atlas.infrastructure.messaging.rabbitmq.core.consumer.BaseRabbitmqMessageConsumer;
@@ -23,16 +24,18 @@ public class RabbitmqSagaCheckoutCommandReplyConsumer extends BaseRabbitmqMessag
       queues = "saga.checkout.commandreply",
       containerFactory = "customContainerFactory"
   )
-  public void consumeCheckoutCommand(@Payload Object messagePayload,
+  public void consumeCheckoutCommand(@Payload Object payload,
       @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag,
       @Header(AmqpHeaders.RECEIVED_ROUTING_KEY) String routingKey,
       @Header(AmqpHeaders.RECEIVED_EXCHANGE) String exchange,
       Channel channel) {
-    super.consumeMessage(messagePayload, deliveryTag, routingKey, exchange, channel);
+    super.consumeMessage(payload, deliveryTag, routingKey, exchange, channel);
   }
 
   @Override
-  protected void handleMessage(Object messagePayload) {
-    sagaOrchestrator.handleSagaCommandReply((SagaCommandReply) messagePayload);
+  protected void handleMessage(Object payload) {
+    SagaCommandReply sagaCommandReply =
+        JsonUtil.getInstance().toObject((String) payload, SagaCommandReply.class);
+    sagaOrchestrator.handleSagaCommandReply(sagaCommandReply);
   }
 }

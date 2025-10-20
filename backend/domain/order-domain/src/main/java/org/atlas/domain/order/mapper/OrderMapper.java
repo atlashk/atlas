@@ -3,7 +3,7 @@ package org.atlas.domain.order.mapper;
 import lombok.experimental.UtilityClass;
 import org.atlas.domain.order.entity.OrderEntity;
 import org.atlas.domain.order.entity.OrderItemEntity;
-import org.atlas.framework.saga.context.CheckoutSagaData;
+import org.atlas.framework.saga.context.model.CheckoutSagaData;
 
 @UtilityClass
 public class OrderMapper {

@@ -1,12 +1,12 @@
 package org.atlas.framework.saga.orchestrator;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.saga.annotation.SagaCommandReplyHandler;
+import org.atlas.framework.saga.command.SagaCommandResult;
 import org.atlas.framework.saga.context.SagaContext;
 import org.atlas.framework.saga.entity.SagaCommandEntity;
 import org.atlas.framework.saga.entity.SagaCommandStatus;
@@ -163,40 +163,42 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
 
   @Override
   @Transactional
-  public void handleSagaCommandReply(SagaCommandReply reply) {
+  public void handleSagaCommandReply(SagaCommandReply sagaCommandReply) {
     log.debug(
         "[COMMAND_REPLY] Processing command reply: sagaId={}, sagaName={}, sagaCommandName={}, success={}",
-        reply.getSagaId(), reply.getSagaName(), reply.getSagaCommandName(),
-        reply.getResult().isSuccess());
+        sagaCommandReply.getSagaId(), sagaCommandReply.getSagaName(),
+        sagaCommandReply.getSagaCommandName(), sagaCommandReply.getSagaCommandResult().isSuccess());
 
-    Optional<SagaMetadata> sagaMetadataOpt = sagaRegistry.getSagaMetadata(reply.getSagaName());
+    Optional<SagaMetadata> sagaMetadataOpt = sagaRegistry.getSagaMetadata(
+        sagaCommandReply.getSagaName());
     if (sagaMetadataOpt.isEmpty()) {
-      throw new SagaConfigException("Saga metadata not found for saga: " + reply.getSagaName());
+      throw new SagaConfigException(
+          "Saga metadata not found for saga: " + sagaCommandReply.getSagaName());
     }
 
-    SagaEntity sagaEntity = findSagaEntity(reply.getSagaId());
+    SagaEntity sagaEntity = findSagaEntity(sagaCommandReply.getSagaId());
 
     SagaCommandEntity sagaCommandEntity =
-        findSagaCommandEntity(reply.getSagaId(), reply.getSagaCommandName());
+        findSagaCommandEntity(sagaCommandReply.getSagaId(), sagaCommandReply.getSagaCommandName());
 
-    if (reply.getResult().isSuccess()) {
+    // Trigger command reply handler
+    triggerSagaCommandReplyHandler(sagaEntity, sagaCommandEntity, sagaMetadataOpt.get(),
+        sagaCommandReply.getSagaCommandResult());
+
+    if (sagaCommandReply.getSagaCommandResult().isSuccess()) {
       // Mark command as COMPLETED
       sagaCommandEntity.setStatus(SagaCommandStatus.COMPLETED);
       sagaCommandEntity.setCompletedAt(DateUtil.now());
       sagaCommandRepository.update(sagaCommandEntity);
-
-      // Trigger command reply handler
-      triggerSagaCommandReplyHandler(sagaEntity, sagaCommandEntity, sagaMetadataOpt.get(),
-          reply.getResult());
     } else {
       // Mark command as FAILED
       sagaCommandEntity.setStatus(SagaCommandStatus.FAILED);
-      sagaCommandEntity.setErrorMessage(reply.getResult().getErrorMessage());
+      sagaCommandEntity.setErrorMessage(sagaCommandReply.getSagaCommandResult().getErrorMessage());
       sagaCommandRepository.update(sagaCommandEntity);
 
       // Mark saga as FAILED
       sagaEntity.setStatus(SagaStatus.FAILED);
-      sagaEntity.setErrorMessage(reply.getResult().getErrorMessage());
+      sagaEntity.setErrorMessage(sagaCommandReply.getSagaCommandResult().getErrorMessage());
       sagaRepository.update(sagaEntity);
 
       // Compensate saga
@@ -205,7 +207,8 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
   }
 
   private void triggerSagaCommandReplyHandler(SagaEntity sagaEntity,
-      SagaCommandEntity sagaCommandEntity, SagaMetadata sagaMetadata, Object result) {
+      SagaCommandEntity sagaCommandEntity, SagaMetadata sagaMetadata,
+      SagaCommandResult sagaCommandResult) {
     // Find saga command reply handler method
     Method sagaCommandReplyHandlerMethod = sagaMetadata.getSagaCommandReplyHandlerMethods()
         .stream()
@@ -219,7 +222,8 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
             sagaCommandEntity.getName(), sagaEntity.getName())));
 
     try {
-      sagaCommandReplyHandlerMethod.invoke(sagaMetadata.getSagaBean(), sagaEntity, result);
+      sagaCommandReplyHandlerMethod.invoke(sagaMetadata.getSagaBean(), sagaEntity,
+          sagaCommandResult);
     } catch (Exception e) {
       throw new SagaExecutionException(String.format(
           "Failed to execute command reply handler: sagaId=%d, sagaName=%s, sagaCommandId=%d, sagaCommandName=%s",
@@ -286,28 +290,31 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
 
   @Override
   @Transactional
-  public void handleSagaCompensationReply(SagaCompensationReply reply) {
+  public void handleSagaCompensationReply(SagaCompensationReply sagaCompensationReply) {
     log.debug(
         "[COMPENSATION_REPLY] Processing compensation reply: sagaId={}, sagaName={}, sagaCommandName={}, success={}",
-        reply.getSagaId(), reply.getSagaName(), reply.getSagaCommandName(),
-        reply.getResult().isSuccess());
+        sagaCompensationReply.getSagaId(), sagaCompensationReply.getSagaName(),
+        sagaCompensationReply.getSagaCommandName(), sagaCompensationReply.getResult().isSuccess());
 
-    if (!sagaRegistry.hasSagaMetadata(reply.getSagaName())) {
-      throw new SagaConfigException("Saga metadata not found for saga: " + reply.getSagaName());
+    if (!sagaRegistry.hasSagaMetadata(sagaCompensationReply.getSagaName())) {
+      throw new SagaConfigException(
+          "Saga metadata not found for saga: " + sagaCompensationReply.getSagaName());
     }
 
-    findSagaEntity(reply.getSagaId());
+    findSagaEntity(sagaCompensationReply.getSagaId());
 
     SagaCommandEntity sagaCommandEntity =
-        findSagaCommandEntity(reply.getSagaId(), reply.getSagaCommandName());
+        findSagaCommandEntity(sagaCompensationReply.getSagaId(),
+            sagaCompensationReply.getSagaCommandName());
 
-    if (reply.getResult().isSuccess()) {
+    if (sagaCompensationReply.getResult().isSuccess()) {
       // Mark command as COMPENSATED
       sagaCommandEntity.setStatus(SagaCommandStatus.COMPENSATED);
     } else {
       // Mark command as COMPENSATION_FAILED
       sagaCommandEntity.setStatus(SagaCommandStatus.COMPENSATION_FAILED);
-      sagaCommandEntity.setCompensationErrorMessage(reply.getResult().getErrorMessage());
+      sagaCommandEntity.setCompensationErrorMessage(
+          sagaCompensationReply.getResult().getErrorMessage());
     }
     sagaCommandEntity.setCompletedAt(DateUtil.now());
     sagaCommandRepository.update(sagaCommandEntity);

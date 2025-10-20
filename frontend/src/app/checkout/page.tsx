@@ -189,7 +189,7 @@ export default function CheckoutPage() {
   // Show initial checkout form
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Header - removed back button */}
         <div className="flex items-center gap-4">
           <h1 className="text-2xl font-bold">Checkout</h1>
@@ -252,7 +252,7 @@ export default function CheckoutPage() {
         <Button 
           onClick={handleCheckout} 
           disabled={isCheckingOut || !cart || cart.cartItems.length === 0 || isLoadingPaymentMethods}
-          className="w-full"
+          className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200"
           size="lg"
         >
           {isCheckingOut ? "Processing..." : `Pay ${formatCurrency(getCartTotal())}`}

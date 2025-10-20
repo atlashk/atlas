@@ -18,6 +18,8 @@ public interface OrderRepository {
 
   Optional<OrderEntity> findById(Integer id);
 
+  Optional<OrderEntity> findBySagaId(Integer sagaId);
+
   void insert(OrderEntity order);
 
   void update(OrderEntity order);

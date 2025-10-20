@@ -3,6 +3,7 @@ package org.atlas.infrastructure.messaging.kafka.impl.payment.consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.saga.command.SagaCommandHandlerDispatcher;
 import org.atlas.framework.saga.messaging.payload.SagaCommand;
 import org.atlas.infrastructure.messaging.kafka.core.consumer.BaseKafkaMessageConsumer;
@@ -36,7 +37,9 @@ public class KafkaSagaCheckoutCommandConsumer extends BaseKafkaMessageConsumer {
   }
 
   @Override
-  protected void handleMessage(Object messagePayload) {
-    dispatcher.dispatch((SagaCommand) messagePayload);
+  protected void handleMessage(Object payload) {
+    SagaCommand sagaCommand =
+        JsonUtil.getInstance().toObject((String) payload, SagaCommand.class);
+    dispatcher.dispatch(sagaCommand);
   }
 }
