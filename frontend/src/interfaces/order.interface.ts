@@ -38,7 +38,12 @@ export interface CheckoutRequest {
 }
 
 export interface CheckoutResponse {
-  sagaId: number;
+  orderId: number;
+}
+
+export interface OrderStatusResponse {
+  status: OrderStatus;
+  cancellationReason?: string;
 }
 
 export interface ListOrderFilters {

@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PaymentMethod } from "@/constants";
-import { usePaymentPolling } from "@/hooks/usePaymentPolling";
+import { PaymentNextAction } from "@/interfaces/payment.interface";
+import { useOrderStatusPolling } from "@/hooks/useOrderStatusPolling";
 import { useCartStore } from "@/stores";
 import { formatCurrency } from "@/utils/formatter.util";
 import { CheckCircle, Clock, CreditCard, XCircle } from "lucide-react";
@@ -19,12 +20,14 @@ export default function CheckoutPage() {
   const { cart, getCartTotal } = useCartStore();
   
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>("CARD");
-  const [sagaId, setSagaId] = useState<number | null>(null);
+  const [orderId, setOrderId] = useState<string | null>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [availablePaymentMethods, setAvailablePaymentMethods] = useState<string[]>([]);
   const [isLoadingPaymentMethods, setIsLoadingPaymentMethods] = useState(true);
+  const [paymentNextAction, setPaymentNextAction] = useState<PaymentNextAction | null>(null);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   
-  const { paymentStatus, isLoading, error } = usePaymentPolling(sagaId);
+  const { orderStatus, isLoading, error, needsPaymentProcessing } = useOrderStatusPolling(orderId);
 
   // Fetch available payment methods on component mount
   useEffect(() => {
@@ -51,6 +54,31 @@ export default function CheckoutPage() {
     fetchPaymentMethods();
   }, []); // Empty dependency array - only run once on mount
 
+  // Handle payment processing when order status is AWAITING_PAYMENT_PROCESSED
+  useEffect(() => {
+    const processPayment = async () => {
+      if (!needsPaymentProcessing || !orderId || isProcessingPayment) return;
+
+      try {
+        setIsProcessingPayment(true);
+        const response = await paymentApi.getPaymentNextAction(orderId);
+        
+        if (response.success && response.data?.nextAction) {
+          setPaymentNextAction(response.data.nextAction);
+        } else {
+          toast.error("Failed to get payment next action");
+        }
+      } catch (err) {
+        console.error("Failed to process payment:", err);
+        toast.error("An error occurred while processing payment");
+      } finally {
+        setIsProcessingPayment(false);
+      }
+    };
+
+    processPayment();
+  }, [needsPaymentProcessing, orderId, isProcessingPayment]);
+
   const handleCheckout = async () => {
     try {
       setIsCheckingOut(true);
@@ -61,9 +89,9 @@ export default function CheckoutPage() {
       });
 
       if (response.success && response.data) {
-        // 2. Get sagaId and start polling
-        setSagaId(response.data.sagaId);
-        toast.success("Order created successfully, processing payment...");
+        // 2. Get orderId and start polling
+        setOrderId(response.data.orderId.toString());
+        toast.success("Order created successfully, processing...");
       } else {
         throw new Error("Checkout failed");
       }
@@ -75,67 +103,46 @@ export default function CheckoutPage() {
     }
   };
 
-  const renderPaymentStatus = () => {
-    if (!paymentStatus) return null;
+  const renderOrderStatus = () => {
+    if (!orderStatus) return null;
 
-    switch (paymentStatus.status) {
-      case 'CREATED':
+    switch (orderStatus.status) {
+      case 'AWAITING_PRODUCT_RESERVATION':
+      case 'AWAITING_PAYMENT_INITIALIZED':
+        // Skip these states - just continue polling without showing anything
+        return null;
+
+      case 'AWAITING_PAYMENT_PROCESSED':
         return (
           <div className="text-center space-y-4">
             <Clock className="w-12 h-12 text-blue-500 mx-auto animate-spin" />
             <h3 className="text-lg font-semibold">Processing Payment</h3>
             <p className="text-gray-600">Please wait while we process your payment...</p>
-            
-            {/* Render next action using dedicated component */}
-             {paymentStatus.nextAction && (
-               <div className="mt-4">
-                 <NextActionHandler
-                   nextAction={paymentStatus.nextAction}
-                   transactionId={paymentStatus.transactionId}
-                   onPaymentComplete={() => {
-                     toast.success("Payment completed successfully!");
-                     // The polling will automatically detect the status change
-                   }}
-                   onPaymentError={(error) => {
-                     toast.error(error);
-                   }}
-                 />
-               </div>
-             )}
           </div>
         );
 
-      case 'SUCCEEDED':
+      case 'FULFILLED':
         return (
           <div className="text-center space-y-4">
             <CheckCircle className="w-12 h-12 text-green-500 mx-auto" />
-            <h3 className="text-lg font-semibold text-green-600">Payment Successful!</h3>
+            <h3 className="text-lg font-semibold text-green-600">Order Completed!</h3>
             <p className="text-gray-600">Your order has been processed successfully.</p>
-            {paymentStatus.transactionId && (
-              <p className="text-sm text-gray-500">Transaction ID: {paymentStatus.transactionId}</p>
-            )}
             <Button onClick={() => router.push('/orders')} className="mt-4">
               View Orders
             </Button>
           </div>
         );
 
-      case 'FAILED':
       case 'CANCELED':
         return (
           <div className="text-center space-y-4">
             <XCircle className="w-12 h-12 text-red-500 mx-auto" />
-            <h3 className="text-lg font-semibold text-red-600">
-              {paymentStatus.status === 'FAILED' ? 'Payment Failed' : 'Payment Canceled'}
-            </h3>
+            <h3 className="text-lg font-semibold text-red-600">Order Canceled</h3>
             <p className="text-gray-600">
-              {paymentStatus.errorMessage || paymentStatus.cancellationReason || 'An error occurred during payment processing.'}
+              {orderStatus.cancellationReason || 'Your order has been canceled.'}
             </p>
-            {paymentStatus.errorCode && (
-              <p className="text-sm text-gray-500">Error Code: {paymentStatus.errorCode}</p>
-            )}
             <div className="space-x-2">
-              <Button variant="outline" onClick={() => setSagaId(null)}>
+              <Button variant="outline" onClick={() => setOrderId(null)}>
                 Try Again
               </Button>
               <Button variant="outline" onClick={() => router.push('/cart')}>
@@ -150,21 +157,21 @@ export default function CheckoutPage() {
           <div className="text-center space-y-4">
             <Clock className="w-12 h-12 text-blue-500 mx-auto animate-spin" />
             <h3 className="text-lg font-semibold">Processing...</h3>
-            <p className="text-gray-600">Status: {paymentStatus.status}</p>
+            <p className="text-gray-600">Status: {orderStatus.status}</p>
           </div>
         );
     }
   };
 
-  // If polling payment status, show status
-  if (sagaId && (isLoading || paymentStatus)) {
+  // If polling order status, show status
+  if (orderId && (isLoading || orderStatus)) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CreditCard className="w-5 h-5" />
-              Payment Status
+              Order Status
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -173,12 +180,34 @@ export default function CheckoutPage() {
                 <XCircle className="w-12 h-12 text-red-500 mx-auto" />
                 <h3 className="text-lg font-semibold text-red-600">An Error Occurred</h3>
                 <p className="text-gray-600">{error}</p>
-                <Button variant="outline" onClick={() => setSagaId(null)}>
+                <Button variant="outline" onClick={() => setOrderId(null)}>
                   Try Again
                 </Button>
               </div>
             ) : (
-              renderPaymentStatus()
+              <>
+                {paymentNextAction ? (
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <h3 className="text-lg font-semibold">Complete Payment</h3>
+                      <p className="text-gray-600">Please complete your payment to proceed</p>
+                    </div>
+                    <NextActionHandler 
+                      nextAction={paymentNextAction}
+                      onPaymentComplete={() => {
+                        setPaymentNextAction(null);
+                        toast.success("Payment completed successfully!");
+                      }}
+                      onPaymentError={(error: string) => {
+                        setPaymentNextAction(null);
+                        toast.error(`Payment failed: ${error}`);
+                      }}
+                    />
+                  </div>
+                ) : (
+                  renderOrderStatus()
+                )}
+              </>
             )}
           </CardContent>
         </Card>

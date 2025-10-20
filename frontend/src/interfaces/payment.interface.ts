@@ -14,12 +14,7 @@ export interface PaymentNextAction {
 // Backend returns List<String> of payment method names
 export type PaymentMethodResponse = string[];
 
-// Payment tracking response interface
-export interface PaymentTrackingResponse {
-  status: PaymentStatus;
-  transactionId?: string;
+// Payment next action response interface
+export interface PaymentNextActionResponse {
   nextAction?: PaymentNextAction;
-  errorCode?: string;
-  errorMessage?: string;
-  cancellationReason?: string;
 }

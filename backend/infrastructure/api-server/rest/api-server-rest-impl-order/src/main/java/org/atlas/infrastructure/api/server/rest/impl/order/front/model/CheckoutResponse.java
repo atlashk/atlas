@@ -15,6 +15,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CheckoutResponse {
 
-  @Schema(description = "The identifier of saga")
-  private Integer sagaId;
+  @Schema(description = "The identifier of the order")
+  private Integer orderId;
 }

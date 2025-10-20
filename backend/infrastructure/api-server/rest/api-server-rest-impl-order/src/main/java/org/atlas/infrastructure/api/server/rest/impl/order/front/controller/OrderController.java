@@ -89,10 +89,10 @@ public class OrderController {
         .map(request, CheckoutInput.class);
     input.setUserId(Contexts.getUserId());
 
-    Integer sagaId = checkoutUseCaseHandler.handle(input);
+    Integer orderId = checkoutUseCaseHandler.handle(input);
 
     CheckoutResponse response = CheckoutResponse.builder()
-        .sagaId(sagaId)
+        .orderId(orderId)
         .build();
     return ApiResponseWrapper.success(response);
   }

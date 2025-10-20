@@ -1,6 +1,6 @@
 import { BaseApi } from './base.api';
 import { ApiResponse } from './apiClient';
-import { PaymentMethodResponse, PaymentTrackingResponse } from '@/interfaces/payment.interface';
+import { PaymentMethodResponse, PaymentNextActionResponse } from '@/interfaces/payment.interface';
 
 class PaymentApi extends BaseApi {
   constructor() {
@@ -11,8 +11,8 @@ class PaymentApi extends BaseApi {
     return this.get<PaymentMethodResponse>('/payment-methods');
   }
 
-  async getPaymentTracking(sagaId: number): Promise<ApiResponse<PaymentTrackingResponse>> {
-    return this.get<PaymentTrackingResponse>(`/payments/${sagaId}/tracking`);
+  async getPaymentNextAction(orderId: string): Promise<ApiResponse<PaymentNextActionResponse>> {
+    return this.get<PaymentNextActionResponse>(`/payments/${orderId}/next-action`);
   }
 }
 
