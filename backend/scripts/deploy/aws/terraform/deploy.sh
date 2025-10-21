@@ -3,7 +3,7 @@
 # Atlas Backend AWS ECS Deployment Script
 # This script automates the deployment of Atlas backend to AWS ECS using Terraform
 
-set -e
+set -euo pipefail  # Exit on error, undefined vars, pipe failures
 
 # Configuration
 TERRAFORM_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -13,8 +13,31 @@ AWS_REGION="${AWS_REGION:-us-east-1}"
 
 # Default options
 SKIP_BUILD=false
+VERBOSE=false
+
+# Error handling
+cleanup_on_error() {
+    local exit_code=$?
+    echo "ERROR: Script failed with exit code $exit_code" >&2
+    
+    # Clean up temporary files
+    if [[ -f "$TERRAFORM_DIR/tfplan" ]]; then
+        echo "Cleaning up Terraform plan file"
+        rm -f "$TERRAFORM_DIR/tfplan"
+    fi
+    
+    exit $exit_code
+}
+
+trap cleanup_on_error ERR
+
+
 
 check_java_version() {
+    if [[ "$VERBOSE" == true ]]; then
+        echo "Checking Java version..."
+    fi
+    
     if ! command -v java &> /dev/null; then
         echo "ERROR: Java is not installed. Please install Java 17 or later." >&2
         return 1
@@ -41,16 +64,80 @@ check_java_version() {
 }
 
 check_docker() {
+    if [[ "$VERBOSE" == true ]]; then
+        echo "Checking Docker..."
+    fi
+    
+    if ! command -v docker &> /dev/null; then
+        echo "ERROR: Docker is not installed. Please install Docker first." >&2
+        return 1
+    fi
+    
     if ! docker info > /dev/null 2>&1; then
         echo "ERROR: Docker is not running. Please start Docker and try again." >&2
         return 1
     fi
-    echo "Docker found and running"
+    
+    local docker_version
+    docker_version=$(docker --version | cut -d' ' -f3 | cut -d',' -f1)
+    echo "Docker found and running: $docker_version"
+    return 0
+}
+
+check_aws_cli() {
+    if [[ "$VERBOSE" == true ]]; then
+        echo "Checking AWS CLI..."
+    fi
+    
+    if ! command -v aws &> /dev/null; then
+        echo "ERROR: AWS CLI is not installed. Please install it first." >&2
+        return 1
+    fi
+    
+    local aws_version
+    aws_version=$(aws --version 2>&1 | cut -d' ' -f1 | cut -d'/' -f2)
+    echo "AWS CLI found: $aws_version"
+    
+    # Check AWS credentials
+    if ! aws sts get-caller-identity &> /dev/null; then
+        echo "ERROR: AWS credentials not configured. Please run 'aws configure' first." >&2
+        return 1
+    fi
+    
+    echo "AWS credentials configured"
+    return 0
+}
+
+check_terraform() {
+    if [[ "$VERBOSE" == true ]]; then
+        echo "Checking Terraform..."
+    fi
+    
+    if ! command -v terraform &> /dev/null; then
+        echo "ERROR: Terraform is not installed. Please install it first." >&2
+        return 1
+    fi
+    
+    local terraform_version
+    terraform_version=$(terraform --version | head -n1 | cut -d'v' -f2)
+    
+    # Check minimum version (1.11)
+    local min_version="1.11.0"
+    if ! printf '%s\n%s\n' "$min_version" "$terraform_version" | sort -V -C; then
+        echo "ERROR: Terraform version $terraform_version is too old. Please install version $min_version or later." >&2
+        return 1
+    fi
+    
+    echo "Terraform found: $terraform_version"
     return 0
 }
 
 check_prerequisites() {
     echo "Checking prerequisites..."
+    
+    # Always check core tools
+    check_aws_cli || exit 1
+    check_terraform || exit 1
     
     # Check build prerequisites only if not skipping build
     if [[ "$SKIP_BUILD" == false ]]; then
@@ -58,48 +145,44 @@ check_prerequisites() {
         check_docker || exit 1
     fi
     
-    # Check if AWS CLI is installed
-    if ! command -v aws &> /dev/null; then
-        echo "ERROR: AWS CLI is not installed. Please install it first."
-        exit 1
-    fi
-    
-    # Check if Terraform is installed
-    if ! command -v terraform &> /dev/null; then
-        echo "ERROR: Terraform is not installed. Please install it first."
-        exit 1
-    fi
-    
-    # Check AWS credentials
-    if ! aws sts get-caller-identity &> /dev/null; then
-        echo "ERROR: AWS credentials not configured. Please run 'aws configure' first."
-        exit 1
-    fi
-    
-    echo "Prerequisites check passed"
+    echo "All prerequisites check passed"
 }
 
 read_app_stack_config() {
     echo "Reading application stack configuration..."
     
-    local CONFIG_FILE="../../../app-stack.aws.cfg"
+    local CONFIG_FILE="$PROJECT_ROOT/app-stack.aws.cfg"
     local TFVARS_FILE="$TERRAFORM_DIR/terraform.tfvars"
     
     # Function to read configuration value
     read_config() {
         local key=$1
         local config_file=$2
-        grep "^${key}=" "$config_file" | cut -d'=' -f2
+        local value
+        value=$(grep "^${key}=" "$config_file" 2>/dev/null | cut -d'=' -f2 | tr -d ' ')
+        
+        if [[ -z "$value" ]]; then
+            echo "ERROR: Configuration key '$key' not found or empty in $config_file" >&2
+            exit 1
+        fi
+        
+        echo "$value"
     }
     
     # Check if config file exists
-    if [ ! -f "$CONFIG_FILE" ]; then
-        echo "ERROR: Configuration file $CONFIG_FILE not found!"
+    if [[ ! -f "$CONFIG_FILE" ]]; then
+        echo "ERROR: Configuration file $CONFIG_FILE not found!" >&2
+        echo "Please ensure app-stack.aws.cfg exists in the project root"
         exit 1
     fi
     
+    if [[ "$VERBOSE" == true ]]; then
+        echo "Using configuration file: $CONFIG_FILE"
+    fi
+    
     # Read datasource configuration
-    local DATASOURCE=$(read_config "datasource" "$CONFIG_FILE")
+    local DATASOURCE
+    DATASOURCE=$(read_config "datasource" "$CONFIG_FILE")
     
     echo "Detected datasource: $DATASOURCE"
     
@@ -121,57 +204,88 @@ read_app_stack_config() {
             echo "Configuring for PostgreSQL database"
             ;;
         *)
-            echo "ERROR: Unsupported datasource '$DATASOURCE'. Supported: mysql, postgres"
+            echo "ERROR: Unsupported datasource '$DATASOURCE'. Supported: mysql, postgres" >&2
             exit 1
             ;;
     esac
     
     # Read API client configuration
-    local API_CLIENT=$(read_config "api-client" "$CONFIG_FILE")
+    local API_CLIENT
+    API_CLIENT=$(read_config "api-client" "$CONFIG_FILE")
     
     echo "Detected api-client: $API_CLIENT"
     
     # Set API client type and endpoints based on configuration
-    local API_CLIENT_TYPE USER_SERVICE_ENDPOINT PRODUCT_SERVICE_ENDPOINT PAYMENT_SERVICE_ENDPOINT
+    # Note: Endpoints will use AWS Cloud Map service discovery DNS names
+    # The DNS names follow the pattern: service-name.namespace.local (e.g., user-service.atlas-dev.local)
+    local API_CLIENT_TYPE USER_SERVICE_ENDPOINT PRODUCT_SERVICE_ENDPOINT ORDER_SERVICE_ENDPOINT PAYMENT_SERVICE_ENDPOINT
+    
+    # Determine the Cloud Map namespace based on project and environment
+    # This should match the namespace created in Terraform: ${name_prefix}-${environment}.local
+    local ENVIRONMENT
+    ENVIRONMENT=$(grep "^environment" "$TFVARS_FILE" 2>/dev/null | cut -d'=' -f2 | tr -d ' "' || echo "dev")
+    local CLOUDMAP_NAMESPACE="${PROJECT_NAME}-${ENVIRONMENT}.local"
+    
     case "$API_CLIENT" in
         "rest-"*)
             API_CLIENT_TYPE="rest"
-            USER_SERVICE_ENDPOINT="http://user-service.atlas.local:8081"
-            PRODUCT_SERVICE_ENDPOINT="http://product-service.atlas.local:8082"
-            ORDER_SERVICE_ENDPOINT="http://order-service.atlas.local:8083"
-            PAYMENT_SERVICE_ENDPOINT="http://payment-service.atlas.local:8084"
-            echo "Configuring for REST API client"
+            # Use Cloud Map DNS names with HTTP protocol and standard ports
+            USER_SERVICE_ENDPOINT="http://user-service.${CLOUDMAP_NAMESPACE}:8081"
+            PRODUCT_SERVICE_ENDPOINT="http://product-service.${CLOUDMAP_NAMESPACE}:8082"
+            ORDER_SERVICE_ENDPOINT="http://order-service.${CLOUDMAP_NAMESPACE}:8083"
+            PAYMENT_SERVICE_ENDPOINT="http://payment-service.${CLOUDMAP_NAMESPACE}:8084"
+            echo "Configuring for REST API client with AWS Cloud Map service discovery"
+            echo "  Cloud Map namespace: $CLOUDMAP_NAMESPACE"
             ;;
         "grpc")
             API_CLIENT_TYPE="grpc"
-            USER_SERVICE_ENDPOINT="static://user-service.atlas.local:50051"
-            PRODUCT_SERVICE_ENDPOINT="static://product-service.atlas.local:50052"
-            ORDER_SERVICE_ENDPOINT="static://order-service.atlas.local:50053"
-            PAYMENT_SERVICE_ENDPOINT="static://payment-service.atlas.local:50054"
-            echo "Configuring for gRPC API client"
+            # Use Cloud Map DNS names for gRPC services with gRPC ports
+            USER_SERVICE_ENDPOINT="static://user-service.${CLOUDMAP_NAMESPACE}:50051"
+            PRODUCT_SERVICE_ENDPOINT="static://product-service.${CLOUDMAP_NAMESPACE}:50052"
+            ORDER_SERVICE_ENDPOINT="static://order-service.${CLOUDMAP_NAMESPACE}:50053"
+            PAYMENT_SERVICE_ENDPOINT="static://payment-service.${CLOUDMAP_NAMESPACE}:50054"
+            echo "Configuring for gRPC API client with AWS Cloud Map service discovery"
+            echo "  Cloud Map namespace: $CLOUDMAP_NAMESPACE"
             ;;
         *)
-            echo "ERROR: Unsupported api-client '$API_CLIENT'. Supported: rest-*, grpc"
+            echo "ERROR: Unsupported api-client '$API_CLIENT'. Supported: rest-*, grpc" >&2
             exit 1
             ;;
     esac
     
     # Create or update terraform.tfvars with database and API client configuration
-    if [ -f "$TFVARS_FILE" ]; then
+    if [[ -f "$TFVARS_FILE" ]]; then
         echo "Updating existing terraform.tfvars with database and API client configuration"
-        # Remove existing database configuration lines
-        sed -i '/^db_engine/d' "$TFVARS_FILE"
-        sed -i '/^db_engine_version/d' "$TFVARS_FILE"
-        sed -i '/^db_port/d' "$TFVARS_FILE"
-        sed -i '/^db_parameter_group_family/d' "$TFVARS_FILE"
-        # Remove existing API client configuration lines
-        sed -i '/^api_client_type/d' "$TFVARS_FILE"
-        sed -i '/^user_service_endpoint/d' "$TFVARS_FILE"
-        sed -i '/^product_service_endpoint/d' "$TFVARS_FILE"
-        sed -i '/^order_service_endpoint/d' "$TFVARS_FILE"
-        sed -i '/^payment_service_endpoint/d' "$TFVARS_FILE"
+        
+        # Create backup
+        local backup_file="${TFVARS_FILE}.backup.$(date +%Y%m%d_%H%M%S)"
+        cp "$TFVARS_FILE" "$backup_file"
+        if [[ "$VERBOSE" == true ]]; then
+            echo "Created backup: $backup_file"
+        fi
+        
+        # Remove existing auto-generated configuration sections
+        sed -i '/^# Database Configuration (auto-generated from app-stack.aws.cfg)/,/^$/d' "$TFVARS_FILE"
+        sed -i '/^# API Client Configuration (auto-generated from app-stack.aws.cfg)/,/^$/d' "$TFVARS_FILE"
+        
+        # Remove any orphaned configuration lines
+        sed -i '/^db_engine[[:space:]]*=/d' "$TFVARS_FILE"
+        sed -i '/^db_engine_version[[:space:]]*=/d' "$TFVARS_FILE"
+        sed -i '/^db_port[[:space:]]*=/d' "$TFVARS_FILE"
+        sed -i '/^db_parameter_group_family[[:space:]]*=/d' "$TFVARS_FILE"
+        sed -i '/^api_client_type[[:space:]]*=/d' "$TFVARS_FILE"
+        sed -i '/^user_service_endpoint[[:space:]]*=/d' "$TFVARS_FILE"
+        sed -i '/^product_service_endpoint[[:space:]]*=/d' "$TFVARS_FILE"
+        sed -i '/^order_service_endpoint[[:space:]]*=/d' "$TFVARS_FILE"
+        sed -i '/^payment_service_endpoint[[:space:]]*=/d' "$TFVARS_FILE"
     else
-        echo "Creating new terraform.tfvars"
+        echo "Creating new terraform.tfvars from template"
+        if [[ -f "$TERRAFORM_DIR/terraform.tfvars.example" ]]; then
+            cp "$TERRAFORM_DIR/terraform.tfvars.example" "$TFVARS_FILE"
+            if [[ "$VERBOSE" == true ]]; then
+                echo "Copied from terraform.tfvars.example"
+            fi
+        fi
     fi
     
     # Append database and API client configuration
@@ -207,31 +321,57 @@ EOF
 check_terraform_vars() {
     echo "Checking Terraform variables..."
     
-    if [ ! -f "$TERRAFORM_DIR/terraform.tfvars" ]; then
-        echo "WARNING: terraform.tfvars not found. Creating from example..."
-        cp "$TERRAFORM_DIR/terraform.tfvars.example" "$TERRAFORM_DIR/terraform.tfvars"
-        echo "WARNING: Please edit terraform.tfvars with your specific values before continuing."
-        echo "WARNING: Especially make sure to set a secure db_password!"
-        read -p "Press Enter to continue after editing terraform.tfvars..."
+    # Check for terraform.tfvars in the terraform directory
+    local TFVARS_FILE="$TERRAFORM_DIR/terraform.tfvars"
+    echo "Looking for terraform.tfvars file: $TFVARS_FILE"
+    
+    # Verify the terraform.tfvars file exists and is readable
+    if [[ ! -f "$TFVARS_FILE" ]]; then
+        echo "ERROR: terraform.tfvars file not found: $TFVARS_FILE" >&2
+        echo "Please create terraform.tfvars file manually in the terraform directory" >&2
+        echo "You can use terraform.tfvars.example as a template if available" >&2
+        exit 1
     fi
+    
+    if [[ ! -r "$TFVARS_FILE" ]]; then
+        echo "ERROR: terraform.tfvars file is not readable: $TFVARS_FILE" >&2
+        exit 1
+    fi
+    
+    echo "terraform.tfvars file validation passed"
 }
 
 create_ecr_repositories() {
     echo "Creating ECR repositories if they don't exist..."
     
     local services=("api-gateway" "user-service" "product-service" "order-service" "payment-service" "eureka-server")
+    local created_count=0
+    local existing_count=0
     
     for service in "${services[@]}"; do
         local repo_name="${PROJECT_NAME}/${service}"
         
         if ! aws ecr describe-repositories --repository-names "$repo_name" --region "$AWS_REGION" &> /dev/null; then
-            echo "Creating ECR repository: $repo_name"
-            aws ecr create-repository --repository-name "$repo_name" --region "$AWS_REGION" > /dev/null
-            echo "Created ECR repository: $repo_name"
+            if [[ "$VERBOSE" == true ]]; then
+                echo "Creating ECR repository: $repo_name"
+            fi
+            
+            if aws ecr create-repository --repository-name "$repo_name" --region "$AWS_REGION" > /dev/null; then
+                echo "Created ECR repository: $repo_name"
+                ((created_count++))
+            else
+                echo "ERROR: Failed to create ECR repository: $repo_name" >&2
+                exit 1
+            fi
         else
-            echo "ECR repository already exists: $repo_name"
+            if [[ "$VERBOSE" == true ]]; then
+                echo "ECR repository already exists: $repo_name"
+            fi
+            ((existing_count++))
         fi
     done
+    
+    echo "ECR repositories ready: $created_count created, $existing_count existing"
 }
 
 build_services() {
@@ -240,91 +380,188 @@ build_services() {
     local build_script="$PROJECT_ROOT/backend/scripts/buildSrc/build.sh"
     if [[ ! -f "$build_script" ]]; then
         echo "ERROR: Build script not found: $build_script" >&2
+        echo "Expected location: $build_script"
         exit 1
     fi
 
-    echo "Granting execute permission to build script..."
+    if [[ "$VERBOSE" == true ]]; then
+        echo "Granting execute permission to build script..."
+    fi
     chmod +x "$build_script"
 
-    echo "Invoking build script..."
+    echo "Invoking build script with Docker build enabled..."
+    if [[ "$VERBOSE" == true ]]; then
+        echo "Build script: $build_script"
+    fi
     
     if "$build_script" --build-docker=true; then
         echo "Build completed successfully"
     else
         echo "ERROR: Build failed" >&2
+        echo "Check the build output above for specific errors"
         exit 1
     fi
-    echo
 }
 
 push_images_to_ecr() {
     echo "Pushing Docker images to ECR..."
     
     # Get ECR login token
-    echo "Logging in to ECR..."
-    aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+    if [[ "$VERBOSE" == true ]]; then
+        echo "Logging in to ECR..."
+    fi
+    if ! aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"; then
+        echo "ERROR: Failed to login to ECR" >&2
+        exit 1
+    fi
+    echo "Successfully logged in to ECR"
     
     local services=("api-gateway" "user-service" "product-service" "order-service" "payment-service" "eureka-server")
+    local pushed_count=0
+    local total_services=${#services[@]}
     
     for service in "${services[@]}"; do
         local local_image="${service}:latest"
         local ecr_repo="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PROJECT_NAME}/${service}"
         local ecr_image="${ecr_repo}:latest"
         
-        echo "Tagging and pushing $service..."
+        echo "Processing $service ($(($pushed_count + 1))/$total_services)..."
+        
+        # Check if local image exists
+        if ! docker image inspect "$local_image" &> /dev/null; then
+            echo "ERROR: Local image not found: $local_image" >&2
+            echo "Make sure the build completed successfully"
+            exit 1
+        fi
         
         # Tag the local image for ECR
+        if [[ "$VERBOSE" == true ]]; then
+            echo "Tagging $local_image as $ecr_image"
+        fi
         if docker tag "$local_image" "$ecr_image"; then
-            echo "Tagged $local_image as $ecr_image"
+            if [[ "$VERBOSE" == true ]]; then
+                echo "Tagged $local_image as $ecr_image"
+            fi
         else
             echo "ERROR: Failed to tag $local_image" >&2
             exit 1
         fi
         
         # Push to ECR
+        if [[ "$VERBOSE" == true ]]; then
+            echo "Pushing $ecr_image..."
+        fi
         if docker push "$ecr_image"; then
-            echo "Pushed $ecr_image successfully"
+            echo "Pushed $service successfully"
+            ((pushed_count++))
         else
             echo "ERROR: Failed to push $ecr_image" >&2
             exit 1
         fi
     done
     
-    echo "All images pushed to ECR successfully"
-    echo
+    echo "All $pushed_count images pushed to ECR successfully"
 }
 
 terraform_init() {
     echo "Initializing Terraform..."
-    cd "$TERRAFORM_DIR"
-    terraform init
-    echo "Terraform initialized"
+    cd "$TERRAFORM_DIR" || {
+        echo "ERROR: Failed to change to Terraform directory: $TERRAFORM_DIR" >&2
+        exit 1
+    }
+    
+    if [[ "$VERBOSE" == true ]]; then
+        echo "Working directory: $(pwd)"
+        echo "Running: terraform init"
+    fi
+    
+    if terraform init; then
+        echo "Terraform initialization completed successfully"
+    else
+        echo "ERROR: Terraform initialization failed" >&2
+        echo "Common solutions:"
+        echo "  - Check your AWS credentials and permissions"
+        echo "  - Verify the backend configuration in main.tf"
+        echo "  - Ensure the S3 bucket for state exists and is accessible"
+        exit 1
+    fi
 }
 
 terraform_plan() {
-    echo "Planning Terraform deployment..."
-    cd "$TERRAFORM_DIR"
-    terraform plan -out=tfplan
-    echo "Terraform plan completed"
+    echo "Running Terraform plan..."
+    cd "$TERRAFORM_DIR" || {
+        echo "ERROR: Failed to change to Terraform directory: $TERRAFORM_DIR" >&2
+        exit 1
+    }
+    
+    local terraform_cmd="terraform plan -var-file=\"terraform.tfvars\""
+    
+    if [[ "$VERBOSE" == true ]]; then
+        echo "Working directory: $(pwd)"
+        echo "Running: $terraform_cmd"
+    fi
+    
+    if terraform plan -var-file="terraform.tfvars"; then
+        echo "Terraform plan completed successfully"
+        echo "Review the plan above to understand what resources will be created/modified"
+    else
+        echo "ERROR: Terraform plan failed" >&2
+        echo "Common solutions:"
+        echo "  - Check terraform.tfvars for correct variable values"
+        echo "  - Verify AWS credentials and permissions"
+        echo "  - Ensure all required variables are set"
+        exit 1
+    fi
 }
 
 terraform_apply() {
     echo "Applying Terraform configuration..."
-    cd "$TERRAFORM_DIR"
+    cd "$TERRAFORM_DIR" || {
+        echo "ERROR: Failed to change to Terraform directory: $TERRAFORM_DIR" >&2
+        exit 1
+    }
     
-    if [ -f "tfplan" ]; then
-        terraform apply tfplan
-    else
-        terraform apply -auto-approve
+    local terraform_cmd="terraform apply -auto-approve -var-file=\"terraform.tfvars\""
+    
+    if [[ "$VERBOSE" == true ]]; then
+        echo "Working directory: $(pwd)"
+        echo "Running: $terraform_cmd"
     fi
     
-    echo "Terraform apply completed"
+    local start_time=$(date +%s)
+    
+    if terraform apply -auto-approve -var-file="terraform.tfvars"; then
+        local end_time=$(date +%s)
+        local duration=$((end_time - start_time))
+        echo "Terraform apply completed successfully in ${duration}s"
+    else
+        echo "ERROR: Terraform apply failed" >&2
+        echo "Common solutions:"
+        echo "  - Check the error messages above for specific issues"
+        echo "  - Verify AWS service limits and quotas"
+        echo "  - Check for resource naming conflicts"
+        echo "  - Run 'terraform plan' to identify issues"
+        exit 1
+    fi
 }
 
 show_outputs() {
-    echo "Deployment outputs:"
-    cd "$TERRAFORM_DIR"
-    terraform output
+    echo "Retrieving deployment outputs..."
+    cd "$TERRAFORM_DIR" || {
+        echo "ERROR: Failed to change to Terraform directory: $TERRAFORM_DIR" >&2
+        exit 1
+    }
+    
+    if terraform output > /dev/null 2>&1; then
+        echo
+        echo "=== DEPLOYMENT OUTPUTS ==="
+        terraform output
+        echo "=========================="
+        echo
+    else
+        echo "WARNING: No outputs available or Terraform state not found"
+        echo "This is normal for a fresh deployment or if no outputs are defined"
+    fi
 }
 
 get_aws_account_id() {
@@ -337,23 +574,46 @@ get_aws_account_id() {
 }
 
 show_help() {
-    echo "Usage: $0 [OPTIONS]"
-    echo ""
-    echo "Atlas Backend AWS ECS Deployment Script"
-    echo ""
-    echo "This script builds and deploys Atlas backend to AWS ECS using Terraform."
-    echo "To destroy/cleanup AWS resources, use the separate cleanup.sh script."
-    echo ""
-    echo "Options:"
-    echo "  --skip-build        Skip all build steps (JAR, Docker images)"
-    echo "  -h, --help          Show this help message"
-    echo ""
-    echo "Examples:"
-    echo "  $0                           # Deploy with build (default)"
-    echo "  $0 --skip-build              # Deploy without building"
-    echo ""
-    echo "Related scripts:"
-    echo "  ./cleanup.sh                 # Destroy all AWS resources"
+    cat << EOF
+Usage: $0 [OPTIONS]
+
+Atlas Backend AWS ECS Deployment Script
+
+This script automates the complete deployment of Atlas backend to AWS ECS using Terraform.
+It handles building Docker images, pushing to ECR, and deploying infrastructure.
+
+OPTIONS:
+  --skip-build        Skip all build steps (JAR compilation, Docker images)
+  --verbose, -v       Enable verbose logging output
+  --dry-run          Perform Terraform plan only, do not apply changes
+  -h, --help         Show this help message and exit
+
+EXAMPLES:
+  $0                           # Deploy using terraform.tfvars
+  $0 --skip-build              # Deploy without building
+  $0 --verbose                 # Deploy with detailed logging
+  $0 --dry-run                 # Plan deployment without applying
+  $0 --skip-build --verbose    # Deploy, skip build with verbose output
+
+PREREQUISITES:
+  - AWS CLI v2.x configured with credentials
+  - Terraform >= 1.11.0
+  - Docker (if not using --skip-build)
+  - Java 17+ (if not using --skip-build)
+  - app-stack.aws.cfg in project root
+  - terraform.tfvars file in terraform directory (must be created manually)
+
+CONFIGURATION:
+  The script reads configuration from:
+  - app-stack.aws.cfg to determine database engine and API client type
+  - terraform.tfvars for deployment variables (must be created manually)
+
+RELATED SCRIPTS:
+  ./cleanup.sh                 # Destroy all AWS resources
+  ./bootstrap/deploy.sh        # Setup Terraform state backend
+
+For more information, see README.md
+EOF
 }
 
 parse_arguments() {
@@ -361,6 +621,14 @@ parse_arguments() {
         case $1 in
             --skip-build)
                 SKIP_BUILD=true
+                if [[ "$VERBOSE" == true ]]; then
+                    echo "Build steps will be skipped"
+                fi
+                shift
+                ;;
+            --verbose|-v)
+                VERBOSE=true
+                echo "Verbose logging enabled"
                 shift
                 ;;
             -h|--help)
@@ -368,7 +636,7 @@ parse_arguments() {
                 exit 0
                 ;;
             *)
-                echo "Unknown option: $1" >&2
+                echo "ERROR: Unknown option: $1" >&2
                 echo "Use --help for usage information"
                 exit 1
                 ;;
@@ -382,11 +650,12 @@ main() {
     # Parse command line arguments
     parse_arguments "$@"
     
-    # Always execute deploy workflow
     check_prerequisites
     get_aws_account_id
     read_app_stack_config
     check_terraform_vars
+    
+    # Create ECR repositories
     create_ecr_repositories
     
     # Build and push images if not skipping build
@@ -394,25 +663,41 @@ main() {
         build_services
         push_images_to_ecr
     else
-        echo "Skipping build step (--skip-build flag provided)"
+        echo "WARNING: Skipping build step (--skip-build flag provided)"
+        echo "Assuming Docker images already exist in ECR"
     fi
-    
+
+    # Terraform workflow
     terraform_init
     terraform_plan
-    
+
+    # Confirmation for actual deployment
     echo
     echo "WARNING: About to deploy Atlas Backend to AWS ECS"
     echo "WARNING: This will create AWS resources that may incur costs"
+    echo "Estimated monthly cost: \$50-200 depending on usage"
+    
     read -p "Do you want to continue? (y/N): " -n 1 -r
     echo
     
     if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo "Proceeding with deployment..."
         terraform_apply
         show_outputs
+        
+        echo
         echo "Deployment completed successfully!"
         echo "Your services will be available at the load balancer DNS shown above"
+        echo "It may take 5-10 minutes for all services to become healthy"
+        
+        # Show next steps
+        echo
+        echo "Next steps:"
+        echo "1. Check service health: aws ecs describe-services --cluster <cluster-name>"
+        echo "2. View logs: aws logs tail /ecs/<service-log-group> --follow"
+        echo "3. Test endpoints using the ALB DNS name shown above"
     else
-        echo "Deployment cancelled"
+        echo "Deployment cancelled by user"
         exit 0
     fi
 }

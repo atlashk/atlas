@@ -2,7 +2,7 @@
 # This should be deployed first, before the main infrastructure
 
 terraform {
-  required_version = ">= 1.0"
+  required_version = ">= 1.11"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -59,25 +59,6 @@ resource "aws_s3_bucket_public_access_block" "terraform_state" {
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
-}
-
-# DynamoDB Table for State Locking
-resource "aws_dynamodb_table" "terraform_locks" {
-  name           = "${var.project_name}-terraform-locks-${var.environment}"
-  billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "LockID"
-
-  attribute {
-    name = "LockID"
-    type = "S"
-  }
-
-  tags = {
-    Name        = "${var.project_name}-terraform-locks"
-    Environment = var.environment
-    Purpose     = "terraform-state-locking"
-    ManagedBy   = "terraform"
-  }
 }
 
 # KMS Key for additional encryption (optional)

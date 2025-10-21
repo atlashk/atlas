@@ -3,7 +3,7 @@
 # Basic Configuration
 environment    = "staging"
 project_name   = "atlas"
-aws_region     = "us-west-2"
+aws_region     = "us-east-1"
 
 # VPC Configuration
 vpc_cidr = "10.1.0.0/16"

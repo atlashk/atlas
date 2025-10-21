@@ -275,12 +275,12 @@ variable "alarm_notification_email" {
 }
 
 # Backup Configuration
-variable "backup_retention_period" {
+variable "db_backup_retention_period" {
   description = "Number of days to retain automated backups"
   type        = number
   default     = 7
   validation {
-    condition = var.backup_retention_period >= 1 && var.backup_retention_period <= 35
+    condition = var.db_backup_retention_period >= 1 && var.db_backup_retention_period <= 35
     error_message = "Backup retention period must be between 1 and 35 days."
   }
 }

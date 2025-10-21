@@ -71,6 +71,12 @@ variable "db_allocated_storage" {
   default     = 20
 }
 
+variable "db_backup_retention_period" {
+  description = "Number of days to retain automated backups"
+  type        = number
+  default     = 7
+}
+
 variable "tags" {
   description = "Tags to apply to resources"
   type        = map(string)

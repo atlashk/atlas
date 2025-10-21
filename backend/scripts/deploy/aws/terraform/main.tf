@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.0"
+  required_version = ">= 1.11"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -7,19 +7,16 @@ terraform {
     }
   }
   
-  # Remote state backend configuration
+  # Remote state backend configuration with S3 native locking (Terraform 1.11+)
   # Note: Run bootstrap module first to create these resources
   # Then uncomment and configure with actual values from bootstrap output
-  /*
   backend "s3" {
-    bucket         = "atlas-terraform-state-dev-xxxxxxxx"  # Replace with actual bucket name from bootstrap
-    key            = "infrastructure/terraform.tfstate"
-    region         = "us-east-1"
-    encrypt        = true
-    dynamodb_table = "atlas-terraform-locks-dev"          # Replace with actual table name from bootstrap
-    kms_key_id     = "arn:aws:kms:us-east-1:xxxxxxxxxxxx:key/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  # Replace with actual KMS key ARN
+    bucket     = "atlas-terraform-state-dev-9d7b2af2"
+    key        = "infrastructure/terraform.tfstate"
+    region     = "us-east-1"
+    encrypt    = true
+    kms_key_id = "arn:aws:kms:us-east-1:604803839284:key/c0cbf423-0b03-43d4-847a-7ed529a78edf"
   }
-  */
 }
 
 provider "aws" {
@@ -91,10 +88,10 @@ module "rds" {
   
   # Database instance configuration
   db_name                     = var.db_name
-  # ✅ db_username removed - AWS will use default username (admin for MySQL)
-  manage_master_user_password = true  # ✅ AWS manages password in Secrets Manager
+  manage_master_user_password = true  # AWS manages password in Secrets Manager
   db_instance_class           = var.db_instance_class
   db_allocated_storage        = var.db_allocated_storage
+  db_backup_retention_period  = var.db_backup_retention_period
   
   tags = local.common_tags
 }
@@ -145,11 +142,11 @@ module "ses" {
   tags = local.common_tags
 }
 
-# Stripe Secrets
-module "stripe_secrets" {
-  source = "./modules/infrastructure/stripe-secrets"
+# Stripe
+module "stripe" {
+  source = "./modules/infrastructure/stripe"
   
-  name_prefix                     = local.name_prefix
+  name_prefix                    = local.name_prefix
   stripe_secret_key              = var.stripe_secret_key
   stripe_publishable_key         = var.stripe_publishable_key
   stripe_webhook_endpoint_secret = var.stripe_webhook_endpoint_secret
@@ -196,7 +193,7 @@ module "user_service" {
   db_host     = module.rds.db_endpoint
   db_port     = var.db_port
   db_name     = var.db_name
-  db_username = module.rds.db_username  # ✅ Use AWS-managed username
+  db_username = module.rds.db_username  # Use AWS-managed username
   # Use secret ARN instead of plain password
   db_secret_arn        = module.rds.db_secret_arn
   db_secret_kms_key_id = module.rds.db_secret_kms_key_id

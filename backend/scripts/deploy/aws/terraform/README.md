@@ -1,53 +1,70 @@
 # Atlas Backend - AWS Terraform Infrastructure
 
-This directory contains the Terraform configuration for deploying the Atlas backend infrastructure on AWS.
+This directory contains the Terraform configuration for deploying the Atlas backend infrastructure on AWS using modern cloud-native patterns and best practices.
 
 ## 🏗️ Architecture Overview
 
-The infrastructure includes:
-- **ECS Fargate** services for microservices (User, Product, Order, Payment, API Gateway)
-- **RDS MySQL** for persistent data storage
-- **ElastiCache Redis** for caching
-- **MSK (Managed Streaming for Apache Kafka)** for event streaming
-- **Application Load Balancers** for traffic distribution
-- **VPC** with public/private subnets across multiple AZs
-- **Auto Scaling** policies for all ECS services
-- **CloudWatch** monitoring and alarms
-- **SNS** notifications for alerts
-- **WAF** for web application security (staging/prod)
-- **SES** for email notifications
+The Atlas backend is deployed as a microservices architecture on AWS with the following components:
+
+### Core Services
+- **API Gateway** (Port 8080) - Central entry point and request routing
+- **User Service** (Port 8081) - User management and authentication
+- **Product Service** (Port 8082) - Product catalog and inventory
+- **Order Service** (Port 8083) - Order processing and management
+- **Payment Service** (Port 8084) - Payment processing with Stripe integration
+
+### Infrastructure Components
+- **ECS Fargate** - Serverless container orchestration for all microservices
+- **RDS** - Managed relational database (MySQL/PostgreSQL support)
+- **ElastiCache Redis** - In-memory caching with auth token management
+- **MSK (Managed Streaming for Apache Kafka)** - Event streaming platform
+- **Application Load Balancers** - High-availability traffic distribution
+- **VPC** - Isolated network with public/private subnets across multiple AZs
+- **Auto Scaling** - Dynamic scaling based on CPU/memory utilization
+- **CloudWatch** - Comprehensive monitoring, logging, and alerting
+- **SNS** - Notification system for operational alerts
+- **WAF** - Web Application Firewall (staging/production environments)
+- **SES** - Email service for transactional notifications
+- **S3** - Object storage for application assets
+- **Secrets Manager** - Secure credential management for RDS and ElastiCache
+- **CloudMap** - Service discovery for internal communication
 
 ## 📁 Directory Structure
 
 ```
 terraform/
 ├── modules/                          # Reusable Terraform modules
-│   ├── infrastructure/
-│   │   ├── autoscaling/             # ECS Auto Scaling policies
-│   │   ├── msk/                     # Managed Streaming for Kafka
-│   │   ├── networking/              # VPC, subnets, security groups
-│   │   ├── rds/                     # RDS MySQL database
-│   │   ├── redis/                   # ElastiCache Redis
-│   │   └── security/                # Security groups
-│   ├── observability/
-│   │   ├── cloudwatch/              # CloudWatch logs and alarms
-│   │   └── sns/                     # SNS topics for notifications
-│   └── services/                    # ECS service modules
-│       ├── api-gateway/
-│       ├── order-service/
-│       ├── payment-service/
-│       ├── product-service/
-│       └── user-service/
-├── environments/                     # Environment-specific configurations
-│   ├── dev.tfvars
-│   ├── staging.tfvars
-│   └── prod.tfvars
-├── backend-configs/                  # Backend configurations for remote state
-│   ├── dev.hcl
-│   ├── staging.hcl
-│   └── prod.hcl
-├── bootstrap/                        # Bootstrap module for remote state setup
-│   ├── main.tf
+│   ├── application/                  # Application service modules
+│   │   ├── api-gateway/             # API Gateway service with ALB and ECS
+│   │   ├── order-service/           # Order service with isolated infrastructure
+│   │   ├── payment-service/         # Payment service with Stripe integration
+│   │   ├── product-service/         # Product catalog service
+│   │   └── user-service/            # User management service
+│   ├── infrastructure/              # Core infrastructure modules
+│   │   ├── autoscaling/             # ECS Auto Scaling policies and targets
+│   │   ├── cloudmap/                # AWS Cloud Map for service discovery
+│   │   ├── elasticache/             # ElastiCache Redis with auth tokens
+│   │   ├── iam/                     # IAM roles and policies
+│   │   ├── msk/                     # Managed Streaming for Apache Kafka
+│   │   ├── rds/                     # RDS database with Secrets Manager
+│   │   ├── s3/                      # S3 buckets for application storage
+│   │   ├── security/                # Security groups and network ACLs
+│   │   ├── ses/                     # Simple Email Service configuration
+│   │   ├── stripe/                  # Stripe payment integration
+│   │   └── vpc/                     # VPC, subnets, and networking
+│   └── observability/               # Monitoring and alerting modules
+│       ├── cloudwatch/              # CloudWatch logs, metrics, and alarms
+│       └── sns/                     # SNS topics for notifications
+├── environments/                     # Environment-specific variable files
+│   ├── dev.tfvars                   # Development environment settings
+│   ├── staging.tfvars               # Staging environment settings
+│   └── prod.tfvars                  # Production environment settings
+├── backend-configs/                  # Remote state backend configurations
+│   ├── dev.hcl                      # Development backend config
+│   ├── staging.hcl                  # Staging backend config
+│   └── prod.hcl                     # Production backend config
+├── bootstrap/                        # Bootstrap infrastructure for state management
+│   ├── main.tf                      # S3 bucket and state management setup
 │   ├── variables.tf
 │   └── outputs.tf
 ├── main.tf                          # Main Terraform configuration
@@ -59,31 +76,61 @@ terraform/
 
 ### Prerequisites
 
-1. **AWS CLI** configured with appropriate credentials
-2. **Terraform** >= 1.0 installed
-3. **Bash shell** (Linux/macOS environment)
+1. **AWS CLI** v2.x configured with appropriate credentials and permissions
+2. **Terraform** >= 1.11 installed (required for S3 native state locking)
+3. **Docker** installed and running (for building container images)
+4. **Java** 17+ installed (for building Spring Boot applications)
+5. **Bash shell** (Linux/macOS) or **PowerShell** (Windows)
 
-### Initial Setup
+### Initial Setup (One-time per Environment)
 
-1. **Bootstrap Remote State Backend** (one-time setup per environment):
+1. **Bootstrap Remote State Backend**:
    ```bash
    cd bootstrap
    terraform init
-   terraform apply -var="environment=dev" -var="project_name=atlas"
+   terraform apply -var="environment=dev" -var="project_name=atlas" -var="aws_region=us-east-1"
    ```
 
-2. **Configure Backend** (update main.tf with bootstrap outputs):
+2. **Configure Backend** (update root `main.tf` with bootstrap outputs):
    ```hcl
    terraform {
-     backend "s3" {
-       # Use values from bootstrap outputs
-     }
+      backend "s3" {
+         bucket         = "atlas-terraform-state-dev-xxxxxxxx"  # Replace with actual bucket name from bootstrap
+         key            = "infrastructure/terraform.tfstate"
+         region         = "us-east-1"
+         encrypt        = true
+         kms_key_id     = "arn:aws:kms:us-east-1:xxxxxxxxxxxx:key/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  # Replace with actual KMS key ARN
+      }
    }
    ```
 
-### Deployment
+### Deployment Options
 
-You can deploy using direct Terraform commands:
+#### Option 1: Automated Deployment (Recommended)
+
+Use the provided deployment script for a complete end-to-end deployment:
+
+```bash
+# Full deployment with build
+./deploy.sh
+
+# Deploy without rebuilding (if images already exist)
+./deploy.sh --skip-build
+
+# Show help
+./deploy.sh --help
+```
+
+The deployment script automatically:
+- Reads configuration from `app-stack.aws.cfg`
+- Creates ECR repositories
+- Builds and pushes Docker images
+- Configures Terraform variables
+- Deploys infrastructure
+
+#### Option 2: Manual Terraform Commands
+
+For more control, use direct Terraform commands:
 
 ```bash
 # Initialize Terraform with backend configuration
@@ -96,12 +143,12 @@ terraform plan -var-file="environments/dev.tfvars"
 terraform apply -var-file="environments/dev.tfvars"
 
 # Destroy resources (use with caution)
-terraform destroy -var-file="environments/prod.tfvars"
+terraform destroy -var-file="environments/dev.tfvars"
 ```
 
 ### Environment-Specific Deployment
 
-For different environments, use the corresponding configuration files:
+Deploy to different environments using the corresponding configuration files:
 
 ```bash
 # Development environment
@@ -116,6 +163,13 @@ terraform apply -var-file="environments/staging.tfvars"
 terraform init -backend-config="backend-configs/prod.hcl"
 terraform apply -var-file="environments/prod.tfvars"
 ```
+
+### Configuration Management
+
+The deployment automatically reads from `app-stack.aws.cfg` to configure:
+- **Database Engine**: MySQL or PostgreSQL based on `datasource` setting
+- **API Client Type**: REST or gRPC based on `api-client` setting
+- **Service Endpoints**: Automatically configured for service discovery
 
 ## 🌍 Environment Configurations
 
@@ -148,11 +202,26 @@ terraform apply -var-file="environments/prod.tfvars"
 - **Scheduled scaling**: Production environment scales up during business hours
 - **Request-based scaling**: ALB request count per target
 
-### Security
-- **Network isolation**: Private subnets for services, public for ALBs
-- **Security groups**: Restrictive rules with specific port access
-- **WAF**: Web Application Firewall for staging/production
-- **Encryption**: At-rest and in-transit encryption for all data stores
+### Security Features
+
+#### Network Security
+- **VPC Isolation**: Dedicated VPC with public/private subnet architecture
+- **Security Groups**: Restrictive ingress/egress rules with least privilege access
+- **Private Subnets**: All application services run in private subnets
+- **Public Subnets**: Only load balancers exposed to internet traffic
+- **WAF Integration**: Web Application Firewall for staging and production environments
+
+#### Data Protection
+- **Encryption at Rest**: RDS and ElastiCache encrypted with AWS managed keys
+- **Encryption in Transit**: TLS/SSL for all service communications
+- **Secrets Management**: AWS Secrets Manager for database and cache credentials
+- **Auto-Generated Passwords**: RDS and ElastiCache passwords managed by AWS
+
+#### Access Control
+- **IAM Roles**: Service-specific IAM roles with minimal required permissions
+- **Task Execution Roles**: Separate roles for ECS task execution and application access
+- **Cross-Service Authentication**: Secure service-to-service communication
+- **Environment Isolation**: Complete separation between dev/staging/production
 
 ### Monitoring & Alerting
 - **CloudWatch Alarms**: CPU, memory, disk, response time, error rates
@@ -242,34 +311,101 @@ Configure `alarm_notification_email` in environment files to receive alerts.
 
 ## 🚨 Troubleshooting
 
-### Common Issues
+### Common Issues and Solutions
 
-1. **Backend Configuration**:
-   - Ensure S3 bucket and DynamoDB table exist (run bootstrap first)
-   - Verify AWS credentials and permissions
+#### 1. State Lock Issues
+```bash
+# Force unlock if Terraform state is locked
+terraform force-unlock <LOCK_ID>
 
-2. **Resource Limits**:
-   - Check AWS service quotas
-   - Verify instance types are available in the region
+# Check current state locks
+aws dynamodb scan --table-name atlas-terraform-locks-dev
+```
 
-3. **Network Connectivity**:
-   - Verify security group rules
-   - Check route table configurations
+#### 2. Backend Configuration Problems
+```bash
+# Verify S3 bucket exists and is accessible
+aws s3 ls s3://atlas-terraform-state-dev-<suffix>
+
+# Check AWS credentials and permissions
+aws sts get-caller-identity
+aws iam get-user
+```
+
+#### 3. ECR Repository Issues
+```bash
+# Create ECR repositories manually if needed
+aws ecr create-repository --repository-name atlas/api-gateway
+aws ecr create-repository --repository-name atlas/user-service
+aws ecr create-repository --repository-name atlas/product-service
+aws ecr create-repository --repository-name atlas/order-service
+aws ecr create-repository --repository-name atlas/payment-service
+```
+
+#### 4. Docker Build Failures
+```bash
+# Check Docker daemon is running
+docker info
+
+# Verify Java version for Spring Boot builds
+java --version
+
+# Manual build troubleshooting
+cd ../../..  # Navigate to project root
+./build.sh
+```
+
+#### 5. Resource Conflicts
+- **VPC CIDR Overlaps**: Ensure VPC CIDR doesn't conflict with existing VPCs
+- **Resource Name Conflicts**: Check for existing resources with same names
+- **Security Group Rules**: Verify port conflicts and CIDR block access
+
+#### 6. Service Health Check Failures
+```bash
+# Check ECS service status
+aws ecs describe-services --cluster atlas-dev --services atlas-api-gateway-dev
+
+# View ECS task logs
+aws logs get-log-events --log-group-name /ecs/atlas-api-gateway-dev
+```
+
+#### 7. Database Connection Issues
+```bash
+# Test RDS connectivity from ECS tasks
+aws rds describe-db-instances --db-instance-identifier atlas-dev
+
+# Check security group rules for database access
+aws ec2 describe-security-groups --group-ids <rds-security-group-id>
+```
+
+#### 8. Load Balancer Health Checks
+- Verify health check path is correct (`/actuator/health`)
+- Check security group allows ALB to reach ECS tasks
+- Ensure application starts within health check timeout
 
 ### Useful Commands
 
 ```bash
-# Check Terraform state
+# View Terraform state
+terraform show
+
+# List all resources
 terraform state list
 
-# Import existing resources
-terraform import aws_instance.example i-1234567890abcdef0
+# Get specific resource details
+terraform state show aws_ecs_service.api_gateway
 
-# Refresh state
-terraform refresh -var-file="environments/dev.tfvars"
+# Refresh state from AWS
+terraform refresh
+
+# Import existing resources
+terraform import aws_s3_bucket.example bucket-name
 
 # Validate configuration
 terraform validate
+
+# Format configuration files
+terraform fmt -recursive
 ```
 
 ## 📞 Support

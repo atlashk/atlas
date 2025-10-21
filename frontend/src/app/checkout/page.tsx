@@ -109,17 +109,9 @@ export default function CheckoutPage() {
     switch (orderStatus.status) {
       case 'AWAITING_PRODUCT_RESERVATION':
       case 'AWAITING_PAYMENT_INITIALIZED':
+      case 'AWAITING_PAYMENT_PROCESSED':
         // Skip these states - just continue polling without showing anything
         return null;
-
-      case 'AWAITING_PAYMENT_PROCESSED':
-        return (
-          <div className="text-center space-y-4">
-            <Clock className="w-12 h-12 text-blue-500 mx-auto animate-spin" />
-            <h3 className="text-lg font-semibold">Processing Payment</h3>
-            <p className="text-gray-600">Please wait while we process your payment...</p>
-          </div>
-        );
 
       case 'FULFILLED':
         return (

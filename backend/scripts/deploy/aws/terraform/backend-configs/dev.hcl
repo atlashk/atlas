@@ -1,6 +1,5 @@
-# Development Backend Configuration
-bucket         = "atlas-terraform-state-dev"
-key            = "dev/terraform.tfstate"
-region         = "us-west-2"
-dynamodb_table = "atlas-terraform-locks-dev"
-encrypt        = true
+# Development Backend Configuration (Terraform 1.11+ with S3 native locking)
+bucket  = "atlas-terraform-state-dev"
+key     = "dev/terraform.tfstate"
+region  = "us-east-1"
+encrypt = true

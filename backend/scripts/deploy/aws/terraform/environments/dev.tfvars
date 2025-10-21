@@ -3,15 +3,15 @@
 # Basic Configuration
 environment    = "dev"
 project_name   = "atlas"
-aws_region     = "us-west-2"
+aws_region     = "us-east-1"
 
 # VPC Configuration
 vpc_cidr = "10.0.0.0/16"
 
 # Database Configuration
-db_instance_class     = "db.t3.micro"
-db_allocated_storage  = 20
-db_backup_retention_period = 1
+db_instance_class          = "db.t3.micro"
+db_allocated_storage       = 20
+db_backup_retention_period = 7
 
 # ECS Configuration
 ecs_min_capacity              = 1
