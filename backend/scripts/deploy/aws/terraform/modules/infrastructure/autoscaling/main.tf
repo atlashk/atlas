@@ -51,7 +51,7 @@ resource "aws_appautoscaling_policy" "ecs_policy_memory" {
 
 # Auto Scaling Policy - ALB Request Count (if ALB target group ARN is provided)
 resource "aws_appautoscaling_policy" "ecs_policy_request_count" {
-  count = var.alb_target_group_arn != null ? 1 : 0
+  count = var.alb_target_group_arn != "" ? 1 : 0
   
   name               = "${var.name_prefix}-${var.service_name}-request-count-scaling"
   policy_type        = "TargetTrackingScaling"

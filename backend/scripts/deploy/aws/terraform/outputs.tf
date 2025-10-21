@@ -89,36 +89,31 @@ output "msk_client_role_arn" {
   value       = module.msk.msk_client_role_arn
 }
 
-output "kafka_topics" {
-  description = "Kafka topic names for different event types"
-  value       = module.msk.kafka_topics
-}
-
 # ECS Outputs
 output "ecs_cluster_name" {
   description = "Name of the ECS cluster"
-  value       = module.ecs.cluster_name
+  value       = module.api_gateway.ecs_cluster_name
 }
 
 output "ecs_cluster_arn" {
   description = "ARN of the ECS cluster"
-  value       = module.ecs.cluster_arn
+  value       = module.api_gateway.ecs_cluster_id
 }
 
 output "load_balancer_dns" {
   description = "DNS name of the load balancer"
-  value       = module.ecs.load_balancer_dns
+  value       = module.api_gateway.alb_dns_name
 }
 
 output "load_balancer_zone_id" {
   description = "Zone ID of the load balancer"
-  value       = module.ecs.load_balancer_zone_id
+  value       = module.api_gateway.alb_zone_id
 }
 
 # Service URLs
 output "api_gateway_url" {
   description = "URL for API Gateway - Single entry point for all services"
-  value       = "http://${module.ecs.load_balancer_dns}/api"
+  value       = "http://${module.api_gateway.alb_dns_name}/api"
 }
 
 # SES Outputs

@@ -89,17 +89,20 @@ resource "aws_db_instance" "main" {
   vpc_security_group_ids = var.security_group_ids
   publicly_accessible    = false
 
+  # High Availability
+  multi_az = var.multi_az
+
   # Backup
   backup_retention_period = var.db_backup_retention_period
   backup_window          = "03:00-04:00"
   maintenance_window     = "sun:04:00-sun:05:00"
 
-  # Monitoring
-  monitoring_interval = 60
-  monitoring_role_arn = aws_iam_role.rds_monitoring.arn
+  # Monitoring (Disabled for dev cost optimization)
+  monitoring_interval = var.enable_enhanced_monitoring ? 60 : 0
+  monitoring_role_arn = var.enable_enhanced_monitoring ? aws_iam_role.rds_monitoring.arn : null
 
-  # Performance Insights
-  performance_insights_enabled = true
+  # Performance Insights (Disabled for dev cost optimization)
+  performance_insights_enabled = var.enable_performance_insights
 
   # Parameter Group
   parameter_group_name = aws_db_parameter_group.main.name

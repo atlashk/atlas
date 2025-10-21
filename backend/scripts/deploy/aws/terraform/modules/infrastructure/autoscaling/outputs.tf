@@ -15,7 +15,7 @@ output "memory_scaling_policy_arn" {
 
 output "request_count_scaling_policy_arn" {
   description = "ARN of the request count-based scaling policy"
-  value       = var.alb_target_group_arn != null ? aws_appautoscaling_policy.ecs_policy_request_count[0].arn : null
+  value       = var.alb_target_group_arn != "" ? aws_appautoscaling_policy.ecs_policy_request_count[0].arn : null
 }
 
 output "scale_up_scheduled_action_arn" {

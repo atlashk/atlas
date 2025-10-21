@@ -5,12 +5,13 @@ resource "aws_msk_configuration" "main" {
 
   server_properties = <<PROPERTIES
 auto.create.topics.enable=true
-default.replication.factor=2
-min.insync.replicas=2
-num.partitions=3
-log.retention.hours=168
-log.retention.bytes=1073741824
-log.segment.bytes=1073741824
+default.replication.factor=${var.kafka_replication_factor}
+min.insync.replicas=${var.kafka_min_insync_replicas}
+num.partitions=${var.kafka_num_partitions}
+log.retention.hours=${var.kafka_log_retention_hours}
+log.retention.bytes=${var.kafka_log_retention_bytes}
+log.segment.bytes=${var.kafka_log_segment_bytes}
+log.cleanup.policy=delete
 PROPERTIES
 }
 

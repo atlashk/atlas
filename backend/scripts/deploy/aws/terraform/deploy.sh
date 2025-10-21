@@ -7,13 +7,12 @@ set -euo pipefail  # Exit on error, undefined vars, pipe failures
 
 # Configuration
 TERRAFORM_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "$TERRAFORM_DIR/../../../.." && pwd)"
+PROJECT_ROOT="$(cd "$TERRAFORM_DIR/../../../../.." && pwd)"
 PROJECT_NAME="atlas"
 AWS_REGION="${AWS_REGION:-us-east-1}"
 
 # Default options
 SKIP_BUILD=false
-VERBOSE=false
 
 # Error handling
 cleanup_on_error() {
@@ -31,12 +30,8 @@ cleanup_on_error() {
 
 trap cleanup_on_error ERR
 
-
-
 check_java_version() {
-    if [[ "$VERBOSE" == true ]]; then
-        echo "Checking Java version..."
-    fi
+    echo "Checking Java version..."
     
     if ! command -v java &> /dev/null; then
         echo "ERROR: Java is not installed. Please install Java 17 or later." >&2
@@ -64,9 +59,7 @@ check_java_version() {
 }
 
 check_docker() {
-    if [[ "$VERBOSE" == true ]]; then
-        echo "Checking Docker..."
-    fi
+    echo "Checking Docker..."
     
     if ! command -v docker &> /dev/null; then
         echo "ERROR: Docker is not installed. Please install Docker first." >&2
@@ -85,9 +78,7 @@ check_docker() {
 }
 
 check_aws_cli() {
-    if [[ "$VERBOSE" == true ]]; then
-        echo "Checking AWS CLI..."
-    fi
+    echo "Checking AWS CLI..."
     
     if ! command -v aws &> /dev/null; then
         echo "ERROR: AWS CLI is not installed. Please install it first." >&2
@@ -99,7 +90,7 @@ check_aws_cli() {
     echo "AWS CLI found: $aws_version"
     
     # Check AWS credentials
-    if ! aws sts get-caller-identity &> /dev/null; then
+    if ! aws sts get-caller-identity --no-cli-pager &> /dev/null; then
         echo "ERROR: AWS credentials not configured. Please run 'aws configure' first." >&2
         return 1
     fi
@@ -109,9 +100,7 @@ check_aws_cli() {
 }
 
 check_terraform() {
-    if [[ "$VERBOSE" == true ]]; then
-        echo "Checking Terraform..."
-    fi
+    echo "Checking Terraform..."
     
     if ! command -v terraform &> /dev/null; then
         echo "ERROR: Terraform is not installed. Please install it first." >&2
@@ -145,13 +134,13 @@ check_prerequisites() {
         check_docker || exit 1
     fi
     
-    echo "All prerequisites check passed"
+    echo "All prerequisites check passed!"
 }
 
 read_app_stack_config() {
     echo "Reading application stack configuration..."
     
-    local CONFIG_FILE="$PROJECT_ROOT/app-stack.aws.cfg"
+    local CONFIG_FILE="$PROJECT_ROOT/backend/app-stack.aws.cfg"
     local TFVARS_FILE="$TERRAFORM_DIR/terraform.tfvars"
     
     # Function to read configuration value
@@ -176,9 +165,7 @@ read_app_stack_config() {
         exit 1
     fi
     
-    if [[ "$VERBOSE" == true ]]; then
-        echo "Using configuration file: $CONFIG_FILE"
-    fi
+    echo "Using configuration file: $CONFIG_FILE"
     
     # Read datasource configuration
     local DATASOURCE
@@ -257,13 +244,6 @@ read_app_stack_config() {
     if [[ -f "$TFVARS_FILE" ]]; then
         echo "Updating existing terraform.tfvars with database and API client configuration"
         
-        # Create backup
-        local backup_file="${TFVARS_FILE}.backup.$(date +%Y%m%d_%H%M%S)"
-        cp "$TFVARS_FILE" "$backup_file"
-        if [[ "$VERBOSE" == true ]]; then
-            echo "Created backup: $backup_file"
-        fi
-        
         # Remove existing auto-generated configuration sections
         sed -i '/^# Database Configuration (auto-generated from app-stack.aws.cfg)/,/^$/d' "$TFVARS_FILE"
         sed -i '/^# API Client Configuration (auto-generated from app-stack.aws.cfg)/,/^$/d' "$TFVARS_FILE"
@@ -282,9 +262,7 @@ read_app_stack_config() {
         echo "Creating new terraform.tfvars from template"
         if [[ -f "$TERRAFORM_DIR/terraform.tfvars.example" ]]; then
             cp "$TERRAFORM_DIR/terraform.tfvars.example" "$TFVARS_FILE"
-            if [[ "$VERBOSE" == true ]]; then
-                echo "Copied from terraform.tfvars.example"
-            fi
+            echo "Copied from terraform.tfvars.example"
         fi
     fi
     
@@ -344,30 +322,29 @@ check_terraform_vars() {
 create_ecr_repositories() {
     echo "Creating ECR repositories if they don't exist..."
     
-    local services=("api-gateway" "user-service" "product-service" "order-service" "payment-service" "eureka-server")
+    local services=("api-gateway" "user-service" "product-service" "order-service" "payment-service")
     local created_count=0
     local existing_count=0
     
     for service in "${services[@]}"; do
         local repo_name="${PROJECT_NAME}/${service}"
         
-        if ! aws ecr describe-repositories --repository-names "$repo_name" --region "$AWS_REGION" &> /dev/null; then
-            if [[ "$VERBOSE" == true ]]; then
-                echo "Creating ECR repository: $repo_name"
-            fi
+        echo "Checking ECR repository: $repo_name"
+        
+        # Use a more compatible way to check repository existence
+        if aws ecr describe-repositories --repository-names "$repo_name" --region "$AWS_REGION" --no-cli-pager >/dev/null 2>&1; then
+            echo "ECR repository already exists: $repo_name"
+            existing_count=$((existing_count + 1))
+        else
+            echo "Creating ECR repository: $repo_name"
             
-            if aws ecr create-repository --repository-name "$repo_name" --region "$AWS_REGION" > /dev/null; then
+            if aws ecr create-repository --repository-name "$repo_name" --region "$AWS_REGION" --no-cli-pager >/dev/null 2>&1; then
                 echo "Created ECR repository: $repo_name"
-                ((created_count++))
+                created_count=$((created_count + 1))
             else
                 echo "ERROR: Failed to create ECR repository: $repo_name" >&2
                 exit 1
             fi
-        else
-            if [[ "$VERBOSE" == true ]]; then
-                echo "ECR repository already exists: $repo_name"
-            fi
-            ((existing_count++))
         fi
     done
     
@@ -384,15 +361,11 @@ build_services() {
         exit 1
     fi
 
-    if [[ "$VERBOSE" == true ]]; then
-        echo "Granting execute permission to build script..."
-    fi
+    echo "Granting execute permission to build script..."
     chmod +x "$build_script"
 
     echo "Invoking build script with Docker build enabled..."
-    if [[ "$VERBOSE" == true ]]; then
-        echo "Build script: $build_script"
-    fi
+    echo "Build script: $build_script"
     
     if "$build_script" --build-docker=true; then
         echo "Build completed successfully"
@@ -407,50 +380,42 @@ push_images_to_ecr() {
     echo "Pushing Docker images to ECR..."
     
     # Get ECR login token
-    if [[ "$VERBOSE" == true ]]; then
-        echo "Logging in to ECR..."
-    fi
-    if ! aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"; then
+    echo "Logging in to ECR..."
+    if ! aws ecr get-login-password --region "$AWS_REGION" --no-cli-pager | docker login --username AWS --password-stdin "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"; then
         echo "ERROR: Failed to login to ECR" >&2
         exit 1
     fi
     echo "Successfully logged in to ECR"
     
-    local services=("api-gateway" "user-service" "product-service" "order-service" "payment-service" "eureka-server")
+    local services=("api-gateway" "user-service" "product-service" "order-service" "payment-service")
     local pushed_count=0
     local total_services=${#services[@]}
     
     for service in "${services[@]}"; do
-        local local_image="${service}:latest"
+        local local_image="${PROJECT_NAME}-${service}:latest"
         local ecr_repo="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PROJECT_NAME}/${service}"
         local ecr_image="${ecr_repo}:latest"
-        
+
         echo "Processing $service ($(($pushed_count + 1))/$total_services)..."
-        
+
         # Check if local image exists
         if ! docker image inspect "$local_image" &> /dev/null; then
             echo "ERROR: Local image not found: $local_image" >&2
             echo "Make sure the build completed successfully"
             exit 1
         fi
-        
+
         # Tag the local image for ECR
-        if [[ "$VERBOSE" == true ]]; then
-            echo "Tagging $local_image as $ecr_image"
-        fi
+        echo "Tagging $local_image as $ecr_image"
         if docker tag "$local_image" "$ecr_image"; then
-            if [[ "$VERBOSE" == true ]]; then
-                echo "Tagged $local_image as $ecr_image"
-            fi
+            echo "Tagged $local_image as $ecr_image"
         else
             echo "ERROR: Failed to tag $local_image" >&2
             exit 1
         fi
-        
+
         # Push to ECR
-        if [[ "$VERBOSE" == true ]]; then
-            echo "Pushing $ecr_image..."
-        fi
+        echo "Pushing $ecr_image..."
         if docker push "$ecr_image"; then
             echo "Pushed $service successfully"
             ((pushed_count++))
@@ -459,7 +424,7 @@ push_images_to_ecr() {
             exit 1
         fi
     done
-    
+
     echo "All $pushed_count images pushed to ECR successfully"
 }
 
@@ -470,11 +435,9 @@ terraform_init() {
         exit 1
     }
     
-    if [[ "$VERBOSE" == true ]]; then
-        echo "Working directory: $(pwd)"
-        echo "Running: terraform init"
-    fi
-    
+    echo "Working directory: $(pwd)"
+    echo "Running: terraform init"
+
     if terraform init; then
         echo "Terraform initialization completed successfully"
     else
@@ -496,10 +459,8 @@ terraform_plan() {
     
     local terraform_cmd="terraform plan -var-file=\"terraform.tfvars\""
     
-    if [[ "$VERBOSE" == true ]]; then
-        echo "Working directory: $(pwd)"
-        echo "Running: $terraform_cmd"
-    fi
+    echo "Working directory: $(pwd)"
+    echo "Running: $terraform_cmd"
     
     if terraform plan -var-file="terraform.tfvars"; then
         echo "Terraform plan completed successfully"
@@ -523,10 +484,8 @@ terraform_apply() {
     
     local terraform_cmd="terraform apply -auto-approve -var-file=\"terraform.tfvars\""
     
-    if [[ "$VERBOSE" == true ]]; then
-        echo "Working directory: $(pwd)"
-        echo "Running: $terraform_cmd"
-    fi
+    echo "Working directory: $(pwd)"
+    echo "Running: $terraform_cmd"
     
     local start_time=$(date +%s)
     
@@ -565,7 +524,7 @@ show_outputs() {
 }
 
 get_aws_account_id() {
-    AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+    AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text --no-cli-pager)
     if [[ -z "$AWS_ACCOUNT_ID" ]]; then
         echo "ERROR: Failed to get AWS Account ID" >&2
         exit 1
@@ -584,16 +543,13 @@ It handles building Docker images, pushing to ECR, and deploying infrastructure.
 
 OPTIONS:
   --skip-build        Skip all build steps (JAR compilation, Docker images)
-  --verbose, -v       Enable verbose logging output
   --dry-run          Perform Terraform plan only, do not apply changes
   -h, --help         Show this help message and exit
 
 EXAMPLES:
   $0                           # Deploy using terraform.tfvars
   $0 --skip-build              # Deploy without building
-  $0 --verbose                 # Deploy with detailed logging
   $0 --dry-run                 # Plan deployment without applying
-  $0 --skip-build --verbose    # Deploy, skip build with verbose output
 
 PREREQUISITES:
   - AWS CLI v2.x configured with credentials
@@ -621,16 +577,10 @@ parse_arguments() {
         case $1 in
             --skip-build)
                 SKIP_BUILD=true
-                if [[ "$VERBOSE" == true ]]; then
-                    echo "Build steps will be skipped"
-                fi
+                echo "Build steps will be skipped"
                 shift
                 ;;
-            --verbose|-v)
-                VERBOSE=true
-                echo "Verbose logging enabled"
-                shift
-                ;;
+
             -h|--help)
                 show_help
                 exit 0

@@ -99,6 +99,24 @@ variable "db_allocated_storage" {
   }
 }
 
+variable "multi_az" {
+  description = "Specifies if the RDS instance is multi-AZ"
+  type        = bool
+  default     = false
+}
+
+variable "enable_enhanced_monitoring" {
+  description = "Enable enhanced monitoring for RDS instance"
+  type        = bool
+  default     = true
+}
+
+variable "enable_performance_insights" {
+  description = "Enable Performance Insights for RDS instance"
+  type        = bool
+  default     = true
+}
+
 # ElastiCache Configuration
 variable "elasticache_node_type" {
   description = "ElastiCache node type"
@@ -129,6 +147,43 @@ variable "msk_broker_volume_size" {
   description = "Size of EBS volume for each broker (in GB)"
   type        = number
   default     = 100
+}
+
+# Kafka Configuration
+variable "kafka_replication_factor" {
+  description = "Default replication factor for Kafka topics"
+  type        = number
+  default     = 2
+}
+
+variable "kafka_min_insync_replicas" {
+  description = "Minimum in-sync replicas for Kafka topics"
+  type        = number
+  default     = 2
+}
+
+variable "kafka_num_partitions" {
+  description = "Default number of partitions for Kafka topics"
+  type        = number
+  default     = 3
+}
+
+variable "kafka_log_retention_hours" {
+  description = "Log retention time in hours"
+  type        = number
+  default     = 168
+}
+
+variable "kafka_log_retention_bytes" {
+  description = "Log retention size in bytes"
+  type        = number
+  default     = 1073741824
+}
+
+variable "kafka_log_segment_bytes" {
+  description = "Log segment size in bytes"
+  type        = number
+  default     = 1073741824
 }
 
 # API Client Configuration
@@ -254,6 +309,35 @@ variable "ecs_target_memory_utilization" {
   validation {
     condition = var.ecs_target_memory_utilization >= 10 && var.ecs_target_memory_utilization <= 90
     error_message = "ECS target memory utilization must be between 10 and 90 percent."
+  }
+}
+
+# Scheduled Scaling Configuration
+variable "enable_scheduled_scaling" {
+  description = "Enable scheduled scaling actions for ECS services"
+  type        = bool
+  default     = false
+}
+
+variable "scale_up_schedule" {
+  description = "Cron expression for scaling up (e.g., 'cron(0 8 * * ? *)' for 8 AM UTC)"
+  type        = string
+  default     = "cron(0 8 * * ? *)"
+}
+
+variable "scale_down_schedule" {
+  description = "Cron expression for scaling down (e.g., 'cron(0 18 * * ? *)' for 6 PM UTC)"
+  type        = string
+  default     = "cron(0 18 * * ? *)"
+}
+
+variable "scheduled_min_capacity" {
+  description = "Minimum capacity during scheduled scale-up periods"
+  type        = number
+  default     = 2
+  validation {
+    condition = var.scheduled_min_capacity >= 1 && var.scheduled_min_capacity <= 100
+    error_message = "Scheduled minimum capacity must be between 1 and 100."
   }
 }
 

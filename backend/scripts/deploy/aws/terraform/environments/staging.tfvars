@@ -12,6 +12,7 @@ vpc_cidr = "10.1.0.0/16"
 db_instance_class     = "db.t3.small"
 db_allocated_storage  = 50
 db_backup_retention_period = 7
+multi_az              = false  # Single instance for staging environment
 
 # ECS Configuration
 ecs_min_capacity              = 2

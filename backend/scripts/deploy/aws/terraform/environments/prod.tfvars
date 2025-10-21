@@ -12,6 +12,7 @@ vpc_cidr = "10.2.0.0/16"
 db_instance_class          = "db.r5.large"
 db_allocated_storage       = 200
 db_backup_retention_period = 30
+multi_az                   = true   # Multi-AZ for high availability in production
 
 # ECS Configuration
 ecs_min_capacity              = 3

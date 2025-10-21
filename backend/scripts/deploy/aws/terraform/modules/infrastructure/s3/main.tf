@@ -52,6 +52,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "product_image" {
     id     = "delete_incomplete_multipart_uploads"
     status = "Enabled"
 
+    filter {}
+
     abort_incomplete_multipart_upload {
       days_after_initiation = 7
     }
@@ -60,6 +62,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "product_image" {
   rule {
     id     = "transition_to_ia"
     status = "Enabled"
+
+    filter {}
 
     transition {
       days          = 30

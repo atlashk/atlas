@@ -5,13 +5,14 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+PROJECT_NAME="atlas"
 
 # Service definitions with name and build context
 SERVICES=(
     "user-service:$PROJECT_ROOT/backend/application/user-application"
     "product-service:$PROJECT_ROOT/backend/application/product-application"
     "order-service:$PROJECT_ROOT/backend/application/order-application"
-    "payment-service:$PROJECT_ROOT/backend/application/notification-application"
+    "payment-service:$PROJECT_ROOT/backend/application/payment-application"
     "eureka-server:$PROJECT_ROOT/backend/edge/discovery-server/discovery-server-eureka"
     "api-gateway:$PROJECT_ROOT/backend/edge/api-gateway/api-gateway-spring-cloud-gateway"
 )
@@ -74,12 +75,12 @@ for service in "${SERVICES[@]}"; do
         continue
     fi
 
-    echo "Building Docker image for atlas-$name..."
-    if ! docker build -t "atlas-$name" "$context"; then
-        echo "Failed to build Docker image for atlas-$name." >&2
+    echo "Building Docker image for $PROJECT_NAME-$name..."
+    if ! docker build -t "$PROJECT_NAME-$name" "$context"; then
+        echo "Failed to build Docker image for $PROJECT_NAME-$name." >&2
         exit 1
     fi
-    echo "Built Docker image for atlas-$name successfully."
+    echo "Built Docker image for $PROJECT_NAME-$name successfully."
     echo
 done
 

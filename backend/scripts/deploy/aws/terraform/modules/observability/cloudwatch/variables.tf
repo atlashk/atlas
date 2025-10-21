@@ -11,7 +11,7 @@ variable "services" {
 variable "log_retention_days" {
   description = "Number of days to retain logs"
   type        = number
-  default     = 14
+  default     = 7
 }
 
 variable "alarm_actions" {

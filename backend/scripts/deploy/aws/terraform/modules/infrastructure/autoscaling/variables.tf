@@ -58,19 +58,19 @@ variable "scale_out_cooldown" {
 variable "alb_target_group_arn" {
   description = "ARN of the ALB target group (optional, for request-based scaling)"
   type        = string
-  default     = null
+  default     = ""
 }
 
 variable "alb_full_name" {
   description = "Full name of the ALB (required if alb_target_group_arn is provided)"
   type        = string
-  default     = null
+  default     = ""
 }
 
 variable "alb_target_group_name" {
   description = "Name of the ALB target group (required if alb_target_group_arn is provided)"
   type        = string
-  default     = null
+  default     = ""
 }
 
 variable "enable_scheduled_scaling" {

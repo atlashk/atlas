@@ -36,3 +36,40 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+# Kafka Configuration Variables
+variable "kafka_replication_factor" {
+  description = "Default replication factor for Kafka topics"
+  type        = number
+  default     = 2
+}
+
+variable "kafka_min_insync_replicas" {
+  description = "Minimum in-sync replicas for Kafka topics"
+  type        = number
+  default     = 2
+}
+
+variable "kafka_num_partitions" {
+  description = "Default number of partitions for Kafka topics"
+  type        = number
+  default     = 3
+}
+
+variable "kafka_log_retention_hours" {
+  description = "Log retention time in hours"
+  type        = number
+  default     = 168
+}
+
+variable "kafka_log_retention_bytes" {
+  description = "Log retention size in bytes"
+  type        = number
+  default     = 1073741824
+}
+
+variable "kafka_log_segment_bytes" {
+  description = "Log segment size in bytes"
+  type        = number
+  default     = 1073741824
+}

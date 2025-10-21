@@ -92,6 +92,11 @@ module "rds" {
   db_instance_class           = var.db_instance_class
   db_allocated_storage        = var.db_allocated_storage
   db_backup_retention_period  = var.db_backup_retention_period
+  multi_az                    = var.multi_az
+  
+  # Monitoring configuration
+  enable_enhanced_monitoring  = var.enable_enhanced_monitoring
+  enable_performance_insights = var.enable_performance_insights
   
   tags = local.common_tags
 }
@@ -166,6 +171,14 @@ module "msk" {
   number_of_broker_nodes = var.msk_number_of_broker_nodes
   broker_instance_type   = var.msk_broker_instance_type
   broker_volume_size     = var.msk_broker_volume_size
+
+  # Kafka Configuration
+  kafka_replication_factor    = var.kafka_replication_factor
+  kafka_min_insync_replicas   = var.kafka_min_insync_replicas
+  kafka_num_partitions        = var.kafka_num_partitions
+  kafka_log_retention_hours   = var.kafka_log_retention_hours
+  kafka_log_retention_bytes   = var.kafka_log_retention_bytes
+  kafka_log_segment_bytes     = var.kafka_log_segment_bytes
   
   tags = local.common_tags
 }
@@ -340,10 +353,10 @@ module "payment_service" {
   service_discovery_arn = module.cloudmap.payment_service_discovery_arn
   
   # Stripe Configuration
-  stripe_secret_key_arn              = module.stripe_secrets.stripe_secret_key_arn
-  stripe_publishable_key_arn         = module.stripe_secrets.stripe_publishable_key_arn
-  stripe_webhook_endpoint_secret_arn = module.stripe_secrets.stripe_webhook_endpoint_secret_arn
-  stripe_secrets_kms_key_id          = module.stripe_secrets.stripe_secrets_kms_key_id
+  stripe_secret_key_arn              = module.stripe.stripe_secret_key_arn
+  stripe_publishable_key_arn         = module.stripe.stripe_publishable_key_arn
+  stripe_webhook_endpoint_secret_arn = module.stripe.stripe_webhook_endpoint_secret_arn
+  stripe_secrets_kms_key_id          = module.stripe.stripe_secrets_kms_key_id
   
   # API Client Configuration
   api_client_type          = var.api_client_type
@@ -414,15 +427,19 @@ module "user_service_autoscaling" {
   
   name_prefix                    = local.name_prefix
   service_name                   = "user-service"
-  cluster_name                   = module.user_service.cluster_name
+  cluster_name                   = module.user_service.ecs_cluster_name
   min_capacity                   = var.ecs_min_capacity
   max_capacity                   = var.ecs_max_capacity
   target_cpu_utilization         = var.ecs_target_cpu_utilization
   target_memory_utilization      = var.ecs_target_memory_utilization
-  alb_target_group_arn          = module.user_service.target_group_arn
-  alb_full_name                 = module.user_service.alb_dns_name
-  alb_target_group_name         = module.user_service.target_group_name
-  enable_scheduled_scaling       = var.environment == "prod"
+  # ALB-based scaling disabled to avoid computed value issues during initial deployment
+  # alb_target_group_arn          = module.user_service.target_group_arn
+  # alb_full_name                 = module.user_service.alb_dns_name
+  # alb_target_group_name         = module.user_service.target_group_name
+  enable_scheduled_scaling       = var.enable_scheduled_scaling
+  scale_up_schedule             = var.scale_up_schedule
+  scale_down_schedule           = var.scale_down_schedule
+  scheduled_min_capacity        = var.scheduled_min_capacity
   
   tags = local.common_tags
 }
@@ -438,10 +455,14 @@ module "product_service_autoscaling" {
   max_capacity                   = var.ecs_max_capacity
   target_cpu_utilization         = var.ecs_target_cpu_utilization
   target_memory_utilization      = var.ecs_target_memory_utilization
-  alb_target_group_arn          = module.product_service.target_group_arn
-  alb_full_name                 = module.product_service.alb_dns_name
-  alb_target_group_name         = module.product_service.target_group_name
-  enable_scheduled_scaling       = var.environment == "prod"
+  # ALB-based scaling disabled to avoid computed value issues during initial deployment
+  # alb_target_group_arn          = module.product_service.target_group_arn
+  # alb_full_name                 = module.product_service.alb_dns_name
+  # alb_target_group_name         = module.product_service.target_group_name
+  enable_scheduled_scaling       = var.enable_scheduled_scaling
+  scale_up_schedule             = var.scale_up_schedule
+  scale_down_schedule           = var.scale_down_schedule
+  scheduled_min_capacity        = var.scheduled_min_capacity
   
   tags = local.common_tags
 }
@@ -457,10 +478,14 @@ module "order_service_autoscaling" {
   max_capacity                   = var.ecs_max_capacity
   target_cpu_utilization         = var.ecs_target_cpu_utilization
   target_memory_utilization      = var.ecs_target_memory_utilization
-  alb_target_group_arn          = module.order_service.target_group_arn
-  alb_full_name                 = module.order_service.alb_dns_name
-  alb_target_group_name         = module.order_service.target_group_name
-  enable_scheduled_scaling       = var.environment == "prod"
+  # ALB-based scaling disabled to avoid computed value issues during initial deployment
+  # alb_target_group_arn          = module.order_service.target_group_arn
+  # alb_full_name                 = module.order_service.alb_dns_name
+  # alb_target_group_name         = module.order_service.target_group_name
+  enable_scheduled_scaling       = var.enable_scheduled_scaling
+  scale_up_schedule             = var.scale_up_schedule
+  scale_down_schedule           = var.scale_down_schedule
+  scheduled_min_capacity        = var.scheduled_min_capacity
   
   tags = local.common_tags
 }
@@ -476,10 +501,14 @@ module "payment_service_autoscaling" {
   max_capacity                   = var.ecs_max_capacity
   target_cpu_utilization         = var.ecs_target_cpu_utilization
   target_memory_utilization      = var.ecs_target_memory_utilization
-  alb_target_group_arn          = module.payment_service.target_group_arn
-  alb_full_name                 = module.payment_service.alb_dns_name
-  alb_target_group_name         = module.payment_service.target_group_name
-  enable_scheduled_scaling       = var.environment == "prod"
+  # ALB-based scaling disabled to avoid computed value issues during initial deployment
+  # alb_target_group_arn          = module.payment_service.target_group_arn
+  # alb_full_name                 = module.payment_service.alb_dns_name
+  # alb_target_group_name         = module.payment_service.target_group_name
+  enable_scheduled_scaling       = var.enable_scheduled_scaling
+  scale_up_schedule             = var.scale_up_schedule
+  scale_down_schedule           = var.scale_down_schedule
+  scheduled_min_capacity        = var.scheduled_min_capacity
   
   tags = local.common_tags
 }
@@ -495,10 +524,14 @@ module "api_gateway_autoscaling" {
   max_capacity                   = var.ecs_max_capacity
   target_cpu_utilization         = var.ecs_target_cpu_utilization
   target_memory_utilization      = var.ecs_target_memory_utilization
-  alb_target_group_arn          = module.api_gateway.target_group_arn
-  alb_full_name                 = module.api_gateway.alb_dns_name
-  alb_target_group_name         = module.api_gateway.target_group_name
-  enable_scheduled_scaling       = var.environment == "prod"
+  # ALB-based scaling disabled to avoid computed value issues during initial deployment
+  # alb_target_group_arn          = module.api_gateway.target_group_arn
+  # alb_full_name                 = module.api_gateway.alb_dns_name
+  # alb_target_group_name         = module.api_gateway.target_group_name
+  enable_scheduled_scaling       = var.enable_scheduled_scaling
+  scale_up_schedule             = var.scale_up_schedule
+  scale_down_schedule           = var.scale_down_schedule
+  scheduled_min_capacity        = var.scheduled_min_capacity
   
   tags = local.common_tags
 }

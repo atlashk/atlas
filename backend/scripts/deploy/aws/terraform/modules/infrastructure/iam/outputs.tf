@@ -52,7 +52,7 @@ output "parameter_store_access_policy_arn" {
 
 output "secrets_manager_access_policy_arn" {
   description = "ARN of the Secrets Manager access policy"
-  value       = aws_iam_policy.secrets_manager_access.arn
+  value       = length(aws_iam_policy.secrets_manager_access) > 0 ? aws_iam_policy.secrets_manager_access[0].arn : null
 }
 
 output "xray_access_policy_arn" {
