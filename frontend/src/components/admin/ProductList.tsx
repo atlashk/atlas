@@ -5,6 +5,7 @@ import { productAdminApi } from "@/api/product.admin.api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Spinner } from "@/components/ui/spinner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -382,7 +383,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
             <Upload className="h-4 w-4" />
             {isImporting ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                <Spinner className="text-blue-600" />
                 Importing...
               </>
             ) : (
@@ -540,7 +541,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
               <Label htmlFor="brandId">Brand</Label>
               {isLoadingBrands ? (
                 <div className="flex justify-center py-3">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                  <Spinner className="text-blue-600" />
                 </div>
               ) : (
                 <>
@@ -580,7 +581,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
               <Label>Categories</Label>
               {isLoadingCategories ? (
                 <div className="flex justify-center py-3">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                  <Spinner className="text-blue-600" />
                 </div>
               ) : (
                 <>
@@ -671,7 +672,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
         <CardContent>
           {isLoadingProducts ? (
             <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <Spinner className="text-blue-600" />
             </div>
           ) : (
             <div className="rounded-md border">

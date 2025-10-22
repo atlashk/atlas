@@ -5,6 +5,7 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 import { withRequireAdmin } from "@/hoc/withAuth";
 import { Product } from "@/interfaces/product.interface";
 import { getProductStatusBadge, formatCurrency } from "@/utils/formatter.util";
@@ -85,7 +86,7 @@ function AdminProductDetailsPage() {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <Spinner className="text-blue-600" />
         </div>
       </AdminLayout>
     );

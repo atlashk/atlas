@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS cart
     user_id    INT      NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME          DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_user_id (user_id)
+    UNIQUE INDEX idx_user_id (user_id)
 ) ENGINE = InnoDB;
 
 CREATE TABLE IF NOT EXISTS cart_item

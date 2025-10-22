@@ -27,12 +27,9 @@ public class RestClientCartApiClient implements CartApiClient {
 
   @Override
   public CartResponse call(GetCartRequest request) {
-    String url = String.format("%s/api/internal/carts", baseUrl);
+    String url = String.format("%s/api/internal/carts?userId=%d", baseUrl, request.getUserId());
     ApiResponseWrapper<CartResponse> apiResponseWrapper = restClient.get()
-        .uri(uriBuilder -> uriBuilder
-            .path(url)
-            .queryParam("userId", request.getUserId())
-            .build())
+        .uri(url)
         .accept(MediaType.APPLICATION_JSON)
         .retrieve()
         .toEntity(new ParameterizedTypeReference<ApiResponseWrapper<CartResponse>>() {

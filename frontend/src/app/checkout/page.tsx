@@ -5,12 +5,13 @@ import { NextActionHandler } from "@/components/payment/NextActionHandler";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
 import { PaymentMethod } from "@/constants";
-import { PaymentNextAction } from "@/interfaces/payment.interface";
 import { useOrderStatusPolling } from "@/hooks/useOrderStatusPolling";
+import { PaymentNextAction } from "@/interfaces/payment.interface";
 import { useCartStore } from "@/stores";
 import { formatCurrency } from "@/utils/formatter.util";
-import { CheckCircle, Clock, CreditCard, XCircle } from "lucide-react";
+import { CheckCircle, CreditCard, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -104,14 +105,35 @@ export default function CheckoutPage() {
   };
 
   const renderOrderStatus = () => {
-    if (!orderStatus) return null;
+    // Show spinner when polling and no order status yet, or when loading
+    if (!orderStatus || isLoading) {
+      return (
+        <div className="text-center space-y-4">
+          <Spinner className="text-blue-600 mx-auto" />
+          <h3 className="text-lg font-semibold">Processing Order</h3>
+          <p className="text-gray-600">
+            {!orderStatus ? "Creating your order..." : "Updating order status..."}
+          </p>
+        </div>
+      );
+    }
 
     switch (orderStatus.status) {
       case 'AWAITING_PRODUCT_RESERVATION':
       case 'AWAITING_PAYMENT_INITIALIZED':
       case 'AWAITING_PAYMENT_PROCESSED':
-        // Skip these states - just continue polling without showing anything
-        return null;
+        // Show spinner for these intermediate states
+        return (
+          <div className="text-center space-y-4">
+            <Spinner className="text-blue-600 mx-auto" />
+            <h3 className="text-lg font-semibold">Processing Order</h3>
+            <p className="text-gray-600">
+              {orderStatus.status === 'AWAITING_PRODUCT_RESERVATION' && "Reserving products..."}
+              {orderStatus.status === 'AWAITING_PAYMENT_INITIALIZED' && "Initializing payment..."}
+              {orderStatus.status === 'AWAITING_PAYMENT_PROCESSED' && "Processing payment..."}
+            </p>
+          </div>
+        );
 
       case 'FULFILLED':
         return (
@@ -141,15 +163,6 @@ export default function CheckoutPage() {
                 Back to Cart
               </Button>
             </div>
-          </div>
-        );
-
-      default:
-        return (
-          <div className="text-center space-y-4">
-            <Clock className="w-12 h-12 text-blue-500 mx-auto animate-spin" />
-            <h3 className="text-lg font-semibold">Processing...</h3>
-            <p className="text-gray-600">Status: {orderStatus.status}</p>
           </div>
         );
     }
@@ -212,7 +225,10 @@ export default function CheckoutPage() {
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <div className="space-y-4">
         {/* Header - removed back button */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <CreditCard className="h-6 w-6 text-primary" />
+          </div>
           <h1 className="text-2xl font-bold">Checkout</h1>
         </div>
 
@@ -245,7 +261,7 @@ export default function CheckoutPage() {
           <CardContent>
             {isLoadingPaymentMethods ? (
               <div className="flex items-center justify-center py-4">
-                <Clock className="w-4 h-4 animate-spin mr-2" />
+                <Spinner className="text-blue-600 mr-2" />
                 <span>Loading payment methods...</span>
               </div>
             ) : (

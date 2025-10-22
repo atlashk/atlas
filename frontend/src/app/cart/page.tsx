@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 import { CartItemResponse } from "@/interfaces/cart.interface";
 import { useCartStore } from "@/stores/cart.store";
 import { useUserStore } from "@/stores/user.store";
@@ -88,7 +89,7 @@ export default function CartPage() {
     return (
       <div className="container mx-auto px-4 py-8 pt-20">
         <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <Spinner className="text-blue-600" />
         </div>
       </div>
     );
@@ -218,7 +219,7 @@ export default function CartPage() {
                    >
                      {checkingOut ? (
                        <div className="flex items-center gap-2">
-                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                         <Spinner className="text-blue-600" />
                          Processing...
                        </div>
                      ) : (

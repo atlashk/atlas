@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { useCartStore } from "@/stores/cart.store";
 import { useUserStore } from "@/stores/user.store";
 import { Clock, ShoppingCart } from "lucide-react";
@@ -154,7 +155,7 @@ export default function NavBar() {
                 >
                   {loading ? (
                     <div className="flex items-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      <Spinner className="text-blue-600 mr-2" />
                       Logging out...
                     </div>
                   ) : (

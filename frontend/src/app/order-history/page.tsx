@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useUserStore } from '../../stores/user.store';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 import { Clock, ChevronDown, ChevronUp, RotateCcw, Search } from 'lucide-react';
 import { orderApi } from "@/api/index.api";
 import { Metadata } from "@/api/apiClient";
@@ -178,7 +179,7 @@ const OrderHistoryPage: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <Spinner className="text-blue-600 mx-auto mb-4" />
           <p className="text-gray-600">Loading...</p>
         </div>
       </div>
@@ -286,13 +287,11 @@ const OrderHistoryPage: React.FC = () => {
       {/* Loading State */}
       {isLoading && (
         <div className="flex justify-center py-8" aria-live="polite">
-          <div
-            className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"
+          <Spinner 
+            className="text-blue-600"
             role="status"
             aria-label="Loading orders"
-          >
-            <span className="sr-only">Loading...</span>
-          </div>
+          />
         </div>
       )}
 

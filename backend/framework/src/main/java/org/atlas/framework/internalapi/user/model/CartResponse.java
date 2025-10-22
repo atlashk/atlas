@@ -14,5 +14,5 @@ import lombok.Setter;
 @Setter
 public class CartResponse {
 
-  private List<CartItemResponse> items;
+  private List<CartItemResponse> cartItems;
 }

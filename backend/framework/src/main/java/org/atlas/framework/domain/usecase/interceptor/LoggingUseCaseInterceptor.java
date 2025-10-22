@@ -1,16 +1,22 @@
 package org.atlas.framework.domain.usecase.interceptor;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.context.ContextInfo;
 import org.atlas.framework.context.Contexts;
+import org.atlas.framework.domain.exception.DomainException;
+import org.atlas.framework.i18n.I18nService;
 import org.atlas.framework.util.StopWatchUtil;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Component
 @Order(1)
+@RequiredArgsConstructor
 @Slf4j
 public class LoggingUseCaseInterceptor implements UseCaseInterceptor {
+
+  private final I18nService i18nService;
 
   // ThreadLocal to store StopWatch per thread
   private static final ThreadLocal<StopWatchUtil> STOP_WATCH_THREAD_LOCAL =
@@ -22,44 +28,48 @@ public class LoggingUseCaseInterceptor implements UseCaseInterceptor {
     StopWatchUtil stopWatchUtil = STOP_WATCH_THREAD_LOCAL.get();
     stopWatchUtil.start();
 
-    ContextInfo contextInfo = Contexts.get();
-    if (contextInfo == null) {
-      log.debug("Anonymous user started handling use case {}",
-          useCaseClass.getSimpleName());
-    } else {
-      log.debug("User {} started handling use case {}",
-          contextInfo, useCaseClass.getSimpleName());
-    }
+    String user = getUserInfo();
+
+    log.debug("User {} started handling use case {}",
+        user, useCaseClass.getSimpleName());
   }
 
   @Override
   public void postHandle(Class<?> useCaseClass, Object input) {
-    ContextInfo contextInfo = Contexts.get();
-
     // Stop the StopWatch and get elapsed time
     StopWatchUtil stopWatchUtil = STOP_WATCH_THREAD_LOCAL.get();
     stopWatchUtil.stop();
     long elapsedTimeMs = stopWatchUtil.getElapsedTimeMs();
 
-    // Merge user info and performance check into one log statement
-    if (contextInfo == null) {
-      log.debug("Anonymous user finished handling use case {} in {} ms",
-          useCaseClass.getSimpleName(), elapsedTimeMs);
-    } else {
-      log.debug("User {} finished handling use case {} in {} ms",
-          contextInfo, useCaseClass.getSimpleName(), elapsedTimeMs);
-    }
+    // User info
+    String user = getUserInfo();
+
+    log.debug("User {} finished handling use case {} in {} ms",
+        user, useCaseClass.getSimpleName(), elapsedTimeMs);
   }
 
   @Override
   public void onError(Class<?> useCaseClass, Object input, Throwable error) {
-    ContextInfo contextInfo = Contexts.get();
-    if (contextInfo == null) {
-      log.error("Anonymous user encountered error while handling use case {}: {}",
-          useCaseClass.getSimpleName(), error.getMessage(), error);
+    // User info
+    String user = getUserInfo();
+
+    // Error message
+    String errorMessage;
+    if (error instanceof DomainException ex) {
+      errorMessage = i18nService.getMessage(ex.getMessage());
     } else {
-      log.error("User {} encountered error while handling use case {}: {}",
-          contextInfo, useCaseClass.getSimpleName(), error.getMessage(), error);
+      errorMessage = error.getMessage();
     }
+    if (errorMessage == null) {
+      errorMessage = "Unknown error";
+    }
+
+    log.error("User {} encountered error while handling use case {}: {}",
+        user, useCaseClass.getSimpleName(), errorMessage, error);
+  }
+
+  private String getUserInfo() {
+    ContextInfo contextInfo = Contexts.get();
+    return contextInfo == null ? "anonymous" : String.valueOf(contextInfo.getUserId());
   }
 }

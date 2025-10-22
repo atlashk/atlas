@@ -1,6 +1,6 @@
 package org.atlas.domain.user.usecase.internal.model;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,6 +14,6 @@ import lombok.Setter;
 @Setter
 public class InternalGetCartInput {
 
-  @NotBlank
+  @NotNull
   private Integer userId;
 }

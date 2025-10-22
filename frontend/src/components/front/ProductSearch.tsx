@@ -1,5 +1,5 @@
-import { productApi } from "@/api/index.api";
 import { Metadata } from "@/api/apiClient";
+import { productApi } from "@/api/index.api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -17,13 +17,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
 import { Brand, Category, Product } from "@/interfaces";
 import { useCartStore, useUserStore } from "@/stores";
 
 import { RotateCcw, Search } from "lucide-react";
+import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import ProductCard from "./ProductCard";
 import ProductDetailsModal from "./ProductDetailsModal";
 
@@ -380,7 +381,7 @@ const ProductSearch: React.FC = () => {
                   </label>
                   {isLoadingBrands ? (
                     <div className="flex justify-center py-3">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                      <Spinner className="text-blue-600" />
                     </div>
                   ) : (
                     <>
@@ -428,7 +429,7 @@ const ProductSearch: React.FC = () => {
                   </label>
                   {isLoadingCategories ? (
                     <div className="flex justify-center py-3">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                      <Spinner className="text-blue-600" />
                     </div>
                   ) : (
                     <>
@@ -507,7 +508,7 @@ const ProductSearch: React.FC = () => {
           <CardContent>
             {isLoadingProducts ? (
               <div className="flex justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <Spinner className="text-blue-600" />
               </div>
             ) : products.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">

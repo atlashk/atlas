@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { CartItemResponse } from "@/interfaces/cart.interface";
 import { useCartStore, useUserStore } from "@/stores";
 import { formatCurrency } from "@/utils/formatter.util";
@@ -103,7 +104,7 @@ const Cart: React.FC = () => {
       <CardContent>
         {isLoading ? (
           <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+            <Spinner className="text-blue-600 mx-auto" />
             <p className="mt-2 text-gray-500">Loading cart...</p>
           </div>
         ) : error ? (

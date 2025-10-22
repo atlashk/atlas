@@ -32,47 +32,8 @@
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>
   </logger>
-  <logger additivity="false" level="DEBUG" name="io.github.resilience4j">
-    <appender-ref ref="CONSOLE"/>
-    <appender-ref ref="FILE"/>
-  </logger>
-
-  <!-- Console Appender using encoder instead of layout -->
-  <logger additivity="false" level="DEBUG" name="io.github.resilience4j.retry">
-    <appender-ref ref="CONSOLE"/>
-    <appender-ref ref="FILE"/>
-  </logger>
-
-  <!-- File Appender with Rolling Policy -->
-  <logger additivity="false" level="DEBUG" name="io.github.resilience4j.circuitbreaker">
-    <appender-ref ref="CONSOLE"/>
-    <appender-ref ref="FILE"/>
-  </logger>
 
   <!-- Logger for specific packages -->
-  <logger additivity="false" level="DEBUG" name="io.github.resilience4j.bulkhead">
-    <appender-ref ref="CONSOLE"/>
-    <appender-ref ref="FILE"/>
-  </logger>
-
-  <!-- Resilience::resilience4j -->
-  <logger additivity="false" level="DEBUG" name="io.github.resilience4j.ratelimiter">
-    <appender-ref ref="CONSOLE"/>
-    <appender-ref ref="FILE"/>
-  </logger>
-  <logger additivity="false" level="DEBUG" name="io.github.resilience4j.timelimiter">
-    <appender-ref ref="CONSOLE"/>
-    <appender-ref ref="FILE"/>
-  </logger>
-  <logger additivity="false" level="DEBUG" name="org.quartz.core">
-    <appender-ref ref="CONSOLE"/>
-    <appender-ref ref="FILE"/>
-  </logger>
-  <logger additivity="false" level="DEBUG"
-    name="org.springframework.cloud.gateway.filter.ratelimit">
-    <appender-ref ref="CONSOLE"/>
-    <appender-ref ref="FILE"/>
-  </logger>
   <logger additivity="false" level="DEBUG" name="reactor.netty.http.client">
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>

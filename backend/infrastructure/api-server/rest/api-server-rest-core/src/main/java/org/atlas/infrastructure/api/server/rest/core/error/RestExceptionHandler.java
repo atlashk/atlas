@@ -24,9 +24,8 @@ public class RestExceptionHandler {
 
   @ExceptionHandler(DomainException.class)
   public ResponseEntity<ApiResponseWrapper<Void>> handle(DomainException e) {
-    log.error("Occurred business exception", e);
     String errorMessage = e.getMessage() != null ? e.getMessage() :
-        i18nService.getMessage(e.getMessageCode(), "Unknown error");
+        i18nService.getMessage(e.getMessage(), "Unknown error");
     ApiResponseWrapper<Void> body = ApiResponseWrapper.error(e.getErrorCode(), errorMessage);
     int status = e.getErrorCode() < 1000 ? e.getErrorCode() :
         HttpStatus.INTERNAL_SERVER_ERROR.value();
@@ -60,7 +59,6 @@ public class RestExceptionHandler {
   @ExceptionHandler(Exception.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public ApiResponseWrapper<Void> handle(Exception e) {
-    log.error("Occurred exception", e);
     return ApiResponseWrapper.error(DomainError.DEFAULT.getErrorCode(), e.getMessage());
   }
 }
