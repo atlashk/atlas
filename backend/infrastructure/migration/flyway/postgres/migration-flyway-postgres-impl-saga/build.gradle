@@ -26,11 +26,9 @@ repositories {
 
 dependencies {
     // Infrastructure
+    api project(':infrastructure.migration.flyway.postgres.core')
+    api project(':infrastructure.migration.flyway.postgres.impl.outbox')
     api project(':infrastructure.migration.flyway.postgres.impl.quartz')
-
-    // Lombok
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
 }
 
 bootJar {

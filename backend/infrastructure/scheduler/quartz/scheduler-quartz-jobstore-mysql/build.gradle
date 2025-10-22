@@ -25,6 +25,9 @@ repositories {
 }
 
 dependencies {
+    // Infrastructure
+    api project(':infrastructure.migration.flyway.mysql.impl.quartz')
+
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

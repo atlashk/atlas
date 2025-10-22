@@ -97,9 +97,11 @@ dependencies {
             switch (rootProject.ext.appStack['datasource']) {
                 case 'mysql':
                     implementation project(':infrastructure.migration.flyway.mysql.impl.payment')
+                    implementation project(':infrastructure.migration.flyway.mysql.impl.outbox')
                     break
                 case 'postgres':
                     implementation project(':infrastructure.migration.flyway.postgres.impl.payment')
+                    implementation project(':infrastructure.migration.flyway.postgres.impl.outbox')
                     break
                 default:
                     throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
