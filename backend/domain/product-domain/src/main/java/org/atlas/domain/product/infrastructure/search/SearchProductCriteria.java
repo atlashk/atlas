@@ -1,4 +1,4 @@
-package org.atlas.framework.search.model;
+package org.atlas.domain.product.infrastructure.search;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SearchCriteria {
+public class SearchProductCriteria {
 
   private String keyword;
   private BigDecimal minPrice;

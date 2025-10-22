@@ -1,0 +1,16 @@
+package org.atlas.infrastructure.search.elasticsearch.core;
+
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+@Component
+@ConfigurationProperties(prefix = "app.search.elasticsearch")
+@Getter
+@Setter
+public class ElasticsearchProps {
+
+  private String host;
+  private String port;
+}

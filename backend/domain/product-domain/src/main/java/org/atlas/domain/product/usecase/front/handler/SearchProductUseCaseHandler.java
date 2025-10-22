@@ -3,15 +3,16 @@ package org.atlas.domain.product.usecase.front.handler;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.ProductEntity;
+import org.atlas.domain.product.infrastructure.search.SearchProductCriteria;
+import org.atlas.domain.product.infrastructure.search.SearchService;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.repository.criteria.FindProductCriteria;
 import org.atlas.domain.product.service.ProductImageService;
 import org.atlas.domain.product.shared.ProductStatus;
-import org.atlas.domain.product.usecase.front.model.FrontSearchProductInput;
+import org.atlas.domain.product.usecase.front.model.SearchProductInput;
 import org.atlas.framework.domain.usecase.ReadOnlyUseCaseHandler;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingResult;
-import org.atlas.framework.search.SearchService;
 
 @ReadOnlyUseCaseHandler
 @RequiredArgsConstructor
@@ -21,15 +22,15 @@ public class SearchProductUseCaseHandler {
   private final ProductRepository productRepository;
   private final ProductImageService productImageService;
 
-  public PagingResult<ProductEntity> handle(FrontSearchProductInput input) throws Exception {
-    PagingResult<ProductEntity> productPage = null;
+  public PagingResult<ProductEntity> handle(SearchProductInput input) throws Exception {
+    PagingResult<ProductEntity> productPage;
     if (searchService != null) {
       // Using search engine
-//      SearchCriteria criteria = ObjectMapperUtil.getInstance()
-//          .map(input, SearchCriteria.class);
-//      productPage = searchPort.search(criteria, input.getPagingRequest());
+      SearchProductCriteria criteria = ObjectMapperUtil.getInstance()
+          .map(input, SearchProductCriteria.class);
+      productPage = searchService.search(criteria, input.getPagingRequest());
     } else {
-      // Using DB
+      // Using DB dynamic query
       FindProductCriteria criteria = ObjectMapperUtil.getInstance()
           .map(input, FindProductCriteria.class);
       criteria.setStatus(ProductStatus.IN_STOCK);

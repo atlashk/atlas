@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.ProductEntity;
 import org.atlas.domain.product.usecase.front.handler.GetProductUseCaseHandler;
 import org.atlas.domain.product.usecase.front.handler.SearchProductUseCaseHandler;
-import org.atlas.domain.product.usecase.front.model.FrontSearchProductInput;
+import org.atlas.domain.product.usecase.front.model.SearchProductInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.objectmapper.ObjectMapperUtil;
@@ -50,7 +50,7 @@ public class ProductController {
       @Parameter(name = "size", description = "Number of items per page.", example = "20")
       @RequestParam(name = "size", required = false, defaultValue = CommonConstant.DEFAULT_PAGE_SIZE_STR) Integer size
   ) throws Exception {
-    FrontSearchProductInput input = FrontSearchProductInput.builder()
+    SearchProductInput input = SearchProductInput.builder()
         .keyword(keyword)
         .minPrice(minPrice)
         .maxPrice(maxPrice)

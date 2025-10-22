@@ -370,6 +370,12 @@ project(':infrastructure.scheduler.quartz.jobstore.postgres').projectDir = file(
 include(':infrastructure.scheduler.quartz.impl.outbox')
 project(':infrastructure.scheduler.quartz.impl.outbox').projectDir = file('infrastructure/scheduler/quartz/scheduler-quartz-impl-outbox')
 
+// Search
+
+// Search::Elasticsearch
+include(':infrastructure.search.elasticsearch.core')
+project(':infrastructure.search.elasticsearch.core').projectDir = file('infrastructure/search/elasticsearch/search-elasticsearch-core')
+
 // Sequence generator
 include(':infrastructure.sequence-generator')
 project(':infrastructure.sequence-generator').projectDir = file('infrastructure/sequence-generator')

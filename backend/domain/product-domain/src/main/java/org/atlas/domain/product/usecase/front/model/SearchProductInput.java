@@ -1,6 +1,5 @@
 package org.atlas.domain.product.usecase.front.model;
 
-import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -15,13 +14,12 @@ import org.atlas.framework.paging.PagingRequest;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class FrontSearchProductInput {
+public class SearchProductInput {
 
   private String keyword;
   private BigDecimal minPrice;
   private BigDecimal maxPrice;
   private Integer brandId;
   private List<Integer> categoryIds;
-  @Valid
   private PagingRequest pagingRequest;
 }

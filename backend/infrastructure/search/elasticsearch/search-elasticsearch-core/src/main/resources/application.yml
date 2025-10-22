@@ -1,0 +1,5 @@
+app:
+  search:
+    elasticsearch:
+      host: ${ELASTICSEARCH_HOST:localhost}
+      port: ${ELASTICSEARCH_PORT:9200}
