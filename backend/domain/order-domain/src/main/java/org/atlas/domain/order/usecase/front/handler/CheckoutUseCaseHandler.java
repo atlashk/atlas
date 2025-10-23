@@ -43,7 +43,7 @@ public class CheckoutUseCaseHandler {
   public Integer handle(CheckoutInput input) {
     // Fetch cart
     CartResponse cart = getCart(input.getUserId());
-    if (CollectionUtil.isEmpty(cart.getItems())) {
+    if (CollectionUtil.isEmpty(cart.getCartItems())) {
       throw new DomainException(DomainError.CART_EMPTY);
     }
 
@@ -84,10 +84,11 @@ public class CheckoutUseCaseHandler {
   private String obtainLockKey(CheckoutInput input, CartResponse cart) {
     // Create a deterministic signature based on order items
     StringBuilder signature = new StringBuilder();
-    cart.getItems().stream()
+    cart.getCartItems().stream()
         .sorted(Comparator.comparingLong(CartItemResponse::getProductId)) // Sort for consistency
-        .forEach(
-            item -> signature.append(item.getProductId()).append(":").append(item.getQuantity())
+        .forEach(item -> signature.append(item.getProductId())
+                .append(":")
+                .append(item.getQuantity())
                 .append(";"));
     String hash = HashingUtil.sha256ToHex(signature.toString());
     return String.format("checkout:%d:%s", input.getUserId(), hash);
@@ -103,8 +104,8 @@ public class CheckoutUseCaseHandler {
     UserEntity user = UserEntity.builder().id(input.getUserId()).build();
     order.setUser(user);
 
-    // Order Items
-    for (CartItemResponse cartItem : cart.getItems()) {
+    // Order items
+    for (CartItemResponse cartItem : cart.getCartItems()) {
       // Product
       ProductEntity product = ProductEntity.builder()
           .id(cartItem.getProductId())

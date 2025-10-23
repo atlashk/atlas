@@ -11,10 +11,11 @@ public class ElasticsearchClientConfig extends ElasticsearchConfiguration {
 
   private final ElasticsearchProps props;
 
-	@Override
-	public ClientConfiguration clientConfiguration() {
-		return ClientConfiguration.builder()
-			.connectedTo(String.format("%s:%s", props.getHost(), props.getPort()))
-			.build();
-	}
+  @Override
+  public ClientConfiguration clientConfiguration() {
+    return ClientConfiguration.builder()
+        .connectedTo(String.format("%s:%s", props.getHost(), props.getPort()))
+        .withBasicAuth(props.getUsername(), props.getPassword())
+        .build();
+  }
 }

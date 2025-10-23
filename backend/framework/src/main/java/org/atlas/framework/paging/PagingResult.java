@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.atlas.framework.util.PagingUtil;
 
 @Getter
 @Setter
@@ -60,8 +61,7 @@ public class PagingResult<T> {
       Pagination pagination = new Pagination();
       pagination.setCurrentPage(pagingRequest.getPage());
       pagination.setPageSize(pagingRequest.getSize());
-      pagination.setTotalPages(
-          (int) Math.ceil((double) totalRecords / pagination.getPageSize()));
+      pagination.setTotalPages(PagingUtil.calcTotalPages(totalRecords, pagination.getPageSize()));
       pagination.setTotalRecords(totalRecords);
       return pagination;
     }

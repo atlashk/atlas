@@ -1,4 +1,4 @@
-package org.atlas.framework.async;
+package org.atlas.framework.util;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -7,7 +7,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import lombok.experimental.UtilityClass;
@@ -102,31 +101,6 @@ public class AsyncUtil {
         });
   }
 
-  // ========== Monitoring ==========
-
-  /**
-   * Gets current thread pool statistics for monitoring.
-   */
-  public static ThreadPoolStats getThreadPoolStats(Executor executor) {
-    if (executor instanceof ThreadPoolExecutor tpe) {
-      return ThreadPoolStats.builder()
-          .activeCount(tpe.getActiveCount())
-          .poolSize(tpe.getPoolSize())
-          .corePoolSize(tpe.getCorePoolSize())
-          .maximumPoolSize(tpe.getMaximumPoolSize())
-          .queueSize(tpe.getQueue().size())
-          .completedTaskCount(tpe.getCompletedTaskCount())
-          .build();
-    } else if (executor instanceof ForkJoinPool fjp) {
-      return ThreadPoolStats.builder()
-          .activeCount(fjp.getActiveThreadCount())
-          .poolSize(fjp.getPoolSize())
-          .queueSize(fjp.getQueuedSubmissionCount())
-          .build();
-    }
-    return ThreadPoolStats.builder().build();
-  }
-
   private static CompletableFuture<Void> processTaskBatch(List<AsyncTask> batch,
       Executor executor) {
     List<CompletableFuture<Void>> futures = batch.stream()
@@ -154,5 +128,12 @@ public class AsyncUtil {
       boolean success) {
     log.info("AsyncUtil.{} - items: {}, duration: {}ms, success: {}",
         operation, itemCount, durationMs, success);
+  }
+
+  public interface AsyncTask extends Runnable {
+
+    void onSuccess();
+
+    void onError(Throwable ex);
   }
 }

@@ -5,7 +5,10 @@ import com.opencsv.bean.CsvBindByPosition;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.domain.product.infrastructure.file.csv.ProductCsvWriter;
 import org.atlas.domain.product.infrastructure.file.model.write.ProductRow;
@@ -24,6 +27,9 @@ public class OpencsvProductCsvWriter implements ProductCsvWriter {
     return OpenCsvWriter.write(csvRows, ProductCsvRow.class);
   }
 
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
   @Getter
   @Setter
   public static class ProductCsvRow {

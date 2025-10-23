@@ -4,7 +4,10 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.domain.product.infrastructure.file.excel.ProductExcelWriter;
 import org.atlas.domain.product.infrastructure.file.model.write.ProductRow;
@@ -23,6 +26,9 @@ public class EasyExcelProductExcelWriter implements ProductExcelWriter {
     return EasyExcelWriter.write(csvRows, SHEET_NAME, ProductExcelRow.class);
   }
 
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
   @Getter
   @Setter
   public static class ProductExcelRow {

@@ -10,11 +10,11 @@ import lombok.Setter;
 import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.framework.paging.PagingRequest;
 
-@Getter
-@Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@Getter
+@Setter
 public class AdminListOrderInput {
 
   private Integer orderId;

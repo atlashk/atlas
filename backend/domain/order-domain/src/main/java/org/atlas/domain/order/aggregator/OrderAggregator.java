@@ -4,9 +4,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.atlas.domain.order.entity.OrderEntity;
 import org.atlas.domain.order.entity.PaymentEntity;
 import org.atlas.domain.order.entity.ProductEntity;
@@ -161,8 +164,11 @@ public class OrderAggregator {
     });
   }
 
-  @Getter
+  @NoArgsConstructor
+  @AllArgsConstructor
   @Builder
+  @Getter
+  @Setter
   public static class AggregationOptions {
 
     private boolean loadUsers;

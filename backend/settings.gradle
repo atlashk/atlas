@@ -375,6 +375,8 @@ project(':infrastructure.scheduler.quartz.impl.outbox').projectDir = file('infra
 // Search::Elasticsearch
 include(':infrastructure.search.elasticsearch.core')
 project(':infrastructure.search.elasticsearch.core').projectDir = file('infrastructure/search/elasticsearch/search-elasticsearch-core')
+include(':infrastructure.search.elasticsearch.impl.product')
+project(':infrastructure.search.elasticsearch.impl.product').projectDir = file('infrastructure/search/elasticsearch/search-elasticsearch-impl-product')
 
 // Sequence generator
 include(':infrastructure.sequence-generator')

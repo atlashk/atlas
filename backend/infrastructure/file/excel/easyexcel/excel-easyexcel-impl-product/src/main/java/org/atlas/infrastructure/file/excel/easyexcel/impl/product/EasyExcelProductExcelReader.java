@@ -6,7 +6,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.domain.product.infrastructure.file.excel.ProductExcelReader;
 import org.atlas.domain.product.infrastructure.file.model.read.ProductRow;
@@ -27,6 +30,9 @@ public class EasyExcelProductExcelReader implements ProductExcelReader {
         .mapList(excelRows, ProductRow.class);
   }
 
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
   @Getter
   @Setter
   public static class ProductExcelRow {

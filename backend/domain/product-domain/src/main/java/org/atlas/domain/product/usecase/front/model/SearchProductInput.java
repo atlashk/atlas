@@ -9,13 +9,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.framework.paging.PagingRequest;
 
-@Getter
-@Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@Getter
+@Setter
 public class SearchProductInput {
 
+  // Product name, description, brand name, category name, attribute name/value
   private String keyword;
   private BigDecimal minPrice;
   private BigDecimal maxPrice;

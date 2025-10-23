@@ -13,4 +13,6 @@ public class ElasticsearchProps {
 
   private String host;
   private String port;
+  private String username;
+  private String password;
 }

@@ -2,7 +2,7 @@ package org.atlas.framework.resilience;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.util.ConcurrentUtil;
+import org.atlas.framework.util.SleepUtil;
 
 @UtilityClass
 @Slf4j
@@ -36,7 +36,7 @@ public class RetryUtil {
         log.warn("Retrying (attempt {}/{}), cause: {}. Retrying in {} ms",
             attempts, maxAttempts, ex.getMessage(), delay);
 
-        ConcurrentUtil.sleep(delay);
+        SleepUtil.sleep(delay);
 
         delay = (long) (delay * backoffMultiplier); // apply backoff
       }
