@@ -18,5 +18,5 @@ public interface JsonService {
 
   String toJson(Object source);
 
-  Object getNodeValue(String json, String key);
+  String getAsString(String source, String key);
 }

@@ -1,6 +1,7 @@
 package org.atlas.domain.product.saga.checkout;
 
 import java.time.Duration;
+import java.util.LinkedHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.product.entity.ProductEntity;
@@ -11,14 +12,16 @@ import org.atlas.domain.product.shared.DecreaseQuantityStrategy;
 import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
+import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.lock.LockAcquisitionException;
 import org.atlas.framework.lock.LockService;
 import org.atlas.framework.saga.annotation.SagaCommandHandler;
 import org.atlas.framework.saga.annotation.SagaCompensationHandler;
-import org.atlas.framework.saga.command.model.CheckoutCommand;
 import org.atlas.framework.saga.command.SagaCommandResult;
-import org.atlas.framework.saga.context.model.CheckoutSagaData;
+import org.atlas.framework.saga.command.model.CheckoutCommand;
+import org.atlas.framework.saga.compensation.SagaCompensationResult;
 import org.atlas.framework.saga.context.SagaContext;
+import org.atlas.framework.saga.context.model.CheckoutSagaData;
 import org.atlas.framework.saga.messaging.payload.SagaCommand;
 import org.atlas.framework.saga.messaging.payload.SagaCompensation;
 import org.springframework.stereotype.Component;
@@ -36,7 +39,8 @@ public class ReserveProductCommandHandler {
   @SagaCommandHandler(command = CheckoutCommand.RESERVE_PRODUCT)
   public SagaCommandResult reserveProduct(SagaCommand sagaCommand) {
     SagaContext sagaContext = SagaContext.deserialize(sagaCommand.getSagaContext());
-    CheckoutSagaData checkoutSagaData = sagaContext.get("data", CheckoutSagaData.class);
+    CheckoutSagaData checkoutSagaData = JsonUtil.getInstance().toObject(
+        sagaContext.get("data", LinkedHashMap.class), CheckoutSagaData.class);
     if (checkoutSagaData == null) {
       throw new IllegalArgumentException("Checkout data is required in the saga context");
     }
@@ -96,9 +100,10 @@ public class ReserveProductCommandHandler {
   }
 
   @SagaCompensationHandler(command = CheckoutCommand.RESERVE_PRODUCT)
-  public void compensateReserveProduct(SagaCompensation sagaCompensation) {
+  public SagaCompensationResult compensateReserveProduct(SagaCompensation sagaCompensation) {
     SagaContext sagaContext = SagaContext.deserialize(sagaCompensation.getSagaContext());
-    CheckoutSagaData checkoutSagaData = sagaContext.get("data", CheckoutSagaData.class);
+    CheckoutSagaData checkoutSagaData = JsonUtil.getInstance().toObject(
+        sagaContext.get("data", LinkedHashMap.class), CheckoutSagaData.class);
     if (checkoutSagaData == null) {
       throw new IllegalArgumentException("Checkout data is required in the saga context");
     }
@@ -116,5 +121,7 @@ public class ReserveProductCommandHandler {
           // Delete reservation
           reservationRepository.delete(reservation);
         });
+
+    return SagaCompensationResult.success(null);
   }
 }

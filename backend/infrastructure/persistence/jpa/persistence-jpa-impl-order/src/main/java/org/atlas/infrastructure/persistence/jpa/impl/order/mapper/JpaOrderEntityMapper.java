@@ -16,6 +16,7 @@ public class JpaOrderEntityMapper {
     // Order
     final JpaOrderEntity jpaOrder = new JpaOrderEntity();
     jpaOrder.setId(order.getId());
+    jpaOrder.setSagaId(order.getSagaId());
     jpaOrder.setCode(order.getCode());
     jpaOrder.setUserId(order.getUser().getId());
     jpaOrder.setAmount(order.getAmount());
@@ -40,6 +41,7 @@ public class JpaOrderEntityMapper {
     // Order
     final OrderEntity order = new OrderEntity();
     order.setId(jpaOrder.getId());
+    order.setSagaId(jpaOrder.getSagaId());
     order.setCode(jpaOrder.getCode());
     order.setAmount(jpaOrder.getAmount());
     order.setStatus(jpaOrder.getStatus());

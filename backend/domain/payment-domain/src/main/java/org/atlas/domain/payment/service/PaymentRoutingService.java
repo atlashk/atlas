@@ -23,7 +23,7 @@ public class PaymentRoutingService {
   public PaymentGatewayService getPaymentGateway(PaymentMethod paymentMethod) {
     // Find the relevant payment gateway from the application config
     String paymentGatewayName = applicationConfigService.getConfig(
-        String.format("payment.routing.%s", paymentMethod.getType()),
+        String.format("payment.routing.%s", paymentMethod.name().toLowerCase()),
         "stripe");
     if (StringUtil.isBlank(paymentGatewayName)) {
       log.error("Payment method {} has not routed yet", paymentMethod);
@@ -31,9 +31,10 @@ public class PaymentRoutingService {
     }
 
     // Load payment gateway instance
-    String paymentGatewayPortName = String.format("%sPaymentGatewayAdapter", paymentGatewayName);
+    String paymentGatewayServiceBeanName =
+        String.format("%sPaymentGatewayService", paymentGatewayName);
     try {
-      return applicationContext.getBean(paymentGatewayPortName, PaymentGatewayService.class);
+      return applicationContext.getBean(paymentGatewayServiceBeanName, PaymentGatewayService.class);
     } catch (NoSuchBeanDefinitionException e) {
       throw new DomainException(DomainError.PAYMENT_GATEWAY_NOT_SUPPORTED);
     }

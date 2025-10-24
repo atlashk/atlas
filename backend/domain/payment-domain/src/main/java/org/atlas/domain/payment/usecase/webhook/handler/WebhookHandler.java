@@ -37,7 +37,7 @@ public class WebhookHandler {
         paymentGateway, payload, headers);
 
     // Find payment gateway port implementation
-    String paymentGatewayInstanceName = String.format("%sPaymentGatewayAdapter",
+    String paymentGatewayInstanceName = String.format("%sPaymentGatewayService",
         paymentGateway.name().toLowerCase());
     PaymentGatewayService paymentGatewayService;
     try {

@@ -11,9 +11,12 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.json.JsonService;
+import org.atlas.framework.util.StringUtil;
 
+@Slf4j
 public class GsonService implements JsonService {
 
   private static final Gson gson;
@@ -62,8 +65,14 @@ public class GsonService implements JsonService {
   }
 
   @Override
-  public String getNodeValue(String json, String key) {
-    JsonObject jsonObject = JsonParser.parseString(json).getAsJsonObject();
-    return jsonObject.has(key) ? jsonObject.get(key).getAsString() : null;
+  public String getAsString(String source, String key) {
+    JsonObject jsonObject = JsonParser.parseString(source).getAsJsonObject();
+    boolean hasKey = jsonObject.has(key);
+    if (hasKey) {
+      return jsonObject.get(key).getAsString();
+    } else {
+      log.warn("Key '{}' not found in the JSON", key);
+      return StringUtil.EMPTY;
+    }
   }
 }

@@ -6,7 +6,9 @@ import com.stripe.model.Event;
 import com.stripe.model.EventDataObjectDeserializer;
 import com.stripe.model.PaymentIntent;
 import com.stripe.model.StripeObject;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +36,12 @@ public class StripePaymentGatewayService implements PaymentGatewayService {
   private final StripeProps stripeProps;
   private final StripeService stripeService;
 
+  private static final List<String> SUPPORTED_WEBHOOK_EVENT_TYPE = Arrays.asList(
+      "payment_intent.succeeded",
+      "payment_intent.payment_failed",
+      "payment_intent.canceled"
+  );
+
   @Override
   public PaymentGateway supports() {
     return PaymentGateway.STRIPE;
@@ -42,28 +50,21 @@ public class StripePaymentGatewayService implements PaymentGatewayService {
   @Override
   public CreatePaymentResponse createPayment(CreatePaymentRequest request)
       throws PaymentGatewayException {
-    StripePaymentMethod method;
-    try {
-      method = StripePaymentMethod.valueOf(request.getMethod().getType());
-    } catch (IllegalArgumentException e) {
-      throw new DomainException(DomainError.PAYMENT_METHOD_NOT_SUPPORTED);
-    }
-
     CreatePaymentResponse response = new CreatePaymentResponse();
     try {
       // Create payment intent
       PaymentIntent paymentIntent = stripeService.createPaymentIntent(
           request.getAmount(),
           request.getCurrency(),
-          method,
           Map.of("paymentId", String.valueOf(request.getPaymentId()))
       );
 
       // Build next action
-      UsePaymentElement nextAction = new UsePaymentElement();
-      nextAction.setProvider(Provider.STRIPE);
-      nextAction.setClientSecret(paymentIntent.getClientSecret());
-      nextAction.setPublishableKey(stripeProps.getPublishableKey());
+      UsePaymentElement nextAction = UsePaymentElement.builder()
+          .provider(Provider.STRIPE)
+          .clientSecret(paymentIntent.getClientSecret())
+          .publishableKey(stripeProps.getPublishableKey())
+          .build();
 
       response.setSuccess(true);
       response.setTransactionId(paymentIntent.getId());
@@ -83,6 +84,13 @@ public class StripePaymentGatewayService implements PaymentGatewayService {
   public WebhookResponse handleWebhook(Map<String, Object> payload,
       Map<String, String> headers) throws PaymentGatewayException {
     WebhookResponse response = new WebhookResponse();
+
+    // Skip unsupported event types
+    String eventType = String.valueOf(payload.get("type"));
+    if (!SUPPORTED_WEBHOOK_EVENT_TYPE.contains(eventType)) {
+      response.setResponseStatus(405);
+      return response;
+    }
 
     // Verify signature
     if (!verifySignature(payload, headers)) {

@@ -22,20 +22,24 @@ public class StripeService {
   private final StripeProps stripeProps;
 
   public PaymentIntent createPaymentIntent(BigDecimal amount, String currency,
-      StripePaymentMethod paymentMethod, Map<String, String> metadata)
+      Map<String, String> metadata)
       throws StripeException {
     PaymentIntentCreateParams params =
         PaymentIntentCreateParams.builder()
             .setAmount(CurrencyUtil.getAmountInSmallestUnit(amount, currency))
             .setCurrency(currency)
-            .setPaymentMethod(paymentMethod.getType())
+            .setAutomaticPaymentMethods(
+                PaymentIntentCreateParams.AutomaticPaymentMethods.builder()
+                    .setEnabled(true)
+                    .build()
+            )
             .putAllMetadata(metadata)
             .build();
     PaymentIntent paymentIntent = stripeClient.v1()
         .paymentIntents()
         .create(params);
-    log.info("Created new PaymentIntent {} successfully: amount={}, currency={}, paymentMethod={}",
-        paymentIntent.getId(), amount, currency, paymentMethod);
+    log.info("Created new PaymentIntent {} successfully: amount={}, currency={}",
+        paymentIntent.getId(), amount, currency);
     return paymentIntent;
   }
 

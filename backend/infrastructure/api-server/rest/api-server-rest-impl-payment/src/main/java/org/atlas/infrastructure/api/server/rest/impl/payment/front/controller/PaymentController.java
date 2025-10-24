@@ -25,7 +25,7 @@ public class PaymentController {
   private final GetPaymentNextActionUseCaseHandler getPaymentNextActionUseCaseHandler;
 
   @GetMapping(value = "/{orderId}/next-action", produces = MediaType.APPLICATION_JSON_VALUE)
-  @Operation(summary = "Get order status")
+  @Operation(summary = "Get payment next action")
   public ApiResponseWrapper<GetPaymentNextActionResponse> getPaymentNextAction(
       @Parameter(name = "orderId", description = "Order ID associated with the payment", example = "1")
       @PathVariable("orderId") Integer orderId) throws Exception {

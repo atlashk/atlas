@@ -20,6 +20,6 @@ public class GetOrderStatusUseCaseHandler {
   public GetOrderStatusOutput handle(GetOrderStatusInput input) throws Exception {
     OrderEntity order = orderRepository.findById(input.getOrderId())
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
-    return new GetOrderStatusOutput(order.getStatus());
+    return new GetOrderStatusOutput(order.getStatus(), order.getCancellationReason());
   }
 }

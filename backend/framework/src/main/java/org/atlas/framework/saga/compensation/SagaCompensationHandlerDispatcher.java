@@ -8,11 +8,11 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.saga.annotation.SagaCompensationHandler;
-import org.atlas.framework.saga.context.SagaContext;
 import org.atlas.framework.saga.exception.SagaConfigException;
 import org.atlas.framework.saga.messaging.SagaMessagePublisher;
 import org.atlas.framework.saga.messaging.payload.SagaCompensation;
 import org.atlas.framework.saga.messaging.payload.SagaCompensationReply;
+import org.atlas.framework.util.ExceptionUtil;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationContext;
@@ -87,49 +87,51 @@ public class SagaCompensationHandlerDispatcher {
    * Dispatches a {@link SagaCompensation} to the appropriate compensation handler method and
    * publishes reply event.
    */
-  public void dispatch(SagaCompensation compensation) {
+  public void dispatch(SagaCompensation sagaCompensation) {
     initializeHandlers();
-    
+
     CachedHandlerMethod cachedHandlerMethod = cachedHandlerMethods.get(
-        compensation.getSagaCommandName());
+        sagaCompensation.getSagaCommandName());
     if (cachedHandlerMethod == null) {
       log.warn("No compensation handler found for saga command {}",
-          compensation.getSagaCommandName());
+          sagaCompensation.getSagaCommandName());
       return;
     }
 
-    SagaContext sagaContext = SagaContext.deserialize(compensation.getSagaContext());
-
-    SagaCompensationResult result;
+    SagaCompensationResult sagaCompensationResult;
     try {
-      log.debug("Dispatching saga compensation {} to handler {}", compensation.getSagaCommandName(),
+      log.debug("Dispatching saga compensation {} to handler {}",
+          sagaCompensation.getSagaCommandName(),
           cachedHandlerMethod.methodSignature);
-      result = (SagaCompensationResult) cachedHandlerMethod.invoke(sagaContext);
-      if (result.isSuccess()) {
-        log.info("Successfully executed saga compensation handler {}", cachedHandlerMethod.methodSignature);
+      sagaCompensationResult = (SagaCompensationResult) cachedHandlerMethod.invoke(
+          sagaCompensation);
+      if (sagaCompensationResult.isSuccess()) {
+        log.info("Successfully executed saga compensation handler {}",
+            cachedHandlerMethod.methodSignature);
       } else {
-        log.error("Failed to execute saga compensation handler {}: {}", cachedHandlerMethod.methodSignature,
-            result.getErrorMessage());
+        log.error("Failed to execute saga compensation handler {}: {}",
+            cachedHandlerMethod.methodSignature, sagaCompensationResult.getErrorMessage());
       }
     } catch (Exception e) {
-      result = SagaCompensationResult.failure(e);
-      log.error("Failed to execute saga compensation handler {}: {}", cachedHandlerMethod.methodSignature,
-          result.getErrorMessage(), e);
+      Throwable cause = ExceptionUtil.getRootCause(e);
+      sagaCompensationResult = SagaCompensationResult.failure(cause);
+      log.error("Failed to execute saga compensation handler {}: {}",
+          cachedHandlerMethod.methodSignature, sagaCompensationResult.getErrorMessage(), cause);
     }
-    
+
     // Publish compensation reply
     SagaCompensationReply reply = SagaCompensationReply.builder()
-        .sagaId(compensation.getSagaId())
-        .sagaName(compensation.getSagaName())
-        .sagaCommandName(compensation.getSagaCommandName())
-        .result(result)
+        .sagaId(sagaCompensation.getSagaId())
+        .sagaName(sagaCompensation.getSagaName())
+        .sagaCommandName(sagaCompensation.getSagaCommandName())
+        .result(sagaCompensationResult)
         .build();
     sagaMessagePublisher.publish(reply);
   }
 
   /**
    * Validates method parameters and returns whether the method takes a parameter. Compensation
-   * handler methods can accept only one optional parameter: SagaContext.
+   * handler methods can accept only one optional parameter: {@link SagaCompensation}.
    */
   private boolean validateAndCheckParameters(Method method) {
     Parameter[] parameters = method.getParameters();
@@ -179,9 +181,9 @@ public class SagaCompensationHandlerDispatcher {
       method.setAccessible(true);
     }
 
-    public Object invoke(SagaContext sagaContext) throws Exception {
+    public Object invoke(SagaCompensation sagaCompensation) throws Exception {
       if (takesParameter) {
-        return method.invoke(bean, sagaContext);
+        return method.invoke(bean, sagaCompensation);
       } else {
         return method.invoke(bean);
       }

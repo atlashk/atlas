@@ -1,5 +1,6 @@
 package org.atlas.domain.payment.saga.checkout;
 
+import java.util.LinkedHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.payment.entity.PaymentEntity;
@@ -8,6 +9,7 @@ import org.atlas.domain.payment.service.PaymentRoutingService;
 import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.constant.CommonConstant;
+import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.payment.PaymentGatewayService;
 import org.atlas.framework.payment.model.CreatePaymentRequest;
 import org.atlas.framework.payment.model.CreatePaymentResponse;
@@ -32,7 +34,8 @@ public class InitializePaymentCommandHandler {
   @SagaCommandHandler(command = CheckoutCommand.INITIALIZE_PAYMENT)
   public SagaCommandResult initializePayment(SagaCommand sagaCommand) {
     SagaContext sagaContext = SagaContext.deserialize(sagaCommand.getSagaContext());
-    CheckoutSagaData checkoutSagaData = sagaContext.get("data", CheckoutSagaData.class);
+    CheckoutSagaData checkoutSagaData = JsonUtil.getInstance().toObject(
+        sagaContext.get("data", LinkedHashMap.class), CheckoutSagaData.class);
     if (checkoutSagaData == null) {
       throw new IllegalArgumentException("Checkout data is required in the saga context");
     }
@@ -59,7 +62,6 @@ public class InitializePaymentCommandHandler {
         .paymentId(paymentEntity.getId())
         .amount(paymentEntity.getAmount())
         .currency(paymentEntity.getCurrency())
-        .method(paymentEntity.getMethod())
         .build();
     CreatePaymentResponse response = paymentGatewayService.createPayment(createPaymentRequest);
 

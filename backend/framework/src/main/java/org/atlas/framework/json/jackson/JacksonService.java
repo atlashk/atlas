@@ -86,9 +86,9 @@ public class JacksonService implements JsonService {
   }
 
   @Override
-  public String getNodeValue(String json, String key) {
+  public String getAsString(String source, String key) {
     try {
-      JsonNode tree = OBJECT_MAPPER.readTree(json);
+      JsonNode tree = OBJECT_MAPPER.readTree(source);
       JsonNode valueNode = tree.get(key);
       if (valueNode != null) {
         return valueNode.asText();

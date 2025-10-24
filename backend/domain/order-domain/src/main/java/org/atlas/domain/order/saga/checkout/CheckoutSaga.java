@@ -10,10 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.order.aggregator.OrderAggregator;
 import org.atlas.domain.order.aggregator.OrderAggregator.AggregationOptions;
 import org.atlas.domain.order.entity.OrderEntity;
+import org.atlas.domain.order.entity.OrderEntity.CancellationReason;
 import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.shared.OrderStatus;
-import org.atlas.framework.util.AsyncUtil.AsyncTask;
-import org.atlas.framework.util.AsyncUtil;
 import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.constant.Services;
 import org.atlas.framework.domain.error.DomainError;
@@ -26,12 +25,12 @@ import org.atlas.framework.saga.annotation.SagaCommandReplyHandler;
 import org.atlas.framework.saga.annotation.StartSaga;
 import org.atlas.framework.saga.command.SagaCommandResult;
 import org.atlas.framework.saga.command.model.CheckoutCommand;
-import org.atlas.framework.saga.context.SagaContext;
-import org.atlas.framework.saga.context.model.CheckoutSagaData;
 import org.atlas.framework.saga.entity.SagaEntity;
 import org.atlas.framework.saga.orchestrator.SagaOrchestrator;
 import org.atlas.framework.template.ResolveTemplateException;
 import org.atlas.framework.template.TemplateService;
+import org.atlas.framework.util.AsyncUtil;
+import org.atlas.framework.util.AsyncUtil.AsyncTask;
 import org.atlas.framework.util.FileUtil;
 
 @Saga(
@@ -65,7 +64,7 @@ public class CheckoutSaga {
       order.setStatus(OrderStatus.AWAITING_PAYMENT_INITIALIZED);
     } else {
       order.setStatus(OrderStatus.CANCELED);
-      order.setCancellationReason(sagaCommandResult.getErrorMessage());
+      order.setCancellationReason(CancellationReason.FAILED_TO_RESERVE_PRODUCT.getValue());
     }
     orderRepository.update(order);
 
@@ -88,40 +87,37 @@ public class CheckoutSaga {
           sagaEntity.getId(), CheckoutCommand.PROCESS_PAYMENT, Services.EXTERNAL_PAYMENT_SERVICE);
     } else {
       order.setStatus(OrderStatus.CANCELED);
-      order.setCancellationReason(sagaCommandResult.getErrorMessage());
+      order.setCancellationReason(CancellationReason.FAILED_TO_INITIALIZE_PAYMENT.getValue());
       orderRepository.update(order);
     }
   }
 
   @SagaCommandReplyHandler(command = CheckoutCommand.PROCESS_PAYMENT)
-  public void handleProcessPaymentReply(SagaEntity sagaEntity) {
-    // Update order status
-    SagaContext sagaContext = SagaContext.deserialize(sagaEntity.getContext());
-    CheckoutSagaData checkoutSagaData = getCheckoutSagaData(sagaContext);
-    OrderEntity order = orderRepository.findById(checkoutSagaData.getOrderId())
+  public void handleProcessPaymentReply(SagaEntity sagaEntity,
+      SagaCommandResult sagaCommandResult) {
+    // Update order
+    OrderEntity order = orderRepository.findBySagaId(sagaEntity.getId())
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
-    order.setStatus(OrderStatus.FULFILLED);
-    orderRepository.update(order);
+    if (sagaCommandResult.isSuccess()) {
+      order.setStatus(OrderStatus.FULFILLED);
+      orderRepository.update(order);
 
-    // Notify to channels
-    orderAggregator.aggregate(
-        order,
-        AggregationOptions.builder()
-            .loadUsers(true)
-            .loadProducts(true)
-            .build()
-    );
-    AsyncUtil.executeAsync(notifyEmail(order));
+      // Notify to channels
+      orderAggregator.aggregate(
+          order,
+          AggregationOptions.builder()
+              .loadUsers(true)
+              .loadProducts(true)
+              .build()
+      );
+      AsyncUtil.executeAsync(notifyEmail(order));
+    } else {
+      order.setStatus(OrderStatus.CANCELED);
+      order.setCancellationReason(CancellationReason.FAILED_TO_PROCESS_PAYMENT.getValue());
+      orderRepository.update(order);
+    }
 
     sagaOrchestrator.endSaga(sagaEntity.getId());
-  }
-
-  private CheckoutSagaData getCheckoutSagaData(SagaContext sagaContext) {
-    CheckoutSagaData checkoutSagaData = sagaContext.get("order", CheckoutSagaData.class);
-    if (checkoutSagaData == null) {
-      throw new IllegalArgumentException("Checkout data is required in the saga context");
-    }
-    return checkoutSagaData;
   }
 
   private AsyncTask notifyEmail(OrderEntity order) {

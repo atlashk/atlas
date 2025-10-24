@@ -8,11 +8,11 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.saga.annotation.SagaCommandHandler;
-import org.atlas.framework.saga.context.SagaContext;
 import org.atlas.framework.saga.exception.SagaConfigException;
 import org.atlas.framework.saga.messaging.SagaMessagePublisher;
 import org.atlas.framework.saga.messaging.payload.SagaCommand;
 import org.atlas.framework.saga.messaging.payload.SagaCommandReply;
+import org.atlas.framework.util.ExceptionUtil;
 import org.atlas.framework.util.StringUtil;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
  * <p><strong>Handler Method Constraints:</strong>
  * <ul>
  *   <li>Handler methods can accept at most one parameter</li>
- *   <li>The parameter must be of type {@link SagaContext} (optional)</li>
+ *   <li>The parameter must be of type {@link SagaCommand} (optional)</li>
  *   <li>Methods with no parameters are also supported</li>
  * </ul>
  *
@@ -102,42 +102,42 @@ public class SagaCommandHandlerDispatcher {
   /**
    * Dispatches a SagaCommandEvent to the appropriate handler method and publishes reply.
    */
-  public void dispatch(SagaCommand command) {
+  public void dispatch(SagaCommand sagaCommand) {
     // Ensure handlers are initialized before dispatching
     initializeHandlers();
-    
+
     CachedHandlerMethod cachedHandlerMethod = cachedHandlerMethods.get(
-        command.getSagaCommandName());
+        sagaCommand.getSagaCommandName());
     if (cachedHandlerMethod == null) {
-      log.warn("No cached handler found for saga command {}", command.getSagaCommandName());
+      log.warn("No cached handler found for saga command {}", sagaCommand.getSagaCommandName());
       return;
     }
 
-    SagaContext sagaContext = SagaContext.deserialize(command.getSagaContext());
-
     SagaCommandResult sagaCommandResult;
     try {
-      log.debug("Dispatching saga command {} to handler {}", command.getSagaCommandName(),
+      log.debug("Dispatching saga command {} to handler {}", sagaCommand.getSagaCommandName(),
           cachedHandlerMethod.methodSignature);
-      sagaCommandResult = (SagaCommandResult) cachedHandlerMethod.invoke(sagaContext);
+      sagaCommandResult = (SagaCommandResult) cachedHandlerMethod.invoke(sagaCommand);
       if (sagaCommandResult.isSuccess()) {
-        log.info("Successfully executed saga command handler {}", cachedHandlerMethod.methodSignature);
+        log.info("Successfully executed saga command handler {}",
+            cachedHandlerMethod.methodSignature);
       } else {
-        log.error("Failed to execute saga command handler {}: {}", cachedHandlerMethod.methodSignature,
-            sagaCommandResult.getErrorMessage());
+        log.error("Failed to execute saga command handler {}: {}",
+            cachedHandlerMethod.methodSignature, sagaCommandResult.getErrorMessage());
       }
     } catch (Exception e) {
+      Throwable cause = ExceptionUtil.getRootCause(e);
       sagaCommandResult = SagaCommandResult.failure(
-          StringUtil.sanitizeErrorMessage(e.getMessage()));
-      log.error("Failed to execute saga command handler {}: {}", cachedHandlerMethod.methodSignature,
-          sagaCommandResult.getErrorMessage(), e);
+          StringUtil.sanitizeErrorMessage(cause.getMessage()));
+      log.error("Failed to execute saga command handler {}: {}",
+          cachedHandlerMethod.methodSignature, sagaCommandResult.getErrorMessage(), cause);
     }
 
     // Publish command reply
     SagaCommandReply reply = SagaCommandReply.builder()
-        .sagaId(command.getSagaId())
-        .sagaName(command.getSagaName())
-        .sagaCommandName(command.getSagaCommandName())
+        .sagaId(sagaCommand.getSagaId())
+        .sagaName(sagaCommand.getSagaName())
+        .sagaCommandName(sagaCommand.getSagaCommandName())
         .sagaCommandResult(sagaCommandResult)
         .build();
     sagaMessagePublisher.publish(reply);
@@ -145,7 +145,7 @@ public class SagaCommandHandlerDispatcher {
 
   /**
    * Validates method parameters and returns whether the method takes a parameter. Handler methods
-   * can accept only one optional parameter: SagaContext.
+   * can accept only one optional parameter: {@link SagaCommand}.
    */
   private boolean validateAndCheckParameters(Method method) {
     Parameter[] parameters = method.getParameters();
@@ -194,9 +194,9 @@ public class SagaCommandHandlerDispatcher {
       method.setAccessible(true);
     }
 
-    public Object invoke(SagaContext sagaContext) throws Exception {
+    public Object invoke(SagaCommand sagaCommand) throws Exception {
       if (takesParameter) {
-        return method.invoke(bean, sagaContext);
+        return method.invoke(bean, sagaCommand);
       } else {
         return method.invoke(bean);
       }

@@ -3,6 +3,7 @@ package org.atlas.domain.order.entity;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -48,5 +49,17 @@ public class OrderEntity extends DomainEntity {
       this.amount = this.amount.add(
           orderItem.getProduct().getPrice().multiply(new BigDecimal(orderItem.getQuantity())));
     }
+  }
+
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  @Getter
+  public enum CancellationReason {
+
+    FAILED_TO_RESERVE_PRODUCT("Failed to reserve product"),
+    FAILED_TO_INITIALIZE_PAYMENT("Failed to initialize payment"),
+    FAILED_TO_PROCESS_PAYMENT("Failed to process payment"),
+    ;
+
+    private final String value;
   }
 }

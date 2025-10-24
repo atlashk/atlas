@@ -15,4 +15,5 @@ import org.atlas.domain.order.shared.OrderStatus;
 public class GetOrderStatusOutput {
 
   private OrderStatus status;
+  private String cancellationReason;
 }

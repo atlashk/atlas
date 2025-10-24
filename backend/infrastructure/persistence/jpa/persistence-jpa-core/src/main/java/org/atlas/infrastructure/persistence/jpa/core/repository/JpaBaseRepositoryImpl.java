@@ -2,10 +2,15 @@ package org.atlas.infrastructure.persistence.jpa.core.repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.Serializable;
+
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 
+@Slf4j
 public class JpaBaseRepositoryImpl<T, ID extends Serializable>
     extends SimpleJpaRepository<T, ID> implements JpaBaseRepository<T, ID> {
 
@@ -20,7 +25,14 @@ public class JpaBaseRepositoryImpl<T, ID extends Serializable>
 
   @Override
   public void insert(T entity) {
-    entityManager.persist(entity);
-    entityManager.flush();
+    try {
+      entityManager.persist(entity);
+      entityManager.flush();
+    } catch (DataIntegrityViolationException e) {
+      // After a constraint failure, the Hibernate session still contains the corrupted entity.
+      // So, we need to detach it from the session.
+      entityManager.detach(entity);
+      throw e;
+    }
   }
 }
