@@ -153,18 +153,18 @@ public class SagaCommandHandlerDispatcher {
       return false;
     }
 
-    // Validate that there's only one parameter and it's SagaContext
+    // Validate that there's only one parameter and it's SagaCommand
     if (parameters.length > 1) {
       throw new SagaConfigException(
           String.format(
-              "Handler method %s.%s can accept at most one parameter of type SagaContext, but found %d parameters",
+              "Handler method %s.%s can accept at most one parameter of type SagaCommand, but found %d parameters",
               method.getDeclaringClass().getSimpleName(), method.getName(), parameters.length));
     }
 
     Parameter parameter = parameters[0];
-    if (parameter.getType() != SagaContext.class) {
+    if (parameter.getType() != SagaCommand.class) {
       throw new SagaConfigException(
-          String.format("Handler method %s.%s parameter must be of type SagaContext, but found: %s",
+          String.format("Handler method %s.%s parameter must be of type SagaCommand, but found: %s",
               method.getDeclaringClass().getSimpleName(), method.getName(),
               parameter.getType().getName()));
     }

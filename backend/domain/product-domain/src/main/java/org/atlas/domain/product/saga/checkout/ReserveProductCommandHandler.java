@@ -96,8 +96,8 @@ public class ReserveProductCommandHandler {
   }
 
   @SagaCompensationHandler(command = CheckoutCommand.RESERVE_PRODUCT)
-  public void compensateReserveProduct(SagaCompensation event) {
-    SagaContext sagaContext = SagaContext.deserialize(event.getSagaContext());
+  public void compensateReserveProduct(SagaCompensation sagaCompensation) {
+    SagaContext sagaContext = SagaContext.deserialize(sagaCompensation.getSagaContext());
     CheckoutSagaData checkoutSagaData = sagaContext.get("data", CheckoutSagaData.class);
     if (checkoutSagaData == null) {
       throw new IllegalArgumentException("Checkout data is required in the saga context");

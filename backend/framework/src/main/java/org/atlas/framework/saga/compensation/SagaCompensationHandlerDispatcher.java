@@ -137,19 +137,19 @@ public class SagaCompensationHandlerDispatcher {
       return false;
     }
 
-    // Validate that there's only one parameter and it's SagaContext
+    // Validate that there's only one parameter and it's SagaCompensation
     if (parameters.length > 1) {
       throw new SagaConfigException(
           String.format(
-              "Compensation handler method %s.%s can accept at most one parameter of type SagaContext, but found %d parameters",
+              "Compensation handler method %s.%s can accept at most one parameter of type SagaCompensation, but found %d parameters",
               method.getDeclaringClass().getSimpleName(), method.getName(), parameters.length));
     }
 
     Parameter parameter = parameters[0];
-    if (parameter.getType() != SagaContext.class) {
+    if (parameter.getType() != SagaCompensation.class) {
       throw new SagaConfigException(
           String.format(
-              "Compensation handler method %s.%s parameter must be of type SagaContext, but found: %s",
+              "Compensation handler method %s.%s parameter must be of type SagaCompensation, but found: %s",
               method.getDeclaringClass().getSimpleName(), method.getName(),
               parameter.getType().getName()));
     }
