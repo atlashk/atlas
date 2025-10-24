@@ -85,10 +85,10 @@ public class CheckoutUseCaseHandler {
     // Create a deterministic signature based on order items
     StringBuilder signature = new StringBuilder();
     cart.getCartItems().stream()
-        .sorted(Comparator.comparingLong(CartItemResponse::getProductId)) // Sort for consistency
-        .forEach(item -> signature.append(item.getProductId())
+        .sorted(Comparator.comparingInt(cartItem -> cartItem.getProduct().getId())) // Sort for consistency
+        .forEach(cartItem -> signature.append(cartItem.getProduct().getId())
                 .append(":")
-                .append(item.getQuantity())
+                .append(cartItem.getQuantity())
                 .append(";"));
     String hash = HashingUtil.sha256ToHex(signature.toString());
     return String.format("checkout:%d:%s", input.getUserId(), hash);
@@ -108,7 +108,7 @@ public class CheckoutUseCaseHandler {
     for (CartItemResponse cartItem : cart.getCartItems()) {
       // Product
       ProductEntity product = ProductEntity.builder()
-          .id(cartItem.getProductId())
+          .id(cartItem.getProduct().getId())
           .build();
 
       OrderItemEntity orderItem = OrderItemEntity.builder()

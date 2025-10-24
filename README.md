@@ -76,7 +76,7 @@ For this style, we can easily use our simple wrapper scripts from the project ro
 To start frontend, we need to make a `.env` file in `frontend` directory:
 
 ```
-VITE_API_BASE_URL=http://localhost:8080
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
 ```
 
 Then start Frontend in development mode:

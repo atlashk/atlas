@@ -46,5 +46,6 @@ public class JpaOutboxMessageEntity extends JpaBaseEntity {
   private String error;
 
   @Column(name = "retries")
+  @Builder.Default
   private Integer retries = 0;
 }
