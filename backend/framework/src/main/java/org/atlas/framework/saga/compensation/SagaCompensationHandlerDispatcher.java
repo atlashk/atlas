@@ -105,16 +105,18 @@ public class SagaCompensationHandlerDispatcher {
       log.debug("Dispatching saga compensation {} to handler {}", compensation.getSagaCommandName(),
           cachedHandlerMethod.methodSignature);
       result = (SagaCompensationResult) cachedHandlerMethod.invoke(sagaContext);
+      if (result.isSuccess()) {
+        log.info("Successfully executed saga compensation handler {}", cachedHandlerMethod.methodSignature);
+      } else {
+        log.error("Failed to execute saga compensation handler {}: {}", cachedHandlerMethod.methodSignature,
+            result.getErrorMessage());
+      }
     } catch (Exception e) {
       result = SagaCompensationResult.failure(e);
+      log.error("Failed to execute saga compensation handler {}: {}", cachedHandlerMethod.methodSignature,
+          result.getErrorMessage(), e);
     }
-    if (result.isSuccess()) {
-      log.info("Successfully executed handler {}", cachedHandlerMethod.methodSignature);
-    } else {
-      log.error("Failed to execute handler {}: {}", cachedHandlerMethod.methodSignature,
-          result.getErrorMessage());
-    }
-
+    
     // Publish compensation reply
     SagaCompensationReply reply = SagaCompensationReply.builder()
         .sagaId(compensation.getSagaId())

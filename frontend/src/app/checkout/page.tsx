@@ -13,7 +13,7 @@ import { useCartStore } from "@/stores";
 import { formatCurrency } from "@/utils/formatter.util";
 import { CheckCircle, CreditCard, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export default function CheckoutPage() {
@@ -28,13 +28,22 @@ export default function CheckoutPage() {
   const [paymentNextAction, setPaymentNextAction] = useState<PaymentNextAction | null>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   
+  // Ref to track if payment methods have been fetched to prevent duplicate calls
+  const paymentMethodsFetched = useRef(false);
+  
   const { orderStatus, isLoading, error, needsPaymentProcessing } = useOrderStatusPolling(orderId);
 
   // Fetch available payment methods on component mount
   useEffect(() => {
     const fetchPaymentMethods = async () => {
+      // Prevent duplicate API calls during development mode double renders
+      if (paymentMethodsFetched.current) {
+        return;
+      }
+      
       try {
         setIsLoadingPaymentMethods(true);
+        paymentMethodsFetched.current = true;
         const response = await paymentApi.getPaymentMethods();
         if (response.success && response.data) {
           setAvailablePaymentMethods(response.data);
@@ -47,6 +56,8 @@ export default function CheckoutPage() {
         console.error("Failed to fetch payment methods:", err);
         // Fallback to default methods if API fails
         setAvailablePaymentMethods(["CARD", "PAYPAL"]);
+        // Reset the ref on error so it can be retried
+        paymentMethodsFetched.current = false;
       } finally {
         setIsLoadingPaymentMethods(false);
       }

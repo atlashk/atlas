@@ -62,12 +62,15 @@ export const getOrderStatusBadge = (status: string): React.ReactElement => {
     return React.createElement(Badge, { variant: "outline" }, "Unknown");
   }
   switch (status.toUpperCase()) {
-    case "PROCESSING":
-      return React.createElement(Badge, { variant: "outline" }, "Processing");
-    case "CONFIRMED":
-      return React.createElement(Badge, { variant: "default" }, "Confirmed");
+    case "AWAITING_PRODUCT_RESERVATION":
+      return React.createElement(Badge, { variant: "outline", className: "bg-yellow-600 text-white" }, "Awaiting Product Reservation");
+    case "AWAITING_PAYMENT_INITIALIZED":
+      return React.createElement(Badge, { variant: "outline", className: "bg-yellow-600 text-white" }, "Awaiting Payment Initialization");
+    case "AWAITING_PAYMENT_PROCESSED":
+      return React.createElement(Badge, { variant: "outline", className: "bg-yellow-600 text-white" }, "Awaiting Payment Processing");
+    case "FULFILLED":
+      return React.createElement(Badge, { variant: "default", className: "bg-green-500 text-white" }, "Fulfilled");
     case "CANCELED":
-    case "CANCELLED":
       return React.createElement(Badge, { variant: "destructive" }, "Canceled");
     default:
       return React.createElement(Badge, { variant: "outline" }, "Unknown");

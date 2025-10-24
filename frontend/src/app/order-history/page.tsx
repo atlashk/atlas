@@ -397,24 +397,32 @@ const OrderHistoryPage: React.FC = () => {
                             <h4 className="text-lg font-semibold mb-3">Payment Information</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div className="space-y-2">
-                                <p>
-                                  <span className="font-medium">Transaction ID:</span> {order.payment.transactionId}
-                                </p>
-                                <p>
-                                  <span className="font-medium">Payment amount:</span> {formatCurrency(order.payment.amount)} {order.payment.currency}
-                                </p>
+                                {order.payment.transactionId && (
+                                  <p>
+                                    <span className="font-medium">Transaction ID:</span> {order.payment.transactionId}
+                                  </p>
+                                )}
+                                {order.payment.amount && (
+                                  <p>
+                                    <span className="font-medium">Payment amount:</span> {formatCurrency(order.payment.amount)} {order.payment.currency || ''}
+                                  </p>
+                                )}
                                 <p>
                                   <span className="font-medium">Payment method:</span> {order.payment.method.charAt(0).toUpperCase() + order.payment.method.slice(1).toLowerCase()}
                                 </p>
-                                <p>
-                                  <span className="font-medium">Payment gateway:</span> {order.payment.gateway.charAt(0).toUpperCase() + order.payment.gateway.slice(1).toLowerCase()}
-                                </p>
+                                {order.payment.gateway && (
+                                  <p>
+                                    <span className="font-medium">Payment gateway:</span> {order.payment.gateway.charAt(0).toUpperCase() + order.payment.gateway.slice(1).toLowerCase()}
+                                  </p>
+                                )}
                               </div>
                               <div className="space-y-2">
-                                <p className="flex items-center gap-2">
-                                  <span className="font-medium">Status:</span>
-                                  {getPaymentStatusBadge(order.payment.status)}
-                                </p>
+                                {order.payment.status && (
+                                  <p className="flex items-center gap-2">
+                                    <span className="font-medium">Status:</span>
+                                    {getPaymentStatusBadge(order.payment.status)}
+                                  </p>
+                                )}
                                 {order.payment.errorCode && (
                                   <p>
                                     <span className="font-medium">Error Code:</span> 

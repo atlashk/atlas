@@ -13,9 +13,9 @@ public class InternalListPaymentRequest {
 
   @NotEmpty
   @Schema(
-      description = "List of unique identifiers (IDs) for the payments to be retrieved.",
+      description = "List of unique order identifiers (IDs) for the payments to be retrieved.",
       example = "[1, 2, 3]",
       requiredMode = RequiredMode.REQUIRED
   )
-  private List<Integer> ids;
+  private List<Integer> orderIds;
 }

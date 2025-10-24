@@ -120,15 +120,17 @@ public class SagaCommandHandlerDispatcher {
       log.debug("Dispatching saga command {} to handler {}", command.getSagaCommandName(),
           cachedHandlerMethod.methodSignature);
       sagaCommandResult = (SagaCommandResult) cachedHandlerMethod.invoke(sagaContext);
+      if (sagaCommandResult.isSuccess()) {
+        log.info("Successfully executed saga command handler {}", cachedHandlerMethod.methodSignature);
+      } else {
+        log.error("Failed to execute saga command handler {}: {}", cachedHandlerMethod.methodSignature,
+            sagaCommandResult.getErrorMessage());
+      }
     } catch (Exception e) {
       sagaCommandResult = SagaCommandResult.failure(
           StringUtil.sanitizeErrorMessage(e.getMessage()));
-    }
-    if (sagaCommandResult.isSuccess()) {
-      log.info("Successfully executed handler {}", cachedHandlerMethod.methodSignature);
-    } else {
-      log.error("Failed to execute handler {}: {}", cachedHandlerMethod.methodSignature,
-          sagaCommandResult.getErrorMessage());
+      log.error("Failed to execute saga command handler {}: {}", cachedHandlerMethod.methodSignature,
+          sagaCommandResult.getErrorMessage(), e);
     }
 
     // Publish command reply
