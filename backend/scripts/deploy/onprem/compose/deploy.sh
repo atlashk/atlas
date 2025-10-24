@@ -234,9 +234,13 @@ read_app_stack_config() {
     echo "  - Messaging: $MESSAGING"
     echo "  - API Client: $API_CLIENT"
     echo "  - Email: $NOTIFICATION_EMAIL"
-    echo "  - Logging: $OBSERVABILITY_LOGGING_STACK"
-    echo "  - Metrics: $OBSERVABILITY_METRICS"
-    echo "  - Tracing: $OBSERVABILITY_TRACING"
+    if [[ "$SKIP_OBSERVABILITY" == true ]]; then
+        echo "  - Observability: SKIPPED (--skip-observability flag enabled)"
+    else
+        echo "  - Logging: $OBSERVABILITY_LOGGING_STACK"
+        echo "  - Metrics: $OBSERVABILITY_METRICS"
+        echo "  - Tracing: $OBSERVABILITY_TRACING"
+    fi
     echo
 }
 
@@ -472,8 +476,8 @@ build_services() {
         exit 1
     fi
 
-    echo "Granting execute permission to build script..."
-    chmod +x "$build_script"
+    echo "Granting execute permissions to build scripts..."
+    chmod +x "$PROJECT_ROOT/backend/scripts/buildSrc/"*.sh
 
     echo "Invoking build script..."
     if "$build_script"; then
