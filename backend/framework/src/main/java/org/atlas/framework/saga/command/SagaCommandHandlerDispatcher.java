@@ -14,6 +14,7 @@ import org.atlas.framework.saga.messaging.SagaMessagePublisher;
 import org.atlas.framework.saga.messaging.payload.SagaCommand;
 import org.atlas.framework.saga.messaging.payload.SagaCommandReply;
 import org.atlas.framework.util.StringUtil;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationContext;
@@ -58,13 +59,13 @@ public class SagaCommandHandlerDispatcher implements InitializingBean {
    */
   @Override
   public void afterPropertiesSet() throws Exception {
-    Map<String, Object> beans = applicationContext.getBeansOfType(Object.class);
+    String[] beanNames = applicationContext.getBeanDefinitionNames();
 
-    for (Object bean : beans.values()) {
-      Class<?> beanClass = bean.getClass();
-      Method[] methods = beanClass.getDeclaredMethods();
+    for (String beanName : beanNames) {
+      Object bean = applicationContext.getBean(beanName);
+      Class<?> beanClass = AopUtils.getTargetClass(bean);
 
-      for (Method method : methods) {
+      for (Method method : beanClass.getDeclaredMethods()) {
         if (method.isAnnotationPresent(SagaCommandHandler.class)) {
           SagaCommandHandler annotation = method.getAnnotation(SagaCommandHandler.class);
           String sagaCommandName = annotation.command();

@@ -63,6 +63,22 @@ export default function NavBar() {
     return "Atlas Store";
   };
 
+  const handleBrandClick = async () => {
+    const href = getBrandHref();
+    
+    // Navigate to the appropriate page
+    router.push(href);
+    
+    // Load cart data if user is authenticated and not admin
+    if (isAuthenticated() && !isAdmin()) {
+      try {
+        await loadCart();
+      } catch (error) {
+        console.error('Failed to reload cart:', error);
+      }
+    }
+  };
+
   const handleLogout = async () => {
     logout();
     router.push("/");
@@ -74,12 +90,12 @@ export default function NavBar() {
         <div className="flex items-center justify-between h-16">
           {/* Brand */}
           <div className="flex items-center">
-            <Link
-              href={getBrandHref()}
-              className="text-xl text-white hover:text-gray-300 transition-colors duration-200"
+            <button
+              onClick={handleBrandClick}
+              className="text-xl text-white hover:text-gray-300 transition-colors duration-200 bg-transparent border-none cursor-pointer"
             >
               {getBrandName()}
-            </Link>
+            </button>
           </div>
 
           {/* Right side - User info & auth buttons */}
