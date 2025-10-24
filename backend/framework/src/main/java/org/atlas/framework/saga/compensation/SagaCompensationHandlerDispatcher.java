@@ -2,8 +2,8 @@ package org.atlas.framework.saga.compensation;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +14,6 @@ import org.atlas.framework.saga.messaging.SagaMessagePublisher;
 import org.atlas.framework.saga.messaging.payload.SagaCompensation;
 import org.atlas.framework.saga.messaging.payload.SagaCompensationReply;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -28,20 +27,31 @@ import org.springframework.stereotype.Component;
 @ConditionalOnBean(SagaMessagePublisher.class)
 @RequiredArgsConstructor
 @Slf4j
-public class SagaCompensationHandlerDispatcher implements InitializingBean {
+public class SagaCompensationHandlerDispatcher {
 
   private final SagaMessagePublisher sagaMessagePublisher;
   private final ApplicationContext applicationContext;
 
   // One compensation handler per command
-  private final Map<String, CachedHandlerMethod> cachedHandlerMethods = new HashMap<>();
+  private final Map<String, CachedHandlerMethod> cachedHandlerMethods = new ConcurrentHashMap<>();
+  private volatile boolean initialized = false;
 
   /**
    * Initializes the compensation handler methods by scanning all beans for
-   * {@link SagaCompensationHandler} annotations.
+   * {@link SagaCompensationHandler} annotations. Uses double-checked locking for thread safety.
    */
-  @Override
-  public void afterPropertiesSet() throws Exception {
+  private void initializeHandlers() {
+    if (!initialized) {
+      synchronized (this) {
+        if (!initialized) {
+          doInitializeHandlers();
+          initialized = true;
+        }
+      }
+    }
+  }
+
+  private void doInitializeHandlers() {
     String[] beanNames = applicationContext.getBeanDefinitionNames();
 
     for (String beanName : beanNames) {
@@ -78,6 +88,8 @@ public class SagaCompensationHandlerDispatcher implements InitializingBean {
    * publishes reply event.
    */
   public void dispatch(SagaCompensation compensation) {
+    initializeHandlers();
+    
     CachedHandlerMethod cachedHandlerMethod = cachedHandlerMethods.get(
         compensation.getSagaCommandName());
     if (cachedHandlerMethod == null) {
