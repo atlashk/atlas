@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# =============================================================================
-# Atlas Development Environment Startup Script
-# =============================================================================
-
 # Configuration
 PROJECT_NAME="atlas-dev"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

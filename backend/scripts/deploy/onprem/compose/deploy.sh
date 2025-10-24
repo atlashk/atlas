@@ -24,7 +24,7 @@ ENV_DIR="$SCRIPT_DIR/.env"
 # Default options
 SKIP_BUILD=false
 FORCE_RECREATE=false
-DISABLE_OBSERVABILITY=false
+SKIP_OBSERVABILITY=false
 
 # Docker Compose command (will be set by check_docker_compose)
 DOCKER_COMPOSE_CMD="docker-compose"
@@ -64,16 +64,16 @@ show_help() {
     echo "Atlas Docker Compose Deployment Script - Generates environment files and starts the Atlas microservices platform"
     echo ""
     echo "Options:"
-    echo "  --skip-build        Skip all build steps (JAR, Docker images)"
-    echo "  --force-recreate    Force recreate containers even if they exist"
-    echo "  --disable-observability  Disable all observability services (Grafana, Prometheus, Loki, Zipkin)"
-    echo "  -h, --help          Show this help message"
+    echo "  --skip-build          Skip all build steps (JAR, Docker images)"
+    echo "  --skip-observability  Skip all observability services (Grafana, Prometheus, Loki, Zipkin)"
+    echo "  --force-recreate      Force recreate containers even if they exist"
+    echo "  -h, --help            Show this help message"
     echo ""
     echo "Examples:"
     echo "  $0                  # Full deployment with parallel startup and environment generation"
     echo "  $0 --skip-build     # Deploy without builds (uses existing images)"
     echo "  $0 --force-recreate # Force recreate all containers with fresh environment files"
-    echo "  $0 --disable-observability # Deploy without observability services (Grafana, Prometheus, etc.)"
+    echo "  $0 --skip-observability # Deploy without observability services (Grafana, Prometheus, etc.)"
 
     echo ""
     echo "Features:"
@@ -98,8 +98,8 @@ parse_arguments() {
                 FORCE_RECREATE=true
                 shift
                 ;;
-            --disable-observability)
-                DISABLE_OBSERVABILITY=true
+            --skip-observability)
+                SKIP_OBSERVABILITY=true
                 shift
                 ;;
             *)
@@ -313,8 +313,7 @@ EOF
 }
 
 generate_observability_config() {
-    # Skip observability configuration if disabled
-    if [[ "$DISABLE_OBSERVABILITY" == true ]]; then
+    if [[ "$SKIP_OBSERVABILITY" == true ]]; then
         return 0
     fi
     
@@ -520,9 +519,8 @@ get_infrastructure_services() {
 
 get_observability_services() {
     local services=()
-    
-    # Skip observability services if disabled
-    if [[ "$DISABLE_OBSERVABILITY" == true ]]; then
+
+    if [[ "$SKIP_OBSERVABILITY" == true ]]; then
         echo "${services[@]}"
         return 0
     fi
