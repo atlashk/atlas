@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,6 @@ import org.atlas.framework.saga.messaging.payload.SagaCommand;
 import org.atlas.framework.saga.messaging.payload.SagaCommandReply;
 import org.atlas.framework.util.StringUtil;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -45,20 +45,31 @@ import org.springframework.stereotype.Component;
 @ConditionalOnBean(SagaMessagePublisher.class)
 @RequiredArgsConstructor
 @Slf4j
-public class SagaCommandHandlerDispatcher implements InitializingBean {
+public class SagaCommandHandlerDispatcher {
 
   private final SagaMessagePublisher sagaMessagePublisher;
   private final ApplicationContext applicationContext;
 
-  // One handler per command
-  private final Map<String, CachedHandlerMethod> cachedHandlerMethods = new HashMap<>();
+  // One handler per command - using ConcurrentHashMap for thread safety
+  private final Map<String, CachedHandlerMethod> cachedHandlerMethods = new ConcurrentHashMap<>();
+  private volatile boolean initialized = false;
 
   /**
    * Initializes the handler methods by scanning all beans for @SagaCommandHandler annotations. Uses
    * lazy initialization with double-checked locking for thread safety.
    */
-  @Override
-  public void afterPropertiesSet() throws Exception {
+  private void initializeHandlers() {
+    if (!initialized) {
+      synchronized (this) {
+        if (!initialized) {
+          doInitializeHandlers();
+          initialized = true;
+        }
+      }
+    }
+  }
+
+  private void doInitializeHandlers() {
     String[] beanNames = applicationContext.getBeanDefinitionNames();
 
     for (String beanName : beanNames) {
@@ -93,6 +104,9 @@ public class SagaCommandHandlerDispatcher implements InitializingBean {
    * Dispatches a SagaCommandEvent to the appropriate handler method and publishes reply.
    */
   public void dispatch(SagaCommand command) {
+    // Ensure handlers are initialized before dispatching
+    initializeHandlers();
+    
     CachedHandlerMethod cachedHandlerMethod = cachedHandlerMethods.get(
         command.getSagaCommandName());
     if (cachedHandlerMethod == null) {
