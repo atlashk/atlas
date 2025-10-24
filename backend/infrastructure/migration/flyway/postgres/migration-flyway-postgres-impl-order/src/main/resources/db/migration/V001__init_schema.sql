@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS orders
     user_id             INT            NOT NULL,
     amount              NUMERIC(11, 2) NOT NULL,
     payment_method      VARCHAR(50)    NOT NULL,
-    status              VARCHAR(20)    NOT NULL,
+    status              VARCHAR(50)    NOT NULL,
     cancellation_reason VARCHAR(255),
     created_at          TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at          TIMESTAMP               DEFAULT CURRENT_TIMESTAMP
