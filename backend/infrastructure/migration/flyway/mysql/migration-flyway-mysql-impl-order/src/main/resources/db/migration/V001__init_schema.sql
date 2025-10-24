@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS orders
 (
     id                  INT            NOT NULL AUTO_INCREMENT PRIMARY KEY,
     code                CHAR(7)        NOT NULL,
-    saga_id             INT            NOT NULL,
+    saga_id             INT,
     user_id             INT            NOT NULL,
     amount              DECIMAL(11, 2) NOT NULL,
     payment_method      VARCHAR(50)    NOT NULL,

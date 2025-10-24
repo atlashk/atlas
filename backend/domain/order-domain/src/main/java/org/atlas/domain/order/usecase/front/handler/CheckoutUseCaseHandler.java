@@ -67,6 +67,8 @@ public class CheckoutUseCaseHandler {
       CheckoutSagaData checkoutSagaData = OrderMapper.toCheckoutSagaData(order);
       Integer sagaId = sagaOrchestrator.startSaga("checkout",
           SagaContext.of("data", checkoutSagaData));
+
+      // Update order saga_id
       order.setSagaId(sagaId);
       orderRepository.update(order);
 
