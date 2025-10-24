@@ -101,7 +101,9 @@ public class CheckoutUseCaseHandler {
     order.setStatus(OrderStatus.AWAITING_PRODUCT_RESERVATION);
 
     // User
-    UserEntity user = UserEntity.builder().id(input.getUserId()).build();
+    UserEntity user = UserEntity.builder()
+        .id(input.getUserId())
+        .build();
     order.setUser(user);
 
     // Order items
@@ -109,6 +111,8 @@ public class CheckoutUseCaseHandler {
       // Product
       ProductEntity product = ProductEntity.builder()
           .id(cartItem.getProduct().getId())
+          .name(cartItem.getProduct().getName())
+          .price(cartItem.getProduct().getPrice())
           .build();
 
       OrderItemEntity orderItem = OrderItemEntity.builder()
