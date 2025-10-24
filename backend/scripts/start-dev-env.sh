@@ -187,10 +187,12 @@ install_docker() {
     # Start and enable Docker service
     sudo systemctl start docker
     sudo systemctl enable docker
-    
+
     # Add current user to docker group
+    sudo groupadd docker
     sudo usermod -aG docker $USER
-    
+    newgrp docker
+
     if command -v docker &> /dev/null; then
         echo "SUCCESS: Docker installed successfully: $(docker --version)"
         echo "WARNING: Please log out and log back in for Docker group changes to take effect"

@@ -20,6 +20,7 @@ public class JpaCartEntityMapper {
     // Cart items
     cart.getCartItems().forEach(cartItem -> {
       JpaCartItemEntity jpaCartItem = new JpaCartItemEntity();
+      jpaCartItem.setId(cartItem.getId());
       jpaCartItem.setProductId(cartItem.getProduct().getId());
       jpaCartItem.setQuantity(cartItem.getQuantity());
       jpaCart.addCartItem(jpaCartItem);
