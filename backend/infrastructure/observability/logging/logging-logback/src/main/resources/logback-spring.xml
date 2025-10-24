@@ -1,5 +1,9 @@
 <configuration>
   <!-- Spring Property Definition - must be defined before use -->
+  <springProperty name="SERVICE_NAME" scope="context" source="spring.application.name"/>
+  <property name="LOG_DIR" value="/var/log/${SERVICE_NAME}"/>
+
+  <!-- use Spring default values -->
   <appender class="ch.qos.logback.core.ConsoleAppender" name="CONSOLE">
     <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
       <layout class="org.atlas.infrastructure.observability.logging.logback.MaskingPatternLayout">
