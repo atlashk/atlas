@@ -52,18 +52,6 @@ public class CheckoutSaga {
   @StartSaga
   public void startSaga(SagaEntity sagaEntity) {
     sagaOrchestrator.sendCommand(
-        sagaEntity, CheckoutCommand.CREATE_ORDER, Services.ORDER_SERVICE);
-  }
-
-  @SagaCommandReplyHandler(command = CheckoutCommand.CREATE_ORDER)
-  public void handleCreateOrderReply(SagaEntity sagaEntity, SagaCommandResult sagaCommandResult) {
-    // Update context
-    SagaContext sagaContext = SagaContext.deserialize(sagaEntity.getContext());
-    sagaContext.remove("input");
-    sagaContext.put("data", sagaCommandResult.getResult());
-    sagaOrchestrator.syncSagaContext(sagaEntity.getId(), sagaContext);
-
-    sagaOrchestrator.sendCommand(
         sagaEntity, CheckoutCommand.RESERVE_PRODUCT, Services.PRODUCT_SERVICE);
   }
 
