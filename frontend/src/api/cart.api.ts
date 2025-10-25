@@ -8,7 +8,7 @@ import { BaseApi } from "./base.api";
 
 export class CartApi extends BaseApi {
   constructor() {
-    super("/api/user-svc/carts");
+    super("/services/user/api/carts");
   }
 
   async getCart(): Promise<ApiResponse<CartResponse>> {

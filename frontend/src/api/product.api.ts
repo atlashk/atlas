@@ -9,7 +9,7 @@ import { BaseApi } from "./base.api";
 
 export class ProductApi extends BaseApi {
   constructor() {
-    super("/api/product-svc");
+    super("/services/product/api");
   }
 
   async listBrand(): Promise<ApiResponse<Brand[]>> {

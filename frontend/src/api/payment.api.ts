@@ -4,7 +4,7 @@ import { PaymentMethodResponse, PaymentNextActionResponse } from '@/interfaces/p
 
 class PaymentApi extends BaseApi {
   constructor() {
-    super('/api/payment-svc');
+    super('/services/payment/api');
   }
 
   async getPaymentMethods(): Promise<ApiResponse<PaymentMethodResponse>> {

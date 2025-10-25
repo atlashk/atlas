@@ -4,7 +4,7 @@ import { BaseApi } from "./base.api";
 
 export class UserApi extends BaseApi {
   constructor() {
-    super("/api/user-svc");
+    super("/services/user/api");
   }
 
   async getProfile(): Promise<ApiResponse<User>> {

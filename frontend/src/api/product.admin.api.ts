@@ -11,7 +11,7 @@ import { BaseApi } from "./base.api";
 
 export class ProductAdminApi extends BaseApi {
   constructor() {
-    super("/api/product-svc/admin");
+    super("/services/product/api/admin");
   }
 
   async listProduct(

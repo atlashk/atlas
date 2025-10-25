@@ -4,7 +4,7 @@ import { BaseApi } from "./base.api";
 
 export class UserAdminApi extends BaseApi {
   constructor() {
-    super("/api/user-svc/admin");
+    super("/services/user/api/admin");
   }
 
   async listUser(filters: ListUserFilters): Promise<ApiResponse<User[]>> {

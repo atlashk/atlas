@@ -10,7 +10,7 @@ import { BaseApi } from "./base.api";
 
 export class OrderApi extends BaseApi {
   constructor() {
-    super("/api/order-svc");
+    super("/services/order/api");
   }
 
   async listOrder(filters: ListOrderFilters): Promise<ApiResponse<Order[]>> {

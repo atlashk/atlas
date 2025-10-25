@@ -4,7 +4,7 @@ import { BaseApi } from "./base.api";
 
 export class AuthApi extends BaseApi {
   constructor() {
-    super("/api/user-svc/auth");
+    super("/services/user/api/auth");
   }
 
   async login(request: LoginRequest): Promise<ApiResponse<LoginResponse>> {

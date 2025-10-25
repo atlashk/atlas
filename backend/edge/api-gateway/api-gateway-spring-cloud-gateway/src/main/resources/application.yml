@@ -32,124 +32,124 @@ spring:
               max-idle-time: 45m # Allow connections to stay idle longer for SSE/WebSocket
           routes:
             # User service
+            - id: user-service
+              uri: ${USER_SERVICE_URI:lb://user-service}
+              predicates:
+                - Path=/services/user/api/**
+              filters:
+                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+                - TokenValidation
+                - TokenRelay
+                - RewritePath=/services/user/api/(?<segment>.*), /api/${segment}
             - id: user-service-admin
               uri: ${USER_SERVICE_URI:lb://user-service}
               predicates:
-                - Path=/api/user-svc/admin/**
+                - Path=/services/user/api/admin/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
                 - TokenValidation
                 - Authorization=ADMIN
                 - TokenRelay
-                - RewritePath=/api/user-svc/admin/(?<segment>.*), /api/admin/${segment}
-            - id: user-service
-              uri: ${USER_SERVICE_URI:lb://user-service}
-              predicates:
-                - Path=/api/user-svc/**
-              filters:
-                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-                - TokenValidation
-                - TokenRelay
-                - RewritePath=/api/user-svc/(?<segment>.*), /api/${segment}
+                - RewritePath=/services/user/api/admin/(?<segment>.*), /api/admin/${segment}
             - id: user-service-auth
               uri: ${USER_SERVICE_URI:lb://user-service}
               predicates:
-                - Path=/api/user-svc/auth/**
+                - Path=/services/user/api/auth/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
                 - TokenValidation
                 - TokenRelay
-                - RewritePath=/api/user-svc/auth/(?<segment>.*), /api/auth/${segment}
+                - RewritePath=/services/user/api/auth/(?<segment>.*), /api/auth/${segment}
             - id: user-service-api-docs
               uri: ${USER_SERVICE_URI:lb://user-service}
               predicates:
-                - Path=/api-docs/user-svc
+                - Path=/api-docs/user-service
               filters:
-                - RewritePath=/api-docs/user-svc, /api-docs
+                - RewritePath=/api-docs/user-service, /api-docs
             # Product service
             - id: product-service
               uri: ${PRODUCT_SERVICE_URI:lb://product-service}
               predicates:
-                - Path=/api/product-svc/**
+                - Path=/services/product/api/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-                - RewritePath=/api/product-svc/(?<segment>.*), /api/${segment}
+                - RewritePath=/services/product/api/(?<segment>.*), /api/${segment}
             - id: product-service-admin
               uri: ${PRODUCT_SERVICE_URI:lb://product-service}
               predicates:
-                - Path=/api/product-svc/admin/**
+                - Path=/services/product/api/admin/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
                 - TokenValidation
                 - Authorization=ADMIN
                 - TokenRelay
-                - RewritePath=/api/product-svc/admin/(?<segment>.*), /api/admin/${segment}
+                - RewritePath=/services/product/api/admin/(?<segment>.*), /api/admin/${segment}
             - id: product-service-api-docs
               uri: ${PRODUCT_SERVICE_URI:lb://product-service}
               predicates:
-                - Path=/api-docs/product-svc
+                - Path=/api-docs/product-service
               filters:
-                - RewritePath=/api-docs/product-svc, /api-docs
+                - RewritePath=/api-docs/product-service, /api-docs
             # Order service
             - id: order-service
               uri: ${ORDER_SERVICE_URI:lb://order-service}
               predicates:
-                - Path=/api/order-svc/**
+                - Path=/services/order/api/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
                 - TokenValidation
                 - TokenRelay
-                - RewritePath=/api/order-svc/(?<segment>.*), /api/${segment}
+                - RewritePath=/services/order/api/(?<segment>.*), /api/${segment}
             - id: order-service-admin
               uri: ${ORDER_SERVICE_URI:lb://order-service}
               predicates:
-                - Path=/api/order-svc/admin/**
+                - Path=/services/order/api/admin/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
                 - TokenValidation
                 - Authorization=ADMIN
                 - TokenRelay
-                - RewritePath=/api/order-svc/admin/(?<segment>.*), /api/admin/${segment}
+                - RewritePath=/services/order/api/admin/(?<segment>.*), /api/admin/${segment}
             - id: order-service-sse
               uri: ${ORDER_SERVICE_URI:lb://order-service}
               predicates:
-                - Path=/order-svc/sse/**
+                - Path=/services/order/notification/sse/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-                - RewritePath=/order-svc/sse/(?<segment>.*), /notification/sse/${segment}
+                - RewritePath=/services/order/notification/sse/(?<segment>.*), /notification/sse/${segment}
             - id: order-service-websocket
               uri: ${ORDER_SERVICE_URI:lb://order-service}
               predicates:
-                - Path=/order-svc/ws/**
+                - Path=/services/order/notification/ws/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-                - RewritePath=/order-svc/ws/(?<segment>.*), /notification/ws/${segment}
+                - RewritePath=/services/order/notification/ws/(?<segment>.*), /notification/ws/${segment}
             - id: order-service-api-docs
               uri: ${ORDER_SERVICE_URI:lb://order-service}
               predicates:
-                - Path=/api-docs/order-svc
+                - Path=/api-docs/order-service
               filters:
-                - RewritePath=/api-docs/order-svc, /api-docs
+                - RewritePath=/api-docs/order-service, /api-docs
             # Payment service
             - id: payment-service
               uri: ${PAYMENT_SERVICE_URI:lb://payment-service}
               predicates:
-                - Path=/api/payment-svc/**
+                - Path=/services/payment/api/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-                - RewritePath=/api/payment-svc/(?<segment>.*), /api/${segment}
+                - RewritePath=/services/payment/api/(?<segment>.*), /api/${segment}
             - id: payment-service-webhook
               uri: ${PAYMENT_SERVICE_URI:lb://payment-service}
               predicates:
-                - Path=/api/payment-svc/webhook/**
+                - Path=/services/payment/api/webhook/**
               filters:
-                - RewritePath=/api/payment-svc/webhook/(?<segment>.*), /api/webhook/${segment}
+                - RewritePath=/services/payment/api/webhook/(?<segment>.*), /api/webhook/${segment}
             - id: payment-service-api-docs
               uri: ${PAYMENT_SERVICE_URI:lb://payment-service}
               predicates:
-                - Path=/api-docs/payment-svc
+                - Path=/api-docs/payment-service
               filters:
-                - RewritePath=/api-docs/payment-svc, /api-docs
+                - RewritePath=/api-docs/payment-service, /api-docs
           discovery:
             locator:
               enabled: true
@@ -173,9 +173,11 @@ springdoc:
     path: /swagger-ui.html
     urls:
       - name: User Service
-        url: /api-docs/user-svc
+        url: /api-docs/user-service
       - name: Product Service
-        url: /api-docs/product-svc
+        url: /api-docs/product-service
       - name: Order Service
-        url: /api-docs/order-svc
+        url: /api-docs/order-service
+      - name: Payment Service
+        url: /api-docs/payment-service
     default-models-expand-depth: -1 # Hide Schemas section
