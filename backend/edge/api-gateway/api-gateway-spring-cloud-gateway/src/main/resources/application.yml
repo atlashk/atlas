@@ -137,6 +137,8 @@ spring:
                 - Path=/services/payment/api/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+                - TokenValidation
+                - TokenRelay
                 - RewritePath=/services/payment/api/(?<segment>.*), /api/${segment}
             - id: payment-service-webhook
               uri: ${PAYMENT_SERVICE_URI:lb://payment-service}

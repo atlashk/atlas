@@ -1,4 +1,4 @@
-package org.atlas.framework.constant;
+package org.atlas.framework.security;
 
 import lombok.experimental.UtilityClass;
 

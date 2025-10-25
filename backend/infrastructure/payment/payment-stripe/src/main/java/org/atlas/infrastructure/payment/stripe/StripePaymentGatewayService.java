@@ -7,6 +7,7 @@ import com.stripe.model.Event;
 import com.stripe.model.PaymentIntent;
 import com.stripe.net.Webhook;
 import com.stripe.param.PaymentIntentCreateParams;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.payment.shared.PaymentGateway;
 import org.atlas.domain.payment.shared.PaymentStatus;
+import org.atlas.framework.http.HttpStatusCode;
 import org.atlas.framework.json.JsonUtil;
+import org.atlas.framework.lock.LockService;
 import org.atlas.framework.payment.PaymentGatewayService;
 import org.atlas.framework.payment.exception.PaymentGatewayException;
 import org.atlas.framework.payment.model.CreatePaymentRequest;
@@ -34,6 +37,7 @@ public class StripePaymentGatewayService implements PaymentGatewayService {
 
   private final StripeClient stripeClient;
   private final StripeProps stripeProps;
+  private final LockService lockService;
 
   private static final List<String> SUPPORTED_EVENT_TYPE = Arrays.asList(
       StripeEventType.PAYMENT_INTENT_SUCCEEDED,
@@ -99,41 +103,52 @@ public class StripePaymentGatewayService implements PaymentGatewayService {
     // Skip unsupported event types
     String eventType = JsonUtil.getInstance().getAsString(rawPayload, "type");
     if (!SUPPORTED_EVENT_TYPE.contains(eventType)) {
-      response.setResponseStatus(405);
-      return response;
-    }
-
-    String sigHeader = headers.get("stripe-signature");
-    if (StringUtil.isBlank(sigHeader)) {
-      log.error("Stripe signature header is required");
-      response.setResponseStatus(400);
+      response.setResponseStatus(HttpStatusCode.BAD_REQUEST.getCode());
       return response;
     }
 
     // Parse event object from raw payload and verify signature
     Event event;
+    String sigHeader = headers.get("stripe-signature");
+    if (StringUtil.isBlank(sigHeader)) {
+      log.error("Stripe signature header is required");
+      response.setResponseStatus(HttpStatusCode.BAD_REQUEST.getCode());
+      return response;
+    }
     try {
       event = Webhook.constructEvent(rawPayload, sigHeader, stripeProps.getWebhookEndpointSecret());
     } catch (SignatureVerificationException e) {
       log.error("Failed to verify webhook signature: {}", e.getMessage(), e);
-      response.setResponseStatus(400);
+      response.setResponseStatus(HttpStatusCode.BAD_REQUEST.getCode());
       return response;
     }
 
-    PaymentResult paymentResult = new PaymentResult();
-    try {
-      // Extract payment_intent object
-      // https://docs.stripe.com/api/payment_intents/object
-      String rawPaymentIntentJson = event.getDataObjectDeserializer().getRawJson();
+    // Extract payment_intent object
+    // https://docs.stripe.com/api/payment_intents/object
+    String rawPaymentIntentJson = event.getDataObjectDeserializer().getRawJson();
 
-      // Payment ID
-      String metadata = JsonUtil.getInstance().getAsString(rawPaymentIntentJson, "metadata");
-      if (StringUtil.isBlank(metadata)) {
-        log.error("Invalid webhook event data: Missing metadata");
-        response.setResponseStatus(400);
+    // Extract payment ID from event metadata
+    String metadata = JsonUtil.getInstance().getAsString(rawPaymentIntentJson, "metadata");
+    if (StringUtil.isBlank(metadata)) {
+      log.error("Invalid webhook event data: Missing metadata");
+      response.setResponseStatus(HttpStatusCode.BAD_REQUEST.getCode());
+      return response;
+    }
+    Integer paymentId = JsonUtil.getInstance().getAsInt(metadata, "paymentId");
+
+    PaymentResult paymentResult = new PaymentResult();
+    String lockKey = "payment:webhook:" + paymentId;
+    Duration waitTime = Duration.ofMinutes(5);
+    Duration leaseTime = Duration.ofDays(7);
+    try {
+      // Webhook idempotency
+      boolean acquiredLock = lockService.acquireLock(lockKey, waitTime, leaseTime);
+      if (!acquiredLock) {
+        log.error("The webhook event of payment {} has been already processing", paymentId);
+        response.setResponseStatus(HttpStatusCode.CONFLICT.getCode());
         return response;
       }
-      Integer paymentId = JsonUtil.getInstance().getAsInt(metadata, "paymentId");
+
       paymentResult.setPaymentId(paymentId);
 
       // Handle different event types
@@ -164,10 +179,12 @@ public class StripePaymentGatewayService implements PaymentGatewayService {
       }
 
       response.setPaymentResult(paymentResult);
-      response.setResponseStatus(200);
+      response.setResponseStatus(HttpStatusCode.OK.getCode());
     } catch (Exception e) {
       log.error("Failed to handle webhook event: {}", e.getMessage(), e);
-      response.setResponseStatus(500);
+      response.setResponseStatus(HttpStatusCode.INTERNAL_SERVER_ERROR.getCode());
+    } finally {
+      lockService.releaseLock(lockKey);
     }
 
     return response;

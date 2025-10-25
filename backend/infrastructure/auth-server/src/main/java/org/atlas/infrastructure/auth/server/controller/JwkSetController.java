@@ -6,7 +6,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.constant.SecurityConstant;
+import org.atlas.framework.security.SecurityConstant;
 import org.atlas.framework.cryptography.RsaKeyLoader;
 import org.atlas.framework.jwks.JwkSetUtil;
 import org.springframework.cache.annotation.Cacheable;

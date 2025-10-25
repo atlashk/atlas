@@ -28,11 +28,13 @@ public class GetCartUseCaseHandler {
     CartEntity cart = cartOpt.get();
 
     // Fetch products
-    boolean allProductsAreValid = cartAggregator.aggregate(cart);
+    if (cart.hasItems()) {
+      boolean allProductsAreValid = cartAggregator.aggregate(cart);
 
-    // Update cart if necessary
-    if (!allProductsAreValid) {
-      cartRepository.update(cart);
+      // Update cart if necessary
+      if (!allProductsAreValid) {
+        cartRepository.update(cart);
+      }
     }
 
     return cart;

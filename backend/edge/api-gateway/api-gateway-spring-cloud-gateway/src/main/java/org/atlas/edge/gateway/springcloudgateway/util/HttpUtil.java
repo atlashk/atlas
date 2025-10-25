@@ -4,7 +4,7 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import lombok.experimental.UtilityClass;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
-import org.atlas.framework.constant.HttpConstant;
+import org.atlas.framework.http.HttpConstant;
 import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.util.StringUtil;
 import org.springframework.core.io.buffer.DataBuffer;

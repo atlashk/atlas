@@ -2,18 +2,19 @@ package org.atlas.framework.domain.error;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.atlas.framework.http.HttpStatusCode;
 
 @Getter
 @RequiredArgsConstructor
 public enum DomainError {
 
   // Common errors
-  DEFAULT(500, "error.commons.default"),
-  BAD_REQUEST(400, "error.commons.bad_request"),
-  UNAUTHORIZED(401, "error.commons.unauthorized"),
-  FORBIDDEN(403, "error.commons.permission_denied"),
-  NOT_FOUND(404, "error.commons.not_found"),
-  CONFLICT(409, "error.commons.conflict"),
+  DEFAULT(HttpStatusCode.INTERNAL_SERVER_ERROR.getCode(), "error.commons.default"),
+  BAD_REQUEST(HttpStatusCode.BAD_REQUEST.getCode(), "error.commons.bad_request"),
+  UNAUTHORIZED(HttpStatusCode.UNAUTHORIZED.getCode(), "error.commons.unauthorized"),
+  FORBIDDEN(HttpStatusCode.FORBIDDEN.getCode(), "error.commons.permission_denied"),
+  NOT_FOUND(HttpStatusCode.NOT_FOUND.getCode(), "error.commons.not_found"),
+  CONFLICT(HttpStatusCode.CONFLICT.getCode(), "error.commons.conflict"),
 
   // User-related errors
   USER_NOT_FOUND(1000, "error.user.not_found"),

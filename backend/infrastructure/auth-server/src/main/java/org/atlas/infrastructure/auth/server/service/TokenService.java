@@ -5,7 +5,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.constant.SecurityConstant;
+import org.atlas.framework.security.SecurityConstant;
 import org.atlas.framework.cryptography.RsaKeyLoader;
 import org.atlas.framework.jwt.DecodeJwtInput;
 import org.atlas.framework.jwt.EncodeJwtInput;

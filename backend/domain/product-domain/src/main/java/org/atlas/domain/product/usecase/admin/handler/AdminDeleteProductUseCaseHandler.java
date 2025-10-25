@@ -5,6 +5,7 @@ import org.atlas.domain.product.entity.ProductEntity;
 import org.atlas.domain.product.infrastructure.messaging.ProductEventMessagePublisher;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.service.ProductImageService;
+import org.atlas.framework.cache.ApplicationCache;
 import org.atlas.framework.cache.CacheService;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.event.contract.product.ProductDeletedEvent;
@@ -32,7 +33,7 @@ public class AdminDeleteProductUseCaseHandler {
     productImageService.deleteImage(product.getId());
 
     // Evict cache
-    cacheService.evict("product", String.valueOf(product.getId()));
+    cacheService.evict(ApplicationCache.PRODUCT, String.valueOf(product.getId()));
 
     // Publish event
     publishEvent(product);

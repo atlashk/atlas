@@ -2,7 +2,7 @@ package org.atlas.infrastructure.api.server.rest.core.util;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.experimental.UtilityClass;
-import org.atlas.framework.constant.HttpConstant;
+import org.atlas.framework.http.HttpConstant;
 import org.springframework.util.StringUtils;
 
 @UtilityClass

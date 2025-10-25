@@ -4,7 +4,7 @@ import java.time.Instant;
 import org.atlas.edge.gateway.springcloudgateway.security.jwt.JwtExtractor;
 import org.atlas.edge.gateway.springcloudgateway.util.HttpUtil;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
-import org.atlas.framework.constant.SecurityConstant;
+import org.atlas.framework.security.SecurityConstant;
 import org.atlas.framework.domain.error.DomainError;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;

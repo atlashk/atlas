@@ -1,4 +1,4 @@
-package org.atlas.framework.constant;
+package org.atlas.framework.http;
 
 import lombok.experimental.UtilityClass;
 

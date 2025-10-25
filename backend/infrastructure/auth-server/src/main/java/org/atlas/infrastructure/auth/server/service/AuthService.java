@@ -6,7 +6,7 @@ import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.user.entity.UserEntity;
 import org.atlas.domain.user.repository.UserRepository;
-import org.atlas.framework.constant.SecurityConstant;
+import org.atlas.framework.security.SecurityConstant;
 import org.atlas.framework.context.ContextInfo;
 import org.atlas.framework.context.Contexts;
 import org.atlas.framework.domain.error.DomainError;

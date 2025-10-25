@@ -41,8 +41,10 @@ public class CacheAspect {
     Method method = signature.getMethod();
     String cacheKey = spelParser.parse(cache.key(), method, joinPoint.getArgs());
 
+    ApplicationCache applicationCache = ApplicationCache.requireByName(cache.cacheName());
+
     // Cache-aside pattern
-    Optional<Object> cachedValue = cacheService.get(cache.cacheName(), cacheKey);
+    Optional<Object> cachedValue = cacheService.get(applicationCache, cacheKey);
     if (cachedValue.isPresent()) {
       Object value = cachedValue.get();
 
@@ -60,7 +62,7 @@ public class CacheAspect {
     Object result = joinPoint.proceed();
 
     if (result != null) {
-      cacheService.put(cache.cacheName(), cacheKey, result, cache.ttl());
+      cacheService.put(applicationCache, cacheKey, result, cache.ttl());
     }
 
     return result;

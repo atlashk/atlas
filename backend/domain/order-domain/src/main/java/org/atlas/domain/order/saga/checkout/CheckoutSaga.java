@@ -68,8 +68,10 @@ public class CheckoutSaga {
     }
     orderRepository.update(order);
 
-    sagaOrchestrator.sendCommand(
-        sagaEntity, CheckoutCommand.INITIALIZE_PAYMENT, Services.PAYMENT_SERVICE);
+    if (sagaCommandResult.isSuccess()) {
+      sagaOrchestrator.sendCommand(
+          sagaEntity, CheckoutCommand.INITIALIZE_PAYMENT, Services.PAYMENT_SERVICE);
+    }
   }
 
   @SagaCommandReplyHandler(command = CheckoutCommand.INITIALIZE_PAYMENT)
@@ -82,7 +84,7 @@ public class CheckoutSaga {
       order.setStatus(OrderStatus.AWAITING_PAYMENT_PROCESSED);
       orderRepository.update(order);
 
-      // Explicitly create command for processing payment
+      // Explicitly create a payment-processing command, since we can’t send commands directly to the external service.
       sagaOrchestrator.createCommand(
           sagaEntity.getId(), CheckoutCommand.PROCESS_PAYMENT, Services.EXTERNAL_PAYMENT_SERVICE);
     } else {
@@ -101,6 +103,10 @@ public class CheckoutSaga {
     if (sagaCommandResult.isSuccess()) {
       order.setStatus(OrderStatus.FULFILLED);
       orderRepository.update(order);
+
+      // Send command to clear user cart
+      sagaOrchestrator.sendCommand(
+          sagaEntity, CheckoutCommand.CLEAR_CART, Services.USER_SERVICE);
 
       // Notify to channels
       orderAggregator.aggregate(

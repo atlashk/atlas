@@ -7,7 +7,7 @@ import org.atlas.domain.user.entity.CartEntity;
 import org.atlas.domain.user.repository.CartRepository;
 import org.atlas.domain.user.usecase.front.model.AddCartItemInput;
 import org.atlas.framework.cache.CacheService;
-import org.atlas.framework.cache.Caches;
+import org.atlas.framework.cache.ApplicationCache;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.springframework.dao.DataIntegrityViolationException;
 
@@ -42,7 +42,7 @@ public class AddCartItemUseCaseHandler {
 
     // Update cache
     cartAggregator.aggregate(cart);
-    cacheService.put(Caches.CART, String.valueOf(cart.getUserId()), cart);
+    cacheService.put(ApplicationCache.CART, String.valueOf(cart.getUserId()), cart);
 
     return cart;
   }

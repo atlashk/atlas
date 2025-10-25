@@ -5,7 +5,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useCartStore } from "@/stores/cart.store";
 import { useUserStore } from "@/stores/user.store";
 import { Clock, ShoppingCart } from "lucide-react";
-import Link from "next/link";
+
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
