@@ -27,10 +27,10 @@ public class StripeWebhookController {
   @PostMapping
   @Webhook(name = "stripe", operation = @Operation(summary = "Handle Stripe Webhook"))
   public ResponseEntity<Map<String, Object>> handleStripeWebhook(
-      @RequestBody Map<String, Object> payload,
+      @RequestBody String rawPayload,
       @RequestHeader Map<String, String> headers
   ) {
-    WebhookResponse response = webhookHandler.handle(PaymentGateway.STRIPE, payload, headers);
+    WebhookResponse response = webhookHandler.handle(PaymentGateway.STRIPE, rawPayload, headers);
     return WebhookResponseUtil.convert(response);
   }
 }

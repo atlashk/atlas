@@ -10,6 +10,7 @@ import org.atlas.domain.payment.usecase.front.model.GetPaymentNextActionOutput;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.ReadOnlyUseCaseHandler;
+import org.atlas.framework.objectmapper.ObjectMapperUtil;
 
 @ReadOnlyUseCaseHandler
 @RequiredArgsConstructor
@@ -27,6 +28,6 @@ public class GetPaymentNextActionUseCaseHandler {
       throw new DomainException(DomainError.INVALID_PAYMENT_STATUS);
     }
 
-    return new GetPaymentNextActionOutput(payment.getNextAction());
+    return ObjectMapperUtil.getInstance().map(payment, GetPaymentNextActionOutput.class);
   }
 }

@@ -69,10 +69,35 @@ public class GsonService implements JsonService {
     JsonObject jsonObject = JsonParser.parseString(source).getAsJsonObject();
     boolean hasKey = jsonObject.has(key);
     if (hasKey) {
-      return jsonObject.get(key).getAsString();
+      var jsonElement = jsonObject.get(key);
+      // If the element is a primitive (string, number, boolean), use getAsString()
+      if (jsonElement.isJsonPrimitive()) {
+        return jsonElement.getAsString();
+      }
+      // If the element is an object or array, return the JSON string representation
+      else if (jsonElement.isJsonObject() || jsonElement.isJsonArray()) {
+        return jsonElement.toString();
+      }
+      // For null values
+      else if (jsonElement.isJsonNull()) {
+        return StringUtil.EMPTY;
+      }
+      // Fallback
+      else {
+        return jsonElement.getAsString();
+      }
     } else {
       log.warn("Key '{}' not found in the JSON", key);
       return StringUtil.EMPTY;
     }
+  }
+
+  @Override
+  public Integer getAsInt(String source, String key) {
+    String plainStr = getAsString(source, key);
+    if (StringUtil.isBlank(plainStr)) {
+      return null;
+    }
+    return Integer.parseInt(plainStr);
   }
 }

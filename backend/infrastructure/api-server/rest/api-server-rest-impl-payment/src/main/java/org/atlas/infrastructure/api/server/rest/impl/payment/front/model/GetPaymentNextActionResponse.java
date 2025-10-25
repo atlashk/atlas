@@ -1,6 +1,7 @@
 package org.atlas.infrastructure.api.server.rest.impl.payment.front.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,4 +19,10 @@ public class GetPaymentNextActionResponse {
 
   @Schema(description = "Next action required for the payment, if any")
   private NextAction nextAction;
+  
+  @Schema(description = "Payment amount")
+  private BigDecimal amount;
+  
+  @Schema(description = "Payment currency")
+  private String currency;
 }

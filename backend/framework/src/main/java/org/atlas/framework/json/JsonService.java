@@ -19,4 +19,6 @@ public interface JsonService {
   String toJson(Object source);
 
   String getAsString(String source, String key);
+
+  Integer getAsInt(String source, String key);
 }

@@ -4,7 +4,13 @@ import { orderApi, paymentApi } from "@/api/index.api";
 import { NextActionHandler } from "@/components/payment/NextActionHandler";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { PaymentMethod } from "@/constants";
 import { useOrderStatusPolling } from "@/hooks/useOrderStatusPolling";
@@ -19,19 +25,32 @@ import { toast } from "sonner";
 export default function CheckoutPage() {
   const router = useRouter();
   const { cart, getCartTotal } = useCartStore();
-  
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>("CARD");
+
+  const [selectedPaymentMethod, setSelectedPaymentMethod] =
+    useState<PaymentMethod>("CARD");
   const [orderId, setOrderId] = useState<string | null>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const [availablePaymentMethods, setAvailablePaymentMethods] = useState<string[]>([]);
+  const [availablePaymentMethods, setAvailablePaymentMethods] = useState<
+    string[]
+  >([]);
   const [isLoadingPaymentMethods, setIsLoadingPaymentMethods] = useState(true);
-  const [paymentNextAction, setPaymentNextAction] = useState<PaymentNextAction | null>(null);
+  const [paymentNextAction, setPaymentNextAction] =
+    useState<PaymentNextAction | null>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-  
+
   // Ref to track if payment methods have been fetched to prevent duplicate calls
   const paymentMethodsFetched = useRef(false);
-  
-  const { orderStatus, isLoading, error, needsPaymentProcessing } = useOrderStatusPolling(orderId);
+  // Ref to track if payment processing has been initiated for current order
+  const paymentProcessingInitiated = useRef<string | null>(null);
+
+  const {
+    orderStatus,
+    isLoading,
+    error,
+    needsPaymentProcessing,
+    stopPolling,
+    startPolling,
+  } = useOrderStatusPolling(orderId);
 
   // Fetch available payment methods on component mount
   useEffect(() => {
@@ -40,7 +59,7 @@ export default function CheckoutPage() {
       if (paymentMethodsFetched.current) {
         return;
       }
-      
+
       try {
         setIsLoadingPaymentMethods(true);
         paymentMethodsFetched.current = true;
@@ -48,7 +67,10 @@ export default function CheckoutPage() {
         if (response.success && response.data) {
           setAvailablePaymentMethods(response.data);
           // Set first available method as default if current selection is not available
-          if (response.data.length > 0 && !response.data.includes(selectedPaymentMethod)) {
+          if (
+            response.data.length > 0 &&
+            !response.data.includes(selectedPaymentMethod)
+          ) {
             setSelectedPaymentMethod(response.data[0] as PaymentMethod);
           }
         }
@@ -71,12 +93,25 @@ export default function CheckoutPage() {
     const processPayment = async () => {
       if (!needsPaymentProcessing || !orderId || isProcessingPayment) return;
 
+      // Prevent duplicate processing for the same order
+      if (paymentProcessingInitiated.current === orderId) return;
+
       try {
         setIsProcessingPayment(true);
+        paymentProcessingInitiated.current = orderId;
+
         const response = await paymentApi.getPaymentNextAction(orderId);
-        
+
         if (response.success && response.data?.nextAction) {
-          setPaymentNextAction(response.data.nextAction);
+          // Include amount and currency from API response in nextAction
+          const nextActionWithPaymentInfo = {
+            ...response.data.nextAction,
+            amount: response.data.amount,
+            currency: response.data.currency,
+          };
+          setPaymentNextAction(nextActionWithPaymentInfo);
+          // Stop order status polling since we now have the payment next action
+          stopPolling();
         } else {
           toast.error("Failed to get payment next action");
         }
@@ -89,15 +124,19 @@ export default function CheckoutPage() {
     };
 
     processPayment();
-  }, [needsPaymentProcessing, orderId, isProcessingPayment]);
+  }, [needsPaymentProcessing, orderId]);
 
   const handleCheckout = async () => {
     try {
       setIsCheckingOut(true);
-      
+
+      // Reset payment processing state for new order
+      paymentProcessingInitiated.current = null;
+      setPaymentNextAction(null);
+
       // 1. Call checkout API
       const response = await orderApi.checkout({
-        paymentMethod: selectedPaymentMethod
+        paymentMethod: selectedPaymentMethod,
       });
 
       if (response.success && response.data) {
@@ -123,54 +162,73 @@ export default function CheckoutPage() {
           <Spinner className="text-blue-600 mx-auto" />
           <h3 className="text-lg font-semibold">Processing Order</h3>
           <p className="text-gray-600">
-            {!orderStatus ? "Creating your order..." : "Updating order status..."}
+            {!orderStatus
+              ? "Creating your order..."
+              : "Updating order status..."}
           </p>
         </div>
       );
     }
 
     switch (orderStatus.status) {
-      case 'AWAITING_PRODUCT_RESERVATION':
-      case 'AWAITING_PAYMENT_INITIALIZED':
-      case 'AWAITING_PAYMENT_PROCESSED':
+      case "AWAITING_PRODUCT_RESERVATION":
+      case "AWAITING_PAYMENT_INITIALIZED":
+      case "AWAITING_PAYMENT_PROCESSED":
         // Show spinner for these intermediate states
         return (
           <div className="text-center space-y-4">
             <Spinner className="text-blue-600 mx-auto" />
             <h3 className="text-lg font-semibold">Processing Order</h3>
             <p className="text-gray-600">
-              {orderStatus.status === 'AWAITING_PRODUCT_RESERVATION' && "Reserving products..."}
-              {orderStatus.status === 'AWAITING_PAYMENT_INITIALIZED' && "Initializing payment..."}
-              {orderStatus.status === 'AWAITING_PAYMENT_PROCESSED' && "Processing payment..."}
+              {orderStatus.status === "AWAITING_PRODUCT_RESERVATION" &&
+                "Reserving products..."}
+              {orderStatus.status === "AWAITING_PAYMENT_INITIALIZED" &&
+                "Initializing payment..."}
+              {orderStatus.status === "AWAITING_PAYMENT_PROCESSED" &&
+                "Processing payment..."}
             </p>
           </div>
         );
 
-      case 'FULFILLED':
+      case "FULFILLED":
         return (
           <div className="text-center space-y-4">
             <CheckCircle className="w-12 h-12 text-green-500 mx-auto" />
-            <h3 className="text-lg font-semibold text-green-600">Order Completed!</h3>
-            <p className="text-gray-600">Your order has been processed successfully.</p>
-            <Button onClick={() => router.push('/orders')} className="mt-4">
+            <h3 className="text-lg font-semibold text-green-600">
+              Order Completed!
+            </h3>
+            <p className="text-gray-600">
+              Your order has been processed successfully.
+            </p>
+            <Button onClick={() => router.push("/order-history")} className="mt-4">
               View Orders
             </Button>
           </div>
         );
 
-      case 'CANCELED':
+      case "CANCELED":
         return (
           <div className="text-center space-y-4">
             <XCircle className="w-12 h-12 text-red-500 mx-auto" />
-            <h3 className="text-lg font-semibold text-red-600">Order Canceled</h3>
+            <h3 className="text-lg font-semibold text-red-600">
+              Order Canceled
+            </h3>
             <p className="text-gray-600">
-              {orderStatus.cancellationReason || 'Your order has been canceled.'}
+              {orderStatus.cancellationReason ||
+                "Your order has been canceled."}
             </p>
             <div className="space-x-2">
-              <Button variant="outline" onClick={() => setOrderId(null)}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setOrderId(null);
+                  paymentProcessingInitiated.current = null;
+                  setPaymentNextAction(null);
+                }}
+              >
                 Try Again
               </Button>
-              <Button variant="outline" onClick={() => router.push('/cart')}>
+              <Button variant="outline" onClick={() => router.push("/cart")}>
                 Back to Cart
               </Button>
             </div>
@@ -187,39 +245,47 @@ export default function CheckoutPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CreditCard className="w-5 h-5" />
-              Order Status
+              Checkout In Progress
             </CardTitle>
           </CardHeader>
           <CardContent>
             {error ? (
               <div className="text-center space-y-4">
                 <XCircle className="w-12 h-12 text-red-500 mx-auto" />
-                <h3 className="text-lg font-semibold text-red-600">An Error Occurred</h3>
+                <h3 className="text-lg font-semibold text-red-600">
+                  An Error Occurred
+                </h3>
                 <p className="text-gray-600">{error}</p>
-                <Button variant="outline" onClick={() => setOrderId(null)}>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setOrderId(null);
+                    paymentProcessingInitiated.current = null;
+                    setPaymentNextAction(null);
+                  }}
+                >
                   Try Again
                 </Button>
               </div>
             ) : (
               <>
                 {paymentNextAction ? (
-                  <div className="space-y-4">
-                    <div className="text-center">
-                      <h3 className="text-lg font-semibold">Complete Payment</h3>
-                      <p className="text-gray-600">Please complete your payment to proceed</p>
-                    </div>
-                    <NextActionHandler 
-                      nextAction={paymentNextAction}
-                      onPaymentComplete={() => {
-                        setPaymentNextAction(null);
-                        toast.success("Payment completed successfully!");
-                      }}
-                      onPaymentError={(error: string) => {
-                        setPaymentNextAction(null);
-                        toast.error(`Payment failed: ${error}`);
-                      }}
-                    />
-                  </div>
+                  <NextActionHandler
+                    nextAction={paymentNextAction}
+                    orderId={orderId}
+                    onPaymentComplete={() => {
+                      setPaymentNextAction(null);
+                      toast.success("Payment completed successfully!");
+                      // Restart polling to check for order completion
+                      startPolling();
+                    }}
+                    onPaymentError={(error: string) => {
+                      setPaymentNextAction(null);
+                      toast.error(`Payment failed: ${error}`);
+                      // Restart polling to check order status after payment error
+                      startPolling();
+                    }}
+                  />
                 ) : (
                   renderOrderStatus()
                 )}
@@ -252,8 +318,12 @@ export default function CheckoutPage() {
             <div className="space-y-2">
               {cart?.cartItems?.map((item) => (
                 <div key={item.product.id} className="flex justify-between">
-                  <span>{item.product.name} x {item.quantity}</span>
-                  <span>{formatCurrency(item.product.price * item.quantity)}</span>
+                  <span>
+                    {item.product.name} x {item.quantity}
+                  </span>
+                  <span>
+                    {formatCurrency(item.product.price * item.quantity)}
+                  </span>
                 </div>
               ))}
               <div className="border-t pt-2 font-semibold flex justify-between">
@@ -276,7 +346,12 @@ export default function CheckoutPage() {
                 <span>Loading payment methods...</span>
               </div>
             ) : (
-              <Select value={selectedPaymentMethod} onValueChange={(value) => setSelectedPaymentMethod(value as PaymentMethod)}>
+              <Select
+                value={selectedPaymentMethod}
+                onValueChange={(value) =>
+                  setSelectedPaymentMethod(value as PaymentMethod)
+                }
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select payment method" />
                 </SelectTrigger>
@@ -287,7 +362,12 @@ export default function CheckoutPage() {
                       {method === "PAYPAL" && "PayPal"}
                       {method === "BANK_TRANSFER" && "Bank Transfer"}
                       {method === "E_WALLET" && "E-Wallet"}
-                      {!["CARD", "PAYPAL", "BANK_TRANSFER", "E_WALLET"].includes(method) && method}
+                      {![
+                        "CARD",
+                        "PAYPAL",
+                        "BANK_TRANSFER",
+                        "E_WALLET",
+                      ].includes(method) && method}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -297,19 +377,26 @@ export default function CheckoutPage() {
         </Card>
 
         {/* Checkout Button */}
-        <Button 
-          onClick={handleCheckout} 
-          disabled={isCheckingOut || !cart || cart.cartItems.length === 0 || isLoadingPaymentMethods}
+        <Button
+          onClick={handleCheckout}
+          disabled={
+            isCheckingOut ||
+            !cart ||
+            cart.cartItems.length === 0 ||
+            isLoadingPaymentMethods
+          }
           className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200"
           size="lg"
         >
-          {isCheckingOut ? "Processing..." : `Pay ${formatCurrency(getCartTotal())}`}
+          {isCheckingOut
+            ? "Processing..."
+            : `Pay ${formatCurrency(getCartTotal())}`}
         </Button>
 
         {/* White Back Button - navigates to cart */}
-        <Button 
-          variant="outline" 
-          onClick={() => router.push('/cart')}
+        <Button
+          variant="outline"
+          onClick={() => router.push("/cart")}
           className="w-full bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
           size="lg"
         >

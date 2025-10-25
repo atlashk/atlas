@@ -13,6 +13,6 @@ public interface PaymentGatewayService {
 
   CreatePaymentResponse createPayment(CreatePaymentRequest request) throws PaymentGatewayException;
 
-  WebhookResponse handleWebhook(Map<String, Object> payload, Map<String, String> headers)
+  WebhookResponse handleWebhook(String rawPayload, Map<String, String> headers)
       throws PaymentGatewayException;
 }

@@ -91,7 +91,18 @@ public class JacksonService implements JsonService {
       JsonNode tree = OBJECT_MAPPER.readTree(source);
       JsonNode valueNode = tree.get(key);
       if (valueNode != null) {
-        return valueNode.asText();
+        // If the node is a text node, use asText()
+        if (valueNode.isTextual()) {
+          return valueNode.asText();
+        }
+        // If the node is an object or array, return the JSON string representation
+        else if (valueNode.isObject() || valueNode.isArray()) {
+          return valueNode.toString();
+        }
+        // For other types (numbers, booleans, null), use asText()
+        else {
+          return valueNode.asText();
+        }
       } else {
         log.warn("Key '{}' not found in the JSON", key);
         return StringUtil.EMPTY;
@@ -100,5 +111,14 @@ public class JacksonService implements JsonService {
       log.error("Failed to parse JSON", e);
       return StringUtil.EMPTY;
     }
+  }
+
+  @Override
+  public Integer getAsInt(String source, String key) {
+    String plainStr = getAsString(source, key);
+    if (StringUtil.isBlank(plainStr)) {
+      return null;
+    }
+    return Integer.parseInt(plainStr);
   }
 }

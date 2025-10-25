@@ -2,21 +2,24 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { UsePaymentElementProvider } from "@/constants";
+import {
+  UsePaymentElementProvider,
+  PAYMENT_NEXT_ACTION_TYPES,
+} from "@/constants";
 import { PaymentNextAction } from "@/interfaces/payment.interface";
 import { CreditCard, ExternalLink, QrCode } from "lucide-react";
 import { StripePaymentForm } from "./StripePaymentForm";
 
 interface NextActionHandlerProps {
   nextAction: PaymentNextAction;
-  transactionId?: string;
+  orderId: string;
   onPaymentComplete?: () => void;
   onPaymentError?: (error: string) => void;
 }
 
 export function NextActionHandler({
   nextAction,
-  transactionId,
+  orderId,
   onPaymentComplete,
   onPaymentError,
 }: NextActionHandlerProps) {
@@ -27,31 +30,31 @@ export function NextActionHandler({
   };
 
   switch (nextAction.type) {
-    case "use_payment_element":
+    case PAYMENT_NEXT_ACTION_TYPES[3]: // "USE_PAYMENT_ELEMENT"
       // Check if provider is supported
-      if (nextAction.provider !== UsePaymentElementProvider.STRIPE || !nextAction.publishable_key) {
+      if (
+        nextAction.provider !== UsePaymentElementProvider.STRIPE ||
+        !nextAction.publishableKey
+      ) {
         return (
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-2">
               <div className="text-center space-y-4">
-                <CreditCard className="w-12 h-12 mx-auto text-red-500" />
                 <h3 className="text-lg font-semibold text-red-600">
                   Payment Configuration Error
                 </h3>
                 <p className="text-gray-600">
-                  {nextAction.provider !== UsePaymentElementProvider.STRIPE 
-                    ? `The payment provider "${nextAction.provider || "unknown"}" is not supported yet.`
+                  {nextAction.provider !== UsePaymentElementProvider.STRIPE
+                    ? `The payment provider "${
+                        nextAction.provider || "unknown"
+                      }" is not supported yet.`
                     : "Missing required payment configuration (publishable key)."}
                 </p>
                 <p className="text-sm text-gray-500">
                   Currently supported providers: Stripe
                 </p>
 
-                {transactionId && (
-                  <p className="text-sm text-gray-500">
-                    Transaction ID: {transactionId}
-                  </p>
-                )}
+                <p className="text-sm text-gray-500">Order ID: {orderId}</p>
 
                 <Button
                   onClick={() =>
@@ -75,24 +78,19 @@ export function NextActionHandler({
       return (
         <div className="space-y-4">
           <div className="text-center">
-            <CreditCard className="w-12 h-12 mx-auto text-blue-500 mb-4" />
             <h3 className="text-lg font-semibold">Complete Your Payment</h3>
             <p className="text-gray-600">
               Please enter your payment details below
             </p>
 
-            {transactionId && (
-              <p className="text-sm text-gray-500 mt-2">
-                Transaction ID: {transactionId}
-              </p>
-            )}
+            <p className="text-sm text-gray-500 mt-2">Order ID: {orderId}</p>
           </div>
 
           <StripePaymentForm
-            clientSecret={nextAction.client_secret || ""}
-            publishableKey={nextAction.publishable_key || ""}
-            amount={0}
-            currency="USD"
+            clientSecret={nextAction.clientSecret || ""}
+            publishableKey={nextAction.publishableKey || ""}
+            amount={nextAction.amount || 0}
+            currency={nextAction.currency || "USD"}
             onSuccess={(paymentIntent) => {
               console.log("Payment successful:", paymentIntent);
               onPaymentComplete?.();
@@ -105,7 +103,7 @@ export function NextActionHandler({
         </div>
       );
 
-    case "redirect_url":
+    case PAYMENT_NEXT_ACTION_TYPES[0]: // "REDIRECT_URL"
       return (
         <Card>
           <CardContent className="p-6">
@@ -118,11 +116,7 @@ export function NextActionHandler({
                 You will be redirected to complete your payment securely
               </p>
 
-              {transactionId && (
-                <p className="text-sm text-gray-500">
-                  Transaction ID: {transactionId}
-                </p>
-              )}
+              <p className="text-sm text-gray-500">Order ID: {orderId}</p>
 
               <Button onClick={handleRedirect} className="w-full" size="lg">
                 <ExternalLink className="w-4 h-4 mr-2" />
@@ -137,7 +131,7 @@ export function NextActionHandler({
         </Card>
       );
 
-    case "qr_code":
+    case PAYMENT_NEXT_ACTION_TYPES[2]: // "QR_CODE"
       return (
         <Card>
           <CardContent className="p-6">
@@ -148,11 +142,7 @@ export function NextActionHandler({
                 Use your mobile banking app to scan the QR code below
               </p>
 
-              {transactionId && (
-                <p className="text-sm text-gray-500">
-                  Transaction ID: {transactionId}
-                </p>
-              )}
+              <p className="text-sm text-gray-500">Order ID: {orderId}</p>
 
               {/* QR Code Placeholder */}
               <div className="bg-gray-100 p-8 rounded-lg border-2 border-dashed border-gray-300 mx-auto max-w-xs">
@@ -183,7 +173,7 @@ export function NextActionHandler({
         </Card>
       );
 
-    case "deeplink":
+    case PAYMENT_NEXT_ACTION_TYPES[1]: // "DEEPLINK"
       return (
         <Card>
           <CardContent className="p-6">
@@ -194,11 +184,7 @@ export function NextActionHandler({
                 Complete your payment using your preferred payment app
               </p>
 
-              {transactionId && (
-                <p className="text-sm text-gray-500">
-                  Transaction ID: {transactionId}
-                </p>
-              )}
+              <p className="text-sm text-gray-500">Order ID: {orderId}</p>
 
               <Button
                 onClick={() =>

@@ -14,8 +14,11 @@ import lombok.Setter;
 @Setter
 public class WebhookResponse {
 
-  private PaymentResult paymentResult;
+  // Respond to the external payment gateway
   private int responseStatus;
   private Map<String, Object> responseBody;
   private Map<String, String> responseHeaders;
+
+  // Respond to order-service (saga command reply)
+  private PaymentResult paymentResult;
 }

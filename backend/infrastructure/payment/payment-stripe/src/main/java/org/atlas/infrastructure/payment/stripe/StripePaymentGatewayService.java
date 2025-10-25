@@ -1,21 +1,19 @@
 package org.atlas.infrastructure.payment.stripe;
 
-import com.google.gson.JsonObject;
+import com.stripe.StripeClient;
+import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
-import com.stripe.model.EventDataObjectDeserializer;
 import com.stripe.model.PaymentIntent;
-import com.stripe.model.StripeObject;
+import com.stripe.net.Webhook;
+import com.stripe.param.PaymentIntentCreateParams;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.payment.shared.PaymentGateway;
 import org.atlas.domain.payment.shared.PaymentStatus;
-import org.atlas.framework.domain.error.DomainError;
-import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.payment.PaymentGatewayService;
 import org.atlas.framework.payment.exception.PaymentGatewayException;
@@ -25,6 +23,7 @@ import org.atlas.framework.payment.model.PaymentResult;
 import org.atlas.framework.payment.model.WebhookResponse;
 import org.atlas.framework.payment.model.nextaction.UsePaymentElement;
 import org.atlas.framework.payment.model.nextaction.UsePaymentElement.Provider;
+import org.atlas.framework.util.CurrencyUtil;
 import org.atlas.framework.util.StringUtil;
 import org.springframework.stereotype.Component;
 
@@ -33,13 +32,13 @@ import org.springframework.stereotype.Component;
 @Slf4j(topic = "payment.stripe")
 public class StripePaymentGatewayService implements PaymentGatewayService {
 
+  private final StripeClient stripeClient;
   private final StripeProps stripeProps;
-  private final StripeService stripeService;
 
-  private static final List<String> SUPPORTED_WEBHOOK_EVENT_TYPE = Arrays.asList(
-      "payment_intent.succeeded",
-      "payment_intent.payment_failed",
-      "payment_intent.canceled"
+  private static final List<String> SUPPORTED_EVENT_TYPE = Arrays.asList(
+      StripeEventType.PAYMENT_INTENT_SUCCEEDED,
+      StripeEventType.PAYMENT_INTENT_PAYMENT_FAILED,
+      StripeEventType.PAYMENT_INTENT_CANCELED
   );
 
   @Override
@@ -53,11 +52,23 @@ public class StripePaymentGatewayService implements PaymentGatewayService {
     CreatePaymentResponse response = new CreatePaymentResponse();
     try {
       // Create payment intent
-      PaymentIntent paymentIntent = stripeService.createPaymentIntent(
-          request.getAmount(),
-          request.getCurrency(),
-          Map.of("paymentId", String.valueOf(request.getPaymentId()))
-      );
+      PaymentIntentCreateParams params =
+          PaymentIntentCreateParams.builder()
+              .setAmount(
+                  CurrencyUtil.getAmountInSmallestUnit(request.getAmount(), request.getCurrency()))
+              .setCurrency(request.getCurrency())
+              .setAutomaticPaymentMethods(
+                  PaymentIntentCreateParams.AutomaticPaymentMethods.builder()
+                      .setEnabled(true)
+                      .build()
+              )
+              .putAllMetadata(Map.of("paymentId", String.valueOf(request.getPaymentId())))
+              .build();
+      PaymentIntent paymentIntent = stripeClient.v1()
+          .paymentIntents()
+          .create(params);
+      log.info("Created new PaymentIntent {} successfully: amount={}, currency={}",
+          paymentIntent.getId(), request.getAmount(), request.getCurrency());
 
       // Build next action
       UsePaymentElement nextAction = UsePaymentElement.builder()
@@ -81,63 +92,70 @@ public class StripePaymentGatewayService implements PaymentGatewayService {
    * Refer <a href="https://docs.stripe.com/api/events/object"></a>
    */
   @Override
-  public WebhookResponse handleWebhook(Map<String, Object> payload,
+  public WebhookResponse handleWebhook(String rawPayload,
       Map<String, String> headers) throws PaymentGatewayException {
     WebhookResponse response = new WebhookResponse();
 
     // Skip unsupported event types
-    String eventType = String.valueOf(payload.get("type"));
-    if (!SUPPORTED_WEBHOOK_EVENT_TYPE.contains(eventType)) {
+    String eventType = JsonUtil.getInstance().getAsString(rawPayload, "type");
+    if (!SUPPORTED_EVENT_TYPE.contains(eventType)) {
       response.setResponseStatus(405);
       return response;
     }
 
-    // Verify signature
-    if (!verifySignature(payload, headers)) {
-      log.error("Invalid webhook signature");
+    String sigHeader = headers.get("stripe-signature");
+    if (StringUtil.isBlank(sigHeader)) {
+      log.error("Stripe signature header is required");
+      response.setResponseStatus(400);
+      return response;
+    }
+
+    // Parse event object from raw payload and verify signature
+    Event event;
+    try {
+      event = Webhook.constructEvent(rawPayload, sigHeader, stripeProps.getWebhookEndpointSecret());
+    } catch (SignatureVerificationException e) {
+      log.error("Failed to verify webhook signature: {}", e.getMessage(), e);
       response.setResponseStatus(400);
       return response;
     }
 
     PaymentResult paymentResult = new PaymentResult();
     try {
-      Event event = JsonUtil.getInstance().toObject((LinkedHashMap<?, ?>) payload, Event.class);
-
       // Extract payment_intent object
       // https://docs.stripe.com/api/payment_intents/object
-      EventDataObjectDeserializer dataObjectDeserializer = event.getDataObjectDeserializer();
-      if (dataObjectDeserializer.getObject().isEmpty()) {
-        log.error("Invalid webhook event data: Missing object");
-        response.setResponseStatus(400);
-        return response;
-      }
-      StripeObject stripeObject = dataObjectDeserializer.getObject().get();
-      JsonObject object = stripeObject.getRawJsonObject();
+      String rawPaymentIntentJson = event.getDataObjectDeserializer().getRawJson();
 
       // Payment ID
-      if (!object.has("metadata")) {
+      String metadata = JsonUtil.getInstance().getAsString(rawPaymentIntentJson, "metadata");
+      if (StringUtil.isBlank(metadata)) {
         log.error("Invalid webhook event data: Missing metadata");
         response.setResponseStatus(400);
         return response;
       }
-      JsonObject metadata = object.getAsJsonObject("metadata");
-      paymentResult.setPaymentId(metadata.get("paymentId").getAsInt());
+      Integer paymentId = JsonUtil.getInstance().getAsInt(metadata, "paymentId");
+      paymentResult.setPaymentId(paymentId);
 
       // Handle different event types
       switch (event.getType()) {
-        case "payment_intent.succeeded" -> paymentResult.setStatus(PaymentStatus.SUCCEEDED);
-        case "payment_intent.payment_failed" -> {
+        case StripeEventType.PAYMENT_INTENT_SUCCEEDED ->
+            paymentResult.setStatus(PaymentStatus.SUCCEEDED);
+        case StripeEventType.PAYMENT_INTENT_PAYMENT_FAILED -> {
           paymentResult.setStatus(PaymentStatus.FAILED);
-          if (object.has("last_payment_error")) {
-            JsonObject lastPaymentError = object.getAsJsonObject("last_payment_error");
-            paymentResult.setErrorCode(lastPaymentError.get("code").getAsString());
+          String lastPaymentError = JsonUtil.getInstance()
+              .getAsString(metadata, "last_payment_error");
+          if (StringUtil.isNotBlank(lastPaymentError)) {
+            paymentResult.setErrorCode(
+                JsonUtil.getInstance().getAsString(lastPaymentError, "error_code"));
             paymentResult.setErrorMessage(
-                StringUtil.sanitizeErrorMessage(lastPaymentError.get("message").getAsString()));
+                StringUtil.sanitizeErrorMessage(
+                    JsonUtil.getInstance().getAsString(lastPaymentError, "message")));
           }
         }
-        case "payment_intent.canceled" -> {
+        case StripeEventType.PAYMENT_INTENT_CANCELED -> {
           paymentResult.setStatus(PaymentStatus.CANCELED);
-          paymentResult.setCancellationReason(object.get("cancellation_reason").getAsString());
+          paymentResult.setCancellationReason(
+              JsonUtil.getInstance().getAsString(rawPaymentIntentJson, "cancellation_reason"));
         }
         default -> {
           log.info("Unknown webhook event type: {}", event.getType());
@@ -148,26 +166,10 @@ public class StripePaymentGatewayService implements PaymentGatewayService {
       response.setPaymentResult(paymentResult);
       response.setResponseStatus(200);
     } catch (Exception e) {
+      log.error("Failed to handle webhook event: {}", e.getMessage(), e);
       response.setResponseStatus(500);
     }
 
     return response;
-  }
-
-  private boolean verifySignature(Map<String, Object> payload, Map<String, String> headers)
-      throws PaymentGatewayException {
-    try {
-      String sigHeader = headers.get("stripe-signature");
-      if (StringUtil.isBlank(sigHeader)) {
-        log.error("Stripe signature header is empty");
-        return false;
-      }
-
-      String payloadJson = JsonUtil.getInstance().toJson(payload);
-
-      return stripeService.verifyWebhookSignature(payloadJson, sigHeader);
-    } catch (Exception e) {
-      throw new PaymentGatewayException(e);
-    }
   }
 }

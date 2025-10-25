@@ -33,13 +33,13 @@ interface PaymentFormProps {
   onCancel?: () => void;
 }
 
-function PaymentForm({ 
+function PaymentForm({
   clientSecret, // eslint-disable-line @typescript-eslint/no-unused-vars
-  amount, 
-  currency = "USD", 
-  onSuccess, 
-  onError, 
-  onCancel
+  amount,
+  currency = "USD",
+  onSuccess,
+  onError,
+  onCancel,
 }: PaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
@@ -60,17 +60,18 @@ function PaymentForm({
       // Use confirmPayment with PaymentElement (modern approach)
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
-        redirect: 'if_required',
+        redirect: "if_required",
       });
 
       if (error) {
         setErrorMessage(error.message || "An error occurred during payment");
         onError?.(error.message || "Payment failed");
-      } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+      } else if (paymentIntent && paymentIntent.status === "succeeded") {
         onSuccess?.(paymentIntent);
       }
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "An unexpected error occurred";
+      const errorMsg =
+        err instanceof Error ? err.message : "An unexpected error occurred";
       setErrorMessage(errorMsg);
       onError?.(errorMsg);
     } finally {
@@ -85,9 +86,9 @@ function PaymentForm({
           Payment Information
         </label>
         {/* Use PaymentElement instead of CardElement for better UX */}
-        <PaymentElement 
+        <PaymentElement
           options={{
-            layout: 'tabs'
+            layout: "tabs",
           }}
         />
       </div>
@@ -110,7 +111,7 @@ function PaymentForm({
             Cancel
           </Button>
         )}
-        
+
         <Button
           type="submit"
           disabled={!stripe || isProcessing}
@@ -124,10 +125,11 @@ function PaymentForm({
           ) : (
             <>
               <CreditCard className="w-4 h-4 mr-2" />
-              Pay {new Intl.NumberFormat('en-US', {
-                style: 'currency',
+              Pay{" "}
+              {new Intl.NumberFormat("en-US", {
+                style: "currency",
                 currency: currency,
-              }).format(amount / 100)}
+              }).format(amount)}
             </>
           )}
         </Button>
@@ -136,9 +138,18 @@ function PaymentForm({
   );
 }
 
-export function StripePaymentForm({ clientSecret, publishableKey, ...props }: StripePaymentFormProps) {
+export function StripePaymentForm({
+  clientSecret,
+  publishableKey,
+  amount,
+  currency,
+  onSuccess,
+  onError,
+  onCancel,
+}: StripePaymentFormProps) {
   const [stripeLoaded, setStripeLoaded] = useState(false);
-  const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
+  const [stripePromise, setStripePromise] =
+    useState<Promise<Stripe | null> | null>(null);
 
   useEffect(() => {
     if (publishableKey) {
@@ -149,21 +160,24 @@ export function StripePaymentForm({ clientSecret, publishableKey, ...props }: St
   }, [publishableKey]);
 
   // Use useMemo to optimize Elements options
-  const options = useMemo(() => ({
-    clientSecret,
-    appearance: {
-      theme: 'stripe' as const,
-      variables: {
-        colorPrimary: '#0570de',
-        colorBackground: '#ffffff',
-        colorText: '#30313d',
-        colorDanger: '#df1b41',
-        fontFamily: 'system-ui, sans-serif',
-        spacingUnit: '4px',
-        borderRadius: '6px',
+  const options = useMemo(
+    () => ({
+      clientSecret,
+      appearance: {
+        theme: "stripe" as const,
+        variables: {
+          colorPrimary: "#0570de",
+          colorBackground: "#ffffff",
+          colorText: "#30313d",
+          colorDanger: "#df1b41",
+          fontFamily: "system-ui, sans-serif",
+          spacingUnit: "4px",
+          borderRadius: "6px",
+        },
       },
-    },
-  }), [clientSecret]);
+    }),
+    [clientSecret]
+  );
 
   if (!stripePromise || !stripeLoaded) {
     return (
@@ -188,7 +202,14 @@ export function StripePaymentForm({ clientSecret, publishableKey, ...props }: St
       </CardHeader>
       <CardContent>
         <Elements stripe={stripePromise} options={options}>
-          <PaymentForm clientSecret={clientSecret} {...props} />
+          <PaymentForm
+            clientSecret={clientSecret}
+            amount={amount}
+            currency={currency}
+            onSuccess={onSuccess}
+            onError={onError}
+            onCancel={onCancel}
+          />
         </Elements>
       </CardContent>
     </Card>
