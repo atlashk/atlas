@@ -15,7 +15,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.domain.payment.shared.PaymentGateway;
+import org.atlas.domain.payment.shared.PaymentGatewayCode;
 import org.atlas.domain.payment.shared.PaymentMethod;
 import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.infrastructure.persistence.jpa.core.entity.JpaBaseEntity;
@@ -56,7 +56,7 @@ public class JpaPaymentEntity extends JpaBaseEntity {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "gateway")
-  private PaymentGateway gateway;
+  private PaymentGatewayCode gateway;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "status")

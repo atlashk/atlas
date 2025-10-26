@@ -37,7 +37,19 @@ public class CheckoutSagaData {
   @Setter
   public static class OrderItem {
 
-    private Integer productId;
+    private Product product;
     private Integer quantity;
+  }
+
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
+  @Getter
+  @Setter
+  public static class Product {
+
+    private Integer id;
+    private String name;
+    private BigDecimal price;
   }
 }

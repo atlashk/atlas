@@ -1,7 +1,7 @@
 package org.atlas.domain.payment.shared;
 
-public enum PaymentGateway {
+public enum PaymentGatewayCode {
 
+  SIMULATOR,
   STRIPE,
-  PAYPAL
 }

@@ -46,18 +46,23 @@ public class ReserveProductCommandHandler {
     }
 
     // Try to reserve products
-    checkoutSagaData.getOrderItems()
-        .forEach(orderItem -> {
-          decreaseQuantity(orderItem.getProductId(), orderItem.getQuantity());
+    for (CheckoutSagaData.OrderItem orderItem : checkoutSagaData.getOrderItems()) {
+      try {
+        decreaseQuantity(orderItem.getProduct().getId(), orderItem.getQuantity());
+      } catch (DomainException e) {
+        return SagaCommandResult.failure(
+            String.format("Product %s has insufficient quantity",
+                orderItem.getProduct().getName()));
+      }
 
-          // Insert new reservation
-          ReservationEntity reservation = ReservationEntity.builder()
-              .orderId(checkoutSagaData.getOrderId())
-              .productId(orderItem.getProductId())
-              .quantity(orderItem.getQuantity())
-              .build();
-          reservationRepository.insert(reservation);
-        });
+      // Insert new reservation
+      ReservationEntity reservation = ReservationEntity.builder()
+          .orderId(checkoutSagaData.getOrderId())
+          .productId(orderItem.getProduct().getId())
+          .quantity(orderItem.getQuantity())
+          .build();
+      reservationRepository.insert(reservation);
+    }
 
     log.info("Successfully reserved products: sagaId={}, orderId={}",
         sagaCommand.getSagaId(), checkoutSagaData.getOrderId());
@@ -112,11 +117,12 @@ public class ReserveProductCommandHandler {
         .forEach(orderItem -> {
           // Check reservation exists or not
           ReservationEntity reservation = reservationRepository.findByOrderIdAndProductId(
-                  checkoutSagaData.getOrderId(), orderItem.getProductId())
+                  checkoutSagaData.getOrderId(), orderItem.getProduct().getId())
               .orElseThrow(() -> new DomainException(DomainError.RESERVATION_NOT_FOUND));
 
           // Increase quantity to compensate
-          productRepository.increaseQuantity(orderItem.getProductId(), orderItem.getQuantity());
+          productRepository.increaseQuantity(orderItem.getProduct().getId(),
+              orderItem.getQuantity());
 
           // Delete reservation
           reservationRepository.delete(reservation);

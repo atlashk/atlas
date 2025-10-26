@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.domain.payment.shared.PaymentGateway;
+import org.atlas.domain.payment.shared.PaymentGatewayCode;
 import org.atlas.domain.payment.shared.PaymentMethod;
 import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.framework.domain.entity.DomainEntity;
@@ -29,7 +29,7 @@ public class PaymentEntity extends DomainEntity {
   private BigDecimal amount;
   private String currency;
   private PaymentMethod method;
-  private PaymentGateway gateway;
+  private PaymentGatewayCode gateway;
   private PaymentStatus status;
 
   // External payment gateway information

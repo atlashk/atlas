@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.domain.payment.shared.PaymentGateway;
+import org.atlas.domain.payment.shared.PaymentGatewayCode;
 import org.atlas.domain.payment.shared.PaymentMethod;
 import org.atlas.domain.payment.shared.PaymentStatus;
 
@@ -35,7 +35,7 @@ public class PaymentResponse {
   private PaymentMethod method;
 
   @Schema(description = "Payment gateway used")
-  private PaymentGateway gateway;
+  private PaymentGatewayCode gateway;
 
   @Schema(description = "Current payment status")
   private PaymentStatus status;

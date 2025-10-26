@@ -11,9 +11,9 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.atlas.domain.order.entity.OrderEntity;
-import org.atlas.domain.order.entity.PaymentEntity;
-import org.atlas.domain.order.entity.ProductEntity;
-import org.atlas.domain.order.entity.UserEntity;
+import org.atlas.domain.order.vo.PaymentVO;
+import org.atlas.domain.order.vo.ProductVO;
+import org.atlas.domain.order.vo.UserVO;
 import org.atlas.framework.internalapi.payment.PaymentApiClient;
 import org.atlas.framework.internalapi.payment.model.ListPaymentRequest;
 import org.atlas.framework.internalapi.payment.model.PaymentResponse;
@@ -88,8 +88,8 @@ public class OrderAggregator {
     orders.forEach(order -> {
       UserResponse userResponse = userResponseMap.get(order.getUser().getId());
       if (userResponse != null) {
-        UserEntity user = ObjectMapperUtil.getInstance()
-            .map(userResponse, UserEntity.class);
+        UserVO user = ObjectMapperUtil.getInstance()
+            .map(userResponse, UserVO.class);
         order.setUser(user);
       }
       // Skip if user not found instead of throwing exception
@@ -123,8 +123,8 @@ public class OrderAggregator {
         ProductResponse productResponse = productResponseMap.get(
             orderItem.getProduct().getId());
         if (productResponse != null) {
-          ProductEntity product = ObjectMapperUtil.getInstance()
-              .map(productResponse, ProductEntity.class);
+          ProductVO product = ObjectMapperUtil.getInstance()
+              .map(productResponse, ProductVO.class);
           orderItem.setProduct(product);
         }
         // Skip if product not found instead of throwing exception
@@ -156,9 +156,9 @@ public class OrderAggregator {
     orders.forEach(order -> {
       PaymentResponse paymentResponse = paymentResponseMap.get(order.getPayment().getId());
       if (paymentResponse != null) {
-        PaymentEntity paymentEntity = ObjectMapperUtil.getInstance()
-            .map(paymentResponse, PaymentEntity.class);
-        order.setPayment(paymentEntity);
+        PaymentVO paymentVO = ObjectMapperUtil.getInstance()
+            .map(paymentResponse, PaymentVO.class);
+        order.setPayment(paymentVO);
       }
       // Skip if payment not found instead of throwing exception
     });

@@ -1,4 +1,4 @@
-package org.atlas.domain.order.entity;
+package org.atlas.domain.order.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,7 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-public class UserEntity {
+public class UserVO {
 
   private Integer id;
   private String firstName;

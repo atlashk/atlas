@@ -64,7 +64,10 @@ public class CheckoutSaga {
       order.setStatus(OrderStatus.AWAITING_PAYMENT_INITIALIZED);
     } else {
       order.setStatus(OrderStatus.CANCELED);
-      order.setCancellationReason(CancellationReason.FAILED_TO_RESERVE_PRODUCT.getValue());
+      order.setCancellationReason(
+          String.format("%s: %s",
+              CancellationReason.FAILED_TO_RESERVE_PRODUCT.getValue(),
+              sagaCommandResult.getErrorMessage()));
     }
     orderRepository.update(order);
 
@@ -89,7 +92,10 @@ public class CheckoutSaga {
           sagaEntity.getId(), CheckoutCommand.PROCESS_PAYMENT, Services.EXTERNAL_PAYMENT_SERVICE);
     } else {
       order.setStatus(OrderStatus.CANCELED);
-      order.setCancellationReason(CancellationReason.FAILED_TO_INITIALIZE_PAYMENT.getValue());
+      order.setCancellationReason(
+          String.format("%s: %s",
+              CancellationReason.FAILED_TO_INITIALIZE_PAYMENT.getValue(),
+              sagaCommandResult.getErrorMessage()));
       orderRepository.update(order);
     }
   }
@@ -119,7 +125,10 @@ public class CheckoutSaga {
       AsyncUtil.executeAsync(notifyEmail(order));
     } else {
       order.setStatus(OrderStatus.CANCELED);
-      order.setCancellationReason(CancellationReason.FAILED_TO_PROCESS_PAYMENT.getValue());
+      order.setCancellationReason(
+          String.format("%s: %s",
+              CancellationReason.FAILED_TO_PROCESS_PAYMENT.getValue(),
+              sagaCommandResult.getErrorMessage()));
       orderRepository.update(order);
     }
 

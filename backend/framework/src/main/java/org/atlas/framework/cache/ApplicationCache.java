@@ -17,7 +17,7 @@ public enum ApplicationCache {
   PRODUCT("product", 300);
 
   private final String name;
-  private final long ttl;
+  private final long ttl; // Time-to-live in seconds
 
   private static final Map<String, ApplicationCache> BY_NAME =
       Arrays.stream(values())

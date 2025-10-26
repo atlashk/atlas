@@ -1,5 +1,7 @@
 ## Chiến lược xử lý webhook failure
+
 ### 1. Payment Status Polling Service
+
 Tạo service để định kỳ kiểm tra trạng thái payment:
 
 ```
@@ -71,7 +73,9 @@ public class PaymentStatusPollingService {
     }
 }
 ```
+
 ### 2. Payment Gateway Status Check API
+
 Thêm method vào `StripePaymentGatewayAdapter.java` :
 
 ```
@@ -118,7 +122,9 @@ throws PaymentGatewayException {
 }
 // ... existing code ...
 ```
+
 ### 3. Frontend Payment Status Checking
+
 Tạo API endpoint để frontend có thể check trạng thái payment:
 
 ```
@@ -145,23 +151,25 @@ public class PaymentStatusController {
     }
 }
 ```
+
 ### 4. Webhook Retry Mechanism
+
 Cải thiện webhook handling với retry logic:
 
 ```
 // ... existing code ...
-public WebhookResponse handle(PaymentGateway paymentGateway,
+public WebhookResponse handle(PaymentGateway paymentGatewayCode,
     Map<String, Object> payload, Map<String, String> headers) {
     
-    log.info("Received webhook event: paymentGateway={}, payload={}, 
+    log.info("Received webhook event: paymentGatewayCode={}, payload={}, 
     headers={}",
-        paymentGateway, payload, headers);
+        paymentGatewayCode, payload, headers);
 
     try {
         // Find payment gateway port implementation
         String paymentGatewayInstanceName = String.format
         ("%sPaymentGatewayAdapter",
-            paymentGateway.name().toLowerCase());
+            paymentGatewayCode.name().toLowerCase());
         PaymentGatewayPort paymentGatewayService = dependencyPort.
         getInstanceByName(
                 paymentGatewayInstanceName, PaymentGatewayPort.class)
@@ -209,7 +217,7 @@ public WebhookResponse handle(PaymentGateway paymentGateway,
 
 private void processPaymentResult(PaymentResult paymentResult) {
     // Update payment entity
-    PaymentEntity paymentEntity = paymentRepository.findById
+    PaymentEntity paymentVO = paymentRepository.findById
     (paymentResult.getPaymentId())
         .orElseThrow(() -> new DomainException(DomainError.
         PAYMENT_NOT_FOUND));
@@ -218,7 +226,9 @@ private void processPaymentResult(PaymentResult paymentResult) {
 }
 // ... existing code ...
 ```
+
 ### 5. Payment Timeout Handling
+
 Thêm timeout mechanism:
 
 ```
@@ -265,7 +275,9 @@ public class PaymentTimeoutService {
     }
 }
 ```
+
 ### 6. Frontend Implementation
+
 Trong frontend, implement polling mechanism:
 
 ```
@@ -304,16 +316,35 @@ export class PaymentService {
     }
 }
 ```
+
 ## Tóm tắt chiến lược
-1. 1.
-   Fix bug hiện tại trong WebhookHandler
-2. 2.
-   Polling service để định kỳ check trạng thái payment
-3. 3.
-   Payment status API để frontend có thể check
-4. 4.
-   Webhook retry mechanism với error handling
-5. 5.
-   Timeout handling cho payments quá lâu
-6. 6.
-   Frontend polling để đảm bảo UX tốt
+
+1.
+    1.
+
+Fix bug hiện tại trong WebhookHandler
+
+2.
+    2.
+
+Polling service để định kỳ check trạng thái payment
+
+3.
+    3.
+
+Payment status API để frontend có thể check
+
+4.
+    4.
+
+Webhook retry mechanism với error handling
+
+5.
+    5.
+
+Timeout handling cho payments quá lâu
+
+6.
+    6.
+
+Frontend polling để đảm bảo UX tốt

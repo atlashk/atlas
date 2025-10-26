@@ -1,8 +1,8 @@
-package org.atlas.domain.order.entity;
+package org.atlas.domain.order.vo;
 
-import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,9 +12,9 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-public class ProductEntity {
+@EqualsAndHashCode(callSuper = false)
+public class OrderItemVO {
 
-  private Integer id;
-  private String name;
-  private BigDecimal price;
+  private ProductVO product;
+  private Integer quantity;
 }

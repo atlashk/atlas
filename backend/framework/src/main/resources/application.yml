@@ -26,6 +26,5 @@ app:
     currency: USD
     routing:
       card: stripe
-      paypal: paypal
   product:
     decrease-quantity-strategy: DISTRIBUTED_LOCK

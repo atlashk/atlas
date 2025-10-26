@@ -2,10 +2,10 @@ package org.atlas.infrastructure.persistence.jpa.impl.order.mapper;
 
 import lombok.experimental.UtilityClass;
 import org.atlas.domain.order.entity.OrderEntity;
-import org.atlas.domain.order.entity.OrderItemEntity;
-import org.atlas.domain.order.entity.PaymentEntity;
-import org.atlas.domain.order.entity.ProductEntity;
-import org.atlas.domain.order.entity.UserEntity;
+import org.atlas.domain.order.vo.OrderItemVO;
+import org.atlas.domain.order.vo.PaymentVO;
+import org.atlas.domain.order.vo.ProductVO;
+import org.atlas.domain.order.vo.UserVO;
 import org.atlas.infrastructure.persistence.jpa.impl.order.entity.JpaOrderEntity;
 import org.atlas.infrastructure.persistence.jpa.impl.order.entity.JpaOrderItemEntity;
 
@@ -49,20 +49,20 @@ public class JpaOrderEntityMapper {
     order.setCreatedAt(jpaOrder.getCreatedAt());
 
     // User
-    UserEntity user = new UserEntity();
+    UserVO user = new UserVO();
     user.setId(jpaOrder.getUserId());
     order.setUser(user);
 
     // Order items
     if (jpaOrder.getOrderItems() != null) {
       jpaOrder.getOrderItems().forEach(jpaOrderItem -> {
-        OrderItemEntity orderItem = new OrderItemEntity();
+        OrderItemVO orderItem = new OrderItemVO();
         orderItem.setId(jpaOrderItem.getId());
         orderItem.setOrderId(jpaOrder.getId());
         orderItem.setQuantity(jpaOrderItem.getQuantity());
 
         // Product
-        ProductEntity product = new ProductEntity();
+        ProductVO product = new ProductVO();
         product.setId(jpaOrderItem.getProductId());
         product.setPrice(jpaOrderItem.getProductPrice());
         orderItem.setProduct(product);
@@ -72,9 +72,9 @@ public class JpaOrderEntityMapper {
     }
 
     // Payment
-    PaymentEntity paymentEntity = new PaymentEntity();
-    paymentEntity.setMethod(jpaOrder.getPaymentMethod());
-    order.setPayment(paymentEntity);
+    PaymentVO paymentVO = new PaymentVO();
+    paymentVO.setMethod(jpaOrder.getPaymentMethod());
+    order.setPayment(paymentVO);
 
     return order;
   }

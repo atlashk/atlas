@@ -5,10 +5,10 @@ import java.util.Comparator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.order.entity.OrderEntity;
-import org.atlas.domain.order.entity.OrderItemEntity;
-import org.atlas.domain.order.entity.PaymentEntity;
-import org.atlas.domain.order.entity.ProductEntity;
-import org.atlas.domain.order.entity.UserEntity;
+import org.atlas.domain.order.vo.OrderItemVO;
+import org.atlas.domain.order.vo.PaymentVO;
+import org.atlas.domain.order.vo.ProductVO;
+import org.atlas.domain.order.vo.UserVO;
 import org.atlas.domain.order.mapper.OrderMapper;
 import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.shared.OrderStatus;
@@ -87,11 +87,12 @@ public class CheckoutUseCaseHandler {
     // Create a deterministic signature based on order items
     StringBuilder signature = new StringBuilder();
     cart.getCartItems().stream()
-        .sorted(Comparator.comparingInt(cartItem -> cartItem.getProduct().getId())) // Sort for consistency
+        .sorted(Comparator.comparingInt(
+            cartItem -> cartItem.getProduct().getId())) // Sort for consistency
         .forEach(cartItem -> signature.append(cartItem.getProduct().getId())
-                .append(":")
-                .append(cartItem.getQuantity())
-                .append(";"));
+            .append(":")
+            .append(cartItem.getQuantity())
+            .append(";"));
     String hash = HashingUtil.sha256ToHex(signature.toString());
     return String.format("checkout:%d:%s", input.getUserId(), hash);
   }
@@ -103,7 +104,7 @@ public class CheckoutUseCaseHandler {
     order.setStatus(OrderStatus.AWAITING_PRODUCT_RESERVATION);
 
     // User
-    UserEntity user = UserEntity.builder()
+    UserVO user = UserVO.builder()
         .id(input.getUserId())
         .build();
     order.setUser(user);
@@ -111,13 +112,13 @@ public class CheckoutUseCaseHandler {
     // Order items
     for (CartItemResponse cartItem : cart.getCartItems()) {
       // Product
-      ProductEntity product = ProductEntity.builder()
+      ProductVO product = ProductVO.builder()
           .id(cartItem.getProduct().getId())
           .name(cartItem.getProduct().getName())
           .price(cartItem.getProduct().getPrice())
           .build();
 
-      OrderItemEntity orderItem = OrderItemEntity.builder()
+      OrderItemVO orderItem = OrderItemVO.builder()
           .product(product)
           .quantity(cartItem.getQuantity())
           .build();
@@ -129,7 +130,7 @@ public class CheckoutUseCaseHandler {
     order.calculateOrderAmount();
 
     // Payment
-    PaymentEntity payment = new PaymentEntity();
+    PaymentVO payment = new PaymentVO();
     payment.setMethod(input.getPaymentMethod());
     order.setPayment(payment);
 

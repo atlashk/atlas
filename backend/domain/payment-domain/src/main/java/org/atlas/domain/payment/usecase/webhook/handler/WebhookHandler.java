@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.payment.entity.PaymentEntity;
 import org.atlas.domain.payment.repository.PaymentRepository;
-import org.atlas.domain.payment.shared.PaymentGateway;
+import org.atlas.domain.payment.shared.PaymentGatewayCode;
 import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
@@ -31,14 +31,14 @@ public class WebhookHandler {
   private final ApplicationContext applicationContext;
   private final SagaMessagePublisher sagaMessagePublisher;
 
-  public WebhookResponse handle(PaymentGateway paymentGateway,
+  public WebhookResponse handle(PaymentGatewayCode paymentGatewayCode,
       String rawPayload, Map<String, String> headers) {
     log.info("Received webhook event: paymentGateway={}, rawPayload={}, headers={}",
-        paymentGateway, rawPayload, headers);
+        paymentGatewayCode, rawPayload, headers);
 
     // Find payment gateway port implementation
     String paymentGatewayInstanceName = String.format("%sPaymentGatewayService",
-        paymentGateway.name().toLowerCase());
+        paymentGatewayCode.name().toLowerCase());
     PaymentGatewayService paymentGatewayService;
     try {
       paymentGatewayService = applicationContext.getBean(

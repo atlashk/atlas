@@ -1,4 +1,4 @@
-package org.atlas.domain.order.entity;
+package org.atlas.domain.order.usecase.front.model;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -13,7 +13,6 @@ import lombok.Setter;
 import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.domain.order.vo.OrderItemVO;
 import org.atlas.domain.order.vo.PaymentVO;
-import org.atlas.domain.order.vo.UserVO;
 import org.atlas.framework.domain.entity.DomainEntity;
 import org.atlas.framework.util.CollectionUtil;
 
@@ -23,7 +22,7 @@ import org.atlas.framework.util.CollectionUtil;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
-public class OrderEntity extends DomainEntity {
+public class OrderOutput extends DomainEntity {
 
   @EqualsAndHashCode.Include
   private Integer id;

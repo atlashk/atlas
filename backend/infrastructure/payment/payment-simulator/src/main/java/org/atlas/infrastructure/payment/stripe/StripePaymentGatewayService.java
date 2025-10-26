@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.domain.payment.shared.PaymentGatewayCode;
+import org.atlas.domain.payment.shared.PaymentGateway;
 import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.framework.http.HttpStatusCode;
 import org.atlas.framework.json.JsonUtil;
@@ -46,8 +46,8 @@ public class StripePaymentGatewayService implements PaymentGatewayService {
   );
 
   @Override
-  public PaymentGatewayCode supports() {
-    return PaymentGatewayCode.STRIPE;
+  public PaymentGateway supports() {
+    return PaymentGateway.STRIPE;
   }
 
   @Override

@@ -2,7 +2,7 @@ package org.atlas.domain.order.mapper;
 
 import lombok.experimental.UtilityClass;
 import org.atlas.domain.order.entity.OrderEntity;
-import org.atlas.domain.order.entity.OrderItemEntity;
+import org.atlas.domain.order.vo.OrderItemVO;
 import org.atlas.framework.saga.context.model.CheckoutSagaData;
 
 @UtilityClass
@@ -18,7 +18,7 @@ public class OrderMapper {
 
     // Map order items
     if (order.getOrderItems() != null) {
-      for (OrderItemEntity orderItem : order.getOrderItems()) {
+      for (OrderItemVO orderItem : order.getOrderItems()) {
         CheckoutSagaData.OrderItem orderItemData = new CheckoutSagaData.OrderItem();
         orderItemData.setProductId(orderItem.getProduct().getId());
         orderItemData.setQuantity(orderItem.getQuantity());
