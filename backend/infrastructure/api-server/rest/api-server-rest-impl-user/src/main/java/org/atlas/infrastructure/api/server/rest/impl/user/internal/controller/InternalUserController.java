@@ -9,7 +9,7 @@ import org.atlas.domain.user.entity.UserEntity;
 import org.atlas.domain.user.usecase.internal.handler.InternalListUserUseCaseHandler;
 import org.atlas.domain.user.usecase.internal.model.InternalListUserInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.api.server.rest.impl.user.front.model.ProfileResponse;
 import org.atlas.infrastructure.api.server.rest.impl.user.internal.model.InternalListUserRequest;
 import org.springframework.http.MediaType;

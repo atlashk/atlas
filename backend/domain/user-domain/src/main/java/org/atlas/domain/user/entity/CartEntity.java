@@ -26,7 +26,7 @@ public class CartEntity extends DomainEntity {
 
   private Integer userId;
 
-  private List<CartItemEntity> cartItems = new ArrayList<>();
+  private List<CartItem> cartItems = new ArrayList<>();
 
   public CartEntity(Integer userId) {
     this.userId = userId;
@@ -34,7 +34,7 @@ public class CartEntity extends DomainEntity {
 
   public BigDecimal getTotalAmount() {
     return cartItems.stream()
-        .map(CartItemEntity::getAmount)
+        .map(CartItem::getAmount)
         .reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 
@@ -43,7 +43,7 @@ public class CartEntity extends DomainEntity {
     return CollectionUtil.isNotEmpty(cartItems);
   }
 
-  public void addCartItem(CartItemEntity cartItem) {
+  public void addCartItem(CartItem cartItem) {
     if (cartItems == null) {
       cartItems = new ArrayList<>();
     }
@@ -61,9 +61,8 @@ public class CartEntity extends DomainEntity {
             it -> it.setQuantity(it.getQuantity() + quantity),
             () -> {
               // Add new cart item
-              CartItemEntity cartItem = new CartItemEntity();
-              ProductEntity product = new ProductEntity();
-              product.setId(productId);
+              CartItem cartItem = new CartItem();
+              Product product = new Product(productId);
               cartItem.setProduct(product);
               cartItem.setQuantity(quantity);
               cartItems.add(cartItem);
@@ -73,9 +72,9 @@ public class CartEntity extends DomainEntity {
 
   public void removeCartItem(Integer productId) {
     if (hasItems()) {
-      Iterator<CartItemEntity> iterator = cartItems.iterator();
+      Iterator<CartItem> iterator = cartItems.iterator();
       while (iterator.hasNext()) {
-        CartItemEntity cartItemEntity = iterator.next();
+        CartItem cartItemEntity = iterator.next();
         if (cartItemEntity.getProduct().getId().equals(productId)) {
           iterator.remove();
           break;
@@ -95,5 +94,35 @@ public class CartEntity extends DomainEntity {
         .map(cartItemEntity -> cartItemEntity.getProduct().getId())
         .distinct()
         .toList();
+  }
+
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
+  @Getter
+  @Setter
+  public static class CartItem {
+
+    private Product product;
+    private Integer quantity;
+
+    public BigDecimal getAmount() {
+      return product.getPrice().multiply(BigDecimal.valueOf(quantity));
+    }
+  }
+
+  @NoArgsConstructor
+  @Getter
+  @Setter
+  public static class Product {
+
+    private Integer id;
+    private String name;
+    private BigDecimal price;
+    private String image;
+
+    public Product(Integer id) {
+      this.id = id;
+    }
   }
 }

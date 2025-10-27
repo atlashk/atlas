@@ -6,11 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.messaging.publisher.Message;
 import org.atlas.framework.messaging.publisher.MessagePublisher;
-import org.atlas.framework.saga.messaging.SagaMessagePublisher;
-import org.atlas.framework.saga.messaging.payload.SagaCommand;
-import org.atlas.framework.saga.messaging.payload.SagaCommandReply;
-import org.atlas.framework.saga.messaging.payload.SagaCompensation;
-import org.atlas.framework.saga.messaging.payload.SagaCompensationReply;
+import org.atlas.framework.saga.core.messaging.SagaMessagePublisher;
+import org.atlas.framework.saga.core.messaging.payload.SagaCommand;
+import org.atlas.framework.saga.core.messaging.payload.SagaCommandReply;
+import org.atlas.framework.saga.core.messaging.payload.SagaCompensation;
+import org.atlas.framework.saga.core.messaging.payload.SagaCompensationReply;
 import org.springframework.stereotype.Component;
 
 @Component

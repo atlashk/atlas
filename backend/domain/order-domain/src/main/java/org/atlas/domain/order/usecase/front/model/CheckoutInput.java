@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.domain.payment.shared.PaymentMethod;
+import org.atlas.domain.order.entity.OrderEntity.Address;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,5 +15,6 @@ import org.atlas.domain.payment.shared.PaymentMethod;
 public class CheckoutInput {
 
   private Integer userId;
-  private PaymentMethod paymentMethod;
+  private Address address;
+  private Integer paymentGatewayId;
 }

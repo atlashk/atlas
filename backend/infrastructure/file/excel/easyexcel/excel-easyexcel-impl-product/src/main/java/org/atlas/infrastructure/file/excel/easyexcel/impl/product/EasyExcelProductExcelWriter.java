@@ -12,7 +12,7 @@ import lombok.Setter;
 import org.atlas.domain.product.infrastructure.file.excel.ProductExcelWriter;
 import org.atlas.domain.product.infrastructure.file.model.write.ProductRow;
 import org.atlas.domain.product.shared.ProductStatus;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.file.excel.easyexcel.core.EasyExcelWriter;
 import org.springframework.stereotype.Component;
 

@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.atlas.framework.util.CollectionUtil;
 import org.atlas.framework.util.PagingUtil;
 
 @Getter
@@ -34,7 +35,7 @@ public class PagingResult<T> {
   }
 
   public boolean checkEmpty() {
-    return pagination.getTotalRecords() == 0L;
+    return CollectionUtil.isEmpty(data) || pagination.getTotalRecords() == 0L;
   }
 
   public <U> PagingResult<U> map(Function<? super T, ? extends U> mapper) {

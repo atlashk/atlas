@@ -1,6 +1,0 @@
-app:
-  payment:
-    stripe:
-      secret-key: ${STRIPE_SECRET_KEY}
-      publishable-key: ${STRIPE_PUBLISHABLE_KEY}
-      webhook-endpoint-secret: ${STRIPE_WEBHOOK_ENDPOINT_SECRET}

@@ -15,4 +15,6 @@ public interface PaymentRepository {
   void insert(PaymentEntity payment);
 
   void update(PaymentEntity payment);
+
+  int markAsWebhookProcessing(PaymentEntity payment);
 }

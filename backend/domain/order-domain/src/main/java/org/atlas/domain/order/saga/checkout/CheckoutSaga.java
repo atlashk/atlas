@@ -7,12 +7,11 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.domain.order.aggregator.OrderAggregator;
-import org.atlas.domain.order.aggregator.OrderAggregator.AggregationOptions;
 import org.atlas.domain.order.entity.OrderEntity;
 import org.atlas.domain.order.entity.OrderEntity.CancellationReason;
 import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.shared.OrderStatus;
+import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.constant.Services;
 import org.atlas.framework.domain.error.DomainError;
@@ -20,13 +19,15 @@ import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.notification.email.Attachment;
 import org.atlas.framework.notification.email.EmailNotification;
 import org.atlas.framework.notification.email.EmailService;
-import org.atlas.framework.saga.annotation.Saga;
-import org.atlas.framework.saga.annotation.SagaCommandReplyHandler;
-import org.atlas.framework.saga.annotation.StartSaga;
-import org.atlas.framework.saga.command.SagaCommandResult;
-import org.atlas.framework.saga.command.model.CheckoutCommand;
-import org.atlas.framework.saga.entity.SagaEntity;
-import org.atlas.framework.saga.orchestrator.SagaOrchestrator;
+import org.atlas.framework.saga.checkout.CheckoutCommand;
+import org.atlas.framework.saga.checkout.InitializePaymentCommandMetadata;
+import org.atlas.framework.saga.checkout.ProcessPaymentCommandMetadata;
+import org.atlas.framework.saga.core.annotation.Saga;
+import org.atlas.framework.saga.core.annotation.SagaCommandReplyHandler;
+import org.atlas.framework.saga.core.annotation.StartSaga;
+import org.atlas.framework.saga.core.command.SagaCommandResult;
+import org.atlas.framework.saga.core.entity.SagaEntity;
+import org.atlas.framework.saga.core.orchestrator.SagaOrchestrator;
 import org.atlas.framework.template.ResolveTemplateException;
 import org.atlas.framework.template.TemplateService;
 import org.atlas.framework.util.AsyncUtil;
@@ -42,7 +43,6 @@ import org.atlas.framework.util.FileUtil;
 public class CheckoutSaga {
 
   private final OrderRepository orderRepository;
-  private final OrderAggregator orderAggregator;
   private final ApplicationConfigService applicationConfigService;
   private final SagaOrchestrator sagaOrchestrator;
   private final EmailService emailService;
@@ -67,7 +67,7 @@ public class CheckoutSaga {
       order.setCancellationReason(
           String.format("%s: %s",
               CancellationReason.FAILED_TO_RESERVE_PRODUCT.getValue(),
-              sagaCommandResult.getErrorMessage()));
+              sagaCommandResult.getError()));
     }
     orderRepository.update(order);
 
@@ -80,22 +80,37 @@ public class CheckoutSaga {
   @SagaCommandReplyHandler(command = CheckoutCommand.INITIALIZE_PAYMENT)
   public void handleInitializePaymentReply(SagaEntity sagaEntity,
       SagaCommandResult sagaCommandResult) {
-    // Update order
     OrderEntity order = orderRepository.findBySagaId(sagaEntity.getId())
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
+
+    InitializePaymentCommandMetadata metadata =
+        (InitializePaymentCommandMetadata) sagaCommandResult.getMetadata();
+
     if (sagaCommandResult.isSuccess()) {
+      // Update order status
       order.setStatus(OrderStatus.AWAITING_PAYMENT_PROCESSED);
+
+      // Update payment snapshot
+      order.getPayment().setTransactionId(metadata.getTransactionId());
+      order.getPayment().setPaymentGateway(metadata.getPaymentGateway());
+      order.getPayment().setStatus(PaymentStatus.CREATED);
+
       orderRepository.update(order);
 
       // Explicitly create a payment-processing command, since we can’t send commands directly to the external service.
       sagaOrchestrator.createCommand(
           sagaEntity.getId(), CheckoutCommand.PROCESS_PAYMENT, Services.EXTERNAL_PAYMENT_SERVICE);
     } else {
+      // Update order status
       order.setStatus(OrderStatus.CANCELED);
       order.setCancellationReason(
           String.format("%s: %s",
               CancellationReason.FAILED_TO_INITIALIZE_PAYMENT.getValue(),
-              sagaCommandResult.getErrorMessage()));
+              sagaCommandResult.getError()));
+
+      // Update payment snapshot
+      order.getPayment().setStatus(PaymentStatus.FAILED);
+
       orderRepository.update(order);
     }
   }
@@ -106,29 +121,42 @@ public class CheckoutSaga {
     // Update order
     OrderEntity order = orderRepository.findBySagaId(sagaEntity.getId())
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
+
+    ProcessPaymentCommandMetadata metadata =
+        (ProcessPaymentCommandMetadata) sagaCommandResult.getMetadata();
+
     if (sagaCommandResult.isSuccess()) {
+      // Update order status
       order.setStatus(OrderStatus.FULFILLED);
+
+      // Update payment snapshot
+      order.getPayment().setStatus(PaymentStatus.SUCCEEDED);
+      order.getPayment().setPaymentMethod(metadata.getPaymentMethod());
+      order.getPayment().setPaymentMethodDetails(metadata.getPaymentMethodDetails());
+
       orderRepository.update(order);
 
       // Send command to clear user cart
       sagaOrchestrator.sendCommand(
           sagaEntity, CheckoutCommand.CLEAR_CART, Services.USER_SERVICE);
 
-      // Notify to channels
-      orderAggregator.aggregate(
-          order,
-          AggregationOptions.builder()
-              .loadUsers(true)
-              .loadProducts(true)
-              .build()
-      );
       AsyncUtil.executeAsync(notifyEmail(order));
     } else {
+      // Update order status
       order.setStatus(OrderStatus.CANCELED);
       order.setCancellationReason(
           String.format("%s: %s",
               CancellationReason.FAILED_TO_PROCESS_PAYMENT.getValue(),
-              sagaCommandResult.getErrorMessage()));
+              sagaCommandResult.getError()));
+
+      // Update payment snapshot
+      order.getPayment().setStatus(metadata.getPaymentStatus());
+      if (PaymentStatus.FAILED.equals(metadata.getPaymentStatus())) {
+        order.getPayment().setError(sagaCommandResult.getError());
+      } else if (PaymentStatus.CANCELED.equals(metadata.getPaymentStatus())) {
+        order.getPayment().setCancellationReason(sagaCommandResult.getError());
+      }
+
       orderRepository.update(order);
     }
 

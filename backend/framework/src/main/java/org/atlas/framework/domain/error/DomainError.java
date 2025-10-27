@@ -39,8 +39,7 @@ public enum DomainError {
   // Payment-related errors
   PAYMENT_NOT_FOUND(4000, "error.payment.payment_not_found"),
   INVALID_PAYMENT_STATUS(4001, "error.payment.invalid_status"),
-  PAYMENT_GATEWAY_NOT_SUPPORTED(4002, "error.payment.payment_gateway_not_supported"),
-  PAYMENT_METHOD_NOT_SUPPORTED(4003, "error.payment.payment_method_not_supported"),
+  PAYMENT_GATEWAY_NOT_FOUND(4002, "error.payment.payment_gateway_not_found"),
 
   // Cart-related errors
   CART_NOT_FOUND(5000, "error.cart.not_found"),

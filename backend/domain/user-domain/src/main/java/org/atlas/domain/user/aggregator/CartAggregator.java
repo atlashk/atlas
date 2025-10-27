@@ -7,12 +7,12 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.user.entity.CartEntity;
-import org.atlas.domain.user.entity.CartItemEntity;
-import org.atlas.domain.user.entity.ProductEntity;
+import org.atlas.domain.user.entity.CartEntity.CartItem;
+import org.atlas.domain.user.entity.CartEntity.Product;
+import org.atlas.domain.user.mapper.CartMapper;
 import org.atlas.framework.internalapi.product.ProductApiClient;
 import org.atlas.framework.internalapi.product.model.ListProductRequest;
 import org.atlas.framework.internalapi.product.model.ProductResponse;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.util.CollectionUtil;
 import org.springframework.stereotype.Service;
 
@@ -48,12 +48,11 @@ public class CartAggregator {
     Map<Integer, ProductResponse> productResponseMap = productResponses.stream()
         .collect(Collectors.toMap(ProductResponse::getId, Function.identity()));
     boolean allProductsAreValid = true;
-    for (CartItemEntity cartItem : cart.getCartItems()) {
+    for (CartItem cartItem : cart.getCartItems()) {
       Integer productId = cartItem.getProduct().getId();
       ProductResponse productResponse = productResponseMap.get(productId);
       if (productResponse != null) {
-        ProductEntity product = ObjectMapperUtil.getInstance()
-            .map(productResponse, ProductEntity.class);
+        Product product = CartMapper.INSTANCE.toProduct(productResponse);
         cartItem.setProduct(product);
       } else {
         log.error("Product {} no longer exists, removing from cart {}", productId, cart.getId());

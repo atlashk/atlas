@@ -7,7 +7,7 @@ import org.atlas.domain.product.entity.CategoryEntity;
 import org.atlas.domain.product.entity.ProductAttributeEntity;
 import org.atlas.domain.product.entity.ProductDetailsEntity;
 import org.atlas.domain.product.entity.ProductEntity;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.api.server.rest.impl.product.admin.model.AdminCreateProductRequest;
 import org.atlas.infrastructure.api.server.rest.impl.product.admin.model.AdminUpdateProductRequest;
 

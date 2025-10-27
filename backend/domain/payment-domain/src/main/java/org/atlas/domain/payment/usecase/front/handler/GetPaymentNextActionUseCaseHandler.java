@@ -10,7 +10,7 @@ import org.atlas.domain.payment.usecase.front.model.GetPaymentNextActionOutput;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.ReadOnlyUseCaseHandler;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 
 @ReadOnlyUseCaseHandler
 @RequiredArgsConstructor

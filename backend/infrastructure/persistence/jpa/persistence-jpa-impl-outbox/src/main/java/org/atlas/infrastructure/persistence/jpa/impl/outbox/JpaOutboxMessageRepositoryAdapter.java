@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.framework.messaging.outbox.OutboxMessageEntity;
 import org.atlas.framework.messaging.outbox.OutboxMessageRepository;
 import org.atlas.framework.messaging.outbox.OutboxMessageStatus;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.persistence.jpa.impl.outbox.entity.JpaOutboxMessageEntity;
 import org.atlas.infrastructure.persistence.jpa.impl.outbox.repository.JpaOutboxMessageRepository;
 import org.springframework.stereotype.Component;

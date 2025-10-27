@@ -10,7 +10,7 @@ import org.atlas.domain.user.usecase.admin.handler.AdminListUserUseCaseHandler;
 import org.atlas.domain.user.usecase.admin.model.AdminListUserInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.constant.CommonConstant;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
 import org.atlas.infrastructure.api.server.rest.impl.user.front.model.ProfileResponse;

@@ -4,7 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.CategoryEntity;
 import org.atlas.domain.product.repository.CategoryRepository;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.persistence.jpa.impl.product.repository.JpaCategoryRepository;
 import org.springframework.stereotype.Component;
 

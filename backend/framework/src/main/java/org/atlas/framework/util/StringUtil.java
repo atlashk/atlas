@@ -93,17 +93,4 @@ public class StringUtil {
     }
     return shuffled.toString();
   }
-
-  public static String sanitizeErrorMessage(String errorMessage) {
-    if (StringUtil.isBlank(errorMessage)) {
-      return "Unknown error";
-    }
-
-    // Limit length to prevent database issues
-    if (errorMessage.length() > 1000) {
-      return errorMessage.substring(0, 997) + "...";
-    }
-
-    return errorMessage;
-  }
 }

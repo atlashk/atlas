@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.payment.entity.PaymentEntity;
 import org.atlas.domain.payment.repository.PaymentRepository;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.persistence.jpa.impl.payment.entity.JpaPaymentEntity;
 import org.atlas.infrastructure.persistence.jpa.impl.payment.mapper.JpaPaymentEntityMapper;
 import org.atlas.infrastructure.persistence.jpa.impl.payment.repository.JpaPaymentRepository;

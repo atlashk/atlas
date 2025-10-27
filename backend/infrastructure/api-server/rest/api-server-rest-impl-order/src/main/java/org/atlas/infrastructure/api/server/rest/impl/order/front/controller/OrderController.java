@@ -18,10 +18,11 @@ import org.atlas.domain.order.usecase.front.model.ListOrderInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.context.Contexts;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingRequest.SortOrder;
 import org.atlas.framework.paging.PagingResult;
+import org.atlas.infrastructure.api.server.rest.impl.order.front.mapper.OrderMapper;
 import org.atlas.infrastructure.api.server.rest.impl.order.front.model.CheckoutRequest;
 import org.atlas.infrastructure.api.server.rest.impl.order.front.model.CheckoutResponse;
 import org.atlas.infrastructure.api.server.rest.impl.order.front.model.GetOrderStatusResponse;
@@ -74,8 +75,8 @@ public class OrderController {
 
     PagingResult<OrderEntity> orderPage = listOrderUseCaseHandler.handle(input);
 
-    PagingResult<OrderResponse> orderResponsePage = ObjectMapperUtil.getInstance()
-        .mapPage(orderPage, OrderResponse.class);
+    PagingResult<OrderResponse> orderResponsePage = ObjectMapperUtil.mapPage(orderPage,
+        OrderMapper.INSTANCE::toOrderResponse);
     return ApiResponseWrapper.successPage(orderResponsePage);
   }
 
@@ -85,8 +86,7 @@ public class OrderController {
   public ApiResponseWrapper<CheckoutResponse> checkout(
       @Parameter(description = "Checkout request", required = true)
       @Valid @RequestBody CheckoutRequest request) throws Exception {
-    CheckoutInput input = ObjectMapperUtil.getInstance()
-        .map(request, CheckoutInput.class);
+    CheckoutInput input = OrderMapper.INSTANCE.toCheckoutInput(request);
     input.setUserId(Contexts.getUserId());
 
     Integer orderId = checkoutUseCaseHandler.handle(input);
@@ -106,8 +106,7 @@ public class OrderController {
 
     GetOrderStatusOutput output = getOrderStatusUseCaseHandler.handle(input);
 
-    GetOrderStatusResponse response = ObjectMapperUtil.getInstance()
-        .map(output, GetOrderStatusResponse.class);
+    GetOrderStatusResponse response = OrderMapper.INSTANCE.toGetOrderStatusResponse(output);
     return ApiResponseWrapper.success(response);
   }
 }

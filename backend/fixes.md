@@ -158,18 +158,18 @@ Cải thiện webhook handling với retry logic:
 
 ```
 // ... existing code ...
-public WebhookResponse handle(PaymentGateway paymentGatewayCode,
+public WebhookResponse handle(PaymentGateway paymentGateway,
     Map<String, Object> payload, Map<String, String> headers) {
     
-    log.info("Received webhook event: paymentGatewayCode={}, payload={}, 
+    log.info("Received webhook event: paymentGateway={}, payload={}, 
     headers={}",
-        paymentGatewayCode, payload, headers);
+        paymentGateway, payload, headers);
 
     try {
         // Find payment gateway port implementation
         String paymentGatewayInstanceName = String.format
         ("%sPaymentGatewayAdapter",
-            paymentGatewayCode.name().toLowerCase());
+            paymentGateway.name().toLowerCase());
         PaymentGatewayPort paymentGatewayService = dependencyPort.
         getInstanceByName(
                 paymentGatewayInstanceName, PaymentGatewayPort.class)

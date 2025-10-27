@@ -2,10 +2,7 @@ package org.atlas.infrastructure.persistence.jpa.impl.order.mapper;
 
 import lombok.experimental.UtilityClass;
 import org.atlas.domain.order.entity.OrderEntity;
-import org.atlas.domain.order.vo.OrderItemVO;
-import org.atlas.domain.order.vo.PaymentVO;
-import org.atlas.domain.order.vo.ProductVO;
-import org.atlas.domain.order.vo.UserVO;
+import org.atlas.domain.order.entity.OrderEntity.ProductVO;
 import org.atlas.infrastructure.persistence.jpa.impl.order.entity.JpaOrderEntity;
 import org.atlas.infrastructure.persistence.jpa.impl.order.entity.JpaOrderItemEntity;
 

@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.CategoryEntity;
 import org.atlas.domain.product.usecase.front.handler.ListCategoryUseCaseHandler;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.api.server.rest.impl.product.front.model.CategoryResponse;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;

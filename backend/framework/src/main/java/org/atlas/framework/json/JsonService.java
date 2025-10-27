@@ -21,4 +21,6 @@ public interface JsonService {
   String getAsString(String source, String key);
 
   Integer getAsInt(String source, String key);
+
+  String compact(String source);
 }

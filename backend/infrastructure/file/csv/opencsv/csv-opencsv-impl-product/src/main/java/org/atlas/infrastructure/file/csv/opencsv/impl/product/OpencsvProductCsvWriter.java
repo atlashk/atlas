@@ -13,7 +13,7 @@ import lombok.Setter;
 import org.atlas.domain.product.infrastructure.file.csv.ProductCsvWriter;
 import org.atlas.domain.product.infrastructure.file.model.write.ProductRow;
 import org.atlas.domain.product.shared.ProductStatus;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.file.csv.opencsv.core.OpenCsvWriter;
 import org.springframework.stereotype.Component;
 

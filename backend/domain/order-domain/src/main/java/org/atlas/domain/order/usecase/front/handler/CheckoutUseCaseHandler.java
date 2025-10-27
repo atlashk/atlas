@@ -2,13 +2,12 @@ package org.atlas.domain.order.usecase.front.handler;
 
 import java.time.Duration;
 import java.util.Comparator;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.order.entity.OrderEntity;
-import org.atlas.domain.order.vo.OrderItemVO;
-import org.atlas.domain.order.vo.PaymentVO;
-import org.atlas.domain.order.vo.ProductVO;
-import org.atlas.domain.order.vo.UserVO;
+import org.atlas.domain.order.entity.OrderEntity.OrderItem;
+import org.atlas.domain.order.entity.OrderEntity.ProductSnapshot;
 import org.atlas.domain.order.mapper.OrderMapper;
 import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.shared.OrderStatus;
@@ -18,13 +17,16 @@ import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.internalapi.user.CartApiClient;
+import org.atlas.framework.internalapi.user.UserApiClient;
 import org.atlas.framework.internalapi.user.model.CartItemResponse;
 import org.atlas.framework.internalapi.user.model.CartResponse;
 import org.atlas.framework.internalapi.user.model.GetCartRequest;
+import org.atlas.framework.internalapi.user.model.ListUserRequest;
+import org.atlas.framework.internalapi.user.model.UserResponse;
 import org.atlas.framework.lock.LockService;
-import org.atlas.framework.saga.context.SagaContext;
-import org.atlas.framework.saga.context.model.CheckoutSagaData;
-import org.atlas.framework.saga.orchestrator.SagaOrchestrator;
+import org.atlas.framework.saga.core.context.SagaContext;
+import org.atlas.framework.saga.checkout.CheckoutSagaData;
+import org.atlas.framework.saga.core.orchestrator.SagaOrchestrator;
 import org.atlas.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.framework.sequencegenerator.SequenceType;
 import org.atlas.framework.util.CollectionUtil;
@@ -36,19 +38,23 @@ public class CheckoutUseCaseHandler {
 
   private final OrderRepository orderRepository;
   private final CartApiClient cartApiClient;
+  private final UserApiClient userApiClient;
   private final LockService lockService;
   private final SequenceGenerator sequenceGenerator;
   private final SagaOrchestrator sagaOrchestrator;
 
   public Integer handle(CheckoutInput input) {
+    // Fetch user
+    UserResponse userResponse = fetchUser(input.getUserId());
+
     // Fetch cart
-    CartResponse cart = getCart(input.getUserId());
-    if (CollectionUtil.isEmpty(cart.getCartItems())) {
+    CartResponse cartResponse = fetchCart(input.getUserId());
+    if (CollectionUtil.isEmpty(cartResponse.getCartItems())) {
       throw new DomainException(DomainError.CART_EMPTY);
     }
 
     // Checkout idempotence guarantee
-    String lockKey = obtainLockKey(input, cart);
+    String lockKey = obtainLockKey(input, cartResponse);
     Duration waitTime = Duration.ofSeconds(30);
     Duration leaseTime = Duration.ofMinutes(15);
     boolean lockAcquired = lockService.acquireLock(lockKey, waitTime, leaseTime);
@@ -59,12 +65,12 @@ public class CheckoutUseCaseHandler {
 
     try {
       // Insert new order into DB
-      OrderEntity order = newOrder(input, cart);
+      OrderEntity order = newOrder(userResponse, cartResponse);
       orderRepository.insert(order);
       log.info("Order created successfully for user {}", input.getUserId());
 
       // Start saga
-      CheckoutSagaData checkoutSagaData = OrderMapper.toCheckoutSagaData(order);
+      CheckoutSagaData checkoutSagaData = OrderMapper.INSTANCE.toCheckoutSagaData(order);
       Integer sagaId = sagaOrchestrator.startSaga("checkout",
           SagaContext.of("data", checkoutSagaData));
 
@@ -78,7 +84,16 @@ public class CheckoutUseCaseHandler {
     }
   }
 
-  private CartResponse getCart(Integer userId) {
+  private UserResponse fetchUser(Integer userId) {
+    ListUserRequest request = new ListUserRequest(List.of(userId));
+    List<UserResponse> userResponses = userApiClient.call(request);
+    if (CollectionUtil.isEmpty(userResponses)) {
+      throw new DomainException(DomainError.USER_NOT_FOUND);
+    }
+    return userResponses.get(0);
+  }
+
+  private CartResponse fetchCart(Integer userId) {
     GetCartRequest request = GetCartRequest.builder().userId(userId).build();
     return cartApiClient.call(request);
   }
@@ -97,30 +112,23 @@ public class CheckoutUseCaseHandler {
     return String.format("checkout:%d:%s", input.getUserId(), hash);
   }
 
-  private OrderEntity newOrder(CheckoutInput input, CartResponse cart) {
+  private OrderEntity newOrder(UserResponse userResponse, CartResponse cartResponse) {
     // Order
     OrderEntity order = new OrderEntity();
     order.setCode(sequenceGenerator.generate(SequenceType.ORDER));
     order.setStatus(OrderStatus.AWAITING_PRODUCT_RESERVATION);
 
     // User
-    UserVO user = UserVO.builder()
-        .id(input.getUserId())
-        .build();
-    order.setUser(user);
+    order.setUser(OrderMapper.INSTANCE.toUserSnapshot(userResponse));
 
     // Order items
-    for (CartItemResponse cartItem : cart.getCartItems()) {
+    for (CartItemResponse cartItemResponse : cartResponse.getCartItems()) {
       // Product
-      ProductVO product = ProductVO.builder()
-          .id(cartItem.getProduct().getId())
-          .name(cartItem.getProduct().getName())
-          .price(cartItem.getProduct().getPrice())
-          .build();
+      ProductSnapshot product = OrderMapper.INSTANCE.toProductSnapshot(cartItemResponse.getProduct());
 
-      OrderItemVO orderItem = OrderItemVO.builder()
+      OrderItem orderItem = OrderItem.builder()
           .product(product)
-          .quantity(cartItem.getQuantity())
+          .quantity(cartItemResponse.getQuantity())
           .build();
 
       order.addOrderItem(orderItem);
@@ -128,11 +136,6 @@ public class CheckoutUseCaseHandler {
 
     // Amount
     order.calculateOrderAmount();
-
-    // Payment
-    PaymentVO payment = new PaymentVO();
-    payment.setMethod(input.getPaymentMethod());
-    order.setPayment(payment);
 
     return order;
   }

@@ -2,8 +2,8 @@ package org.atlas.infrastructure.persistence.jpa.impl.user.mapper;
 
 import lombok.experimental.UtilityClass;
 import org.atlas.domain.user.entity.CartEntity;
-import org.atlas.domain.user.entity.CartItemEntity;
-import org.atlas.domain.user.entity.ProductEntity;
+import org.atlas.domain.user.entity.CartEntity.CartItemEntity;
+import org.atlas.domain.user.entity.CartEntity.ProductEntity;
 import org.atlas.framework.util.CollectionUtil;
 import org.atlas.infrastructure.persistence.jpa.impl.user.entity.JpaCartEntity;
 import org.atlas.infrastructure.persistence.jpa.impl.user.entity.JpaCartItemEntity;

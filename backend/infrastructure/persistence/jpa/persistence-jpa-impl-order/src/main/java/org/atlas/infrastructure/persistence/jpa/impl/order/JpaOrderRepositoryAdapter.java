@@ -8,7 +8,7 @@ import org.atlas.domain.order.entity.OrderEntity;
 import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.repository.criteria.FindOrderCriteria;
 import org.atlas.domain.order.shared.OrderStatus;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
 import org.atlas.infrastructure.persistence.jpa.impl.order.entity.JpaOrderEntity;

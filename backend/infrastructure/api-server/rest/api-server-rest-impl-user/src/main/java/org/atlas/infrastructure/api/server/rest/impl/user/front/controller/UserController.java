@@ -11,7 +11,7 @@ import org.atlas.domain.user.usecase.front.model.GetProfileInput;
 import org.atlas.domain.user.usecase.front.model.RegisterInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.context.Contexts;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.api.server.rest.impl.user.front.model.ProfileResponse;
 import org.atlas.infrastructure.api.server.rest.impl.user.front.model.RegisterRequest;
 import org.springframework.http.MediaType;

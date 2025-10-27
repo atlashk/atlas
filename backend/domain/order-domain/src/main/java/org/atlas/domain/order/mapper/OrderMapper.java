@@ -1,31 +1,38 @@
 package org.atlas.domain.order.mapper;
 
-import lombok.experimental.UtilityClass;
 import org.atlas.domain.order.entity.OrderEntity;
-import org.atlas.domain.order.vo.OrderItemVO;
-import org.atlas.framework.saga.context.model.CheckoutSagaData;
+import org.atlas.domain.order.entity.OrderEntity.ProductSnapshot;
+import org.atlas.domain.order.entity.OrderEntity.UserSnapshot;
+import org.atlas.domain.order.repository.criteria.FindOrderCriteria;
+import org.atlas.domain.order.usecase.admin.model.AdminListOrderInput;
+import org.atlas.domain.order.usecase.front.model.ListOrderInput;
+import org.atlas.framework.internalapi.user.model.CartItemResponse.Product;
+import org.atlas.framework.internalapi.user.model.UserResponse;
+import org.atlas.framework.saga.checkout.CheckoutSagaData;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
 
-@UtilityClass
-public class OrderMapper {
+@Mapper
+public interface OrderMapper {
 
-  public static CheckoutSagaData toCheckoutSagaData(OrderEntity order) {
-    // Map order basic info
-    CheckoutSagaData data = new CheckoutSagaData();
-    data.setOrderId(order.getId());
-    data.setUserId(order.getUser().getId());
-    data.setAmount(order.getAmount());
-    data.setPaymentMethod(order.getPayment().getMethod());
+  OrderMapper INSTANCE = Mappers.getMapper(OrderMapper.class);
 
-    // Map order items
-    if (order.getOrderItems() != null) {
-      for (OrderItemVO orderItem : order.getOrderItems()) {
-        CheckoutSagaData.OrderItem orderItemData = new CheckoutSagaData.OrderItem();
-        orderItemData.setProductId(orderItem.getProduct().getId());
-        orderItemData.setQuantity(orderItem.getQuantity());
-        data.addOrderItem(orderItemData);
-      }
-    }
+  UserSnapshot toUserSnapshot(UserResponse response);
 
-    return data;
-  }
+  ProductSnapshot toProductSnapshot(Product product);
+
+  @Mapping(target = "orderId", source = "id")
+  @Mapping(target = "userId", source = "user.id")
+  @Mapping(target = "orderItems", source = "orderItems")
+  @Mapping(target = "amount", source = "amount")
+  CheckoutSagaData toCheckoutSagaData(OrderEntity entity);
+
+  @Mapping(target = "productId", source = "product.id")
+  @Mapping(target = "quantity", source = "quantity")
+  CheckoutSagaData.OrderItem toCheckoutSagaDataOrderItem(OrderEntity.OrderItem orderItem);
+
+  FindOrderCriteria toFindOrderCriteria(ListOrderInput input);
+
+  FindOrderCriteria toFindOrderCriteria(AdminListOrderInput input);
 }

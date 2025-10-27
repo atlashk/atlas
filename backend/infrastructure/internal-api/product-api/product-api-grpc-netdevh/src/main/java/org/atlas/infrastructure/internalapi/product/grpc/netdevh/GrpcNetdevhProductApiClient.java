@@ -8,7 +8,7 @@ import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.atlas.framework.internalapi.product.ProductApiClient;
 import org.atlas.framework.internalapi.product.model.ListProductRequest;
 import org.atlas.framework.internalapi.product.model.ProductResponse;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.api.server.grpc.protobuf.product.ListProductRequestProto;
 import org.atlas.infrastructure.api.server.grpc.protobuf.product.ListProductResponseProto;
 import org.atlas.infrastructure.api.server.grpc.protobuf.product.ProductProto;

@@ -4,9 +4,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Webhook;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.atlas.domain.payment.shared.PaymentGatewayCode;
 import org.atlas.domain.payment.usecase.webhook.handler.WebhookHandler;
-import org.atlas.framework.payment.model.WebhookResponse;
+import org.atlas.framework.payment.model.HandleWebhookResponse;
 import org.atlas.infrastructure.api.server.rest.impl.payment.webhook.util.WebhookResponseUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -30,7 +29,7 @@ public class WebhookController {
       @RequestBody String rawPayload,
       @RequestHeader Map<String, String> headers
   ) {
-    WebhookResponse response = webhookHandler.handle(PaymentGatewayCode.STRIPE, rawPayload,
+    HandleWebhookResponse response = webhookHandler.handle(PaymentGateway.STRIPE, rawPayload,
         headers);
     return WebhookResponseUtil.convert(response);
   }

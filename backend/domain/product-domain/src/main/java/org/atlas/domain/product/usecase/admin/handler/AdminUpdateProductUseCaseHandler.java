@@ -12,7 +12,7 @@ import org.atlas.framework.domain.event.contract.product.ProductUpdatedEvent;
 import org.atlas.framework.domain.event.contract.product.model.Product;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.framework.util.StringUtil;
 
 @UseCaseHandler

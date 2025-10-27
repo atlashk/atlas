@@ -12,7 +12,7 @@ import org.atlas.domain.product.service.ProductImageService;
 import org.atlas.domain.product.shared.ProductStatus;
 import org.atlas.domain.product.usecase.front.model.SearchProductInput;
 import org.atlas.framework.domain.usecase.ReadOnlyUseCaseHandler;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingResult;
 import org.atlas.framework.util.CollectionUtil;
 

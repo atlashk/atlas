@@ -1,10 +1,11 @@
 CREATE TABLE IF NOT EXISTS payment_gateway
 (
-    id         INT      NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    code       VARCHAR(50),
-    name       INT      NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME          DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    id         INT         NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    code       VARCHAR(50) NOT NULL,
+    name       INT         NOT NULL,
+    enabled    TINYINT(1)  NOT NULL,
+    created_at DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME             DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE INDEX idx_code (code)
 ) ENGINE = InnoDB;
 

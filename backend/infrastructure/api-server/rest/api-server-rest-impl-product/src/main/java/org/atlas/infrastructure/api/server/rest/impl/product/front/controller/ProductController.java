@@ -11,7 +11,7 @@ import org.atlas.domain.product.usecase.front.handler.SearchProductUseCaseHandle
 import org.atlas.domain.product.usecase.front.model.SearchProductInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.constant.CommonConstant;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
 import org.atlas.infrastructure.api.server.rest.impl.product.front.model.ProductResponse;

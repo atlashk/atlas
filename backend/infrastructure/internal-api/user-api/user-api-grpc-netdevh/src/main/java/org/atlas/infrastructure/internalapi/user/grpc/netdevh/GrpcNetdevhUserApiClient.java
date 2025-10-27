@@ -9,7 +9,7 @@ import org.atlas.domain.user.shared.Role;
 import org.atlas.framework.internalapi.user.UserApiClient;
 import org.atlas.framework.internalapi.user.model.ListUserRequest;
 import org.atlas.framework.internalapi.user.model.UserResponse;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.api.server.grpc.protobuf.user.ListUserRequestProto;
 import org.atlas.infrastructure.api.server.grpc.protobuf.user.ListUserResponseProto;
 import org.atlas.infrastructure.api.server.grpc.protobuf.user.UserProto;

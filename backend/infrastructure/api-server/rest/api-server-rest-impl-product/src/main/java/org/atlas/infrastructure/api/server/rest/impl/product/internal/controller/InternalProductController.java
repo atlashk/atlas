@@ -9,7 +9,7 @@ import org.atlas.domain.product.entity.ProductEntity;
 import org.atlas.domain.product.usecase.internal.handler.InternalListProductUseCaseHandler;
 import org.atlas.domain.product.usecase.internal.model.InternalListProductInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.api.server.rest.impl.product.front.model.ProductResponse;
 import org.atlas.infrastructure.api.server.rest.impl.product.internal.model.InternalListProductRequest;
 import org.springframework.http.MediaType;

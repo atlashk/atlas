@@ -7,7 +7,7 @@ import org.atlas.domain.user.usecase.internal.handler.InternalGetCartUseCaseHand
 import org.atlas.domain.user.usecase.internal.model.InternalGetCartInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.internalapi.user.model.CartResponse;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -4,8 +4,10 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -99,5 +101,17 @@ public class GsonService implements JsonService {
       return null;
     }
     return Integer.parseInt(plainStr);
+  }
+
+  @Override
+  public String compact(String source) {
+    try {
+      // Parse the JSON string to validate it and then write it back compactly
+      JsonElement jsonElement = JsonParser.parseString(source);
+      return gson.toJson(jsonElement);
+    } catch (JsonSyntaxException e) {
+      log.error("Failed to compact JSON", e);
+      return source;
+    }
   }
 }

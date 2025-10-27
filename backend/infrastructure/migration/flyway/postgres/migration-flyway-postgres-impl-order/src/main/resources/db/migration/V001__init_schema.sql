@@ -1,16 +1,16 @@
 CREATE TABLE IF NOT EXISTS orders
 (
     id                  SERIAL PRIMARY KEY,
-    code                CHAR(7)        NOT NULL UNIQUE,
     saga_id             INT,
+    code                CHAR(7)        NOT NULL UNIQUE,
+    status              VARCHAR(50)    NOT NULL,
     user_id             INT            NOT NULL,
     amount              NUMERIC(11, 2) NOT NULL,
-    payment_method      VARCHAR(50)    NOT NULL,
-    status              VARCHAR(50)    NOT NULL,
     cancellation_reason VARCHAR(255),
     created_at          TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at          TIMESTAMP               DEFAULT CURRENT_TIMESTAMP
 );
+CREATE INDEX idx_saga_id ON orders (saga_id);
 CREATE INDEX idx_user_id ON orders (user_id);
 
 CREATE TABLE IF NOT EXISTS order_item

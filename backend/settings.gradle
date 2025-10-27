@@ -316,6 +316,10 @@ project(':infrastructure.observability.tracing.zipkin').projectDir = file('infra
 include(':infrastructure.payment.parent')
 project(':infrastructure.payment.parent').projectDir = file('infrastructure/payment/payment-parent')
 
+// Payment::Simulator
+include(':infrastructure.payment.simulator')
+project(':infrastructure.payment.simulator').projectDir = file('infrastructure/payment/payment-simulator')
+
 // Payment::Stripe
 include(':infrastructure.payment.stripe')
 project(':infrastructure.payment.stripe').projectDir = file('infrastructure/payment/payment-stripe')

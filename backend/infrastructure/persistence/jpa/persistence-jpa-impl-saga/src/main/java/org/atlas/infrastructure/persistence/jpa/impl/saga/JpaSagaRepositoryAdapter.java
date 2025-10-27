@@ -2,9 +2,9 @@ package org.atlas.infrastructure.persistence.jpa.impl.saga;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
-import org.atlas.framework.saga.entity.SagaEntity;
-import org.atlas.framework.saga.repository.SagaRepository;
+import org.atlas.framework.util.ObjectMapperUtil;
+import org.atlas.framework.saga.core.entity.SagaEntity;
+import org.atlas.framework.saga.core.repository.SagaRepository;
 import org.atlas.infrastructure.persistence.jpa.impl.saga.entity.JpaSagaEntity;
 import org.atlas.infrastructure.persistence.jpa.impl.saga.repository.JpaSagaRepository;
 import org.springframework.stereotype.Component;

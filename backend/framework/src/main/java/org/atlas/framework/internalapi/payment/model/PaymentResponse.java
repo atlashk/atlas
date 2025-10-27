@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.domain.payment.shared.PaymentGatewayCode;
-import org.atlas.domain.payment.shared.PaymentMethod;
 import org.atlas.domain.payment.shared.PaymentStatus;
 
 @Getter
@@ -17,11 +15,13 @@ import org.atlas.domain.payment.shared.PaymentStatus;
 @AllArgsConstructor
 public class PaymentResponse {
 
-  private Integer id;
+  private Integer paymentId;
+  private Integer orderId;
   private BigDecimal amount;
   private String currency;
-  private PaymentMethod method;
-  private PaymentGatewayCode gateway;
+  private String paymentGateway;
+  private String paymentMethod;
+  private String paymentMethodDetails;
   private PaymentStatus status;
   private String errorCode;
   private String errorMessage;

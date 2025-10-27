@@ -22,9 +22,5 @@ app:
   notification:
     email:
       sender: admin@atlas.org
-  payment:
-    currency: USD
-    routing:
-      card: stripe
   product:
     decrease-quantity-strategy: DISTRIBUTED_LOCK

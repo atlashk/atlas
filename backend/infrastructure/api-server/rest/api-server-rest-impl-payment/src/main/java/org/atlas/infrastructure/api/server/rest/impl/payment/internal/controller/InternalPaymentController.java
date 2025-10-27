@@ -10,7 +10,7 @@ import org.atlas.domain.payment.usecase.internal.handler.InternalListPaymentUseC
 import org.atlas.domain.payment.usecase.internal.model.InternalListPaymentInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.internalapi.payment.model.PaymentResponse;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.api.server.rest.impl.payment.internal.model.InternalListPaymentRequest;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;

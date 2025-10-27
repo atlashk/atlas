@@ -1,6 +1,5 @@
 package org.atlas.domain.order.usecase.admin.model;
 
-import jakarta.validation.Valid;
 import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,17 +17,10 @@ import org.atlas.framework.paging.PagingRequest;
 public class AdminListOrderInput {
 
   private Integer orderId;
-
   private Integer userId;
-
   private Integer productId;
-
   private OrderStatus status;
-
   private Date startDate;
-
   private Date endDate;
-
-  @Valid
   private PagingRequest pagingRequest;
 }

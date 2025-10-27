@@ -121,4 +121,16 @@ public class JacksonService implements JsonService {
     }
     return Integer.parseInt(plainStr);
   }
+
+  @Override
+  public String compact(String source) {
+    try {
+      // Parse the JSON string to validate it and then write it back compactly
+      JsonNode jsonNode = OBJECT_MAPPER.readTree(source);
+      return OBJECT_MAPPER.writeValueAsString(jsonNode);
+    } catch (JsonProcessingException e) {
+      log.error("Failed to compact JSON", e);
+      return source;
+    }
+  }
 }

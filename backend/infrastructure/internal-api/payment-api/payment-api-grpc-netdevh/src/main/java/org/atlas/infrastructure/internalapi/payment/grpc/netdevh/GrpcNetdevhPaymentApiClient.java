@@ -8,7 +8,7 @@ import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.atlas.framework.internalapi.payment.PaymentApiClient;
 import org.atlas.framework.internalapi.payment.model.ListPaymentRequest;
 import org.atlas.framework.internalapi.payment.model.PaymentResponse;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.api.server.grpc.protobuf.payment.ListPaymentRequestProto;
 import org.atlas.infrastructure.api.server.grpc.protobuf.payment.ListPaymentResponseProto;
 import org.atlas.infrastructure.api.server.grpc.protobuf.payment.PaymentProto;

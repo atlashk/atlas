@@ -63,11 +63,6 @@ dependencies {
     // JSON::Gson
     api 'com.google.code.gson:gson:2.12.1'
 
-    // Object mapper
-
-    // Object mapper::ModelMapper
-    api 'org.modelmapper:modelmapper:3.2.2'
-
     // QR generator
     api 'com.google.zxing:core:3.5.3'
     api 'com.google.zxing:javase:3.5.3'

@@ -4,7 +4,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.ReservationEntity;
 import org.atlas.domain.product.repository.ReservationRepository;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.persistence.jpa.impl.product.entity.JpaReservationEntity;
 import org.atlas.infrastructure.persistence.jpa.impl.product.repository.JpaReservationRepository;
 import org.springframework.stereotype.Component;

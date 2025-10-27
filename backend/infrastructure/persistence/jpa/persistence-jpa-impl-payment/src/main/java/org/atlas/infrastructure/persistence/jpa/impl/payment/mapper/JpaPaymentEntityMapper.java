@@ -3,7 +3,7 @@ package org.atlas.infrastructure.persistence.jpa.impl.payment.mapper;
 import lombok.experimental.UtilityClass;
 import org.atlas.domain.payment.entity.PaymentEntity;
 import org.atlas.framework.json.JsonUtil;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.framework.payment.model.nextaction.DeepLink;
 import org.atlas.framework.payment.model.nextaction.NextAction;
 import org.atlas.framework.payment.model.nextaction.NextActionType;

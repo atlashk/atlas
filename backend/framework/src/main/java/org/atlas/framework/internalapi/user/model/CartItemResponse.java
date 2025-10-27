@@ -15,7 +15,6 @@ import lombok.Setter;
 public class CartItemResponse {
 
   private Product product;
-
   private Integer quantity;
 
   @NoArgsConstructor
@@ -26,9 +25,8 @@ public class CartItemResponse {
   public static class Product {
 
     private Integer id;
-
     private String name;
-
     private BigDecimal price;
+    private String image;
   }
 }

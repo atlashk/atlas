@@ -7,7 +7,7 @@ import org.atlas.domain.payment.usecase.front.handler.GetPaymentNextActionUseCas
 import org.atlas.domain.payment.usecase.front.model.GetPaymentNextActionInput;
 import org.atlas.domain.payment.usecase.front.model.GetPaymentNextActionOutput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.api.server.rest.impl.payment.front.model.GetPaymentNextActionResponse;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;

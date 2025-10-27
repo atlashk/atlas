@@ -17,7 +17,7 @@ import org.atlas.domain.user.usecase.front.model.RemoveCartItemInput;
 import org.atlas.domain.user.usecase.front.model.UpdateCartItemInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.context.Contexts;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.api.server.rest.impl.user.front.model.AddCartItemRequest;
 import org.atlas.infrastructure.api.server.rest.impl.user.front.model.CartResponse;
 import org.atlas.infrastructure.api.server.rest.impl.user.front.model.UpdateCartItemRequest;

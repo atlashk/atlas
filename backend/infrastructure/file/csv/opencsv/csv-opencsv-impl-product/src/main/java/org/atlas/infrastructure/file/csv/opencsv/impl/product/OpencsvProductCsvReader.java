@@ -15,7 +15,7 @@ import lombok.Setter;
 import org.atlas.domain.product.infrastructure.file.csv.ProductCsvReader;
 import org.atlas.domain.product.infrastructure.file.model.read.ProductRow;
 import org.atlas.domain.product.shared.ProductStatus;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.file.csv.opencsv.core.OpenCsvReader;
 import org.springframework.stereotype.Component;
 

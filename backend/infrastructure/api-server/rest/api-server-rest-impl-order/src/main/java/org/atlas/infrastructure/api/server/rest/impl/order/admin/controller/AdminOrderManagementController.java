@@ -11,11 +11,12 @@ import org.atlas.domain.order.usecase.admin.handler.AdminListOrderUseCaseHandler
 import org.atlas.domain.order.usecase.admin.model.AdminListOrderInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.constant.CommonConstant;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingRequest.SortOrder;
 import org.atlas.framework.paging.PagingResult;
-import org.atlas.infrastructure.api.server.rest.impl.order.front.model.OrderResponse;
+import org.atlas.framework.util.ObjectMapperUtil;
+import org.atlas.infrastructure.api.server.rest.impl.order.admin.mapper.AdminOrderMapper;
+import org.atlas.infrastructure.api.server.rest.impl.order.admin.model.AdminOrderResponse;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -34,7 +35,7 @@ public class AdminOrderManagementController {
 
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve a list of orders with optional filtering and pagination")
-  public ApiResponseWrapper<List<OrderResponse>> listOrder(
+  public ApiResponseWrapper<List<AdminOrderResponse>> listOrder(
       @Parameter(name = "orderId", description = "Order ID", example = "1")
       @RequestParam(name = "orderId", required = false) Integer orderId,
       @Parameter(name = "userId", description = "User ID", example = "1")
@@ -66,8 +67,8 @@ public class AdminOrderManagementController {
 
     PagingResult<OrderEntity> orderPage = adminListOrderUseCaseHandler.handle(input);
 
-    PagingResult<OrderResponse> orderResponsePage = ObjectMapperUtil.getInstance()
-        .mapPage(orderPage, OrderResponse.class);
+    PagingResult<AdminOrderResponse> orderResponsePage = ObjectMapperUtil.mapPage(orderPage,
+        AdminOrderMapper.INSTANCE::toOrderResponse);
     return ApiResponseWrapper.successPage(orderResponsePage);
   }
 }

@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.domain.user.entity.UserEntity;
 import org.atlas.domain.user.repository.UserRepository;
 import org.atlas.domain.user.repository.criteria.FindUserCriteria;
-import org.atlas.framework.objectmapper.ObjectMapperUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
 import org.atlas.infrastructure.persistence.jpa.impl.user.entity.JpaUserEntity;
