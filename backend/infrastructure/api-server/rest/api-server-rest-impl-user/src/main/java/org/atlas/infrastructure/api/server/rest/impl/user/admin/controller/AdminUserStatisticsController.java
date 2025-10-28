@@ -18,7 +18,8 @@ public class AdminUserStatisticsController {
   @GetMapping("/count")
   @Operation(summary = "Count total users")
   public ApiResponseWrapper<Long> countUsers() throws Exception {
-    Long count = adminCountUserUseCaseHandler.handle();
-    return ApiResponseWrapper.success(count);
+    Long responseData = adminCountUserUseCaseHandler.handle();
+
+    return ApiResponseWrapper.success(responseData);
   }
 }

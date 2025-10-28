@@ -103,9 +103,10 @@ public class AdminProductManagementController {
         .pagingRequest(PagingRequest.of(page - 1, size))
         .build();
     PagingResult<Product> productPage = adminListProductUseCaseHandler.handle(input);
-    PagingResult<AdminProductResponse> responsePage = ObjectMapperUtil.mapPage(productPage,
+
+    PagingResult<AdminProductResponse> responseData = ObjectMapperUtil.mapPage(productPage,
         AdminProductMapper.INSTANCE::toAdminProductResponse);
-    return ApiResponseWrapper.successPage(responsePage);
+    return ApiResponseWrapper.successPage(responseData);
   }
 
   @GetMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -139,6 +140,7 @@ public class AdminProductManagementController {
     Product product = AdminProductMapper.INSTANCE.toProduct(request);
     product.setId(productId);
     adminUpdateProductUseCaseHandler.handle(product);
+
     return ApiResponseWrapper.success();
   }
 
@@ -148,6 +150,7 @@ public class AdminProductManagementController {
       @Parameter(name = "productId", description = "The unique identifier of the product to delete", example = "1")
       @PathVariable("productId") Integer productId) throws Exception {
     adminDeleteProductUseCaseHandler.handle(productId);
+
     return ApiResponseWrapper.success();
   }
 
@@ -161,6 +164,7 @@ public class AdminProductManagementController {
     byte[] fileContent = file.getBytes();
     AdminImportProductInput input = new AdminImportProductInput(fileType, fileContent);
     adminImportProductUseCaseHandler.handle(input);
+
     return ApiResponseWrapper.success();
   }
 

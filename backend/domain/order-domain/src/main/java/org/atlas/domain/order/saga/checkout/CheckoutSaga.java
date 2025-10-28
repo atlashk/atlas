@@ -91,7 +91,7 @@ public class CheckoutSaga {
 
       // Update payment snapshot
       order.getPayment().setTransactionId(metadata.getTransactionId());
-      order.getPayment().setPaymentGateway(metadata.getPaymentGateway());
+      order.getPayment().setPaymentGatewayName(metadata.getPaymentGatewayName());
       order.getPayment().setStatus(PaymentStatus.CREATED);
 
       orderRepository.update(order);

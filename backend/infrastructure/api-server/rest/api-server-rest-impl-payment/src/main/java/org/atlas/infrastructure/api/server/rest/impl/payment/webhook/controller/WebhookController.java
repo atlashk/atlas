@@ -29,8 +29,7 @@ public class WebhookController {
       @RequestBody String rawPayload,
       @RequestHeader Map<String, String> headers
   ) {
-    HandleWebhookResponse response = webhookHandler.handle(PaymentGateway.STRIPE, rawPayload,
-        headers);
+    HandleWebhookResponse response = webhookHandler.handle("stripe", rawPayload, headers);
     return WebhookResponseUtil.convert(response);
   }
 }

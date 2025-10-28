@@ -11,9 +11,10 @@ import org.atlas.domain.product.usecase.front.handler.SearchProductUseCaseHandle
 import org.atlas.domain.product.usecase.front.model.SearchProductInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.constant.CommonConstant;
-import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
+import org.atlas.framework.util.ObjectMapperUtil;
+import org.atlas.infrastructure.api.server.rest.impl.product.front.mapper.ProductMapper;
 import org.atlas.infrastructure.api.server.rest.impl.product.front.model.ProductResponse;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -58,23 +59,11 @@ public class ProductController {
         .categoryIds(categoryIds)
         .pagingRequest(PagingRequest.of(page - 1, size))
         .build();
-
     PagingResult<Product> productPage = searchProductUseCaseHandler.handle(input);
 
-    List<ProductResponse> productResponses = productPage.getData()
-        .stream()
-        .map(product -> {
-          ProductResponse productResponse = new ProductResponse();
-          productResponse.setId(product.getId());
-          productResponse.setName(product.getName());
-          productResponse.setPrice(product.getPrice());
-          productResponse.setImage(product.getImage());
-          return productResponse;
-        })
-        .toList();
-    PagingResult<ProductResponse> productResponsePage = PagingResult.of(productResponses,
-        productPage.getPagination());
-    return ApiResponseWrapper.successPage(productResponsePage);
+    PagingResult<ProductResponse> responseData = ObjectMapperUtil.mapPage(productPage,
+        ProductMapper.INSTANCE::toProductResponse);
+    return ApiResponseWrapper.successPage(responseData);
   }
 
   @GetMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -83,8 +72,8 @@ public class ProductController {
       @Parameter(name = "productId", description = "The unique identifier of the product.", example = "1", required = true)
       @PathVariable("productId") Integer productId) throws Exception {
     Product product = getProductUseCaseHandler.handle(productId);
-    ProductResponse response = ObjectMapperUtil.getInstance()
-        .map(product, ProductResponse.class);
-    return ApiResponseWrapper.success(response);
+
+    ProductResponse responseData = ProductMapper.INSTANCE.toProductResponse(product);
+    return ApiResponseWrapper.success(responseData);
   }
 }

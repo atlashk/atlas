@@ -1,4 +1,4 @@
-package org.atlas.framework.saga.checkout;
+package org.atlas.infrastructure.api.server.rest.impl.payment.front.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,8 +11,8 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-public class InitializePaymentCommandMetadata {
+public class PaymentGatewayResponse {
 
-  private String transactionId;
-  private String paymentGatewayName;
+  private Integer id;
+  private String name;
 }

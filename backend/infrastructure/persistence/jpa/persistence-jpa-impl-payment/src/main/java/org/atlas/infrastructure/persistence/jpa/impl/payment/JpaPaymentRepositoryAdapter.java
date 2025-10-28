@@ -32,7 +32,7 @@ public class JpaPaymentRepositoryAdapter implements PaymentRepository {
   @Override
   public void insert(Payment payment) {
     JpaPayment jpaPayment = JpaPaymentMapper.INSTANCE.toJpaPayment(payment);
-    jpaPaymentRepository.save(jpaPayment);
+    jpaPaymentRepository.insert(jpaPayment);
     payment.setId(jpaPayment.getId());
   }
 

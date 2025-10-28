@@ -9,8 +9,9 @@ import org.atlas.domain.product.entity.Product;
 import org.atlas.domain.product.usecase.internal.handler.InternalListProductUseCaseHandler;
 import org.atlas.domain.product.usecase.internal.model.InternalListProductInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
+import org.atlas.framework.internalapi.product.model.ProductResponse;
 import org.atlas.framework.util.ObjectMapperUtil;
-import org.atlas.infrastructure.api.server.rest.impl.product.front.model.ProductResponse;
+import org.atlas.infrastructure.api.server.rest.impl.product.internal.mapper.InternalProductMapper;
 import org.atlas.infrastructure.api.server.rest.impl.product.internal.model.InternalListProductRequest;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -32,11 +33,12 @@ public class InternalProductController {
   public ApiResponseWrapper<List<ProductResponse>> listProduct(
       @Parameter(description = "Request object containing the criteria for listing products", required = true)
       @Valid @RequestBody InternalListProductRequest request) throws Exception {
-    InternalListProductInput input = ObjectMapperUtil.getInstance()
-        .map(request, InternalListProductInput.class);
+    InternalListProductInput input =
+        InternalProductMapper.INSTANCE.toInternalListProductInput(request);
     List<Product> products = internalListProductUseCaseHandler.handle(input);
-    List<ProductResponse> productResponses = ObjectMapperUtil.getInstance()
-        .mapList(products, ProductResponse.class);
-    return ApiResponseWrapper.success(productResponses);
+
+    List<ProductResponse> responseData = ObjectMapperUtil.mapList(products,
+        InternalProductMapper.INSTANCE::toProductResponse);
+    return ApiResponseWrapper.success(responseData);
   }
 }

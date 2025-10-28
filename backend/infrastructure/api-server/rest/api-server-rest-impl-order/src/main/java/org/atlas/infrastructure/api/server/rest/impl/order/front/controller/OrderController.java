@@ -18,10 +18,10 @@ import org.atlas.domain.order.usecase.front.model.ListOrderInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.context.Contexts;
-import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingRequest.SortOrder;
 import org.atlas.framework.paging.PagingResult;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.api.server.rest.impl.order.front.mapper.OrderMapper;
 import org.atlas.infrastructure.api.server.rest.impl.order.front.model.CheckoutRequest;
 import org.atlas.infrastructure.api.server.rest.impl.order.front.model.CheckoutResponse;
@@ -72,12 +72,11 @@ public class OrderController {
         .endDate(endDate)
         .pagingRequest(PagingRequest.of(page - 1, size, "createdAt", SortOrder.DESC))
         .build();
-
     PagingResult<Order> orderPage = listOrderUseCaseHandler.handle(input);
 
-    PagingResult<OrderResponse> orderResponsePage = ObjectMapperUtil.mapPage(orderPage,
+    PagingResult<OrderResponse> responseData = ObjectMapperUtil.mapPage(orderPage,
         OrderMapper.INSTANCE::toOrderResponse);
-    return ApiResponseWrapper.successPage(orderResponsePage);
+    return ApiResponseWrapper.successPage(responseData);
   }
 
   @PostMapping(value = "/checkout", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -88,13 +87,10 @@ public class OrderController {
       @Valid @RequestBody CheckoutRequest request) throws Exception {
     CheckoutInput input = OrderMapper.INSTANCE.toCheckoutInput(request);
     input.setUserId(Contexts.getUserId());
-
     Integer orderId = checkoutUseCaseHandler.handle(input);
 
-    CheckoutResponse response = CheckoutResponse.builder()
-        .orderId(orderId)
-        .build();
-    return ApiResponseWrapper.success(response);
+    CheckoutResponse responseData = new CheckoutResponse(orderId);
+    return ApiResponseWrapper.success(responseData);
   }
 
   @GetMapping(value = "/{orderId}/status", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -103,10 +99,9 @@ public class OrderController {
       @Parameter(name = "orderId", description = "ID of the order to retrieve the status for", example = "123")
       @PathVariable("orderId") Integer orderId) throws Exception {
     GetOrderStatusInput input = new GetOrderStatusInput(orderId);
-
     GetOrderStatusOutput output = getOrderStatusUseCaseHandler.handle(input);
 
-    GetOrderStatusResponse response = OrderMapper.INSTANCE.toGetOrderStatusResponse(output);
-    return ApiResponseWrapper.success(response);
+    GetOrderStatusResponse responseData = OrderMapper.INSTANCE.toGetOrderStatusResponse(output);
+    return ApiResponseWrapper.success(responseData);
   }
 }

@@ -7,6 +7,7 @@ import org.atlas.domain.product.entity.Category;
 import org.atlas.domain.product.usecase.front.handler.ListCategoryUseCaseHandler;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.util.ObjectMapperUtil;
+import org.atlas.infrastructure.api.server.rest.impl.product.front.mapper.CategoryMapper;
 import org.atlas.infrastructure.api.server.rest.impl.product.front.model.CategoryResponse;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -25,9 +26,9 @@ public class CategoryController {
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve a list of all categories")
   public ApiResponseWrapper<List<CategoryResponse>> listCategory() throws Exception {
-    List<Category> categoryEntities = listCategoryUseCaseHandler.handle(null);
-    List<CategoryResponse> categoryResponses = ObjectMapperUtil.getInstance()
-        .mapList(categoryEntities, CategoryResponse.class);
-    return ApiResponseWrapper.success(categoryResponses);
+    List<Category> categories = listCategoryUseCaseHandler.handle(null);
+    List<CategoryResponse> responseData = ObjectMapperUtil.mapList(categories,
+        CategoryMapper.INSTANCE::toCategoryResponse);
+    return ApiResponseWrapper.success(responseData);
   }
 }

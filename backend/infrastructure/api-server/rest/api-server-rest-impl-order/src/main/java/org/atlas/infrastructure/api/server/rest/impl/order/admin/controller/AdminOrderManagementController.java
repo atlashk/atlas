@@ -64,11 +64,10 @@ public class AdminOrderManagementController {
         .endDate(endDate)
         .pagingRequest(PagingRequest.of(page - 1, size, "createdAt", SortOrder.DESC))
         .build();
-
     PagingResult<Order> orderPage = adminListOrderUseCaseHandler.handle(input);
 
-    PagingResult<AdminOrderResponse> orderResponsePage = ObjectMapperUtil.mapPage(orderPage,
+    PagingResult<AdminOrderResponse> responseData = ObjectMapperUtil.mapPage(orderPage,
         AdminOrderMapper.INSTANCE::toOrderResponse);
-    return ApiResponseWrapper.successPage(orderResponsePage);
+    return ApiResponseWrapper.successPage(responseData);
   }
 }

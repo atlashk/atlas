@@ -17,6 +17,8 @@ import org.atlas.domain.product.shared.ProductStatus;
 import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.file.excel.easyexcel.core.EasyExcelReader;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -26,8 +28,7 @@ public class EasyExcelProductExcelReader implements ProductExcelReader {
   public List<ProductRow> read(byte[] fileContent) throws IOException {
     List<ProductExcelRow> excelRows =
         EasyExcelReader.read(fileContent, SHEET_NAME, ProductExcelRow.class);
-    return ObjectMapperUtil.getInstance()
-        .mapList(excelRows, ProductRow.class);
+    return ObjectMapperUtil.mapList(excelRows, ProductExcelRowMapper.INSTANCE::toProductRow);
   }
 
   @NoArgsConstructor
@@ -61,5 +62,13 @@ public class EasyExcelProductExcelReader implements ProductExcelReader {
 
     @ExcelProperty(value = "Category IDs")
     private String categoryIds;
+  }
+
+  @Mapper
+  public interface ProductExcelRowMapper {
+
+    ProductExcelRowMapper INSTANCE = Mappers.getMapper(ProductExcelRowMapper.class);
+
+    ProductRow toProductRow(ProductExcelRow productExcelRow);
   }
 }

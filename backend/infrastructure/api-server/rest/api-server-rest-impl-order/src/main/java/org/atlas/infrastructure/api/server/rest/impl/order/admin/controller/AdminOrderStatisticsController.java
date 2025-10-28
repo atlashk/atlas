@@ -21,14 +21,16 @@ public class AdminOrderStatisticsController {
   @GetMapping("/count")
   @Operation(summary = "Count total orders")
   public ApiResponseWrapper<Long> countOrder() throws Exception {
-    Long count = adminCountOrderUseCaseHandler.handle();
-    return ApiResponseWrapper.success(count);
+    Long responseData = adminCountOrderUseCaseHandler.handle();
+
+    return ApiResponseWrapper.success(responseData);
   }
 
   @GetMapping("/total-revenue")
   @Operation(summary = "Get total revenue")
   public ApiResponseWrapper<BigDecimal> getTotalRevenue() throws Exception {
-    BigDecimal totalRevenue = adminGetTotalRevenueUseCaseHandler.handle();
-    return ApiResponseWrapper.success(totalRevenue);
+    BigDecimal responseData = adminGetTotalRevenueUseCaseHandler.handle();
+
+    return ApiResponseWrapper.success(responseData);
   }
 }

@@ -14,6 +14,8 @@ import org.atlas.domain.product.infrastructure.file.model.write.ProductRow;
 import org.atlas.domain.product.shared.ProductStatus;
 import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.file.excel.easyexcel.core.EasyExcelWriter;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,8 +23,8 @@ public class EasyExcelProductExcelWriter implements ProductExcelWriter {
 
   @Override
   public byte[] write(List<ProductRow> productRows) throws Exception {
-    List<ProductExcelRow> csvRows = ObjectMapperUtil.getInstance()
-        .mapList(productRows, ProductExcelRow.class);
+    List<ProductExcelRow> csvRows = ObjectMapperUtil.mapList(productRows,
+        ProductExcelRowMapper.INSTANCE::toProductExcelRow);
     return EasyExcelWriter.write(csvRows, SHEET_NAME, ProductExcelRow.class);
   }
 
@@ -59,5 +61,13 @@ public class EasyExcelProductExcelWriter implements ProductExcelWriter {
 
     @ExcelProperty(value = "Category IDs")
     private String categoryIds;
+  }
+
+  @Mapper
+  public interface ProductExcelRowMapper {
+
+    ProductExcelRowMapper INSTANCE = Mappers.getMapper(ProductExcelRowMapper.class);
+
+    ProductExcelRow toProductExcelRow(ProductRow productExcelRow);
   }
 }

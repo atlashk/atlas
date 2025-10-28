@@ -15,6 +15,8 @@ import org.atlas.domain.product.infrastructure.file.model.write.ProductRow;
 import org.atlas.domain.product.shared.ProductStatus;
 import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.file.csv.opencsv.core.OpenCsvWriter;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -22,8 +24,8 @@ public class OpencsvProductCsvWriter implements ProductCsvWriter {
 
   @Override
   public byte[] write(List<ProductRow> productRows) throws Exception {
-    List<ProductCsvRow> csvRows = ObjectMapperUtil.getInstance()
-        .mapList(productRows, ProductCsvRow.class);
+    List<ProductCsvRow> csvRows = ObjectMapperUtil.mapList(productRows,
+        ProductCsvRowMapper.INSTANCE::toProductCsvRow);
     return OpenCsvWriter.write(csvRows, ProductCsvRow.class);
   }
 
@@ -69,5 +71,13 @@ public class OpencsvProductCsvWriter implements ProductCsvWriter {
     @CsvBindByName(column = "Category IDs")
     @CsvBindByPosition(position = 8)
     private String categoryIds;
+  }
+
+  @Mapper
+  public interface ProductCsvRowMapper {
+
+    ProductCsvRowMapper INSTANCE = Mappers.getMapper(ProductCsvRowMapper.class);
+
+    ProductCsvRow toProductCsvRow(ProductRow productRow);
   }
 }

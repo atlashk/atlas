@@ -17,6 +17,8 @@ import org.atlas.domain.product.infrastructure.file.model.read.ProductRow;
 import org.atlas.domain.product.shared.ProductStatus;
 import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.file.csv.opencsv.core.OpenCsvReader;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -25,8 +27,7 @@ public class OpencsvProductCsvReader implements ProductCsvReader {
   @Override
   public List<ProductRow> read(byte[] fileContent) throws IOException {
     List<ProductCsvRow> csvRows = OpenCsvReader.read(fileContent, ProductCsvRow.class);
-    return ObjectMapperUtil.getInstance()
-        .mapList(csvRows, ProductRow.class);
+    return ObjectMapperUtil.mapList(csvRows, ProductCsvRowMapper.INSTANCE::toProductRow);
   }
 
   @NoArgsConstructor
@@ -68,5 +69,13 @@ public class OpencsvProductCsvReader implements ProductCsvReader {
     @CsvBindByName(column = "Category IDs")
     @CsvBindByPosition(position = 7)
     private String categoryIds;
+  }
+
+  @Mapper
+  public interface ProductCsvRowMapper {
+
+    ProductCsvRowMapper INSTANCE = Mappers.getMapper(ProductCsvRowMapper.class);
+
+    ProductRow toProductRow(ProductCsvRow productCsvRow);
   }
 }

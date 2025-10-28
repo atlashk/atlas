@@ -51,8 +51,9 @@ public class AdminUserManagementController {
         .pagingRequest(PagingRequest.of(page - 1, size))
         .build();
     PagingResult<User> userPage = adminListUserUseCaseHandler.handle(input);
-    PagingResult<UserResponse> userResponsePage = ObjectMapperUtil.mapPage(userPage,
+
+    PagingResult<UserResponse> responseData = ObjectMapperUtil.mapPage(userPage,
         AdminUserMapper.INSTANCE::toUserResponse);
-    return ApiResponseWrapper.successPage(userResponsePage);
+    return ApiResponseWrapper.successPage(responseData);
   }
 }

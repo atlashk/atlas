@@ -5,7 +5,7 @@ import org.atlas.domain.order.entity.Order.ProductSnapshot;
 import org.atlas.domain.order.entity.Order.UserSnapshot;
 import org.atlas.domain.order.repository.criteria.FindOrderCriteria;
 import org.atlas.domain.order.usecase.front.model.ListOrderInput;
-import org.atlas.framework.internalapi.user.model.CartResponse.CartItemResponse.Product;
+import org.atlas.framework.internalapi.user.model.CartResponse;
 import org.atlas.framework.internalapi.user.model.UserResponse;
 import org.atlas.framework.saga.checkout.CheckoutSagaData;
 import org.mapstruct.Mapper;
@@ -19,7 +19,7 @@ public interface OrderMapper {
 
   UserSnapshot toUserSnapshot(UserResponse response);
 
-  ProductSnapshot toProductSnapshot(Product product);
+  ProductSnapshot toProductSnapshot(CartResponse.Product product);
 
   @Mapping(target = "orderId", source = "id")
   @Mapping(target = "userId", source = "user.id")

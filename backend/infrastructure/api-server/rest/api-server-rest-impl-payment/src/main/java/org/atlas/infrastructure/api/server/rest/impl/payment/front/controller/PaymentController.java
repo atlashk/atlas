@@ -7,7 +7,7 @@ import org.atlas.domain.payment.usecase.front.handler.GetPaymentNextActionUseCas
 import org.atlas.domain.payment.usecase.front.model.GetPaymentNextActionInput;
 import org.atlas.domain.payment.usecase.front.model.GetPaymentNextActionOutput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
-import org.atlas.framework.util.ObjectMapperUtil;
+import org.atlas.infrastructure.api.server.rest.impl.payment.front.mapper.PaymentMapper;
 import org.atlas.infrastructure.api.server.rest.impl.payment.front.model.GetPaymentNextActionResponse;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -31,8 +31,8 @@ public class PaymentController {
       @PathVariable("orderId") Integer orderId) throws Exception {
     GetPaymentNextActionInput input = new GetPaymentNextActionInput(orderId);
     GetPaymentNextActionOutput output = getPaymentNextActionUseCaseHandler.handle(input);
-    GetPaymentNextActionResponse response = ObjectMapperUtil.getInstance()
-        .map(output, GetPaymentNextActionResponse.class);
+    GetPaymentNextActionResponse response =
+        PaymentMapper.INSTANCE.toGetPaymentNextActionResponse(output);
     return ApiResponseWrapper.success(response);
   }
 }

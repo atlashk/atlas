@@ -8,10 +8,8 @@ import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.atlas.framework.internalapi.product.ProductApiClient;
 import org.atlas.framework.internalapi.product.model.ListProductRequest;
 import org.atlas.framework.internalapi.product.model.ProductResponse;
-import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.api.server.grpc.protobuf.product.ListProductRequestProto;
 import org.atlas.infrastructure.api.server.grpc.protobuf.product.ListProductResponseProto;
-import org.atlas.infrastructure.api.server.grpc.protobuf.product.ProductProto;
 import org.atlas.infrastructure.api.server.grpc.protobuf.product.ProductServiceGrpc;
 import org.springframework.stereotype.Component;
 
@@ -26,26 +24,8 @@ public class GrpcNetdevhProductApiClient implements ProductApiClient {
 
   @Override
   public List<ProductResponse> call(ListProductRequest request) {
-    ListProductRequestProto requestProto = map(request);
+    ListProductRequestProto requestProto = GrpcProductMapper.INSTANCE.map(request);
     ListProductResponseProto responseProto = productServiceBlockingStub.listProduct(requestProto);
-    return map(responseProto);
-  }
-
-  private ListProductRequestProto map(ListProductRequest request) {
-    return ListProductRequestProto.newBuilder()
-        .addAllId(request.getIds())
-        .build();
-  }
-
-  private List<ProductResponse> map(ListProductResponseProto responseProto) {
-    return responseProto.getProductList()
-        .stream()
-        .map(this::map)
-        .toList();
-  }
-
-  private ProductResponse map(ProductProto productProto) {
-    return ObjectMapperUtil.getInstance()
-        .map(productProto, ProductResponse.class);
+    return GrpcProductMapper.INSTANCE.map(responseProto);
   }
 }

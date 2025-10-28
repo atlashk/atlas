@@ -7,18 +7,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.order.entity.Order;
 import org.atlas.domain.order.entity.Order.OrderItem;
+import org.atlas.domain.order.entity.Order.PaymentSnapshot;
 import org.atlas.domain.order.entity.Order.ProductSnapshot;
 import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.domain.order.usecase.front.mapper.OrderMapper;
 import org.atlas.domain.order.usecase.front.model.CheckoutInput;
+import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.framework.cryptography.HashingUtil;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.internalapi.user.CartApiClient;
 import org.atlas.framework.internalapi.user.UserApiClient;
-import org.atlas.framework.internalapi.user.model.CartResponse.CartItemResponse;
 import org.atlas.framework.internalapi.user.model.CartResponse;
 import org.atlas.framework.internalapi.user.model.GetCartRequest;
 import org.atlas.framework.internalapi.user.model.ListUserRequest;
@@ -65,7 +66,7 @@ public class CheckoutUseCaseHandler {
 
     try {
       // Insert new order into DB
-      Order order = newOrder(userResponse, cartResponse);
+      Order order = newOrder(input, userResponse, cartResponse);
       orderRepository.insert(order);
       log.info("Order created successfully for user {}", input.getUserId());
 
@@ -101,18 +102,16 @@ public class CheckoutUseCaseHandler {
   private String obtainLockKey(CheckoutInput input, CartResponse cart) {
     // Create a deterministic signature based on order items
     StringBuilder signature = new StringBuilder();
-    cart.getCartItems().stream()
-        .sorted(Comparator.comparingInt(
-            cartItem -> cartItem.getProduct().getId())) // Sort for consistency
-        .forEach(cartItem -> signature.append(cartItem.getProduct().getId())
-            .append(":")
-            .append(cartItem.getQuantity())
-            .append(";"));
+    cart.getCartItems().stream().sorted(
+            Comparator.comparingInt(cartItem -> cartItem.getProduct().getId())) // Sort for consistency
+        .forEach(cartItem -> signature.append(cartItem.getProduct().getId()).append(":")
+            .append(cartItem.getQuantity()).append(";"));
     String hash = HashingUtil.sha256ToHex(signature.toString());
     return String.format("checkout:%d:%s", input.getUserId(), hash);
   }
 
-  private Order newOrder(UserResponse userResponse, CartResponse cartResponse) {
+  private Order newOrder(CheckoutInput input, UserResponse userResponse,
+      CartResponse cartResponse) {
     // Order
     Order order = new Order();
     order.setCode(sequenceGenerator.generate(SequenceType.ORDER));
@@ -122,13 +121,11 @@ public class CheckoutUseCaseHandler {
     order.setUser(OrderMapper.INSTANCE.toUserSnapshot(userResponse));
 
     // Order items
-    for (CartItemResponse cartItemResponse : cartResponse.getCartItems()) {
+    for (CartResponse.CartItem cartItem : cartResponse.getCartItems()) {
       // Product
-      ProductSnapshot product = OrderMapper.INSTANCE.toProductSnapshot(cartItemResponse.getProduct());
+      ProductSnapshot product = OrderMapper.INSTANCE.toProductSnapshot(cartItem.getProduct());
 
-      OrderItem orderItem = OrderItem.builder()
-          .product(product)
-          .quantity(cartItemResponse.getQuantity())
+      OrderItem orderItem = OrderItem.builder().product(product).quantity(cartItem.getQuantity())
           .build();
 
       order.addOrderItem(orderItem);
@@ -136,6 +133,13 @@ public class CheckoutUseCaseHandler {
 
     // Amount
     order.calculateOrderAmount();
+
+    // Payment snapshot
+    PaymentSnapshot payment = PaymentSnapshot.builder()
+        .paymentGatewayId(input.getPaymentGatewayId())
+        .status(PaymentStatus.PENDING)
+        .build();
+    order.setPayment(payment);
 
     return order;
   }
