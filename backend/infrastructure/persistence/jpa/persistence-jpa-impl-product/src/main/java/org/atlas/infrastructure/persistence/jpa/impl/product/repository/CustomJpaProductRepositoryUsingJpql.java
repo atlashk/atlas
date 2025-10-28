@@ -10,7 +10,7 @@ import org.atlas.domain.product.repository.criteria.FindProductCriteria;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.util.CollectionUtil;
 import org.atlas.framework.util.StringUtil;
-import org.atlas.infrastructure.persistence.jpa.impl.product.entity.JpaProductEntity;
+import org.atlas.infrastructure.persistence.jpa.impl.product.entity.JpaProduct;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
@@ -22,7 +22,7 @@ public class CustomJpaProductRepositoryUsingJpql implements CustomJpaProductRepo
   private EntityManager entityManager;
 
   @Override
-  public List<JpaProductEntity> findByCriteria(FindProductCriteria criteria,
+  public List<JpaProduct> findByCriteria(FindProductCriteria criteria,
       PagingRequest pagingRequest) {
     StringBuilder sqlBuilder = new StringBuilder("""
         select p
@@ -45,7 +45,7 @@ public class CustomJpaProductRepositoryUsingJpql implements CustomJpaProductRepo
     }
 
     String sql = sqlBuilder.toString();
-    TypedQuery<JpaProductEntity> query = entityManager.createQuery(sql, JpaProductEntity.class);
+    TypedQuery<JpaProduct> query = entityManager.createQuery(sql, JpaProduct.class);
 
     // Set parameters
     params.forEach(query::setParameter);
@@ -65,7 +65,7 @@ public class CustomJpaProductRepositoryUsingJpql implements CustomJpaProductRepo
     String whereClause = buildWhereClause(criteria, params);
     String countSql = """
         select count(distinct p.id)
-        from JpaProductEntity p
+        from JpaProduct p
         left join p.details d
         left join p.brand b
         left join p.categories c

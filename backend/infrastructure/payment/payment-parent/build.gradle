@@ -25,7 +25,7 @@ repositories {
 }
 
 dependencies {
-    // Stripe
+    api project(':infrastructure.payment.simulator')
     api project(':infrastructure.payment.stripe')
 }
 

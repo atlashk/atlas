@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import org.atlas.domain.order.repository.criteria.FindOrderCriteria;
 import org.atlas.framework.paging.PagingRequest;
-import org.atlas.infrastructure.persistence.jpa.impl.order.entity.JpaOrderEntity;
+import org.atlas.infrastructure.persistence.jpa.impl.order.entity.JpaOrder;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
@@ -20,7 +20,7 @@ public class CustomJpaOrderRepositoryUsingJpql implements CustomJpaOrderReposito
   private EntityManager entityManager;
 
   @Override
-  public List<JpaOrderEntity> findByCriteria(FindOrderCriteria criteria,
+  public List<JpaOrder> findByCriteria(FindOrderCriteria criteria,
       PagingRequest pagingRequest) {
     StringBuilder sqlBuilder = new StringBuilder("""
         select distinct o
@@ -40,7 +40,7 @@ public class CustomJpaOrderRepositoryUsingJpql implements CustomJpaOrderReposito
     }
 
     String sql = sqlBuilder.toString();
-    TypedQuery<JpaOrderEntity> query = entityManager.createQuery(sql, JpaOrderEntity.class);
+    TypedQuery<JpaOrder> query = entityManager.createQuery(sql, JpaOrder.class);
 
     // Set parameters
     params.forEach(query::setParameter);
@@ -60,7 +60,7 @@ public class CustomJpaOrderRepositoryUsingJpql implements CustomJpaOrderReposito
     String whereClause = buildWhereClause(criteria, params);
     String countSql = """
         select count(distinct o.id)
-        from JpaOrderEntity o
+        from JpaOrder o
         left join o.orderItems oi
         """ + whereClause;
     TypedQuery<Long> countQuery = entityManager.createQuery(countSql, Long.class);

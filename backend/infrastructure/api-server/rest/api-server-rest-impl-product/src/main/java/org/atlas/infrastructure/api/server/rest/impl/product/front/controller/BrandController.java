@@ -3,10 +3,11 @@ package org.atlas.infrastructure.api.server.rest.impl.product.front.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.atlas.domain.product.entity.BrandEntity;
+import org.atlas.domain.product.entity.Brand;
 import org.atlas.domain.product.usecase.front.handler.ListBrandUseCaseHandler;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.util.ObjectMapperUtil;
+import org.atlas.infrastructure.api.server.rest.impl.product.front.mapper.BrandMapper;
 import org.atlas.infrastructure.api.server.rest.impl.product.front.model.BrandResponse;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -25,9 +26,9 @@ public class BrandController {
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve a list of all brands")
   public ApiResponseWrapper<List<BrandResponse>> listBrand() throws Exception {
-    List<BrandEntity> brandEntities = listBrandUseCaseHandler.handle(null);
-    List<BrandResponse> brandResponses = ObjectMapperUtil.getInstance()
-        .mapList(brandEntities, BrandResponse.class);
-    return ApiResponseWrapper.success(brandResponses);
+    List<Brand> brands = listBrandUseCaseHandler.handle(null);
+    List<BrandResponse> responses = ObjectMapperUtil.mapList(brands,
+        BrandMapper.INSTANCE::toBrandResponse);
+    return ApiResponseWrapper.success(responses);
   }
 }

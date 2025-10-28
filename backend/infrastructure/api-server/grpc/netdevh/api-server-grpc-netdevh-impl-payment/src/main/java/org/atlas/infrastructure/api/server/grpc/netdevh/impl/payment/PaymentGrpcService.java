@@ -4,7 +4,7 @@ import io.grpc.stub.StreamObserver;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.server.service.GrpcService;
-import org.atlas.domain.payment.entity.PaymentEntity;
+import org.atlas.domain.payment.entity.Payment;
 import org.atlas.domain.payment.usecase.internal.handler.InternalListPaymentUseCaseHandler;
 import org.atlas.domain.payment.usecase.internal.model.InternalListPaymentInput;
 import org.atlas.framework.util.CollectionUtil;
@@ -25,7 +25,7 @@ public class PaymentGrpcService extends PaymentServiceGrpc.PaymentServiceImplBas
       StreamObserver<ListPaymentResponseProto> responseObserver) {
     InternalListPaymentInput input = map(requestProto);
     try {
-      List<PaymentEntity> paymentEntities = internalListPaymentUseCaseHandler.handle(input);
+      List<Payment> paymentEntities = internalListPaymentUseCaseHandler.handle(input);
       ListPaymentResponseProto paymentResponseProtoList = map(paymentEntities);
       responseObserver.onNext(paymentResponseProtoList);
       responseObserver.onCompleted();
@@ -38,7 +38,7 @@ public class PaymentGrpcService extends PaymentServiceGrpc.PaymentServiceImplBas
     return new InternalListPaymentInput(requestProto.getOrderIdList());
   }
 
-  private ListPaymentResponseProto map(List<PaymentEntity> paymentEntities) {
+  private ListPaymentResponseProto map(List<Payment> paymentEntities) {
     if (CollectionUtil.isEmpty(paymentEntities)) {
       return ListPaymentResponseProto.getDefaultInstance();
     }
@@ -47,20 +47,20 @@ public class PaymentGrpcService extends PaymentServiceGrpc.PaymentServiceImplBas
     return builder.build();
   }
 
-  private PaymentProto map(PaymentEntity paymentEntity) {
+  private PaymentProto map(Payment payment) {
     return PaymentProto.newBuilder()
-        .setId(paymentEntity.getId())
-        .setAmount(paymentEntity.getAmount().doubleValue())
-        .setCurrency(paymentEntity.getCurrency())
+        .setId(payment.getId())
+        .setAmount(payment.getAmount().doubleValue())
+        .setCurrency(payment.getCurrency())
         .setMethod(
-            paymentEntity.getMethod() != null ? paymentEntity.getMethod().name() : StringUtil.EMPTY)
-        .setGateway(paymentEntity.getGateway() != null ? paymentEntity.getGateway().name()
+            payment.getMethod() != null ? payment.getMethod().name() : StringUtil.EMPTY)
+        .setGateway(payment.getGateway() != null ? payment.getGateway().name()
             : StringUtil.EMPTY)
         .setStatus(
-            paymentEntity.getStatus() != null ? paymentEntity.getStatus().name() : StringUtil.EMPTY)
-        .setErrorCode(StringUtil.nvl(paymentEntity.getErrorCode()))
-        .setErrorMessage(StringUtil.nvl(paymentEntity.getErrorMessage()))
-        .setCancellationReason(StringUtil.nvl(paymentEntity.getCancellationReason()))
+            payment.getStatus() != null ? payment.getStatus().name() : StringUtil.EMPTY)
+        .setErrorCode(StringUtil.nvl(payment.getErrorCode()))
+        .setErrorMessage(StringUtil.nvl(payment.getErrorMessage()))
+        .setCancellationReason(StringUtil.nvl(payment.getCancellationReason()))
         .build();
   }
 }

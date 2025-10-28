@@ -1,17 +1,16 @@
 package org.atlas.infrastructure.search.elasticsearch.impl.product;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.atlas.domain.product.entity.ProductEntity;
+import org.atlas.domain.product.entity.Product;
 import org.atlas.domain.product.infrastructure.search.SearchIndex;
 import org.atlas.domain.product.infrastructure.search.SearchProductCriteria;
 import org.atlas.domain.product.infrastructure.search.SearchService;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
 import org.atlas.framework.util.CollectionUtil;
-import org.atlas.infrastructure.search.elasticsearch.impl.product.document.ProductDocument;
-import org.atlas.infrastructure.search.elasticsearch.impl.product.mapper.ProductDocumentMapper;
+import org.atlas.infrastructure.search.elasticsearch.impl.product.document.ElasticsearchProduct;
+import org.atlas.infrastructure.search.elasticsearch.impl.product.mapper.ElasticsearchProductMapper;
 import org.atlas.infrastructure.search.elasticsearch.impl.product.repository.ElasticsearchProductRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +25,7 @@ public class ElasticsearchSearchService implements SearchService {
 
   private final ElasticsearchProductRepository elasticsearchProductRepository;
   private final ElasticsearchOperations elasticsearchOperations;
-  private final ProductDocumentMapper productDocumentMapper;
+  private final ElasticsearchProductMapper elasticsearchProductMapper;
 
   @Override
   public boolean initializeIndex(SearchIndex index) {
@@ -54,7 +53,7 @@ public class ElasticsearchSearchService implements SearchService {
       PagingRequest pagingRequest) {
     Pageable pageable = PageRequest.of(pagingRequest.getPage(), pagingRequest.getSize());
 
-    SearchHits<ProductDocument> searchHits = elasticsearchProductRepository.search(criteria, pageable);
+    SearchHits<ElasticsearchProduct> searchHits = elasticsearchProductRepository.search(criteria, pageable);
 
     List<Integer> matchedProductIds = searchHits.stream()
         .map(hit -> hit.getContent().getProductId())
@@ -65,31 +64,31 @@ public class ElasticsearchSearchService implements SearchService {
   }
 
   @Override
-  public void saveAll(List<ProductEntity> products) {
+  public void saveAll(List<Product> products) {
     if (CollectionUtil.isEmpty(products)) {
       return;
     }
 
-    List<ProductDocument> documents = products.stream()
-        .map(productDocumentMapper::toProductDocument)
+    List<ElasticsearchProduct> elasticsearchProducts = products.stream()
+        .map(elasticsearchProductMapper::toProductDocument)
         .toList();
 
-    elasticsearchProductRepository.saveAll(documents);
+    elasticsearchProductRepository.saveAll(elasticsearchProducts);
   }
 
   @Override
   public void deleteProduct(Integer productId) {
-    ProductDocument document = elasticsearchProductRepository.findByProductId(productId)
+    ElasticsearchProduct elasticsearchProduct = elasticsearchProductRepository.findByProductId(productId)
         .orElseThrow(() -> new IllegalArgumentException(
             String.format("Product %d does not exist in search index", productId)));
 
-    elasticsearchProductRepository.deleteById(document.getId());
+    elasticsearchProductRepository.deleteById(elasticsearchProduct.getId());
   }
 
   private IndexOperations createIndexOperation(SearchIndex index) {
     IndexOperations indexOperations;
     if (SearchIndex.PRODUCT.equals(index)) {
-      indexOperations = elasticsearchOperations.indexOps(ProductDocument.class);
+      indexOperations = elasticsearchOperations.indexOps(ElasticsearchProduct.class);
     } else {
       throw new UnsupportedOperationException(
           String.format("Search index %s is not supported yet", index));

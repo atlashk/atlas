@@ -1,20 +1,15 @@
 package org.atlas.domain.payment.repository;
 
-import java.util.List;
 import java.util.Optional;
-import org.atlas.domain.payment.entity.PaymentEntity;
+import org.atlas.domain.payment.entity.Payment;
 
 public interface PaymentRepository {
 
-  List<PaymentEntity> findByOrderIdIn(List<Integer> orderIds);
+  Optional<Payment> findById(Integer id);
 
-  Optional<PaymentEntity> findById(Integer id);
+  Optional<Payment> findByOrderId(Integer orderId);
 
-  Optional<PaymentEntity> findByOrderId(Integer orderId);
+  void insert(Payment payment);
 
-  void insert(PaymentEntity payment);
-
-  void update(PaymentEntity payment);
-
-  int markAsWebhookProcessing(PaymentEntity payment);
+  void update(Payment payment);
 }

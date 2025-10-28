@@ -4,7 +4,7 @@ import io.grpc.stub.StreamObserver;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.server.service.GrpcService;
-import org.atlas.domain.product.entity.ProductEntity;
+import org.atlas.domain.product.entity.Product;
 import org.atlas.domain.product.usecase.internal.handler.InternalListProductUseCaseHandler;
 import org.atlas.domain.product.usecase.internal.model.InternalListProductInput;
 import org.atlas.framework.util.CollectionUtil;
@@ -24,7 +24,7 @@ public class ProductGrpcService extends ProductServiceGrpc.ProductServiceImplBas
       StreamObserver<ListProductResponseProto> responseObserver) {
     InternalListProductInput input = map(requestProto);
     try {
-      List<ProductEntity> products = internalListProductUseCaseHandler.handle(input);
+      List<Product> products = internalListProductUseCaseHandler.handle(input);
       ListProductResponseProto productResponseProtoList = map(products);
       responseObserver.onNext(productResponseProtoList);
       responseObserver.onCompleted();
@@ -37,7 +37,7 @@ public class ProductGrpcService extends ProductServiceGrpc.ProductServiceImplBas
     return new InternalListProductInput(requestProto.getIdList());
   }
 
-  private ListProductResponseProto map(List<ProductEntity> products) {
+  private ListProductResponseProto map(List<Product> products) {
     if (CollectionUtil.isEmpty(products)) {
       return ListProductResponseProto.getDefaultInstance();
     }
@@ -46,7 +46,7 @@ public class ProductGrpcService extends ProductServiceGrpc.ProductServiceImplBas
     return builder.build();
   }
 
-  private ProductProto map(ProductEntity product) {
+  private ProductProto map(Product product) {
     return ProductProto.newBuilder()
         .setId(product.getId())
         .setName(product.getName())

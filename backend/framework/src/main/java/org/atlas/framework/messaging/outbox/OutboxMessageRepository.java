@@ -4,9 +4,9 @@ import java.util.List;
 
 public interface OutboxMessageRepository {
 
-  List<OutboxMessageEntity> findByStatusOrderByCreatedAt(OutboxMessageStatus status);
+  List<OutboxMessage> findByStatusOrderByCreatedAt(OutboxMessageStatus status);
 
-  void insert(OutboxMessageEntity outboxMessageEntity);
+  void insert(OutboxMessage outboxMessage);
 
-  void update(OutboxMessageEntity outboxMessageEntity);
+  void update(OutboxMessage outboxMessage);
 }

@@ -2,7 +2,7 @@ package org.atlas.domain.user.usecase.front.handler;
 
 import javax.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
-import org.atlas.domain.user.entity.UserEntity;
+import org.atlas.domain.user.entity.User;
 import org.atlas.domain.user.repository.UserRepository;
 import org.atlas.domain.user.usecase.front.model.GetProfileInput;
 import org.atlas.framework.domain.error.DomainError;
@@ -15,7 +15,7 @@ public class GetProfileUseCaseHandler {
 
   private final UserRepository userRepository;
 
-  public UserEntity handle(@Nonnull GetProfileInput input) throws Exception {
+  public User handle(@Nonnull GetProfileInput input) throws Exception {
     return userRepository.findById(input.getUserId())
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
   }

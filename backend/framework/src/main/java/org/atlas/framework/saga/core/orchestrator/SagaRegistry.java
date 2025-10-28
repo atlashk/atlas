@@ -10,10 +10,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.saga.core.annotation.Saga;
 import org.atlas.framework.saga.core.annotation.SagaCommandReplyHandler;
 import org.atlas.framework.saga.core.annotation.StartSaga;
-import org.atlas.framework.saga.core.entity.SagaEntity;
+import org.atlas.framework.saga.core.entity.Saga;
 import org.atlas.framework.saga.core.exception.SagaConfigException;
 import org.atlas.framework.util.StringUtil;
 import org.springframework.aop.support.AopUtils;
@@ -87,7 +86,8 @@ public class SagaRegistry {
    * Register all sagas from the application context
    */
   private void registerSagas() {
-    Map<String, Object> sagaBeans = applicationContext.getBeansWithAnnotation(Saga.class);
+    Map<String, Object> sagaBeans = applicationContext.getBeansWithAnnotation(
+        org.atlas.framework.saga.core.annotation.Saga.class);
     log.debug("Found {} potential saga beans", sagaBeans.size());
     if (sagaBeans.isEmpty()) {
       return;
@@ -115,7 +115,8 @@ public class SagaRegistry {
         : sagaBean.getClass();
 
     // Read Saga annotation
-    Saga sagaAnnotation = sagaClass.getAnnotation(Saga.class);
+    org.atlas.framework.saga.core.annotation.Saga sagaAnnotation = sagaClass.getAnnotation(
+        org.atlas.framework.saga.core.annotation.Saga.class);
     if (sagaAnnotation == null) {
       throw new SagaConfigException(
           String.format("Bean '%s' is missing @Saga annotation", beanName));
@@ -207,7 +208,7 @@ public class SagaRegistry {
 
     boolean existSagaEntityParameter = false;
     for (Parameter parameter : parameters) {
-      if (SagaEntity.class.isAssignableFrom(parameter.getType())) {
+      if (Saga.class.isAssignableFrom(parameter.getType())) {
         existSagaEntityParameter = true;
       }
     }
@@ -227,7 +228,7 @@ public class SagaRegistry {
 
     boolean existSagaEntityParameter = false;
     for (Parameter parameter : parameters) {
-      if (SagaEntity.class.isAssignableFrom(parameter.getType())) {
+      if (Saga.class.isAssignableFrom(parameter.getType())) {
         existSagaEntityParameter = true;
       }
     }

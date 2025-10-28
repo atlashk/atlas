@@ -1,13 +1,13 @@
 package org.atlas.domain.user.repository;
 
 import java.util.Optional;
-import org.atlas.domain.user.entity.CartEntity;
+import org.atlas.domain.user.entity.Cart;
 
 public interface CartRepository {
 
-  Optional<CartEntity> findByUserId(Integer userId);
+  Optional<Cart> findByUserId(Integer userId);
 
-  void insert(CartEntity cart);
+  void insert(Cart cart);
 
-  void update(CartEntity cart);
+  void update(Cart cart);
 }

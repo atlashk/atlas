@@ -1,14 +1,13 @@
 package org.atlas.domain.product.usecase.admin.handler;
 
 import lombok.RequiredArgsConstructor;
-import org.atlas.domain.product.entity.ProductEntity;
+import org.atlas.domain.product.entity.Product;
 import org.atlas.domain.product.infrastructure.messaging.ProductEventMessagePublisher;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.service.ProductImageService;
+import org.atlas.domain.product.usecase.admin.mapper.AdminProductMapper;
 import org.atlas.framework.domain.event.contract.product.ProductCreatedEvent;
-import org.atlas.framework.domain.event.contract.product.model.Product;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
-import org.atlas.framework.util.ObjectMapperUtil;
 
 @UseCaseHandler
 @RequiredArgsConstructor
@@ -18,7 +17,7 @@ public class AdminCreateProductUseCaseHandler {
   private final ProductImageService productImageService;
   private final ProductEventMessagePublisher productEventMessagePublisher;
 
-  public Integer handle(ProductEntity product) throws Exception {
+  public Integer handle(Product product) throws Exception {
     // Insert product into DB
     productRepository.insert(product);
 
@@ -32,8 +31,9 @@ public class AdminCreateProductUseCaseHandler {
     return product.getId();
   }
 
-  private void publishEvent(ProductEntity product) {
-    Product productPayload = ObjectMapperUtil.getInstance().map(product, Product.class);
+  private void publishEvent(Product product) {
+    org.atlas.framework.domain.event.contract.product.model.Product productPayload =
+        AdminProductMapper.INSTANCE.toProduct(product);
     ProductCreatedEvent event = new ProductCreatedEvent(productPayload);
     productEventMessagePublisher.publish(event);
   }

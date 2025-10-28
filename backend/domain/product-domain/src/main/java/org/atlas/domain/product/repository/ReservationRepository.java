@@ -1,13 +1,13 @@
 package org.atlas.domain.product.repository;
 
 import java.util.Optional;
-import org.atlas.domain.product.entity.ReservationEntity;
+import org.atlas.domain.product.entity.Reservation;
 
 public interface ReservationRepository {
 
-  Optional<ReservationEntity> findByOrderIdAndProductId(Integer orderId, Integer productId);
+  Optional<Reservation> findByOrderIdAndProductId(Integer orderId, Integer productId);
 
-  void insert(ReservationEntity reservation);
+  void insert(Reservation reservation);
 
-  void delete(ReservationEntity reservation);
+  void delete(Reservation reservation);
 }

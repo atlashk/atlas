@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.domain.order.entity.OrderEntity;
-import org.atlas.domain.order.entity.OrderEntity.CancellationReason;
+import org.atlas.domain.order.entity.Order;
+import org.atlas.domain.order.entity.Order.CancellationReason;
 import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.domain.payment.shared.PaymentStatus;
@@ -22,11 +22,10 @@ import org.atlas.framework.notification.email.EmailService;
 import org.atlas.framework.saga.checkout.CheckoutCommand;
 import org.atlas.framework.saga.checkout.InitializePaymentCommandMetadata;
 import org.atlas.framework.saga.checkout.ProcessPaymentCommandMetadata;
-import org.atlas.framework.saga.core.annotation.Saga;
 import org.atlas.framework.saga.core.annotation.SagaCommandReplyHandler;
 import org.atlas.framework.saga.core.annotation.StartSaga;
 import org.atlas.framework.saga.core.command.SagaCommandResult;
-import org.atlas.framework.saga.core.entity.SagaEntity;
+import org.atlas.framework.saga.core.entity.Saga;
 import org.atlas.framework.saga.core.orchestrator.SagaOrchestrator;
 import org.atlas.framework.template.ResolveTemplateException;
 import org.atlas.framework.template.TemplateService;
@@ -34,7 +33,7 @@ import org.atlas.framework.util.AsyncUtil;
 import org.atlas.framework.util.AsyncUtil.AsyncTask;
 import org.atlas.framework.util.FileUtil;
 
-@Saga(
+@org.atlas.framework.saga.core.annotation.Saga(
     sagaName = "checkout",
     description = "Orchestrates the checkout process"
 )
@@ -49,16 +48,16 @@ public class CheckoutSaga {
   private final TemplateService templateService;
 
   @StartSaga
-  public void startSaga(SagaEntity sagaEntity) {
+  public void startSaga(Saga saga) {
     sagaOrchestrator.sendCommand(
-        sagaEntity, CheckoutCommand.RESERVE_PRODUCT, Services.PRODUCT_SERVICE);
+        saga, CheckoutCommand.RESERVE_PRODUCT, Services.PRODUCT_SERVICE);
   }
 
   @SagaCommandReplyHandler(command = CheckoutCommand.RESERVE_PRODUCT)
-  public void handleReserveProductReply(SagaEntity sagaEntity,
+  public void handleReserveProductReply(Saga saga,
       SagaCommandResult sagaCommandResult) {
     // Update order
-    OrderEntity order = orderRepository.findBySagaId(sagaEntity.getId())
+    Order order = orderRepository.findBySagaId(saga.getId())
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
     if (sagaCommandResult.isSuccess()) {
       order.setStatus(OrderStatus.AWAITING_PAYMENT_INITIALIZED);
@@ -73,14 +72,14 @@ public class CheckoutSaga {
 
     if (sagaCommandResult.isSuccess()) {
       sagaOrchestrator.sendCommand(
-          sagaEntity, CheckoutCommand.INITIALIZE_PAYMENT, Services.PAYMENT_SERVICE);
+          saga, CheckoutCommand.INITIALIZE_PAYMENT, Services.PAYMENT_SERVICE);
     }
   }
 
   @SagaCommandReplyHandler(command = CheckoutCommand.INITIALIZE_PAYMENT)
-  public void handleInitializePaymentReply(SagaEntity sagaEntity,
+  public void handleInitializePaymentReply(Saga saga,
       SagaCommandResult sagaCommandResult) {
-    OrderEntity order = orderRepository.findBySagaId(sagaEntity.getId())
+    Order order = orderRepository.findBySagaId(saga.getId())
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
 
     InitializePaymentCommandMetadata metadata =
@@ -99,7 +98,7 @@ public class CheckoutSaga {
 
       // Explicitly create a payment-processing command, since we can’t send commands directly to the external service.
       sagaOrchestrator.createCommand(
-          sagaEntity.getId(), CheckoutCommand.PROCESS_PAYMENT, Services.EXTERNAL_PAYMENT_SERVICE);
+          saga.getId(), CheckoutCommand.PROCESS_PAYMENT, Services.EXTERNAL_PAYMENT_SERVICE);
     } else {
       // Update order status
       order.setStatus(OrderStatus.CANCELED);
@@ -116,10 +115,10 @@ public class CheckoutSaga {
   }
 
   @SagaCommandReplyHandler(command = CheckoutCommand.PROCESS_PAYMENT)
-  public void handleProcessPaymentReply(SagaEntity sagaEntity,
+  public void handleProcessPaymentReply(Saga saga,
       SagaCommandResult sagaCommandResult) {
     // Update order
-    OrderEntity order = orderRepository.findBySagaId(sagaEntity.getId())
+    Order order = orderRepository.findBySagaId(saga.getId())
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
 
     ProcessPaymentCommandMetadata metadata =
@@ -138,7 +137,7 @@ public class CheckoutSaga {
 
       // Send command to clear user cart
       sagaOrchestrator.sendCommand(
-          sagaEntity, CheckoutCommand.CLEAR_CART, Services.USER_SERVICE);
+          saga, CheckoutCommand.CLEAR_CART, Services.USER_SERVICE);
 
       AsyncUtil.executeAsync(notifyEmail(order));
     } else {
@@ -160,10 +159,10 @@ public class CheckoutSaga {
       orderRepository.update(order);
     }
 
-    sagaOrchestrator.endSaga(sagaEntity.getId());
+    sagaOrchestrator.endSaga(saga.getId());
   }
 
-  private AsyncTask notifyEmail(OrderEntity order) {
+  private AsyncTask notifyEmail(Order order) {
     return new AsyncTask() {
       @Override
       public void run() {

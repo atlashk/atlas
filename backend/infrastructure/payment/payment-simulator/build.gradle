@@ -28,10 +28,6 @@ dependencies {
     // Framework
     api project(':framework')
 
-    // Lib
-    implementation 'org.springframework.boot:spring-boot-starter'
-    implementation 'com.stripe:stripe-java:29.5.0'
-
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.atlas.domain.product.entity.ProductEntity;
+import org.atlas.domain.product.entity.Product;
 import org.atlas.domain.product.shared.ProductStatus;
 import org.atlas.domain.product.usecase.admin.handler.AdminCreateProductUseCaseHandler;
 import org.atlas.domain.product.usecase.admin.handler.AdminDeleteProductUseCaseHandler;
@@ -22,14 +22,14 @@ import org.atlas.domain.product.usecase.admin.model.AdminListProductInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.file.FileType;
-import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
 import org.atlas.framework.util.DateUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.api.server.rest.impl.product.admin.mapper.AdminProductMapper;
 import org.atlas.infrastructure.api.server.rest.impl.product.admin.model.AdminCreateProductRequest;
+import org.atlas.infrastructure.api.server.rest.impl.product.admin.model.AdminProductResponse;
 import org.atlas.infrastructure.api.server.rest.impl.product.admin.model.AdminUpdateProductRequest;
-import org.atlas.infrastructure.api.server.rest.impl.product.front.model.ProductResponse;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -65,7 +65,7 @@ public class AdminProductManagementController {
 
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve a list of products with optional filtering and pagination")
-  public ApiResponseWrapper<List<ProductResponse>> listProduct(
+  public ApiResponseWrapper<List<AdminProductResponse>> listProduct(
       @Parameter(name = "id", description = "The unique identifier of the product", example = "1")
       @RequestParam(name = "id", required = false) Integer id,
       @Parameter(name = "keyword", description = "Keyword for searching products", example = "T-Shirt")
@@ -102,23 +102,20 @@ public class AdminProductManagementController {
         .categoryIds(categoryIds)
         .pagingRequest(PagingRequest.of(page - 1, size))
         .build();
-
-    PagingResult<ProductEntity> productPage = adminListProductUseCaseHandler.handle(input);
-
-    PagingResult<ProductResponse> productResponsePage = ObjectMapperUtil.getInstance()
-        .mapPage(productPage, ProductResponse.class);
-    return ApiResponseWrapper.successPage(productResponsePage);
+    PagingResult<Product> productPage = adminListProductUseCaseHandler.handle(input);
+    PagingResult<AdminProductResponse> responsePage = ObjectMapperUtil.mapPage(productPage,
+        AdminProductMapper.INSTANCE::toAdminProductResponse);
+    return ApiResponseWrapper.successPage(responsePage);
   }
 
   @GetMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve details of a specific product by ID")
-  public ApiResponseWrapper<ProductResponse> getProduct(
+  public ApiResponseWrapper<AdminProductResponse> getProduct(
       @Parameter(name = "productId", description = "The unique identifier of the product", example = "1")
       @PathVariable("productId") Integer productId) throws Exception {
-    ProductEntity product = adminGetProductUseCaseHandler.handle(productId);
-    ProductResponse productResponse = ObjectMapperUtil.getInstance()
-        .map(product, ProductResponse.class);
-    return ApiResponseWrapper.success(productResponse);
+    Product product = adminGetProductUseCaseHandler.handle(productId);
+    AdminProductResponse response = AdminProductMapper.INSTANCE.toAdminProductResponse(product);
+    return ApiResponseWrapper.success(response);
   }
 
   @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -127,7 +124,7 @@ public class AdminProductManagementController {
   public ApiResponseWrapper<Integer> createProduct(
       @Parameter(description = "Request object containing the details of the product to create", required = true)
       @Valid @RequestBody AdminCreateProductRequest request) throws Exception {
-    ProductEntity product = AdminProductMapper.toProductEntity(request);
+    Product product = AdminProductMapper.INSTANCE.toProduct(request);
     Integer productId = adminCreateProductUseCaseHandler.handle(product);
     return ApiResponseWrapper.success(productId);
   }
@@ -139,7 +136,7 @@ public class AdminProductManagementController {
       @PathVariable("productId") Integer productId,
       @Parameter(description = "Request object containing the new details for the product", required = true)
       @Valid @RequestBody AdminUpdateProductRequest request) throws Exception {
-    ProductEntity product = AdminProductMapper.toProductEntity(request);
+    Product product = AdminProductMapper.INSTANCE.toProduct(request);
     product.setId(productId);
     adminUpdateProductUseCaseHandler.handle(product);
     return ApiResponseWrapper.success();

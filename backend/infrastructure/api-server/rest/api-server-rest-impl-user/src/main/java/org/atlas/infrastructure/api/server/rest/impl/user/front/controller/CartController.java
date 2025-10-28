@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.atlas.domain.user.entity.CartEntity;
+import org.atlas.domain.user.entity.Cart;
 import org.atlas.domain.user.usecase.front.handler.AddCartItemUseCaseHandler;
 import org.atlas.domain.user.usecase.front.handler.ClearCartUseCaseHandler;
 import org.atlas.domain.user.usecase.front.handler.GetCartUseCaseHandler;
@@ -17,7 +17,7 @@ import org.atlas.domain.user.usecase.front.model.RemoveCartItemInput;
 import org.atlas.domain.user.usecase.front.model.UpdateCartItemInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.context.Contexts;
-import org.atlas.framework.util.ObjectMapperUtil;
+import org.atlas.infrastructure.api.server.rest.impl.user.front.mapper.CartMapper;
 import org.atlas.infrastructure.api.server.rest.impl.user.front.model.AddCartItemRequest;
 import org.atlas.infrastructure.api.server.rest.impl.user.front.model.CartResponse;
 import org.atlas.infrastructure.api.server.rest.impl.user.front.model.UpdateCartItemRequest;
@@ -48,9 +48,8 @@ public class CartController {
     GetCartInput input = GetCartInput.builder()
         .userId(Contexts.getUserId())
         .build();
-    CartEntity cart = getCartUseCaseHandler.handle(input);
-    CartResponse response = ObjectMapperUtil.getInstance()
-        .map(cart, CartResponse.class);
+    Cart cart = getCartUseCaseHandler.handle(input);
+    CartResponse response = CartMapper.INSTANCE.toCartResponse(cart);
     return ApiResponseWrapper.success(response);
   }
 
@@ -64,9 +63,8 @@ public class CartController {
         .productId(request.getProductId())
         .quantity(request.getQuantity())
         .build();
-    CartEntity cart = addCartItemUseCaseHandler.handle(input);
-    CartResponse response = ObjectMapperUtil.getInstance()
-        .map(cart, CartResponse.class);
+    Cart cart = addCartItemUseCaseHandler.handle(input);
+    CartResponse response = CartMapper.INSTANCE.toCartResponse(cart);
     return ApiResponseWrapper.success(response);
   }
 
@@ -82,9 +80,8 @@ public class CartController {
         .productId(productId)
         .quantity(request.getQuantity())
         .build();
-    CartEntity cart = updateCartItemUseCaseHandler.handle(input);
-    CartResponse response = ObjectMapperUtil.getInstance()
-        .map(cart, CartResponse.class);
+    Cart cart = updateCartItemUseCaseHandler.handle(input);
+    CartResponse response = CartMapper.INSTANCE.toCartResponse(cart);
     return ApiResponseWrapper.success(response);
   }
 
@@ -97,9 +94,8 @@ public class CartController {
         .userId(Contexts.getUserId())
         .productId(productId)
         .build();
-    CartEntity cart = removeCartItemUseCaseHandler.handle(input);
-    CartResponse response = ObjectMapperUtil.getInstance()
-        .map(cart, CartResponse.class);
+    Cart cart = removeCartItemUseCaseHandler.handle(input);
+    CartResponse response = CartMapper.INSTANCE.toCartResponse(cart);
     return ApiResponseWrapper.success(response);
   }
 
@@ -109,9 +105,8 @@ public class CartController {
     ClearCartInput input = ClearCartInput.builder()
         .userId(Contexts.getUserId())
         .build();
-    CartEntity cart = clearCartUseCaseHandler.handle(input);
-    CartResponse response = ObjectMapperUtil.getInstance()
-        .map(cart, CartResponse.class);
+    Cart cart = clearCartUseCaseHandler.handle(input);
+    CartResponse response = CartMapper.INSTANCE.toCartResponse(cart);
     return ApiResponseWrapper.success(response);
   }
 }

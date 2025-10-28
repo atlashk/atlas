@@ -14,7 +14,7 @@ import org.atlas.framework.util.StringUtil;
 import org.atlas.infrastructure.persistence.jpa.core.specification.QueryFilter;
 import org.atlas.infrastructure.persistence.jpa.core.specification.QueryOperator;
 import org.atlas.infrastructure.persistence.jpa.core.specification.QuerySpecification;
-import org.atlas.infrastructure.persistence.jpa.impl.user.entity.JpaUserEntity;
+import org.atlas.infrastructure.persistence.jpa.impl.user.entity.JpaUser;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
@@ -25,13 +25,13 @@ public class CustomJpaUserRepositoryUsingCriteria implements CustomJpaUserReposi
   private EntityManager entityManager;
 
   @Override
-  public List<JpaUserEntity> findByCriteria(FindUserCriteria criteria,
+  public List<JpaUser> findByCriteria(FindUserCriteria criteria,
       PagingRequest pagingRequest) {
     CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-    CriteriaQuery<JpaUserEntity> criteriaQuery = criteriaBuilder.createQuery(JpaUserEntity.class);
-    Root<JpaUserEntity> root = criteriaQuery.from(JpaUserEntity.class);
+    CriteriaQuery<JpaUser> criteriaQuery = criteriaBuilder.createQuery(JpaUser.class);
+    Root<JpaUser> root = criteriaQuery.from(JpaUser.class);
 
-    Specification<JpaUserEntity> spec = buildSpec(criteria);
+    Specification<JpaUser> spec = buildSpec(criteria);
     Predicate predicate = spec.toPredicate(root, criteriaQuery, criteriaBuilder);
     criteriaQuery.where(predicate);
 
@@ -44,7 +44,7 @@ public class CustomJpaUserRepositoryUsingCriteria implements CustomJpaUserReposi
       }
     }
 
-    TypedQuery<JpaUserEntity> query = entityManager.createQuery(criteriaQuery);
+    TypedQuery<JpaUser> query = entityManager.createQuery(criteriaQuery);
 
     // Paging
     if (pagingRequest.hasPaging()) {
@@ -59,19 +59,19 @@ public class CustomJpaUserRepositoryUsingCriteria implements CustomJpaUserReposi
   public long countByCriteria(FindUserCriteria criteria) {
     CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Long> query = criteriaBuilder.createQuery(Long.class);
-    Root<JpaUserEntity> root = query.from(JpaUserEntity.class);
+    Root<JpaUser> root = query.from(JpaUser.class);
 
     query.select(criteriaBuilder.count(root.get("id")));
 
-    Specification<JpaUserEntity> spec = buildSpec(criteria);
+    Specification<JpaUser> spec = buildSpec(criteria);
     Predicate predicate = spec.toPredicate(root, query, criteriaBuilder);
     query.where(predicate);
 
     return entityManager.createQuery(query).getSingleResult();
   }
 
-  private Specification<JpaUserEntity> buildSpec(FindUserCriteria criteria) {
-    QuerySpecification<JpaUserEntity> spec = new QuerySpecification<>();
+  private Specification<JpaUser> buildSpec(FindUserCriteria criteria) {
+    QuerySpecification<JpaUser> spec = new QuerySpecification<>();
 
     if (criteria.getId() != null) {
       spec.addFilter(QueryFilter.of("id", criteria.getId(), QueryOperator.EQUAL));

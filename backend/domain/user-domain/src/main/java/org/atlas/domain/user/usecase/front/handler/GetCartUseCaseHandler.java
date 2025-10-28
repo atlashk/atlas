@@ -4,7 +4,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.user.aggregator.CartAggregator;
-import org.atlas.domain.user.entity.CartEntity;
+import org.atlas.domain.user.entity.Cart;
 import org.atlas.domain.user.repository.CartRepository;
 import org.atlas.domain.user.usecase.front.model.GetCartInput;
 import org.atlas.framework.cache.Cache;
@@ -19,13 +19,13 @@ public class GetCartUseCaseHandler {
   private final CartAggregator cartAggregator;
 
   @Cache(cacheName = "cart", key = "#input.userId")
-  public CartEntity handle(GetCartInput input) throws Exception {
+  public Cart handle(GetCartInput input) throws Exception {
     // Get or create cart for user
-    Optional<CartEntity> cartOpt = cartRepository.findByUserId(input.getUserId());
+    Optional<Cart> cartOpt = cartRepository.findByUserId(input.getUserId());
     if (cartOpt.isEmpty()) {
-      return new CartEntity(input.getUserId());
+      return new Cart(input.getUserId());
     }
-    CartEntity cart = cartOpt.get();
+    Cart cart = cartOpt.get();
 
     // Fetch products
     if (cart.hasItems()) {

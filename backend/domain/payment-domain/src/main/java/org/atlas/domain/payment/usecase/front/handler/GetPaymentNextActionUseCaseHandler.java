@@ -2,8 +2,8 @@ package org.atlas.domain.payment.usecase.front.handler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.domain.payment.entity.PaymentEntity;
-import org.atlas.domain.payment.mapper.PaymentMapper;
+import org.atlas.domain.payment.entity.Payment;
+import org.atlas.domain.payment.usecase.front.mapper.PaymentMapper;
 import org.atlas.domain.payment.repository.PaymentRepository;
 import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.domain.payment.usecase.front.model.GetPaymentNextActionInput;
@@ -20,7 +20,7 @@ public class GetPaymentNextActionUseCaseHandler {
   private final PaymentRepository paymentRepository;
 
   public GetPaymentNextActionOutput handle(GetPaymentNextActionInput input) throws Exception {
-    PaymentEntity payment = paymentRepository.findByOrderId(input.getOrderId())
+    Payment payment = paymentRepository.findByOrderId(input.getOrderId())
         .orElseThrow(() -> new DomainException(DomainError.PAYMENT_NOT_FOUND));
 
     if (!PaymentStatus.CREATED.equals(payment.getStatus())) {

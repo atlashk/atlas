@@ -4,8 +4,8 @@ import java.time.Duration;
 import java.util.LinkedHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.domain.product.entity.ProductEntity;
-import org.atlas.domain.product.entity.ReservationEntity;
+import org.atlas.domain.product.entity.Product;
+import org.atlas.domain.product.entity.Reservation;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.repository.ReservationRepository;
 import org.atlas.domain.product.shared.DecreaseQuantityStrategy;
@@ -15,13 +15,13 @@ import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.lock.LockAcquisitionException;
 import org.atlas.framework.lock.LockService;
+import org.atlas.framework.saga.checkout.CheckoutCommand;
+import org.atlas.framework.saga.checkout.CheckoutSagaData;
 import org.atlas.framework.saga.core.annotation.SagaCommandHandler;
 import org.atlas.framework.saga.core.annotation.SagaCompensationHandler;
 import org.atlas.framework.saga.core.command.SagaCommandResult;
-import org.atlas.framework.saga.checkout.CheckoutCommand;
 import org.atlas.framework.saga.core.compensation.SagaCompensationResult;
 import org.atlas.framework.saga.core.context.SagaContext;
-import org.atlas.framework.saga.checkout.CheckoutSagaData;
 import org.atlas.framework.saga.core.messaging.payload.SagaCommand;
 import org.atlas.framework.saga.core.messaging.payload.SagaCompensation;
 import org.springframework.stereotype.Component;
@@ -48,17 +48,16 @@ public class ReserveProductCommandHandler {
     // Try to reserve products
     for (CheckoutSagaData.OrderItem orderItem : checkoutSagaData.getOrderItems()) {
       try {
-        decreaseQuantity(orderItem.getProduct().getId(), orderItem.getQuantity());
+        decreaseQuantity(orderItem.getProductId(), orderItem.getQuantity());
       } catch (DomainException e) {
         return SagaCommandResult.failure(
-            String.format("Product %s has insufficient quantity",
-                orderItem.getProduct().getName()));
+            String.format("Product %s has insufficient quantity", orderItem.getProductId()));
       }
 
       // Insert new reservation
-      ReservationEntity reservation = ReservationEntity.builder()
+      Reservation reservation = Reservation.builder()
           .orderId(checkoutSagaData.getOrderId())
-          .productId(orderItem.getProduct().getId())
+          .productId(orderItem.getProductId())
           .quantity(orderItem.getQuantity())
           .build();
       reservationRepository.insert(reservation);
@@ -88,7 +87,7 @@ public class ReserveProductCommandHandler {
           if (!acquiredLock) {
             throw new LockAcquisitionException("Failed to acquire lock: " + lockKey);
           }
-          ProductEntity product = productRepository.findById(productId)
+          Product product = productRepository.findById(productId)
               .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
           if (product.getQuantity() < quantity) {
             throw new DomainException(DomainError.PRODUCT_INSUFFICIENT_QUANTITY);
@@ -116,18 +115,18 @@ public class ReserveProductCommandHandler {
     checkoutSagaData.getOrderItems()
         .forEach(orderItem -> {
           // Check reservation exists or not
-          ReservationEntity reservation = reservationRepository.findByOrderIdAndProductId(
-                  checkoutSagaData.getOrderId(), orderItem.getProduct().getId())
+          Reservation reservation = reservationRepository.findByOrderIdAndProductId(
+                  checkoutSagaData.getOrderId(), orderItem.getProductId())
               .orElseThrow(() -> new DomainException(DomainError.RESERVATION_NOT_FOUND));
 
           // Increase quantity to compensate
-          productRepository.increaseQuantity(orderItem.getProduct().getId(),
+          productRepository.increaseQuantity(orderItem.getProductId(),
               orderItem.getQuantity());
 
           // Delete reservation
           reservationRepository.delete(reservation);
         });
 
-    return SagaCompensationResult.success(null);
+    return SagaCompensationResult.success();
   }
 }

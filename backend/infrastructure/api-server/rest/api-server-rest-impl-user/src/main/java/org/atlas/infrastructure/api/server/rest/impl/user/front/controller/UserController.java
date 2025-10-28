@@ -4,14 +4,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.atlas.domain.user.entity.UserEntity;
+import org.atlas.domain.user.entity.User;
 import org.atlas.domain.user.usecase.front.handler.GetProfileUseCaseHandler;
 import org.atlas.domain.user.usecase.front.handler.RegisterUseCaseHandler;
 import org.atlas.domain.user.usecase.front.model.GetProfileInput;
 import org.atlas.domain.user.usecase.front.model.RegisterInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.context.Contexts;
-import org.atlas.framework.util.ObjectMapperUtil;
+import org.atlas.infrastructure.api.server.rest.impl.user.front.mapper.UserMapper;
 import org.atlas.infrastructure.api.server.rest.impl.user.front.model.ProfileResponse;
 import org.atlas.infrastructure.api.server.rest.impl.user.front.model.RegisterRequest;
 import org.springframework.http.MediaType;
@@ -36,8 +36,7 @@ public class UserController {
   public ApiResponseWrapper<Void> register(
       @Parameter(description = "Request object containing the needed information to register a user", required = true)
       @Valid @RequestBody RegisterRequest request) throws Exception {
-    RegisterInput input = ObjectMapperUtil.getInstance()
-        .map(request, RegisterInput.class);
+    RegisterInput input = UserMapper.INSTANCE.toRegisterInput(request);
     registerUseCaseHandler.handle(input);
     return ApiResponseWrapper.success();
   }
@@ -48,9 +47,8 @@ public class UserController {
     GetProfileInput input = GetProfileInput.builder()
         .userId(Contexts.getUserId())
         .build();
-    UserEntity user = getProfileUseCaseHandler.handle(input);
-    ProfileResponse profileResponse = ObjectMapperUtil.getInstance()
-        .map(user, ProfileResponse.class);
-    return ApiResponseWrapper.success(profileResponse);
+    User user = getProfileUseCaseHandler.handle(input);
+    ProfileResponse response = UserMapper.INSTANCE.toProfileResponse(user);
+    return ApiResponseWrapper.success(response);
   }
 }

@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.domain.order.entity.OrderEntity.OrderItem;
+import org.atlas.domain.order.entity.Order.OrderItem;
 import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.framework.domain.entity.DomainEntity;

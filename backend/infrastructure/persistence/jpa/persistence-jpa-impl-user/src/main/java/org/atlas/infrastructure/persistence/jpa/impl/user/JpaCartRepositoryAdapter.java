@@ -2,10 +2,10 @@ package org.atlas.infrastructure.persistence.jpa.impl.user;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.atlas.domain.user.entity.CartEntity;
+import org.atlas.domain.user.entity.Cart;
 import org.atlas.domain.user.repository.CartRepository;
-import org.atlas.infrastructure.persistence.jpa.impl.user.entity.JpaCartEntity;
-import org.atlas.infrastructure.persistence.jpa.impl.user.mapper.JpaCartEntityMapper;
+import org.atlas.infrastructure.persistence.jpa.impl.user.entity.JpaCart;
+import org.atlas.infrastructure.persistence.jpa.impl.user.mapper.JpaCartMapper;
 import org.atlas.infrastructure.persistence.jpa.impl.user.repository.JpaCartRepository;
 import org.springframework.stereotype.Component;
 
@@ -16,21 +16,21 @@ public class JpaCartRepositoryAdapter implements CartRepository {
   private final JpaCartRepository jpaCartRepository;
 
   @Override
-  public Optional<CartEntity> findByUserId(Integer userId) {
+  public Optional<Cart> findByUserId(Integer userId) {
     return jpaCartRepository.findByUserIdAndFetch(userId)
-        .map(JpaCartEntityMapper::toCartEntity);
+        .map(JpaCartMapper.INSTANCE::toCart);
   }
 
   @Override
-  public void insert(CartEntity cart) {
-    JpaCartEntity jpaCart = JpaCartEntityMapper.toJpaCartEntity(cart);
+  public void insert(Cart cart) {
+    JpaCart jpaCart = JpaCartMapper.INSTANCE.toJpaCart(cart);
     jpaCartRepository.insert(jpaCart);
     cart.setId(jpaCart.getId());
   }
 
   @Override
-  public void update(CartEntity cart) {
-    JpaCartEntity jpaCart = JpaCartEntityMapper.toJpaCartEntity(cart);
+  public void update(Cart cart) {
+    JpaCart jpaCart = JpaCartMapper.INSTANCE.toJpaCart(cart);
     jpaCartRepository.save(jpaCart);
   }
 }

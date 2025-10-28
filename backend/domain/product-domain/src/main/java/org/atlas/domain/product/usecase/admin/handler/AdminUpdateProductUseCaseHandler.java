@@ -1,18 +1,17 @@
 package org.atlas.domain.product.usecase.admin.handler;
 
 import lombok.RequiredArgsConstructor;
-import org.atlas.domain.product.entity.ProductEntity;
+import org.atlas.domain.product.entity.Product;
 import org.atlas.domain.product.infrastructure.messaging.ProductEventMessagePublisher;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.service.ProductImageService;
+import org.atlas.domain.product.usecase.admin.mapper.AdminProductMapper;
 import org.atlas.framework.cache.ApplicationCache;
 import org.atlas.framework.cache.CacheService;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.event.contract.product.ProductUpdatedEvent;
-import org.atlas.framework.domain.event.contract.product.model.Product;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
-import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.framework.util.StringUtil;
 
 @UseCaseHandler
@@ -24,13 +23,13 @@ public class AdminUpdateProductUseCaseHandler {
   private final CacheService cacheService;
   private final ProductEventMessagePublisher productEventMessagePublisher;
 
-  public Void handle(ProductEntity product) throws Exception {
+  public Void handle(Product product) throws Exception {
     // Find product
-    ProductEntity existingProductEntity = productRepository.findById(product.getId())
+    Product existingProduct = productRepository.findById(product.getId())
         .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
 
     // Update product into DB
-    ObjectMapperUtil.getInstance().merge(product, existingProductEntity);
+    AdminProductMapper.INSTANCE.merge(product, existingProduct);
     productRepository.update(product);
 
     // Upload image
@@ -47,8 +46,9 @@ public class AdminUpdateProductUseCaseHandler {
     return null;
   }
 
-  private void publishEvent(ProductEntity product) {
-    Product productPayload = ObjectMapperUtil.getInstance().map(product, Product.class);
+  private void publishEvent(Product product) {
+    org.atlas.framework.domain.event.contract.product.model.Product productPayload =
+        AdminProductMapper.INSTANCE.toProduct(product);
     ProductUpdatedEvent event = new ProductUpdatedEvent(productPayload);
     productEventMessagePublisher.publish(event);
   }

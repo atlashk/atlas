@@ -2,7 +2,7 @@ package org.atlas.domain.order.repository;
 
 import java.math.BigDecimal;
 import java.util.Optional;
-import org.atlas.domain.order.entity.OrderEntity;
+import org.atlas.domain.order.entity.Order;
 import org.atlas.domain.order.repository.criteria.FindOrderCriteria;
 import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.framework.paging.PagingRequest;
@@ -10,17 +10,17 @@ import org.atlas.framework.paging.PagingResult;
 
 public interface OrderRepository {
 
-  PagingResult<OrderEntity> findByCriteria(FindOrderCriteria criteria, PagingRequest pagingRequest);
+  PagingResult<Order> findByCriteria(FindOrderCriteria criteria, PagingRequest pagingRequest);
 
   Long countAll();
 
   BigDecimal sumAmountByStatus(OrderStatus status);
 
-  Optional<OrderEntity> findById(Integer id);
+  Optional<Order> findById(Integer id);
 
-  Optional<OrderEntity> findBySagaId(Integer sagaId);
+  Optional<Order> findBySagaId(Integer sagaId);
 
-  void insert(OrderEntity order);
+  void insert(Order order);
 
-  void update(OrderEntity order);
+  void update(Order order);
 }

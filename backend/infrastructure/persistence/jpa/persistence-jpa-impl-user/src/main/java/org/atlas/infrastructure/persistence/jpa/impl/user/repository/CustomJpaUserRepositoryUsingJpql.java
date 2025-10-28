@@ -9,7 +9,7 @@ import java.util.Map;
 import org.atlas.domain.user.repository.criteria.FindUserCriteria;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.util.StringUtil;
-import org.atlas.infrastructure.persistence.jpa.impl.user.entity.JpaUserEntity;
+import org.atlas.infrastructure.persistence.jpa.impl.user.entity.JpaUser;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
@@ -21,7 +21,7 @@ public class CustomJpaUserRepositoryUsingJpql implements CustomJpaUserRepository
   private EntityManager entityManager;
 
   @Override
-  public List<JpaUserEntity> findByCriteria(FindUserCriteria criteria,
+  public List<JpaUser> findByCriteria(FindUserCriteria criteria,
       PagingRequest pagingRequest) {
     StringBuilder sqlBuilder = new StringBuilder("""
         select u
@@ -40,7 +40,7 @@ public class CustomJpaUserRepositoryUsingJpql implements CustomJpaUserRepository
     }
 
     String sql = sqlBuilder.toString();
-    TypedQuery<JpaUserEntity> query = entityManager.createQuery(sql, JpaUserEntity.class);
+    TypedQuery<JpaUser> query = entityManager.createQuery(sql, JpaUser.class);
 
     // Set parameters
     params.forEach(query::setParameter);
@@ -60,7 +60,7 @@ public class CustomJpaUserRepositoryUsingJpql implements CustomJpaUserRepository
     String whereClause = buildWhereClause(criteria, params);
     String countSql = """
         select count(u.id)
-        from JpaUserEntity u
+        from JpaUser u
         """ + whereClause;
     TypedQuery<Long> countQuery = entityManager.createQuery(countSql, Long.class);
     params.forEach(countQuery::setParameter);

@@ -1,7 +1,7 @@
 package org.atlas.framework.saga.core.orchestrator;
 
 import org.atlas.framework.saga.core.context.SagaContext;
-import org.atlas.framework.saga.core.entity.SagaEntity;
+import org.atlas.framework.saga.core.entity.Saga;
 import org.atlas.framework.saga.core.messaging.payload.SagaCommandReply;
 import org.atlas.framework.saga.core.messaging.payload.SagaCompensationReply;
 
@@ -12,7 +12,7 @@ public interface SagaOrchestrator {
    */
   Integer startSaga(String sagaName, SagaContext sagaContext);
 
-  void sendCommand(SagaEntity sagaEntity, String sagaCommandName, String targetServiceName);
+  void sendCommand(Saga saga, String sagaCommandName, String targetServiceName);
 
   void createCommand(Integer sagaId, String sagaCommandName, String targetServiceName);
 

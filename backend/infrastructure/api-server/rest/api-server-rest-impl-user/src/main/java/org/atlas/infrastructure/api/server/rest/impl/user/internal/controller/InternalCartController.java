@@ -2,12 +2,12 @@ package org.atlas.infrastructure.api.server.rest.impl.user.internal.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import org.atlas.domain.user.entity.CartEntity;
+import org.atlas.domain.user.entity.Cart;
 import org.atlas.domain.user.usecase.internal.handler.InternalGetCartUseCaseHandler;
 import org.atlas.domain.user.usecase.internal.model.InternalGetCartInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.internalapi.user.model.CartResponse;
-import org.atlas.framework.util.ObjectMapperUtil;
+import org.atlas.infrastructure.api.server.rest.impl.user.internal.mapper.InternalCartMapper;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,9 +28,8 @@ public class InternalCartController {
   public ApiResponseWrapper<CartResponse> getCart(@RequestParam("userId") Integer userId)
       throws Exception {
     InternalGetCartInput input = new InternalGetCartInput(userId);
-    CartEntity cart = internalGetCartUseCaseHandler.handle(input);
-    CartResponse cartResponse = ObjectMapperUtil.getInstance()
-        .map(cart, CartResponse.class);
+    Cart cart = internalGetCartUseCaseHandler.handle(input);
+    CartResponse cartResponse = InternalCartMapper.INSTANCE.toCartResponse(cart);
     return ApiResponseWrapper.success(cartResponse);
   }
 }

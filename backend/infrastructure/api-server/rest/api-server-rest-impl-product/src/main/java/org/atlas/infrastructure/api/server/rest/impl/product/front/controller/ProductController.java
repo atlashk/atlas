@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import java.math.BigDecimal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.atlas.domain.product.entity.ProductEntity;
+import org.atlas.domain.product.entity.Product;
 import org.atlas.domain.product.usecase.front.handler.GetProductUseCaseHandler;
 import org.atlas.domain.product.usecase.front.handler.SearchProductUseCaseHandler;
 import org.atlas.domain.product.usecase.front.model.SearchProductInput;
@@ -59,7 +59,7 @@ public class ProductController {
         .pagingRequest(PagingRequest.of(page - 1, size))
         .build();
 
-    PagingResult<ProductEntity> productPage = searchProductUseCaseHandler.handle(input);
+    PagingResult<Product> productPage = searchProductUseCaseHandler.handle(input);
 
     List<ProductResponse> productResponses = productPage.getData()
         .stream()
@@ -82,7 +82,7 @@ public class ProductController {
   public ApiResponseWrapper<ProductResponse> getProduct(
       @Parameter(name = "productId", description = "The unique identifier of the product.", example = "1", required = true)
       @PathVariable("productId") Integer productId) throws Exception {
-    ProductEntity product = getProductUseCaseHandler.handle(productId);
+    Product product = getProductUseCaseHandler.handle(productId);
     ProductResponse response = ObjectMapperUtil.getInstance()
         .map(product, ProductResponse.class);
     return ApiResponseWrapper.success(response);

@@ -3,7 +3,7 @@ package org.atlas.domain.user.saga.checkout;
 import java.util.LinkedHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.domain.user.entity.CartEntity;
+import org.atlas.domain.user.entity.Cart;
 import org.atlas.domain.user.repository.CartRepository;
 import org.atlas.framework.cache.ApplicationCache;
 import org.atlas.framework.cache.CacheService;
@@ -36,7 +36,7 @@ public class ClearCartCommandHandler {
     }
 
     try {
-      CartEntity cart = cartRepository.findByUserId(checkoutSagaData.getUserId())
+      Cart cart = cartRepository.findByUserId(checkoutSagaData.getUserId())
           .orElseThrow(() -> new DomainException(DomainError.CART_NOT_FOUND));
 
       if (!cart.hasItems()) {

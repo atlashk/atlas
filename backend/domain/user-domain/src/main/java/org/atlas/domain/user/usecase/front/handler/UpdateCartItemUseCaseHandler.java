@@ -2,7 +2,7 @@ package org.atlas.domain.user.usecase.front.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.user.aggregator.CartAggregator;
-import org.atlas.domain.user.entity.CartEntity;
+import org.atlas.domain.user.entity.Cart;
 import org.atlas.domain.user.repository.CartRepository;
 import org.atlas.domain.user.usecase.front.model.UpdateCartItemInput;
 import org.atlas.framework.cache.CacheService;
@@ -19,9 +19,9 @@ public class UpdateCartItemUseCaseHandler {
   private final CartAggregator cartAggregator;
   private final CacheService cacheService;
 
-  public CartEntity handle(UpdateCartItemInput input) throws Exception {
+  public Cart handle(UpdateCartItemInput input) throws Exception {
     // Find cart
-    CartEntity cart = cartRepository.findByUserId(input.getUserId())
+    Cart cart = cartRepository.findByUserId(input.getUserId())
         .orElseThrow(() -> new DomainException(DomainError.CART_NOT_FOUND));
 
     // Update DB

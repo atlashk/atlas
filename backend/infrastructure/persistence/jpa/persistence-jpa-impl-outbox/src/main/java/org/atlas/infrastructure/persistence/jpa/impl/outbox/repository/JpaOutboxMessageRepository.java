@@ -3,12 +3,12 @@ package org.atlas.infrastructure.persistence.jpa.impl.outbox.repository;
 import java.util.List;
 import org.atlas.framework.messaging.outbox.OutboxMessageStatus;
 import org.atlas.infrastructure.persistence.jpa.core.repository.JpaBaseRepository;
-import org.atlas.infrastructure.persistence.jpa.impl.outbox.entity.JpaOutboxMessageEntity;
+import org.atlas.infrastructure.persistence.jpa.impl.outbox.entity.JpaOutboxMessage;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface JpaOutboxMessageRepository extends
-    JpaBaseRepository<JpaOutboxMessageEntity, Integer> {
+    JpaBaseRepository<JpaOutboxMessage, Integer> {
 
-  List<JpaOutboxMessageEntity> findByStatusOrderByCreatedAt(OutboxMessageStatus status);
+  List<JpaOutboxMessage> findByStatusOrderByCreatedAt(OutboxMessageStatus status);
 }

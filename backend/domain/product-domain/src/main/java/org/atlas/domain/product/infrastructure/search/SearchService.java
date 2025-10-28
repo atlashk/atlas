@@ -1,7 +1,7 @@
 package org.atlas.domain.product.infrastructure.search;
 
 import java.util.List;
-import org.atlas.domain.product.entity.ProductEntity;
+import org.atlas.domain.product.entity.Product;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
 
@@ -18,7 +18,7 @@ public interface SearchService {
    * Synchronize a batch of products to the search engine
    * @param products List of products to synchronize
    */
-  void saveAll(List<ProductEntity> products);
+  void saveAll(List<Product> products);
 
   /**
    * Delete a product from the search engine

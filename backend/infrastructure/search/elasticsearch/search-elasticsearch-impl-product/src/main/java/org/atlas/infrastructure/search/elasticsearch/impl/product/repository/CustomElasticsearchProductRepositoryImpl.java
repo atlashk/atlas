@@ -10,7 +10,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.infrastructure.search.SearchProductCriteria;
 import org.atlas.domain.product.shared.ProductStatus;
-import org.atlas.infrastructure.search.elasticsearch.impl.product.document.ProductDocument;
+import org.atlas.infrastructure.search.elasticsearch.impl.product.document.ElasticsearchProduct;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
@@ -25,7 +25,7 @@ public class CustomElasticsearchProductRepositoryImpl implements
 
   private final ElasticsearchOperations elasticsearchOperations;
 
-  public SearchHits<ProductDocument> search(SearchProductCriteria criteria, Pageable pageable) {
+  public SearchHits<ElasticsearchProduct> search(SearchProductCriteria criteria, Pageable pageable) {
     // Build dynamic search query using NativeQuery with Elasticsearch Java client
     NativeQueryBuilder queryBuilder = NativeQuery.builder();
 
@@ -120,6 +120,6 @@ public class CustomElasticsearchProductRepositoryImpl implements
         .build();
 
     // Execute search
-    return elasticsearchOperations.search(searchQuery, ProductDocument.class);
+    return elasticsearchOperations.search(searchQuery, ElasticsearchProduct.class);
   }
 }

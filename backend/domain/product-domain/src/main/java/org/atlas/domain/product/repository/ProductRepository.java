@@ -2,27 +2,27 @@ package org.atlas.domain.product.repository;
 
 import java.util.List;
 import java.util.Optional;
-import org.atlas.domain.product.entity.ProductEntity;
+import org.atlas.domain.product.entity.Product;
 import org.atlas.domain.product.repository.criteria.FindProductCriteria;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
 
 public interface ProductRepository {
 
-  PagingResult<ProductEntity> findByCriteria(FindProductCriteria criteria,
+  PagingResult<Product> findByCriteria(FindProductCriteria criteria,
       PagingRequest pagingRequest);
 
   Long countAll();
 
-  List<ProductEntity> findByIdIn(List<Integer> ids);
+  List<Product> findByIdIn(List<Integer> ids);
 
-  Optional<ProductEntity> findById(Integer id);
+  Optional<Product> findById(Integer id);
 
-  void insert(ProductEntity product);
+  void insert(Product product);
 
-  void insertBatch(List<ProductEntity> products);
+  void insertBatch(List<Product> products);
 
-  void update(ProductEntity product);
+  void update(Product product);
 
   void decreaseQuantityWithConstraint(Integer id, Integer decrement);
 

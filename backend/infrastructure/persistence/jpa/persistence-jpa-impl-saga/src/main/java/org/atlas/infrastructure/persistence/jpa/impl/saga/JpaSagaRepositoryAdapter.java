@@ -2,10 +2,10 @@ package org.atlas.infrastructure.persistence.jpa.impl.saga;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.atlas.framework.util.ObjectMapperUtil;
-import org.atlas.framework.saga.core.entity.SagaEntity;
+import org.atlas.framework.saga.core.entity.Saga;
 import org.atlas.framework.saga.core.repository.SagaRepository;
-import org.atlas.infrastructure.persistence.jpa.impl.saga.entity.JpaSagaEntity;
+import org.atlas.infrastructure.persistence.jpa.impl.saga.entity.JpaSaga;
+import org.atlas.infrastructure.persistence.jpa.impl.saga.mapper.JpaSagaMapper;
 import org.atlas.infrastructure.persistence.jpa.impl.saga.repository.JpaSagaRepository;
 import org.springframework.stereotype.Component;
 
@@ -16,24 +16,21 @@ public class JpaSagaRepositoryAdapter implements SagaRepository {
   private final JpaSagaRepository jpaSagaRepository;
 
   @Override
-  public Optional<SagaEntity> findById(Integer sagaId) {
+  public Optional<Saga> findById(Integer sagaId) {
     return jpaSagaRepository.findById(sagaId)
-        .map(jpaSaga -> ObjectMapperUtil.getInstance()
-            .map(jpaSaga, SagaEntity.class));
+        .map(JpaSagaMapper.INSTANCE::toSagaEntity);
   }
 
   @Override
-  public void insert(SagaEntity saga) {
-    JpaSagaEntity jpaSaga = ObjectMapperUtil.getInstance()
-        .map(saga, JpaSagaEntity.class);
+  public void insert(Saga saga) {
+    JpaSaga jpaSaga = JpaSagaMapper.INSTANCE.toJpaSagaEntity(saga);
     jpaSagaRepository.insert(jpaSaga);
     saga.setId(jpaSaga.getId());
   }
 
   @Override
-  public void update(SagaEntity saga) {
-    JpaSagaEntity jpaSaga = ObjectMapperUtil.getInstance()
-        .map(saga, JpaSagaEntity.class);
+  public void update(Saga saga) {
+    JpaSaga jpaSaga = JpaSagaMapper.INSTANCE.toJpaSagaEntity(saga);
     jpaSagaRepository.save(jpaSaga);
   }
 }

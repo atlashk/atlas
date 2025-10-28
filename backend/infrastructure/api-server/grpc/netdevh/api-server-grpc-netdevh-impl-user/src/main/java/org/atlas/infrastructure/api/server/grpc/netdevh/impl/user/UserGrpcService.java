@@ -4,7 +4,7 @@ import io.grpc.stub.StreamObserver;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.server.service.GrpcService;
-import org.atlas.domain.user.entity.UserEntity;
+import org.atlas.domain.user.entity.User;
 import org.atlas.domain.user.usecase.internal.handler.InternalListUserUseCaseHandler;
 import org.atlas.domain.user.usecase.internal.model.InternalListUserInput;
 import org.atlas.framework.util.CollectionUtil;
@@ -24,7 +24,7 @@ public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
       StreamObserver<ListUserResponseProto> responseObserver) {
     InternalListUserInput input = map(requestProto);
     try {
-      List<UserEntity> users = internalListUserUseCaseHandler.handle(input);
+      List<User> users = internalListUserUseCaseHandler.handle(input);
       ListUserResponseProto responseProto = map(users);
       responseObserver.onNext(responseProto);
       responseObserver.onCompleted();
@@ -37,7 +37,7 @@ public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
     return new InternalListUserInput(requestProto.getIdList());
   }
 
-  private ListUserResponseProto map(List<UserEntity> users) {
+  private ListUserResponseProto map(List<User> users) {
     if (CollectionUtil.isEmpty(users)) {
       return ListUserResponseProto.getDefaultInstance();
     }
@@ -46,7 +46,7 @@ public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
     return builder.build();
   }
 
-  private UserProto map(UserEntity user) {
+  private UserProto map(User user) {
     return UserProto.newBuilder()
         .setId(user.getId())
         .setUsername(user.getUsername())

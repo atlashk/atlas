@@ -6,10 +6,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.domain.user.entity.CartEntity;
-import org.atlas.domain.user.entity.CartEntity.CartItem;
-import org.atlas.domain.user.entity.CartEntity.Product;
-import org.atlas.domain.user.mapper.CartMapper;
+import org.atlas.domain.user.entity.Cart;
+import org.atlas.domain.user.entity.Cart.CartItem;
+import org.atlas.domain.user.entity.Cart.Product;
+import org.atlas.domain.user.usecase.front.mapper.CartMapper;
 import org.atlas.framework.internalapi.product.ProductApiClient;
 import org.atlas.framework.internalapi.product.model.ListProductRequest;
 import org.atlas.framework.internalapi.product.model.ProductResponse;
@@ -23,7 +23,7 @@ public class CartAggregator {
 
   private final ProductApiClient productApiClient;
 
-  public boolean aggregate(CartEntity cart) {
+  public boolean aggregate(Cart cart) {
     if (cart == null) {
       throw new IllegalArgumentException("Cart must be provided");
     }
@@ -33,7 +33,7 @@ public class CartAggregator {
   /**
    * @return false if at least one product is no longer available
    */
-  private boolean loadProducts(CartEntity cart) {
+  private boolean loadProducts(Cart cart) {
     List<Integer> productIds = cart.collectProductIds();
     ListProductRequest request = new ListProductRequest(productIds);
     List<ProductResponse> productResponses = productApiClient.call(request);

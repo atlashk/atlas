@@ -1,0 +1,18 @@
+package org.atlas.infrastructure.persistence.jpa.impl.product.mapper;
+
+import org.atlas.domain.product.entity.ProductDetails;
+import org.atlas.infrastructure.persistence.jpa.impl.product.entity.JpaProductDetails;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
+
+@Mapper
+public interface JpaProductDetailsMapper {
+
+  JpaProductDetailsMapper INSTANCE = Mappers.getMapper(JpaProductDetailsMapper.class);
+
+  @Mapping(target = "product", ignore = true)
+  JpaProductDetails toJpaProductDetails(ProductDetails productDetails);
+
+  ProductDetails toProductDetails(JpaProductDetails jpaProductDetails);
+}

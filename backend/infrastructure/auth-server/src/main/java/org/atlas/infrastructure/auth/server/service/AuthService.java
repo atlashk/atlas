@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
-import org.atlas.domain.user.entity.UserEntity;
+import org.atlas.domain.user.entity.User;
 import org.atlas.domain.user.repository.UserRepository;
 import org.atlas.framework.security.SecurityConstant;
 import org.atlas.framework.context.ContextInfo;
@@ -74,7 +74,7 @@ public class AuthService {
     }
 
     // Reissue tokens
-    UserEntity user = userRepository.findById(refreshTokenJwt.getUserId())
+    User user = userRepository.findById(refreshTokenJwt.getUserId())
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
     UserDetailsImpl userDetails = new UserDetailsImpl(user);
 

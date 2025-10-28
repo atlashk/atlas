@@ -1,82 +1,62 @@
 package org.atlas.infrastructure.api.server.rest.impl.product.admin.mapper;
 
 import java.util.List;
-import lombok.experimental.UtilityClass;
-import org.atlas.domain.product.entity.BrandEntity;
-import org.atlas.domain.product.entity.CategoryEntity;
-import org.atlas.domain.product.entity.ProductAttributeEntity;
-import org.atlas.domain.product.entity.ProductDetailsEntity;
-import org.atlas.domain.product.entity.ProductEntity;
-import org.atlas.framework.util.ObjectMapperUtil;
+import org.atlas.domain.product.entity.Brand;
+import org.atlas.domain.product.entity.Category;
+import org.atlas.domain.product.entity.Product;
+import org.atlas.domain.product.entity.ProductAttribute;
+import org.atlas.domain.product.entity.ProductDetails;
 import org.atlas.infrastructure.api.server.rest.impl.product.admin.model.AdminCreateProductRequest;
+import org.atlas.infrastructure.api.server.rest.impl.product.admin.model.AdminProductResponse;
 import org.atlas.infrastructure.api.server.rest.impl.product.admin.model.AdminUpdateProductRequest;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
 
-@UtilityClass
-public class AdminProductMapper {
+@Mapper
+public interface AdminProductMapper {
 
-  public static ProductEntity toProductEntity(AdminCreateProductRequest request) {
-    // Product
-    ProductEntity product = ObjectMapperUtil.getInstance()
-        .map(request, ProductEntity.class);
+  AdminProductMapper INSTANCE = Mappers.getMapper(AdminProductMapper.class);
 
-    // Brand
-    BrandEntity brandEntity = BrandEntity.builder()
-        .id(request.getBrandId())
+  AdminProductResponse toAdminProductResponse(Product product);
+
+  @Mapping(target = "brand", source = "brandId")
+  @Mapping(target = "categories", source = "categoryIds")
+  @Mapping(target = "id", ignore = true)
+  Product toProduct(AdminCreateProductRequest request);
+
+  @Mapping(target = "brand", source = "brandId")
+  @Mapping(target = "categories", source = "categoryIds")
+  @Mapping(target = "id", ignore = true)
+  Product toProduct(AdminUpdateProductRequest request);
+
+  // Helper methods for mapping complex objects
+  default Brand mapBrandId(Integer brandId) {
+    if (brandId == null) {
+      return null;
+    }
+    return Brand.builder()
+        .id(brandId)
         .build();
-    product.setBrand(brandEntity);
+  }
 
-    // Details
-    ProductDetailsEntity detailsEntity = ObjectMapperUtil.getInstance()
-        .map(request.getDetails(), ProductDetailsEntity.class);
-    product.setDetails(detailsEntity);
-
-    // Attributes
-    List<ProductAttributeEntity> attributeEntities = ObjectMapperUtil.getInstance()
-        .mapList(request.getAttributes(), ProductAttributeEntity.class);
-    product.setAttributes(attributeEntities);
-
-    // Categories
-    List<CategoryEntity> categoryEntities = request.getCategoryIds()
-        .stream()
-        .map(id -> CategoryEntity.builder()
+  default List<Category> mapCategoryIds(List<Integer> categoryIds) {
+    if (categoryIds == null) {
+      return null;
+    }
+    return categoryIds.stream()
+        .map(id -> Category.builder()
             .id(id)
             .build())
         .toList();
-    product.setCategories(categoryEntities);
-
-    return product;
   }
 
-  public static ProductEntity toProductEntity(AdminUpdateProductRequest request) {
-    // Product
-    ProductEntity product = ObjectMapperUtil.getInstance()
-        .map(request, ProductEntity.class);
+  // Mapping for nested objects
+  ProductDetails map(AdminCreateProductRequest.ProductDetails details);
 
-    // Brand
-    BrandEntity brandEntity = BrandEntity.builder()
-        .id(request.getBrandId())
-        .build();
-    product.setBrand(brandEntity);
+  ProductAttribute map(AdminCreateProductRequest.ProductAttribute attribute);
 
-    // Details
-    ProductDetailsEntity detailsEntity = ObjectMapperUtil.getInstance()
-        .map(request.getDetails(), ProductDetailsEntity.class);
-    product.setDetails(detailsEntity);
+  ProductDetails map(AdminUpdateProductRequest.ProductDetails details);
 
-    // Attributes
-    List<ProductAttributeEntity> attributeEntities = ObjectMapperUtil.getInstance()
-        .mapList(request.getAttributes(), ProductAttributeEntity.class);
-    product.setAttributes(attributeEntities);
-
-    // Categories
-    List<CategoryEntity> categoryEntities = request.getCategoryIds()
-        .stream()
-        .map(id -> CategoryEntity.builder()
-            .id(id)
-            .build())
-        .toList();
-    product.setCategories(categoryEntities);
-
-    return product;
-  }
+  ProductAttribute map(AdminUpdateProductRequest.ProductAttribute attribute);
 }

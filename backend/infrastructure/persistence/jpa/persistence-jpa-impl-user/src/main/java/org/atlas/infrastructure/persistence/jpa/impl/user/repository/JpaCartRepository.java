@@ -2,19 +2,19 @@ package org.atlas.infrastructure.persistence.jpa.impl.user.repository;
 
 import java.util.Optional;
 import org.atlas.infrastructure.persistence.jpa.core.repository.JpaBaseRepository;
-import org.atlas.infrastructure.persistence.jpa.impl.user.entity.JpaCartEntity;
+import org.atlas.infrastructure.persistence.jpa.impl.user.entity.JpaCart;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface JpaCartRepository extends JpaBaseRepository<JpaCartEntity, Integer> {
+public interface JpaCartRepository extends JpaBaseRepository<JpaCart, Integer> {
 
   @Query("""
       select c
-      from JpaCartEntity c
+      from JpaCart c
       left join fetch c.cartItems
       where c.userId = :userId
       """)
-  Optional<JpaCartEntity> findByUserIdAndFetch(@Param("userId") Integer userId);
+  Optional<JpaCart> findByUserIdAndFetch(@Param("userId") Integer userId);
 }

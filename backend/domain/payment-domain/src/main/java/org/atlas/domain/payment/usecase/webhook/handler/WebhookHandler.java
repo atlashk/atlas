@@ -3,16 +3,16 @@ package org.atlas.domain.payment.usecase.webhook.handler;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.domain.payment.entity.PaymentEventEntity;
+import org.atlas.domain.payment.entity.PaymentEvent;
 import org.atlas.domain.payment.entity.PaymentEventStatus;
-import org.atlas.domain.payment.entity.PaymentGatewayEntity;
+import org.atlas.domain.payment.entity.PaymentGateway;
 import org.atlas.domain.payment.repository.PaymentEventRepository;
 import org.atlas.domain.payment.repository.PaymentGatewayRepository;
 import org.atlas.framework.http.HttpStatusCode;
 import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.payment.model.HandleWebhookRequest;
 import org.atlas.framework.saga.checkout.CheckoutCommand;
-import org.atlas.domain.payment.entity.PaymentEntity;
+import org.atlas.domain.payment.entity.Payment;
 import org.atlas.domain.payment.repository.PaymentRepository;
 import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.framework.domain.error.DomainError;
@@ -46,7 +46,7 @@ public class WebhookHandler {
         paymentGatewayCode, rawPayload, headers);
 
     // Find payment gateway
-    PaymentGatewayEntity paymentGateway = paymentGatewayRepository.findByCode(
+    PaymentGateway paymentGateway = paymentGatewayRepository.findByCode(
             paymentGatewayCode.toUpperCase())
         .orElseThrow(() -> {
           log.error("Payment gateway {} not found", paymentGatewayCode);
@@ -65,7 +65,7 @@ public class WebhookHandler {
     }
 
     // Persist payment event
-    PaymentEventEntity paymentEvent = PaymentEventEntity.builder()
+    PaymentEvent paymentEvent = PaymentEvent.builder()
         .paymentGatewayId(paymentGateway.getId())
         .payload(JsonUtil.getInstance().compact(rawPayload))
         .headers(JsonUtil.getInstance().toJson(headers))
@@ -104,30 +104,30 @@ public class WebhookHandler {
         @Override
         public void run() {
           // Update payment entity
-          PaymentEntity paymentEntity = paymentRepository.findById(handleResult.getPaymentId())
+          Payment payment = paymentRepository.findById(handleResult.getPaymentId())
               .orElseThrow(() -> new DomainException(DomainError.PAYMENT_NOT_FOUND));
           switch (handleResult.getStatus()) {
             case SUCCEEDED -> {
-              paymentEntity.setPaymentMethod(handleResult.getPaymentMethod());
-              paymentEntity.setPaymentMethodDetails(
+              payment.setPaymentMethod(handleResult.getPaymentMethod());
+              payment.setPaymentMethodDetails(
                   JsonUtil.getInstance().toJson(handleResult.getPaymentMethodDetails()));
-              paymentEntity.setStatus(PaymentStatus.SUCCEEDED);
+              payment.setStatus(PaymentStatus.SUCCEEDED);
             }
             case FAILED -> {
-              paymentEntity.setStatus(PaymentStatus.FAILED);
-              paymentEntity.setError(handleResult.getError());
+              payment.setStatus(PaymentStatus.FAILED);
+              payment.setError(handleResult.getError());
             }
             case CANCELED -> {
-              paymentEntity.setStatus(PaymentStatus.CANCELED);
-              paymentEntity.setCancellationReason(handleResult.getCancellationReason());
+              payment.setStatus(PaymentStatus.CANCELED);
+              payment.setCancellationReason(handleResult.getCancellationReason());
             }
-            default -> paymentEntity.setStatus(PaymentStatus.UNKNOWN);
+            default -> payment.setStatus(PaymentStatus.UNKNOWN);
           }
-          paymentRepository.update(paymentEntity);
+          paymentRepository.update(payment);
 
           // Publish saga command reply message
           SagaCommandReply.SagaCommandReplyBuilder sagaCommandReplyBuilder = SagaCommandReply.builder()
-              .sagaId(paymentEntity.getSagaId())
+              .sagaId(payment.getSagaId())
               .sagaName("checkout")
               .sagaCommandName(CheckoutCommand.PROCESS_PAYMENT);
           SagaCommandResult sagaCommandResult = null;
@@ -135,16 +135,16 @@ public class WebhookHandler {
             case SUCCEEDED -> sagaCommandResult = SagaCommandResult.success(
                 ProcessPaymentCommandMetadata.builder()
                     .paymentStatus(PaymentStatus.SUCCEEDED)
-                    .paymentMethod(paymentEntity.getPaymentMethod())
-                    .paymentMethodDetails(paymentEntity.getPaymentMethodDetails())
+                    .paymentMethod(payment.getPaymentMethod())
+                    .paymentMethodDetails(payment.getPaymentMethodDetails())
                     .build());
             case FAILED -> sagaCommandResult = SagaCommandResult.failure(
-                paymentEntity.getError(),
+                payment.getError(),
                 ProcessPaymentCommandMetadata.builder()
                     .paymentStatus(PaymentStatus.FAILED)
                     .build());
             case CANCELED -> sagaCommandResult = SagaCommandResult.failure(
-                paymentEntity.getCancellationReason(),
+                payment.getCancellationReason(),
                 ProcessPaymentCommandMetadata.builder()
                     .paymentStatus(PaymentStatus.CANCELED)
                     .build());

@@ -3,20 +3,21 @@ package org.atlas.domain.product.usecase.admin.handler;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.atlas.domain.product.entity.CategoryEntity;
-import org.atlas.domain.product.entity.ProductEntity;
+import org.atlas.domain.product.entity.Category;
+import org.atlas.domain.product.entity.Product;
 import org.atlas.domain.product.infrastructure.file.csv.ProductCsvWriter;
 import org.atlas.domain.product.infrastructure.file.excel.ProductExcelWriter;
 import org.atlas.domain.product.infrastructure.file.model.write.ProductRow;
 import org.atlas.domain.product.infrastructure.file.pdf.ProductPdfWriter;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.repository.criteria.FindProductCriteria;
+import org.atlas.domain.product.usecase.admin.mapper.AdminProductMapper;
 import org.atlas.domain.product.usecase.admin.model.AdminExportProductInput;
 import org.atlas.framework.domain.usecase.ReadOnlyUseCaseHandler;
-import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
 import org.atlas.framework.util.CollectionUtil;
+import org.atlas.framework.util.ObjectMapperUtil;
 
 @ReadOnlyUseCaseHandler
 @RequiredArgsConstructor
@@ -28,14 +29,13 @@ public class AdminExportProductUseCaseHandler {
   private final ProductPdfWriter productPdfWriter;
 
   public byte[] handle(AdminExportProductInput input) throws Exception {
-    FindProductCriteria criteria = ObjectMapperUtil.getInstance()
-        .map(input, FindProductCriteria.class);
-    PagingResult<ProductEntity> products = productRepository.findByCriteria(criteria,
+    FindProductCriteria criteria = AdminProductMapper.INSTANCE.toFindProductCriteria(input);
+    PagingResult<Product> products = productRepository.findByCriteria(criteria,
         PagingRequest.unpaged());
 
     // Use custom mapping method for complex attribute mapping
-    List<ProductRow> productRows = ObjectMapperUtil.getInstance()
-        .mapList(products.getData(), this::toProductRow);
+    List<ProductRow> productRows = ObjectMapperUtil.mapList(products.getData(),
+        AdminProductMapper.INSTANCE::toProductRow);
 
     byte[] fileContent;
     switch (input.getFileType()) {
@@ -48,7 +48,7 @@ public class AdminExportProductUseCaseHandler {
     return fileContent;
   }
 
-  private ProductRow toProductRow(ProductEntity entity) {
+  private ProductRow toProductRow(Product entity) {
     ProductRow row = new ProductRow();
 
     // Basic info
@@ -68,7 +68,7 @@ public class AdminExportProductUseCaseHandler {
     // Categories
     if (CollectionUtil.isNotEmpty(entity.getCategories())) {
       String categoryIds = entity.getCategories().stream()
-          .map(CategoryEntity::getId)
+          .map(Category::getId)
           .map(String::valueOf)
           .collect(Collectors.joining("|"));
       row.setCategoryIds(categoryIds);

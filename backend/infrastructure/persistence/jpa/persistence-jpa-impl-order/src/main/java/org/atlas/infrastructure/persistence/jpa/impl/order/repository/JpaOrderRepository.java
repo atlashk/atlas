@@ -4,33 +4,33 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.infrastructure.persistence.jpa.core.repository.JpaBaseRepository;
-import org.atlas.infrastructure.persistence.jpa.impl.order.entity.JpaOrderEntity;
+import org.atlas.infrastructure.persistence.jpa.impl.order.entity.JpaOrder;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface JpaOrderRepository extends JpaBaseRepository<JpaOrderEntity, Integer> {
+public interface JpaOrderRepository extends JpaBaseRepository<JpaOrder, Integer> {
 
   @Query("""
       select o
-      from JpaOrderEntity o
+      from JpaOrder o
       left join fetch o.orderItems
       where o.id = :id
       """)
-  Optional<JpaOrderEntity> findByIdAndFetch(@Param("id") Integer id);
+  Optional<JpaOrder> findByIdAndFetch(@Param("id") Integer id);
 
   @Query("""
       select o
-      from JpaOrderEntity o
+      from JpaOrder o
       left join fetch o.orderItems
       where o.sagaId = :sagaId
       """)
-  Optional<JpaOrderEntity> findBySagaIdAndFetch(@Param("sagaId") Integer sagaId);
+  Optional<JpaOrder> findBySagaIdAndFetch(@Param("sagaId") Integer sagaId);
 
   @Query("""
         select coalesce(sum(o.amount), 0)
-        from JpaOrderEntity o
+        from JpaOrder o
         where o.status = :status
       """)
   BigDecimal sumAmountByStatus(@Param("status") OrderStatus status);

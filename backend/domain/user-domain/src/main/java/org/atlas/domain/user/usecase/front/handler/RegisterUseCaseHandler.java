@@ -3,19 +3,19 @@ package org.atlas.domain.user.usecase.front.handler;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.domain.user.entity.UserEntity;
+import org.atlas.domain.user.entity.User;
 import org.atlas.domain.user.infrastructure.messaging.UserEventMessagePublisher;
+import org.atlas.domain.user.usecase.front.mapper.UserMapper;
 import org.atlas.domain.user.repository.UserRepository;
 import org.atlas.domain.user.shared.Role;
 import org.atlas.domain.user.usecase.front.model.RegisterInput;
 import org.atlas.framework.auth.client.AuthClient;
 import org.atlas.framework.auth.client.model.CreateAuthUserRequest;
+import org.atlas.framework.cryptography.PasswordUtil;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.event.contract.user.UserRegisteredEvent;
-import org.atlas.framework.domain.event.contract.user.model.User;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
-import org.atlas.framework.util.ObjectMapperUtil;
 
 @UseCaseHandler
 @RequiredArgsConstructor
@@ -28,7 +28,7 @@ public class RegisterUseCaseHandler {
 
   public Void handle(RegisterInput input) throws Exception {
     checkValidity(input);
-    UserEntity user = createUser(input);
+    User user = createUser(input);
     syncUser(user);
     publishEvent(user);
     return null;
@@ -46,25 +46,25 @@ public class RegisterUseCaseHandler {
     }
   }
 
-  private UserEntity createUser(RegisterInput input) {
-    UserEntity user = ObjectMapperUtil.getInstance().map(input, UserEntity.class);
+  private User createUser(RegisterInput input) {
+    User user = UserMapper.INSTANCE.toUser(input);
+    user.setPassword(PasswordUtil.hashPassword(input.getPassword()));
     user.setRole(Role.USER);
     userRepository.insert(user);
     return user;
   }
 
-  private void syncUser(UserEntity user) {
+  private void syncUser(User user) {
     if (authClient != null) {
-      CreateAuthUserRequest request = ObjectMapperUtil.getInstance()
-          .map(user, CreateAuthUserRequest.class);
+      CreateAuthUserRequest request = UserMapper.INSTANCE.toCreateAuthUserRequest(user);
       authClient.createAuthUser(request);
       log.info("Created auth user: userId={}, username={}",
           user.getId(), user.getUsername());
     }
   }
 
-  private void publishEvent(UserEntity user) {
-    User userPayload = ObjectMapperUtil.getInstance().map(user, User.class);
+  private void publishEvent(User user) {
+    org.atlas.framework.domain.event.contract.user.model.User userPayload = UserMapper.INSTANCE.toUser(user);
     UserRegisteredEvent event = new UserRegisteredEvent(userPayload);
     userEventMessagePublisher.publish(event);
   }

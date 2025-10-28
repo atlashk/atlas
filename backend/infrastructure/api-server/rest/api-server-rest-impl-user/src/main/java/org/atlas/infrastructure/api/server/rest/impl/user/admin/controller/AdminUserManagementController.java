@@ -4,16 +4,17 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.atlas.domain.user.entity.UserEntity;
+import org.atlas.domain.user.entity.User;
 import org.atlas.domain.user.shared.Role;
 import org.atlas.domain.user.usecase.admin.handler.AdminListUserUseCaseHandler;
 import org.atlas.domain.user.usecase.admin.model.AdminListUserInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.constant.CommonConstant;
-import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
-import org.atlas.infrastructure.api.server.rest.impl.user.front.model.ProfileResponse;
+import org.atlas.framework.util.ObjectMapperUtil;
+import org.atlas.infrastructure.api.server.rest.impl.user.admin.mapper.AdminUserMapper;
+import org.atlas.infrastructure.api.server.rest.impl.user.admin.model.UserResponse;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +32,7 @@ public class AdminUserManagementController {
 
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve a paginated list of users with optional filtering and pagination")
-  public ApiResponseWrapper<List<ProfileResponse>> listUser(
+  public ApiResponseWrapper<List<UserResponse>> listUser(
       @Parameter(name = "id", description = "User ID", example = "1")
       @RequestParam(name = "id", required = false) Integer id,
       @Parameter(name = "keyword", description = "Username, first name, last name, email, phone number", example = "john.doe")
@@ -49,9 +50,9 @@ public class AdminUserManagementController {
         .role(role)
         .pagingRequest(PagingRequest.of(page - 1, size))
         .build();
-    PagingResult<UserEntity> userPage = adminListUserUseCaseHandler.handle(input);
-    PagingResult<ProfileResponse> userResponsePage = ObjectMapperUtil.getInstance()
-        .mapPage(userPage, ProfileResponse.class);
+    PagingResult<User> userPage = adminListUserUseCaseHandler.handle(input);
+    PagingResult<UserResponse> userResponsePage = ObjectMapperUtil.mapPage(userPage,
+        AdminUserMapper.INSTANCE::toUserResponse);
     return ApiResponseWrapper.successPage(userResponsePage);
   }
 }

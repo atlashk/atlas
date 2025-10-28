@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.atlas.domain.order.entity.OrderEntity;
+import org.atlas.domain.order.entity.Order;
 import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.domain.order.usecase.admin.handler.AdminListOrderUseCaseHandler;
 import org.atlas.domain.order.usecase.admin.model.AdminListOrderInput;
@@ -65,7 +65,7 @@ public class AdminOrderManagementController {
         .pagingRequest(PagingRequest.of(page - 1, size, "createdAt", SortOrder.DESC))
         .build();
 
-    PagingResult<OrderEntity> orderPage = adminListOrderUseCaseHandler.handle(input);
+    PagingResult<Order> orderPage = adminListOrderUseCaseHandler.handle(input);
 
     PagingResult<AdminOrderResponse> orderResponsePage = ObjectMapperUtil.mapPage(orderPage,
         AdminOrderMapper.INSTANCE::toOrderResponse);

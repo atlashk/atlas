@@ -3,7 +3,7 @@ package org.atlas.domain.user.usecase.front.handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.user.aggregator.CartAggregator;
-import org.atlas.domain.user.entity.CartEntity;
+import org.atlas.domain.user.entity.Cart;
 import org.atlas.domain.user.repository.CartRepository;
 import org.atlas.domain.user.usecase.front.model.AddCartItemInput;
 import org.atlas.framework.cache.CacheService;
@@ -20,13 +20,13 @@ public class AddCartItemUseCaseHandler {
   private final CartAggregator cartAggregator;
   private final CacheService cacheService;
 
-  public CartEntity handle(AddCartItemInput input) throws Exception {
+  public Cart handle(AddCartItemInput input) throws Exception {
     // Get or create cart for user
-    CartEntity cart = cartRepository.findByUserId(input.getUserId())
+    Cart cart = cartRepository.findByUserId(input.getUserId())
         .orElseGet(() -> {
           // Create new cart
           try {
-            CartEntity newCart = new CartEntity(input.getUserId());
+            Cart newCart = new Cart(input.getUserId());
             cartRepository.insert(newCart);
             return newCart;
           } catch (DataIntegrityViolationException e) {

@@ -16,7 +16,7 @@ public class CreateAuthUserRequest {
 
   private Integer userId;
   private String username;
-  private String password;
+  private String plainPassword;
   private String email;
   private String phoneNumber;
   private Role role;

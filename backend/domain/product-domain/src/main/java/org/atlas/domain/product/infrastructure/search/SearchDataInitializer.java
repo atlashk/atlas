@@ -3,7 +3,7 @@ package org.atlas.domain.product.infrastructure.search;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.domain.product.entity.ProductEntity;
+import org.atlas.domain.product.entity.Product;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.repository.criteria.FindProductCriteria;
 import org.atlas.framework.paging.PagingRequest;
@@ -61,9 +61,9 @@ public class SearchDataInitializer {
         PagingRequest pagingRequest = PagingRequest.of(batch, BATCH_SIZE);
         FindProductCriteria criteria = new FindProductCriteria();
 
-        PagingResult<ProductEntity> productPage = productRepository.findByCriteria(criteria,
+        PagingResult<Product> productPage = productRepository.findByCriteria(criteria,
             pagingRequest);
-        List<ProductEntity> products = productPage.getData();
+        List<Product> products = productPage.getData();
 
         if (products.isEmpty()) {
           log.warn("Empty batch encountered at page {}/{}", batch + 1, totalBatches);

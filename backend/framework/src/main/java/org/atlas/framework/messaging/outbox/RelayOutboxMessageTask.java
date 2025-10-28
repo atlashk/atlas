@@ -22,7 +22,7 @@ public class RelayOutboxMessageTask {
 
   public void execute() {
     // Find pending outbox messages
-    List<OutboxMessageEntity> outboxMessages = outboxMessageRepository.findByStatusOrderByCreatedAt(
+    List<OutboxMessage> outboxMessages = outboxMessageRepository.findByStatusOrderByCreatedAt(
         OutboxMessageStatus.PENDING);
     if (outboxMessages.isEmpty()) {
       return;

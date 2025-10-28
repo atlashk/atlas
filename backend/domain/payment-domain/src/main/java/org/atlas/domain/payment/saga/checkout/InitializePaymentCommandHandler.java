@@ -3,8 +3,8 @@ package org.atlas.domain.payment.saga.checkout;
 import java.util.LinkedHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.domain.payment.entity.PaymentEntity;
-import org.atlas.domain.payment.entity.PaymentGatewayEntity;
+import org.atlas.domain.payment.entity.Payment;
+import org.atlas.domain.payment.entity.PaymentGateway;
 import org.atlas.domain.payment.repository.PaymentGatewayRepository;
 import org.atlas.domain.payment.repository.PaymentRepository;
 import org.atlas.domain.payment.shared.PaymentStatus;
@@ -45,7 +45,7 @@ public class InitializePaymentCommandHandler {
     }
 
     // Find payment gateway
-    PaymentGatewayEntity paymentGateway = paymentGatewayRepository.findById(
+    PaymentGateway paymentGateway = paymentGatewayRepository.findById(
             checkoutSagaData.getPaymentGatewayId())
         .orElseThrow(() -> {
           log.error("Payment gateway {} not found", checkoutSagaData.getPaymentGatewayId());
@@ -64,50 +64,50 @@ public class InitializePaymentCommandHandler {
     }
 
     // Insert new payment entity
-    PaymentEntity paymentEntity = new PaymentEntity();
-    paymentEntity.setUserId(checkoutSagaData.getUserId());
-    paymentEntity.setOrderId(checkoutSagaData.getOrderId());
-    paymentEntity.setSagaId(sagaCommand.getSagaId());
-    paymentEntity.setAmount(checkoutSagaData.getAmount());
-    paymentEntity.setCurrency(CommonConstant.DEFAULT_CURRENCY);
-    paymentEntity.setPaymentGatewayId(paymentGateway.getId());
-    paymentEntity.setStatus(PaymentStatus.PENDING);
-    paymentRepository.insert(paymentEntity);
+    Payment payment = new Payment();
+    payment.setUserId(checkoutSagaData.getUserId());
+    payment.setOrderId(checkoutSagaData.getOrderId());
+    payment.setSagaId(sagaCommand.getSagaId());
+    payment.setAmount(checkoutSagaData.getAmount());
+    payment.setCurrency(CommonConstant.DEFAULT_CURRENCY);
+    payment.setPaymentGatewayId(paymentGateway.getId());
+    payment.setStatus(PaymentStatus.PENDING);
+    paymentRepository.insert(payment);
 
     // Create external payment
     CreatePaymentRequest createPaymentRequest = CreatePaymentRequest.builder()
-        .paymentId(paymentEntity.getId())
-        .amount(paymentEntity.getAmount())
-        .currency(paymentEntity.getCurrency())
+        .paymentId(payment.getId())
+        .amount(payment.getAmount())
+        .currency(payment.getCurrency())
         .build();
     CreatePaymentResponse response = paymentGatewayService.createPayment(createPaymentRequest);
 
     if (response.isSuccess()) {
       log.info(
           "Created payment via payment gateway successfully: orderId={}, userId={}, paymentId={}, transactionId={}",
-          paymentEntity.getOrderId(), paymentEntity.getUserId(), paymentEntity.getId(),
+          payment.getOrderId(), payment.getUserId(), payment.getId(),
           response.getTransactionId());
 
       // Update payment entity
-      paymentEntity.setTransactionId(response.getTransactionId());
-      paymentEntity.setNextAction(response.getNextAction());
-      paymentEntity.setStatus(PaymentStatus.CREATED);
-      paymentRepository.update(paymentEntity);
+      payment.setTransactionId(response.getTransactionId());
+      payment.setNextAction(response.getNextAction());
+      payment.setStatus(PaymentStatus.CREATED);
+      paymentRepository.update(payment);
 
       return SagaCommandResult.success(null);
     } else {
       log.error(
           "Failed to create payment via payment gateway: orderId={}, userId={}, paymentId={}, errorCode={}, errorMessage={}",
-          paymentEntity.getId(), paymentEntity.getUserId(), paymentEntity.getOrderId(),
+          payment.getId(), payment.getUserId(), payment.getOrderId(),
           response.getErrorCode(), response.getErrorMessage());
 
       // Update payment entity
-      paymentEntity.setStatus(PaymentStatus.FAILED);
-      paymentEntity.setError(
+      payment.setStatus(PaymentStatus.FAILED);
+      payment.setError(
           ErrorUtil.buildErrorMessage(response.getErrorCode(), response.getErrorMessage()));
-      paymentRepository.update(paymentEntity);
+      paymentRepository.update(payment);
 
-      return SagaCommandResult.failure(paymentEntity.getError());
+      return SagaCommandResult.failure(payment.getError());
     }
   }
 }

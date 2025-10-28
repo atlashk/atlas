@@ -1,13 +1,13 @@
 package org.atlas.framework.saga.core.repository;
 
 import java.util.Optional;
-import org.atlas.framework.saga.core.entity.SagaEntity;
+import org.atlas.framework.saga.core.entity.Saga;
 
 public interface SagaRepository {
 
-  Optional<SagaEntity> findById(Integer sagaId);
+  Optional<Saga> findById(Integer sagaId);
 
-  void insert(SagaEntity saga);
+  void insert(Saga saga);
 
-  void update(SagaEntity saga);
+  void update(Saga saga);
 }

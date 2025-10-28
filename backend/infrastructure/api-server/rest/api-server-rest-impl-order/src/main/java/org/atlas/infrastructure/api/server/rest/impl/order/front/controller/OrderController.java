@@ -6,7 +6,7 @@ import jakarta.validation.Valid;
 import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.atlas.domain.order.entity.OrderEntity;
+import org.atlas.domain.order.entity.Order;
 import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.domain.order.usecase.front.handler.CheckoutUseCaseHandler;
 import org.atlas.domain.order.usecase.front.handler.GetOrderStatusUseCaseHandler;
@@ -73,7 +73,7 @@ public class OrderController {
         .pagingRequest(PagingRequest.of(page - 1, size, "createdAt", SortOrder.DESC))
         .build();
 
-    PagingResult<OrderEntity> orderPage = listOrderUseCaseHandler.handle(input);
+    PagingResult<Order> orderPage = listOrderUseCaseHandler.handle(input);
 
     PagingResult<OrderResponse> orderResponsePage = ObjectMapperUtil.mapPage(orderPage,
         OrderMapper.INSTANCE::toOrderResponse);

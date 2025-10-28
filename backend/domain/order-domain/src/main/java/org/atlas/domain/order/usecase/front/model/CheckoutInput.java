@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.domain.order.entity.OrderEntity.Address;
+import org.atlas.domain.order.entity.Order.Address;
 
 @NoArgsConstructor
 @AllArgsConstructor
