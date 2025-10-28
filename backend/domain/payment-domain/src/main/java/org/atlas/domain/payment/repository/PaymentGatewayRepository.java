@@ -8,7 +8,7 @@ public interface PaymentGatewayRepository {
 
   List<PaymentGatewayEntity> findAll();
 
-  Optional<PaymentGatewayEntity> findById(String id);
+  Optional<PaymentGatewayEntity> findById(Integer id);
 
   Optional<PaymentGatewayEntity> findByCode(String code);
 }

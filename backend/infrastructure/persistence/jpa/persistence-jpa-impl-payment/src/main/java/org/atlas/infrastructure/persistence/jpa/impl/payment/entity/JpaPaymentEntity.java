@@ -4,9 +4,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
@@ -15,7 +18,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.domain.payment.shared.PaymentMethod;
 import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.infrastructure.persistence.jpa.core.entity.JpaBaseEntity;
 
@@ -49,13 +51,15 @@ public class JpaPaymentEntity extends JpaBaseEntity {
   @Column(name = "currency")
   private String currency;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "method")
-  private PaymentMethod method;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "payment_gateway_id")
+  private JpaPaymentGatewayEntity paymentGateway;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "gateway")
-  private PaymentGateway gateway;
+  @Column(name = "payment_method")
+  private String paymentMethod;
+
+  @Column(name = "payment_method_details")
+  private String paymentMethodDetails;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "status")
@@ -68,11 +72,8 @@ public class JpaPaymentEntity extends JpaBaseEntity {
   @Column(name = "next_action")
   private String nextAction;
 
-  @Column(name = "error_code")
-  private String errorCode;
-
-  @Column(name = "error_message")
-  private String errorMessage;
+  @Column(name = "error")
+  private String error;
 
   @Column(name = "cancellation_reason")
   private String cancellationReason;

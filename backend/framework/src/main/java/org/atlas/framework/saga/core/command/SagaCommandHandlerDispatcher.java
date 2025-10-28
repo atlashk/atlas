@@ -12,8 +12,7 @@ import org.atlas.framework.saga.core.exception.SagaConfigException;
 import org.atlas.framework.saga.core.messaging.SagaMessagePublisher;
 import org.atlas.framework.saga.core.messaging.payload.SagaCommand;
 import org.atlas.framework.saga.core.messaging.payload.SagaCommandReply;
-import org.atlas.framework.util.ExceptionUtil;
-import org.atlas.framework.util.StringUtil;
+import org.atlas.framework.util.ErrorUtil;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationContext;
@@ -126,9 +125,9 @@ public class SagaCommandHandlerDispatcher {
             cachedHandlerMethod.methodSignature, sagaCommandResult.getError());
       }
     } catch (Exception e) {
-      Throwable cause = ExceptionUtil.getRootCause(e);
+      Throwable cause = ErrorUtil.getRootCause(e);
       sagaCommandResult = SagaCommandResult.failure(
-          ExceptionUtil.sanitizeErrorMessage(cause.getMessage()));
+          ErrorUtil.sanitizeErrorMessage(cause.getMessage()));
       log.error("Failed to execute saga command handler {}: {}",
           cachedHandlerMethod.methodSignature, sagaCommandResult.getError(), cause);
     }

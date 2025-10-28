@@ -1,5 +1,7 @@
 package org.atlas.infrastructure.payment.stripe;
 
+import static org.atlas.framework.payment.model.HandleWebhookResponse.BODY_FIELD_ERROR;
+
 import com.stripe.StripeClient;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
@@ -18,16 +20,16 @@ import org.atlas.framework.http.HttpStatusCode;
 import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.payment.PaymentGatewayService;
 import org.atlas.framework.payment.exception.PaymentGatewayException;
+import org.atlas.framework.payment.method.Card;
 import org.atlas.framework.payment.model.CreatePaymentRequest;
 import org.atlas.framework.payment.model.CreatePaymentResponse;
-import static org.atlas.framework.payment.model.HandleWebhookResponse.BODY_FIELD_ERROR;
 import org.atlas.framework.payment.model.HandleWebhookRequest;
 import org.atlas.framework.payment.model.HandleWebhookResponse;
 import org.atlas.framework.payment.model.HandleWebhookResponse.Result;
 import org.atlas.framework.payment.model.nextaction.UsePaymentElement;
 import org.atlas.framework.payment.model.nextaction.UsePaymentElement.Provider;
-import org.atlas.framework.payment.method.Card;
 import org.atlas.framework.util.CurrencyUtil;
+import org.atlas.framework.util.ErrorUtil;
 import org.atlas.framework.util.StringUtil;
 import org.springframework.stereotype.Component;
 
@@ -170,14 +172,7 @@ public class StripePaymentGatewayService implements PaymentGatewayService {
         if (StringUtil.isNotBlank(lastPaymentError)) {
           String errorCode = JsonUtil.getInstance().getAsString(lastPaymentError, "error_code");
           String errorMessage = JsonUtil.getInstance().getAsString(lastPaymentError, "message");
-
-          if (StringUtil.isNotBlank(errorCode) && StringUtil.isNotBlank(errorMessage)) {
-            result.setError(String.format("%s:%s", errorCode, errorMessage));
-          } else if (StringUtil.isNotBlank(errorCode)) {
-            result.setError(errorCode);
-          } else if (StringUtil.isNotBlank(errorMessage)) {
-            result.setError(errorMessage);
-          }
+          result.setError(ErrorUtil.buildErrorMessage(errorCode, errorMessage));
         }
       }
       case StripeEventType.PAYMENT_INTENT_CANCELED -> {

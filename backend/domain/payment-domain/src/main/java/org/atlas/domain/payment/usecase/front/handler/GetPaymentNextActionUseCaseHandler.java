@@ -3,6 +3,7 @@ package org.atlas.domain.payment.usecase.front.handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.payment.entity.PaymentEntity;
+import org.atlas.domain.payment.mapper.PaymentMapper;
 import org.atlas.domain.payment.repository.PaymentRepository;
 import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.domain.payment.usecase.front.model.GetPaymentNextActionInput;
@@ -10,7 +11,6 @@ import org.atlas.domain.payment.usecase.front.model.GetPaymentNextActionOutput;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.ReadOnlyUseCaseHandler;
-import org.atlas.framework.util.ObjectMapperUtil;
 
 @ReadOnlyUseCaseHandler
 @RequiredArgsConstructor
@@ -28,6 +28,6 @@ public class GetPaymentNextActionUseCaseHandler {
       throw new DomainException(DomainError.INVALID_PAYMENT_STATUS);
     }
 
-    return ObjectMapperUtil.getInstance().map(payment, GetPaymentNextActionOutput.class);
+    return PaymentMapper.INSTANCE.toGetPaymentNextActionOutput(payment);
   }
 }

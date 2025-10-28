@@ -26,7 +26,7 @@ public class PaymentEntity extends DomainEntity {
   private Integer sagaId; // Support for webhook case
   private BigDecimal amount;
   private String currency;
-  private String paymentGateway;
+  private Integer paymentGatewayId;
   private String paymentMethod;
   private String paymentMethodDetails;
   private PaymentStatus status;

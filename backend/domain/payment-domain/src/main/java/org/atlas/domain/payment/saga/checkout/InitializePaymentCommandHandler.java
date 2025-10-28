@@ -4,22 +4,26 @@ import java.util.LinkedHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.payment.entity.PaymentEntity;
+import org.atlas.domain.payment.entity.PaymentGatewayEntity;
+import org.atlas.domain.payment.repository.PaymentGatewayRepository;
 import org.atlas.domain.payment.repository.PaymentRepository;
-import org.atlas.domain.payment.service.PaymentRoutingService;
 import org.atlas.domain.payment.shared.PaymentStatus;
-import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.constant.CommonConstant;
+import org.atlas.framework.domain.error.DomainError;
+import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.payment.PaymentGatewayService;
 import org.atlas.framework.payment.model.CreatePaymentRequest;
 import org.atlas.framework.payment.model.CreatePaymentResponse;
-import org.atlas.framework.saga.core.annotation.SagaCommandHandler;
 import org.atlas.framework.saga.checkout.CheckoutCommand;
-import org.atlas.framework.saga.core.command.SagaCommandResult;
 import org.atlas.framework.saga.checkout.CheckoutSagaData;
+import org.atlas.framework.saga.core.annotation.SagaCommandHandler;
+import org.atlas.framework.saga.core.command.SagaCommandResult;
 import org.atlas.framework.saga.core.context.SagaContext;
 import org.atlas.framework.saga.core.messaging.payload.SagaCommand;
-import org.atlas.framework.util.StringUtil;
+import org.atlas.framework.util.ErrorUtil;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -28,8 +32,8 @@ import org.springframework.stereotype.Component;
 public class InitializePaymentCommandHandler {
 
   private final PaymentRepository paymentRepository;
-  private final PaymentRoutingService paymentRoutingService;
-  private final ApplicationConfigService applicationConfigService;
+  private final PaymentGatewayRepository paymentGatewayRepository;
+  private final ApplicationContext applicationContext;
 
   @SagaCommandHandler(command = CheckoutCommand.INITIALIZE_PAYMENT)
   public SagaCommandResult initializePayment(SagaCommand sagaCommand) {
@@ -40,9 +44,24 @@ public class InitializePaymentCommandHandler {
       throw new IllegalArgumentException("Checkout data is required in the saga context");
     }
 
-    // Find the relevant payment gateway
-    PaymentGatewayService paymentGatewayService = paymentRoutingService.getPaymentGateway(
-        checkoutSagaData.getPaymentMethod());
+    // Find payment gateway
+    PaymentGatewayEntity paymentGateway = paymentGatewayRepository.findById(
+            checkoutSagaData.getPaymentGatewayId())
+        .orElseThrow(() -> {
+          log.error("Payment gateway {} not found", checkoutSagaData.getPaymentGatewayId());
+          return new DomainException(DomainError.PAYMENT_GATEWAY_NOT_FOUND);
+        });
+
+    // Find the corresponding payment gateway service implementation
+    String paymentGatewayServiceBeanName = String.format("%sPaymentGatewayService",
+        paymentGateway.getCode().toUpperCase());
+    PaymentGatewayService paymentGatewayService;
+    try {
+      paymentGatewayService = applicationContext.getBean(
+          paymentGatewayServiceBeanName, PaymentGatewayService.class);
+    } catch (NoSuchBeanDefinitionException e) {
+      throw new DomainException(DomainError.PAYMENT_GATEWAY_NOT_FOUND);
+    }
 
     // Insert new payment entity
     PaymentEntity paymentEntity = new PaymentEntity();
@@ -50,10 +69,8 @@ public class InitializePaymentCommandHandler {
     paymentEntity.setOrderId(checkoutSagaData.getOrderId());
     paymentEntity.setSagaId(sagaCommand.getSagaId());
     paymentEntity.setAmount(checkoutSagaData.getAmount());
-    paymentEntity.setCurrency(
-        applicationConfigService.getConfig("payment.currency", CommonConstant.DEFAULT_CURRENCY));
-    paymentEntity.setMethod(checkoutSagaData.getPaymentMethod());
-    paymentEntity.setGateway(paymentGatewayService.supports());
+    paymentEntity.setCurrency(CommonConstant.DEFAULT_CURRENCY);
+    paymentEntity.setPaymentGatewayId(paymentGateway.getId());
     paymentEntity.setStatus(PaymentStatus.PENDING);
     paymentRepository.insert(paymentEntity);
 
@@ -86,11 +103,11 @@ public class InitializePaymentCommandHandler {
 
       // Update payment entity
       paymentEntity.setStatus(PaymentStatus.FAILED);
-      paymentEntity.setErrorCode(response.getErrorCode());
-      paymentEntity.setErrorMessage(StringUtil.sanitizeErrorMessage(response.getErrorMessage()));
+      paymentEntity.setError(
+          ErrorUtil.buildErrorMessage(response.getErrorCode(), response.getErrorMessage()));
       paymentRepository.update(paymentEntity);
 
-      return SagaCommandResult.failure(paymentEntity.getErrorMessage());
+      return SagaCommandResult.failure(paymentEntity.getError());
     }
   }
 }

@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.framework.util.ExceptionUtil;
+import org.atlas.framework.util.ErrorUtil;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -27,7 +27,7 @@ public class SagaCompensationResult implements Serializable {
   public static SagaCompensationResult failure(Throwable throwable) {
     return SagaCompensationResult.builder()
         .success(false)
-        .error(ExceptionUtil.sanitizeErrorMessage(throwable.getMessage()))
+        .error(ErrorUtil.sanitizeErrorMessage(throwable.getMessage()))
         .build();
   }
 }
