@@ -7,53 +7,44 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ArrowLeft, CreditCard, Smartphone, QrCode, AlertCircle } from "lucide-react";
-import { PaymentMethod } from "@/interfaces/payment.interface";
-import { PAYMENT_METHOD_LABELS } from "@/constants/checkout.constants";
+import { ArrowLeft, CreditCard, AlertCircle } from "lucide-react";
+import { PaymentGatewayResponse } from "@/interfaces/payment.interface";
 import { LoadingState, InlineLoader } from "@/components/common/LoadingState";
 import { ErrorState } from "@/hooks/useErrorHandler";
 import { formatCurrency } from "@/utils/formatter.util";
 import { useRouter } from "next/navigation";
+import { AddressForm, Address } from "./AddressForm";
 
 interface CheckoutFormProps {
   cart: { items: Array<{ product: { id: string; name: string; price: number }; quantity: number }> };
   cartTotal: number;
-  paymentMethods: string[];
-  selectedPaymentMethod: PaymentMethod | null;
+  paymentGateways: PaymentGatewayResponse[];
+  selectedPaymentGateway: PaymentGatewayResponse | null;
+  address: Address;
+  addressErrors?: Partial<Record<keyof Address, string>>;
   isCheckingOut: boolean;
-  isLoadingPaymentMethods: boolean;
-  paymentMethodsError: ErrorState | null;
-  onPaymentMethodChange: (method: PaymentMethod) => void;
+  isLoadingPaymentGateways: boolean;
+  paymentGatewaysError: ErrorState | null;
+  onPaymentGatewayChange: (gateway: PaymentGatewayResponse) => void;
+  onAddressChange: (address: Address) => void;
   onCheckout: () => void;
-  onRetryPaymentMethods: () => void;
+  onRetryPaymentGateways: () => void;
 }
-
-const getPaymentIcon = (method: string) => {
-  switch (method) {
-    case "CARD":
-      return <CreditCard className="h-4 w-4" />;
-    case "PAYPAL":
-      return <CreditCard className="h-4 w-4" />;
-    case "E_WALLET":
-      return <Smartphone className="h-4 w-4" />;
-    case "QR_CODE":
-      return <QrCode className="h-4 w-4" />;
-    default:
-      return <CreditCard className="h-4 w-4" />;
-  }
-};
 
 export const CheckoutForm = React.memo<CheckoutFormProps>(function CheckoutForm({
   cart,
   cartTotal,
-  paymentMethods,
-  selectedPaymentMethod,
+  paymentGateways,
+  selectedPaymentGateway,
+  address,
+  addressErrors,
   isCheckingOut,
-  isLoadingPaymentMethods,
-  paymentMethodsError,
-  onPaymentMethodChange,
+  isLoadingPaymentGateways,
+  paymentGatewaysError,
+  onPaymentGatewayChange,
+  onAddressChange,
   onCheckout,
-  onRetryPaymentMethods,
+  onRetryPaymentGateways,
 }) {
   const router = useRouter();
 
@@ -61,11 +52,12 @@ export const CheckoutForm = React.memo<CheckoutFormProps>(function CheckoutForm(
     router.push("/cart");
   }, [router]);
 
-  const handlePaymentMethodChange = React.useCallback((value: string) => {
-    if (paymentMethods.includes(value)) {
-      onPaymentMethodChange(value as PaymentMethod);
+  const handlePaymentGatewayChange = React.useCallback((value: string) => {
+    const gateway = paymentGateways.find(g => g.id.toString() === value);
+    if (gateway) {
+      onPaymentGatewayChange(gateway);
     }
-  }, [paymentMethods, onPaymentMethodChange]);
+  }, [paymentGateways, onPaymentGatewayChange]);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
@@ -103,56 +95,63 @@ export const CheckoutForm = React.memo<CheckoutFormProps>(function CheckoutForm(
           </CardContent>
         </Card>
 
-        {/* Payment Method Selection */}
+        {/* Address Form */}
+        <AddressForm
+          address={address}
+          onAddressChange={onAddressChange}
+          errors={addressErrors}
+        />
+
+        {/* Payment Gateway Selection */}
         <Card>
           <CardHeader>
-            <CardTitle>Payment Method</CardTitle>
+            <CardTitle>Payment Gateway</CardTitle>
           </CardHeader>
           <CardContent>
-            {isLoadingPaymentMethods ? (
+            {isLoadingPaymentGateways ? (
               <LoadingState 
-                message="Loading payment methods..." 
+                message="Loading payment gateways..." 
                 size="sm" 
                 className="py-4"
               />
-            ) : paymentMethodsError ? (
+            ) : paymentGatewaysError ? (
               <div className="space-y-3">
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    {paymentMethodsError.message}
+                    {paymentGatewaysError.message}
                   </AlertDescription>
                 </Alert>
                 <Button 
                   variant="outline" 
-                  onClick={onRetryPaymentMethods}
+                  onClick={onRetryPaymentGateways}
                   className="w-full"
                 >
                   Try Again
                 </Button>
               </div>
-            ) : paymentMethods.length === 0 ? (
+            ) : paymentGateways.length === 0 ? (
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  No payment methods available. Please contact support.
+                  No payment gateways available. Please contact support.
                 </AlertDescription>
               </Alert>
             ) : (
               <RadioGroup
-                value={selectedPaymentMethod || ""}
-                onValueChange={handlePaymentMethodChange}
+                value={selectedPaymentGateway?.id.toString() || ""}
+                onValueChange={handlePaymentGatewayChange}
                 className="space-y-3"
               >
-                {paymentMethods.map((method) => (
-                  <div key={method} className="flex items-center space-x-2">
-                    <RadioGroupItem value={method} id={method} />
+                {paymentGateways.map((gateway) => (
+                  <div key={gateway.id} className="flex items-center space-x-2">
+                    <RadioGroupItem value={gateway.id.toString()} id={gateway.id.toString()} />
                     <Label
-                      htmlFor={method}
+                      htmlFor={gateway.id.toString()}
                       className="flex items-center space-x-2 cursor-pointer flex-1"
                     >
-                      {getPaymentIcon(method)}
-                      <span>{PAYMENT_METHOD_LABELS[method as PaymentMethod] || method}</span>
+                      <CreditCard className="h-4 w-4" />
+                      <span>{gateway.name}</span>
                     </Label>
                   </div>
                 ))}
@@ -176,7 +175,7 @@ export const CheckoutForm = React.memo<CheckoutFormProps>(function CheckoutForm(
           </Button>
           <Button
             onClick={onCheckout}
-            disabled={!selectedPaymentMethod || isCheckingOut || isLoadingPaymentMethods}
+            disabled={!selectedPaymentGateway || isCheckingOut || isLoadingPaymentGateways}
             className="flex-1"
           >
             {isCheckingOut && <InlineLoader className="mr-2" />}

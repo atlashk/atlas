@@ -17,6 +17,7 @@ import org.atlas.framework.payment.model.CreatePaymentRequest;
 import org.atlas.framework.payment.model.CreatePaymentResponse;
 import org.atlas.framework.saga.checkout.CheckoutCommand;
 import org.atlas.framework.saga.checkout.CheckoutSagaData;
+import org.atlas.framework.saga.checkout.InitializePaymentCommandMetadata;
 import org.atlas.framework.saga.core.annotation.SagaCommandHandler;
 import org.atlas.framework.saga.core.command.SagaCommandResult;
 import org.atlas.framework.saga.core.context.SagaContext;
@@ -94,7 +95,12 @@ public class InitializePaymentCommandHandler {
       payment.setStatus(PaymentStatus.CREATED);
       paymentRepository.update(payment);
 
-      return SagaCommandResult.success(null);
+      // Saga command result
+      InitializePaymentCommandMetadata metadata = InitializePaymentCommandMetadata.builder()
+          .transactionId(payment.getTransactionId())
+          .paymentGatewayName(paymentGateway.getName())
+          .build();
+      return SagaCommandResult.success(metadata);
     } else {
       log.error(
           "Failed to create payment via payment gateway: orderId={}, userId={}, paymentId={}, errorCode={}, errorMessage={}",

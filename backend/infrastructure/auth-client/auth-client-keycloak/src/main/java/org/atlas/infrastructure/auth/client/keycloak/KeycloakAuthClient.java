@@ -55,7 +55,7 @@ public class KeycloakAuthClient implements AuthClient {
   private CredentialRepresentation toCredentialRepresentation(CreateAuthUserRequest request) {
     CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
     credentialRepresentation.setType(CredentialRepresentation.PASSWORD);
-    credentialRepresentation.setValue(request.getPassword());
+    credentialRepresentation.setValue(request.getPlainPassword());
     credentialRepresentation.setTemporary(false);
     return credentialRepresentation;
   }

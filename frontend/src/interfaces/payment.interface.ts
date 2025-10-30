@@ -1,5 +1,5 @@
 // Re-export types from constants to avoid duplication
-export type { PaymentMethod, PaymentNextActionType, PaymentStatus, UsePaymentElementProvider } from '@/constants';
+export type { PaymentNextActionType, PaymentStatus, UsePaymentElementProvider } from '@/constants';
 import type { PaymentNextActionType, UsePaymentElementProvider } from '@/constants';
 
 export interface PaymentNextAction {
@@ -13,8 +13,11 @@ export interface PaymentNextAction {
   currency?: string; // Payment currency
 }
 
-// Backend returns List<String> of payment method names
-export type PaymentMethodResponse = string[];
+// Payment gateway response interface
+export interface PaymentGatewayResponse {
+  id: number;
+  name: string;
+}
 
 // Payment next action response interface
 export interface PaymentNextActionResponse {

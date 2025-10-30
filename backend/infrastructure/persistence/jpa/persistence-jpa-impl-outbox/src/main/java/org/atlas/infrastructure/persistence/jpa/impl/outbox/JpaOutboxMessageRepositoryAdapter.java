@@ -19,9 +19,9 @@ public class JpaOutboxMessageRepositoryAdapter implements OutboxMessageRepositor
 
   @Override
   public List<OutboxMessage> findByStatusOrderByCreatedAt(OutboxMessageStatus status) {
-    List<JpaOutboxMessage> jpaOutboxMessageEntities =
+    List<JpaOutboxMessage> jpaOutboxMessages =
         jpaOutboxMessageRepository.findByStatusOrderByCreatedAt(status);
-    return ObjectMapperUtil.mapList(jpaOutboxMessageEntities,
+    return ObjectMapperUtil.mapList(jpaOutboxMessages,
         JpaOutboxMessageMapper.INSTANCE::toOutboxMessage);
   }
 

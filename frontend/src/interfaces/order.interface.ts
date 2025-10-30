@@ -1,4 +1,4 @@
-import { OrderStatus, PaymentMethod } from "@/constants";
+import { OrderStatus } from "@/constants";
 import type { PaymentStatus } from "./payment.interface";
 import type { Product } from "./product.interface";
 import type { User } from "./user.interface";
@@ -34,7 +34,13 @@ export interface OrderItem {
 }
 
 export interface CheckoutRequest {
-  paymentMethod: PaymentMethod;
+  address: {
+    street: string;
+    city: string;
+    country: string;
+    postalCode: string;
+  };
+  paymentGatewayId: number;
 }
 
 export interface CheckoutResponse {

@@ -7,7 +7,7 @@ import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { useCheckoutState } from "@/hooks/useCheckoutState";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { useOrderStatusPolling } from "@/hooks/useOrderStatusPolling";
-import { usePaymentMethods } from "@/hooks/usePaymentMethods";
+import { usePaymentGateways } from "@/hooks/usePaymentGateways";
 import { usePaymentProcessing } from "@/hooks/usePaymentProcessing";
 import { useCartStore } from "@/stores/cart.store";
 import { useUserStore } from "@/stores/user.store";
@@ -42,13 +42,22 @@ function CheckoutPageContent() {
   const [paymentCurrency, setPaymentCurrency] = useState<string | null>(null);
 
   const {
-    availablePaymentMethods,
-    selectedPaymentMethod,
-    isLoading: isLoadingPaymentMethods,
-    error: paymentMethodsError,
-    setSelectedPaymentMethod,
-    retry: retryPaymentMethods,
-  } = usePaymentMethods();
+    availablePaymentGateways,
+    selectedPaymentGateway,
+    isLoading: isLoadingPaymentGateways,
+    error: paymentGatewaysError,
+    setSelectedPaymentGateway,
+    retry: retryPaymentGateways,
+  } = usePaymentGateways();
+
+  // Address state
+  const [address, setAddress] = useState({
+    street: "",
+    city: "",
+    country: "",
+    postalCode: "",
+  });
+  const [addressErrors, setAddressErrors] = useState<Record<string, string>>({});
 
   const {
     isLoading: isProcessingPaymentAction,
@@ -124,9 +133,34 @@ function CheckoutPageContent() {
     setPaymentNextAction,
   ]);
 
+  const validateAddress = () => {
+    const errors: Record<string, string> = {};
+    
+    if (!address.street.trim()) {
+      errors.street = "Street address is required";
+    }
+    if (!address.city.trim()) {
+      errors.city = "City is required";
+    }
+    if (!address.country.trim()) {
+      errors.country = "Country is required";
+    }
+    if (!address.postalCode.trim()) {
+      errors.postalCode = "Postal code is required";
+    }
+    
+    setAddressErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleCheckout = async () => {
-    if (!selectedPaymentMethod) {
-      toast.error("Please select a payment method");
+    if (!selectedPaymentGateway) {
+      toast.error("Please select a payment gateway");
+      return;
+    }
+
+    if (!validateAddress()) {
+      toast.error("Please fill in all address fields");
       return;
     }
 
@@ -135,7 +169,8 @@ function CheckoutPageContent() {
 
     try {
       const order = await orderApi.checkout({
-        paymentMethod: selectedPaymentMethod,
+        address,
+        paymentGatewayId: selectedPaymentGateway.id,
       });
 
       setOrderId(order.data.orderId.toString());
@@ -209,14 +244,17 @@ function CheckoutPageContent() {
           })) || [],
       }}
       cartTotal={cartTotal}
-      paymentMethods={availablePaymentMethods}
-      selectedPaymentMethod={selectedPaymentMethod}
+      paymentGateways={availablePaymentGateways}
+      selectedPaymentGateway={selectedPaymentGateway}
+      address={address}
+      addressErrors={addressErrors}
       isCheckingOut={isCheckingOut}
-      isLoadingPaymentMethods={isLoadingPaymentMethods}
-      paymentMethodsError={paymentMethodsError}
-      onPaymentMethodChange={setSelectedPaymentMethod}
+      isLoadingPaymentGateways={isLoadingPaymentGateways}
+      paymentGatewaysError={paymentGatewaysError}
+      onPaymentGatewayChange={setSelectedPaymentGateway}
+      onAddressChange={setAddress}
       onCheckout={handleCheckout}
-      onRetryPaymentMethods={retryPaymentMethods}
+      onRetryPaymentGateways={retryPaymentGateways}
     />
   );
 }

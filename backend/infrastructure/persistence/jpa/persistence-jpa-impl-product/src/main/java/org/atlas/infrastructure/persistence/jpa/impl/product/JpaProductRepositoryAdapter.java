@@ -39,17 +39,17 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
     if (totalCount == 0L) {
       return PagingResult.empty();
     }
-    List<JpaProduct> jpaProductEntities = customJpaProductRepository.findByCriteria(criteria,
+    List<JpaProduct> jpaProducts = customJpaProductRepository.findByCriteria(criteria,
         pagingRequest);
-    List<Product> products =
-        ObjectMapperUtil.mapList(jpaProductEntities, JpaProductMapper.INSTANCE::toProduct);
+    List<Product> products = ObjectMapperUtil.mapList(jpaProducts,
+        JpaProductMapper.INSTANCE::toProduct);
     return PagingResult.of(products, totalCount, pagingRequest);
   }
 
   @Override
   public List<Product> findByIdIn(List<Integer> ids) {
-    List<JpaProduct> jpaProductEntities = jpaProductRepository.findAllById(ids);
-    return ObjectMapperUtil.mapList(jpaProductEntities, JpaProductMapper.INSTANCE::toProduct);
+    List<JpaProduct> jpaProducts = jpaProductRepository.findAllById(ids);
+    return ObjectMapperUtil.mapList(jpaProducts, JpaProductMapper.INSTANCE::toProduct);
   }
 
   @Override

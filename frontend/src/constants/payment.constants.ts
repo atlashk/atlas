@@ -1,8 +1,4 @@
 // Payment constants (mapped to backend)
-export const PAYMENT_METHODS = ["CARD", "PAYPAL"] as const;
-
-export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
-
 export const PAYMENT_STATUSES = [
   "PENDING",
   "CREATED",

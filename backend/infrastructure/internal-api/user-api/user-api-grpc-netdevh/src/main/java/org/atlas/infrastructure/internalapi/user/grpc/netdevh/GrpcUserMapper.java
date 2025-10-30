@@ -4,6 +4,7 @@ import java.util.List;
 import org.atlas.domain.user.shared.Role;
 import org.atlas.framework.internalapi.user.model.ListUserRequest;
 import org.atlas.framework.internalapi.user.model.UserResponse;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.api.server.grpc.protobuf.user.ListUserRequestProto;
 import org.atlas.infrastructure.api.server.grpc.protobuf.user.ListUserResponseProto;
 import org.atlas.infrastructure.api.server.grpc.protobuf.user.UserProto;
@@ -26,8 +27,9 @@ public interface GrpcUserMapper {
   /**
    * Maps ListUserResponseProto to List of UserResponse
    */
-  @Mapping(source = "userList", target = ".")
-  List<UserResponse> map(ListUserResponseProto responseProto);
+  default List<UserResponse> map(ListUserResponseProto responseProto) {
+    return ObjectMapperUtil.mapList(responseProto.getUserList(), this::map);
+  }
 
   /**
    * Maps UserProto to UserResponse

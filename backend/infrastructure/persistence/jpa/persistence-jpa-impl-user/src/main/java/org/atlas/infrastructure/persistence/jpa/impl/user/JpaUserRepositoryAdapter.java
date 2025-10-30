@@ -29,17 +29,15 @@ public class JpaUserRepositoryAdapter implements UserRepository {
     if (totalCount == 0L) {
       return PagingResult.empty();
     }
-    List<JpaUser> jpaUserEntities = customJpaUserRepository.findByCriteria(criteria,
-        pagingRequest);
-    List<User> users = ObjectMapperUtil.mapList(jpaUserEntities,
-        JpaUserMapper.INSTANCE::toUserEntity);
+    List<JpaUser> jpaUsers = customJpaUserRepository.findByCriteria(criteria, pagingRequest);
+    List<User> users = ObjectMapperUtil.mapList(jpaUsers, JpaUserMapper.INSTANCE::toUserEntity);
     return PagingResult.of(users, totalCount, pagingRequest);
   }
 
   @Override
   public List<User> findByIdIn(List<Integer> ids) {
-    List<JpaUser> jpaUserEntities = jpaUserRepository.findAllById(ids);
-    return ObjectMapperUtil.mapList(jpaUserEntities, JpaUserMapper.INSTANCE::toUserEntity);
+    List<JpaUser> jpaUsers = jpaUserRepository.findAllById(ids);
+    return ObjectMapperUtil.mapList(jpaUsers, JpaUserMapper.INSTANCE::toUserEntity);
   }
 
   @Override
