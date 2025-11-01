@@ -1,0 +1,4 @@
+app:
+  payment:
+    simulator:
+      webhook-url: ${PAYMENT_SIMULATOR_WEBHOOK_URL:http://localhost:8080/services/payment/api/webhook/simulator}

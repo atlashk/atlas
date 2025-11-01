@@ -25,7 +25,7 @@ public class CustomJpaUserRepositoryUsingJpql implements CustomJpaUserRepository
       PagingRequest pagingRequest) {
     StringBuilder sqlBuilder = new StringBuilder("""
         select u
-        from JpaUserEntity u
+        from JpaUser u
         """);
 
     Map<String, Object> params = new HashMap<>();

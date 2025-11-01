@@ -9,27 +9,68 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 @UtilityClass
+@Slf4j
 public class ExecutorUtil {
 
+  /**
+   * Gracefully shuts down an ExecutorService with a default timeout of 30 seconds.
+   *
+   * @param executorService the executor service to shut down
+   */
   public static void gracefulShutdown(ExecutorService executorService) {
+    gracefulShutdown(executorService, 30, TimeUnit.SECONDS);
+  }
+
+  /**
+   * Gracefully shuts down an ExecutorService with a configurable timeout.
+   *
+   * @param executorService the executor service to shut down
+   * @param timeout         the maximum time to wait for shutdown
+   * @param timeUnit        the time unit of the timeout argument
+   */
+  public static void gracefulShutdown(ExecutorService executorService, long timeout,
+      TimeUnit timeUnit) {
+    if (executorService == null) {
+      log.warn("ExecutorService is null, skipping shutdown");
+      return;
+    }
+
+    if (executorService.isShutdown()) {
+      log.debug("ExecutorService is already shutdown");
+      return;
+    }
+
+    log.debug("Initiating graceful shutdown of ExecutorService");
+
     // Initiates an orderly shutdown of the executor service.
     // It prevents new tasks from being submitted, but allows previously submitted tasks to finish.
     executorService.shutdown();
 
     try {
-      // Waits for the tasks to complete, with a timeout of 30 seconds.
+      // Waits for the tasks to complete, with the specified timeout.
       // If the tasks do not finish in the given time, it returns false.
-      if (!executorService.awaitTermination(30, TimeUnit.SECONDS)) {
+      if (!executorService.awaitTermination(timeout, timeUnit)) {
+        log.warn("ExecutorService did not terminate within {} {}, forcing shutdown", timeout,
+            timeUnit);
         // If tasks did not finish within the timeout, force a shutdown immediately.
         // It attempts to stop all running tasks and halts the executor service.
         executorService.shutdownNow();
+
+        // Wait a bit more for tasks to respond to being cancelled
+        if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
+          log.error("ExecutorService did not terminate even after forced shutdown");
+        }
+      } else {
+        log.debug("ExecutorService shutdown completed successfully");
       }
     } catch (InterruptedException e) {
       // If the current thread is interrupted while waiting for tasks to finish,
       // it catches the InterruptedException, restores the interrupt status,
       // and forces the shutdown of the executor service.
+      log.warn("Thread interrupted during ExecutorService shutdown, forcing immediate shutdown");
       Thread.currentThread().interrupt();
       executorService.shutdownNow();
     }

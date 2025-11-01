@@ -9,9 +9,9 @@ import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.repository.criteria.FindProductCriteria;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
+import org.atlas.framework.domain.exception.OutOfStockException;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
-import org.atlas.framework.resilience.RetryUtil;
 import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.persistence.jpa.impl.product.entity.JpaOptimisticProduct;
 import org.atlas.infrastructure.persistence.jpa.impl.product.entity.JpaProduct;
@@ -86,38 +86,49 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
   }
 
   @Override
-  public void decreaseQuantityWithConstraint(Integer id, Integer decrement) {
+  public void decreaseQuantityWithConstraint(Integer id, Integer decrement)
+      throws OutOfStockException {
     int updated = jpaProductRepository.decreaseQuantityWithConstraint(id, decrement);
     if (updated == 0) {
-      throw new DomainException(DomainError.PRODUCT_INSUFFICIENT_QUANTITY);
+      throw new OutOfStockException();
     }
   }
 
+  // TODO: Implement retry
   @Override
-  public void decreaseQuantityWithPessimisticLock(Integer id, Integer decrement) {
-    RetryUtil.retryOn(() -> {
-      JpaProduct product = jpaProductRepository.findByIdWithLock(id)
-          .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
-      if (product.getQuantity() < decrement) {
-        throw new DomainException(DomainError.PRODUCT_INSUFFICIENT_QUANTITY);
-      }
-      product.setQuantity(product.getQuantity() - decrement);
+  public void decreaseQuantityWithPessimisticLock(Integer id, Integer decrement)
+      throws OutOfStockException {
+    JpaProduct product = jpaProductRepository.findByIdWithLock(id)
+        .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
+    if (product.getQuantity() < decrement) {
+      throw new OutOfStockException();
+    }
+
+    product.setQuantity(product.getQuantity() - decrement);
+    try {
       jpaProductRepository.save(product);
-    }, DataAccessException.class);
+    } catch (DataAccessException e) {
+      throw new OutOfStockException(e);
+    }
   }
 
+  // TODO: Implement retry
   @Override
-  public void decreaseQuantityWithOptimisticLock(Integer id, Integer decrement) {
-    RetryUtil.retryOn(() -> {
-      JpaOptimisticProduct jpaOptimisticProduct =
-          jpaOptimisticProductRepository.findById(id)
-              .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
-      if (jpaOptimisticProduct.getQuantity() < decrement) {
-        throw new DomainException(DomainError.PRODUCT_INSUFFICIENT_QUANTITY);
-      }
-      jpaOptimisticProduct.setQuantity(jpaOptimisticProduct.getQuantity() - decrement);
+  public void decreaseQuantityWithOptimisticLock(Integer id, Integer decrement)
+      throws OutOfStockException {
+    JpaOptimisticProduct jpaOptimisticProduct =
+        jpaOptimisticProductRepository.findById(id)
+            .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
+    if (jpaOptimisticProduct.getQuantity() < decrement) {
+      throw new OutOfStockException();
+    }
+
+    jpaOptimisticProduct.setQuantity(jpaOptimisticProduct.getQuantity() - decrement);
+    try {
       jpaOptimisticProductRepository.save(jpaOptimisticProduct);
-    }, OptimisticLockingFailureException.class);
+    } catch (OptimisticLockingFailureException e) {
+      throw new OutOfStockException(e);
+    }
   }
 
   @Override

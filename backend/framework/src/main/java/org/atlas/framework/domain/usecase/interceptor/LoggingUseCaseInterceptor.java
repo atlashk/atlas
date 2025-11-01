@@ -7,6 +7,7 @@ import org.atlas.framework.context.Contexts;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.i18n.I18nService;
 import org.atlas.framework.util.StopWatchUtil;
+import org.atlas.framework.util.StringUtil;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +29,7 @@ public class LoggingUseCaseInterceptor implements UseCaseInterceptor {
     StopWatchUtil stopWatchUtil = STOP_WATCH_THREAD_LOCAL.get();
     stopWatchUtil.start();
 
-    String user = getUserInfo();
+    String user = Contexts.getUserInfo();
 
     log.debug("User {} started handling use case {}",
         user, useCaseClass.getSimpleName());
@@ -42,7 +43,7 @@ public class LoggingUseCaseInterceptor implements UseCaseInterceptor {
     long elapsedTimeMs = stopWatchUtil.getElapsedTimeMs();
 
     // User info
-    String user = getUserInfo();
+    String user = Contexts.getUserInfo();
 
     log.debug("User {} finished handling use case {} in {} ms",
         user, useCaseClass.getSimpleName(), elapsedTimeMs);
@@ -51,7 +52,7 @@ public class LoggingUseCaseInterceptor implements UseCaseInterceptor {
   @Override
   public void onError(Class<?> useCaseClass, Object input, Throwable error) {
     // User info
-    String user = getUserInfo();
+    String user = Contexts.getUserInfo();
 
     // Error message
     String errorMessage;
@@ -66,10 +67,5 @@ public class LoggingUseCaseInterceptor implements UseCaseInterceptor {
 
     log.error("User {} encountered error while handling use case {}: {}",
         user, useCaseClass.getSimpleName(), errorMessage, error);
-  }
-
-  private String getUserInfo() {
-    ContextInfo contextInfo = Contexts.get();
-    return contextInfo == null ? "anonymous" : String.valueOf(contextInfo.getUserId());
   }
 }

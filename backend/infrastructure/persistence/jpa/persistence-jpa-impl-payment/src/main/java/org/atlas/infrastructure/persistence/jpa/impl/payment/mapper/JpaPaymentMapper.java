@@ -24,7 +24,7 @@ public interface JpaPaymentMapper {
   @Mapping(target = "nextAction", ignore = true)
   JpaPayment toJpaPayment(Payment payment);
 
-    /**
+  /**
    * After mapping for Payment to JpaPayment - handle NextAction serialization
    */
   @AfterMapping

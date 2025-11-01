@@ -26,6 +26,7 @@ interface CartActions {
   setCart: (cart: CartResponse | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+  clearError: () => void;
   clearCartState: () => void;
 }
 
@@ -60,13 +61,17 @@ export const useCartStore = create<CartStore>()((set, get) => ({
       const response = await cartApi.getCart();
       
       if (response.success && response.data) {
-        set({ cart: response.data });
+        set({ cart: response.data, error: null });
       } else {
-        set({ cart: null, error: response.errorMessage || "Failed to load cart" });
+        // Set error but don't clear cart if we had one before
+        const errorMessage = response.errorMessage || "Failed to load cart";
+        set({ error: errorMessage });
+        console.warn('Failed to load cart:', errorMessage);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      set({ cart: null, error: errorMessage });
+      set({ error: errorMessage });
+      console.error('Cart API error:', errorMessage);
     } finally {
       set({ isLoading: false });
     }
@@ -183,7 +188,7 @@ export const useCartStore = create<CartStore>()((set, get) => ({
   // Computed values
   getCartItemCount: () => {
     const { cart } = get();
-    return cart?.cartItems.length || 0;
+    return cart?.cartItems?.length || 0;
   },
 
   getCartTotal: () => {
@@ -210,6 +215,10 @@ export const useCartStore = create<CartStore>()((set, get) => ({
 
   setError: (error: string | null) => {
     set({ error });
+  },
+
+  clearError: () => {
+    set({ error: null });
   },
 
   // Clear cart state locally (for logout)

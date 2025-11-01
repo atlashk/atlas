@@ -24,12 +24,11 @@ public enum DomainError {
 
   // Product-related errors
   PRODUCT_NOT_FOUND(2000, "error.product.not_found"),
-  PRODUCT_INSUFFICIENT_QUANTITY(2001, "error.product.insufficient_quantity"),
-  BRAND_NOT_FOUND(2002, "error.product.brand.not_found"),
-  CATEGORY_NOT_FOUND(2003, "error.product.category.not_found"),
-  NO_IMPORTED_PRODUCT(2004, "error.product.no_imported_product"),
-  FAILED_TO_IMPORT_PRODUCT(2005, "error.product.failed_to_import_product"),
-  RESERVATION_NOT_FOUND(2006, "error.product.reservation.not_found"),
+  BRAND_NOT_FOUND(2001, "error.product.brand.not_found"),
+  CATEGORY_NOT_FOUND(2002, "error.product.category.not_found"),
+  NO_IMPORTED_PRODUCT(2003, "error.product.no_imported_product"),
+  FAILED_TO_IMPORT_PRODUCT(2004, "error.product.failed_to_import_product"),
+  RESERVATION_NOT_FOUND(2005, "error.product.reservation.not_found"),
 
   // Order-related errors
   ORDER_NOT_FOUND(3000, "error.order.not_found"),

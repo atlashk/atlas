@@ -3,6 +3,7 @@ package org.atlas.domain.order.saga.checkout;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -16,16 +17,18 @@ import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.constant.Services;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
+import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.notification.email.Attachment;
 import org.atlas.framework.notification.email.EmailNotification;
 import org.atlas.framework.notification.email.EmailService;
 import org.atlas.framework.saga.checkout.CheckoutCommand;
 import org.atlas.framework.saga.checkout.InitializePaymentCommandMetadata;
 import org.atlas.framework.saga.checkout.ProcessPaymentCommandMetadata;
+import org.atlas.framework.saga.core.annotation.Saga;
 import org.atlas.framework.saga.core.annotation.SagaCommandReplyHandler;
 import org.atlas.framework.saga.core.annotation.StartSaga;
 import org.atlas.framework.saga.core.command.SagaCommandResult;
-import org.atlas.framework.saga.core.entity.Saga;
+import org.atlas.framework.saga.core.entity.SagaEntity;
 import org.atlas.framework.saga.core.orchestrator.SagaOrchestrator;
 import org.atlas.framework.template.ResolveTemplateException;
 import org.atlas.framework.template.TemplateService;
@@ -33,7 +36,7 @@ import org.atlas.framework.util.AsyncUtil;
 import org.atlas.framework.util.AsyncUtil.AsyncTask;
 import org.atlas.framework.util.FileUtil;
 
-@org.atlas.framework.saga.core.annotation.Saga(
+@Saga(
     sagaName = "checkout",
     description = "Orchestrates the checkout process"
 )
@@ -48,14 +51,13 @@ public class CheckoutSaga {
   private final TemplateService templateService;
 
   @StartSaga
-  public void startSaga(Saga saga) {
+  public void startSaga(SagaEntity saga) {
     sagaOrchestrator.sendCommand(
         saga, CheckoutCommand.RESERVE_PRODUCT, Services.PRODUCT_SERVICE);
   }
 
   @SagaCommandReplyHandler(command = CheckoutCommand.RESERVE_PRODUCT)
-  public void handleReserveProductReply(Saga saga,
-      SagaCommandResult sagaCommandResult) {
+  public void handleReserveProductReply(SagaEntity saga, SagaCommandResult sagaCommandResult) {
     // Update order
     Order order = orderRepository.findBySagaId(saga.getId())
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
@@ -77,15 +79,15 @@ public class CheckoutSaga {
   }
 
   @SagaCommandReplyHandler(command = CheckoutCommand.INITIALIZE_PAYMENT)
-  public void handleInitializePaymentReply(Saga saga,
-      SagaCommandResult sagaCommandResult) {
+  public void handleInitializePaymentReply(SagaEntity saga, SagaCommandResult sagaCommandResult) {
     Order order = orderRepository.findBySagaId(saga.getId())
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
 
-    InitializePaymentCommandMetadata metadata =
-        (InitializePaymentCommandMetadata) sagaCommandResult.getMetadata();
-
     if (sagaCommandResult.isSuccess()) {
+      InitializePaymentCommandMetadata metadata = JsonUtil.getInstance().toObject(
+          (LinkedHashMap<?, ?>) sagaCommandResult.getMetadata(),
+          InitializePaymentCommandMetadata.class);
+
       // Update order status
       order.setStatus(OrderStatus.AWAITING_PAYMENT_PROCESSED);
 
@@ -115,14 +117,13 @@ public class CheckoutSaga {
   }
 
   @SagaCommandReplyHandler(command = CheckoutCommand.PROCESS_PAYMENT)
-  public void handleProcessPaymentReply(Saga saga,
-      SagaCommandResult sagaCommandResult) {
+  public void handleProcessPaymentReply(SagaEntity saga, SagaCommandResult sagaCommandResult) {
     // Update order
     Order order = orderRepository.findBySagaId(saga.getId())
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
 
-    ProcessPaymentCommandMetadata metadata =
-        (ProcessPaymentCommandMetadata) sagaCommandResult.getMetadata();
+    ProcessPaymentCommandMetadata metadata = JsonUtil.getInstance().toObject(
+        (LinkedHashMap<?, ?>) sagaCommandResult.getMetadata(), ProcessPaymentCommandMetadata.class);
 
     if (sagaCommandResult.isSuccess()) {
       // Update order status

@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.saga.core.annotation.SagaCommandReplyHandler;
 import org.atlas.framework.saga.core.annotation.StartSaga;
-import org.atlas.framework.saga.core.entity.Saga;
+import org.atlas.framework.saga.core.entity.SagaEntity;
 import org.atlas.framework.saga.core.exception.SagaConfigException;
 import org.atlas.framework.util.StringUtil;
 import org.springframework.aop.support.AopUtils;
@@ -208,7 +208,7 @@ public class SagaRegistry {
 
     boolean existSagaEntityParameter = false;
     for (Parameter parameter : parameters) {
-      if (Saga.class.isAssignableFrom(parameter.getType())) {
+      if (SagaEntity.class.isAssignableFrom(parameter.getType())) {
         existSagaEntityParameter = true;
       }
     }
@@ -228,7 +228,7 @@ public class SagaRegistry {
 
     boolean existSagaEntityParameter = false;
     for (Parameter parameter : parameters) {
-      if (Saga.class.isAssignableFrom(parameter.getType())) {
+      if (SagaEntity.class.isAssignableFrom(parameter.getType())) {
         existSagaEntityParameter = true;
       }
     }

@@ -17,16 +17,11 @@ import lombok.Setter;
 @Setter
 public class UsePaymentElement implements NextAction {
 
-  private Provider provider;
-  private String clientSecret;
   private String publishableKey;
+  private String clientSecret;
 
   @Override
   public NextActionType getType() {
     return NextActionType.USE_PAYMENT_ELEMENT;
-  }
-
-  public enum Provider {
-    STRIPE,
   }
 }

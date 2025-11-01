@@ -10,6 +10,7 @@ public class ContextInfo {
 
   private Integer userId;
   private Role userRole;
+  private String ipAddress;
 
   public boolean isAdmin() {
     return Role.ADMIN.equals(userRole);

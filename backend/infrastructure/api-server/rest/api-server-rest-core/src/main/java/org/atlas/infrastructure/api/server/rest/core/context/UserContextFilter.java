@@ -12,13 +12,14 @@ import org.atlas.framework.context.ContextInfo;
 import org.atlas.framework.context.Contexts;
 import org.atlas.framework.util.StringUtil;
 import org.atlas.infrastructure.api.server.rest.core.util.HttpUtil;
+import org.atlas.infrastructure.api.server.rest.core.util.IpAddressUtil;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
 @Order(1)
-public class ContextFilter extends OncePerRequestFilter {
+public class UserContextFilter extends OncePerRequestFilter {
 
   // Only apply context filter to /api/** routes
   private static final Pattern FILTERED_PATHS = Pattern.compile("^/api(/.*)?$");
@@ -29,6 +30,9 @@ public class ContextFilter extends OncePerRequestFilter {
       FilterChain filterChain)
       throws ServletException, IOException {
     ContextInfo contextInfo = new ContextInfo();
+
+    // Client IP address
+    contextInfo.setIpAddress(IpAddressUtil.getIpAddress(request));
 
     // For authorized requests
     final String userIdHeader = HttpUtil.getHeader(request, CustomClaim.USER_ID.getHeader());

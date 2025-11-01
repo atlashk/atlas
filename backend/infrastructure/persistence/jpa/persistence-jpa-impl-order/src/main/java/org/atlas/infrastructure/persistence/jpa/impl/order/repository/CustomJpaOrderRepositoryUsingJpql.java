@@ -24,7 +24,7 @@ public class CustomJpaOrderRepositoryUsingJpql implements CustomJpaOrderReposito
       PagingRequest pagingRequest) {
     StringBuilder sqlBuilder = new StringBuilder("""
         select distinct o
-        from JpaOrderEntity o
+        from JpaOrder o
         left join fetch o.orderItems oi
         """);
 

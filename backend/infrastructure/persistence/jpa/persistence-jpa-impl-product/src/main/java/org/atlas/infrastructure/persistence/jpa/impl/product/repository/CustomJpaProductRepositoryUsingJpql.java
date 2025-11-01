@@ -26,7 +26,7 @@ public class CustomJpaProductRepositoryUsingJpql implements CustomJpaProductRepo
       PagingRequest pagingRequest) {
     StringBuilder sqlBuilder = new StringBuilder("""
         select p
-        from JpaProductEntity p
+        from JpaProduct p
         left join fetch p.details d
         left join fetch p.attributes a
         left join fetch p.brand b
@@ -67,9 +67,9 @@ public class CustomJpaProductRepositoryUsingJpql implements CustomJpaProductRepo
         select count(distinct p.id)
         from JpaProduct p
         left join p.details d
+        left join p.attributes a
         left join p.brand b
         left join p.categories c
-        left join JpaProductAttributeEntity a on p.id = a.product.id
         """ + whereClause;
     TypedQuery<Long> countQuery = entityManager.createQuery(countSql, Long.class);
     params.forEach(countQuery::setParameter);

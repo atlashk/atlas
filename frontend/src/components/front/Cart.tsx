@@ -33,16 +33,19 @@ const Cart: React.FC = () => {
     const loadData = async () => {
       if (!isAuthenticated()) return;
 
-      try {
-        await loadCart();
-      } catch (error) {
-        console.error('Failed to load cart data:', error);
-        toast.error('Failed to load cart data');
+      // Only load cart if we don't have it yet and not currently loading
+      if (!cart && !isLoading) {
+        try {
+          await loadCart();
+        } catch (error) {
+          console.error('Failed to load cart data:', error);
+          toast.error('Failed to load cart data');
+        }
       }
     };
 
     loadData();
-  }, [isAuthenticated, loadCart]);
+  }, [isAuthenticated(), cart, isLoading]);
 
 
 

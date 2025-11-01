@@ -3,9 +3,9 @@ package org.atlas.infrastructure.auth.client.keycloak;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
-@Component
+@Configuration
 @ConfigurationProperties(prefix = "app.auth-client.keycloak")
 @Getter
 @Setter

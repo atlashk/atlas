@@ -14,5 +14,6 @@ import lombok.Setter;
 public class PaymentGatewayResponse {
 
   private Integer id;
+  private String code;
   private String name;
 }

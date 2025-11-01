@@ -10,7 +10,7 @@ public interface JpaUserMapper {
 
   JpaUserMapper INSTANCE = Mappers.getMapper(JpaUserMapper.class);
 
-  User toUserEntity(JpaUser jpaUser);
+  User toUser(JpaUser jpaUser);
 
-  JpaUser toJpaUserEntity(User user);
+  JpaUser toJpaUser(User user);
 }

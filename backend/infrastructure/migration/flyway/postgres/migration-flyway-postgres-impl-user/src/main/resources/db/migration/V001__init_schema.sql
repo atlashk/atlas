@@ -33,8 +33,7 @@ CREATE INDEX idx_cart_item_cart_id ON cart_item (cart_id);
 CREATE INDEX idx_cart_item_product_id ON cart_item (product_id);
 
 -- Trigger function for auditing
-CREATE
-    OR REPLACE FUNCTION fn_audit()
+CREATE OR REPLACE FUNCTION fn_audit()
     RETURNS TRIGGER AS
 $$
 BEGIN
@@ -45,7 +44,7 @@ $$
     LANGUAGE plpgsql;
 
 -- Apply triggers to tables
-CREATE TRIGGER trg_audit
+CREATE TRIGGER trg_audit_users
     BEFORE UPDATE
     ON users
     FOR EACH ROW

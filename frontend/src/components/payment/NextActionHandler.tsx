@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 
 import { useNextActionHandler } from "@/hooks/useNextActionHandler";
-import { PaymentNextAction } from "@/interfaces/payment.interface";
+import { PaymentNextAction, PaymentGatewayResponse } from "@/interfaces/payment.interface";
 import { AlertCircle, CreditCard } from "lucide-react";
 import {
   DeeplinkAction,
@@ -15,6 +15,7 @@ import {
 interface NextActionHandlerProps {
   nextAction: PaymentNextAction | null;
   orderId: string;
+  selectedPaymentGateway?: PaymentGatewayResponse | null;
   amount?: number | null;
   currency?: string | null;
   onPaymentComplete?: () => void;
@@ -24,6 +25,7 @@ interface NextActionHandlerProps {
 export function NextActionHandler({
   nextAction,
   orderId,
+  selectedPaymentGateway,
   amount,
   currency,
   onPaymentComplete,
@@ -34,7 +36,6 @@ export function NextActionHandler({
     isValidNextAction,
     handlePaymentComplete,
     handlePaymentError,
-    handleRetry,
   } = useNextActionHandler({
     nextAction,
     orderId,
@@ -90,12 +91,6 @@ export function NextActionHandler({
             <h3 className="text-lg font-semibold">Payment Error</h3>
             <p className="text-gray-600">{error}</p>
             <p className="text-sm text-gray-500">Order ID: {orderId}</p>
-            <button
-              onClick={handleRetry}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Try Again
-            </button>
           </div>
         </CardContent>
       </Card>
@@ -109,6 +104,7 @@ export function NextActionHandler({
         <PaymentElementAction
           nextAction={nextAction}
           orderId={orderId}
+          selectedPaymentGateway={selectedPaymentGateway}
           amount={amount}
           currency={currency}
           onPaymentComplete={handlePaymentComplete}

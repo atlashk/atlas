@@ -2,13 +2,12 @@ package org.atlas.infrastructure.persistence.jpa.impl.order.mapper;
 
 import org.atlas.domain.order.entity.Order;
 import org.atlas.domain.order.entity.Order.OrderItem;
-import org.atlas.domain.order.entity.Order.PaymentSnapshot;
-import org.atlas.domain.order.entity.Order.ProductSnapshot;
-import org.atlas.domain.order.entity.Order.UserSnapshot;
 import org.atlas.infrastructure.persistence.jpa.impl.order.entity.JpaOrder;
 import org.atlas.infrastructure.persistence.jpa.impl.order.entity.JpaOrderItem;
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 
 @Mapper
@@ -27,20 +26,33 @@ public interface JpaOrderMapper {
 
   @Mapping(target = "productId", source = "product.id")
   @Mapping(target = "productPrice", source = "product.price")
+  @Mapping(target = "order", ignore = true)
   JpaOrderItem toJpaOrderItem(OrderItem orderItem);
+
+  @AfterMapping
+  default void setOrderReference(@MappingTarget JpaOrder jpaOrder) {
+    if (jpaOrder.getOrderItems() != null) {
+      for (JpaOrderItem orderItem : jpaOrder.getOrderItems()) {
+        orderItem.setOrder(jpaOrder);
+      }
+    }
+  }
 
   @Mapping(target = "user.id", source = "userId")
   @Mapping(target = "address.street", source = "addressStreet")
   @Mapping(target = "address.city", source = "addressCity")
   @Mapping(target = "address.country", source = "addressCountry")
   @Mapping(target = "address.postalCode", source = "addressPostalCode")
+  @Mapping(target = "payment.paymentGatewayId", source = "paymentGatewayId")
   Order toOrder(JpaOrder jpaOrder);
 
+  @AfterMapping
+  default void setInheritedFields(@MappingTarget Order order, JpaOrder jpaOrder) {
+    order.setCreatedAt(jpaOrder.getCreatedAt());
+    order.setUpdatedAt(jpaOrder.getUpdatedAt());
+  }
+
+  @Mapping(target = "product.id", source = "productId")
+  @Mapping(target = "product.price", source = "productPrice")
   OrderItem toOrderItem(JpaOrderItem jpaOrderItem);
-
-  @Mapping(target = "id", source = "productId")
-  @Mapping(target = "price", source = "productPrice")
-  ProductSnapshot toProductSnapshot(JpaOrderItem jpaOrderItem);
-
-  PaymentSnapshot toPaymentSnapshot(String paymentMethod);
 }

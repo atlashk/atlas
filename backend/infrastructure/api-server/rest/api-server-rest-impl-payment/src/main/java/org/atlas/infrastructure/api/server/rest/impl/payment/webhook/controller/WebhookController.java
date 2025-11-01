@@ -23,6 +23,16 @@ public class WebhookController {
 
   private final WebhookHandler webhookHandler;
 
+  @PostMapping("/simulator")
+  @Webhook(name = "simulator", operation = @Operation(summary = "Handle simulator webhook"))
+  public ResponseEntity<Map<String, Object>> handleSimulatorWebhook(
+      @RequestBody String rawPayload,
+      @RequestHeader Map<String, String> headers
+  ) {
+    HandleWebhookResponse response = webhookHandler.handle("simulator", rawPayload, headers);
+    return WebhookResponseUtil.convert(response);
+  }
+
   @PostMapping("/stripe")
   @Webhook(name = "stripe", operation = @Operation(summary = "Handle Stripe webhook"))
   public ResponseEntity<Map<String, Object>> handleStripeWebhook(

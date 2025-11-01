@@ -28,13 +28,12 @@ export default function CartPage() {
     }
   }, [isAuthenticated, isAdmin, router]);
 
-  // Load cart data
   // Load cart data on component mount
   useEffect(() => {
-    if (isAuthenticated() && !isAdmin()) {
+    if (isAuthenticated() && !isAdmin() && !cart && !isLoading) {
       loadCart();
     }
-  }, [isAuthenticated, isAdmin, loadCart]);
+  }, [isAuthenticated(), isAdmin(), cart, isLoading]);
 
 
 
@@ -210,12 +209,19 @@ export default function CartPage() {
                    <span className="text-xl font-semibold text-gray-700">Total:</span>
                    <span className="text-xl font-bold text-gray-900">{formatCurrency(totalAmount)}</span>
                  </div>
-                 <div className="space-y-3">
+                 <div className="flex gap-3">
+                   <Button
+                     onClick={() => router.push("/")}
+                     variant="outline"
+                     className="flex-1"
+                   >
+                     <ArrowLeft className="h-5 w-5 mr-2" />
+                     Continue Shopping
+                   </Button>
                    <Button
                      onClick={handleCheckout}
                      disabled={checkingOut}
-                     className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-                     size="lg"
+                     className="flex-1"
                    >
                      {checkingOut ? (
                        <div className="flex items-center gap-2">
@@ -228,15 +234,6 @@ export default function CartPage() {
                          Proceed to Checkout
                        </>
                      )}
-                   </Button>
-                   <Button
-                     onClick={() => router.push("/")}
-                     variant="outline"
-                     className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200"
-                     size="lg"
-                   >
-                     <ShoppingCart className="h-5 w-5 mr-2" />
-                     Continue Shopping
                    </Button>
                  </div>
                </CardContent>

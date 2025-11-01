@@ -33,6 +33,9 @@ public class Cart extends DomainEntity {
   }
 
   public BigDecimal getTotalAmount() {
+    if (!hasItems()) {
+      return BigDecimal.ZERO;
+    }
     return cartItems.stream()
         .map(CartItem::getAmount)
         .reduce(BigDecimal.ZERO, BigDecimal::add);

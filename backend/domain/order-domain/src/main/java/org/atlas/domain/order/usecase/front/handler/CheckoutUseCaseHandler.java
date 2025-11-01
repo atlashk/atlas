@@ -72,7 +72,7 @@ public class CheckoutUseCaseHandler {
 
       // Start saga
       CheckoutSagaData checkoutSagaData = OrderMapper.INSTANCE.toCheckoutSagaData(order);
-      Integer sagaId = sagaOrchestrator.startSaga("checkout",
+      Integer sagaId = sagaOrchestrator.runSaga("checkout",
           SagaContext.of("data", checkoutSagaData));
 
       // Update order saga_id
@@ -120,12 +120,17 @@ public class CheckoutUseCaseHandler {
     // User
     order.setUser(OrderMapper.INSTANCE.toUserSnapshot(userResponse));
 
+    // Address
+    order.setAddress(OrderMapper.INSTANCE.toAddress(input.getAddress()));
+
     // Order items
     for (CartResponse.CartItem cartItem : cartResponse.getCartItems()) {
       // Product
       ProductSnapshot product = OrderMapper.INSTANCE.toProductSnapshot(cartItem.getProduct());
 
-      OrderItem orderItem = OrderItem.builder().product(product).quantity(cartItem.getQuantity())
+      OrderItem orderItem = OrderItem.builder()
+          .product(product)
+          .quantity(cartItem.getQuantity())
           .build();
 
       order.addOrderItem(orderItem);

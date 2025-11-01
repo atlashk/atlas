@@ -40,6 +40,7 @@ public class CheckoutSagaData {
   public static class OrderItem {
 
     private Integer productId;
+    private String productName;
     private Integer quantity;
   }
 }

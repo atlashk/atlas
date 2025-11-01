@@ -35,7 +35,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         >
           {product.name}
         </CardTitle>
-        <p className="text-lg font-bold text-blue-600">
+        <p className="font-bold text-blue-600">
           {formatCurrency(product.price)}
         </p>
       </CardContent>

@@ -13,9 +13,10 @@ export default function NavBar() {
   const router = useRouter();
   const { isAuthenticated, isAdmin, fullName, logout, loading, profile, accessToken } =
     useUserStore();
-  const { loadCart, getCartItemCount, cart, isLoading } = useCartStore();
+  const { loadCart, getCartItemCount, cart, isLoading, error } = useCartStore();
   const cartItemCount = getCartItemCount();
   const [isHydrated, setIsHydrated] = useState(false);
+  const [cartLoadAttempted, setCartLoadAttempted] = useState(false);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -24,17 +25,40 @@ export default function NavBar() {
   // Load cart data when user is authenticated
   useEffect(() => {
     const loadCartData = async () => {
-      if (isHydrated && isAuthenticated() && !isAdmin() && !cart && !isLoading) {
+      // Only attempt to load cart if:
+      // 1. Component is hydrated
+      // 2. User is authenticated
+      // 3. User is not admin
+      // 4. Cart hasn't been loaded yet (cart is null)
+      // 5. Not currently loading
+      // 6. Haven't attempted to load cart yet OR there's no error (to allow retry after successful auth)
+      if (
+        isHydrated && 
+        isAuthenticated() && 
+        !isAdmin() && 
+        !cart && 
+        !isLoading && 
+        (!cartLoadAttempted || !error)
+      ) {
         try {
+          setCartLoadAttempted(true);
           await loadCart();
         } catch (error) {
           console.error('Failed to load cart:', error);
+          // Don't retry immediately - let user manually refresh or navigate
         }
       }
     };
 
     loadCartData();
-  }, [isHydrated, accessToken, profile, cart, isLoading, loadCart, isAuthenticated, isAdmin]);
+  }, [isHydrated, isAuthenticated(), isAdmin(), cart, isLoading, error, cartLoadAttempted]);
+
+  // Reset cart load attempt when user authentication changes
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      setCartLoadAttempted(false);
+    }
+  }, [isAuthenticated()]);
 
   const getBrandHref = () => {
     // Always return default during hydration to prevent mismatch

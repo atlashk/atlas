@@ -11,8 +11,7 @@ CREATE TABLE IF NOT EXISTS outbox_message
 );
 
 -- Trigger function for auditing
-CREATE
-    OR REPLACE FUNCTION fn_audit()
+CREATE OR REPLACE FUNCTION fn_audit()
     RETURNS TRIGGER AS
 $$
 BEGIN
@@ -24,8 +23,7 @@ $$
     LANGUAGE plpgsql;
 
 -- Apply triggers to tables
-
-CREATE TRIGGER trg_audit
+CREATE TRIGGER trg_audit_outbox_message
     BEFORE UPDATE
     ON outbox_message
     FOR EACH ROW

@@ -12,6 +12,7 @@ import org.atlas.domain.product.shared.DecreaseQuantityStrategy;
 import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
+import org.atlas.framework.domain.exception.OutOfStockException;
 import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.lock.LockAcquisitionException;
 import org.atlas.framework.lock.LockService;
@@ -49,9 +50,15 @@ public class ReserveProductCommandHandler {
     for (CheckoutSagaData.OrderItem orderItem : checkoutSagaData.getOrderItems()) {
       try {
         decreaseQuantity(orderItem.getProductId(), orderItem.getQuantity());
-      } catch (DomainException e) {
+      } catch (OutOfStockException e) {
+        log.error("Out of stock occurred for product {}: {}",
+            orderItem.getProductId(), e.getMessage(), e);
         return SagaCommandResult.failure(
-            String.format("Product %s has insufficient quantity", orderItem.getProductId()));
+            String.format("Product %s is out of stock", orderItem.getProductName()));
+      } catch (Exception e) {
+        log.error("Failed to reserve product {}: {}", orderItem.getProductId(), e.getMessage(), e);
+        return SagaCommandResult.failure("Something went wrong with product %s",
+            orderItem.getProductName());
       }
 
       // Insert new reservation
@@ -68,7 +75,8 @@ public class ReserveProductCommandHandler {
     return SagaCommandResult.success(null);
   }
 
-  private void decreaseQuantity(Integer productId, Integer quantity) {
+  private void decreaseQuantity(Integer productId, Integer quantity)
+      throws OutOfStockException {
     DecreaseQuantityStrategy decreaseQuantityStrategy =
         applicationConfigService.getConfigAsClass("product.decrease-quantity-strategy",
             DecreaseQuantityStrategy.class, DecreaseQuantityStrategy.CONSTRAINT);
@@ -90,7 +98,7 @@ public class ReserveProductCommandHandler {
           Product product = productRepository.findById(productId)
               .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
           if (product.getQuantity() < quantity) {
-            throw new DomainException(DomainError.PRODUCT_INSUFFICIENT_QUANTITY);
+            throw new OutOfStockException();
           }
           product.setQuantity(product.getQuantity() - quantity);
           productRepository.update(product);

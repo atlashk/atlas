@@ -25,11 +25,11 @@ repositories {
 }
 
 dependencies {
-    // Infrastructure
-    api project(':infrastructure.api-client.rest.feign')
+    // Framework
+    api project(':framework')
 
     // Lib
-    api 'org.keycloak:keycloak-admin-client:26.0.5'
+    api 'org.keycloak:keycloak-admin-client:26.0.7'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

@@ -15,7 +15,7 @@ public class RandomUtil {
   private static final String DIGITS = "0123456789";
   private static final String SPECIAL_CHARS = "!@#$%^&*()-_+=<>?/{}~|";
 
-  public static String generatePassword(int length, boolean useUppercase, boolean useDigits,
+  public static String randomPassword(int length, boolean useUppercase, boolean useDigits,
       boolean useSpecialChars) {
     StringBuilder password = new StringBuilder(length);
     String charCategories = LOWERCASE;
@@ -34,9 +34,16 @@ public class RandomUtil {
     return StringUtil.shuffle(password.toString());
   }
 
-  public static String generateOneTimeToken(int byteLength) {
+  public static String randomOneTimeToken(int byteLength) {
     byte[] randomBytes = new byte[byteLength];
     secureRandom.nextBytes(randomBytes);
     return base64Encoder.encodeToString(randomBytes);
+  }
+
+  public static int randomInt(int minVal, int maxVal) {
+    if (minVal < 0 || maxVal < 0 || minVal > maxVal) {
+      throw new IllegalArgumentException("Invalid range: min=" + minVal + ", max=" + maxVal);
+    }
+    return minVal + secureRandom.nextInt(maxVal - minVal + 1);
   }
 }

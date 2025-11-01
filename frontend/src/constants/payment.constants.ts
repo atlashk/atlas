@@ -19,16 +19,13 @@ export const PAYMENT_NEXT_ACTION_TYPES = [
 
 export type PaymentNextActionType = (typeof PAYMENT_NEXT_ACTION_TYPES)[number];
 
-export enum UsePaymentElementProvider {
-  STRIPE = "STRIPE",
-}
-
-// Frontend payment providers (for UI handling)
-export const PAYMENT_PROVIDERS = [
-  "stripe",
-  "qr_code",
-  "redirect",
-  "deep_link",
+// Payment gateway codes (mapped to backend)
+export const PAYMENT_GATEWAY_CODES = [
+  "STRIPE",
+  "SIMULATOR",
 ] as const;
 
-export type PaymentProvider = (typeof PAYMENT_PROVIDERS)[number];
+export type PaymentGatewayCode = (typeof PAYMENT_GATEWAY_CODES)[number];
+
+// Supported payment gateways for UI rendering
+export const SUPPORTED_PAYMENT_GATEWAYS: PaymentGatewayCode[] = ["STRIPE"];

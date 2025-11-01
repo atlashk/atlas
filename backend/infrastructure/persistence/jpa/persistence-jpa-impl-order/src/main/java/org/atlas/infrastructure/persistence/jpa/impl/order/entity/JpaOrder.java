@@ -41,6 +41,10 @@ public class JpaOrder extends JpaBaseEntity {
   @Column(name = "code")
   private String code;
 
+  @Column(name = "status")
+  @Enumerated(EnumType.STRING)
+  private OrderStatus status;
+
   @Column(name = "user_id")
   private Integer userId;
 
@@ -64,10 +68,6 @@ public class JpaOrder extends JpaBaseEntity {
 
   @Column(name = "payment_gateway_id")
   private Integer paymentGatewayId;
-
-  @Column(name = "status")
-  @Enumerated(EnumType.STRING)
-  private OrderStatus status;
 
   @Column(name = "cancellation_reason")
   private String cancellationReason;

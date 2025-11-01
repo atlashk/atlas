@@ -70,7 +70,7 @@ public class JpaProduct extends JpaBaseEntity {
   @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
   private JpaProductDetails details;
 
-  @OneToMany(cascade = CascadeType.ALL, mappedBy = "product", orphanRemoval = true)
+  @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, mappedBy = "product", orphanRemoval = true)
   private Set<JpaProductAttribute> attributes = new HashSet<>();
 
   @ManyToMany

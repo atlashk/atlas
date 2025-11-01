@@ -2,6 +2,7 @@ package org.atlas.infrastructure.api.server.rest.impl.order.front.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -21,7 +22,7 @@ public class CheckoutRequest {
 
   @NotNull
   @Schema(description = "Delivery or billing address information", requiredMode = RequiredMode.REQUIRED)
-  private Address address;
+  private @Valid Address address;
 
   @Schema(description = "The identifier of payment gateway", example = "1", requiredMode = RequiredMode.REQUIRED)
   @NotNull

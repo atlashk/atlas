@@ -1,9 +1,11 @@
 package org.atlas.domain.order.usecase.front.mapper;
 
 import org.atlas.domain.order.entity.Order;
+import org.atlas.domain.order.entity.Order.Address;
 import org.atlas.domain.order.entity.Order.ProductSnapshot;
 import org.atlas.domain.order.entity.Order.UserSnapshot;
 import org.atlas.domain.order.repository.criteria.FindOrderCriteria;
+import org.atlas.domain.order.usecase.front.model.CheckoutInput;
 import org.atlas.domain.order.usecase.front.model.ListOrderInput;
 import org.atlas.framework.internalapi.user.model.CartResponse;
 import org.atlas.framework.internalapi.user.model.UserResponse;
@@ -19,15 +21,17 @@ public interface OrderMapper {
 
   UserSnapshot toUserSnapshot(UserResponse response);
 
+  Address toAddress(CheckoutInput.Address address);
+
   ProductSnapshot toProductSnapshot(CartResponse.Product product);
 
   @Mapping(target = "orderId", source = "id")
   @Mapping(target = "userId", source = "user.id")
-  @Mapping(target = "orderItems", source = "orderItems")
-  @Mapping(target = "amount", source = "amount")
+  @Mapping(target = "paymentGatewayId", source = "payment.paymentGatewayId")
   CheckoutSagaData toCheckoutSagaData(Order entity);
 
   @Mapping(target = "productId", source = "product.id")
+  @Mapping(target = "productName", source = "product.name")
   @Mapping(target = "quantity", source = "quantity")
   CheckoutSagaData.OrderItem toCheckoutSagaDataOrderItem(Order.OrderItem orderItem);
 

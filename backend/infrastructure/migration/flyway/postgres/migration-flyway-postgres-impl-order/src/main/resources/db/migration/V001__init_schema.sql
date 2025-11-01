@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS orders
     address_country     CHAR(2)        NOT NULL,
     address_postal_code VARCHAR(20)    NOT NULL,
     amount              NUMERIC(11, 2) NOT NULL,
+    payment_gateway_id  INT            NOT NULL,
     cancellation_reason VARCHAR(255),
     created_at          TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at          TIMESTAMP               DEFAULT CURRENT_TIMESTAMP
@@ -39,8 +40,7 @@ CREATE TABLE IF NOT EXISTS sequence_generator
 );
 
 -- Trigger function for auditing
-CREATE
-    OR REPLACE FUNCTION fn_audit()
+CREATE OR REPLACE FUNCTION fn_audit()
     RETURNS TRIGGER AS
 $$
 BEGIN
@@ -51,19 +51,19 @@ $$
     LANGUAGE plpgsql;
 
 -- Apply triggers to tables
-CREATE TRIGGER trg_audit
+CREATE TRIGGER trg_audit_orders
     BEFORE UPDATE
     ON orders
     FOR EACH ROW
 EXECUTE FUNCTION fn_audit();
 
-CREATE TRIGGER trg_audit
+CREATE TRIGGER trg_audit_order_item
     BEFORE UPDATE
     ON order_item
     FOR EACH ROW
 EXECUTE FUNCTION fn_audit();
 
-CREATE TRIGGER trg_audit
+CREATE TRIGGER trg_audit_sequence_generator
     BEFORE UPDATE
     ON sequence_generator
     FOR EACH ROW

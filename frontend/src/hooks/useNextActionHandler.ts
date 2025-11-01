@@ -40,10 +40,7 @@ export function useNextActionHandler({
     [onPaymentError]
   );
 
-  const handleRetry = useCallback(() => {
-    setError(null);
-    setIsProcessing(false);
-  }, []);
+
 
   const startProcessing = useCallback(() => {
     setIsProcessing(true);
@@ -59,8 +56,7 @@ export function useNextActionHandler({
       case "USE_PAYMENT_ELEMENT":
         return !!(
           nextAction.clientSecret &&
-          nextAction.publishableKey &&
-          nextAction.provider
+          nextAction.publishableKey
         );
       case "REDIRECT_URL":
         return !!nextAction.url;
@@ -79,7 +75,6 @@ export function useNextActionHandler({
     isValidNextAction: isValidNextAction(),
     handlePaymentComplete,
     handlePaymentError,
-    handleRetry,
     startProcessing,
   };
 }

@@ -51,9 +51,8 @@ public class JpaPayment extends JpaBaseEntity {
   @Column(name = "currency")
   private String currency;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "payment_gateway_id")
-  private JpaPaymentGateway paymentGateway;
+  @Column(name = "payment_gateway_id")
+  private Integer paymentGatewayId;
 
   @Column(name = "payment_method")
   private String paymentMethod;

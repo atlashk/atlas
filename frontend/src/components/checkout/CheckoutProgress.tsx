@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NextActionHandler } from "@/components/payment/NextActionHandler";
 import React, { useCallback, useEffect } from "react";
-import { PaymentNextAction } from "@/interfaces/payment.interface";
+import { PaymentNextAction, PaymentGatewayResponse } from "@/interfaces/payment.interface";
 import { OrderStatusResponse } from "@/interfaces/order.interface";
 import { CreditCard, XCircle, CheckCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -19,6 +19,7 @@ interface CheckoutProgressProps {
   orderId: string;
   orderStatus: OrderStatusResponse | null;
   paymentNextAction: PaymentNextAction | null;
+  selectedPaymentGateway?: PaymentGatewayResponse | null;
   paymentAmount?: number | null;
   paymentCurrency?: string | null;
   isProcessingPayment: boolean;
@@ -26,7 +27,6 @@ interface CheckoutProgressProps {
   onPaymentError: (error: string) => void;
   isLoading: boolean;
   error: string | null;
-  onRetry: () => void;
   startPolling: () => void;
   stopPolling: () => void;
 }
@@ -37,9 +37,9 @@ export const CheckoutProgress = React.memo(function CheckoutProgress({
   isLoading,
   error,
   paymentNextAction,
+  selectedPaymentGateway,
   paymentAmount,
   paymentCurrency,
-  onRetry,
   onPaymentComplete,
   onPaymentError,
   startPolling,
@@ -106,9 +106,6 @@ export const CheckoutProgress = React.memo(function CheckoutProgress({
                 An Error Occurred
               </h3>
               <p className="text-gray-600">{error}</p>
-              <Button variant="outline" onClick={onRetry}>
-                Try Again
-              </Button>
             </div>
           ) : (
             <>
@@ -163,25 +160,14 @@ export const CheckoutProgress = React.memo(function CheckoutProgress({
                           {orderStatus.cancellationReason}
                         </p>
                       </div>
-                      <div className="space-y-2">
-                        {onRetry && (
-                          <Button
-                            onClick={onRetry}
-                            className="w-full"
-                            size="lg"
-                          >
-                            Try Again
-                          </Button>
-                        )}
-                        <Button
-                          variant="outline"
-                          onClick={handleBackToCart}
-                          className="w-full"
-                          size="lg"
-                        >
-                          Back to Cart
-                        </Button>
-                      </div>
+                      <Button
+                        variant="outline"
+                        onClick={handleBackToCart}
+                        className="w-full"
+                        size="lg"
+                      >
+                        Back to Cart
+                      </Button>
                     </div>
                   ) : null}
                 </>
@@ -192,6 +178,7 @@ export const CheckoutProgress = React.memo(function CheckoutProgress({
                     <NextActionHandler
                       nextAction={paymentNextAction}
                       orderId={orderId}
+                      selectedPaymentGateway={selectedPaymentGateway}
                       amount={paymentAmount}
                       currency={paymentCurrency}
                       onPaymentComplete={handlePaymentComplete}

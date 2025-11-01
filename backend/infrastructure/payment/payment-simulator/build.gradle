@@ -28,6 +28,9 @@ dependencies {
     // Framework
     api project(':framework')
 
+    // Infrastructure
+    api project(':infrastructure.api-client.rest.restclient')
+
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

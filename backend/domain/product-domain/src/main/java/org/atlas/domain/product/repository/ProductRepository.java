@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import org.atlas.domain.product.entity.Product;
 import org.atlas.domain.product.repository.criteria.FindProductCriteria;
+import org.atlas.framework.domain.exception.OutOfStockException;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
 
@@ -24,11 +25,12 @@ public interface ProductRepository {
 
   void update(Product product);
 
-  void decreaseQuantityWithConstraint(Integer id, Integer decrement);
+  void decreaseQuantityWithConstraint(Integer id, Integer decrement) throws OutOfStockException;
 
-  void decreaseQuantityWithPessimisticLock(Integer id, Integer decrement);
+  void decreaseQuantityWithPessimisticLock(Integer id, Integer decrement)
+      throws OutOfStockException;
 
-  void decreaseQuantityWithOptimisticLock(Integer id, Integer decrement);
+  void decreaseQuantityWithOptimisticLock(Integer id, Integer decrement) throws OutOfStockException;
 
   void increaseQuantity(Integer id, Integer increment);
 

@@ -30,38 +30,38 @@ public class JpaUserRepositoryAdapter implements UserRepository {
       return PagingResult.empty();
     }
     List<JpaUser> jpaUsers = customJpaUserRepository.findByCriteria(criteria, pagingRequest);
-    List<User> users = ObjectMapperUtil.mapList(jpaUsers, JpaUserMapper.INSTANCE::toUserEntity);
+    List<User> users = ObjectMapperUtil.mapList(jpaUsers, JpaUserMapper.INSTANCE::toUser);
     return PagingResult.of(users, totalCount, pagingRequest);
   }
 
   @Override
   public List<User> findByIdIn(List<Integer> ids) {
     List<JpaUser> jpaUsers = jpaUserRepository.findAllById(ids);
-    return ObjectMapperUtil.mapList(jpaUsers, JpaUserMapper.INSTANCE::toUserEntity);
+    return ObjectMapperUtil.mapList(jpaUsers, JpaUserMapper.INSTANCE::toUser);
   }
 
   @Override
   public Optional<User> findById(Integer id) {
     return jpaUserRepository.findById(id)
-        .map(JpaUserMapper.INSTANCE::toUserEntity);
+        .map(JpaUserMapper.INSTANCE::toUser);
   }
 
   @Override
   public Optional<User> findByUsername(String username) {
     return jpaUserRepository.findByUsername(username)
-        .map(JpaUserMapper.INSTANCE::toUserEntity);
+        .map(JpaUserMapper.INSTANCE::toUser);
   }
 
   @Override
   public Optional<User> findByEmail(String email) {
     return jpaUserRepository.findByEmail(email)
-        .map(JpaUserMapper.INSTANCE::toUserEntity);
+        .map(JpaUserMapper.INSTANCE::toUser);
   }
 
   @Override
   public Optional<User> findByPhoneNumber(String phoneNumber) {
     return jpaUserRepository.findByPhoneNumber(phoneNumber)
-        .map(JpaUserMapper.INSTANCE::toUserEntity);
+        .map(JpaUserMapper.INSTANCE::toUser);
   }
 
   @Override
@@ -71,7 +71,7 @@ public class JpaUserRepositoryAdapter implements UserRepository {
 
   @Override
   public void insert(User user) {
-    JpaUser jpaUser = JpaUserMapper.INSTANCE.toJpaUserEntity(user);
+    JpaUser jpaUser = JpaUserMapper.INSTANCE.toJpaUser(user);
     jpaUserRepository.save(jpaUser);
     user.setId(jpaUser.getId());
   }

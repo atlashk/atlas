@@ -47,7 +47,6 @@ function CheckoutPageContent() {
     isLoading: isLoadingPaymentGateways,
     error: paymentGatewaysError,
     setSelectedPaymentGateway,
-    retry: retryPaymentGateways,
   } = usePaymentGateways();
 
   // Address state
@@ -84,16 +83,19 @@ function CheckoutPageContent() {
         return;
       }
 
-      try {
-        await loadCart();
-      } catch (error) {
-        console.error("Failed to load cart data:", error);
-        toast.error("Failed to load cart data");
-      }
-    };
+      // Only load cart if we don't have it yet and not currently loading
+       if (!cart && !isCartLoading) {
+         try {
+           await loadCart();
+         } catch (error) {
+           console.error("Failed to load cart data:", error);
+           toast.error("Failed to load cart data");
+         }
+       }
+     };
 
-    loadData();
-  }, [isAuthenticated, loadCart, router]);
+     loadData();
+   }, [isAuthenticated(), cart, isCartLoading]);
 
   // Get actual cart total
   const cartTotal = getCartTotal();
@@ -198,15 +200,7 @@ function CheckoutPageContent() {
     resetState();
   };
 
-  const handleRetry = () => {
-    resetOrderStatus();
-    setPaymentNextAction(null);
-    clearPaymentError();
-    // Only start polling if order is not in final state
-    if (orderStatus?.status !== "FULFILLED" && orderStatus?.status !== "CANCELED") {
-      startPolling();
-    }
-  };
+
 
   // Show checkout progress if we have an order ID
   if (orderId) {
@@ -215,6 +209,7 @@ function CheckoutPageContent() {
         orderId={orderId}
         orderStatus={orderStatus}
         paymentNextAction={paymentNextAction}
+        selectedPaymentGateway={selectedPaymentGateway}
         paymentAmount={paymentAmount}
         paymentCurrency={paymentCurrency}
         isProcessingPayment={isProcessingPayment || isProcessingPaymentAction}
@@ -222,7 +217,6 @@ function CheckoutPageContent() {
         onPaymentError={handlePaymentError}
         isLoading={isPollingOrderStatus}
         error={orderStatusError}
-        onRetry={handleRetry}
         startPolling={startPolling}
         stopPolling={stopPolling}
       />
@@ -254,7 +248,6 @@ function CheckoutPageContent() {
       onPaymentGatewayChange={setSelectedPaymentGateway}
       onAddressChange={setAddress}
       onCheckout={handleCheckout}
-      onRetryPaymentGateways={retryPaymentGateways}
     />
   );
 }
@@ -267,8 +260,10 @@ export default function CheckoutPage() {
         // You could send this to an error reporting service
       }}
     >
-      <div className="container mx-auto px-4 py-8">
-        <CheckoutPageContent />
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-4xl mx-auto px-4">
+          <CheckoutPageContent />
+        </div>
       </div>
     </ErrorBoundary>
   );

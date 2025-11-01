@@ -23,7 +23,7 @@ public class OneTimeTokenServiceImpl implements OneTimeTokenService {
 
   @Override
   public OneTimeToken generate(GenerateOneTimeTokenRequest request) {
-    String tokenValue = RandomUtil.generateOneTimeToken(TOKEN_BYTE_LENGTH);
+    String tokenValue = RandomUtil.randomOneTimeToken(TOKEN_BYTE_LENGTH);
     OneTimeToken token = new DefaultOneTimeToken(
         tokenValue, request.getUsername(), Instant.now().plus(TOKEN_TTL));
     redisTemplate.opsForValue().set(redisKey(request.getUsername()), token, TOKEN_TTL);

@@ -55,7 +55,7 @@ public class WebhookHandler {
 
     // Find the corresponding payment gateway service implementation
     String paymentGatewayServiceBeanName = String.format("%sPaymentGatewayService",
-        paymentGateway.getCode().toUpperCase());
+        paymentGateway.getCode().toLowerCase());
     PaymentGatewayService paymentGatewayService;
     try {
       paymentGatewayService = applicationContext.getBean(

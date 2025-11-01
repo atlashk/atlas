@@ -59,8 +59,7 @@ CREATE TABLE IF NOT EXISTS product_category
 );
 
 -- Trigger function for auditing
-CREATE
-    OR REPLACE FUNCTION fn_audit()
+CREATE OR REPLACE FUNCTION fn_audit()
     RETURNS TRIGGER AS
 $$
 BEGIN
@@ -71,37 +70,37 @@ $$
     LANGUAGE plpgsql;
 
 -- Apply triggers to tables
-CREATE TRIGGER trg_audit
+CREATE TRIGGER trg_audit_brand
     BEFORE UPDATE
     ON brand
     FOR EACH ROW
 EXECUTE FUNCTION fn_audit();
 
-CREATE TRIGGER trg_audit
+CREATE TRIGGER trg_audit_category
     BEFORE UPDATE
     ON category
     FOR EACH ROW
 EXECUTE FUNCTION fn_audit();
 
-CREATE TRIGGER trg_audit
+CREATE TRIGGER trg_audit_product
     BEFORE UPDATE
     ON product
     FOR EACH ROW
 EXECUTE FUNCTION fn_audit();
 
-CREATE TRIGGER trg_audit
+CREATE TRIGGER trg_audit_product_details
     BEFORE UPDATE
     ON product_details
     FOR EACH ROW
 EXECUTE FUNCTION fn_audit();
 
-CREATE TRIGGER trg_audit
+CREATE TRIGGER trg_audit_product_attribute
     BEFORE UPDATE
     ON product_attribute
     FOR EACH ROW
 EXECUTE FUNCTION fn_audit();
 
-CREATE TRIGGER trg_audit
+CREATE TRIGGER trg_audit_product_category
     BEFORE UPDATE
     ON product_category
     FOR EACH ROW

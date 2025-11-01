@@ -25,6 +25,18 @@ public class Contexts {
     return require().getUserRole();
   }
 
+  public static String getUserInfo() {
+    ContextInfo contextInfo = get();
+    if (contextInfo == null) {
+      return "anonymous";
+    }
+    Integer userId = contextInfo.getUserId();
+    if (userId == null) {
+      return contextInfo.getIpAddress();
+    }
+    return userId.toString();
+  }
+
   /**
    * Require context info or throw UNAUTHORIZED error.
    */
