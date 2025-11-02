@@ -5,7 +5,6 @@ import { productAdminApi } from "@/api/product.admin.api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Spinner } from "@/components/ui/spinner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -23,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Table,
   TableBody,
@@ -72,6 +72,7 @@ interface ActiveStates {
 const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
   const router = useRouter();
   const isInitialized = useRef(false);
+  const hasInitialized = useRef(false); // Flag to prevent double initialization
 
   // UI State
   const [activeStates, setActiveStates] = useState<ActiveStates>({
@@ -146,8 +147,8 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
   const [productsError, setProductsError] = useState<string | null>(null);
   const [pagination, setPagination] = useState<Metadata | null>(null);
 
-  // Filter state - current form values being edited by user
-  const [filters, setFilters] = useState<ListProductFilters>({
+  // Filter state - current form values being edited by user (UI only)
+  const [formFilters, setFormFilters] = useState<ListProductFilters>({
     id: undefined,
     keyword: undefined,
     minPrice: undefined,
@@ -161,52 +162,33 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     size: 20,
   });
 
-  // Load products based on filters
-  const loadProducts = useCallback(async () => {
-    try {
-      setIsLoadingProducts(true);
-      setProductsError(null);
-
-      // Clean up empty or undefined filters for API call
-      const apiFilters: ListProductFilters = { ...filters };
-      Object.keys(apiFilters).forEach((key) => {
-        const typedKey = key as keyof ListProductFilters;
-        if (apiFilters[typedKey] === "" || apiFilters[typedKey] === undefined) {
-          delete apiFilters[typedKey];
-        }
-      });
-
-      const response = await productAdminApi.listProduct(apiFilters);
-
-      if (!response.success) {
-        throw new Error(response.errorMessage || "Failed to load products");
-      }
-
-      setProducts(response.data || []);
-      setPagination(response.metadata || null);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to load products";
-      setProductsError(errorMessage);
-      toast.error(errorMessage);
-      setProducts([]);
-      setPagination(null);
-    } finally {
-      setIsLoadingProducts(false);
-    }
-  }, [filters]);
+  // Applied filters - used for API calls (only updated when Search is clicked)
+  const [appliedFilters, setAppliedFilters] = useState<ListProductFilters>({
+    id: undefined,
+    keyword: undefined,
+    minPrice: undefined,
+    maxPrice: undefined,
+    status: undefined,
+    availableFrom: undefined,
+    isActive: undefined,
+    brandId: undefined,
+    categoryIds: undefined,
+    page: 1,
+    size: 20,
+  });
 
   // Reload products function for external use
   const reloadProducts = useCallback(() => {
-    loadProducts();
-  }, [loadProducts]);
+    // Force reload by updating applied filters with current values
+    setAppliedFilters((prev) => ({ ...prev }));
+  }, []);
 
   const goToPage = useCallback((page: number) => {
-    setFilters((prev) => ({ ...prev, page }));
+    setAppliedFilters((prev) => ({ ...prev, page }));
   }, []);
 
   const resetProductFilters = useCallback(() => {
-    setFilters({
+    const resetFilters = {
       id: undefined,
       keyword: undefined,
       minPrice: undefined,
@@ -218,7 +200,9 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
       categoryIds: undefined,
       page: 1,
       size: 20,
-    });
+    };
+    setFormFilters(resetFilters);
+    setAppliedFilters(resetFilters);
   }, []);
 
   const handleActiveStateChange = useCallback(() => {
@@ -232,8 +216,8 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     } else {
       isActive = undefined;
     }
-    setFilters((prev) => ({ ...prev, isActive }));
-  }, [activeStates.active, activeStates.inactive, setFilters]);
+    setFormFilters((prev) => ({ ...prev, isActive }));
+  }, [activeStates.active, activeStates.inactive]);
 
   useEffect(() => {
     handleActiveStateChange();
@@ -255,25 +239,115 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
 
   // Initial data loading
   useEffect(() => {
-    if (isInitialized.current) {
+    if (hasInitialized.current) {
+      return;
+    }
+    hasInitialized.current = true;
+
+    const initializeData = async () => {
+      // Inline API calls to avoid dependency issues
+      try {
+        // Load brands
+        setIsLoadingBrands(true);
+        setBrandsError(null);
+        const brandsResponse = await productApi.listBrand();
+        if (!brandsResponse.success) {
+          throw new Error(
+            brandsResponse.errorMessage || "Failed to load brands"
+          );
+        }
+        setBrands(brandsResponse.data || []);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Failed to load brands";
+        setBrandsError(errorMessage);
+        toast.error(errorMessage);
+      } finally {
+        setIsLoadingBrands(false);
+      }
+
+      try {
+        // Load categories
+        setIsLoadingCategories(true);
+        setCategoriesError(null);
+        const categoriesResponse = await productApi.listCategory();
+        if (!categoriesResponse.success) {
+          throw new Error(
+            categoriesResponse.errorMessage || "Failed to load categories"
+          );
+        }
+        setCategories(categoriesResponse.data || []);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Failed to load categories";
+        setCategoriesError(errorMessage);
+        toast.error(errorMessage);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+
+      // Mark as initialized and trigger initial product load
+      isInitialized.current = true;
+      // Force a filter update to trigger product loading
+      setAppliedFilters((prev) => ({ ...prev }));
+    };
+    initializeData();
+  }, []); // Empty dependency array to run only once
+
+  // Reload products when applied filters change (including initial load)
+  useEffect(() => {
+    // Don't fetch on initial mount until initialization is complete
+    if (!isInitialized.current) {
       return;
     }
 
-    isInitialized.current = true;
+    const fetchProducts = async () => {
+      try {
+        setIsLoadingProducts(true);
+        setProductsError(null);
 
-    const initializeData = async () => {
-      await Promise.all([loadBrands(), loadCategories(), loadProducts()]);
+        // Clean up empty or undefined filters for API call
+        const apiFilters: ListProductFilters = { ...appliedFilters };
+        Object.keys(apiFilters).forEach((key) => {
+          const typedKey = key as keyof ListProductFilters;
+          if (
+            apiFilters[typedKey] === "" ||
+            apiFilters[typedKey] === undefined
+          ) {
+            delete apiFilters[typedKey];
+          }
+        });
+
+        const response = await productAdminApi.listProduct(apiFilters);
+
+        if (!response.success) {
+          throw new Error(response.errorMessage || "Failed to load products");
+        }
+
+        setProducts(response.data || []);
+        setPagination(response.metadata || null);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Failed to load products";
+        setProductsError(errorMessage);
+        toast.error(errorMessage);
+        setProducts([]);
+        setPagination(null);
+      } finally {
+        setIsLoadingProducts(false);
+      }
     };
-    initializeData();
-  }, [loadBrands, loadCategories, loadProducts]);
+
+    fetchProducts();
+  }, [appliedFilters]);
 
   // Filter update functions
-  const updateFilter = useCallback(
+  const updateFormFilter = useCallback(
     <K extends keyof ListProductFilters>(
       key: K,
       value: ListProductFilters[K]
     ) => {
-      setFilters((prev) => ({ ...prev, [key]: value }));
+      setFormFilters((prev) => ({ ...prev, [key]: value }));
     },
     []
   );
@@ -283,15 +357,15 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
       field: keyof ListProductFilters,
       value: string | number | boolean | undefined | number[]
     ) => {
-      updateFilter(field, value);
+      updateFormFilter(field, value);
     },
-    [updateFilter]
+    [updateFormFilter]
   );
 
   const handleSearch = useCallback(() => {
-    // Trigger products reload by updating filters
-    setFilters((prev) => ({ ...prev }));
-  }, []);
+    // Copy form filters to applied filters and reset to first page
+    setAppliedFilters((prev) => ({ ...formFilters, page: 1 }));
+  }, [formFilters]);
 
   const handleDelete = useCallback(
     async (productId: number) => {
@@ -315,15 +389,15 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
       setIsExporting(true);
       try {
         const exportFilters: ExportProductFilters = {
-          id: filters.id,
-          keyword: filters.keyword,
-          minPrice: filters.minPrice,
-          maxPrice: filters.maxPrice,
-          status: filters.status,
-          availableFrom: filters.availableFrom,
-          isActive: filters.isActive,
-          brandId: filters.brandId,
-          categoryIds: filters.categoryIds,
+          id: appliedFilters.id,
+          keyword: appliedFilters.keyword,
+          minPrice: appliedFilters.minPrice,
+          maxPrice: appliedFilters.maxPrice,
+          status: appliedFilters.status,
+          availableFrom: appliedFilters.availableFrom,
+          isActive: appliedFilters.isActive,
+          brandId: appliedFilters.brandId,
+          categoryIds: appliedFilters.categoryIds,
           fileType: FileType[fileType.toUpperCase() as keyof typeof FileType],
         };
         await productAdminApi.exportProduct(exportFilters);
@@ -336,7 +410,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
         setIsExporting(false);
       }
     },
-    [isExporting, filters]
+    [isExporting, appliedFilters]
   );
 
   const handleImportClick = useCallback(() => {
@@ -408,7 +482,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                 type="number"
                 id="productId"
                 placeholder="Enter product ID"
-                value={filters.id || ""}
+                value={formFilters.id || ""}
                 onChange={(e) =>
                   handleFilterChange(
                     "id",
@@ -424,7 +498,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                 type="text"
                 id="keyword"
                 placeholder="Search by product name, description, or an attribute"
-                value={filters.keyword || ""}
+                value={formFilters.keyword || ""}
                 onChange={(e) =>
                   handleFilterChange("keyword", e.target.value || undefined)
                 }
@@ -438,7 +512,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                 step="0.01"
                 id="minPrice"
                 placeholder="Min price"
-                value={filters.minPrice || ""}
+                value={formFilters.minPrice || ""}
                 onChange={(e) =>
                   handleFilterChange(
                     "minPrice",
@@ -455,7 +529,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                 step="0.01"
                 id="maxPrice"
                 placeholder="Max price"
-                value={filters.maxPrice || ""}
+                value={formFilters.maxPrice || ""}
                 onChange={(e) =>
                   handleFilterChange(
                     "maxPrice",
@@ -471,7 +545,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
             <div className="space-y-2">
               <Label htmlFor="status">Product Status</Label>
               <Select
-                value={filters.status || ""}
+                value={formFilters.status || ""}
                 onValueChange={(value) => handleFilterChange("status", value)}
               >
                 <SelectTrigger>
@@ -492,7 +566,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
               <Input
                 type="date"
                 id="availableFrom"
-                value={filters.availableFrom || ""}
+                value={formFilters.availableFrom || ""}
                 onChange={(e) =>
                   handleFilterChange(
                     "availableFrom",
@@ -547,7 +621,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                 <>
                   <Select
                     disabled={!brands.length}
-                    value={filters.brandId || ""}
+                    value={formFilters.brandId || ""}
                     onValueChange={(value) =>
                       handleFilterChange("brandId", value)
                     }
@@ -588,8 +662,9 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                   <Select value="placeholder" onValueChange={() => {}}>
                     <SelectTrigger>
                       <SelectValue>
-                        {filters.categoryIds && filters.categoryIds.length > 0
-                          ? `${filters.categoryIds.length} categories selected`
+                        {formFilters.categoryIds &&
+                        formFilters.categoryIds.length > 0
+                          ? `${formFilters.categoryIds.length} categories selected`
                           : "All Categories"}
                       </SelectValue>
                     </SelectTrigger>
@@ -607,12 +682,13 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                               type="checkbox"
                               className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                               checked={
-                                filters.categoryIds?.includes(category.id) ||
-                                false
+                                formFilters.categoryIds?.includes(
+                                  category.id
+                                ) || false
                               }
                               onChange={(e) => {
                                 const currentCategories =
-                                  filters.categoryIds || [];
+                                  formFilters.categoryIds || [];
                                 if (e.target.checked) {
                                   handleFilterChange("categoryIds", [
                                     ...currentCategories,

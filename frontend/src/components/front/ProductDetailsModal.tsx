@@ -123,9 +123,15 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
 
                 <div>
                   <h4 className="text-lg font-semibold mb-2">Brand</h4>
-                  <p className="text-muted-foreground">
-                    {product.brand?.name || "N/A"}
-                  </p>
+                  {product.brand?.name ? (
+                    <Badge variant="secondary">
+                      {product.brand.name}
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline">
+                      N/A
+                    </Badge>
+                  )}
                 </div>
 
                 <div>

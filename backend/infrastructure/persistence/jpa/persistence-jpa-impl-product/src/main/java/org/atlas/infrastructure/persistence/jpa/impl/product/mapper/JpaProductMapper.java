@@ -1,14 +1,13 @@
 package org.atlas.infrastructure.persistence.jpa.impl.product.mapper;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import org.atlas.domain.product.entity.Product;
-import org.atlas.domain.product.entity.ProductAttribute;
+import org.atlas.framework.util.CollectionUtil;
 import org.atlas.infrastructure.persistence.jpa.impl.product.entity.JpaProduct;
 import org.atlas.infrastructure.persistence.jpa.impl.product.entity.JpaProductAttribute;
+import org.atlas.infrastructure.persistence.jpa.impl.product.entity.JpaProductDetails;
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 
@@ -22,33 +21,60 @@ public interface JpaProductMapper {
 
   JpaProductMapper INSTANCE = Mappers.getMapper(JpaProductMapper.class);
 
+  @Mapping(target = "details", ignore = true)
+  @Mapping(target = "attributes", ignore = true)
   JpaProduct toJpaProduct(Product product);
 
-  default Set<JpaProductAttribute> mapAttributesToSet(List<ProductAttribute> attributes) {
-    if (attributes == null) {
-      return new HashSet<>();
+  /**
+   * After mapping for {@link Product} to {@link JpaProduct} - handles bidirectional relationships
+   */
+  @AfterMapping
+  default void afterToJpaProduct(@MappingTarget JpaProduct jpaProduct, Product product) {
+    if (jpaProduct.getDetails() != null) {
+      jpaProduct.getDetails().setProduct(jpaProduct);
     }
-    Set<JpaProductAttribute> result = new HashSet<>();
-    for (ProductAttribute attribute : attributes) {
-      result.add(JpaProductAttributeMapper.INSTANCE.toJpaProductAttribute(attribute));
+
+    if (CollectionUtil.isNotEmpty(product.getAttributes())) {
+      product.getAttributes().forEach(attribute -> {
+        JpaProductAttribute jpaAttribute =
+            JpaProductAttributeMapper.INSTANCE.toJpaProductAttribute(attribute);
+        jpaProduct.addAttribute(jpaAttribute);
+      });
     }
-    return result;
   }
 
   Product toProduct(JpaProduct jpaProduct);
 
-  default List<ProductAttribute> mapAttributesToList(Set<JpaProductAttribute> attributes) {
-    if (attributes == null) {
-      return new ArrayList<>();
-    }
-    List<ProductAttribute> result = new ArrayList<>();
-    for (JpaProductAttribute attribute : attributes) {
-      ProductAttribute domainAttribute = JpaProductAttributeMapper.INSTANCE.toProductAttribute(
-          attribute);
-      result.add(domainAttribute);
-    }
-    return result;
-  }
-
+  @Mapping(target = "details", ignore = true)
+  @Mapping(target = "attributes", ignore = true)
   void merge(Product product, @MappingTarget JpaProduct jpaProduct);
+
+  /**
+   * After mapping for merge operation - handles complex relationship updates
+   */
+  @AfterMapping
+  default void afterMerge(@MappingTarget JpaProduct jpaProduct, Product product) {
+    if (product.getDetails() != null) {
+      if (jpaProduct.getDetails() != null) {
+        // Merge into existing details
+        JpaProductDetailsMapper.INSTANCE.merge(product.getDetails(), jpaProduct.getDetails());
+      } else {
+        // Create new details if none exist
+        JpaProductDetails jpaDetails =
+            JpaProductDetailsMapper.INSTANCE.toJpaProductDetails(product.getDetails());
+        jpaDetails.setProduct(jpaProduct);
+        jpaProduct.setDetails(jpaDetails);
+      }
+    }
+
+    if (CollectionUtil.isNotEmpty(product.getAttributes())) {
+      // Clear existing attributes and add new ones using entity helper method
+      jpaProduct.getAttributes().clear();
+      product.getAttributes().forEach(attribute -> {
+        JpaProductAttribute jpaAttribute =
+            JpaProductAttributeMapper.INSTANCE.toJpaProductAttribute(attribute);
+        jpaProduct.addAttribute(jpaAttribute);
+      });
+    }
+  }
 }

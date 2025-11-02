@@ -43,9 +43,14 @@ import {
 import {
   ChevronDown,
   ChevronUp,
+  CreditCard,
   Loader2,
+  MapPin,
   RotateCcw,
   Search,
+  ShoppingBag,
+  TriangleAlert,
+  User,
 } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -72,58 +77,64 @@ const OrderList: React.FC = () => {
     totalRecords: 0,
   });
 
-  const toggleDetails = useCallback((orderId: number) => {
-    setSelectedOrderId(selectedOrderId === orderId ? null : orderId);
-  }, [selectedOrderId]);
-
-  const applyFilters = useCallback(
-      async (page: number, currentFilters?: ListOrderFilters) => {
-        setIsLoadingOrders(true);
-        try {
-          const filtersToUse = currentFilters || filters;
-          const updatedFilters = {...filtersToUse, page};
-          setFilters(updatedFilters);
-          setMetadata((prev) => ({...prev, currentPage: page}));
-
-          // Clean filters for API call - remove empty or undefined values
-          const apiFilters: ListOrderFilters = {...updatedFilters};
-          Object.keys(apiFilters).forEach((key) => {
-            const typedKey = key as keyof ListOrderFilters;
-            if (
-                apiFilters[typedKey] === "" ||
-                apiFilters[typedKey] === undefined
-            ) {
-              delete apiFilters[typedKey];
-            }
-          });
-
-          const response = await orderAdminApi.listOrder(apiFilters);
-
-          if (response.success) {
-            setOrders(response.data || []);
-            if (response.metadata) {
-              setMetadata(response.metadata);
-            }
-          } else {
-            toast.error("Failed to load orders");
-            setOrders([]);
-          }
-          setSelectedOrderId(null);
-        } catch {
-          toast.error("Failed to load orders");
-          setOrders([]);
-        } finally {
-          setIsLoadingOrders(false);
-        }
-      },
-      [filters]
+  const toggleDetails = useCallback(
+    (orderId: number) => {
+      setSelectedOrderId(selectedOrderId === orderId ? null : orderId);
+    },
+    [selectedOrderId]
   );
 
-  const changePage = useCallback((newPage: number) => {
-    if (newPage >= 1 && newPage <= metadata.totalPages) {
-      applyFilters(newPage);
-    }
-  }, [metadata.totalPages, applyFilters]);
+  const applyFilters = useCallback(
+    async (page: number, currentFilters?: ListOrderFilters) => {
+      setIsLoadingOrders(true);
+      try {
+        const filtersToUse = currentFilters || filters;
+        const updatedFilters = { ...filtersToUse, page };
+        setFilters(updatedFilters);
+        setMetadata((prev) => ({ ...prev, currentPage: page }));
+
+        // Clean filters for API call - remove empty or undefined values
+        const apiFilters: ListOrderFilters = { ...updatedFilters };
+        Object.keys(apiFilters).forEach((key) => {
+          const typedKey = key as keyof ListOrderFilters;
+          if (
+            apiFilters[typedKey] === "" ||
+            apiFilters[typedKey] === undefined
+          ) {
+            delete apiFilters[typedKey];
+          }
+        });
+
+        const response = await orderAdminApi.listOrder(apiFilters);
+
+        if (response.success) {
+          setOrders(response.data || []);
+          if (response.metadata) {
+            setMetadata(response.metadata);
+          }
+        } else {
+          toast.error("Failed to load orders");
+          setOrders([]);
+        }
+        setSelectedOrderId(null);
+      } catch {
+        toast.error("Failed to load orders");
+        setOrders([]);
+      } finally {
+        setIsLoadingOrders(false);
+      }
+    },
+    [filters]
+  );
+
+  const changePage = useCallback(
+    (newPage: number) => {
+      if (newPage >= 1 && newPage <= metadata.totalPages) {
+        applyFilters(newPage);
+      }
+    },
+    [metadata.totalPages, applyFilters]
+  );
 
   const resetFilters = useCallback(() => {
     const resetFiltersData: ListOrderFilters = {
@@ -140,12 +151,15 @@ const OrderList: React.FC = () => {
     applyFilters(1, resetFiltersData);
   }, [applyFilters]);
 
-  const handleFilterChange = useCallback((
+  const handleFilterChange = useCallback(
+    (
       field: keyof ListOrderFilters,
       value: string | number | boolean | undefined
-  ) => {
-    setFilters((prev) => ({...prev, [field]: value}));
-  }, []);
+    ) => {
+      setFilters((prev) => ({ ...prev, [field]: value }));
+    },
+    []
+  );
 
   const handleSearch = useCallback(() => {
     applyFilters(1);
@@ -162,383 +176,525 @@ const OrderList: React.FC = () => {
   }, [applyFilters]);
 
   return (
-      <div className="space-y-6">
-        {/* Filters Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Order Filters</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {/* Row 1: Order ID, User ID, Product ID */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="orderId">Order ID</Label>
-                <Input
-                    type="number"
-                    id="orderId"
-                    placeholder="Enter order ID"
-                    value={filters.orderId || ""}
-                    onChange={(e) =>
-                        handleFilterChange(
-                            "orderId",
-                            e.target.value ? parseInt(e.target.value) : undefined
-                        )
-                    }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="userId">User ID</Label>
-                <Input
-                    type="number"
-                    id="userId"
-                    placeholder="Enter user ID"
-                    value={filters.userId || ""}
-                    onChange={(e) =>
-                        handleFilterChange(
-                            "userId",
-                            e.target.value ? parseInt(e.target.value) : undefined
-                        )
-                    }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="productId">Product ID</Label>
-                <Input
-                    type="number"
-                    id="productId"
-                    placeholder="Enter product ID"
-                    value={filters.productId || ""}
-                    onChange={(e) =>
-                        handleFilterChange(
-                            "productId",
-                            e.target.value ? parseInt(e.target.value) : undefined
-                        )
-                    }
-                />
-              </div>
+    <div className="space-y-6">
+      {/* Filters Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Order Filters</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {/* Row 1: Order ID, User ID, Product ID */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="orderId">Order ID</Label>
+              <Input
+                type="number"
+                id="orderId"
+                placeholder="Enter order ID"
+                value={filters.orderId || ""}
+                onChange={(e) =>
+                  handleFilterChange(
+                    "orderId",
+                    e.target.value ? parseInt(e.target.value) : undefined
+                  )
+                }
+              />
             </div>
-
-            {/* Row 2: Start Date, End Date, Status */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-              <div className="space-y-2">
-                <Label htmlFor="startDate">Start Date</Label>
-                <Input
-                    type="date"
-                    id="startDate"
-                    value={filters.startDate || ""}
-                    onChange={(e) =>
-                        handleFilterChange("startDate", e.target.value || undefined)
-                    }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="endDate">End Date</Label>
-                <Input
-                    type="date"
-                    id="endDate"
-                    value={filters.endDate || ""}
-                    onChange={(e) =>
-                        handleFilterChange("endDate", e.target.value || undefined)
-                    }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="status">Order Status</Label>
-                <Select
-                    value={filters.status || ""}
-                    onValueChange={(value) => handleFilterChange("status", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Statuses"/>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ORDER_STATUSES.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {status}
-                        </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="userId">User ID</Label>
+              <Input
+                type="number"
+                id="userId"
+                placeholder="Enter user ID"
+                value={filters.userId || ""}
+                onChange={(e) =>
+                  handleFilterChange(
+                    "userId",
+                    e.target.value ? parseInt(e.target.value) : undefined
+                  )
+                }
+              />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="productId">Product ID</Label>
+              <Input
+                type="number"
+                id="productId"
+                placeholder="Enter product ID"
+                value={filters.productId || ""}
+                onChange={(e) =>
+                  handleFilterChange(
+                    "productId",
+                    e.target.value ? parseInt(e.target.value) : undefined
+                  )
+                }
+              />
+            </div>
+          </div>
 
-            <div className="flex justify-start space-x-2 mt-4">
-              <Button onClick={handleSearch} disabled={isLoadingOrders}>
-                <Search className="h-4 w-4 mr-2"/>
-                Search
-              </Button>
-              <Button
-                  variant="outline"
-                  onClick={resetFilters}
-                  disabled={isLoadingOrders}
+          {/* Row 2: Start Date, End Date, Status */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="startDate">Start Date</Label>
+              <Input
+                type="date"
+                id="startDate"
+                value={filters.startDate || ""}
+                onChange={(e) =>
+                  handleFilterChange("startDate", e.target.value || undefined)
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="endDate">End Date</Label>
+              <Input
+                type="date"
+                id="endDate"
+                value={filters.endDate || ""}
+                onChange={(e) =>
+                  handleFilterChange("endDate", e.target.value || undefined)
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="status">Order Status</Label>
+              <Select
+                value={filters.status || ""}
+                onValueChange={(value) => handleFilterChange("status", value)}
               >
-                <RotateCcw className="h-4 w-4 mr-2"/>
-                Reset
-              </Button>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ORDER_STATUSES.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {status}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Orders Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Order Results</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoadingOrders ? (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary"/>
-                  <p className="mt-2 text-muted-foreground">Loading orders...</p>
-                </div>
-            ) : (
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Code</TableHead>
-                        <TableHead>User</TableHead>
-                        <TableHead>Amount</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Created At</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {orders.length === 0 ? (
-                          <TableRow>
-                            <TableCell
-                                colSpan={7}
-                                className="text-center py-8 text-muted-foreground"
+          <div className="flex justify-start space-x-2 mt-4">
+            <Button onClick={handleSearch} disabled={isLoadingOrders}>
+              <Search className="h-4 w-4 mr-2" />
+              Search
+            </Button>
+            <Button
+              variant="outline"
+              onClick={resetFilters}
+              disabled={isLoadingOrders}
+            >
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Reset
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Orders Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Order Results</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoadingOrders ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="mt-2 text-muted-foreground">Loading orders...</p>
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Code</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Created At</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {orders.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={7}
+                        className="text-center py-8 text-muted-foreground"
+                      >
+                        No orders found
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    orders.map((order) => (
+                      <React.Fragment key={order.id}>
+                        <TableRow className="hover:bg-muted/50">
+                          <TableCell>{order.id}</TableCell>
+                          <TableCell>{order.code}</TableCell>
+                          <TableCell>
+                            {order.user
+                              ? `${order.user.firstName} ${order.user.lastName}`
+                              : "N/A"}
+                          </TableCell>
+                          <TableCell>{formatCurrency(order.amount)}</TableCell>
+                          <TableCell>
+                            {getOrderStatusBadge(order.status)}
+                          </TableCell>
+                          <TableCell>{formatDate(order.createdAt)}</TableCell>
+                          <TableCell>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => toggleDetails(order.id)}
                             >
-                              No orders found
-                            </TableCell>
-                          </TableRow>
-                      ) : (
-                          orders.map((order) => (
-                              <React.Fragment key={order.id}>
-                                <TableRow className="hover:bg-muted/50">
-                                  <TableCell>{order.id}</TableCell>
-                                  <TableCell>{order.code}</TableCell>
-                                  <TableCell>
-                                    {order.user
+                              {selectedOrderId === order.id ? (
+                                <>
+                                  <ChevronUp className="h-4 w-4 mr-2" />
+                                  Hide Details
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronDown className="h-4 w-4 mr-2" />
+                                  View Details
+                                </>
+                              )}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+
+                        {/* Order Details */}
+                        {selectedOrderId === order.id && (
+                          <TableRow>
+                            <TableCell colSpan={7} className="p-0">
+                              <div className="p-4 bg-muted/30 border-t">
+                                <div className="space-y-5">
+                                  {/* User Information */}
+                                  <div className="bg-white rounded-lg border p-4 shadow-sm">
+                                    <h6 className="font-semibold mb-2 border-b pb-2 flex items-center gap-2">
+                                      <User className="w-4 h-4" />
+                                      User Information
+                                    </h6>
+                                    <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                      <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                        User ID
+                                      </span>
+                                      {order.user?.id ?? "N/A"}
+                                    </div>
+                                    <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                      <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                        Full Name
+                                      </span>
+                                      {order.user
                                         ? `${order.user.firstName} ${order.user.lastName}`
                                         : "N/A"}
-                                  </TableCell>
-                                  <TableCell>{formatCurrency(order.amount)}</TableCell>
-                                  <TableCell>
-                                    {getOrderStatusBadge(order.status)}
-                                  </TableCell>
-                                  <TableCell>{formatDate(order.createdAt)}</TableCell>
-                                  <TableCell>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => toggleDetails(order.id)}
-                                    >
-                                      {selectedOrderId === order.id ? (
-                                          <>
-                                            <ChevronUp className="h-4 w-4 mr-2"/>
-                                            Hide Details
-                                          </>
-                                      ) : (
-                                          <>
-                                            <ChevronDown className="h-4 w-4 mr-2"/>
-                                            View Details
-                                          </>
-                                      )}
-                                    </Button>
-                                  </TableCell>
-                                </TableRow>
+                                    </div>
+                                    <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                      <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                        Email
+                                      </span>
+                                      {order.user?.email ?? "N/A"}
+                                    </div>
+                                    <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                      <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                        Phone Number
+                                      </span>
+                                      {order.user?.phoneNumber ?? "N/A"}
+                                    </div>
+                                  </div>
 
-                                {/* Order Details */}
-                                {selectedOrderId === order.id && (
-                                    <TableRow>
-                                      <TableCell colSpan={7} className="p-0">
-                                        <div className="p-6 bg-muted/30 border-t">
-                                          <div className="space-y-6">
-                                            <div>
-                                              <h6 className="text-lg font-semibold mb-4">
-                                                User Information
-                                              </h6>
-                                              <div
-                                                  className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                                <div>
-                                        <span className="text-sm font-medium text-muted-foreground">
-                                          User ID
+                                  {/* Address Information */}
+                                  {order.address && (
+                                    <div className="bg-white rounded-lg border p-4 shadow-sm">
+                                      <h6 className="font-semibold mb-2 border-b pb-2 flex items-center gap-2">
+                                        <MapPin className="w-4 h-4" />
+                                        Delivery Address
+                                      </h6>
+                                      <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                        <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                          Street
                                         </span>
-                                                  <p className="text-sm">
-                                                    {order.user?.id ?? "N/A"}
-                                                  </p>
-                                                </div>
-                                                <div>
-                                        <span className="text-sm font-medium text-muted-foreground">
-                                          First Name
+                                        {order.address.street}
+                                      </div>
+                                      <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                        <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                          City
                                         </span>
-                                                  <p className="text-sm">
-                                                    {order.user?.firstName ?? "N/A"}
-                                                  </p>
-                                                </div>
-                                                <div>
-                                        <span className="text-sm font-medium text-muted-foreground">
-                                          Last Name
+                                        {order.address.city}
+                                      </div>
+                                      <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                        <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                          Country
                                         </span>
-                                                  <p className="text-sm">
-                                                    {order.user?.lastName ?? "N/A"}
-                                                  </p>
-                                                </div>
-                                              </div>
-                                            </div>
+                                        {order.address.country}
+                                      </div>
+                                      <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                        <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                          Postal Code
+                                        </span>
+                                        {order.address.postalCode}
+                                      </div>
+                                    </div>
+                                  )}
 
-                                            {order.cancellationReason && (
-                                                <Alert
-                                                    className="border-destructive bg-destructive/10">
-                                                  <AlertDescription>
-                                                    <strong>Cancellation Reason:</strong>{" "}
-                                                    {order.cancellationReason}
-                                                  </AlertDescription>
-                                                </Alert>
-                                            )}
-
-                                            <div>
-                                              <h6 className="text-lg font-semibold mb-4">
-                                                Order Items
-                                              </h6>
-                                              <div className="rounded-md border">
-                                                <Table>
-                                                  <TableHeader>
-                                                    <TableRow>
-                                                      <TableHead>Product ID</TableHead>
-                                                      <TableHead>Product Name</TableHead>
-                                                      <TableHead>Price</TableHead>
-                                                      <TableHead>Quantity</TableHead>
-                                                      <TableHead>Subtotal</TableHead>
-                                                    </TableRow>
-                                                  </TableHeader>
-                                                  <TableBody>
-                                                    {order.orderItems?.map((item) => (
-                                                        <TableRow key={item.product.id}>
-                                                          <TableCell>
-                                                            {item.product.id}
-                                                          </TableCell>
-                                                          <TableCell>
-                                                            {item.product.name}
-                                                          </TableCell>
-                                                          <TableCell>
-                                                            {formatCurrency(
-                                                                item.product.price
-                                                            )}
-                                                          </TableCell>
-                                                          <TableCell>
-                                                            {item.quantity}
-                                                          </TableCell>
-                                                          <TableCell>
-                                                            {formatCurrency(
-                                                                item.product.price *
-                                                                item.quantity
-                                                            )}
-                                                          </TableCell>
-                                                        </TableRow>
-                                                    ))}
-                                                  </TableBody>
-                                                </Table>
-                                              </div>
-                                            </div>
-                                          </div>
+                                  {/* Cancellation Reason */}
+                                  {order.cancellationReason && (
+                                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 shadow-sm">
+                                      <h6 className="font-semibold mb-2 text-red-800 border-b border-red-200 pb-2 flex items-center gap-2">
+                                        <TriangleAlert className="w-4 h-4" />
+                                        Cancellation Information
+                                      </h6>
+                                      <div className="flex items-start space-x-3">
+                                        <div>
+                                          <p className="text-sm text-red-800 mt-1 leading-relaxed">
+                                            {order.cancellationReason}
+                                          </p>
                                         </div>
-                                      </TableCell>
-                                    </TableRow>
-                                )}
-                              </React.Fragment>
-                          ))
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-            )}
-          </CardContent>
-        </Card>
+                                      </div>
+                                    </div>
+                                  )}
 
-        {/* Pagination */}
-        {metadata.totalPages > 1 && (
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
-                Page {metadata.currentPage} of {metadata.totalPages} (
-                {metadata.totalRecords} records)
-              </div>
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          if (metadata.currentPage > 1) {
-                            changePage(metadata.currentPage - 1);
-                          }
-                        }}
-                        className={
-                          metadata.currentPage <= 1
-                              ? "pointer-events-none opacity-50"
-                              : ""
-                        }
-                    />
-                  </PaginationItem>
+                                  {/* Order Items */}
+                                  <div className="bg-white rounded-lg border p-4 shadow-sm">
+                                    <h6 className="font-semibold mb-2 border-b pb-2 flex items-center gap-2">
+                                      <ShoppingBag className="w-4 h-4" />
+                                      Order Items (
+                                      {order.orderItems?.length || 0} items)
+                                    </h6>
+                                    <div className="rounded-lg border border-gray-200 overflow-hidden">
+                                      <Table>
+                                        <TableHeader>
+                                          <TableRow className="bg-gray-50">
+                                            <TableHead className="font-semibold text-gray-700">
+                                              Product ID
+                                            </TableHead>
+                                            <TableHead className="font-semibold text-gray-700">
+                                              Product Name
+                                            </TableHead>
+                                            <TableHead className="font-semibold text-gray-700">
+                                              Price
+                                            </TableHead>
+                                            <TableHead className="font-semibold text-gray-700">
+                                              Quantity
+                                            </TableHead>
+                                            <TableHead className="font-semibold text-gray-700">
+                                              Subtotal
+                                            </TableHead>
+                                          </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                          {order.orderItems?.map(
+                                            (item, index) => (
+                                              <TableRow
+                                                key={item.product.id}
+                                                className={
+                                                  index % 2 === 0
+                                                    ? "bg-white"
+                                                    : "bg-gray-50/50"
+                                                }
+                                              >
+                                                <TableCell className="text-sm text-gray-600">
+                                                  {item.product.id}
+                                                </TableCell>
+                                                <TableCell className="font-medium text-gray-900">
+                                                  {item.product.name}
+                                                </TableCell>
+                                                <TableCell className="text-gray-700">
+                                                  {formatCurrency(
+                                                    item.product.price
+                                                  )}
+                                                </TableCell>
+                                                <TableCell className="text-center">
+                                                  {item.quantity}
+                                                </TableCell>
+                                                <TableCell className="font-semibold text-gray-900">
+                                                  {formatCurrency(
+                                                    item.product.price *
+                                                      item.quantity
+                                                  )}
+                                                </TableCell>
+                                              </TableRow>
+                                            )
+                                          )}
+                                        </TableBody>
+                                      </Table>
+                                    </div>
 
-                  {/* Page numbers */}
-                  {Array.from(
-                      {length: Math.min(5, metadata.totalPages)},
-                      (_, i) => {
-                        const pageNumber =
-                            Math.max(
-                                1,
-                                Math.min(
-                                    metadata.totalPages - 4,
-                                    metadata.currentPage - 2
-                                )
-                            ) + i;
+                                    {/* Order Total */}
+                                    <div className="mt-6 pt-4 border-t border-gray-200">
+                                      <div className="flex justify-between items-center">
+                                        <span className="font-semibold">
+                                          Total Amount:
+                                        </span>
+                                        <span className="font-bold text-green-600 bg-green-50 px-4 py-2 rounded-lg">
+                                          {formatCurrency(order.amount)}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
 
-                        if (pageNumber <= metadata.totalPages) {
-                          return (
-                              <PaginationItem key={pageNumber}>
-                                <PaginationLink
-                                    href="#"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      changePage(pageNumber);
-                                    }}
-                                    isActive={pageNumber === metadata.currentPage}
-                                >
-                                  {pageNumber}
-                                </PaginationLink>
-                              </PaginationItem>
-                          );
-                        }
-                        return null;
-                      }
+                                  {/* Payment Information */}
+                                  {order.payment && (
+                                    <div className="bg-white rounded-lg border p-4 shadow-sm">
+                                      <h6 className="font-semibold mb-2 border-b pb-2 flex items-center gap-2">
+                                        <CreditCard className="w-4 h-4" />
+                                        Payment Information
+                                      </h6>
+                                      {order.payment.paymentGateway && (
+                                        <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                          <span className="text-sm font-medium text-gray-600 min-w-[140px]">
+                                            Payment Gateway
+                                          </span>
+                                          <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
+                                            {(() => {
+                                              const paymentGateway =
+                                                order.payment.paymentGateway;
+                                              return paymentGateway
+                                                ? paymentGateway
+                                                    .charAt(0)
+                                                    .toUpperCase() +
+                                                    paymentGateway
+                                                      .slice(1)
+                                                      .toLowerCase()
+                                                : "";
+                                            })()}
+                                          </span>
+                                        </div>
+                                      )}
+                                      {order.payment.paymentMethod && (
+                                        <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                          <span className="text-sm font-medium text-gray-600 min-w-[140px]">
+                                            Payment Method
+                                          </span>
+                                          {(() => {
+                                            const paymentMethod =
+                                              order.payment.paymentMethod;
+                                            return paymentMethod
+                                              ? paymentMethod
+                                                  .charAt(0)
+                                                  .toUpperCase() +
+                                                  paymentMethod
+                                                    .slice(1)
+                                                    .toLowerCase()
+                                              : "";
+                                          })()}
+                                        </div>
+                                      )}
+                                      {order.payment.paymentMethodDetails && (
+                                        <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                          <span className="text-sm font-medium text-gray-600 min-w-[140px]">
+                                            Payment Details
+                                          </span>
+                                          {order.payment.paymentMethodDetails}
+                                        </div>
+                                      )}
+                                      {order.payment.transactionId && (
+                                        <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                          <span className="text-sm font-medium text-gray-600 min-w-[140px]">
+                                            Transaction ID
+                                          </span>
+                                          {order.payment.transactionId}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </React.Fragment>
+                    ))
                   )}
-
-                  <PaginationItem>
-                    <PaginationNext
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          if (metadata.currentPage < metadata.totalPages) {
-                            changePage(metadata.currentPage + 1);
-                          }
-                        }}
-                        className={
-                          metadata.currentPage >= metadata.totalPages
-                              ? "pointer-events-none opacity-50"
-                              : ""
-                        }
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+                </TableBody>
+              </Table>
             </div>
-        )}
-      </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Pagination */}
+      {metadata.totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Page {metadata.currentPage} of {metadata.totalPages} (
+            {metadata.totalRecords} records)
+          </div>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (metadata.currentPage > 1) {
+                      changePage(metadata.currentPage - 1);
+                    }
+                  }}
+                  className={
+                    metadata.currentPage <= 1
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }
+                />
+              </PaginationItem>
+
+              {/* Page numbers */}
+              {Array.from(
+                { length: Math.min(5, metadata.totalPages) },
+                (_, i) => {
+                  const pageNumber =
+                    Math.max(
+                      1,
+                      Math.min(
+                        metadata.totalPages - 4,
+                        metadata.currentPage - 2
+                      )
+                    ) + i;
+
+                  if (pageNumber <= metadata.totalPages) {
+                    return (
+                      <PaginationItem key={pageNumber}>
+                        <PaginationLink
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            changePage(pageNumber);
+                          }}
+                          isActive={pageNumber === metadata.currentPage}
+                        >
+                          {pageNumber}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  }
+                  return null;
+                }
+              )}
+
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (metadata.currentPage < metadata.totalPages) {
+                      changePage(metadata.currentPage + 1);
+                    }
+                  }}
+                  className={
+                    metadata.currentPage >= metadata.totalPages
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
+    </div>
   );
 };
 

@@ -1,13 +1,8 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { useUserStore } from '../../stores/user.store';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
-import { Clock, ChevronDown, ChevronUp, RotateCcw, Search } from 'lucide-react';
-import { orderApi } from "@/api/index.api";
 import { Metadata } from "@/api/apiClient";
+import { orderApi } from "@/api/index.api";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Pagination,
@@ -17,6 +12,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Table,
   TableBody,
@@ -31,9 +27,21 @@ import {
   formatCurrency,
   formatDate,
   getOrderStatusBadge,
-  getPaymentStatusBadge,
 } from "@/utils/formatter.util";
+import {
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  CreditCard,
+  MapPin,
+  RotateCcw,
+  Search,
+  ShoppingBag,
+} from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { useUserStore } from "../../stores/user.store";
 
 const OrderHistoryPage: React.FC = () => {
   const { isAuthenticated, isAdmin, loading } = useUserStore();
@@ -68,7 +76,7 @@ const OrderHistoryPage: React.FC = () => {
   // Redirect if not authenticated or is admin
   useEffect(() => {
     if (isHydrated && (!isAuthenticated() || isAdmin())) {
-      router.push('/');
+      router.push("/");
       return;
     }
   }, [isHydrated, isAuthenticated, isAdmin, router]);
@@ -81,11 +89,11 @@ const OrderHistoryPage: React.FC = () => {
       setIsLoading(true);
       try {
         const filtersToUse = currentFilters || filters;
-        const updatedFilters = {...filtersToUse, page};
-        setMetadata((prev) => ({...prev, currentPage: page}));
+        const updatedFilters = { ...filtersToUse, page };
+        setMetadata((prev) => ({ ...prev, currentPage: page }));
 
         // Clean up empty or undefined filters for API call
-        const apiFilters: ListOrderFilters = {...updatedFilters};
+        const apiFilters: ListOrderFilters = { ...updatedFilters };
         Object.keys(apiFilters).forEach((key) => {
           const typedKey = key as keyof ListOrderFilters;
           if (
@@ -149,7 +157,7 @@ const OrderHistoryPage: React.FC = () => {
       field: keyof ListOrderFilters,
       value: string | number | boolean | undefined
     ) => {
-      setFilters((prev) => ({...prev, [field]: value}));
+      setFilters((prev) => ({ ...prev, [field]: value }));
     },
     []
   );
@@ -178,8 +186,12 @@ const OrderHistoryPage: React.FC = () => {
 
   // Listen for refresh parameter to reload data
   useEffect(() => {
-    const refreshParam = searchParams.get('refresh');
-    if (refreshParam && isInitialized.current && refreshParam !== lastRefreshParam.current) {
+    const refreshParam = searchParams.get("refresh");
+    if (
+      refreshParam &&
+      isInitialized.current &&
+      refreshParam !== lastRefreshParam.current
+    ) {
       // Only refresh if this is a new refresh parameter
       lastRefreshParam.current = refreshParam;
       applyFilters(1);
@@ -279,7 +291,7 @@ const OrderHistoryPage: React.FC = () => {
             </div>
             <div className="flex gap-2 mt-4">
               <Button type="submit" className="flex items-center gap-2">
-                <Search className="h-4 w-4"/>
+                <Search className="h-4 w-4" />
                 Search
               </Button>
               <Button
@@ -288,7 +300,7 @@ const OrderHistoryPage: React.FC = () => {
                 onClick={resetFilters}
                 className="flex items-center gap-2"
               >
-                <RotateCcw className="h-4 w-4"/>
+                <RotateCcw className="h-4 w-4" />
                 Reset
               </Button>
             </div>
@@ -299,7 +311,7 @@ const OrderHistoryPage: React.FC = () => {
       {/* Loading State */}
       {isLoading && (
         <div className="flex justify-center py-8" aria-live="polite">
-          <Spinner 
+          <Spinner
             className="text-blue-600"
             role="status"
             aria-label="Loading orders"
@@ -336,18 +348,19 @@ const OrderHistoryPage: React.FC = () => {
                           <span className="font-medium">Status:</span>
                           {getOrderStatusBadge(order.status)}
                         </p>
-                        {order.status === "CANCELED" && order.cancellationReason && (
-                          <div className="mt-2">
-                            <p>
-                              <span className="font-medium">
-                                Cancellation Reason:
-                              </span>{" "}
-                              <span className="text-red-600">
-                                {order.cancellationReason}
-                              </span>
-                            </p>
-                          </div>
-                        )}
+                        {order.status === "CANCELED" &&
+                          order.cancellationReason && (
+                            <div className="mt-2">
+                              <p>
+                                <span className="font-medium">
+                                  Cancellation Reason:
+                                </span>{" "}
+                                <span className="text-red-600">
+                                  {order.cancellationReason}
+                                </span>
+                              </p>
+                            </div>
+                          )}
                       </div>
                       <Button
                         variant="outline"
@@ -357,11 +370,11 @@ const OrderHistoryPage: React.FC = () => {
                       >
                         {selectedOrderId === order.id ? (
                           <>
-                            <ChevronUp className="h-4 w-4"/> Hide Details
+                            <ChevronUp className="h-4 w-4" /> Hide Details
                           </>
                         ) : (
                           <>
-                            <ChevronDown className="h-4 w-4"/> View Details
+                            <ChevronDown className="h-4 w-4" /> View Details
                           </>
                         )}
                       </Button>
@@ -369,101 +382,148 @@ const OrderHistoryPage: React.FC = () => {
 
                     {/* Order Details */}
                     {selectedOrderId === order.id && (
-                      <div className="mt-4 pt-4 border-t border-gray-200">
-                        {/* Order Items Table */}
-                        <div className="mb-6">
-                          <h4 className="text-lg font-semibold mb-3">Order Items</h4>
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Product ID</TableHead>
-                                <TableHead>Product Name</TableHead>
-                                <TableHead>Price</TableHead>
-                                <TableHead>Quantity</TableHead>
-                                <TableHead>Subtotal</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {order.orderItems?.map((item) => (
-                                <TableRow key={item.product.id}>
-                                  <TableCell>{item.product.id}</TableCell>
-                                  <TableCell>{item.product.name}</TableCell>
-                                  <TableCell>
-                                    {formatCurrency(item.product.price)}
-                                  </TableCell>
-                                  <TableCell>{item.quantity}</TableCell>
-                                  <TableCell>
-                                    {formatCurrency(
-                                      item.product.price * item.quantity
-                                    )}
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </div>
-
-                        {/* Payment Information */}
-                        {order.payment && (
-                          <div className="mt-6 pt-4 border-t border-gray-200">
-                            <h4 className="text-lg font-semibold mb-3">Payment Information</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div className="space-y-2">
-                                {order.payment.paymentGateway && (
-                                  <p>
-                                    <span className="font-medium">Payment gateway:</span> {
-                                      (() => {
-                                        const paymentGateway = order.payment.paymentGateway;
-                                        return paymentGateway ? paymentGateway.charAt(0).toUpperCase() + paymentGateway.slice(1).toLowerCase() : '';
-                                      })()
-                                    }
-                                  </p>
-                                )}
-                                {order.payment.paymentMethod && (
-                                  <p>
-                                    <span className="font-medium">Payment method:</span> {
-                                      (() => {
-                                        const paymentMethod = order.payment.paymentMethod;
-                                        return paymentMethod ? paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1).toLowerCase() : '';
-                                      })()
-                                    }
-                                  </p>
-                                )}
-                                {order.payment.paymentMethodDetails && (
-                                  <p>
-                                    <span className="font-medium">Payment details:</span> {order.payment.paymentMethodDetails}
-                                  </p>
-                                )}
+                      <div className="mt-4 p-4 bg-muted/30 border">
+                        <div className="space-y-5">
+                          {/* Address Information */}
+                          {order.address && (
+                            <div className="bg-white rounded-lg border p-4 shadow-sm">
+                              <h6 className="font-semibold mb-2 border-b pb-2 flex items-center gap-2">
+                                <MapPin className="w-4 h-4" />
+                                Delivery Address
+                              </h6>
+                              <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                  Street
+                                </span>
+                                {order.address.street}
                               </div>
-                              <div className="space-y-2">
-                                {order.payment.status && (
-                                  <p className="flex items-center gap-2">
-                                    <span className="font-medium">Status:</span>
-                                    {getPaymentStatusBadge(order.payment.status)}
-                                  </p>
-                                )}
-                                {order.payment.errorCode && (
-                                  <p>
-                                    <span className="font-medium">Error Code:</span> 
-                                    <span className="text-red-600 ml-1">{order.payment.errorCode}</span>
-                                  </p>
-                                )}
-                                {order.payment.errorMessage && (
-                                  <p>
-                                    <span className="font-medium">Error Message:</span> 
-                                    <span className="text-red-600 ml-1">{order.payment.errorMessage}</span>
-                                  </p>
-                                )}
-                                {order.payment.cancellationReason && (
-                                  <p>
-                                    <span className="font-medium">Cancellation Reason:</span> 
-                                    <span className="text-red-600 ml-1">{order.payment.cancellationReason}</span>
-                                  </p>
-                                )}
+                              <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                  City
+                                </span>
+                                {order.address.city}
+                              </div>
+                              <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                  Country
+                                </span>
+                                {order.address.country}
+                              </div>
+                              <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                  Postal Code
+                                </span>
+                                {order.address.postalCode}
                               </div>
                             </div>
+                          )}
+
+                          {/* Order Items */}
+                          <div className="bg-white rounded-lg border p-4 shadow-sm">
+                            <h6 className="font-semibold mb-2 border-b pb-2 flex items-center gap-2">
+                              <ShoppingBag className="w-4 h-4" />
+                              Order Items ({order.orderItems?.length || 0}{" "}
+                              items)
+                            </h6>
+                            <div className="rounded-lg border border-gray-200 overflow-hidden">
+                              <Table>
+                                <TableHeader>
+                                  <TableRow className="bg-gray-50">
+                                    <TableHead className="font-semibold text-gray-700">
+                                      Product ID
+                                    </TableHead>
+                                    <TableHead className="font-semibold text-gray-700">
+                                      Product Name
+                                    </TableHead>
+                                    <TableHead className="font-semibold text-gray-700">
+                                      Price
+                                    </TableHead>
+                                    <TableHead className="font-semibold text-gray-700">
+                                      Quantity
+                                    </TableHead>
+                                    <TableHead className="font-semibold text-gray-700">
+                                      Subtotal
+                                    </TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {order.orderItems?.map((item, index) => (
+                                    <TableRow
+                                      key={item.product.id}
+                                      className={
+                                        index % 2 === 0
+                                          ? "bg-white"
+                                          : "bg-gray-50/50"
+                                      }
+                                    >
+                                      <TableCell className="text-sm text-gray-700">
+                                        {item.product.id}
+                                      </TableCell>
+                                      <TableCell className="text-sm font-medium text-gray-900">
+                                        {item.product.name}
+                                      </TableCell>
+                                      <TableCell className="text-sm text-gray-700">
+                                        {formatCurrency(item.product.price)}
+                                      </TableCell>
+                                      <TableCell className="text-sm text-gray-700">
+                                        {item.quantity}
+                                      </TableCell>
+                                      <TableCell className="text-sm font-medium text-gray-900">
+                                        {formatCurrency(
+                                          item.product.price * item.quantity
+                                        )}
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </div>
                           </div>
-                        )}
+
+                          {/* Payment Information */}
+                          {order.payment && (
+                            <div className="bg-white rounded-lg border p-4 shadow-sm">
+                              <h6 className="font-semibold mb-2 border-b pb-2 flex items-center gap-2">
+                                <CreditCard className="w-4 h-4" />
+                                Payment Information
+                              </h6>
+                              {order.payment.paymentGateway && (
+                                <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                  <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                    Payment Gateway
+                                  </span>
+                                  {order.payment.paymentGateway
+                                    .charAt(0)
+                                    .toUpperCase() +
+                                    order.payment.paymentGateway
+                                      .slice(1)
+                                      .toLowerCase()}
+                                </div>
+                              )}
+                              {order.payment.paymentMethod && (
+                                <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                  <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                    Payment Method
+                                  </span>
+                                  {order.payment.paymentMethod
+                                    .charAt(0)
+                                    .toUpperCase() +
+                                    order.payment.paymentMethod
+                                      .slice(1)
+                                      .toLowerCase()}
+                                </div>
+                              )}
+                              {order.payment.paymentMethodDetails && (
+                                <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                  <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                    Payment Details
+                                  </span>
+                                  {order.payment.paymentMethodDetails}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </CardContent>
@@ -490,7 +550,7 @@ const OrderHistoryPage: React.FC = () => {
                 />
               </PaginationItem>
 
-              {Array.from({length: metadata.totalPages}, (_, i) => i + 1).map(
+              {Array.from({ length: metadata.totalPages }, (_, i) => i + 1).map(
                 (page) => (
                   <PaginationItem key={page}>
                     <PaginationLink

@@ -119,10 +119,10 @@ public class Order extends DomainEntity {
   @Setter
   public static class PaymentSnapshot {
 
-    private String transactionId;
     private Integer paymentGatewayId;
     private String paymentGatewayName;
     private String paymentMethod;
     private String paymentMethodDetails;
+    private String transactionId;
   }
 }

@@ -23,7 +23,7 @@ public interface JpaCartMapper {
   JpaCartItem toJpaCartItem(Cart.CartItem cartItem);
 
   /**
-   * After mapping for Cart to JpaCart
+   * After mapping for {@link Cart} to {@link JpaCart} - handles bidirectional relationships
    */
   @AfterMapping
   default void afterToJpaCart(@MappingTarget JpaCart jpaCart, Cart cart) {

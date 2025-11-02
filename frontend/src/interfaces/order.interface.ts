@@ -7,6 +7,7 @@ export interface Order {
   id: number;
   code: string;
   user?: User;
+  address?: Address;
   orderItems: OrderItem[];
   amount: number;
   payment?: Payment;
@@ -35,6 +36,13 @@ export interface Payment {
 export interface OrderItem {
   product: Product;
   quantity: number;
+}
+
+export interface Address {
+  street: string;
+  city: string;
+  country: string;
+  postalCode: string;
 }
 
 export interface CheckoutRequest {

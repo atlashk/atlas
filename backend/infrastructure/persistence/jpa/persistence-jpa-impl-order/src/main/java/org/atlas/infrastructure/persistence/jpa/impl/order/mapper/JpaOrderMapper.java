@@ -17,6 +17,10 @@ public interface JpaOrderMapper {
   JpaOrderMapper INSTANCE = Mappers.getMapper(JpaOrderMapper.class);
 
   @Mapping(target = "userId", source = "user.id")
+  @Mapping(target = "userFirstName", source = "user.firstName")
+  @Mapping(target = "userLastName", source = "user.lastName")
+  @Mapping(target = "userEmail", source = "user.email")
+  @Mapping(target = "userPhoneNumber", source = "user.phoneNumber")
   @Mapping(target = "addressStreet", source = "address.street")
   @Mapping(target = "addressCity", source = "address.city")
   @Mapping(target = "addressCountry", source = "address.country")
@@ -25,6 +29,7 @@ public interface JpaOrderMapper {
   @Mapping(target = "paymentGatewayName", source = "payment.paymentGatewayName")
   @Mapping(target = "paymentMethod", source = "payment.paymentMethod")
   @Mapping(target = "paymentMethodDetails", source = "payment.paymentMethodDetails")
+  @Mapping(target = "paymentTransactionId", source = "payment.transactionId")
   @Mapping(target = "orderItems", ignore = true)
   JpaOrder toJpaOrder(Order order);
 
@@ -34,18 +39,24 @@ public interface JpaOrderMapper {
   @Mapping(target = "order", ignore = true)
   JpaOrderItem toJpaOrderItem(OrderItem orderItem);
 
+  /**
+   * After mapping for {@link Order} to {@link JpaOrder} - handles bidirectional relationships
+   */
   @AfterMapping
   default void afterToJpaOrder(@MappingTarget JpaOrder jpaOrder, Order order) {
     if (CollectionUtil.isNotEmpty(order.getOrderItems())) {
       order.getOrderItems().forEach(orderItem -> {
         JpaOrderItem jpaOrderItem = toJpaOrderItem(orderItem);
-        // Bidirectional handling
         jpaOrder.addOrderItem(jpaOrderItem);
       });
     }
   }
 
   @Mapping(target = "user.id", source = "userId")
+  @Mapping(target = "user.firstName", source = "userFirstName")
+  @Mapping(target = "user.lastName", source = "userLastName")
+  @Mapping(target = "user.email", source = "userEmail")
+  @Mapping(target = "user.phoneNumber", source = "userPhoneNumber")
   @Mapping(target = "address.street", source = "addressStreet")
   @Mapping(target = "address.city", source = "addressCity")
   @Mapping(target = "address.country", source = "addressCountry")
@@ -54,6 +65,7 @@ public interface JpaOrderMapper {
   @Mapping(target = "payment.paymentGatewayName", source = "paymentGatewayName")
   @Mapping(target = "payment.paymentMethod", source = "paymentMethod")
   @Mapping(target = "payment.paymentMethodDetails", source = "paymentMethodDetails")
+  @Mapping(target = "payment.transactionId", source = "paymentTransactionId")
   Order toOrder(JpaOrder jpaOrder);
 
   @Mapping(target = "product.id", source = "productId")

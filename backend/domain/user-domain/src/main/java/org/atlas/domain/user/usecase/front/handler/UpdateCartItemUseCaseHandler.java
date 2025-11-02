@@ -26,7 +26,7 @@ public class UpdateCartItemUseCaseHandler {
 
     // Update DB
     if (input.getQuantity() > 0) {
-      cart.addCartItem(input.getProductId(), input.getQuantity());
+      cart.setCartItemQuantity(input.getProductId(), input.getQuantity());
     } else {
       cart.removeCartItem(input.getProductId());
     }

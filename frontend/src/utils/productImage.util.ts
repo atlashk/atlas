@@ -1,6 +1,6 @@
-export const getProductImageUrl = (image: string | null): string => {
+export const getProductImageUrl = (image: string | null | undefined): string => {
   if (!image) {
-    // Handle null/empty case - use Next.js public directory
+    // Handle null/undefined/empty case - use Next.js public directory
     return "/product-placeholder.jpg";
   }
 

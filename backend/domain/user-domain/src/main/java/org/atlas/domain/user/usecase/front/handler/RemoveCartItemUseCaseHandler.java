@@ -10,6 +10,7 @@ import org.atlas.framework.cache.ApplicationCache;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
+import org.atlas.framework.util.CollectionUtil;
 
 @UseCaseHandler
 @RequiredArgsConstructor
@@ -29,8 +30,10 @@ public class RemoveCartItemUseCaseHandler {
     cartRepository.update(cart);
 
     // Update cache
-    cartAggregator.aggregate(cart);
-    cacheService.put(ApplicationCache.CART, String.valueOf(cart.getUserId()), cart);
+    if (CollectionUtil.isNotEmpty(cart.getCartItems())) {
+      cartAggregator.aggregate(cart);
+      cacheService.put(ApplicationCache.CART, String.valueOf(cart.getUserId()), cart);
+    }
 
     return cart;
   }

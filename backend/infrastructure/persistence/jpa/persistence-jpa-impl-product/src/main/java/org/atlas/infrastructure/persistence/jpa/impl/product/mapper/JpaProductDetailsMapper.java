@@ -4,6 +4,7 @@ import org.atlas.domain.product.entity.ProductDetails;
 import org.atlas.infrastructure.persistence.jpa.impl.product.entity.JpaProductDetails;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 
 @Mapper
@@ -15,4 +16,8 @@ public interface JpaProductDetailsMapper {
   JpaProductDetails toJpaProductDetails(ProductDetails productDetails);
 
   ProductDetails toProductDetails(JpaProductDetails jpaProductDetails);
+
+  @Mapping(target = "product", ignore = true)
+  @Mapping(target = "productId", ignore = true)
+  void merge(ProductDetails productDetails, @MappingTarget JpaProductDetails jpaProductDetails);
 }

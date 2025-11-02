@@ -138,19 +138,21 @@ export const useCartStore = create<CartStore>()((set, get) => ({
     }
   },
 
-  updateQuantity: async (productId: number, quantity: number) => {
+  updateQuantity: async (productId: number, newQuantity: number) => {
     if (!isUserAuthenticated()) {
       set({ error: "Please login to manage cart items" });
       return false;
     }
 
-    if (quantity <= 0) {
+    // If new quantity is <= 0, remove the item
+    if (newQuantity <= 0) {
       return await get().removeFromCart(productId);
     }
 
     try {
       set({ isLoading: true, error: null });
-      const response = await cartApi.updateCartItem(productId, { quantity });
+      // Send final quantity to API
+      const response = await cartApi.updateCartItem(productId, { quantity: newQuantity });
       
       if (response.success && response.data) {
         set({ cart: response.data, isIntentionallyCleared: false });

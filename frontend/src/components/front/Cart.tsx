@@ -66,13 +66,9 @@ const Cart: React.FC = () => {
   };
 
   const handleDecreaseQuantity = async (item: CartItemResponse) => {
-    if (item.quantity <= 1) {
-      await handleRemoveFromCart(item.product.id);
-    } else {
-      const success = await updateQuantity(item.product.id, item.quantity - 1);
-      if (!success) {
-        toast.error('Failed to update quantity');
-      }
+    const success = await updateQuantity(item.product.id, item.quantity - 1);
+    if (!success) {
+      toast.error('Failed to update quantity');
     }
   };
 
@@ -174,9 +170,11 @@ const Cart: React.FC = () => {
                       value={item.quantity}
                       onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
                         const newQuantity = parseInt(e.target.value) || 1;
-                        const success = await updateQuantity(item.product.id, newQuantity);
-                        if (!success) {
-                          toast.error('Failed to update quantity');
+                        if (newQuantity !== item.quantity) {
+                          const success = await updateQuantity(item.product.id, newQuantity);
+                          if (!success) {
+                            toast.error('Failed to update quantity');
+                          }
                         }
                       }}
                       className="w-12 h-8 text-center text-sm"

@@ -2,8 +2,8 @@ import { ProductStatus } from "@/constants";
 
 export interface Product {
   id: number;
-  name?: string;
-  image?: string;
+  name: string;
+  image: string;
   price: number;
   quantity?: number;
   status?: ProductStatus;

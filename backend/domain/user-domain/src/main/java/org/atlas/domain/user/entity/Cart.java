@@ -60,6 +60,23 @@ public class Cart extends DomainEntity {
         );
   }
 
+  public synchronized void setCartItemQuantity(Integer productId, Integer quantity) {
+    cartItems.stream()
+        .filter(it -> it.getProduct().getId().equals(productId))
+        .findFirst()
+        .ifPresentOrElse(
+            it -> it.setQuantity(quantity),
+            () -> {
+              // Add new cart item
+              CartItem cartItem = new CartItem();
+              Product product = new Product(productId);
+              cartItem.setProduct(product);
+              cartItem.setQuantity(quantity);
+              cartItems.add(cartItem);
+            }
+        );
+  }
+
   public void removeCartItem(Integer productId) {
     if (CollectionUtil.isNotEmpty(cartItems)) {
       Iterator<CartItem> iterator = cartItems.iterator();

@@ -33,7 +33,7 @@ export const getRoleBadgeClasses = (role: string | null): string => {
   }
 };
 
-export const getProductStatusBadge = (status: string): React.ReactElement => {
+export const getProductStatusBadge = (status: string | undefined): React.ReactElement => {
   if (!status) {
     return React.createElement(Badge, { variant: "outline" }, "Unknown");
   }

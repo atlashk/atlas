@@ -80,7 +80,6 @@ public class AdminUpdateProductRequest {
   @Schema(description = "Attributes associated with the product")
   public static class ProductAttribute {
 
-    @NotNull
     @Schema(description = "Unique identifier of the product attribute", example = "1")
     private Integer id;
 

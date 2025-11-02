@@ -60,6 +60,12 @@ export abstract class BaseApi {
     }
   }
 
+  protected async getBlob(endpoint: string): Promise<AxiosResponse<Blob>> {
+    return await apiClient.get(`${this.baseUrl}${endpoint}`, {
+      responseType: "blob",
+    });
+  }
+
   private handleError<T>(error: unknown): ApiResponse<T> {
     console.error("Service error:", error);
     return {

@@ -6,7 +6,7 @@ import {
   type Product,
   type UpdateProductRequest,
 } from "@/interfaces/product.interface";
-import apiClient, { ApiResponse } from "./apiClient";
+import { ApiResponse } from "./apiClient";
 import { BaseApi } from "./base.api";
 
 export class ProductAdminApi extends BaseApi {
@@ -90,11 +90,8 @@ export class ProductAdminApi extends BaseApi {
     }
     queryParams.append("file_type", filters.fileType);
 
-    const response = await apiClient.get(
-      `/products/export?${queryParams.toString()}`,
-      {
-        responseType: "blob",
-      }
+    const response = await this.getBlob(
+      `/products/export?${queryParams.toString()}`
     );
 
     // Create blob and download

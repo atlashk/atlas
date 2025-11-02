@@ -70,7 +70,15 @@ public class JpaProduct extends JpaBaseEntity {
   @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
   private JpaProductDetails details;
 
-  @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, mappedBy = "product", orphanRemoval = true)
+  @OneToMany(
+      cascade = {
+          CascadeType.PERSIST,
+          CascadeType.MERGE,
+          CascadeType.REMOVE
+      },
+      mappedBy = "product",
+      orphanRemoval = true
+  )
   private Set<JpaProductAttribute> attributes = new HashSet<>();
 
   @ManyToMany
@@ -87,12 +95,5 @@ public class JpaProduct extends JpaBaseEntity {
     }
     attribute.setProduct(this);
     attributes.add(attribute);
-  }
-
-  public void addCategory(JpaCategory category) {
-    if (categories == null) {
-      categories = new HashSet<>();
-    }
-    categories.add(category);
   }
 }

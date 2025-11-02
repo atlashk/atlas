@@ -2,6 +2,7 @@ package org.atlas.infrastructure.persistence.jpa.impl.order.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -20,6 +21,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.domain.order.shared.OrderStatus;
+import org.atlas.infrastructure.persistence.jpa.core.converter.StringCryptoConverter;
 import org.atlas.infrastructure.persistence.jpa.core.entity.JpaBaseEntity;
 
 @Entity
@@ -48,6 +50,20 @@ public class JpaOrder extends JpaBaseEntity {
 
   @Column(name = "user_id")
   private Integer userId;
+
+  @Column(name = "user_first_name")
+  private String userFirstName;
+
+  @Column(name = "user_last_name")
+  private String userLastName;
+
+  @Column(name = "user_email")
+  @Convert(converter = StringCryptoConverter.class)
+  private String userEmail;
+
+  @Column(name = "user_phone_number")
+  @Convert(converter = StringCryptoConverter.class)
+  private String userPhoneNumber;
 
   @Column(name = "address_street")
   private String addressStreet;
@@ -82,6 +98,9 @@ public class JpaOrder extends JpaBaseEntity {
 
   @Column(name = "payment_method_details")
   private String paymentMethodDetails;
+
+  @Column(name = "payment_transaction_id")
+  private String paymentTransactionId;
 
   @Column(name = "cancellation_reason")
   private String cancellationReason;

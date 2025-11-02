@@ -164,7 +164,7 @@ export default function CartPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleUpdateQuantity(item.product.id, item.quantity - 1)}
-                        disabled={updating || item.quantity <= 1}
+                        disabled={updating}
                         className="h-8 w-8 p-0 hover:bg-gray-100"
                       >
                         <Minus className="h-3 w-3" />
