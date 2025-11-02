@@ -99,8 +99,8 @@ public class OrderResponse {
     @Schema(description = "Unit price of the product in the order currency", example = "1199.99")
     private BigDecimal price;
 
-    @Schema(description = "Product image encoded as Base64 data URL for display purposes", 
-            example = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD...")
+    @Schema(description = "Product image encoded as Base64 data URL for display purposes",
+        example = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD...")
     private String image;
   }
 
@@ -112,14 +112,17 @@ public class OrderResponse {
   @AllArgsConstructor
   public static class Payment {
 
+    @Schema(description = "External transaction identifier of the payment", example = "TXN_123456789")
+    private String transactionId;
+
     @Schema(description = "Payment processing gateway used for the transaction", example = "Stripe")
     private String paymentGateway;
 
     @Schema(description = "Payment method type used by the customer", example = "Credit Card")
     private String paymentMethod;
 
-    @Schema(description = "Additional details about the payment method (e.g., last 4 digits of card)", 
-            example = "{\"last4\":\"1234\"}")
+    @Schema(description = "Additional details about the payment method (e.g., last 4 digits of card)",
+        example = "{\"last4\":\"1234\"}")
     private String paymentMethodDetails;
   }
 }

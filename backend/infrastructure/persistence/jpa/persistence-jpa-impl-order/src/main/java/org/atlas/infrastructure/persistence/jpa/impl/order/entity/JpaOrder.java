@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -60,8 +61,12 @@ public class JpaOrder extends JpaBaseEntity {
   @Column(name = "address_postal_code")
   private String addressPostalCode;
 
-  @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<JpaOrderItem> orderItems;
+  @OneToMany(
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE},
+      mappedBy = "order",
+      orphanRemoval = true
+  )
+  private List<JpaOrderItem> orderItems = new ArrayList<>();
 
   @Column(name = "amount")
   private BigDecimal amount;
@@ -69,6 +74,23 @@ public class JpaOrder extends JpaBaseEntity {
   @Column(name = "payment_gateway_id")
   private Integer paymentGatewayId;
 
+  @Column(name = "payment_gateway_name")
+  private String paymentGatewayName;
+
+  @Column(name = "payment_method")
+  private String paymentMethod;
+
+  @Column(name = "payment_method_details")
+  private String paymentMethodDetails;
+
   @Column(name = "cancellation_reason")
   private String cancellationReason;
+
+  public void addOrderItem(JpaOrderItem orderItem) {
+    if (orderItems == null) {
+      orderItems = new ArrayList<>();
+    }
+    orderItem.setOrder(this);
+    orderItems.add(orderItem);
+  }
 }

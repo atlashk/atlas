@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useUserStore } from '../../stores/user.store';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { Clock, ChevronDown, ChevronUp, RotateCcw, Search } from 'lucide-react';
@@ -39,9 +39,11 @@ const OrderHistoryPage: React.FC = () => {
   const { isAuthenticated, isAdmin, loading } = useUserStore();
   const [isHydrated, setIsHydrated] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // OrderHistory component state
   const isInitialized = useRef(false);
+  const lastRefreshParam = useRef<string | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -173,6 +175,16 @@ const OrderHistoryPage: React.FC = () => {
     };
     initializeData();
   }, [applyFilters]);
+
+  // Listen for refresh parameter to reload data
+  useEffect(() => {
+    const refreshParam = searchParams.get('refresh');
+    if (refreshParam && isInitialized.current && refreshParam !== lastRefreshParam.current) {
+      // Only refresh if this is a new refresh parameter
+      lastRefreshParam.current = refreshParam;
+      applyFilters(1);
+    }
+  }, [searchParams]); // Remove applyFilters from dependencies to prevent continuous calls
 
   // Show loading while checking authentication
   if (loading || !isHydrated) {
@@ -397,22 +409,29 @@ const OrderHistoryPage: React.FC = () => {
                             <h4 className="text-lg font-semibold mb-3">Payment Information</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div className="space-y-2">
-                                {order.payment.transactionId && (
+                                {order.payment.paymentGateway && (
                                   <p>
-                                    <span className="font-medium">Transaction ID:</span> {order.payment.transactionId}
+                                    <span className="font-medium">Payment gateway:</span> {
+                                      (() => {
+                                        const paymentGateway = order.payment.paymentGateway;
+                                        return paymentGateway ? paymentGateway.charAt(0).toUpperCase() + paymentGateway.slice(1).toLowerCase() : '';
+                                      })()
+                                    }
                                   </p>
                                 )}
-                                {order.payment.amount && (
+                                {order.payment.paymentMethod && (
                                   <p>
-                                    <span className="font-medium">Payment amount:</span> {formatCurrency(order.payment.amount)} {order.payment.currency || ''}
+                                    <span className="font-medium">Payment method:</span> {
+                                      (() => {
+                                        const paymentMethod = order.payment.paymentMethod;
+                                        return paymentMethod ? paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1).toLowerCase() : '';
+                                      })()
+                                    }
                                   </p>
                                 )}
-                                <p>
-                                  <span className="font-medium">Payment method:</span> {order.payment.method.charAt(0).toUpperCase() + order.payment.method.slice(1).toLowerCase()}
-                                </p>
-                                {order.payment.gateway && (
+                                {order.payment.paymentMethodDetails && (
                                   <p>
-                                    <span className="font-medium">Payment gateway:</span> {order.payment.gateway.charAt(0).toUpperCase() + order.payment.gateway.slice(1).toLowerCase()}
+                                    <span className="font-medium">Payment details:</span> {order.payment.paymentMethodDetails}
                                   </p>
                                 )}
                               </div>

@@ -52,7 +52,7 @@ public class CheckoutSaga {
 
   @StartSaga
   public void startSaga(SagaEntity saga) {
-    sagaOrchestrator.sendCommand(
+    sagaOrchestrator.sendSagaCommand(
         saga, CheckoutCommand.RESERVE_PRODUCT, Services.PRODUCT_SERVICE);
   }
 
@@ -73,7 +73,7 @@ public class CheckoutSaga {
     orderRepository.update(order);
 
     if (sagaCommandResult.isSuccess()) {
-      sagaOrchestrator.sendCommand(
+      sagaOrchestrator.sendSagaCommand(
           saga, CheckoutCommand.INITIALIZE_PAYMENT, Services.PAYMENT_SERVICE);
     }
   }
@@ -94,12 +94,11 @@ public class CheckoutSaga {
       // Update payment snapshot
       order.getPayment().setTransactionId(metadata.getTransactionId());
       order.getPayment().setPaymentGatewayName(metadata.getPaymentGatewayName());
-      order.getPayment().setStatus(PaymentStatus.CREATED);
 
       orderRepository.update(order);
 
       // Explicitly create a payment-processing command, since we can’t send commands directly to the external service.
-      sagaOrchestrator.createCommand(
+      sagaOrchestrator.createSagaCommand(
           saga.getId(), CheckoutCommand.PROCESS_PAYMENT, Services.EXTERNAL_PAYMENT_SERVICE);
     } else {
       // Update order status
@@ -108,9 +107,6 @@ public class CheckoutSaga {
           String.format("%s: %s",
               CancellationReason.FAILED_TO_INITIALIZE_PAYMENT.getValue(),
               sagaCommandResult.getError()));
-
-      // Update payment snapshot
-      order.getPayment().setStatus(PaymentStatus.FAILED);
 
       orderRepository.update(order);
     }
@@ -130,15 +126,13 @@ public class CheckoutSaga {
       order.setStatus(OrderStatus.FULFILLED);
 
       // Update payment snapshot
-      order.getPayment().setStatus(PaymentStatus.SUCCEEDED);
       order.getPayment().setPaymentMethod(metadata.getPaymentMethod());
       order.getPayment().setPaymentMethodDetails(metadata.getPaymentMethodDetails());
 
       orderRepository.update(order);
 
       // Send command to clear user cart
-      sagaOrchestrator.sendCommand(
-          saga, CheckoutCommand.CLEAR_CART, Services.USER_SERVICE);
+      sagaOrchestrator.sendSagaCommand(saga, CheckoutCommand.CLEAR_CART, Services.USER_SERVICE);
 
       AsyncUtil.executeAsync(notifyEmail(order));
     } else {
@@ -148,14 +142,6 @@ public class CheckoutSaga {
           String.format("%s: %s",
               CancellationReason.FAILED_TO_PROCESS_PAYMENT.getValue(),
               sagaCommandResult.getError()));
-
-      // Update payment snapshot
-      order.getPayment().setStatus(metadata.getPaymentStatus());
-      if (PaymentStatus.FAILED.equals(metadata.getPaymentStatus())) {
-        order.getPayment().setError(sagaCommandResult.getError());
-      } else if (PaymentStatus.CANCELED.equals(metadata.getPaymentStatus())) {
-        order.getPayment().setCancellationReason(sagaCommandResult.getError());
-      }
 
       orderRepository.update(order);
     }

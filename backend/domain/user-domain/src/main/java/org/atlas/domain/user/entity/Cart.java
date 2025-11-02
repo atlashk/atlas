@@ -33,7 +33,7 @@ public class Cart extends DomainEntity {
   }
 
   public BigDecimal getTotalAmount() {
-    if (!hasItems()) {
+    if (CollectionUtil.isEmpty(cartItems)) {
       return BigDecimal.ZERO;
     }
     return cartItems.stream()
@@ -42,21 +42,8 @@ public class Cart extends DomainEntity {
   }
 
   // Helper methods
-  public boolean hasItems() {
-    return CollectionUtil.isNotEmpty(cartItems);
-  }
 
-  public void addCartItem(CartItem cartItem) {
-    if (cartItems == null) {
-      cartItems = new ArrayList<>();
-    }
-    cartItems.add(cartItem);
-  }
-
-  public synchronized void putCartItem(Integer productId, Integer quantity) {
-    if (!hasItems()) {
-      cartItems = new ArrayList<>();
-    }
+  public synchronized void addCartItem(Integer productId, Integer quantity) {
     cartItems.stream()
         .filter(it -> it.getProduct().getId().equals(productId))
         .findFirst()
@@ -74,7 +61,7 @@ public class Cart extends DomainEntity {
   }
 
   public void removeCartItem(Integer productId) {
-    if (hasItems()) {
+    if (CollectionUtil.isNotEmpty(cartItems)) {
       Iterator<CartItem> iterator = cartItems.iterator();
       while (iterator.hasNext()) {
         CartItem cartItemEntity = iterator.next();
@@ -87,7 +74,7 @@ public class Cart extends DomainEntity {
   }
 
   public void clear() {
-    if (hasItems()) {
+    if (CollectionUtil.isNotEmpty(cartItems)) {
       cartItems.clear();
     }
   }

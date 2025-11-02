@@ -16,16 +16,20 @@ export interface Order {
 }
 
 export interface Payment {
-  id: number;
-  transactionId: string;
-  amount: number;
-  currency: string;
-  method: string;
-  gateway: string;
-  status: PaymentStatus;
+  id?: number;
+  transactionId?: string;
+  amount?: number;
+  currency?: string;
+  method?: string;
+  gateway?: string;
+  status?: PaymentStatus;
   errorCode?: string;
   errorMessage?: string;
   cancellationReason?: string;
+  // Alternative property names from API response
+  paymentMethod?: string;
+  paymentGateway?: string;
+  paymentMethodDetails?: string;
 }
 
 export interface OrderItem {

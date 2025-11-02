@@ -15,7 +15,7 @@ import org.atlas.framework.domain.entity.DomainEntity;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
-public class SagaCommand extends DomainEntity {
+public class SagaCommandEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
   private Integer id;

@@ -7,6 +7,7 @@ interface CartState {
   cart: CartResponse | null;
   isLoading: boolean;
   error: string | null;
+  isIntentionallyCleared: boolean;
 }
 
 interface CartActions {
@@ -28,6 +29,7 @@ interface CartActions {
   setError: (error: string | null) => void;
   clearError: () => void;
   clearCartState: () => void;
+  resetIntentionallyCleared: () => void;
 }
 
 type CartStore = CartState & CartActions;
@@ -42,11 +44,18 @@ export const useCartStore = create<CartStore>()((set, get) => ({
   cart: null,
   isLoading: false,
   error: null,
+  isIntentionallyCleared: false,
 
   // Core cart operations
   loadCart: async () => {
     if (!isUserAuthenticated()) {
       set({ cart: null, error: null });
+      return;
+    }
+
+    // Don't load if cart was intentionally cleared (e.g., after payment)
+    const { isIntentionallyCleared } = get();
+    if (isIntentionallyCleared) {
       return;
     }
 
@@ -61,7 +70,7 @@ export const useCartStore = create<CartStore>()((set, get) => ({
       const response = await cartApi.getCart();
       
       if (response.success && response.data) {
-        set({ cart: response.data, error: null });
+        set({ cart: response.data, error: null, isIntentionallyCleared: false });
       } else {
         // Set error but don't clear cart if we had one before
         const errorMessage = response.errorMessage || "Failed to load cart";
@@ -88,7 +97,7 @@ export const useCartStore = create<CartStore>()((set, get) => ({
       const response = await cartApi.addCartItem({ productId, quantity });
       
       if (response.success && response.data) {
-        set({ cart: response.data });
+        set({ cart: response.data, isIntentionallyCleared: false });
         return true;
       } else {
         set({ error: response.errorMessage || "Failed to add item to cart" });
@@ -114,7 +123,7 @@ export const useCartStore = create<CartStore>()((set, get) => ({
       const response = await cartApi.removeCartItem(productId);
       
       if (response.success && response.data) {
-        set({ cart: response.data });
+        set({ cart: response.data, isIntentionallyCleared: false });
         return true;
       } else {
         set({ error: response.errorMessage || "Failed to remove item from cart" });
@@ -144,7 +153,7 @@ export const useCartStore = create<CartStore>()((set, get) => ({
       const response = await cartApi.updateCartItem(productId, { quantity });
       
       if (response.success && response.data) {
-        set({ cart: response.data });
+        set({ cart: response.data, isIntentionallyCleared: false });
         return true;
       } else {
         set({ error: response.errorMessage || "Failed to update item quantity" });
@@ -170,7 +179,7 @@ export const useCartStore = create<CartStore>()((set, get) => ({
       const response = await cartApi.clearCart();
       
       if (response.success && response.data) {
-        set({ cart: response.data });
+        set({ cart: response.data, isIntentionallyCleared: false });
         return true;
       } else {
         set({ error: response.errorMessage || "Failed to clear cart" });
@@ -223,6 +232,10 @@ export const useCartStore = create<CartStore>()((set, get) => ({
 
   // Clear cart state locally (for logout)
   clearCartState: () => {
-    set({ cart: null, error: null, isLoading: false });
+    set({ cart: null, error: null, isLoading: false, isIntentionallyCleared: true });
+  },
+
+  resetIntentionallyCleared: () => {
+    set({ isIntentionallyCleared: false });
   },
 }));

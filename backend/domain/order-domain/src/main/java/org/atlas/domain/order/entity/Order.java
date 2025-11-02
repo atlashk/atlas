@@ -30,17 +30,10 @@ public class Order extends DomainEntity {
   private OrderStatus status;
   private UserSnapshot user;
   private Address address;
-  private List<OrderItem> orderItems;
+  private List<OrderItem> orderItems = new ArrayList<>();
   private BigDecimal amount;
   private PaymentSnapshot payment;
   private String cancellationReason;
-
-  public void addOrderItem(OrderItem orderItem) {
-    if (orderItems == null) {
-      orderItems = new ArrayList<>();
-    }
-    this.orderItems.add(orderItem);
-  }
 
   public void calculateOrderAmount() {
     this.amount = BigDecimal.ZERO;
@@ -131,8 +124,5 @@ public class Order extends DomainEntity {
     private String paymentGatewayName;
     private String paymentMethod;
     private String paymentMethodDetails;
-    private PaymentStatus status;
-    private String error;
-    private String cancellationReason;
   }
 }

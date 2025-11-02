@@ -1,19 +1,22 @@
 CREATE TABLE IF NOT EXISTS orders
 (
-    id                  SERIAL PRIMARY KEY,
-    saga_id             INT,
-    code                CHAR(7)        NOT NULL UNIQUE,
-    status              VARCHAR(50)    NOT NULL,
-    user_id             INT            NOT NULL,
-    address_street      VARCHAR(255)   NOT NULL,
-    address_city        VARCHAR(100)   NOT NULL,
-    address_country     CHAR(2)        NOT NULL,
-    address_postal_code VARCHAR(20)    NOT NULL,
-    amount              NUMERIC(11, 2) NOT NULL,
-    payment_gateway_id  INT            NOT NULL,
-    cancellation_reason VARCHAR(255),
-    created_at          TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP               DEFAULT CURRENT_TIMESTAMP
+    id                     SERIAL PRIMARY KEY,
+    saga_id                INT,
+    code                   CHAR(7)        NOT NULL UNIQUE,
+    status                 VARCHAR(50)    NOT NULL,
+    user_id                INT            NOT NULL,
+    address_street         VARCHAR(255)   NOT NULL,
+    address_city           VARCHAR(100)   NOT NULL,
+    address_country        CHAR(2)        NOT NULL,
+    address_postal_code    VARCHAR(20)    NOT NULL,
+    amount                 NUMERIC(11, 2) NOT NULL,
+    payment_gateway_id     INT            NOT NULL,
+    payment_gateway_name   VARCHAR(255),
+    payment_method         VARCHAR(50),
+    payment_method_details TEXT,
+    cancellation_reason    VARCHAR(255),
+    created_at             TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at             TIMESTAMP               DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX idx_saga_id ON orders (saga_id);
 CREATE INDEX idx_user_id ON orders (user_id);
@@ -23,6 +26,7 @@ CREATE TABLE IF NOT EXISTS order_item
     id            SERIAL PRIMARY KEY,
     order_id      INT           NOT NULL,
     product_id    INT           NOT NULL,
+    product_name  VARCHAR(255)  NOT NULL,
     product_price NUMERIC(9, 2) NOT NULL,
     quantity      INT           NOT NULL,
     created_at    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,

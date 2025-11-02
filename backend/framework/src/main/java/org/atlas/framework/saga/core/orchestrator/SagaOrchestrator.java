@@ -12,9 +12,9 @@ public interface SagaOrchestrator {
    */
   Integer runSaga(String sagaName, SagaContext sagaContext);
 
-  void sendCommand(SagaEntity saga, String sagaCommandName, String targetServiceName);
+  void sendSagaCommand(SagaEntity saga, String sagaCommandName, String targetServiceName);
 
-  void createCommand(Integer sagaId, String sagaCommandName, String targetServiceName);
+  void createSagaCommand(Integer sagaId, String sagaCommandName, String targetServiceName);
 
   void handleSagaCommandReply(SagaCommandReply reply);
 

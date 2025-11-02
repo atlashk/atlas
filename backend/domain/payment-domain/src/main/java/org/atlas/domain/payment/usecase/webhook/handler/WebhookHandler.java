@@ -83,6 +83,7 @@ public class WebhookHandler {
     // Update payment event status
     try {
       handleResponse = paymentGatewayService.handleWebhook(handleRequest);
+      paymentEvent.setPaymentId(handleResponse.getResult().getPaymentId());
       if (handleResponse.getResponseStatus() == HttpStatusCode.OK.getCode()) {
         paymentEvent.setStatus(PaymentEventStatus.SUCCEEDED);
       } else {

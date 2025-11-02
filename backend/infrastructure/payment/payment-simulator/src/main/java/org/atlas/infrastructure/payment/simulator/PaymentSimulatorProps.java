@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("app.payment.simulator")
 @Getter
 @Setter
-public class SimulatorPaymentProps {
+public class PaymentSimulatorProps {
 
   private String webhookUrl;
 }

@@ -7,6 +7,7 @@ import org.atlas.infrastructure.api.server.rest.impl.order.front.model.CheckoutR
 import org.atlas.infrastructure.api.server.rest.impl.order.front.model.GetOrderStatusResponse;
 import org.atlas.infrastructure.api.server.rest.impl.order.front.model.OrderResponse;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 @Mapper
@@ -19,8 +20,13 @@ public interface OrderMapper {
   GetOrderStatusResponse toGetOrderStatusResponse(GetOrderStatusOutput output);
 
   OrderResponse toOrderResponse(Order entity);
+
   OrderResponse.Address toAddressResponse(Order.Address address);
+
   OrderResponse.OrderItem toOrderItemResponse(Order.OrderItem orderItem);
+
   OrderResponse.Product toProductResponse(Order.ProductSnapshot product);
+
+  @Mapping(target = "paymentGateway", source = "paymentGatewayName")
   OrderResponse.Payment toPaymentResponse(Order.PaymentSnapshot payment);
 }

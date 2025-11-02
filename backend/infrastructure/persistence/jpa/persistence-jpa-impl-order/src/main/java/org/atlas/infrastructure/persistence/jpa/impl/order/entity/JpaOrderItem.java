@@ -39,6 +39,9 @@ public class JpaOrderItem extends JpaBaseEntity {
   @Column(name = "product_id")
   private Integer productId;
 
+  @Column(name = "product_name")
+  private String productName;
+
   @Column(name = "product_price")
   private BigDecimal productPrice;
 

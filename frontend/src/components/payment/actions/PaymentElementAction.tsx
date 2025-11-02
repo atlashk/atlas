@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PaymentGatewayResponse, PaymentNextAction } from "@/interfaces/payment.interface";
-import { StripePaymentForm } from "../StripePaymentForm";
+import { StripeForm } from "../StripeForm";
 import { PaymentSimulatorForm } from "../PaymentSimulatorForm";
 
 // Supported payment gateway codes
@@ -73,7 +73,7 @@ export function PaymentElementAction({
     switch (gatewayCode) {
       case "STRIPE":
         return (
-          <StripePaymentForm
+          <StripeForm
             clientSecret={nextAction.clientSecret || ""}
             publishableKey={nextAction.publishableKey || ""}
             amount={amount || 0}
@@ -95,8 +95,15 @@ export function PaymentElementAction({
             amount={amount || 0}
             currency={currency || "USD"}
             onSubmit={(data) => {
-              console.log("Simulator payment data:", data);
+              console.log("Simulator payment started:", data);
+            }}
+            onSuccess={(data) => {
+              console.log("Simulator payment completed:", data);
               onPaymentComplete?.();
+            }}
+            onError={(error) => {
+              console.error("Simulator payment error:", error);
+              onPaymentError?.(error);
             }}
             onCancel={() => {
               onPaymentError?.("Payment cancelled by user");

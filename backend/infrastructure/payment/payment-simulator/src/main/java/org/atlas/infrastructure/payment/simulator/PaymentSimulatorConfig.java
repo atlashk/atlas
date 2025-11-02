@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @Slf4j
-public class SimulatorPaymentConfig implements DisposableBean {
+public class PaymentSimulatorConfig implements DisposableBean {
 
   private ScheduledExecutorService scheduledExecutorService;
 

@@ -11,9 +11,17 @@ import { useEffect, useState } from "react";
 
 export default function NavBar() {
   const router = useRouter();
-  const { isAuthenticated, isAdmin, fullName, logout, loading, profile, accessToken } =
+  const { isAuthenticated, isAdmin, fullName, logout, loading } =
     useUserStore();
-  const { loadCart, getCartItemCount, cart, isLoading, error } = useCartStore();
+  const {
+    loadCart,
+    getCartItemCount,
+    cart,
+    isLoading,
+    error,
+    isIntentionallyCleared,
+    resetIntentionallyCleared,
+  } = useCartStore();
   const cartItemCount = getCartItemCount();
   const [isHydrated, setIsHydrated] = useState(false);
   const [cartLoadAttempted, setCartLoadAttempted] = useState(false);
@@ -33,25 +41,33 @@ export default function NavBar() {
       // 5. Not currently loading
       // 6. Haven't attempted to load cart yet OR there's no error (to allow retry after successful auth)
       if (
-        isHydrated && 
-        isAuthenticated() && 
-        !isAdmin() && 
-        !cart && 
-        !isLoading && 
+        isHydrated &&
+        isAuthenticated() &&
+        !isAdmin() &&
+        !cart &&
+        !isLoading &&
         (!cartLoadAttempted || !error)
       ) {
         try {
           setCartLoadAttempted(true);
           await loadCart();
         } catch (error) {
-          console.error('Failed to load cart:', error);
+          console.error("Failed to load cart:", error);
           // Don't retry immediately - let user manually refresh or navigate
         }
       }
     };
 
     loadCartData();
-  }, [isHydrated, isAuthenticated(), isAdmin(), cart, isLoading, error, cartLoadAttempted]);
+  }, [
+    isHydrated,
+    isAuthenticated(),
+    isAdmin(),
+    cart,
+    isLoading,
+    error,
+    cartLoadAttempted,
+  ]);
 
   // Reset cart load attempt when user authentication changes
   useEffect(() => {
@@ -59,6 +75,26 @@ export default function NavBar() {
       setCartLoadAttempted(false);
     }
   }, [isAuthenticated()]);
+
+  // Reset intentionally cleared flag when user navigates to shopping areas
+  useEffect(() => {
+    if (isIntentionallyCleared && isAuthenticated() && !isAdmin()) {
+      const currentPath = window.location.pathname;
+      // Reset flag when user navigates to shopping areas (home, products, categories)
+      if (
+        currentPath === "/" ||
+        currentPath.startsWith("/products") ||
+        currentPath.startsWith("/categories")
+      ) {
+        resetIntentionallyCleared();
+      }
+    }
+  }, [
+    isIntentionallyCleared,
+    isAuthenticated,
+    isAdmin,
+    resetIntentionallyCleared,
+  ]);
 
   const getBrandHref = () => {
     // Always return default during hydration to prevent mismatch
@@ -88,19 +124,33 @@ export default function NavBar() {
   };
 
   const handleBrandClick = async () => {
+    // Reset intentionally cleared flag when user goes back to shopping
+    if (isIntentionallyCleared) {
+      resetIntentionallyCleared();
+    }
+
     const href = getBrandHref();
-    
+
+    // Add refresh parameter if navigating to home page to trigger ProductSearch refresh
+    const finalHref = href === "/" ? `/?refresh=${Date.now()}` : href;
+
     // Navigate to the appropriate page
-    router.push(href);
-    
+    router.push(finalHref);
+
     // Load cart data if user is authenticated and not admin
     if (isAuthenticated() && !isAdmin()) {
       try {
         await loadCart();
       } catch (error) {
-        console.error('Failed to reload cart:', error);
+        console.error("Failed to reload cart:", error);
       }
     }
+  };
+
+  const handleOrderHistoryClick = () => {
+    // Add timestamp parameter to force page refresh and data reload
+    const timestamp = Date.now();
+    router.push(`/order-history?refresh=${timestamp}`);
   };
 
   const handleLogout = async () => {
@@ -148,7 +198,7 @@ export default function NavBar() {
                 <span className="text-gray-300 text-sm">
                   Welcome, {fullName()}
                 </span>
-                
+
                 {/* Navigation items - Only show for non-admin users */}
                 {!isAdmin() && (
                   <div className="flex items-center space-x-2">
@@ -159,25 +209,29 @@ export default function NavBar() {
                         onClick={() => router.push("/cart")}
                         className="text-white hover:text-gray-300 hover:bg-white/10 p-3"
                       >
-                        <ShoppingCart style={{ width: '1.25rem', height: '1.25rem' }} />
+                        <ShoppingCart
+                          style={{ width: "1.25rem", height: "1.25rem" }}
+                        />
                         <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center min-w-[20px]">
-                            {cartItemCount > 99 ? '99+' : cartItemCount}
-                          </span>
+                          {cartItemCount > 99 ? "99+" : cartItemCount}
+                        </span>
                       </Button>
                       {/* Tooltip for Cart */}
                       <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
                         Cart
                       </div>
                     </div>
-        
+
                     {/* Order History */}
                     <div className="relative group">
                       <Button
                         variant="ghost"
-                        onClick={() => router.push("/order-history")}
+                        onClick={handleOrderHistoryClick}
                         className="text-white hover:text-gray-300 hover:bg-white/10 p-3"
                       >
-                        <Clock style={{ width: '1.25rem', height: '1.25rem' }} />
+                        <Clock
+                          style={{ width: "1.25rem", height: "1.25rem" }}
+                        />
                       </Button>
                       {/* Tooltip for Order History */}
                       <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
@@ -186,7 +240,7 @@ export default function NavBar() {
                     </div>
                   </div>
                 )}
-                
+
                 <Button
                   variant="secondary"
                   onClick={handleLogout}

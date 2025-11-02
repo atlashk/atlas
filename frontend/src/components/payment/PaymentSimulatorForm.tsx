@@ -50,6 +50,8 @@ interface PaymentSimulatorFormProps {
   amount?: number;
   currency?: string;
   onSubmit?: (data: PaymentFormData) => void;
+  onSuccess?: (data: PaymentFormData) => void;
+  onError?: (error: string) => void;
   onCancel?: () => void;
   isLoading?: boolean;
 }
@@ -94,12 +96,12 @@ const years = Array.from({ length: 20 }, (_, i) => {
   return { value: year, label: year };
 });
 
-
-
 export function PaymentSimulatorForm({
   amount = 99.99,
   currency = "USD",
   onSubmit,
+  onSuccess,
+  onError,
   onCancel,
   isLoading = false,
 }: PaymentSimulatorFormProps) {
@@ -125,16 +127,20 @@ export function PaymentSimulatorForm({
     setErrorMessage("");
 
     try {
-      // Simulate payment processing
+      // Call onSubmit callback immediately for any immediate processing needs
+      onSubmit?.(data);
+      
+      // Simulate payment processing delay
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // Payment simulation always succeeds - call onSubmit callback
-      // The parent component will handle showing success state based on order status
-      setPaymentStatus("idle");
-      onSubmit?.(data);
+      // Do NOT call onSuccess here - success should be determined by order status polling
+      // The payment status remains "processing" until the order status polling determines success
+      // onSuccess will be called by the parent component when order status becomes FULFILLED
     } catch (error) {
       setPaymentStatus("error");
-      setErrorMessage("An unexpected error occurred. Please try again.");
+      const errorMessage = "An unexpected error occurred. Please try again.";
+      setErrorMessage(errorMessage);
+      onError?.(errorMessage);
     }
   };
 

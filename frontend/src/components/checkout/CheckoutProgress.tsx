@@ -1,19 +1,19 @@
 "use client";
 
+import { NextActionHandler } from "@/components/payment/NextActionHandler";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { NextActionHandler } from "@/components/payment/NextActionHandler";
-import React, { useCallback, useEffect } from "react";
-import { PaymentNextAction, PaymentGatewayResponse } from "@/interfaces/payment.interface";
-import { OrderStatusResponse } from "@/interfaces/order.interface";
-import { CreditCard, XCircle, CheckCircle, Loader2 } from "lucide-react";
-import { toast } from "sonner";
 import {
   ORDER_STATUS_DESCRIPTIONS,
   ORDER_STATUS_MESSAGES,
 } from "@/constants/checkout.constants";
-import { useRouter } from "next/navigation";
+import { OrderStatusResponse } from "@/interfaces/order.interface";
+import { PaymentGatewayResponse, PaymentNextAction } from "@/interfaces/payment.interface";
 import { useCartStore } from "@/stores/cart.store";
+import { CheckCircle, CreditCard, Loader2, XCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import React, { useCallback, useEffect, useRef } from "react";
+import { toast } from "sonner";
 
 interface CheckoutProgressProps {
   orderId: string;
@@ -48,6 +48,9 @@ export const CheckoutProgress = React.memo(function CheckoutProgress({
 
   const router = useRouter();
   const { clearCartState } = useCartStore();
+  
+  // Ref to prevent multiple payment completion calls
+  const paymentCompletedRef = useRef(false);
 
   // Clear cart and stop polling when order is fulfilled or canceled
   useEffect(() => {
@@ -63,8 +66,21 @@ export const CheckoutProgress = React.memo(function CheckoutProgress({
     }
   }, [orderStatus?.status, clearCartState, stopPolling, orderId]);
 
+  // Handle payment success when order is fulfilled
+  useEffect(() => {
+    if (orderStatus?.status === "FULFILLED" && !paymentCompletedRef.current) {
+      paymentCompletedRef.current = true;
+      // Trigger parent callback
+      onPaymentComplete();
+    }
+  }, [orderStatus?.status, onPaymentComplete]);
+
+  // Reset payment completion flag when orderId changes (new payment process)
+  useEffect(() => {
+    paymentCompletedRef.current = false;
+  }, [orderId]);
+
   const handlePaymentComplete = () => {
-    toast.success("Payment completed successfully!");
     onPaymentComplete();
     // Only restart polling if order is not in final state
     if (orderStatus?.status !== "FULFILLED" && orderStatus?.status !== "CANCELED") {

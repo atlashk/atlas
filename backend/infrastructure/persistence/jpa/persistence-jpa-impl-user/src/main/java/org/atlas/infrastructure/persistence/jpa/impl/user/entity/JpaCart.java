@@ -35,14 +35,18 @@ public class JpaCart extends JpaBaseEntity {
   @Column(name = "user_id")
   private Integer userId;
 
-  @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE},
+      mappedBy = "cart",
+      orphanRemoval = true
+  )
   private List<JpaCartItem> cartItems;
 
   public void addCartItem(JpaCartItem cartItem) {
-    cartItem.setCart(this);
     if (cartItems == null) {
       cartItems = new ArrayList<>();
     }
+    cartItem.setCart(this);
     cartItems.add(cartItem);
   }
 }

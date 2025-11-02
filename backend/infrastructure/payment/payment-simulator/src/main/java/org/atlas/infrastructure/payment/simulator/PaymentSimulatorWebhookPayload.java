@@ -12,7 +12,7 @@ import org.atlas.domain.payment.shared.PaymentStatus;
 @Builder
 @Getter
 @Setter
-public class SimulatorPaymentWebhookPayload {
+public class PaymentSimulatorWebhookPayload {
 
   private Integer paymentId;
   private String paymentMethod;

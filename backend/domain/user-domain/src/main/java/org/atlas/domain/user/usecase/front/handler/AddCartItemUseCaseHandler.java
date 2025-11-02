@@ -36,8 +36,8 @@ public class AddCartItemUseCaseHandler {
           }
         });
 
-    // Update DB
-    cart.putCartItem(input.getProductId(), input.getQuantity());
+    // Add cart item and update DB
+    cart.addCartItem(input.getProductId(), input.getQuantity());
     cartRepository.update(cart);
 
     // Update cache

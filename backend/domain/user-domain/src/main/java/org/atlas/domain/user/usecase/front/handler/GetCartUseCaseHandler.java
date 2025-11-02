@@ -9,6 +9,7 @@ import org.atlas.domain.user.repository.CartRepository;
 import org.atlas.domain.user.usecase.front.model.GetCartInput;
 import org.atlas.framework.cache.Cache;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
+import org.atlas.framework.util.CollectionUtil;
 
 @UseCaseHandler
 @RequiredArgsConstructor
@@ -28,7 +29,7 @@ public class GetCartUseCaseHandler {
     Cart cart = cartOpt.get();
 
     // Fetch products
-    if (cart.hasItems()) {
+    if (CollectionUtil.isNotEmpty(cart.getCartItems())) {
       boolean allProductsAreValid = cartAggregator.aggregate(cart);
 
       // Update cart if necessary

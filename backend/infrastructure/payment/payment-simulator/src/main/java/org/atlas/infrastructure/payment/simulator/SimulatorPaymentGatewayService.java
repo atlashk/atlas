@@ -30,7 +30,7 @@ import org.springframework.web.client.RestClient;
 @Slf4j(topic = "payment.simulator")
 public class SimulatorPaymentGatewayService implements PaymentGatewayService {
 
-  private final SimulatorPaymentProps simulatorPaymentProps;
+  private final PaymentSimulatorProps paymentSimulatorProps;
   private final RestClient restClient;
   private final ScheduledExecutorService scheduledExecutorService;
 
@@ -99,8 +99,8 @@ public class SimulatorPaymentGatewayService implements PaymentGatewayService {
     log.info("Webhook signature verified successfully");
 
     // Parse the simulated webhook payload
-    SimulatorPaymentWebhookPayload payload = JsonUtil.getInstance()
-        .toObject(request.getRawPayload(), SimulatorPaymentWebhookPayload.class);
+    PaymentSimulatorWebhookPayload payload = JsonUtil.getInstance()
+        .toObject(request.getRawPayload(), PaymentSimulatorWebhookPayload.class);
 
     Result result = Result.builder()
         .paymentId(payload.getPaymentId())
@@ -119,7 +119,7 @@ public class SimulatorPaymentGatewayService implements PaymentGatewayService {
   }
 
   private void scheduleWebhookCall(Integer paymentId, String transactionId) {
-    int delaySeconds = RandomUtil.randomInt(10, 20);
+    int delaySeconds = RandomUtil.randomInt(10, 15);
     scheduledExecutorService.schedule(() -> {
       log.info("Executing scheduled webhook call for paymentId={}, transactionId={}",
           paymentId, transactionId);
@@ -129,7 +129,7 @@ public class SimulatorPaymentGatewayService implements PaymentGatewayService {
 
   private void sendWebhook(Integer paymentId) {
     // Create webhook payload
-    SimulatorPaymentWebhookPayload payload = SimulatorPaymentWebhookPayload.builder()
+    PaymentSimulatorWebhookPayload payload = PaymentSimulatorWebhookPayload.builder()
         .paymentId(paymentId)
         .paymentMethod("card")
         .paymentMethodDetails("{\"brand\":\"visa\",\"last4\":\"1234\"}")
@@ -138,12 +138,12 @@ public class SimulatorPaymentGatewayService implements PaymentGatewayService {
 
     // Send webhook
     log.info("Sending simulated webhook to: {} for paymentId={}",
-        simulatorPaymentProps.getWebhookUrl(), paymentId);
+        paymentSimulatorProps.getWebhookUrl(), paymentId);
 
     String payloadJson = JsonUtil.getInstance().toJson(payload);
 
     ResponseEntity<?> response = restClient.post()
-        .uri(simulatorPaymentProps.getWebhookUrl())
+        .uri(paymentSimulatorProps.getWebhookUrl())
         .contentType(MediaType.APPLICATION_JSON)
         .header(SIGNATURE_HEADER_NAME, generateSignature(payloadJson))
         .body(payloadJson)

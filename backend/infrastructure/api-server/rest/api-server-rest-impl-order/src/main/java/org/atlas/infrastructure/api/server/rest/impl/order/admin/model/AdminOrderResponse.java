@@ -153,17 +153,5 @@ public class AdminOrderResponse {
     @Schema(description = "Additional details about the payment method (e.g., last 4 digits of card)",
         example = "{\"last4\":\"1234\"}")
     private String paymentMethodDetails;
-
-    @Schema(description = "Current payment status")
-    private PaymentStatus status;
-
-    @Schema(description = "Error code if payment failed", example = "CARD_DECLINED")
-    private String errorCode;
-
-    @Schema(description = "Error message if payment failed", example = "Your card was declined. Please try a different payment method.")
-    private String errorMessage;
-
-    @Schema(description = "Cancellation reason if payment was canceled", example = "Customer requested cancellation")
-    private String cancellationReason;
   }
 }

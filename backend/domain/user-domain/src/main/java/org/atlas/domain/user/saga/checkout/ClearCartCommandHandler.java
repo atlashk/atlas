@@ -10,12 +10,13 @@ import org.atlas.framework.cache.CacheService;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.json.JsonUtil;
+import org.atlas.framework.saga.checkout.CheckoutCommand;
+import org.atlas.framework.saga.checkout.CheckoutSagaData;
 import org.atlas.framework.saga.core.annotation.SagaCommandHandler;
 import org.atlas.framework.saga.core.command.SagaCommandResult;
-import org.atlas.framework.saga.checkout.CheckoutCommand;
 import org.atlas.framework.saga.core.context.SagaContext;
-import org.atlas.framework.saga.checkout.CheckoutSagaData;
 import org.atlas.framework.saga.core.messaging.payload.SagaCommand;
+import org.atlas.framework.util.CollectionUtil;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -39,7 +40,7 @@ public class ClearCartCommandHandler {
       Cart cart = cartRepository.findByUserId(checkoutSagaData.getUserId())
           .orElseThrow(() -> new DomainException(DomainError.CART_NOT_FOUND));
 
-      if (!cart.hasItems()) {
+      if (CollectionUtil.isEmpty(cart.getCartItems())) {
         throw new DomainException(DomainError.CART_EMPTY);
       }
 

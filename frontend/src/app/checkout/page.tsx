@@ -12,7 +12,7 @@ import { usePaymentProcessing } from "@/hooks/usePaymentProcessing";
 import { useCartStore } from "@/stores/cart.store";
 import { useUserStore } from "@/stores/user.store";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 function CheckoutPageContent() {
@@ -58,6 +58,9 @@ function CheckoutPageContent() {
   });
   const [addressErrors, setAddressErrors] = useState<Record<string, string>>({});
 
+  // Ref to prevent multiple payment completion calls
+  const paymentCompletedRef = useRef(false);
+
   const {
     isLoading: isProcessingPaymentAction,
     fetchPaymentNextAction,
@@ -82,6 +85,9 @@ function CheckoutPageContent() {
         router.push("/login");
         return;
       }
+
+      // Reset payment completion flag on mount
+      paymentCompletedRef.current = false;
 
       // Only load cart if we don't have it yet and not currently loading
        if (!cart && !isCartLoading) {
@@ -186,21 +192,28 @@ function CheckoutPageContent() {
     }
   };
 
-  const handlePaymentComplete = () => {
-    toast.success("Payment completed successfully!");
+  const handlePaymentComplete = useCallback(() => {
+    // Prevent multiple calls
+    if (paymentCompletedRef.current) {
+      return;
+    }
+    
+    paymentCompletedRef.current = true;
+    
+    // Toast is now handled by CheckoutProgress when order status becomes FULFILLED
     // Clear cart state when payment is complete
     useCartStore.getState().clearCartState();
     // Don't redirect immediately - let OrderStatus component handle the UI and navigation
-  };
+  }, []);
 
   const handlePaymentError = (error: string) => {
     toast.error(error);
     setPaymentNextAction(null);
     resetOrderStatus();
     resetState();
+    // Reset payment completion flag for retry
+    paymentCompletedRef.current = false;
   };
-
-
 
   // Show checkout progress if we have an order ID
   if (orderId) {

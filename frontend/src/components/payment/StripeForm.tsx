@@ -14,7 +14,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { CreditCard, Loader2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
-interface StripePaymentFormProps {
+interface StripeFormProps {
   clientSecret: string;
   publishableKey: string;
   amount: number;
@@ -138,7 +138,7 @@ function PaymentForm({
   );
 }
 
-export function StripePaymentForm({
+export function StripeForm({
   clientSecret,
   publishableKey,
   amount,
@@ -146,7 +146,7 @@ export function StripePaymentForm({
   onSuccess,
   onError,
   onCancel,
-}: StripePaymentFormProps) {
+}: StripeFormProps) {
   const [stripeLoaded, setStripeLoaded] = useState(false);
   const [stripePromise, setStripePromise] =
     useState<Promise<Stripe | null> | null>(null);
@@ -217,4 +217,4 @@ export function StripePaymentForm({
 }
 
 // Simple wrapper for backward compatibility
-export default StripePaymentForm;
+export default StripeForm;

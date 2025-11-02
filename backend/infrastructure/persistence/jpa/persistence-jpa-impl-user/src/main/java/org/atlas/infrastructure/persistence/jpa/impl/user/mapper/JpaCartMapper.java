@@ -18,45 +18,26 @@ public interface JpaCartMapper {
   @Mapping(target = "cartItems", ignore = true)
   JpaCart toJpaCart(Cart cart);
 
+  @Mapping(target = "cart", ignore = true)
+  @Mapping(target = "productId", source = "product.id")
+  JpaCartItem toJpaCartItem(Cart.CartItem cartItem);
+
   /**
-   * After mapping for Cart to JpaCart - handle cart items
+   * After mapping for Cart to JpaCart
    */
   @AfterMapping
   default void afterToJpaCart(@MappingTarget JpaCart jpaCart, Cart cart) {
     if (CollectionUtil.isNotEmpty(cart.getCartItems())) {
       cart.getCartItems().forEach(cartItem -> {
         JpaCartItem jpaCartItem = toJpaCartItem(cartItem);
+        // Bidirectional handling
         jpaCart.addCartItem(jpaCartItem);
       });
     }
   }
 
-  @Mapping(target = "cart", ignore = true)
-  @Mapping(target = "productId", source = "product.id")
-  JpaCartItem toJpaCartItem(Cart.CartItem cartItem);
-
-  @Mapping(target = "cartItems", ignore = true)
   Cart toCart(JpaCart jpaCart);
 
-  @Mapping(target = "product", ignore = true)
-  Cart.CartItem toCartItem(JpaCartItem jpaCartItem);
-
-  /**
-   * After mapping for JpaCart to Cart - handle cart items
-   */
-  @AfterMapping
-  default void afterToCart(@MappingTarget Cart cart, JpaCart jpaCart) {
-    if (CollectionUtil.isNotEmpty(jpaCart.getCartItems())) {
-      jpaCart.getCartItems().forEach(jpaCartItem -> {
-        Cart.CartItem cartItem = toCartItem(jpaCartItem);
-
-        // Create product with only ID
-        Cart.Product product = new Cart.Product();
-        product.setId(jpaCartItem.getProductId());
-        cartItem.setProduct(product);
-
-        cart.addCartItem(cartItem);
-      });
-    }
-  }
+  @Mapping(target = "product.id", source = "productId")
+  Cart.CartItem toOrderItem(JpaCartItem jpaCartItem);
 }

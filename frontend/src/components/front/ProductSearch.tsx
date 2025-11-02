@@ -22,7 +22,7 @@ import { Brand, Category, Product } from "@/interfaces";
 import { useCartStore, useUserStore } from "@/stores";
 
 import { RotateCcw, Search } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import ProductCard from "./ProductCard";
@@ -41,7 +41,9 @@ const ProductSearch: React.FC = () => {
   const { addToCart } = useCartStore();
   const { isAuthenticated } = useUserStore();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const isInitialized = useRef(false);
+  const lastRefreshParam = useRef<string | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -294,6 +296,35 @@ const ProductSearch: React.FC = () => {
     };
     initializeData();
   }, [loadBrands, loadCategories, loadProducts]); // Include function dependencies
+
+  // Listen for refresh parameter to reload all data when brand name is clicked
+  useEffect(() => {
+    const refreshParam = searchParams.get('refresh');
+    if (refreshParam && isInitialized.current && refreshParam !== lastRefreshParam.current) {
+      // Only refresh if this is a new refresh parameter
+      lastRefreshParam.current = refreshParam;
+      
+      // Reset filters to default state
+      setFormFilters({
+        keyword: "",
+        minPrice: undefined,
+        maxPrice: undefined,
+        brandId: "",
+        categoryIds: [],
+      });
+      setCommittedSearchFilters({});
+      
+      // Reload all data (brands, categories, and products)
+      const refreshAllData = async () => {
+        await Promise.all([
+          loadBrands(),
+          loadCategories(),
+          loadProducts({}, 1, 9), // Reset to first page with default filters
+        ]);
+      };
+      refreshAllData();
+    }
+  }, [searchParams, loadBrands, loadCategories, loadProducts]);
 
   // Loading states
   const isLoading = isLoadingBrands || isLoadingCategories || isLoadingProducts;

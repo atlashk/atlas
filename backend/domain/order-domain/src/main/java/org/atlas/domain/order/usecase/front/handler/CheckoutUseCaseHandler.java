@@ -132,8 +132,7 @@ public class CheckoutUseCaseHandler {
           .product(product)
           .quantity(cartItem.getQuantity())
           .build();
-
-      order.addOrderItem(orderItem);
+      order.getOrderItems().add(orderItem);
     }
 
     // Amount
@@ -142,7 +141,6 @@ public class CheckoutUseCaseHandler {
     // Payment snapshot
     PaymentSnapshot payment = PaymentSnapshot.builder()
         .paymentGatewayId(input.getPaymentGatewayId())
-        .status(PaymentStatus.PENDING)
         .build();
     order.setPayment(payment);
 
