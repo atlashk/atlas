@@ -1,8 +1,7 @@
 "use client";
 
-import React, { ComponentType, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import React, { ComponentType } from 'react';
+import { useAuthRedirect, useGuestRedirect } from '@/hooks/useAuthRedirect';
 import { Spinner } from '@/components/ui/spinner';
 
 interface WithAuthOptions {
@@ -13,31 +12,14 @@ interface WithAuthOptions {
   fallbackComponent?: ComponentType;
 }
 
-interface LoadingComponentProps {
-  message?: string;
-}
-
-const DefaultLoadingComponent: React.FC<LoadingComponentProps> = ({ message = 'Loading...' }) => (
+// Default loading component
+const DefaultLoadingComponent: React.FC<{ message?: string }> = ({ 
+  message = "Loading..." 
+}) => (
   <div className="flex items-center justify-center min-h-screen">
     <div className="text-center">
       <Spinner className="text-blue-600 mx-auto mb-4" />
       <p className="text-gray-600">{message}</p>
-    </div>
-  </div>
-);
-
-const DefaultUnauthorizedComponent: React.FC = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <div className="text-center">
-      <h1 className="text-4xl font-bold text-red-600 mb-4">403</h1>
-      <h2 className="text-2xl font-semibold text-gray-800 mb-2">Access Denied</h2>
-      <p className="text-gray-600 mb-4">You don&apos;t have permission to access this page.</p>
-      <button 
-        onClick={() => window.history.back()}
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-      >
-        Go Back
-      </button>
     </div>
   </div>
 );
@@ -55,61 +37,26 @@ export function withAuth<P extends object>(
   } = options;
 
   const WithAuthComponent: React.FC<P> = (props) => {
-    const router = useRouter();
-    const auth = useAuth();
-
-    useEffect(() => {
-      // Wait for auth to finish loading
-      if (auth.isLoading) return;
-
-      // If authentication is not required, allow access
-      if (!requireAuth) return;
-
-      // Handle unauthenticated users
-      if (!auth.isAuthenticated) {
-        const redirectPath = redirectTo || '/login';
-        const currentPath = window.location.pathname;
-        const redirectUrl = `${redirectPath}?redirect=${encodeURIComponent(currentPath)}`;
-        router.push(redirectUrl);
-        return;
-      }
-
-      // Handle unauthorized access (admin or role-based)
-      const hasRequiredRole = allowedRoles.length === 0 || allowedRoles.some(role => auth.hasRole(role));
-      const hasAdminAccess = !requireAdmin || auth.isAdmin;
-      
-      if (!hasRequiredRole || !hasAdminAccess) {
-        if (redirectTo) {
-          router.push(redirectTo);
-        }
-        return;
-      }
-    }, [auth, router]);
+    const { isLoading, canAccess } = useAuthRedirect({
+      requireAuth,
+      requireAdmin,
+      redirectUnauthenticated: redirectTo || '/login',
+      redirectUnauthorized: redirectTo || '/',
+      allowedRoles
+    });
 
     // Show loading state
-    if (auth.isLoading) {
-      return <DefaultLoadingComponent message="Checking authentication..." />;
+    if (isLoading) {
+      return FallbackComponent ? 
+        <FallbackComponent /> : 
+        <DefaultLoadingComponent message="Checking authentication..." />;
     }
 
-    // If authentication is not required, render component
-    if (!requireAuth) {
-      return <WrappedComponent {...props} />;
+    // Check if user can access this component
+    if (!canAccess()) {
+      return null; // Will redirect in useAuthRedirect
     }
 
-    // Check authentication
-    if (!auth.isAuthenticated) {
-      return null; // Will redirect in useEffect
-    }
-
-    // Check authorization
-    const hasRequiredRole = allowedRoles.length === 0 || allowedRoles.some(role => auth.hasRole(role));
-    const hasAdminAccess = !requireAdmin || auth.isAdmin;
-    
-    if (!hasRequiredRole || !hasAdminAccess) {
-      return FallbackComponent ? <FallbackComponent /> : <DefaultUnauthorizedComponent />;
-    }
-
-    // Render the wrapped component
     return <WrappedComponent {...props} />;
   };
 
@@ -127,27 +74,18 @@ export const withRequireAdmin = <P extends object>(Component: ComponentType<P>) 
 
 // HOC for pages that should redirect authenticated users (like login/register)
 export const withGuestOnly = <P extends object>(
-  Component: ComponentType<P>,
-  redirectTo: string = '/'
+  Component: ComponentType<P>
 ) => {
   const WithGuestOnlyComponent: React.FC<P> = (props) => {
-    const router = useRouter();
-    const auth = useAuth();
-
-    useEffect(() => {
-      if (!auth.isLoading && auth.isAuthenticated) {
-        const destination = auth.isAdmin ? '/admin/dashboard' : redirectTo;
-        router.push(destination);
-      }
-    }, [auth.isLoading, auth.isAuthenticated, auth.isAdmin, router]);
+    const { isLoading, shouldRedirect } = useGuestRedirect();
 
     // Show loading while checking auth status
-    if (auth.isLoading) {
+    if (isLoading) {
       return <DefaultLoadingComponent />;
     }
 
-    // Redirect if authenticated (handled in useEffect)
-    if (auth.isAuthenticated) {
+    // Redirect if authenticated (handled in useGuestRedirect)
+    if (shouldRedirect) {
       return null;
     }
 

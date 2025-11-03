@@ -77,31 +77,15 @@ const Login: React.FC = () => {
         // Check if there's a redirect URL from the middleware
         const redirectUrl = getRedirectUrl();
 
-        let targetUrl: string;
         if (redirectUrl) {
           // Use the redirect URL from middleware
-          targetUrl = redirectUrl;
-          console.log("Redirecting to original destination:", targetUrl);
+          console.log("Redirecting to original destination:", redirectUrl);
+          router.push(redirectUrl);
         } else {
-          // Default redirect based on user role
-          if (response.userRole === "ADMIN") {
-            targetUrl = "/admin/dashboard";
-            console.log("Redirecting to admin dashboard");
-          } else if (response.userRole === undefined) {
-            // If userRole is undefined (profile fetch failed), redirect to home
-            // and let the AuthContext handle proper role-based redirect
-            targetUrl = "/";
-            console.log("User role undefined, redirecting to home for AuthContext to handle");
-          } else {
-            targetUrl = "/";
-            console.log("Redirecting to home page");
-          }
+          // Let useGuestRedirect handle the role-based redirect automatically
+          // This will redirect ADMIN to /admin/dashboard and USER to /
+          console.log("No redirect URL, letting useGuestRedirect handle role-based redirect");
         }
-
-        console.log('Login page redirecting to:', targetUrl);
-        
-        // Use Next.js router for better navigation
-        router.push(targetUrl);
       } else {
         setErrorMessage(
           response.errorMessage ||

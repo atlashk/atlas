@@ -39,13 +39,11 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState, Suspense } from "react";
 import { toast } from "sonner";
-import { useUserStore } from "../../stores/user.store";
+import { withAuth } from '@/hoc/withAuth';
 
-const OrderHistoryPage: React.FC = () => {
-  const { isAuthenticated, isAdmin, loading } = useUserStore();
-  const [isHydrated, setIsHydrated] = useState(false);
+const OrderHistoryContent: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -68,18 +66,6 @@ const OrderHistoryPage: React.FC = () => {
     totalPages: 1,
     totalRecords: 0,
   });
-
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
-
-  // Redirect if not authenticated or is admin
-  useEffect(() => {
-    if (isHydrated && (!isAuthenticated() || isAdmin())) {
-      router.push("/");
-      return;
-    }
-  }, [isHydrated, isAuthenticated, isAdmin, router]);
 
   // OrderHistory component functions
   const applyFilters = useCallback(
@@ -197,23 +183,6 @@ const OrderHistoryPage: React.FC = () => {
       applyFilters(1);
     }
   }, [searchParams]); // Remove applyFilters from dependencies to prevent continuous calls
-
-  // Show loading while checking authentication
-  if (loading || !isHydrated) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <Spinner className="text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Don't render if user is not authenticated or is admin
-  if (!isAuthenticated() || isAdmin()) {
-    return null;
-  }
 
   return (
     <div className="container mx-auto p-4">
@@ -582,4 +551,13 @@ const OrderHistoryPage: React.FC = () => {
   );
 };
 
-export default OrderHistoryPage;
+const OrderHistoryPageWrapper: React.FC = () => {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center min-h-screen"><Spinner className="h-8 w-8" /></div>}>
+      <OrderHistoryContent />
+    </Suspense>
+  );
+};
+
+// Export with authentication HOC that requires USER role
+export default withAuth(OrderHistoryPageWrapper, { requireAuth: true, allowedRoles: ['USER'] });

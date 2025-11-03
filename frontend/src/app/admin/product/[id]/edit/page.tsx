@@ -164,7 +164,7 @@ function AdminProductEditPage() {
         setProduct(productData);
 
         // Format the date for datetime-local input
-        const availableFromDate = new Date(productData.availableFrom);
+        const availableFromDate = new Date(productData.availableFrom || new Date());
         const formattedDate = availableFromDate.toISOString().slice(0, 16);
 
         // Set form values

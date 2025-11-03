@@ -185,23 +185,26 @@ function AdminProductDetailsPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Available From:</span>
                     <span className="text-sm">
-                      {new Date((product as Product).availableFrom).toLocaleDateString()}
+                      {(product as Product).availableFrom 
+                        ? new Date((product as Product).availableFrom!).toLocaleDateString()
+                        : 'Not set'
+                      }
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Brand:</span>
-                    <span className="text-sm">{(product as Product).brand.name}</span>
+                    <span className="text-sm">{(product as Product).brand?.name || 'No brand'}</span>
                   </div>
 
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Categories:</span>
                     <div className="flex flex-wrap gap-1">
-                      {(product as Product).categories.map((category) => (
+                      {(product as Product).categories?.map((category) => (
                         <Badge key={category.id} variant="secondary">
                           {category.name}
                         </Badge>
-                      ))}
+                      )) || <span className="text-sm text-gray-500">No categories</span>}
                     </div>
                   </div>
                 </div>
@@ -218,7 +221,7 @@ function AdminProductDetailsPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm leading-relaxed">
-                  {(product as Product).details.description || "No description available."}
+                  {(product as Product).details?.description || "No description available."}
                 </p>
               </CardContent>
             </Card>
@@ -229,9 +232,9 @@ function AdminProductDetailsPage() {
                 <CardTitle>Specifications</CardTitle>
               </CardHeader>
               <CardContent>
-                {(product as Product).attributes && (product as Product).attributes.length > 0 ? (
+                {(product as Product).attributes?.length ? (
                   <div className="space-y-3">
-                    {(product as Product).attributes.map((attr) => (
+                    {(product as Product).attributes?.map((attr) => (
                       <div
                         key={attr.id}
                         className="flex items-center justify-between py-2 border-b border-border last:border-b-0"

@@ -1,29 +1,20 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { ProductSearch } from '../components/front';
 import { Spinner } from '../components/ui/spinner';
-import { useUserStore } from '../stores/user.store';
+import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 
 const StoreFront: React.FC = () => {
-  const { isAuthenticated, profile, loading } = useUserStore();
   const [isHydrated, setIsHydrated] = useState(false);
-  const router = useRouter();
+  const { isLoading } = useAuthRedirect(); // This handles all auth-based redirects automatically
 
   useEffect(() => {
     setIsHydrated(true);
   }, []);
 
-  // Redirect admin users to admin dashboard
-  useEffect(() => {
-    if (!loading && isAuthenticated() && profile?.role === 'ADMIN') {
-      router.push('/admin/dashboard');
-    }
-  }, [loading, isAuthenticated, profile?.role, router]);
-
-  // Show loading while checking authentication
-  if (loading || !isHydrated) {
+  // Show loading while checking authentication or hydrating
+  if (isLoading || !isHydrated) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">

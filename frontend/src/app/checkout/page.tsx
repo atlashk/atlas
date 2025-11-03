@@ -9,8 +9,8 @@ import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { useOrderStatusPolling } from "@/hooks/useOrderStatusPolling";
 import { usePaymentGateways } from "@/hooks/usePaymentGateways";
 import { usePaymentProcessing } from "@/hooks/usePaymentProcessing";
+import { withAuth } from '@/hoc/withAuth';
 import { useCartStore } from "@/stores/cart.store";
-import { useUserStore } from "@/stores/user.store";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -24,7 +24,6 @@ function CheckoutPageContent() {
     getCartTotal,
     isLoading: isCartLoading,
   } = useCartStore();
-  const { isAuthenticated } = useUserStore();
 
   const {
     orderId,
@@ -81,11 +80,6 @@ function CheckoutPageContent() {
   // Load cart data on component mount
   useEffect(() => {
     const loadData = async () => {
-      if (!isAuthenticated()) {
-        router.push("/login");
-        return;
-      }
-
       // Reset payment completion flag on mount
       paymentCompletedRef.current = false;
 
@@ -101,7 +95,7 @@ function CheckoutPageContent() {
      };
 
      loadData();
-   }, [isAuthenticated(), cart, isCartLoading]);
+   }, [cart, isCartLoading]);
 
   // Get actual cart total
   const cartTotal = getCartTotal();
@@ -265,7 +259,7 @@ function CheckoutPageContent() {
   );
 }
 
-export default function CheckoutPage() {
+function CheckoutPageWrapper() {
   return (
     <ErrorBoundary
       onError={(error, errorInfo) => {
@@ -281,3 +275,6 @@ export default function CheckoutPage() {
     </ErrorBoundary>
   );
 }
+
+// Export with authentication HOC that requires USER role
+export default withAuth(CheckoutPageWrapper, { requireAuth: true, allowedRoles: ['USER'] });

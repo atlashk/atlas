@@ -6,36 +6,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { CartItemResponse } from "@/interfaces/cart.interface";
 import { useCartStore } from "@/stores/cart.store";
-import { useUserStore } from "@/stores/user.store";
+import { withAuth } from '@/hoc/withAuth';
 import { formatCurrency } from "@/utils/formatter.util";
 import { ArrowLeft, CreditCard, Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function CartPage() {
+function CartPage() {
   const router = useRouter();
-  const { isAuthenticated, isAdmin } = useUserStore();
-  const { cart, loadCart, updateQuantity, removeFromCart, clearCart, isLoading, getCartTotal } = useCartStore();
+  const { cart, loadCart, updateQuantity, removeFromCart, clearCart, isLoading: cartLoading, getCartTotal } = useCartStore();
   
   const [updating, setUpdating] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
 
-  // Redirect if not authenticated or is admin
-  useEffect(() => {
-    if (!isAuthenticated() || isAdmin()) {
-      router.push("/");
-      return;
-    }
-  }, [isAuthenticated, isAdmin, router]);
-
   // Load cart data on component mount
   useEffect(() => {
-    if (isAuthenticated() && !isAdmin() && !cart && !isLoading) {
+    if (!cart && !cartLoading) {
       loadCart();
     }
-  }, [isAuthenticated(), isAdmin(), cart, isLoading]);
-
-
+  }, [cart, cartLoading]);
 
   const handleUpdateQuantity = async (productId: number, newQuantity: number) => {
     try {
@@ -84,7 +73,7 @@ export default function CartPage() {
     }
   };
 
-  if (isLoading) {
+  if (cartLoading) {
     return (
       <div className="container mx-auto px-4 py-8 pt-20">
         <div className="flex items-center justify-center min-h-[400px]">
@@ -244,3 +233,6 @@ export default function CartPage() {
     </div>
   );
 }
+
+// Export with authentication HOC that requires USER role
+export default withAuth(CartPage, { requireAuth: true, allowedRoles: ['USER'] });
