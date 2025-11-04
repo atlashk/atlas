@@ -65,6 +65,14 @@ const Dashboard: React.FC = () => {
     
     isInitialized.current = true;
     loadStats();
+    
+    // Set up polling to update data every 5 seconds
+    const interval = setInterval(() => {
+      loadStats();
+    }, 5000);
+    
+    // Cleanup interval on component unmount
+    return () => clearInterval(interval);
   }, [loadStats]);
 
   const displayStats = stats;
