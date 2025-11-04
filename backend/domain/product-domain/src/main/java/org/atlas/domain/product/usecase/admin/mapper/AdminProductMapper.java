@@ -1,6 +1,5 @@
 package org.atlas.domain.product.usecase.admin.mapper;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +11,7 @@ import org.atlas.domain.product.repository.criteria.FindProductCriteria;
 import org.atlas.domain.product.usecase.admin.model.AdminExportProductInput;
 import org.atlas.domain.product.usecase.admin.model.AdminListProductInput;
 import org.atlas.framework.util.CollectionUtil;
+import org.atlas.framework.util.StringUtil;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -39,7 +39,8 @@ public interface AdminProductMapper {
     product.setBrand(brand);
 
     // Categories
-    List<Category> categories = Arrays.stream(row.getCategoryIds().split("\\|"))
+    List<Category> categories = StringUtil.split(row.getCategoryIds(), "\\|")
+        .stream()
         .filter(StringUtils::isNotBlank)
         .map(categoryIdStr -> {
           Category category = new Category();

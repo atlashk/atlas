@@ -6,24 +6,31 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class NumberUtil {
 
-  public static boolean isZero(Integer input) {
-    if (input == null) {
+  public static boolean isZero(Integer val) {
+    if (val == null) {
       return false;
     }
-    return input == 0;
+    return val == 0;
   }
 
-  public static boolean isZero(Long input) {
-    if (input == null) {
+  public static boolean isZero(Long val) {
+    if (val == null) {
       return false;
     }
-    return input == 0L;
+    return val == 0L;
   }
 
-  public static boolean isZero(BigDecimal input) {
-    if (input == null) {
+  public static boolean isZero(BigDecimal val) {
+    if (val == null) {
       return false;
     }
-    return input.compareTo(BigDecimal.ZERO) == 0;
+    return val.compareTo(BigDecimal.ZERO) == 0;
+  }
+
+  public static boolean isPositive(BigDecimal val) {
+    if (val == null) {
+      return false;
+    }
+    return val.compareTo(BigDecimal.ZERO) > 0;
   }
 }

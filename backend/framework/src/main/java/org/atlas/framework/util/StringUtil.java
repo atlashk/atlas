@@ -1,6 +1,7 @@
 package org.atlas.framework.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import lombok.experimental.UtilityClass;
@@ -27,6 +28,39 @@ public class StringUtil {
    */
   public static boolean isNotBlank(String str) {
     return !isBlank(str);
+  }
+
+  /**
+   * Checks if the string contains only letters (Unicode letters). Returns false for null, empty, or
+   * whitespace-only strings.
+   */
+  public static boolean isAlpha(String str) {
+    if (isBlank(str)) {
+      return false;
+    }
+    return str.chars().allMatch(Character::isLetter);
+  }
+
+  /**
+   * Checks if the string contains only digits (0-9). Returns false for null, empty, or
+   * whitespace-only strings.
+   */
+  public static boolean isNumeric(String str) {
+    if (isBlank(str)) {
+      return false;
+    }
+    return str.chars().allMatch(Character::isDigit);
+  }
+
+  /**
+   * Checks if the string contains only letters and digits. Returns false for null, empty, or
+   * whitespace-only strings.
+   */
+  public static boolean isAlphanumeric(String str) {
+    if (isBlank(str)) {
+      return false;
+    }
+    return str.chars().allMatch(Character::isLetterOrDigit);
   }
 
   /**
@@ -92,5 +126,26 @@ public class StringUtil {
       shuffled.append(character);
     }
     return shuffled.toString();
+  }
+
+  public static String ordinalNumber(int number) {
+    String suffix;
+    if (number % 10 == 1) {
+      suffix = "-st";
+    } else if (number % 10 == 2) {
+      suffix = "-nd";
+    } else if (number % 10 == 3) {
+      suffix = "-rd";
+    } else {
+      suffix = "-th";
+    }
+    return String.format("%d%s", number, suffix);
+  }
+
+  public static List<String> split(String str, String delimiter) {
+    if (isBlank(str)) {
+      return CollectionUtil.emptyList();
+    }
+    return Arrays.asList(str.split(delimiter));
   }
 }
