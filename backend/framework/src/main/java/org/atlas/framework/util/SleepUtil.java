@@ -29,7 +29,7 @@ public class SleepUtil {
   public static void sleepJitter(long baseBackOfMs, int attempt) {
     try {
       long delay = (long) (baseBackOfMs * Math.pow(2, attempt - 1));
-      long jitter = ThreadLocalRandom.current().nextLong(0, 3);
+      long jitter = ThreadLocalRandom.current().nextLong(0, (long) (delay * 0.2));
       Thread.sleep(delay + jitter);
     } catch (InterruptedException ignored) {
       Thread.currentThread().interrupt();
