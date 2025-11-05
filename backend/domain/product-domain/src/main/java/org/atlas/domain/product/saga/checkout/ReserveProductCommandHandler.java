@@ -49,22 +49,22 @@ public class ReserveProductCommandHandler {
     // Try to reserve products
     for (CheckoutSagaData.OrderItem orderItem : checkoutSagaData.getOrderItems()) {
       try {
-        decreaseQuantity(orderItem.getProductId(), orderItem.getQuantity());
+        decreaseQuantity(orderItem.getProduct().getId(), orderItem.getQuantity());
       } catch (OutOfStockException e) {
         log.error("Out of stock occurred for product {}: {}",
-            orderItem.getProductId(), e.getMessage(), e);
+            orderItem.getProduct().getId(), e.getMessage(), e);
         return SagaCommandResult.failure(
-            String.format("Product %s is out of stock", orderItem.getProductName()));
+            String.format("Product %s is out of stock", orderItem.getProduct().getName()));
       } catch (Exception e) {
-        log.error("Failed to reserve product {}: {}", orderItem.getProductId(), e.getMessage(), e);
+        log.error("Failed to reserve product {}: {}", orderItem.getProduct().getId(), e.getMessage(), e);
         return SagaCommandResult.failure("Something went wrong with product %s",
-            orderItem.getProductName());
+            orderItem.getProduct().getName());
       }
 
       // Insert new reservation
       Reservation reservation = Reservation.builder()
           .orderId(checkoutSagaData.getOrderId())
-          .productId(orderItem.getProductId())
+          .productId(orderItem.getProduct().getId())
           .quantity(orderItem.getQuantity())
           .build();
       reservationRepository.insert(reservation);
@@ -72,7 +72,7 @@ public class ReserveProductCommandHandler {
 
     log.info("Successfully reserved products: sagaId={}, orderId={}",
         sagaCommand.getSagaId(), checkoutSagaData.getOrderId());
-    return SagaCommandResult.success(null);
+    return SagaCommandResult.success();
   }
 
   private void decreaseQuantity(Integer productId, Integer quantity)
@@ -124,11 +124,11 @@ public class ReserveProductCommandHandler {
         .forEach(orderItem -> {
           // Check reservation exists or not
           Reservation reservation = reservationRepository.findByOrderIdAndProductId(
-                  checkoutSagaData.getOrderId(), orderItem.getProductId())
+                  checkoutSagaData.getOrderId(), orderItem.getProduct().getId())
               .orElseThrow(() -> new DomainException(DomainError.RESERVATION_NOT_FOUND));
 
           // Increase quantity to compensate
-          productRepository.increaseQuantity(orderItem.getProductId(),
+          productRepository.increaseQuantity(orderItem.getProduct().getId(),
               orderItem.getQuantity());
 
           // Delete reservation

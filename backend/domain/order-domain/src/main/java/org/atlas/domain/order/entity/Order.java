@@ -52,6 +52,20 @@ public class Order extends DomainEntity {
   @Builder
   @Getter
   @Setter
+  public static class UserSnapshot {
+
+    private Integer id;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String phoneNumber;
+  }
+
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
+  @Getter
+  @Setter
   @EqualsAndHashCode(callSuper = false)
   public static class Address {
 
@@ -71,32 +85,6 @@ public class Order extends DomainEntity {
 
     private ProductSnapshot product;
     private Integer quantity;
-  }
-
-  @AllArgsConstructor(access = AccessLevel.PRIVATE)
-  @Getter
-  public enum CancellationReason {
-
-    FAILED_TO_RESERVE_PRODUCT("Failed to reserve product"),
-    FAILED_TO_INITIALIZE_PAYMENT("Failed to initialize payment"),
-    FAILED_TO_PROCESS_PAYMENT("Failed to process payment"),
-    ;
-
-    private final String value;
-  }
-
-  @NoArgsConstructor
-  @AllArgsConstructor
-  @Builder
-  @Getter
-  @Setter
-  public static class UserSnapshot {
-
-    private Integer id;
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String phoneNumber;
   }
 
   @NoArgsConstructor
@@ -124,5 +112,17 @@ public class Order extends DomainEntity {
     private String paymentMethod;
     private String paymentMethodDetails;
     private String transactionId;
+  }
+
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  @Getter
+  public enum CancellationReason {
+
+    FAILED_TO_RESERVE_PRODUCT("Failed to reserve product"),
+    FAILED_TO_INITIALIZE_PAYMENT("Failed to initialize payment"),
+    FAILED_TO_PROCESS_PAYMENT("Failed to process payment"),
+    ;
+
+    private final String value;
   }
 }

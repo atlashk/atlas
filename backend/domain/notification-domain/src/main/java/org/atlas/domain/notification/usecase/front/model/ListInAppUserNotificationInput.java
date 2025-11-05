@@ -1,0 +1,19 @@
+package org.atlas.domain.notification.usecase.front.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.atlas.framework.paging.PagingRequest;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Getter
+@Setter
+public class ListInAppUserNotificationInput {
+
+  private Integer userId;
+  private PagingRequest pagingRequest;
+}

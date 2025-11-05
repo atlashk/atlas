@@ -2,6 +2,7 @@ package org.atlas.framework.util;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -29,14 +30,14 @@ public class AsyncUtil {
   /**
    * Executes a single async task with default executor.
    */
-  public static void executeAsync(AsyncTask task) {
-    executeAsync(task, DEFAULT_EXECUTOR);
+  public static void executeTask(AsyncTask task) {
+    executeTask(task, DEFAULT_EXECUTOR);
   }
 
   /**
    * Executes a single async task with custom executor.
    */
-  public static void executeAsync(AsyncTask task, Executor executor) {
+  public static void executeTask(AsyncTask task, Executor executor) {
     long startTime = System.currentTimeMillis();
     CompletableFuture.runAsync(() -> {
       try {
@@ -55,14 +56,25 @@ public class AsyncUtil {
   /**
    * Executes a list of AsyncTask objects using default settings.
    */
-  public static CompletableFuture<Void> executeAsync(List<AsyncTask> tasks) {
-    return executeAsync(tasks, DEFAULT_TIMEOUT, DEFAULT_EXECUTOR, DEFAULT_BATCH_SIZE);
+  public static CompletableFuture<Void> executeTasks(AsyncTask... tasks) {
+    if (ArrayUtil.isEmpty(tasks)) {
+      throw new IllegalArgumentException("Tasks must not be empty");
+    }
+    return executeTasks(Arrays.asList(tasks), DEFAULT_TIMEOUT, DEFAULT_EXECUTOR,
+        DEFAULT_BATCH_SIZE);
+  }
+
+  public static CompletableFuture<Void> executeTasks(List<AsyncTask> tasks) {
+    if (CollectionUtil.isEmpty(tasks)) {
+      throw new IllegalArgumentException("Tasks must not be empty");
+    }
+    return executeTasks(tasks, DEFAULT_TIMEOUT, DEFAULT_EXECUTOR, DEFAULT_BATCH_SIZE);
   }
 
   /**
    * Executes a list of AsyncTask objects with full configuration options.
    */
-  public static CompletableFuture<Void> executeAsync(List<AsyncTask> tasks, Duration timeout,
+  public static CompletableFuture<Void> executeTasks(List<AsyncTask> tasks, Duration timeout,
       Executor executor, int batchSize) {
     if (tasks == null || tasks.isEmpty()) {
       return CompletableFuture.completedFuture(null);
@@ -83,19 +95,20 @@ public class AsyncUtil {
 
     return CompletableFuture.allOf(batchFutures.toArray(new CompletableFuture[0]))
         .orTimeout(timeout.toMillis(), TimeUnit.MILLISECONDS)
-        .whenComplete((result, throwable) -> {
+        .whenComplete((result, error) -> {
           long duration = System.currentTimeMillis() - startTime;
-          if (throwable != null) {
-            if (throwable instanceof TimeoutException) {
-              log.error("Task execution timed out after {}ms for {} tasks", duration, tasks.size());
+          if (error != null) {
+            if (error instanceof TimeoutException) {
+              log.error("Task execution timed out after {}ms for {} tasks",
+                  duration, tasks.size());
             } else {
-              log.error("Task execution failed after {}ms for {} tasks", duration, tasks.size(),
-                  throwable);
+              log.error("Task execution failed after {}ms for {} tasks",
+                  duration, tasks.size(), error);
             }
             logMetrics("task_execution", tasks.size(), duration, false);
           } else {
-            log.debug("Task execution completed successfully in {}ms for {} tasks", duration,
-                tasks.size());
+            log.debug("Task execution completed successfully in {}ms for {} tasks",
+                duration, tasks.size());
             logMetrics("task_execution", tasks.size(), duration, true);
           }
         });
@@ -132,8 +145,12 @@ public class AsyncUtil {
 
   public interface AsyncTask extends Runnable {
 
-    void onSuccess();
+    default void onSuccess() {
+      // Skipped
+    }
 
-    void onError(Throwable ex);
+    default void onError(Throwable e) {
+      log.error("Error executing async task", e);
+    }
   }
 }

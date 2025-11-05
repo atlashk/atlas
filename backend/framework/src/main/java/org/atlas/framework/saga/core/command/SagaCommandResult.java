@@ -19,6 +19,12 @@ public class SagaCommandResult implements Serializable {
   private String error;
   private Object metadata;
 
+  public static SagaCommandResult success() {
+    return SagaCommandResult.builder()
+        .success(true)
+        .build();
+  }
+
   public static SagaCommandResult success(Object metadata) {
     return SagaCommandResult.builder()
         .success(true)

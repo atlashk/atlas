@@ -21,6 +21,4 @@ public interface SagaOrchestrator {
   void handleSagaCompensationReply(SagaCompensationReply reply);
 
   void endSaga(Integer sagaId);
-
-  void syncSagaContext(Integer sagaId, SagaContext newSagaContext);
 }

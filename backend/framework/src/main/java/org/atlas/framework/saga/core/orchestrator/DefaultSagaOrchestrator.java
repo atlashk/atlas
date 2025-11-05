@@ -150,14 +150,6 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
         sagaId, saga.getName());
   }
 
-  @Override
-  @Transactional
-  public void syncSagaContext(Integer sagaId, SagaContext newSagaContext) {
-    SagaEntity saga = findSaga(sagaId);
-    saga.setContext(newSagaContext.serialize());
-    sagaRepository.update(saga);
-  }
-
   // Command reply handling
   // -----------------------------------------------------------------------------------------------
 

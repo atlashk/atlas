@@ -101,68 +101,55 @@ public class WebhookHandler {
     // Execute the remaining tasks asynchronously to be quickly respond the external payment gateway
     if (handleResponse != null && handleResponse.getResult() != null) {
       HandleWebhookResponse.Result handleResult = handleResponse.getResult();
-      AsyncUtil.executeAsync(new AsyncTask() {
-        @Override
-        public void run() {
-          // Update payment entity
-          Payment payment = paymentRepository.findById(handleResult.getPaymentId())
-              .orElseThrow(() -> new DomainException(DomainError.PAYMENT_NOT_FOUND));
-          switch (handleResult.getStatus()) {
-            case SUCCEEDED -> {
-              payment.setPaymentMethod(handleResult.getPaymentMethod());
-              payment.setPaymentMethodDetails(
-                  JsonUtil.getInstance().toJson(handleResult.getPaymentMethodDetails()));
-              payment.setStatus(PaymentStatus.SUCCEEDED);
-            }
-            case FAILED -> {
-              payment.setStatus(PaymentStatus.FAILED);
-              payment.setError(handleResult.getError());
-            }
-            case CANCELED -> {
-              payment.setStatus(PaymentStatus.CANCELED);
-              payment.setCancellationReason(handleResult.getCancellationReason());
-            }
-            default -> payment.setStatus(PaymentStatus.UNKNOWN);
+      AsyncUtil.executeTask(() -> {
+        // Update payment entity
+        Payment payment = paymentRepository.findById(handleResult.getPaymentId())
+            .orElseThrow(() -> new DomainException(DomainError.PAYMENT_NOT_FOUND));
+        switch (handleResult.getStatus()) {
+          case SUCCEEDED -> {
+            payment.setPaymentMethod(handleResult.getPaymentMethod());
+            payment.setPaymentMethodDetails(
+                JsonUtil.getInstance().toJson(handleResult.getPaymentMethodDetails()));
+            payment.setStatus(PaymentStatus.SUCCEEDED);
           }
-          paymentRepository.update(payment);
-
-          // Publish saga command reply message
-          SagaCommandReply.SagaCommandReplyBuilder sagaCommandReplyBuilder = SagaCommandReply.builder()
-              .sagaId(payment.getSagaId())
-              .sagaName("checkout")
-              .sagaCommandName(CheckoutCommand.PROCESS_PAYMENT);
-          SagaCommandResult sagaCommandResult = null;
-          switch (handleResult.getStatus()) {
-            case SUCCEEDED -> sagaCommandResult = SagaCommandResult.success(
-                ProcessPaymentCommandMetadata.builder()
-                    .paymentStatus(PaymentStatus.SUCCEEDED)
-                    .paymentMethod(payment.getPaymentMethod())
-                    .paymentMethodDetails(payment.getPaymentMethodDetails())
-                    .build());
-            case FAILED -> sagaCommandResult = SagaCommandResult.failure(
-                payment.getError(),
-                ProcessPaymentCommandMetadata.builder()
-                    .paymentStatus(PaymentStatus.FAILED)
-                    .build());
-            case CANCELED -> sagaCommandResult = SagaCommandResult.failure(
-                payment.getCancellationReason(),
-                ProcessPaymentCommandMetadata.builder()
-                    .paymentStatus(PaymentStatus.CANCELED)
-                    .build());
+          case FAILED -> {
+            payment.setStatus(PaymentStatus.FAILED);
+            payment.setError(handleResult.getError());
           }
-          sagaCommandReplyBuilder.sagaCommandResult(sagaCommandResult);
-          sagaMessagePublisher.publish(sagaCommandReplyBuilder.build());
+          case CANCELED -> {
+            payment.setStatus(PaymentStatus.CANCELED);
+            payment.setCancellationReason(handleResult.getCancellationReason());
+          }
+          default -> payment.setStatus(PaymentStatus.UNKNOWN);
         }
+        paymentRepository.update(payment);
 
-        @Override
-        public void onSuccess() {
-          // Ignored
+        // Publish saga command reply message
+        SagaCommandReply.SagaCommandReplyBuilder sagaCommandReplyBuilder = SagaCommandReply.builder()
+            .sagaId(payment.getSagaId())
+            .sagaName("checkout")
+            .sagaCommandName(CheckoutCommand.PROCESS_PAYMENT);
+        SagaCommandResult sagaCommandResult = null;
+        switch (handleResult.getStatus()) {
+          case SUCCEEDED -> sagaCommandResult = SagaCommandResult.success(
+              ProcessPaymentCommandMetadata.builder()
+                  .paymentStatus(PaymentStatus.SUCCEEDED)
+                  .paymentMethod(payment.getPaymentMethod())
+                  .paymentMethodDetails(payment.getPaymentMethodDetails())
+                  .build());
+          case FAILED -> sagaCommandResult = SagaCommandResult.failure(
+              payment.getError(),
+              ProcessPaymentCommandMetadata.builder()
+                  .paymentStatus(PaymentStatus.FAILED)
+                  .build());
+          case CANCELED -> sagaCommandResult = SagaCommandResult.failure(
+              payment.getCancellationReason(),
+              ProcessPaymentCommandMetadata.builder()
+                  .paymentStatus(PaymentStatus.CANCELED)
+                  .build());
         }
-
-        @Override
-        public void onError(Throwable ex) {
-          // Ignored
-        }
+        sagaCommandReplyBuilder.sagaCommandResult(sagaCommandResult);
+        sagaMessagePublisher.publish(sagaCommandReplyBuilder.build());
       });
     }
 

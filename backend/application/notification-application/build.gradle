@@ -26,53 +26,22 @@ repositories {
 
 dependencies {
     // Domain
-    implementation project(':domain.order')
+    implementation project(':domain.notification')
 
     // Infrastructure
-    switch (rootProject.ext.appStack['api-client']) {
-        case 'grpc-netdevh':
-            implementation project(':infrastructure.internal-api.product.grpc.netdevh')
-            implementation project(':infrastructure.internal-api.user.grpc.netdevh')
-            break
-        case 'rest-apachehttpclient':
-            implementation project(':infrastructure.internal-api.product.rest.apachehttpclient')
-            implementation project(':infrastructure.internal-api.user.rest.apachehttpclient')
-            break
-        case 'rest-feign':
-            implementation project(':infrastructure.internal-api.product.rest.feign')
-            implementation project(':infrastructure.internal-api.user.rest.feign')
-            break
-        case 'rest-restclient':
-            implementation project(':infrastructure.internal-api.product.rest.restclient')
-            implementation project(':infrastructure.internal-api.user.rest.restclient')
-            break
-        case 'rest-resttemplate':
-            implementation project(':infrastructure.internal-api.product.rest.resttemplate')
-            implementation project(':infrastructure.internal-api.user.rest.resttemplate')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-client']}")
-    }
     switch (rootProject.ext.appStack['api-server']) {
         case 'rest':
-            implementation project(':infrastructure.api-server.rest.impl.order')
+            implementation project(':infrastructure.api-server.rest.impl.notification')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
     }
-    switch (rootProject.ext.appStack['cache']) {
-        case 'redis':
-            implementation project(':infrastructure.cache.redis')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['cache']}")
-    }
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
-            implementation project(':infrastructure.datasource.mysql.impl.order')
+            implementation project(':infrastructure.datasource.mysql.impl.notification')
             break
         case 'postgres':
-            implementation project(':infrastructure.datasource.postgres.impl.order')
+            implementation project(':infrastructure.datasource.postgres.impl.notification')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
@@ -89,29 +58,12 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['discovery-client']}")
     }
-    switch (rootProject.ext.appStack['kv']) {
-        case 'redis':
-            implementation project(':infrastructure.kv.redis.parent')
-            break
-        case 'dynamodb':
-            implementation project(':infrastructure.kv.dynamodb')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['kv']}")
-    }
-    switch (rootProject.ext.appStack['lock']) {
-        case 'redisson':
-            implementation project(':infrastructure.lock.redisson')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['lock']}")
-    }
     switch (rootProject.ext.appStack['messaging']) {
         case 'kafka':
-            implementation project(':infrastructure.messaging.kafka.impl.order')
+            implementation project(':infrastructure.messaging.kafka.impl.notification')
             break
         case 'rabbitmq':
-            implementation project(':infrastructure.messaging.rabbitmq.impl.order')
+            implementation project(':infrastructure.messaging.rabbitmq.impl.notification')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['messaging']}")
@@ -120,14 +72,12 @@ dependencies {
         case 'flyway':
             switch (rootProject.ext.appStack['datasource']) {
                 case 'mysql':
-                    implementation project(':infrastructure.migration.flyway.mysql.impl.order')
+                    implementation project(':infrastructure.migration.flyway.mysql.impl.notification')
                     implementation project(':infrastructure.migration.flyway.mysql.impl.outbox')
-                    implementation project(':infrastructure.migration.flyway.mysql.impl.saga')
                     break
                 case 'postgres':
-                    implementation project(':infrastructure.migration.flyway.postgres.impl.order')
+                    implementation project(':infrastructure.migration.flyway.postgres.impl.notification')
                     implementation project(':infrastructure.migration.flyway.postgres.impl.outbox')
-                    implementation project(':infrastructure.migration.flyway.postgres.impl.saga')
                     break
                 default:
                     throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
@@ -178,7 +128,7 @@ dependencies {
     }
     switch (rootProject.ext.appStack['persistence']) {
         case 'jpa':
-            implementation project(':infrastructure.persistence.jpa.impl.order')
+            implementation project(':infrastructure.persistence.jpa.impl.notification')
             implementation project(':infrastructure.persistence.jpa.impl.outbox')
             implementation project(':infrastructure.persistence.jpa.impl.saga')
             break
@@ -195,7 +145,16 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['scheduler']}")
     }
-    implementation project(':infrastructure.sequence-generator')
+    switch (rootProject.ext.appStack['template']) {
+        case 'freemarker':
+            implementation project(':infrastructure.template.freemarker')
+            break
+        case 'thymeleaf':
+            implementation project(':infrastructure.template.thymeleaf')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['template']}")
+    }
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

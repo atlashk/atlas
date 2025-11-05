@@ -9,25 +9,28 @@ project(':framework').projectDir = file('framework')
 // Domain
 // =================================================================================================
 
-include(':domain.user')
-project(':domain.user').projectDir = file('domain/user-domain')
-include(':domain.user.shared')
-project(':domain.user.shared').projectDir = file('domain/user-domain-shared')
+include(':domain.notification')
+project(':domain.notification').projectDir = file('domain/notification-domain')
 
-include(':domain.product')
-project(':domain.product').projectDir = file('domain/product-domain')
-include(':domain.product.shared')
-project(':domain.product.shared').projectDir = file('domain/product-domain-shared')
+include(':domain.order')
+project(':domain.order').projectDir = file('domain/order-domain')
+include(':domain.order.shared')
+project(':domain.order.shared').projectDir = file('domain/order-domain-shared')
 
 include(':domain.payment')
 project(':domain.payment').projectDir = file('domain/payment-domain')
 include(':domain.payment.shared')
 project(':domain.payment.shared').projectDir = file('domain/payment-domain-shared')
 
-include(':domain.order')
-project(':domain.order').projectDir = file('domain/order-domain')
-include(':domain.order.shared')
-project(':domain.order.shared').projectDir = file('domain/order-domain-shared')
+include(':domain.product')
+project(':domain.product').projectDir = file('domain/product-domain')
+include(':domain.product.shared')
+project(':domain.product.shared').projectDir = file('domain/product-domain-shared')
+
+include(':domain.user')
+project(':domain.user').projectDir = file('domain/user-domain')
+include(':domain.user.shared')
+project(':domain.user.shared').projectDir = file('domain/user-domain-shared')
 
 // =================================================================================================
 // Infrastructure
@@ -392,17 +395,20 @@ project(':infrastructure.template.thymeleaf').projectDir = file('infrastructure/
 // Application::Spring Boot
 // -------------------------------------------------------------------------------------------------
 
-include(':application.user')
-project(':application.user').projectDir = file('application/user-application')
-
-include(':application.product')
-project(':application.product').projectDir = file('application/product-application')
+include(':application.notification')
+project(':application.notification').projectDir = file('application/notification-application')
 
 include(':application.order')
 project(':application.order').projectDir = file('application/order-application')
 
 include(':application.payment')
 project(':application.payment').projectDir = file('application/payment-application')
+
+include(':application.product')
+project(':application.product').projectDir = file('application/product-application')
+
+include(':application.user')
+project(':application.user').projectDir = file('application/user-application')
 
 // =================================================================================================
 // Edge

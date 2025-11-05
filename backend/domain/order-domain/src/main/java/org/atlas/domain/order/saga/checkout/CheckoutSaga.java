@@ -45,10 +45,7 @@ import org.atlas.framework.util.FileUtil;
 public class CheckoutSaga {
 
   private final OrderRepository orderRepository;
-  private final ApplicationConfigService applicationConfigService;
   private final SagaOrchestrator sagaOrchestrator;
-  private final EmailService emailService;
-  private final TemplateService templateService;
 
   @StartSaga
   public void startSaga(SagaEntity saga) {
@@ -131,10 +128,13 @@ public class CheckoutSaga {
 
       orderRepository.update(order);
 
-      // Send command to clear user cart
-      sagaOrchestrator.sendSagaCommand(saga, CheckoutCommand.CLEAR_CART, Services.USER_SERVICE);
-
-      AsyncUtil.executeAsync(notifyEmail(order));
+      // Send the remaining commands
+      AsyncUtil.executeTasks(
+          () -> sagaOrchestrator.sendSagaCommand(
+              saga, CheckoutCommand.CLEAR_CART, Services.USER_SERVICE),
+          () -> sagaOrchestrator.sendSagaCommand(
+              saga, CheckoutCommand.NOTIFY_ORDER_FULFILLED, Services.NOTIFICATION_SERVICE)
+      );
     } else {
       // Update order status
       order.setStatus(OrderStatus.CANCELED);
@@ -147,68 +147,5 @@ public class CheckoutSaga {
     }
 
     sagaOrchestrator.endSaga(saga.getId());
-  }
-
-  private AsyncTask notifyEmail(Order order) {
-    return new AsyncTask() {
-      @Override
-      public void run() {
-        // Model
-        Map<String, Object> model = new HashMap<>();
-        model.put("order", order);
-
-        // Subject
-        String subject;
-        try {
-          subject = templateService.resolveEmailSubject("order_fulfilled", model);
-        } catch (Exception e) {
-          throw new ResolveTemplateException("Could not resolve subject template", e);
-        }
-
-        // Body
-        String body;
-        try {
-          body = templateService.resolveEmailBody("order_fulfilled", model);
-        } catch (Exception e) {
-          throw new ResolveTemplateException("Could not resolve body template", e);
-        }
-
-        // Attachments (demo)
-        Attachment attachment;
-        File attachmentFile;
-        try {
-          attachmentFile = FileUtil.readResourceFile("email/attachment/coffee.jpg");
-        } catch (IOException e) {
-          throw new ResolveTemplateException("Could not resolve attachment", e);
-        }
-        attachment = new Attachment(attachmentFile.getName(), attachmentFile);
-
-        String sender = Optional.ofNullable(
-                applicationConfigService.getConfig("notification.email.sender"))
-            .orElseThrow(() -> new IllegalStateException("email.sender is not configured"));
-
-        EmailNotification notification = new EmailNotification.Builder()
-            .setSender(sender)
-            .addRecipient(order.getUser().getEmail())
-            .setSubject(subject)
-            .setBody(body)
-            .addAttachment(attachment)
-            .setHtml(true)
-            .build();
-        emailService.notify(notification);
-      }
-
-      @Override
-      public void onSuccess() {
-        log.info("Email notification for order fulfilled succeeded: orderId={}",
-            order.getId());
-      }
-
-      @Override
-      public void onError(Throwable ex) {
-        log.error("Email notification for order fulfilled failed: orderId={}, error={}",
-            order.getId(), ex.getMessage(), ex);
-      }
-    };
   }
 }
