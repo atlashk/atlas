@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.cryptography.Base64Util;
 import org.atlas.framework.notification.email.Attachment;
-import org.atlas.framework.notification.email.EmailNotification;
+import org.atlas.framework.notification.email.SendRequest;
 import org.atlas.framework.notification.email.EmailService;
 import org.atlas.framework.notification.email.SendEmailException;
 import org.atlas.framework.util.CollectionUtil;
@@ -30,7 +30,7 @@ public class SendgridEmailService implements EmailService {
   private final SendGrid sendGrid;
 
   @Override
-  public void notify(EmailNotification notification) throws SendEmailException {
+  public void notify(SendRequest notification) throws SendEmailException {
     try {
       Request request = createSendGridRequest(notification);
       Response response = sendGrid.api(request);
@@ -50,7 +50,7 @@ public class SendgridEmailService implements EmailService {
     }
   }
 
-  private Request createSendGridRequest(EmailNotification notification) throws IOException {
+  private Request createSendGridRequest(SendRequest notification) throws IOException {
     Email from = new Email(notification.getSender());
     Email[] recipients = notification.getRecipients().stream().map(Email::new)
         .toArray(Email[]::new);

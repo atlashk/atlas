@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS saga
 (
     id            SERIAL      NOT NULL PRIMARY KEY,
     name          VARCHAR(50) NOT NULL,
-    context       TEXT,
+    context       JSONB,
     status        VARCHAR(20) NOT NULL,
     completed_at  TIMESTAMP,
     error_message TEXT,

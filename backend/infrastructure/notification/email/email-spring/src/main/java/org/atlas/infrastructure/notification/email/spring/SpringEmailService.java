@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.notification.email.Attachment;
-import org.atlas.framework.notification.email.EmailNotification;
+import org.atlas.framework.notification.email.SendRequest;
 import org.atlas.framework.notification.email.EmailService;
 import org.atlas.framework.notification.email.SendEmailException;
 import org.atlas.framework.util.CollectionUtil;
@@ -22,7 +22,7 @@ public class SpringEmailService implements EmailService {
   private final JavaMailSender mailSender;
 
   @Override
-  public void notify(EmailNotification notification) throws SendEmailException {
+  public void notify(SendRequest notification) throws SendEmailException {
     try {
       MimeMessage mimeMessage = createMimeMessage(notification);
       mailSender.send(mimeMessage);
@@ -33,7 +33,7 @@ public class SpringEmailService implements EmailService {
     }
   }
 
-  private MimeMessage createMimeMessage(EmailNotification request) throws MessagingException {
+  private MimeMessage createMimeMessage(SendRequest request) throws MessagingException {
     MimeMessage mimeMessage = mailSender.createMimeMessage();
     MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true,
         StandardCharsets.UTF_8.name());

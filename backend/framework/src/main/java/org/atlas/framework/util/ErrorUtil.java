@@ -16,8 +16,8 @@ public class ErrorUtil {
     }
 
     // Limit length to prevent database issues
-    if (errorMessage.length() > 1000) {
-      return errorMessage.substring(0, 997) + "...";
+    if (errorMessage.length() > 500) {
+      return errorMessage.substring(0, 447) + "...";
     }
 
     return errorMessage;

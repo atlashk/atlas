@@ -8,11 +8,17 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.atlas.domain.notification.entity.DeliveryStatus;
+import org.atlas.domain.notification.entity.Notification;
+import org.atlas.domain.notification.entity.NotificationChannel;
+import org.atlas.domain.notification.entity.NotificationType;
+import org.atlas.domain.notification.entity.metadata.OrderFulfilledMetadata;
+import org.atlas.domain.notification.repository.NotificationRepository;
 import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.notification.email.Attachment;
-import org.atlas.framework.notification.email.EmailNotification;
 import org.atlas.framework.notification.email.EmailService;
+import org.atlas.framework.notification.email.SendRequest;
 import org.atlas.framework.saga.checkout.CheckoutCommand;
 import org.atlas.framework.saga.checkout.CheckoutSagaData;
 import org.atlas.framework.saga.core.annotation.SagaCommandHandler;
@@ -23,6 +29,8 @@ import org.atlas.framework.template.ResolveTemplateException;
 import org.atlas.framework.template.TemplateService;
 import org.atlas.framework.util.AsyncUtil;
 import org.atlas.framework.util.AsyncUtil.AsyncTask;
+import org.atlas.framework.util.DateUtil;
+import org.atlas.framework.util.ErrorUtil;
 import org.atlas.framework.util.FileUtil;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +39,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class NotifyOrderFulfilledCommandHandler {
 
+  private final NotificationRepository notificationRepository;
   private final ApplicationConfigService applicationConfigService;
   private final EmailService emailService;
   private final TemplateService templateService;
@@ -48,10 +57,10 @@ public class NotifyOrderFulfilledCommandHandler {
         .whenComplete((result, error) -> {
           if (error == null) {
             log.info("Successfully notified for order fulfilled: sagaId={}, orderId={}",
-              sagaCommand.getSagaId(), checkoutSagaData.getOrderId());
+                sagaCommand.getSagaId(), checkoutSagaData.getOrderId());
           } else {
             log.error("Failed to notify for order fulfilled: sagaId={}, orderId={}, error={}",
-              sagaCommand.getSagaId(), checkoutSagaData.getOrderId(), error.getMessage());
+                sagaCommand.getSagaId(), checkoutSagaData.getOrderId(), error.getMessage());
           }
         });
 
@@ -60,8 +69,23 @@ public class NotifyOrderFulfilledCommandHandler {
 
   private AsyncTask notifyEmail(CheckoutSagaData sagaData) {
     return new AsyncTask() {
+      private Notification notification;
+
       @Override
       public void run() {
+        // Create new notification
+        OrderFulfilledMetadata metadata = OrderFulfilledMetadata.builder()
+            .orderId(sagaData.getOrderId())
+            .build();
+        notification = Notification.builder()
+            .userId(sagaData.getUser().getId())
+            .type(NotificationType.ORDER_FULFILLED)
+            .channel(NotificationChannel.EMAIL)
+            .metadata(JsonUtil.getInstance().toJson(metadata))
+            .deliveryStatus(DeliveryStatus.IN_PROGRESS)
+            .build();
+        notificationRepository.insert(notification);
+
         // Model
         Map<String, Object> model = new HashMap<>();
         model.put("order", sagaData);
@@ -96,7 +120,7 @@ public class NotifyOrderFulfilledCommandHandler {
                 applicationConfigService.getConfig("notification.email.sender"))
             .orElseThrow(() -> new IllegalStateException("email.sender is not configured"));
 
-        EmailNotification notification = new EmailNotification.Builder()
+        SendRequest sendRequest = new SendRequest.Builder()
             .setSender(sender)
             .addRecipient(sagaData.getUser().getEmail())
             .setSubject(subject)
@@ -104,19 +128,29 @@ public class NotifyOrderFulfilledCommandHandler {
             .addAttachment(attachment)
             .setHtml(true)
             .build();
-        emailService.notify(notification);
+        emailService.send(sendRequest);
       }
 
       @Override
       public void onSuccess() {
+        if (notification != null) {
+          notification.setDeliveryStatus(DeliveryStatus.SUCCEEDED);
+          notification.setDeliveredAt(DateUtil.now());
+          notificationRepository.update(notification);
+        }
         log.info("Email notification for order fulfilled succeeded: orderId={}",
             sagaData.getOrderId());
       }
 
       @Override
-      public void onError(Throwable ex) {
+      public void onError(Throwable e) {
+        if (notification != null) {
+          notification.setDeliveryStatus(DeliveryStatus.FAILED);
+          notification.setDeliveryError(ErrorUtil.sanitizeErrorMessage(e));
+          notificationRepository.update(notification);
+        }
         log.error("Email notification for order fulfilled failed: orderId={}, error={}",
-            sagaData.getOrderId(), ex.getMessage(), ex);
+            sagaData.getOrderId(), e.getMessage(), e);
       }
     };
   }

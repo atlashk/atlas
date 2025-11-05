@@ -15,5 +15,5 @@ import org.atlas.framework.paging.PagingRequest;
 public class ListInAppUserNotificationInput {
 
   private Integer userId;
-  private PagingRequest pagingRequest;
+  private Integer limit;
 }

@@ -1,6 +1,6 @@
 package org.atlas.domain.notification.entity;
 
-public enum NotificationChannelType {
+public enum NotificationChannel {
 
   EMAIL,
   SMS,

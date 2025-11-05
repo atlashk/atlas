@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS saga
 (
     id            INT         NOT NULL AUTO_INCREMENT PRIMARY KEY,
     name          VARCHAR(50) NOT NULL,
-    context       TEXT,
+    context       JSON,
     status        VARCHAR(20) NOT NULL,
     completed_at  DATETIME,
     error_message TEXT,

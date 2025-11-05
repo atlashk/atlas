@@ -22,11 +22,11 @@ public class Notification extends DomainEntity {
   private Integer id;
   private Integer userId;
   private NotificationType type;
-  private NotificationChannelType channelType;
+  private NotificationChannel channel;
   private String message;
   private Object metadata;
   private Date deliveredAt;
-  private NotificationDeliveryStatus deliveryStatus;
+  private DeliveryStatus deliveryStatus;
   private String deliveryError;
   private Date readAt;
 

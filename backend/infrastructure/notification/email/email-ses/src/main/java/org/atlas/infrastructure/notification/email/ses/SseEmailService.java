@@ -13,7 +13,7 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.notification.email.Attachment;
-import org.atlas.framework.notification.email.EmailNotification;
+import org.atlas.framework.notification.email.SendRequest;
 import org.atlas.framework.notification.email.EmailService;
 import org.atlas.framework.notification.email.SendEmailException;
 import org.atlas.framework.util.CollectionUtil;
@@ -35,7 +35,7 @@ public class SseEmailService implements EmailService {
 
   private final SesV2Client sesClient;
 
-  public void notify(EmailNotification notification) {
+  public void notify(SendRequest notification) {
     try {
       SendEmailResponse response;
       if (CollectionUtil.isNotEmpty(notification.getAttachments())) {
@@ -51,7 +51,7 @@ public class SseEmailService implements EmailService {
     }
   }
 
-  private SendEmailResponse sendSimpleEmail(EmailNotification notification) {
+  private SendEmailResponse sendSimpleEmail(SendRequest notification) {
     Destination destination = Destination.builder()
         .toAddresses(notification.getRecipients())
         .build();
@@ -92,7 +92,7 @@ public class SseEmailService implements EmailService {
     return sesClient.sendEmail(emailRequest);
   }
 
-  private SendEmailResponse sendEmailWithAttachments(EmailNotification request)
+  private SendEmailResponse sendEmailWithAttachments(SendRequest request)
       throws MessagingException, IOException {
     MimeMessage mimeMessage = createMimeMessage(request);
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -108,7 +108,7 @@ public class SseEmailService implements EmailService {
     return sesClient.sendEmail(awsSendEmailRequest);
   }
 
-  private MimeMessage createMimeMessage(EmailNotification request)
+  private MimeMessage createMimeMessage(SendRequest request)
       throws MessagingException, IOException {
     Session session = Session.getDefaultInstance(System.getProperties());
     MimeMessage mimeMessage = new MimeMessage(session);
