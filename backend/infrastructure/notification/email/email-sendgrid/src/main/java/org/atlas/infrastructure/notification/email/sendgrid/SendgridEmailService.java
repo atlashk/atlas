@@ -15,9 +15,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.cryptography.Base64Util;
 import org.atlas.framework.notification.email.Attachment;
-import org.atlas.framework.notification.email.SendRequest;
 import org.atlas.framework.notification.email.EmailService;
 import org.atlas.framework.notification.email.SendEmailException;
+import org.atlas.framework.notification.email.SendEmailRequest;
 import org.atlas.framework.util.CollectionUtil;
 import org.springframework.stereotype.Service;
 
@@ -30,35 +30,32 @@ public class SendgridEmailService implements EmailService {
   private final SendGrid sendGrid;
 
   @Override
-  public void notify(SendRequest notification) throws SendEmailException {
+  public void send(SendEmailRequest request) throws SendEmailException {
     try {
-      Request request = createSendGridRequest(notification);
-      Response response = sendGrid.api(request);
+      Request sendGridRequest = createSendGridRequest(request);
+      Response response = sendGrid.api(sendGridRequest);
       if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
-        log.info("Sent email successfully: notificationId={}, recipients={}",
-            notification.getId(), notification.getRecipients());
+        log.info("Sent email successfully: recipients={}", request.getRecipients());
       } else {
-        log.error("Failed to send email: notificationId={}, recipients={}, status={}, body={}",
-            notification.getId(), notification.getRecipients(), response.getStatusCode(),
-            response.getBody());
+        log.error("Failed to send email: recipients={}, status={}, body={}",
+            request.getRecipients(), response.getStatusCode(), response.getBody());
         throw new SendEmailException("SendGrid API error: " + response.getBody());
       }
     } catch (IOException e) {
-      log.error("Failed to send email: notificationId={}, recipients={}",
-          notification.getId(), notification.getRecipients(), e);
+      log.error("Failed to send email: recipients={}", request.getRecipients(), e);
       throw new SendEmailException(e);
     }
   }
 
-  private Request createSendGridRequest(SendRequest notification) throws IOException {
-    Email from = new Email(notification.getSender());
-    Email[] recipients = notification.getRecipients().stream().map(Email::new)
+  private Request createSendGridRequest(SendEmailRequest request) throws IOException {
+    Email from = new Email(request.getSender());
+    Email[] recipients = request.getRecipients().stream().map(Email::new)
         .toArray(Email[]::new);
-    Content content = new Content(notification.isHtml() ? "text/html" : "text/plain",
-        notification.getBody());
+    Content content = new Content(request.isHtml() ? "text/html" : "text/plain",
+        request.getBody());
     Mail mail = new Mail();
     mail.setFrom(from);
-    mail.setSubject(notification.getSubject());
+    mail.setSubject(request.getSubject());
     Personalization personalization = new Personalization();
     for (Email recipient : recipients) {
       personalization.addTo(recipient);
@@ -66,8 +63,8 @@ public class SendgridEmailService implements EmailService {
     mail.addPersonalization(personalization);
     mail.addContent(content);
 
-    if (CollectionUtil.isNotEmpty(notification.getAttachments())) {
-      for (Attachment attachment : notification.getAttachments()) {
+    if (CollectionUtil.isNotEmpty(request.getAttachments())) {
+      for (Attachment attachment : request.getAttachments()) {
         Attachments sendGridAttachment = new Attachments();
         sendGridAttachment.setFilename(attachment.name());
         byte[] attachmentContent = Files.readAllBytes(attachment.file().toPath());
@@ -76,10 +73,10 @@ public class SendgridEmailService implements EmailService {
       }
     }
 
-    Request request = new Request();
-    request.setMethod(Method.POST);
-    request.setEndpoint("mail/send");
-    request.setBody(mail.build());
-    return request;
+    Request sendGridRequest = new Request();
+    sendGridRequest.setMethod(Method.POST);
+    sendGridRequest.setEndpoint("mail/send");
+    sendGridRequest.setBody(mail.build());
+    return sendGridRequest;
   }
 }

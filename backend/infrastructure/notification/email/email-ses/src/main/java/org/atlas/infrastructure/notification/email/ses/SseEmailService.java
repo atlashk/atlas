@@ -13,9 +13,9 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.notification.email.Attachment;
-import org.atlas.framework.notification.email.SendRequest;
 import org.atlas.framework.notification.email.EmailService;
 import org.atlas.framework.notification.email.SendEmailException;
+import org.atlas.framework.notification.email.SendEmailRequest;
 import org.atlas.framework.util.CollectionUtil;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.SdkBytes;
@@ -35,35 +35,41 @@ public class SseEmailService implements EmailService {
 
   private final SesV2Client sesClient;
 
-  public void notify(SendRequest notification) {
+  @Override
+  public void send(SendEmailRequest request) throws SendEmailException {
     try {
       SendEmailResponse response;
-      if (CollectionUtil.isNotEmpty(notification.getAttachments())) {
-        response = sendEmailWithAttachments(notification);
+      if (CollectionUtil.isNotEmpty(request.getAttachments())) {
+        response = sendEmailWithAttachments(request);
       } else {
-        response = sendSimpleEmail(notification);
+        response = sendSimpleEmail(request);
       }
       log.info("Sent email successfully: messageId={}, recipients={}", response.messageId(),
           response.messageId());
     } catch (Exception e) {
-      log.error("Failed to send email: recipients={}", notification.getRecipients(), e);
+      log.error("Failed to send email: recipients={}", request.getRecipients(), e);
       throw new SendEmailException(e);
     }
   }
 
-  private SendEmailResponse sendSimpleEmail(SendRequest notification) {
+  private SendEmailResponse sendSimpleEmail(SendEmailRequest request) {
     Destination destination = Destination.builder()
-        .toAddresses(notification.getRecipients())
+        .toAddresses(request.getRecipients())
         .build();
 
+    // Subject
     Content subject = Content.builder()
-        .data(notification.getSubject())
+        .data(request.getSubject())
         .build();
+
+    // Content
     Content content = Content.builder()
-        .data(notification.getBody())
+        .data(request.getBody())
         .build();
+
+    // Body
     Body body;
-    if (notification.isHtml()) {
+    if (request.isHtml()) {
       body = Body.builder()
           .html(content)
           .build();
@@ -86,13 +92,13 @@ public class SseEmailService implements EmailService {
         software.amazon.awssdk.services.sesv2.model.SendEmailRequest.builder()
             .destination(destination)
             .content(emailContent)
-            .fromEmailAddress(notification.getSender())
+            .fromEmailAddress(request.getSender())
             .build();
 
     return sesClient.sendEmail(emailRequest);
   }
 
-  private SendEmailResponse sendEmailWithAttachments(SendRequest request)
+  private SendEmailResponse sendEmailWithAttachments(SendEmailRequest request)
       throws MessagingException, IOException {
     MimeMessage mimeMessage = createMimeMessage(request);
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -108,7 +114,7 @@ public class SseEmailService implements EmailService {
     return sesClient.sendEmail(awsSendEmailRequest);
   }
 
-  private MimeMessage createMimeMessage(SendRequest request)
+  private MimeMessage createMimeMessage(SendEmailRequest request)
       throws MessagingException, IOException {
     Session session = Session.getDefaultInstance(System.getProperties());
     MimeMessage mimeMessage = new MimeMessage(session);

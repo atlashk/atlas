@@ -6,9 +6,9 @@ import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.notification.email.Attachment;
-import org.atlas.framework.notification.email.SendRequest;
 import org.atlas.framework.notification.email.EmailService;
 import org.atlas.framework.notification.email.SendEmailException;
+import org.atlas.framework.notification.email.SendEmailRequest;
 import org.atlas.framework.util.CollectionUtil;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -22,18 +22,18 @@ public class SpringEmailService implements EmailService {
   private final JavaMailSender mailSender;
 
   @Override
-  public void notify(SendRequest notification) throws SendEmailException {
+  public void send(SendEmailRequest request) throws SendEmailException {
     try {
-      MimeMessage mimeMessage = createMimeMessage(notification);
+      MimeMessage mimeMessage = createMimeMessage(request);
       mailSender.send(mimeMessage);
-      log.info("Sent email successfully: recipients={}", notification.getRecipients());
+      log.info("Sent email successfully: recipients={}", request.getRecipients());
     } catch (MessagingException e) {
-      log.error("Failed to send email: recipients={}", notification.getRecipients(), e);
+      log.error("Failed to send email: recipients={}", request.getRecipients(), e);
       throw new SendEmailException(e);
     }
   }
 
-  private MimeMessage createMimeMessage(SendRequest request) throws MessagingException {
+  private MimeMessage createMimeMessage(SendEmailRequest request) throws MessagingException {
     MimeMessage mimeMessage = mailSender.createMimeMessage();
     MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true,
         StandardCharsets.UTF_8.name());

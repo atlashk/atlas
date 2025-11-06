@@ -1,1 +1,1 @@
-Order #${order.orderId} was confirmed
+Your order #${order.orderCode} has been fulfilled successfully!

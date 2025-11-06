@@ -49,7 +49,7 @@
 <div class="content">
   <p>Dear ${order.user.firstName} ${order.user.lastName},</p>
 
-  <p>Thank you for your order! Your order <strong>${order.orderId}</strong>, placed on
+  <p>Thank you for your order! Your order <strong>${order.orderCode}</strong>, placed on
     <strong>${order.createdAt?string("yyyy-MM-dd HH:mm:ss")}</strong>, was confirmed.</p>
 
   <table class="order-summary">

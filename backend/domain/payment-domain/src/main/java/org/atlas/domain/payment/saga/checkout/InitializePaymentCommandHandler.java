@@ -66,7 +66,7 @@ public class InitializePaymentCommandHandler {
 
     // Insert new payment entity
     Payment payment = new Payment();
-    payment.setUserId(checkoutSagaData.getUserId());
+    payment.setUserId(checkoutSagaData.getUser().getId());
     payment.setOrderId(checkoutSagaData.getOrderId());
     payment.setSagaId(sagaCommand.getSagaId());
     payment.setAmount(checkoutSagaData.getAmount());

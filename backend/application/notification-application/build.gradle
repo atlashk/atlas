@@ -99,6 +99,16 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['notification.email']}")
     }
+    switch (rootProject.ext.appStack['notification.inapp']) {
+        case 'sse':
+            implementation project(':infrastructure.notification.inapp.sse')
+            break
+        case 'websocket':
+            implementation project(':infrastructure.notification.inapp.websocket')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['notification.inapp']}")
+    }
     implementation project(':infrastructure.observability.actuator')
     switch (rootProject.ext.appStack['observability.logging.framework']) {
         case 'logback':

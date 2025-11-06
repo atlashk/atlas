@@ -1,6 +1,6 @@
 package org.atlas.framework.notification.email;
 
-public class SendEmailException extends RuntimeException {
+public class SendEmailException extends Exception {
 
   public SendEmailException(String message) {
     super(message);

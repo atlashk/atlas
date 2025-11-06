@@ -15,4 +15,9 @@ public interface TemplateService {
       throws Exception {
     return resolveTemplate("email/body/" + templateName, data);
   }
+
+  default String resolveInAppMessage(String templateName, Map<String, Object> data)
+      throws Exception {
+    return resolveTemplate("inapp/" + templateName, data);
+  }
 }

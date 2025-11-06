@@ -20,6 +20,7 @@ import lombok.Setter;
 public class CheckoutSagaData {
 
   private Integer orderId;
+  private String orderCode;
   private User user;
   private Address address;
   private List<OrderItem> orderItems;
