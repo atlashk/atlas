@@ -1,16 +1,18 @@
 package org.atlas.infrastructure.persistence.jpa.impl.user.mapper;
 
 import org.atlas.domain.user.entity.Cart;
+import org.atlas.domain.user.entity.CartItem;
 import org.atlas.framework.util.CollectionUtil;
 import org.atlas.infrastructure.persistence.jpa.impl.user.entity.JpaCart;
 import org.atlas.infrastructure.persistence.jpa.impl.user.entity.JpaCartItem;
 import org.mapstruct.AfterMapping;
+import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(builder = @Builder(disableBuilder = true))
 public interface JpaCartMapper {
 
   JpaCartMapper INSTANCE = Mappers.getMapper(JpaCartMapper.class);
@@ -20,7 +22,7 @@ public interface JpaCartMapper {
 
   @Mapping(target = "cart", ignore = true)
   @Mapping(target = "productId", source = "product.id")
-  JpaCartItem toJpaCartItem(Cart.CartItem cartItem);
+  JpaCartItem toJpaCartItem(CartItem cartItem);
 
   /**
    * After mapping for {@link Cart} to {@link JpaCart} - handles bidirectional relationships
@@ -39,5 +41,5 @@ public interface JpaCartMapper {
   Cart toCart(JpaCart jpaCart);
 
   @Mapping(target = "product.id", source = "productId")
-  Cart.CartItem toOrderItem(JpaCartItem jpaCartItem);
+  CartItem toOrderItem(JpaCartItem jpaCartItem);
 }

@@ -8,14 +8,15 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class SpringWebSocketService implements InAppService {
+public class WebSocketInAppService implements InAppService {
 
   private final SimpMessagingTemplate messagingTemplate;
 
   @Override
   public void send(SendInAppRequest request) {
     WebSocketEvent event = WebSocketEvent.of(request.getPayload());
-    String destination = "/inapp/" + request.getReceiverUserId();
+    // Send to broker-managed destination under /topic
+    String destination = "/topic/inapp/" + request.getReceiverUserId();
     messagingTemplate.convertAndSend(destination, event);
   }
 }

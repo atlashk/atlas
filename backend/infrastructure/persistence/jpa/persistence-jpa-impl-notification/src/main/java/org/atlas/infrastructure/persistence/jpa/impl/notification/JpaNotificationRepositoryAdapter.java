@@ -39,6 +39,7 @@ public class JpaNotificationRepositoryAdapter implements NotificationRepository 
         .toJpaNotification(notification);
     jpaNotificationRepository.insert(jpaNotification);
     notification.setId(jpaNotification.getId());
+    notification.setCreatedAt(jpaNotification.getCreatedAt());
   }
 
   @Override

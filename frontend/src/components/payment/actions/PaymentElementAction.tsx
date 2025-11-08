@@ -96,9 +96,6 @@ export function PaymentElementAction({
             currency={currency || "USD"}
             onSubmit={(data) => {
               console.log("Simulator payment started:", data);
-            }}
-            onSuccess={(data) => {
-              console.log("Simulator payment completed:", data);
               onPaymentComplete?.();
             }}
             onError={(error) => {

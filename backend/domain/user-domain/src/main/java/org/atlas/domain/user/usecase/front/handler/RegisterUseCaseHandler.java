@@ -5,9 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.user.entity.User;
 import org.atlas.domain.user.infrastructure.messaging.UserEventMessagePublisher;
-import org.atlas.domain.user.usecase.front.mapper.UserMapper;
 import org.atlas.domain.user.repository.UserRepository;
 import org.atlas.domain.user.shared.Role;
+import org.atlas.domain.user.usecase.front.mapper.UserMapper;
 import org.atlas.domain.user.usecase.front.model.RegisterInput;
 import org.atlas.framework.auth.client.AuthClient;
 import org.atlas.framework.auth.client.model.CreateAuthUserRequest;
@@ -64,7 +64,8 @@ public class RegisterUseCaseHandler {
   }
 
   private void publishEvent(User user) {
-    org.atlas.framework.domain.event.contract.user.model.User userPayload = UserMapper.INSTANCE.toUser(user);
+    org.atlas.framework.domain.event.contract.user.model.User userPayload = UserMapper.INSTANCE.toUser(
+        user);
     UserRegisteredEvent event = new UserRegisteredEvent(userPayload);
     userEventMessagePublisher.publish(event);
   }

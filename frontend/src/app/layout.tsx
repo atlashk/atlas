@@ -1,5 +1,6 @@
 import { NavBar } from "@/components/layout";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { RealtimeProvider } from "@/contexts/RealtimeContext";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
@@ -31,9 +32,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen`}
       >
         <AuthProvider>
-          <NavBar />
-          <main className="px-10 py-20">{children}</main>
-          <Toaster />
+          <RealtimeProvider>
+            <NavBar />
+            <main className="px-10 py-20">{children}</main>
+            <Toaster />
+          </RealtimeProvider>
         </AuthProvider>
       </body>
     </html>

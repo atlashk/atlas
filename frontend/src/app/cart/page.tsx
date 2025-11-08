@@ -14,17 +14,19 @@ import { useEffect, useState } from "react";
 
 function CartPage() {
   const router = useRouter();
-  const { cart, loadCart, updateQuantity, removeFromCart, clearCart, isLoading: cartLoading, getCartTotal } = useCartStore();
+  const { cart, loadCart, updateQuantity, removeFromCart, clearCart, isLoading: cartLoading, getCartTotal, resetIntentionallyCleared } = useCartStore();
   
   const [updating, setUpdating] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
 
-  // Load cart data on component mount
+  // Ensure cart loads when arriving on cart page
   useEffect(() => {
+    // Reset the intentionally-cleared flag so cart can be fetched
+    resetIntentionallyCleared();
     if (!cart && !cartLoading) {
       loadCart();
     }
-  }, [cart, cartLoading]);
+  }, [cart, cartLoading, loadCart, resetIntentionallyCleared]);
 
   const handleUpdateQuantity = async (productId: number, newQuantity: number) => {
     try {
@@ -73,7 +75,8 @@ function CartPage() {
     }
   };
 
-  if (cartLoading) {
+  // Show loading spinner only during initial cart fetch (when cart is not yet available)
+  if (!cart && cartLoading) {
     return (
       <div className="container mx-auto px-4 py-8 pt-20">
         <div className="flex items-center justify-center min-h-[400px]">

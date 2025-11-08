@@ -36,6 +36,7 @@ declare -A SERVICE_CONFIGS=(
     ["product-service"]="product-service-config"
     ["order-service"]="order-service-config"
     ["payment-service"]="payment-service-config"
+    ["notification-service"]="notification-service-config"
 )
 
 declare -A SERVICE_DATABASES=(
@@ -43,12 +44,13 @@ declare -A SERVICE_DATABASES=(
     ["product-service"]="db_product"
     ["order-service"]="db_order"
     ["payment-service"]="db_payment"
+    ["notification-service"]="db_notification"
 )
 
 # Define service-specific configurations
 declare -A SERVICE_SPECIFIC_CONFIGS=(
     ["api-gateway"]="jwt_config"
-    ["order-service"]="email_config"
+    ["notification-service"]="email_config"
 )
 
 # =============================================================================
@@ -338,8 +340,6 @@ generate_api_client_config() {
   # REST API Configuration
   API_CLIENT_REST_USER_SERVICE_BASE_URL: "http://user-service:8081"
   API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL: "http://product-service:8082"
-  API_CLIENT_REST_ORDER_SERVICE_BASE_URL: "http://order-service:8083"
-  API_CLIENT_REST_PAYMENT_SERVICE_BASE_URL: "http://payment-service:8084"
 EOF
     elif [[ "$api_client_prefix" == "grpc" ]]; then
         cat << EOF
@@ -347,8 +347,6 @@ EOF
   # gRPC Configuration
   GRPC_CLIENT_USER_ADDRESS: "static://user-service:50051"
   GRPC_CLIENT_PRODUCT_ADDRESS: "static://product-service:50052"
-  GRPC_CLIENT_ORDER_ADDRESS: "static://order-service:50053"
-  GRPC_CLIENT_PAYMENT_ADDRESS: "static://payment-service:50054"
 EOF
     fi
 }
@@ -503,7 +501,7 @@ generate_configmaps_and_secrets() {
     fi
 
     # Generate ConfigMaps and Secrets for other services
-    local services=("user-service" "product-service" "order-service" "payment-service")
+    local services=("user-service" "product-service" "order-service" "payment-service" "notification-service")
     for service in "${services[@]}"; do
         if ! generate_service_configmap "$service" "$namespace"; then
             echo "Failed to generate ConfigMap for service: $service" >&2
@@ -518,7 +516,7 @@ generate_configmaps_and_secrets() {
     done
     
     # Verify all expected ConfigMap files were created
-    local expected_configmap_files=("api-gateway-configmap.yaml" "user-service-configmap.yaml" "product-service-configmap.yaml" "order-service-configmap.yaml" "payment-service-configmap.yaml")
+    local expected_configmap_files=("api-gateway-configmap.yaml" "user-service-configmap.yaml" "product-service-configmap.yaml" "order-service-configmap.yaml" "payment-service-configmap.yaml" "notification-service-configmap.yaml")
     for file in "${expected_configmap_files[@]}"; do
         if [[ ! -f "$ENV_DIR/$file" ]]; then
             echo "Error: Expected ConfigMap file not found: $ENV_DIR/$file" >&2
@@ -527,7 +525,7 @@ generate_configmaps_and_secrets() {
     done
     
     # Verify all expected Secret files were created
-    local expected_secret_files=("user-service-secret.yaml" "product-service-secret.yaml" "order-service-secret.yaml" "payment-service-secret.yaml")
+    local expected_secret_files=("user-service-secret.yaml" "product-service-secret.yaml" "order-service-secret.yaml" "payment-service-secret.yaml" "notification-service-secret.yaml")
     for file in "${expected_secret_files[@]}"; do
         if [[ ! -f "$ENV_DIR/$file" ]]; then
             echo "Error: Expected Secret file not found: $ENV_DIR/$file" >&2
@@ -826,7 +824,7 @@ get_observability_services() {
 }
 
 get_application_services() {
-    local services=("user-service" "product-service" "order-service" "payment-service")
+    local services=("user-service" "product-service" "order-service" "payment-service" "notification-service")
     echo "${services[@]}"
 }
 

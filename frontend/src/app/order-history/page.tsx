@@ -22,6 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ORDER_STATUSES } from "@/constants";
+import { withAuth } from "@/hoc/withAuth";
 import { ListOrderFilters, Order } from "@/interfaces";
 import {
   formatCurrency,
@@ -38,21 +39,23 @@ import {
   Search,
   ShoppingBag,
 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import React, { useCallback, useEffect, useRef, useState, Suspense } from "react";
+import React, {
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { toast } from "sonner";
-import { withAuth } from '@/hoc/withAuth';
 
 const OrderHistoryContent: React.FC = () => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
   // OrderHistory component state
   const isInitialized = useRef(false);
   const lastRefreshParam = useRef<string | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const [filters, setFilters] = useState<ListOrderFilters>({
     status: undefined,
     startDate: undefined,
@@ -70,7 +73,8 @@ const OrderHistoryContent: React.FC = () => {
   // OrderHistory component functions
   const applyFilters = useCallback(
     async (page: number, currentFilters?: ListOrderFilters) => {
-      if (isLoading) return;
+      // Prevent multiple simultaneous API calls
+      if (isLoading || !isClient) return;
 
       setIsLoading(true);
       try {
@@ -107,19 +111,21 @@ const OrderHistoryContent: React.FC = () => {
         setIsLoading(false);
       }
     },
-    [filters, isLoading]
+    [filters, isLoading, isClient]
   );
 
   const changePage = useCallback(
     (newPage: number) => {
-      if (newPage >= 1 && newPage <= metadata.totalPages) {
+      if (newPage >= 1 && newPage <= metadata.totalPages && !isLoading) {
         applyFilters(newPage, filters);
       }
     },
-    [metadata.totalPages, applyFilters, filters]
+    [metadata.totalPages, applyFilters, filters, isLoading]
   );
 
   const resetFilters = useCallback(() => {
+    if (isLoading) return;
+
     const resetFilters: ListOrderFilters = {
       status: undefined,
       startDate: undefined,
@@ -129,13 +135,14 @@ const OrderHistoryContent: React.FC = () => {
     };
     setFilters(resetFilters);
     applyFilters(1, resetFilters);
-  }, [applyFilters]);
+  }, [applyFilters, isLoading]);
 
   const toggleDetails = useCallback(
     (orderId: number) => {
+      if (isLoading) return;
       setSelectedOrderId(selectedOrderId === orderId ? null : orderId);
     },
-    [selectedOrderId]
+    [selectedOrderId, isLoading]
   );
 
   const handleFilterChange = useCallback(
@@ -151,38 +158,59 @@ const OrderHistoryContent: React.FC = () => {
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
+      if (isLoading) return;
       applyFilters(1, filters);
     },
-    [applyFilters, filters]
+    [applyFilters, filters, isLoading]
   );
 
-  // Load initial data on component mount
+  // Keep a stable reference to applyFilters to avoid changing effect dependencies size
+  const applyFiltersRef = useRef(applyFilters);
   useEffect(() => {
-    if (isInitialized.current) {
+    applyFiltersRef.current = applyFilters;
+  }, [applyFilters]);
+
+  // Guard to prevent duplicate initial fetch
+  const hasFetchedRef = useRef(false);
+
+  // Set isClient to true on mount to prevent hydration issues
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Load initial data only after client hydration to avoid early exit
+  useEffect(() => {
+    if (isInitialized.current || !isClient || hasFetchedRef.current) {
       return;
     }
 
     isInitialized.current = true;
+    // If a refresh param is present on first load, record it to avoid a second call
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const initialRefresh = urlParams.get("refresh");
+      if (initialRefresh) {
+        lastRefreshParam.current = initialRefresh;
+      }
+    }
 
-    const initializeData = async () => {
-      await applyFilters(1);
-    };
-    initializeData();
-  }, [applyFilters]);
+    hasFetchedRef.current = true;
+    applyFiltersRef.current(1);
+  }, [isClient]);
 
-  // Listen for refresh parameter to reload data
+  // Listen for refresh parameter changes to reload data after first fetch
   useEffect(() => {
-    const refreshParam = searchParams.get("refresh");
-    if (
-      refreshParam &&
-      isInitialized.current &&
-      refreshParam !== lastRefreshParam.current
-    ) {
+    if (!isInitialized.current || !isClient || typeof window === 'undefined') return;
+    
+    // Use window.location.search to avoid hydration issues with useSearchParams
+    const urlParams = new URLSearchParams(window.location.search);
+    const refreshParam = urlParams.get("refresh");
+    if (refreshParam && refreshParam !== lastRefreshParam.current) {
       // Only refresh if this is a new refresh parameter
       lastRefreshParam.current = refreshParam;
-      applyFilters(1);
+      applyFiltersRef.current(1);
     }
-  }, [searchParams]); // Remove applyFilters from dependencies to prevent continuous calls
+  }, [isClient]); // Only run when isClient is true
 
   return (
     <div className="container mx-auto p-4">
@@ -259,7 +287,11 @@ const OrderHistoryContent: React.FC = () => {
               </div>
             </div>
             <div className="flex gap-2 mt-4">
-              <Button type="submit" className="flex items-center gap-2">
+              <Button
+                type="submit"
+                className="flex items-center gap-2"
+                disabled={isLoading}
+              >
                 <Search className="h-4 w-4" />
                 Search
               </Button>
@@ -268,6 +300,7 @@ const OrderHistoryContent: React.FC = () => {
                 variant="outline"
                 onClick={resetFilters}
                 className="flex items-center gap-2"
+                disabled={isLoading}
               >
                 <RotateCcw className="h-4 w-4" />
                 Reset
@@ -336,6 +369,7 @@ const OrderHistoryContent: React.FC = () => {
                         size="sm"
                         onClick={() => toggleDetails(order.id)}
                         className="flex items-center gap-2"
+                        disabled={isLoading}
                       >
                         {selectedOrderId === order.id ? (
                           <>
@@ -351,148 +385,145 @@ const OrderHistoryContent: React.FC = () => {
 
                     {/* Order Details */}
                     {selectedOrderId === order.id && (
-                      <div className="mt-4 p-4 bg-muted/30 border">
-                        <div className="space-y-5">
-                          {/* Address Information */}
-                          {order.address && (
-                            <div className="bg-white rounded-lg border p-4 shadow-sm">
-                              <h6 className="font-semibold mb-2 border-b pb-2 flex items-center gap-2">
-                                <MapPin className="w-4 h-4" />
-                                Delivery Address
-                              </h6>
-                              <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                                <span className="text-sm font-medium text-gray-600 min-w-[120px]">
-                                  Street
-                                </span>
-                                {order.address.street}
-                              </div>
-                              <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                                <span className="text-sm font-medium text-gray-600 min-w-[120px]">
-                                  City
-                                </span>
-                                {order.address.city}
-                              </div>
-                              <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                                <span className="text-sm font-medium text-gray-600 min-w-[120px]">
-                                  Country
-                                </span>
-                                {order.address.country}
-                              </div>
-                              <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                                <span className="text-sm font-medium text-gray-600 min-w-[120px]">
-                                  Postal Code
-                                </span>
-                                {order.address.postalCode}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Order Items */}
+                      <div className="mt-4 space-y-5">
+                        {/* Address Information */}
+                        {order.address && (
                           <div className="bg-white rounded-lg border p-4 shadow-sm">
                             <h6 className="font-semibold mb-2 border-b pb-2 flex items-center gap-2">
-                              <ShoppingBag className="w-4 h-4" />
-                              Order Items ({order.orderItems?.length || 0}{" "}
-                              items)
+                              <MapPin className="w-4 h-4" />
+                              Delivery Address
                             </h6>
-                            <div className="rounded-lg border border-gray-200 overflow-hidden">
-                              <Table>
-                                <TableHeader>
-                                  <TableRow className="bg-gray-50">
-                                    <TableHead className="font-semibold text-gray-700">
-                                      Product ID
-                                    </TableHead>
-                                    <TableHead className="font-semibold text-gray-700">
-                                      Product Name
-                                    </TableHead>
-                                    <TableHead className="font-semibold text-gray-700">
-                                      Price
-                                    </TableHead>
-                                    <TableHead className="font-semibold text-gray-700">
-                                      Quantity
-                                    </TableHead>
-                                    <TableHead className="font-semibold text-gray-700">
-                                      Subtotal
-                                    </TableHead>
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                  {order.orderItems?.map((item, index) => (
-                                    <TableRow
-                                      key={item.product.id}
-                                      className={
-                                        index % 2 === 0
-                                          ? "bg-white"
-                                          : "bg-gray-50/50"
-                                      }
-                                    >
-                                      <TableCell className="text-sm text-gray-700">
-                                        {item.product.id}
-                                      </TableCell>
-                                      <TableCell className="text-sm font-medium text-gray-900">
-                                        {item.product.name}
-                                      </TableCell>
-                                      <TableCell className="text-sm text-gray-700">
-                                        {formatCurrency(item.product.price)}
-                                      </TableCell>
-                                      <TableCell className="text-sm text-gray-700">
-                                        {item.quantity}
-                                      </TableCell>
-                                      <TableCell className="text-sm font-medium text-gray-900">
-                                        {formatCurrency(
-                                          item.product.price * item.quantity
-                                        )}
-                                      </TableCell>
-                                    </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
+                            <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                              <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                Street
+                              </span>
+                              {order.address.street}
+                            </div>
+                            <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                              <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                City
+                              </span>
+                              {order.address.city}
+                            </div>
+                            <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                              <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                Country
+                              </span>
+                              {order.address.country}
+                            </div>
+                            <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                              <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                Postal Code
+                              </span>
+                              {order.address.postalCode}
                             </div>
                           </div>
+                        )}
 
-                          {/* Payment Information */}
-                          {order.payment && (
-                            <div className="bg-white rounded-lg border p-4 shadow-sm">
-                              <h6 className="font-semibold mb-2 border-b pb-2 flex items-center gap-2">
-                                <CreditCard className="w-4 h-4" />
-                                Payment Information
-                              </h6>
-                              {order.payment.paymentGateway && (
-                                <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                                  <span className="text-sm font-medium text-gray-600 min-w-[120px]">
-                                    Payment Gateway
-                                  </span>
-                                  {order.payment.paymentGateway
-                                    .charAt(0)
-                                    .toUpperCase() +
-                                    order.payment.paymentGateway
-                                      .slice(1)
-                                      .toLowerCase()}
-                                </div>
-                              )}
-                              {order.payment.paymentMethod && (
-                                <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                                  <span className="text-sm font-medium text-gray-600 min-w-[120px]">
-                                    Payment Method
-                                  </span>
-                                  {order.payment.paymentMethod
-                                    .charAt(0)
-                                    .toUpperCase() +
-                                    order.payment.paymentMethod
-                                      .slice(1)
-                                      .toLowerCase()}
-                                </div>
-                              )}
-                              {order.payment.paymentMethodDetails && (
-                                <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                                  <span className="text-sm font-medium text-gray-600 min-w-[120px]">
-                                    Payment Details
-                                  </span>
-                                  {order.payment.paymentMethodDetails}
-                                </div>
-                              )}
-                            </div>
-                          )}
+                        {/* Order Items */}
+                        <div className="bg-white rounded-lg border p-4 shadow-sm">
+                          <h6 className="font-semibold mb-2 border-b pb-2 flex items-center gap-2">
+                            <ShoppingBag className="w-4 h-4" />
+                            Order Items ({order.orderItems?.length || 0} items)
+                          </h6>
+                          <div className="rounded-lg border border-gray-200 overflow-hidden">
+                            <Table>
+                              <TableHeader>
+                                <TableRow className="bg-gray-50">
+                                  <TableHead className="font-semibold text-gray-700">
+                                    Product ID
+                                  </TableHead>
+                                  <TableHead className="font-semibold text-gray-700">
+                                    Product Name
+                                  </TableHead>
+                                  <TableHead className="font-semibold text-gray-700">
+                                    Price
+                                  </TableHead>
+                                  <TableHead className="font-semibold text-gray-700">
+                                    Quantity
+                                  </TableHead>
+                                  <TableHead className="font-semibold text-gray-700">
+                                    Subtotal
+                                  </TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {order.orderItems?.map((item, index) => (
+                                  <TableRow
+                                    key={item.product.id}
+                                    className={
+                                      index % 2 === 0
+                                        ? "bg-white"
+                                        : "bg-gray-50/50"
+                                    }
+                                  >
+                                    <TableCell className="text-sm text-gray-700">
+                                      {item.product.id}
+                                    </TableCell>
+                                    <TableCell className="text-sm font-medium text-gray-900">
+                                      {item.product.name}
+                                    </TableCell>
+                                    <TableCell className="text-sm text-gray-700">
+                                      {formatCurrency(item.product.price)}
+                                    </TableCell>
+                                    <TableCell className="text-sm text-gray-700">
+                                      {item.quantity}
+                                    </TableCell>
+                                    <TableCell className="text-sm font-medium text-gray-900">
+                                      {formatCurrency(
+                                        item.product.price * item.quantity
+                                      )}
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
                         </div>
+
+                        {/* Payment Information */}
+                        {order.payment && (
+                          <div className="bg-white rounded-lg border p-4 shadow-sm">
+                            <h6 className="font-semibold mb-2 border-b pb-2 flex items-center gap-2">
+                              <CreditCard className="w-4 h-4" />
+                              Payment Information
+                            </h6>
+                            {order.payment.paymentGateway && (
+                              <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                  Payment Gateway
+                                </span>
+                                {order.payment.paymentGateway
+                                  .charAt(0)
+                                  .toUpperCase() +
+                                  order.payment.paymentGateway
+                                    .slice(1)
+                                    .toLowerCase()}
+                              </div>
+                            )}
+                            {order.payment.paymentMethod && (
+                              <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                  Payment Method
+                                </span>
+                                {order.payment.paymentMethod
+                                  .charAt(0)
+                                  .toUpperCase() +
+                                  order.payment.paymentMethod
+                                    .slice(1)
+                                    .toLowerCase()}
+                              </div>
+                            )}
+                            {order.payment.paymentMethodDetails && (
+                              <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                  Payment Details
+                                </span>
+                                {order.payment.paymentMethodDetails}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )}
                   </CardContent>
@@ -510,36 +541,53 @@ const OrderHistoryContent: React.FC = () => {
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
-                  onClick={() => changePage(metadata.currentPage - 1)}
+                  onClick={() => {
+                    if (!isLoading && metadata.currentPage > 1) {
+                      changePage(metadata.currentPage - 1);
+                    }
+                  }}
                   className={
-                    metadata.currentPage === 1
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
+                    isLoading || metadata.currentPage <= 1
+                      ? "pointer-events-none opacity-50 cursor-not-allowed"
+                      : ""
                   }
                 />
               </PaginationItem>
-
               {Array.from({ length: metadata.totalPages }, (_, i) => i + 1).map(
                 (page) => (
                   <PaginationItem key={page}>
                     <PaginationLink
-                      onClick={() => changePage(page)}
+                      onClick={() => {
+                        if (!isLoading) {
+                          changePage(page);
+                        }
+                      }}
                       isActive={metadata.currentPage === page}
-                      className="cursor-pointer"
+                      className={
+                        isLoading
+                          ? "pointer-events-none opacity-50 cursor-not-allowed"
+                          : ""
+                      }
                     >
                       {page}
                     </PaginationLink>
                   </PaginationItem>
                 )
               )}
-
               <PaginationItem>
                 <PaginationNext
-                  onClick={() => changePage(metadata.currentPage + 1)}
+                  onClick={() => {
+                    if (
+                      !isLoading &&
+                      metadata.currentPage < metadata.totalPages
+                    ) {
+                      changePage(metadata.currentPage + 1);
+                    }
+                  }}
                   className={
-                    metadata.currentPage === metadata.totalPages
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
+                    isLoading || metadata.currentPage >= metadata.totalPages
+                      ? "pointer-events-none opacity-50 cursor-not-allowed"
+                      : ""
                   }
                 />
               </PaginationItem>
@@ -553,11 +601,32 @@ const OrderHistoryContent: React.FC = () => {
 
 const OrderHistoryPageWrapper: React.FC = () => {
   return (
-    <Suspense fallback={<div className="flex justify-center items-center min-h-screen"><Spinner className="h-8 w-8" /></div>}>
+    <Suspense
+      fallback={
+        <div className="container mx-auto p-4">
+          <div className="flex items-center gap-4 mb-6">
+            <h1 className="text-xl font-bold flex items-center gap-2">
+              <Clock className="h-6 w-6" />
+              Order History
+            </h1>
+          </div>
+          <div className="flex justify-center py-8">
+            <Spinner
+              className="text-blue-600"
+              role="status"
+              aria-label="Loading page"
+            />
+          </div>
+        </div>
+      }
+    >
       <OrderHistoryContent />
     </Suspense>
   );
 };
 
 // Export with authentication HOC that requires USER role
-export default withAuth(OrderHistoryPageWrapper, { requireAuth: true, allowedRoles: ['USER'] });
+export default withAuth(OrderHistoryPageWrapper, {
+  requireAuth: true,
+  allowedRoles: ["USER"],
+});

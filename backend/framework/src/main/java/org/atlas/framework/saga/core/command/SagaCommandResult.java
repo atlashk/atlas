@@ -1,7 +1,6 @@
 package org.atlas.framework.saga.core.command;
 
 import java.io.Serializable;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

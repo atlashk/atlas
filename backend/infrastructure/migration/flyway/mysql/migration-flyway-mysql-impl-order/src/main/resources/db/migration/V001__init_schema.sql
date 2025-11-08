@@ -20,8 +20,8 @@ CREATE TABLE IF NOT EXISTS orders
     payment_method_details TEXT,
     payment_transaction_id VARCHAR(255),
     cancellation_reason    VARCHAR(255),
-    created_at             DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at             DATETIME                DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at             DATETIME       NOT NULL,
+    updated_at             DATETIME,
     UNIQUE INDEX idx_saga_id (saga_id),
     UNIQUE INDEX idx_code (code),
     INDEX idx_user_id (user_id)

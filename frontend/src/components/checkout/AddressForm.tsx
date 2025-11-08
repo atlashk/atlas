@@ -1,9 +1,17 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input, Input as UiInput } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SelectItem } from "@/components/ui/select";
+import { ChevronDown } from "lucide-react";
 import React from "react";
 
 // RequiredLabel component for form fields with red asterisk
@@ -221,6 +229,11 @@ const COUNTRIES = [
   { code: "ZW", name: "Zimbabwe" },
 ];
 
+// Map for O(1) code -> name lookup
+const COUNTRY_MAP: Record<string, string> = Object.fromEntries(
+  COUNTRIES.map((c) => [c.code, c.name])
+);
+
 export interface Address {
   street: string;
   city: string;
@@ -239,12 +252,28 @@ export const AddressForm = React.memo<AddressFormProps>(function AddressForm({
   onAddressChange,
   errors = {},
 }) {
-  const handleFieldChange = React.useCallback((field: keyof Address, value: string) => {
-    onAddressChange({
-      ...address,
-      [field]: value,
-    });
-  }, [address, onAddressChange]);
+  const handleFieldChange = React.useCallback(
+    (field: keyof Address, value: string) => {
+      onAddressChange({
+        ...address,
+        [field]: value,
+      });
+    },
+    [address, onAddressChange]
+  );
+
+  // Memoize the rendered country items to avoid re-creating on each render
+  const countryItems = React.useMemo(
+    () =>
+      COUNTRIES.map((country) => (
+        <SelectItem key={country.code} value={country.code}>
+          <div className="flex items-center gap-2">
+            <span>{country.name}</span>
+          </div>
+        </SelectItem>
+      )),
+    []
+  );
 
   return (
     <Card>
@@ -303,30 +332,12 @@ export const AddressForm = React.memo<AddressFormProps>(function AddressForm({
 
         <div className="space-y-2">
           <RequiredLabel htmlFor="country">Country</RequiredLabel>
-          <Select
+          {/* Searchable, lightweight combobox for improved performance */}
+          <CountryCombobox
             value={address.country}
-            onValueChange={(value) => handleFieldChange("country", value)}
-          >
-            <SelectTrigger className={errors.country ? "border-red-500" : ""}>
-              <SelectValue placeholder="Select a country">
-                {address.country && (
-                  <div className="flex items-center gap-2">
-                    <span>{COUNTRIES.find(c => c.code === address.country)?.name}</span>
-                    <span className="text-gray-500">({address.country})</span>
-                  </div>
-                )}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {COUNTRIES.map((country) => (
-                <SelectItem key={country.code} value={country.code}>
-                  <div className="flex items-center gap-2">
-                    <span>{country.name}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            onChange={(code) => handleFieldChange("country", code)}
+            hasError={Boolean(errors.country)}
+          />
           {errors.country && (
             <p className="text-sm text-red-500">{errors.country}</p>
           )}
@@ -337,3 +348,91 @@ export const AddressForm = React.memo<AddressFormProps>(function AddressForm({
 });
 
 AddressForm.displayName = "AddressForm";
+
+interface CountryComboboxProps {
+  value: string;
+  onChange: (code: string) => void;
+  hasError?: boolean;
+}
+
+const CountryCombobox: React.FC<CountryComboboxProps> = ({
+  value,
+  onChange,
+  hasError,
+}) => {
+  const [open, setOpen] = React.useState(false);
+  const [query, setQuery] = React.useState("");
+
+  const filtered = React.useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return COUNTRIES;
+    return COUNTRIES.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q)
+    );
+  }, [query]);
+
+  const selectedLabel = React.useMemo(() => {
+    if (!value) return undefined;
+    return COUNTRY_MAP[value];
+  }, [value]);
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (isOpen) {
+      // Reset search when opening for a fresh start
+      setQuery("");
+    }
+  };
+
+  return (
+    <DropdownMenu open={open} onOpenChange={handleOpenChange}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outline"
+          className={`w-full justify-between ${
+            hasError ? "border-red-500" : ""
+          }`}
+        >
+          {selectedLabel ? (
+            <span className="truncate">
+              {selectedLabel} <span className="text-gray-500">({value})</span>
+            </span>
+          ) : (
+            <span className="text-muted-foreground">Select a country</span>
+          )}
+          <ChevronDown className="h-4 w-4 opacity-60" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="data-[state=open]:animate-none data-[state=closed]:animate-none w-[var(--radix-dropdown-menu-trigger-width)]">
+        <div className="p-2">
+          <UiInput
+            autoFocus
+            placeholder="Type to filter countries..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+        <div className="max-h-64 overflow-y-auto">
+          {filtered.map((c) => (
+            <DropdownMenuItem
+              key={c.code}
+              onClick={() => {
+                onChange(c.code);
+                setOpen(false);
+              }}
+            >
+              <span className="truncate">{c.name}</span>
+              <span className="ml-2 text-muted-foreground">({c.code})</span>
+            </DropdownMenuItem>
+          ))}
+          {!filtered.length && (
+            <div className="px-2 py-3 text-sm text-muted-foreground">
+              No matches
+            </div>
+          )}
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};

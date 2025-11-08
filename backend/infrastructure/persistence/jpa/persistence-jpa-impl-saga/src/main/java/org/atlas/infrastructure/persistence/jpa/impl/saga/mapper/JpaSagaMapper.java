@@ -2,10 +2,11 @@ package org.atlas.infrastructure.persistence.jpa.impl.saga.mapper;
 
 import org.atlas.framework.saga.core.entity.SagaEntity;
 import org.atlas.infrastructure.persistence.jpa.impl.saga.entity.JpaSaga;
+import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(builder = @Builder(disableBuilder = true))
 public interface JpaSagaMapper {
 
   JpaSagaMapper INSTANCE = Mappers.getMapper(JpaSagaMapper.class);

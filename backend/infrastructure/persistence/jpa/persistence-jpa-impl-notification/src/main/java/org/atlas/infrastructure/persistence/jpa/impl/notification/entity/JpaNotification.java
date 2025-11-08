@@ -15,8 +15,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.domain.notification.entity.NotificationChannel;
 import org.atlas.domain.notification.entity.DeliveryStatus;
+import org.atlas.domain.notification.entity.NotificationChannel;
 import org.atlas.domain.notification.entity.NotificationType;
 import org.atlas.infrastructure.persistence.jpa.core.entity.JpaBaseEntity;
 
@@ -51,9 +51,6 @@ public class JpaNotification extends JpaBaseEntity {
 
   @Column(name = "metadata")
   private String metadata;
-
-  @Column(name = "delivered_at")
-  private Date deliveredAt;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "delivery_status")

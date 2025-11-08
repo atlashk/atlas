@@ -1,5 +1,6 @@
 "use client";
 
+import NotificationBell from "./NotificationBell";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useCartStore } from "@/stores/cart.store";
@@ -26,6 +27,9 @@ export default function NavBar() {
   const [isHydrated, setIsHydrated] = useState(false);
   const [cartLoadAttempted, setCartLoadAttempted] = useState(false);
 
+  const isAuth = isAuthenticated();
+  const admin = isAdmin();
+
   useEffect(() => {
     setIsHydrated(true);
   }, []);
@@ -42,8 +46,8 @@ export default function NavBar() {
       // 6. Haven't attempted to load cart yet OR there's no error (to allow retry after successful auth)
       if (
         isHydrated &&
-        isAuthenticated() &&
-        !isAdmin() &&
+        isAuth &&
+        !admin &&
         !cart &&
         !isLoading &&
         (!cartLoadAttempted || !error)
@@ -59,26 +63,18 @@ export default function NavBar() {
     };
 
     loadCartData();
-  }, [
-    isHydrated,
-    isAuthenticated(),
-    isAdmin(),
-    cart,
-    isLoading,
-    error,
-    cartLoadAttempted,
-  ]);
+  }, [isHydrated, isAuth, admin, cart, isLoading, error, cartLoadAttempted, loadCart]);
 
   // Reset cart load attempt when user authentication changes
   useEffect(() => {
-    if (!isAuthenticated()) {
+    if (!isAuth) {
       setCartLoadAttempted(false);
     }
-  }, [isAuthenticated()]);
+  }, [isAuth]);
 
   // Reset intentionally cleared flag when user navigates to shopping areas
   useEffect(() => {
-    if (isIntentionallyCleared && isAuthenticated() && !isAdmin()) {
+    if (isIntentionallyCleared && isAuth && !admin) {
       const currentPath = window.location.pathname;
       // Reset flag when user navigates to shopping areas (home, products, categories)
       if (
@@ -89,12 +85,7 @@ export default function NavBar() {
         resetIntentionallyCleared();
       }
     }
-  }, [
-    isIntentionallyCleared,
-    isAuthenticated,
-    isAdmin,
-    resetIntentionallyCleared,
-  ]);
+  }, [isIntentionallyCleared, isAuth, admin, resetIntentionallyCleared]);
 
   const getBrandHref = () => {
     // Always return default during hydration to prevent mismatch
@@ -238,6 +229,8 @@ export default function NavBar() {
                         Order History
                       </div>
                     </div>
+
+                    <NotificationBell />
                   </div>
                 )}
 

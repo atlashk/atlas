@@ -13,7 +13,6 @@ import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.domain.order.usecase.front.mapper.OrderMapper;
 import org.atlas.domain.order.usecase.front.model.CheckoutInput;
-import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.framework.cryptography.HashingUtil;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;

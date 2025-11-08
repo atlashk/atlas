@@ -95,7 +95,7 @@ function CheckoutPageContent() {
      };
 
      loadData();
-   }, [cart, isCartLoading]);
+   }, [cart, isCartLoading, loadCart]);
 
   // Get actual cart total
   const cartTotal = getCartTotal();
@@ -198,7 +198,7 @@ function CheckoutPageContent() {
     // Clear cart state when payment is complete
     useCartStore.getState().clearCartState();
     // Don't redirect immediately - let OrderStatus component handle the UI and navigation
-  }, []);
+  }, []); // Remove handlePaymentComplete from dependency array
 
   const handlePaymentError = (error: string) => {
     toast.error(error);

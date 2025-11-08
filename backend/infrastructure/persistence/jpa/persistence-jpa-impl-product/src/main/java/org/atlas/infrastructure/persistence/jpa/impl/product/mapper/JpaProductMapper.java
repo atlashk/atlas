@@ -6,17 +6,20 @@ import org.atlas.infrastructure.persistence.jpa.impl.product.entity.JpaProduct;
 import org.atlas.infrastructure.persistence.jpa.impl.product.entity.JpaProductAttribute;
 import org.atlas.infrastructure.persistence.jpa.impl.product.entity.JpaProductDetails;
 import org.mapstruct.AfterMapping;
+import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(uses = {
-    JpaProductAttributeMapper.class,
-    JpaProductDetailsMapper.class,
-    JpaBrandMapper.class,
-    JpaCategoryMapper.class
-})
+@Mapper(
+    uses = {
+        JpaProductAttributeMapper.class,
+        JpaProductDetailsMapper.class,
+        JpaBrandMapper.class,
+        JpaCategoryMapper.class
+    },
+    builder = @Builder(disableBuilder = true))
 public interface JpaProductMapper {
 
   JpaProductMapper INSTANCE = Mappers.getMapper(JpaProductMapper.class);

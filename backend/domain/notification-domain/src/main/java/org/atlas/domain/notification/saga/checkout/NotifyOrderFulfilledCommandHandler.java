@@ -13,7 +13,7 @@ import org.atlas.domain.notification.entity.Notification;
 import org.atlas.domain.notification.entity.NotificationChannel;
 import org.atlas.domain.notification.entity.NotificationType;
 import org.atlas.domain.notification.entity.metadata.OrderFulfilledMetadata;
-import org.atlas.domain.notification.repository.NotificationRepository;
+import org.atlas.domain.notification.service.NotificationService;
 import org.atlas.framework.config.ApplicationConfigService;
 import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.notification.email.Attachment;
@@ -33,7 +33,6 @@ import org.atlas.framework.template.ResolveTemplateException;
 import org.atlas.framework.template.TemplateService;
 import org.atlas.framework.util.AsyncUtil;
 import org.atlas.framework.util.AsyncUtil.AsyncTask;
-import org.atlas.framework.util.DateUtil;
 import org.atlas.framework.util.ErrorUtil;
 import org.atlas.framework.util.FileUtil;
 import org.springframework.stereotype.Component;
@@ -43,10 +42,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class NotifyOrderFulfilledCommandHandler {
 
-  private final NotificationRepository notificationRepository;
   private final ApplicationConfigService applicationConfigService;
   private final EmailService emailService;
   private final InAppService inAppService;
+  private final NotificationService notificationService;
   private final TemplateService templateService;
 
   @SagaCommandHandler(command = CheckoutCommand.NOTIFY_ORDER_FULFILLED)
@@ -59,18 +58,9 @@ public class NotifyOrderFulfilledCommandHandler {
     }
 
     AsyncUtil.executeTasks(
-            notifyEmail(checkoutSagaData),
-            notifyInApp(checkoutSagaData)
-        )
-        .whenComplete((result, error) -> {
-          if (error == null) {
-            log.info("Successfully notified for order fulfilled: sagaId={}, orderId={}",
-                sagaCommand.getSagaId(), checkoutSagaData.getOrderId());
-          } else {
-            log.error("Failed to notify for order fulfilled: sagaId={}, orderId={}, error={}",
-                sagaCommand.getSagaId(), checkoutSagaData.getOrderId(), error.getMessage());
-          }
-        });
+        notifyEmail(checkoutSagaData),
+        notifyInApp(checkoutSagaData)
+    );
 
     return SagaCommandResult.success();
   }
@@ -92,7 +82,7 @@ public class NotifyOrderFulfilledCommandHandler {
             .metadata(JsonUtil.getInstance().toJson(metadata))
             .deliveryStatus(DeliveryStatus.IN_PROGRESS)
             .build();
-        notificationRepository.insert(notification);
+        notificationService.create(notification);
 
         // Model
         Map<String, Object> model = new HashMap<>();
@@ -146,9 +136,7 @@ public class NotifyOrderFulfilledCommandHandler {
       @Override
       public void onSuccess() {
         if (notification != null) {
-          notification.setDeliveryStatus(DeliveryStatus.SUCCEEDED);
-          notification.setDeliveredAt(DateUtil.now());
-          notificationRepository.update(notification);
+          notificationService.markAsSucceeded(notification);
         }
         log.info("Email notification for order fulfilled succeeded: orderId={}",
             sagaData.getOrderId());
@@ -157,9 +145,7 @@ public class NotifyOrderFulfilledCommandHandler {
       @Override
       public void onError(Throwable e) {
         if (notification != null) {
-          notification.setDeliveryStatus(DeliveryStatus.FAILED);
-          notification.setDeliveryError(ErrorUtil.sanitizeErrorMessage(e));
-          notificationRepository.update(notification);
+          notificationService.markAsFailed(notification, ErrorUtil.sanitizeErrorMessage(e));
         }
         log.error("Email notification for order fulfilled failed: orderId={}, error={}",
             sagaData.getOrderId(), e.getMessage(), e);
@@ -175,8 +161,7 @@ public class NotifyOrderFulfilledCommandHandler {
       public void run() {
         // Model
         Map<String, Object> model = new HashMap<>();
-        model.put("orderCode", sagaData.getOrderCode());
-        model.put("amount", sagaData.getAmount());
+        model.put("order", sagaData);
 
         // Message
         String message;
@@ -198,13 +183,13 @@ public class NotifyOrderFulfilledCommandHandler {
             .metadata(JsonUtil.getInstance().toJson(metadata))
             .deliveryStatus(DeliveryStatus.IN_PROGRESS)
             .build();
-        notificationRepository.insert(notification);
+        notificationService.create(notification);
 
         SendInAppRequest request = SendInAppRequest.builder()
             .receiverUserId(sagaData.getUser().getId())
             .payload(Payload.builder()
                 .message(message)
-                .notifiedAt(notification.getCreatedAt())
+                .deliveredAt(notification.getCreatedAt())
                 .build())
             .build();
         inAppService.send(request);
@@ -213,9 +198,7 @@ public class NotifyOrderFulfilledCommandHandler {
       @Override
       public void onSuccess() {
         if (notification != null) {
-          notification.setDeliveryStatus(DeliveryStatus.SUCCEEDED);
-          notification.setDeliveredAt(DateUtil.now());
-          notificationRepository.update(notification);
+          notificationService.markAsSucceeded(notification);
         }
         log.info("In-App notification for order fulfilled succeeded: orderId={}",
             sagaData.getOrderId());
@@ -224,9 +207,7 @@ public class NotifyOrderFulfilledCommandHandler {
       @Override
       public void onError(Throwable e) {
         if (notification != null) {
-          notification.setDeliveryStatus(DeliveryStatus.FAILED);
-          notification.setDeliveryError(ErrorUtil.sanitizeErrorMessage(e));
-          notificationRepository.update(notification);
+          notificationService.markAsFailed(notification, ErrorUtil.sanitizeErrorMessage(e));
         }
         log.error("In-App notification for order fulfilled failed: orderId={}, error={}",
             sagaData.getOrderId(), e.getMessage(), e);

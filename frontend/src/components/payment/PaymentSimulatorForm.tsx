@@ -50,7 +50,6 @@ interface PaymentSimulatorFormProps {
   amount?: number;
   currency?: string;
   onSubmit?: (data: PaymentFormData) => void;
-  onSuccess?: (data: PaymentFormData) => void;
   onError?: (error: string) => void;
   onCancel?: () => void;
   isLoading?: boolean;
@@ -100,7 +99,6 @@ export function PaymentSimulatorForm({
   amount = 99.99,
   currency = "USD",
   onSubmit,
-  onSuccess,
   onError,
   onCancel,
   isLoading = false,
@@ -136,7 +134,7 @@ export function PaymentSimulatorForm({
       // Do NOT call onSuccess here - success should be determined by order status polling
       // The payment status remains "processing" until the order status polling determines success
       // onSuccess will be called by the parent component when order status becomes FULFILLED
-    } catch (error) {
+    } catch (err) {
       setPaymentStatus("error");
       const errorMessage = "An unexpected error occurred. Please try again.";
       setErrorMessage(errorMessage);

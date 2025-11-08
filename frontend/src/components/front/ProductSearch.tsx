@@ -281,62 +281,66 @@ const ProductSearch: React.FC = () => {
 
   // Initial data loading - load static data once and initial products
   useEffect(() => {
-    if (isInitialized.current) {
+    const refreshParam = searchParams.get("refresh");
+
+    // This effect should run only once on initialization or when a new refresh is triggered
+    if (isInitialized.current && !refreshParam) {
       return;
     }
-    
-    isInitialized.current = true;
-    
+
+    // If it's a refresh, ensure it's a new one
+    if (refreshParam && refreshParam === lastRefreshParam.current) {
+      return;
+    }
+
+    if (refreshParam) {
+      lastRefreshParam.current = refreshParam;
+    }
+
     const initializeData = async () => {
+      // Reset filters if it's a refresh
+      if (refreshParam) {
+        setFormFilters({
+          keyword: "",
+          minPrice: undefined,
+          maxPrice: undefined,
+          brandId: "",
+          categoryIds: [],
+        });
+        setCommittedSearchFilters({});
+      }
+
+      // Fetch all data
       await Promise.all([
         loadBrands(),
         loadCategories(),
-        loadProducts({}, 1, 9),
+        loadProducts(refreshParam ? {} : committedSearchFilters, 1, 9),
       ]);
     };
-    initializeData();
-  }, [loadBrands, loadCategories, loadProducts]); // Include function dependencies
 
-  // Listen for refresh parameter to reload all data when brand name is clicked
-  useEffect(() => {
-    const refreshParam = searchParams.get('refresh');
-    if (refreshParam && isInitialized.current && refreshParam !== lastRefreshParam.current) {
-      // Only refresh if this is a new refresh parameter
-      lastRefreshParam.current = refreshParam;
-      
-      // Reset filters to default state
-      setFormFilters({
-        keyword: "",
-        minPrice: undefined,
-        maxPrice: undefined,
-        brandId: "",
-        categoryIds: [],
-      });
-      setCommittedSearchFilters({});
-      
-      // Reload all data (brands, categories, and products)
-      const refreshAllData = async () => {
-        await Promise.all([
-          loadBrands(),
-          loadCategories(),
-          loadProducts({}, 1, 9), // Reset to first page with default filters
-        ]);
-      };
-      refreshAllData();
+    initializeData();
+
+    // Mark as initialized after the first load
+    if (!isInitialized.current) {
+      isInitialized.current = true;
     }
-  }, [searchParams, loadBrands, loadCategories, loadProducts]);
+  }, [
+    searchParams,
+    loadBrands,
+    loadCategories,
+    loadProducts,
+    committedSearchFilters,
+  ]);
 
   // Loading states
   const isLoading = isLoadingBrands || isLoadingCategories || isLoadingProducts;
 
-  const handleSearch = useCallback(
-    () => {
-      // Commit form filters to search and trigger search
-      setCommittedSearchFilters(formFilters);
-      // Only load products, not static data
-      loadProducts(formFilters, 1, pagination.pageSize);
-    },
-    [formFilters, loadProducts, pagination.pageSize]
+  const handleSearch = useCallback(() => {
+    // Commit form filters to search and trigger search
+    setCommittedSearchFilters(formFilters);
+    // Only load products, not static data
+    loadProducts(formFilters, 1, pagination.pageSize);
+  }, [formFilters, loadProducts, pagination.pageSize]
   );
 
   return (

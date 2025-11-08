@@ -45,9 +45,7 @@ const Cart: React.FC = () => {
     };
 
     loadData();
-  }, [isAuthenticated(), cart, isLoading]);
-
-
+  }, [isAuthenticated, cart, isLoading, loadCart]);
 
   const handleRemoveFromCart = async (productId: number) => {
     const success = await removeFromCart(productId);

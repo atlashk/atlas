@@ -1,9 +1,9 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import { useUserStore } from '@/stores/user.store';
-import type { User } from '@/interfaces/user.interface';
 import type { LoginRequest } from '@/interfaces/auth.interface';
+import type { User } from '@/interfaces/user.interface';
+import { useUserStore } from '@/stores/user.store';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 interface AuthContextType {
   // Auth state

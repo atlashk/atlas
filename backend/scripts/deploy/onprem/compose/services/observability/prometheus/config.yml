@@ -1,31 +1,29 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
 scrape_configs:
-  - job_name: 'eureka-server-metrics'
-    metrics_path: '/actuator/prometheus'
-    scrape_interval: 5s
-    static_configs:
-      - targets: [ 'eureka-server:8761' ]
   - job_name: 'user-service-metrics'
-    metrics_path: '/actuator/prometheus'
-    scrape_interval: 5s
     static_configs:
       - targets: [ 'user-service:8081' ]
-  - job_name: 'product-service-metrics'
     metrics_path: '/actuator/prometheus'
-    scrape_interval: 5s
+  - job_name: 'product-service-metrics'
     static_configs:
       - targets: [ 'product-service:8082' ]
-  - job_name: 'order-service-metrics'
     metrics_path: '/actuator/prometheus'
-    scrape_interval: 5s
+  - job_name: 'order-service-metrics'
     static_configs:
       - targets: [ 'order-service:8083' ]
-  - job_name: 'payment-service-metrics'
     metrics_path: '/actuator/prometheus'
-    scrape_interval: 5s
+  - job_name: 'payment-service-metrics'
     static_configs:
       - targets: [ 'payment-service:8084' ]
-  - job_name: 'api-gateway-metrics'
     metrics_path: '/actuator/prometheus'
-    scrape_interval: 5s
+  - job_name: 'notification-service-metrics'
+    static_configs:
+      - targets: [ 'notification-service:8085' ]
+    metrics_path: '/actuator/prometheus'
+  - job_name: 'api-gateway-metrics'
     static_configs:
       - targets: [ 'api-gateway:8080' ]
+    metrics_path: '/actuator/prometheus'

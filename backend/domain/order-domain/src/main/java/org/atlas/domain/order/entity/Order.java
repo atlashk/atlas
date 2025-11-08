@@ -11,7 +11,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.domain.order.shared.OrderStatus;
-import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.framework.domain.entity.DomainEntity;
 import org.atlas.framework.util.CollectionUtil;
 

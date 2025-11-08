@@ -6,8 +6,8 @@ CREATE TABLE IF NOT EXISTS saga
     status        VARCHAR(20) NOT NULL,
     completed_at  DATETIME,
     error_message TEXT,
-    created_at    DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at    DATETIME             DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    created_at    DATETIME    NOT NULL,
+    updated_at    DATETIME
 ) ENGINE = InnoDB;
 
 CREATE TABLE IF NOT EXISTS saga_command
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS saga_command
     completed_at               DATETIME,
     error_message              TEXT,
     compensation_error_message TEXT,
-    created_at                 DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at                 DATETIME             DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at                 DATETIME    NOT NULL,
+    updated_at                 DATETIME,
     INDEX idx_saga_id (saga_id)
 ) ENGINE = InnoDB;

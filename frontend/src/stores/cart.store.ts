@@ -199,7 +199,9 @@ export const useCartStore = create<CartStore>()((set, get) => ({
   // Computed values
   getCartItemCount: () => {
     const { cart } = get();
-    return cart?.cartItems?.length || 0;
+    // Count distinct products (cart items), not total quantity
+    if (!cart || !cart.cartItems) return 0;
+    return cart.cartItems.length;
   },
 
   getCartTotal: () => {

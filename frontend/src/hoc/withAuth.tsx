@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ComponentType } from 'react';
+import React, { ComponentType, useEffect, useState } from 'react';
 import { useAuthRedirect, useGuestRedirect } from '@/hooks/useAuthRedirect';
 import { Spinner } from '@/components/ui/spinner';
 
@@ -37,6 +37,12 @@ export function withAuth<P extends object>(
   } = options;
 
   const WithAuthComponent: React.FC<P> = (props) => {
+    // Hydration guard to ensure consistent SSR/CSR markup
+    const [isHydrated, setIsHydrated] = useState(false);
+    useEffect(() => {
+      setIsHydrated(true);
+    }, []);
+
     const { isLoading, canAccess } = useAuthRedirect({
       requireAuth,
       requireAdmin,
@@ -44,6 +50,14 @@ export function withAuth<P extends object>(
       redirectUnauthorized: redirectTo || '/',
       allowedRoles
     });
+
+    // During SSR and the very first client render, show a stable fallback
+    // This prevents hydration mismatches when auth state differs between server and client
+    if (!isHydrated) {
+      return FallbackComponent ? 
+        <FallbackComponent /> : 
+        <DefaultLoadingComponent message="Checking authentication..." />;
+    }
 
     // Show loading state
     if (isLoading) {

@@ -14,6 +14,8 @@ import org.atlas.framework.context.Contexts;
 import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.api.server.rest.impl.notification.front.mapper.NotificationMapper;
 import org.atlas.infrastructure.api.server.rest.impl.notification.front.model.InAppNotificationResponse;
+import org.atlas.infrastructure.api.server.rest.impl.notification.front.model.InAppServiceInfoResponse;
+import org.atlas.infrastructure.api.server.rest.impl.notification.front.service.InAppServiceInfoService;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,13 +25,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/notifications")
+@RequestMapping("/api/notifications/inapp")
 @Validated
 @RequiredArgsConstructor
-public class NotificationController {
+public class InAppNotificationController {
 
   private final ListInAppUserNotificationUseCaseHandler listInAppUserNotificationUseCaseHandler;
   private final MarkAsReadAllUseCaseHandler markAsReadAllUseCaseHandler;
+  private final InAppServiceInfoService inAppServiceInfoService;
+
+  @GetMapping(value = "/service-info", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Get current in-app service type information")
+  public ApiResponseWrapper<InAppServiceInfoResponse> getInAppServiceInfo() {
+    String serviceType = inAppServiceInfoService.getCurrentInAppServiceType();
+
+    InAppServiceInfoResponse response = InAppServiceInfoResponse.builder()
+        .serviceType(serviceType.toLowerCase())
+        .build();
+
+    return ApiResponseWrapper.success(response);
+  }
 
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve a list of in-app notifications for the current user")
@@ -39,7 +54,7 @@ public class NotificationController {
   ) throws Exception {
     ListInAppUserNotificationInput input = ListInAppUserNotificationInput.builder()
         .userId(Contexts.getUserId())
-        .limit(1)
+        .limit(limit)
         .build();
 
     List<Notification> notifications = listInAppUserNotificationUseCaseHandler.handle(input);

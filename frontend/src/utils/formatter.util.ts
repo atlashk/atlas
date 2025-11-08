@@ -3,12 +3,14 @@ import { PaymentStatus } from "@/constants";
 import React from "react";
 
 export const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleString(undefined, {
+  // Use a fixed timezone to ensure SSR and client render the same output
+  return new Date(dateString).toLocaleString("en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "UTC",
   });
 };
 

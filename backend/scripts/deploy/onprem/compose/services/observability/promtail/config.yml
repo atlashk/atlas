@@ -45,6 +45,13 @@ scrape_configs:
         labels:
           service_name: payment-service
           __path__: /var/log/payment-service/*.log
+  - job_name: notification-service
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          service_name: notification-service
+          __path__: /var/log/notification-service/*.log
   - job_name: api-gateway
     static_configs:
       - targets:

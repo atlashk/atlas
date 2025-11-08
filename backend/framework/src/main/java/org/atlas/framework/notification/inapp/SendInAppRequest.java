@@ -25,6 +25,6 @@ public class SendInAppRequest {
   public static class Payload {
 
     private String message;
-    private Date notifiedAt;
+    private Date deliveredAt;
   }
 }

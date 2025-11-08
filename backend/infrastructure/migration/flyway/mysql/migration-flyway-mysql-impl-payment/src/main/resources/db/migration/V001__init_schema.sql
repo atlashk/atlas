@@ -3,8 +3,8 @@ CREATE TABLE IF NOT EXISTS payment_gateway
     id         INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
     code       VARCHAR(50)  NOT NULL,
     name       VARCHAR(255) NOT NULL,
-    created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at DATETIME     NOT NULL,
+    updated_at DATETIME,
     UNIQUE INDEX idx_code (code)
 ) ENGINE = InnoDB;
 
@@ -24,8 +24,8 @@ CREATE TABLE IF NOT EXISTS payment
     next_action            JSON,
     error                  VARCHAR(500),
     cancellation_reason    VARCHAR(500),
-    created_at             DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at             DATETIME                DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at             DATETIME       NOT NULL,
+    updated_at             DATETIME,
     INDEX idx_user_id (user_id),
     UNIQUE INDEX idx_order_id (order_id),
     UNIQUE INDEX idx_saga_id (saga_id),
@@ -41,8 +41,8 @@ CREATE TABLE IF NOT EXISTS payment_event
     headers            TEXT,
     status             VARCHAR(50) NOT NULL,
     error              VARCHAR(500),
-    created_at         DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at         DATETIME             DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at         DATETIME    NOT NULL,
+    updated_at         DATETIME,
     INDEX idx_payment_gateway_id (payment_gateway_id),
     INDEX idx_payment_id (payment_id)
 ) ENGINE = InnoDB;

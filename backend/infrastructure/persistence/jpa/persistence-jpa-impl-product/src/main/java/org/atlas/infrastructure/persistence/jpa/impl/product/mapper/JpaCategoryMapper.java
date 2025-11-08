@@ -2,10 +2,11 @@ package org.atlas.infrastructure.persistence.jpa.impl.product.mapper;
 
 import org.atlas.domain.product.entity.Category;
 import org.atlas.infrastructure.persistence.jpa.impl.product.entity.JpaCategory;
+import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(builder = @Builder(disableBuilder = true))
 public interface JpaCategoryMapper {
 
   JpaCategoryMapper INSTANCE = Mappers.getMapper(JpaCategoryMapper.class);

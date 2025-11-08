@@ -2,16 +2,16 @@ CREATE TABLE IF NOT EXISTS brand
 (
     `id`         INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `name`       VARCHAR(255) NOT NULL,
-    `created_at` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    `created_at` DATETIME     NOT NULL,
+    `updated_at` DATETIME
 ) ENGINE = InnoDB;
 
 CREATE TABLE IF NOT EXISTS category
 (
     `id`         INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `name`       VARCHAR(255) NOT NULL,
-    `created_at` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    `created_at` DATETIME     NOT NULL,
+    `updated_at` DATETIME
 ) ENGINE = InnoDB;
 
 CREATE TABLE IF NOT EXISTS product
@@ -24,19 +24,17 @@ CREATE TABLE IF NOT EXISTS product
     `available_from` DATETIME      NOT NULL,
     `is_active`      TINYINT(1)    NOT NULL,
     `brand_id`       INT           NOT NULL,
-    `version`        BIGINT                 DEFAULT 0,
-    `created_at`     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at`     DATETIME               DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    `version`        BIGINT DEFAULT 0,
+    `created_at`     DATETIME      NOT NULL,
+    `updated_at`     DATETIME
 ) ENGINE = InnoDB;
 
 CREATE TABLE IF NOT EXISTS product_details
 (
     `product_id`  INT      NOT NULL PRIMARY KEY,
     `description` TEXT,
-    `created_at`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at`  DATETIME          DEFAULT CURRENT_TIMESTAMP ON
-        UPDATE
-        CURRENT_TIMESTAMP
+    `created_at`  DATETIME NOT NULL,
+    `updated_at`  DATETIME
 ) ENGINE = InnoDB;
 
 CREATE TABLE IF NOT EXISTS product_attribute
@@ -45,8 +43,8 @@ CREATE TABLE IF NOT EXISTS product_attribute
     `product_id` INT          NOT NULL,
     `name`       VARCHAR(255) NOT NULL,
     `value`      VARCHAR(255) NOT NULL,
-    `created_at` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `created_at` DATETIME     NOT NULL,
+    `updated_at` DATETIME,
     INDEX idx_product_id (product_id),
     UNIQUE INDEX idx_product_id_name (product_id, name)
 ) ENGINE = InnoDB;
@@ -55,10 +53,8 @@ CREATE TABLE IF NOT EXISTS product_category
 (
     `product_id`  INT      NOT NULL,
     `category_id` INT      NOT NULL,
-    `created_at`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at`  DATETIME          DEFAULT CURRENT_TIMESTAMP ON
-        UPDATE
-        CURRENT_TIMESTAMP,
+    `created_at`  DATETIME NOT NULL,
+    `updated_at`  DATETIME,
     PRIMARY KEY (`product_id`, `category_id`)
 ) ENGINE = InnoDB;
 
@@ -68,7 +64,7 @@ CREATE TABLE IF NOT EXISTS reservation
     `order_id`   INT      NOT NULL,
     `product_id` INT      NOT NULL,
     `quantity`   INT      NOT NULL,
-    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME          DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `created_at` DATETIME NOT NULL,
+    `updated_at` DATETIME,
     UNIQUE INDEX idx_order_id_product_id (order_id, product_id)
 ) ENGINE = InnoDB;

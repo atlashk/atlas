@@ -136,19 +136,6 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['migration']}")
     }
-    switch (rootProject.ext.appStack['notification.email']) {
-        case 'spring':
-            implementation project(':infrastructure.notification.email.spring')
-            break
-        case 'ses':
-            implementation project(':infrastructure.notification.email.ses')
-            break
-        case 'sendgrid':
-            implementation project(':infrastructure.notification.email.sendgrid')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['notification.email']}")
-    }
     implementation project(':infrastructure.observability.actuator')
     switch (rootProject.ext.appStack['observability.logging.framework']) {
         case 'logback':

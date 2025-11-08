@@ -10,6 +10,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.atlas.domain.user.entity.CartItem.Product;
 import org.atlas.framework.domain.entity.DomainEntity;
 import org.atlas.framework.util.CollectionUtil;
 
@@ -101,35 +102,5 @@ public class Cart extends DomainEntity {
         .map(cartItemEntity -> cartItemEntity.getProduct().getId())
         .distinct()
         .toList();
-  }
-
-  @NoArgsConstructor
-  @AllArgsConstructor
-  @Builder
-  @Getter
-  @Setter
-  public static class CartItem {
-
-    private Product product;
-    private Integer quantity;
-
-    public BigDecimal getAmount() {
-      return product.getPrice().multiply(BigDecimal.valueOf(quantity));
-    }
-  }
-
-  @NoArgsConstructor
-  @Getter
-  @Setter
-  public static class Product {
-
-    private Integer id;
-    private String name;
-    private BigDecimal price;
-    private String image;
-
-    public Product(Integer id) {
-      this.id = id;
-    }
   }
 }

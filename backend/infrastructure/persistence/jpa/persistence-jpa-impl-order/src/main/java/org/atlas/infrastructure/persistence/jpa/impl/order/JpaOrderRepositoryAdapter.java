@@ -8,9 +8,9 @@ import org.atlas.domain.order.entity.Order;
 import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.repository.criteria.FindOrderCriteria;
 import org.atlas.domain.order.shared.OrderStatus;
-import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
+import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.persistence.jpa.impl.order.entity.JpaOrder;
 import org.atlas.infrastructure.persistence.jpa.impl.order.mapper.JpaOrderMapper;
 import org.atlas.infrastructure.persistence.jpa.impl.order.repository.CustomJpaOrderRepository;
@@ -64,6 +64,7 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
     JpaOrder jpaOrder = JpaOrderMapper.INSTANCE.toJpaOrder(order);
     jpaOrderRepository.insert(jpaOrder);
     order.setId(jpaOrder.getId());
+    order.setCreatedAt(jpaOrder.getCreatedAt());
   }
 
   @Override

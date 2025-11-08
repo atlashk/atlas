@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS outbox_message
     status       VARCHAR(50) NOT NULL,
     processed_at DATETIME,
     error        TEXT,
-    retries      INT                  DEFAULT 0,
-    created_at   DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at   DATETIME             DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    retries      INT DEFAULT 0,
+    created_at   DATETIME    NOT NULL,
+    updated_at   DATETIME
 ) ENGINE = InnoDB;

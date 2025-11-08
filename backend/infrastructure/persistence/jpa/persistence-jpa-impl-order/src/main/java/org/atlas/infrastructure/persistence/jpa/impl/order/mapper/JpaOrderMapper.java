@@ -6,12 +6,13 @@ import org.atlas.framework.util.CollectionUtil;
 import org.atlas.infrastructure.persistence.jpa.impl.order.entity.JpaOrder;
 import org.atlas.infrastructure.persistence.jpa.impl.order.entity.JpaOrderItem;
 import org.mapstruct.AfterMapping;
+import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(builder = @Builder(disableBuilder = true))
 public interface JpaOrderMapper {
 
   JpaOrderMapper INSTANCE = Mappers.getMapper(JpaOrderMapper.class);
@@ -72,10 +73,4 @@ public interface JpaOrderMapper {
   @Mapping(target = "product.name", source = "productName")
   @Mapping(target = "product.price", source = "productPrice")
   OrderItem toOrderItem(JpaOrderItem jpaOrderItem);
-
-  @AfterMapping
-  default void setInheritedFields(@MappingTarget Order order, JpaOrder jpaOrder) {
-    order.setCreatedAt(jpaOrder.getCreatedAt());
-    order.setUpdatedAt(jpaOrder.getUpdatedAt());
-  }
 }

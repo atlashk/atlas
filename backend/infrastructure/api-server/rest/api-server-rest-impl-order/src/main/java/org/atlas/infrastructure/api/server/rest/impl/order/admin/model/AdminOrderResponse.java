@@ -10,7 +10,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.domain.order.shared.OrderStatus;
-import org.atlas.domain.payment.shared.PaymentStatus;
 import org.atlas.infrastructure.api.server.rest.impl.order.front.model.OrderResponse;
 
 @Schema(description = "Represents an order in the order list")

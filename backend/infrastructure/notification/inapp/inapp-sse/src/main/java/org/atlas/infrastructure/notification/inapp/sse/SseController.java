@@ -12,18 +12,18 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
-@RequestMapping("/notification/sse/inapp")
+@RequestMapping("/sse/inapp")
 @Slf4j
 public class SseController {
 
   private final ConcurrentHashMap<String, Set<SseEmitter>> userEmitters = new ConcurrentHashMap<>();
 
-  @GetMapping("/subscribe/{userId}")
+  @GetMapping("/{userId}")
   public SseEmitter subscribe(@PathVariable String userId) {
     log.info("User {} subscribing to in-app notifications", userId);
 
     SseEmitter emitter = new SseEmitter(-1L); // No timeout
-    
+
     emitter.onCompletion(() -> {
       log.debug("SseEmitter completed for user: {}", userId);
       removeEmitter(userId, emitter);
@@ -41,24 +41,24 @@ public class SseController {
 
     // Add emitter to the user's emitter set
     userEmitters.computeIfAbsent(userId, k -> new CopyOnWriteArraySet<>()).add(emitter);
-    
-    log.info("User {} subscribed successfully, total emitters: {}", 
-             userId, userEmitters.get(userId).size());
+
+    log.info("User {} subscribed successfully, total emitters: {}",
+        userId, userEmitters.get(userId).size());
 
     return emitter;
   }
-  
+
   public void sendEvent(SseEvent event) {
     String userId = event.getEventKey();
     Set<SseEmitter> emitters = userEmitters.get(userId);
-    
+
     if (emitters == null || emitters.isEmpty()) {
       log.warn("No active SSE connections for user: {}", userId);
       return;
     }
 
     log.info("Sending in-app notification to user {}: {}", userId, event.getPayload());
-    
+
     int successCount = 0;
     int errorCount = 0;
 
@@ -75,9 +75,9 @@ public class SseController {
         errorCount++;
       }
     }
-    
-    log.info("Notification sent to user {} - {} emitters succeeded, {} failed", 
-             userId, successCount, errorCount);
+
+    log.info("Notification sent to user {} - {} emitters succeeded, {} failed",
+        userId, successCount, errorCount);
   }
 
   private void removeEmitter(String userId, SseEmitter emitter) {

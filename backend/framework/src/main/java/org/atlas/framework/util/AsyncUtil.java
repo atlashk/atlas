@@ -44,7 +44,6 @@ public class AsyncUtil {
         task.run();
         logMetrics("single_task", 1, System.currentTimeMillis() - startTime, true);
       } catch (Exception e) {
-        log.error("Error executing async task", e);
         logMetrics("single_task", 1, System.currentTimeMillis() - startTime, false);
         throw new CompletionException(e);
       }

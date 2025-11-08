@@ -15,7 +15,7 @@ export function useOrderStatusPolling(orderId: string | null) {
       intervalRef.current = null;
     }
     isPollingRef.current = false;
-  }, [orderId]);
+  }, []);
 
   const startPolling = useCallback(() => {
     if (!orderId) return;
@@ -81,7 +81,7 @@ export function useOrderStatusPolling(orderId: string | null) {
     return () => {
       stopPolling();
     };
-  }, [orderId]); // Remove startPolling from dependencies to prevent infinite loop
+  }, [orderId, startPolling, stopPolling]);
 
   // Helper function to check if payment processing is needed
   const needsPaymentProcessing = orderStatus?.status === 'AWAITING_PAYMENT_PROCESSED';

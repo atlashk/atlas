@@ -110,20 +110,6 @@ spring:
                 - Authorization=ADMIN
                 - TokenRelay
                 - RewritePath=/services/order/api/admin/(?<segment>.*), /api/admin/${segment}
-            - id: order-service-sse
-              uri: ${ORDER_SERVICE_URI:lb://order-service}
-              predicates:
-                - Path=/services/order/notification/sse/**
-              filters:
-                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-                - RewritePath=/services/order/notification/sse/(?<segment>.*), /notification/sse/${segment}
-            - id: order-service-websocket
-              uri: ${ORDER_SERVICE_URI:lb://order-service}
-              predicates:
-                - Path=/services/order/notification/ws/**
-              filters:
-                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-                - RewritePath=/services/order/notification/ws/(?<segment>.*), /notification/ws/${segment}
             - id: order-service-api-docs
               uri: ${ORDER_SERVICE_URI:lb://order-service}
               predicates:
@@ -152,6 +138,38 @@ spring:
                 - Path=/api-docs/payment-service
               filters:
                 - RewritePath=/api-docs/payment-service, /api-docs
+            # Notification service
+            - id: notification-service
+              uri: ${NOTIFICATION_SERVICE_URI:lb://notification-service}
+              predicates:
+                - Path=/services/notification/api/**
+              filters:
+                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+                - TokenValidation
+                - TokenRelay
+                - RewritePath=/services/notification/api/(?<segment>.*), /api/${segment}
+            - id: notification-service-sse
+              uri: ${NOTIFICATION_SERVICE_URI:lb://notification-service}
+              predicates:
+                - Path=/services/notification/sse/**
+              filters:
+                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+                - RewritePath=/services/notification/sse/(?<segment>.*), /sse/${segment}
+              metadata:
+                response-timeout: -1 # Disables response timeout for SSE
+            - id: notification-service-websocket
+              uri: ${NOTIFICATION_SERVICE_URI:lb://notification-service}
+              predicates:
+                - Path=/services/notification/ws/**
+              filters:
+                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+                - RewritePath=/services/notification/ws/(?<segment>.*), /ws/${segment}
+            - id: notification-service-api-docs
+              uri: ${NOTIFICATION_SERVICE_URI:lb://notification-service}
+              predicates:
+                - Path=/api-docs/notification-service
+              filters:
+                - RewritePath=/api-docs/notification-service, /api-docs
           discovery:
             locator:
               enabled: true
@@ -182,4 +200,6 @@ springdoc:
         url: /api-docs/order-service
       - name: Payment Service
         url: /api-docs/payment-service
+      - name: Notification Service
+        url: /api-docs/notification-service
     default-models-expand-depth: -1 # Hide Schemas section

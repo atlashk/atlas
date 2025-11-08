@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 
 import { useNextActionHandler } from "@/hooks/useNextActionHandler";
-import { PaymentNextAction, PaymentGatewayResponse } from "@/interfaces/payment.interface";
+import { PaymentGatewayResponse, PaymentNextAction } from "@/interfaces/payment.interface";
 import { AlertCircle, CreditCard } from "lucide-react";
 import {
   DeeplinkAction,

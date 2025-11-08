@@ -7,8 +7,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.user.entity.Cart;
-import org.atlas.domain.user.entity.Cart.CartItem;
-import org.atlas.domain.user.entity.Cart.Product;
+import org.atlas.domain.user.entity.CartItem;
 import org.atlas.domain.user.usecase.front.mapper.CartMapper;
 import org.atlas.framework.internalapi.product.ProductApiClient;
 import org.atlas.framework.internalapi.product.model.ListProductRequest;
@@ -52,7 +51,7 @@ public class CartAggregator {
       Integer productId = cartItem.getProduct().getId();
       ProductResponse productResponse = productResponseMap.get(productId);
       if (productResponse != null) {
-        Product product = CartMapper.INSTANCE.toProduct(productResponse);
+        CartItem.Product product = CartMapper.INSTANCE.toProduct(productResponse);
         cartItem.setProduct(product);
       } else {
         log.error("Product {} no longer exists, removing from cart {}", productId, cart.getId());

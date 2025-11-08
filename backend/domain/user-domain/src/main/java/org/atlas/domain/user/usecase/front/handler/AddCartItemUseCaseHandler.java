@@ -6,8 +6,8 @@ import org.atlas.domain.user.aggregator.CartAggregator;
 import org.atlas.domain.user.entity.Cart;
 import org.atlas.domain.user.repository.CartRepository;
 import org.atlas.domain.user.usecase.front.model.AddCartItemInput;
-import org.atlas.framework.cache.CacheService;
 import org.atlas.framework.cache.ApplicationCache;
+import org.atlas.framework.cache.CacheService;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.springframework.dao.DataIntegrityViolationException;
 
@@ -30,7 +30,7 @@ public class AddCartItemUseCaseHandler {
             cartRepository.insert(newCart);
             return newCart;
           } catch (DataIntegrityViolationException e) {
-            // If a duplicate occurs, try finding it again
+            // If a duplicate occurs, try refetching the cart entity
             log.error("Duplicate cart record for user {}", input.getUserId(), e);
             return cartRepository.findByUserId(input.getUserId()).get();
           }
