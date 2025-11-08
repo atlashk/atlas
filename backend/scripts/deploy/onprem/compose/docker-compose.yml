@@ -14,6 +14,7 @@ include:
   - services/infrastructure/kafka.yml
   - services/infrastructure/rabbitmq/rabbitmq.yml
   - services/infrastructure/keycloak.yml
+  - services/infrastructure/minio.yml
   - services/infrastructure/smtp4dev.yml
   - services/infrastructure/nginx/nginx.yml
   

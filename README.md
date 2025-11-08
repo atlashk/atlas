@@ -2,7 +2,10 @@
 
 ## Project Overview
 
-**Atlas** is a comprehensive microservices-based e-commerce platform built with modern technologies and best practices. It demonstrates Domain-Driven Design (DDD), Event-Driven Architecture, and Clean Architecture principles across multiple bounded contexts including User Management, Product Catalog, Order Processing, and Notifications.
+**Atlas** is a comprehensive microservices-based e-commerce platform built with modern technologies
+and best practices. It demonstrates Domain-Driven Design (DDD), Event-Driven Architecture, and Clean
+Architecture principles across multiple bounded contexts including User Management, Product Catalog,
+Order Processing, and Notifications.
 
 ---
 
@@ -61,7 +64,8 @@
 
 ### Backend Startup
 
-For this style, we can easily use our simple wrapper scripts from the project root. They will invoke the relevant on-prem Docker compose scripts.
+For this style, we can easily use our simple wrapper scripts from the project root. They will invoke
+the relevant on-prem Docker compose scripts.
 
 ```bash
 # Start services
@@ -87,8 +91,9 @@ npm install
 npm run dev
 ```
 
-The web application will be accessible at **http://localhost:9000**.
+The web application will be accessible at **http://localhost:8000**.
 
 Login Credentials:
+
 - **Customer Portal**: `user` / `Aa@123456`
 - **Admin Dashboard**: `admin` / `Aa@123456`

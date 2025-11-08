@@ -18,16 +18,11 @@ metadata:
     tier: infrastructure
 data:
   init_db.sql: |
-    CREATE
-    DATABASE db_notification;
-    CREATE
-    DATABASE db_order;
-    CREATE
-    DATABASE db_payment;
-    CREATE
-    DATABASE db_product;
-    CREATE
-    DATABASE db_user;
+    CREATE DATABASE db_notification;
+    CREATE DATABASE db_order;
+    CREATE DATABASE db_payment;
+    CREATE DATABASE db_product;
+    CREATE DATABASE db_user;
 ---
 apiVersion: apps/v1
 kind: StatefulSet

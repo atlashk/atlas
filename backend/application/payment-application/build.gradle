@@ -69,9 +69,6 @@ dependencies {
         case 'redis':
             implementation project(':infrastructure.kv.redis.parent')
             break
-        case 'dynamodb':
-            implementation project(':infrastructure.kv.dynamodb')
-            break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['kv']}")
     }
@@ -121,9 +118,6 @@ dependencies {
     switch (rootProject.ext.appStack['observability.metrics']) {
         case 'prometheus':
             implementation project(':infrastructure.observability.metrics.prometheus')
-            break
-        case 'cloudwatch':
-            implementation project(':infrastructure.observability.metrics.cloudwatch')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.metrics']}")

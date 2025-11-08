@@ -60,9 +60,6 @@ dependencies {
         case 'prometheus':
             implementation project(':infrastructure.observability.metrics.prometheus')
             break
-        case 'cloudwatch':
-            implementation project(':infrastructure.observability.metrics.cloudwatch')
-            break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.metrics']}")
     }

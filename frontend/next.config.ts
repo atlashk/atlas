@@ -1,4 +1,4 @@
-import type { NextConfig } from "next";
+import type {NextConfig} from "next";
 
 const nextConfig: NextConfig = {
   async headers() {
@@ -55,7 +55,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Access-Control-Allow-Origin',
-            value: process.env.NODE_ENV === 'production' ? 'https://yourdomain.com' : 'http://localhost:9000'
+            value: process.env.NODE_ENV === 'production' ? 'https://yourdomain.com' : 'http://localhost:8000'
           },
           {
             key: 'Access-Control-Allow-Methods',
@@ -69,10 +69,10 @@ const nextConfig: NextConfig = {
       }
     ];
   },
-  
+
   // Configure output file tracing root to resolve workspace warning
   outputFileTracingRoot: process.cwd(),
-  
+
   // Configure turbopack root to silence warning
   // turbopack: {
   //   root: process.cwd()

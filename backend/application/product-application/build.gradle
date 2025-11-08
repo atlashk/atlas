@@ -115,9 +115,6 @@ dependencies {
         case 'redis':
             implementation project(':infrastructure.kv.redis.parent')
             break
-        case 'dynamodb':
-            implementation project(':infrastructure.kv.dynamodb')
-            break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['kv']}")
     }
@@ -168,9 +165,6 @@ dependencies {
         case 'prometheus':
             implementation project(':infrastructure.observability.metrics.prometheus')
             break
-        case 'cloudwatch':
-            implementation project(':infrastructure.observability.metrics.cloudwatch')
-            break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.metrics']}")
     }
@@ -205,8 +199,8 @@ dependencies {
         case 'filesystem':
             implementation project(':infrastructure.storage.filesystem')
             break
-        case 's3':
-            implementation project(':infrastructure.storage.s3')
+        case 'minio':
+            implementation project(':infrastructure.storage.minio')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['storage']}")

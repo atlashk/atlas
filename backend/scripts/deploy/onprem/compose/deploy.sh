@@ -30,7 +30,7 @@ SKIP_OBSERVABILITY=false
 DOCKER_COMPOSE_CMD="docker-compose"
 
 # Configuration variables (populated by read_app_stack_config)
-declare -g DATASOURCE MESSAGING API_CLIENT NOTIFICATION_EMAIL OBSERVABILITY_LOGGING_STACK OBSERVABILITY_METRICS OBSERVABILITY_TRACING
+declare -g DATASOURCE MESSAGING STORAGE API_CLIENT NOTIFICATION_EMAIL OBSERVABILITY_LOGGING_STACK OBSERVABILITY_METRICS OBSERVABILITY_TRACING
 
 # Service configuration arrays for environment file generation
 declare -A SERVICE_CONFIGS=(
@@ -213,6 +213,7 @@ read_app_stack_config() {
     DATASOURCE=$(read_config_value "datasource" "mysql")
     MESSAGING=$(read_config_value "messaging" "kafka")
     API_CLIENT=$(read_config_value "api-client" "rest-restclient")
+    STORAGE=$(read_config_value "storage" "filesystem")
     NOTIFICATION_EMAIL=$(read_config_value "notification.email" "spring")
     OBSERVABILITY_LOGGING_STACK=$(read_config_value "observability.logging.stack" "loki")
     OBSERVABILITY_METRICS=$(read_config_value "observability.metrics" "prometheus")
@@ -229,9 +230,16 @@ read_app_stack_config() {
         MESSAGING="kafka"
     fi
     
+    # Validate storage option
+    if [[ ! "$STORAGE" =~ ^(filesystem|minio)$ ]]; then
+        echo "Warning: Invalid storage '$STORAGE', defaulting to 'filesystem'"
+        STORAGE="filesystem"
+    fi
+
     echo "Configuration loaded:"
     echo "  - Datasource: $DATASOURCE"
     echo "  - Messaging: $MESSAGING"
+    echo "  - Storage: $STORAGE"
     echo "  - API Client: $API_CLIENT"
     echo "  - Email: $NOTIFICATION_EMAIL"
     if [[ "$SKIP_OBSERVABILITY" == true ]]; then
@@ -314,6 +322,23 @@ REDIS_PORT=6379
 # Service Discovery Configuration
 EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
 EOF
+}
+
+generate_storage_config() {
+    local service_name="$1"
+
+    if [[ "$STORAGE" == "minio" ]]; then
+        # Only product-service currently uses object storage for images
+        if [[ "$service_name" == "product-service" ]]; then
+            cat << EOF
+
+# Object Storage Configuration (MinIO)
+APP_STORAGE_MINIO_ENDPOINT=http://minio:9000
+APP_STORAGE_MINIO_ACCESS_KEY=admin
+APP_STORAGE_MINIO_SECRET_KEY=admin123
+EOF
+        fi
+    fi
 }
 
 generate_observability_config() {
@@ -401,6 +426,7 @@ generate_service_env() {
         generate_messaging_config
         generate_common_infrastructure_config
         generate_api_client_config "${API_CLIENT%%-*}"
+        generate_storage_config "$service_name"
 
         # Add service-specific configurations
         local specific_config="${SERVICE_SPECIFIC_CONFIGS[$service_name]:-}"
@@ -513,6 +539,11 @@ get_infrastructure_services() {
             services+=("kafka")
             ;;
     esac
+
+    # Object storage
+    if [[ "$STORAGE" == "minio" ]]; then
+        services+=("minio")
+    fi
     
     if [[ "$NOTIFICATION_EMAIL" == "spring" ]]; then
         services+=("smtp4dev")
@@ -701,6 +732,10 @@ show_access_information() {
     echo "  Zipkin:        http://zipkin.atlas.local"
     if [[ "$NOTIFICATION_EMAIL" == "spring" ]]; then
         echo "  SMTP4Dev:      http://smtp4dev.atlas.local"
+    fi
+    if [[ "$STORAGE" == "minio" ]]; then
+        echo "  MinIO Console: http://localhost:9001"
+        echo "  MinIO S3 API:  http://localhost:9000"
     fi
     echo
 }

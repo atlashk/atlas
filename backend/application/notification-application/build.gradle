@@ -90,9 +90,6 @@ dependencies {
         case 'spring':
             implementation project(':infrastructure.notification.email.spring')
             break
-        case 'ses':
-            implementation project(':infrastructure.notification.email.ses')
-            break
         case 'sendgrid':
             implementation project(':infrastructure.notification.email.sendgrid')
             break
@@ -120,9 +117,6 @@ dependencies {
     switch (rootProject.ext.appStack['observability.metrics']) {
         case 'prometheus':
             implementation project(':infrastructure.observability.metrics.prometheus')
-            break
-        case 'cloudwatch':
-            implementation project(':infrastructure.observability.metrics.cloudwatch')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.metrics']}")

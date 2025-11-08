@@ -203,10 +203,6 @@ project(':infrastructure.kv.redis.connector.standalone').projectDir = file('infr
 include(':infrastructure.kv.redis.ops')
 project(':infrastructure.kv.redis.ops').projectDir = file('infrastructure/kv/redis/kv-redis-ops')
 
-// Key-Value Store::DynamoDB
-include(':infrastructure.kv.dynamodb')
-project(':infrastructure.kv.dynamodb').projectDir = file('infrastructure/kv/kv-dynamodb')
-
 // Lock
 include(':infrastructure.lock.redisson')
 project(':infrastructure.lock.redisson').projectDir = file('infrastructure/lock/lock-redisson')
@@ -293,10 +289,6 @@ project(':infrastructure.migration.flyway.postgres.impl.user').projectDir = file
 include(':infrastructure.notification.email.spring')
 project(':infrastructure.notification.email.spring').projectDir = file('infrastructure/notification/email/email-spring')
 
-// Notification::Email::SES
-include(':infrastructure.notification.email.ses')
-project(':infrastructure.notification.email.ses').projectDir = file('infrastructure/notification/email/email-ses')
-
 // Notification::Email::Sendgrid
 include(':infrastructure.notification.email.sendgrid')
 project(':infrastructure.notification.email.sendgrid').projectDir = file('infrastructure/notification/email/email-sendgrid')
@@ -322,8 +314,6 @@ include(':infrastructure.observability.logging.logback')
 project(':infrastructure.observability.logging.logback').projectDir = file('infrastructure/observability/logging/logging-logback')
 
 // Observability::Metrics
-include(':infrastructure.observability.metrics.cloudwatch')
-project(':infrastructure.observability.metrics.cloudwatch').projectDir = file('infrastructure/observability/metrics/metrics-cloudwatch')
 include(':infrastructure.observability.metrics.prometheus')
 project(':infrastructure.observability.metrics.prometheus').projectDir = file('infrastructure/observability/metrics/metrics-prometheus')
 
@@ -400,8 +390,8 @@ project(':infrastructure.sequence-generator').projectDir = file('infrastructure/
 // Storage
 include(':infrastructure.storage.filesystem')
 project(':infrastructure.storage.filesystem').projectDir = file('infrastructure/storage/storage-filesystem')
-include(':infrastructure.storage.s3')
-project(':infrastructure.storage.s3').projectDir = file('infrastructure/storage/storage-s3')
+include(':infrastructure.storage.minio')
+project(':infrastructure.storage.minio').projectDir = file('infrastructure/storage/storage-minio')
 
 // Template
 include(':infrastructure.template.freemarker')

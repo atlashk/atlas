@@ -15,11 +15,11 @@ import org.atlas.framework.storage.model.DeleteFileRequest;
 import org.atlas.framework.storage.model.GetDownloadUrlRequest;
 import org.atlas.framework.storage.model.GetFileRequest;
 import org.atlas.framework.storage.model.UploadFileRequest;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 @RequiredArgsConstructor
-@Slf4j
+@Slf4j(topic = "storage.filesystem")
 public class FilesystemStorageService implements StorageService {
 
   private final FilesystemProps props;
