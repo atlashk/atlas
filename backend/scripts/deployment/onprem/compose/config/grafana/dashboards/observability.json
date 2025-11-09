@@ -1,0 +1,66 @@
+{
+  "__requires": [
+    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.1.0" },
+    { "type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0" }
+  ],
+  "annotations": { "list": [ { "builtIn": 1, "datasource": { "type": "datasource", "uid": "grafana" }, "enable": true, "hide": true, "iconColor": "rgba(0, 211, 255, 1)", "name": "Annotations & Alerts", "target": { "limit": 100, "matchAny": false, "tags": [], "type": "dashboard" }, "type": "dashboard" } ] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 101,
+      "panels": [],
+      "title": "Service Metrics",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" },
+      "fieldConfig": { "defaults": { "mappings": [], "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null } ] }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 1 },
+      "id": 102,
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": [ "lastNotNull" ], "fields": "", "values": false }, "textMode": "auto" },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" }, "editorMode": "code", "exemplar": true, "expr": "sum(http_server_requests_seconds_count{application=~\"(api-gateway|user-service|product-service|order-service|payment-service|notification-service)\", uri!=\"/actuator/prometheus\"})", "instant": true, "legendFormat": "", "range": false, "refId": "A" } ],
+      "title": "Total Requests (last)",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" },
+      "fieldConfig": { "defaults": { "mappings": [], "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null } ] }, "unit": "s" }, "overrides": [] },
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 1 },
+      "id": 103,
+      "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "single", "sort": "none" } },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" }, "editorMode": "code", "exemplar": true, "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=~\"(api-gateway|user-service|product-service|order-service|payment-service|notification-service)\", uri!=\"/actuator/prometheus\"}[5m])) by (le))", "legendFormat": "p95 Latency", "range": true, "refId": "A" } ],
+      "title": "Latency p95",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" },
+      "fieldConfig": { "defaults": { "mappings": [], "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null } ] }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 1 },
+      "id": 104,
+      "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "single", "sort": "none" } },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" }, "editorMode": "code", "exemplar": true, "expr": "sum(rate(http_server_requests_seconds_count{application=~\"(api-gateway|user-service|product-service|order-service|payment-service|notification-service)\", status=~\"[45].*\", uri!=\"/actuator/prometheus\"}[5m]))", "legendFormat": "Error Rate", "range": true, "refId": "A" } ],
+      "title": "Error Rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" },
+      "fieldConfig": { "defaults": { "mappings": [], "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null } ] }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 1 },
+      "id": 105,
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": [ "lastNotNull" ], "fields": "", "values": false }, "textMode": "auto" },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" }, "editorMode": "code", "exemplar": true, "expr": "sum(jvm_threads_live_threads{application=~\"(api-gateway|user-service|product-service|order-service|payment-service|notification-service)\"})", "instant": true, "legendFormat": "", "range": false, "refId": "A" } ],
+      "title": "JVM Threads (Live)",
+      "type": "stat"
+    }
+  ],
+  "time": { "from": "now-5m", "to": "now" },
+  "timezone": "",
+  "title": "Observability",
+  "version": 1,
+  "weekStart": ""
+}

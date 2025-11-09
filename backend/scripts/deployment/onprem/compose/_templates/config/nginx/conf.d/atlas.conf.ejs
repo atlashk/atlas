@@ -1,0 +1,88 @@
+<%
+  // Derive flags similar to docker-compose.yml.ejs
+  const notifEmail = (stack.NOTIFICATION_EMAIL || (stack.notification && stack.notification.email) || '').toLowerCase();
+  const obsLog = (stack.OBSERVABILITY_LOGGING_STACK || (stack.observability && stack.observability.logging && stack.observability.logging.stack) || '').toLowerCase();
+  const obsMetrics = (stack.OBSERVABILITY_METRICS || (stack.observability && stack.observability.metrics) || '').toLowerCase();
+  const obsTracing = (stack.OBSERVABILITY_TRACING || (stack.observability && stack.observability.tracing) || '').toLowerCase();
+
+  const hasLoki = obsLog === 'loki';
+  const hasPrometheus = obsMetrics === 'prometheus';
+  const hasZipkin = obsTracing === 'zipkin';
+  const hasGrafana = hasLoki || hasPrometheus || hasZipkin;
+  const hasSmtp4dev = notifEmail === 'spring';
+%>
+
+# Atlas reverse proxy configuration
+
+server {
+    listen 80;
+    server_name api.atlas.local;
+
+    location / {
+        proxy_pass http://api-gateway:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+<% if (hasGrafana) { %>
+server {
+    listen 80;
+    server_name grafana.atlas.local;
+
+    location / {
+        proxy_pass http://grafana:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+<% } %>
+
+<% if (hasPrometheus) { %>
+server {
+    listen 80;
+    server_name prometheus.atlas.local;
+
+    location / {
+        proxy_pass http://prometheus:9090;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+<% } %>
+
+<% if (hasZipkin) { %>
+server {
+    listen 80;
+    server_name zipkin.atlas.local;
+
+    location / {
+        proxy_pass http://zipkin:9411;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+<% } %>
+
+<% if (hasSmtp4dev) { %>
+server {
+    listen 80;
+    server_name smtp4dev.atlas.local;
+
+    location / {
+        proxy_pass http://smtp4dev:80;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+<% } %>

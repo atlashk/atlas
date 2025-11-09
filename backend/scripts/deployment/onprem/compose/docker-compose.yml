@@ -1,0 +1,613 @@
+# =============================================================================
+# Atlas Microservices Platform - Single Compose Template (Generated)
+# =============================================================================
+# This template renders one docker-compose.yml and writes required service
+# configuration files from embedded blocks. It mirrors deploy.sh logic for
+# service inclusion and env variables via generated env_file entries.
+# =============================================================================
+
+
+
+version: "3.8"
+services:
+
+  <!-- Database -->
+
+  
+  mysql:
+    container_name: mysql
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - ./config/mysql/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql:ro
+      - mysql-data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - atlas-network
+  
+
+  
+
+  <!-- Key-value Store -->
+
+  
+  redis:
+    container_name: redis
+    image: redis:7
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/var/lib/redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - atlas-network
+  
+
+  <!-- Messaging -->
+
+  
+  kafka:
+    container_name: kafka
+    image: confluentinc/cp-kafka:7.9.0
+    ports:
+      - "9092:9092"
+      - "9101:9101"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - atlas-network
+  
+
+  
+
+  <!-- Storage -->
+
+  
+  minio:
+    container_name: minio
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-admin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-admin}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - atlas-network
+  
+
+  <!-- Email -->
+
+  
+  smtp4dev:
+    container_name: smtp4dev
+    image: rnwood/smtp4dev
+    ports:
+      - "5000:80"
+      - "25:25"
+      - "143:143"
+    volumes:
+      - smtp4dev-data:/smtp4dev
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - atlas-network
+  
+
+  <!-- Observability -->
+
+  
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:main
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus-config.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./config/prometheus/config.yml:/etc/prometheus/prometheus-config.yml:ro
+      - prometheus-data:/prometheus
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9090/-/healthy || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - atlas-network
+  
+
+  
+  loki:
+    container_name: loki
+    image: grafana/loki:main
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1"]
+    interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - atlas-network
+  
+
+  
+  promtail:
+    container_name: promtail
+    image: grafana/promtail:main
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - ./config/promtail/config.yml:/etc/promtail/config.yml:ro
+      - user-service-log:/var/log/user-service
+      - product-service-log:/var/log/product-service
+      - order-service-log:/var/log/order-service
+      - payment-service-log:/var/log/payment-service
+      - notification-service-log:/var/log/notification-service
+      - eureka-server-log:/var/log/eureka-server
+      - api-gateway-log:/var/log/api-gateway
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9080/metrics || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - atlas-network
+  
+
+  
+  zipkin:
+    container_name: zipkin
+    image: openzipkin/zipkin
+    ports:
+      - "9411:9411"
+    environment:
+      - STORAGE_TYPE=mem
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9411/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - atlas-network
+  
+
+  
+  grafana:
+    container_name: grafana
+    image: grafana/grafana-oss:main
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel,grafana-clock-panel
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./config/grafana/dashboards:/etc/grafana/dashboards:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    networks:
+      - atlas-network
+  
+
+  <!-- Service Discovery -->
+
+  eureka-server:
+    container_name: eureka-server
+    image: atlas-eureka-server
+    ports:
+      - "8761:8761"
+    volumes:
+      - eureka-server-log:/var/log/eureka-server
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8761/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - atlas-network
+
+  <!-- Application Services -->
+
+  user-service:
+    container_name: user-service
+    image: atlas-user-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - eureka-server
+      
+      - redis
+      
+      
+      - kafka
+      
+      
+      
+      - mysql
+      
+      
+    environment:
+      
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      
+      - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
+      
+      - DB_URL=jdbc:mysql://mysql:3306/db_user?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+      - DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
+      - DB_QUARTZ_USERNAME=root
+      - DB_QUARTZ_PASSWORD=root
+      
+      
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      
+      
+      - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+      
+    volumes:
+      - user-service-log:/var/log/user-service
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8081/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - atlas-network
+
+  product-service:
+    container_name: product-service
+    image: atlas-product-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - eureka-server
+      
+      - redis
+      
+      
+      - kafka
+      
+      
+      
+      - mysql
+      
+      
+    environment:
+      
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      
+      - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
+      
+      - DB_URL=jdbc:mysql://mysql:3306/db_product?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+      - DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
+      - DB_QUARTZ_USERNAME=root
+      - DB_QUARTZ_PASSWORD=root
+      
+      
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      
+      
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_ACCESS_KEY=admin
+      - MINIO_SECRET_KEY=admin123
+      
+      
+      - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+      
+    volumes:
+      - product-service-log:/var/log/product-service
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8082/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - atlas-network
+
+  order-service:
+    container_name: order-service
+    image: atlas-order-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - eureka-server
+      
+      - redis
+      
+      
+      - kafka
+      
+      
+      
+      - mysql
+      
+      
+    environment:
+      
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      
+      - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
+      
+      - DB_URL=jdbc:mysql://mysql:3306/db_order?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+      - DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
+      - DB_QUARTZ_USERNAME=root
+      - DB_QUARTZ_PASSWORD=root
+      
+      
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      
+      
+      - API_CLIENT_REST_USER_SERVICE_BASE_URL=http://user-service:8081
+      - API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL=http://product-service:8082
+      
+      
+      - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+      
+    volumes:
+      - order-service-log:/var/log/order-service
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8083/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - atlas-network
+
+  payment-service:
+    container_name: payment-service
+    image: atlas-payment-service
+    ports:
+      - "8084:8084"
+    depends_on:
+      - eureka-server
+      
+      - redis
+      
+      
+      - kafka
+      
+      
+      
+      - mysql
+      
+      
+    environment:
+      
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      
+      - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
+      
+      - DB_URL=jdbc:mysql://mysql:3306/db_payment?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+      - DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
+      - DB_QUARTZ_USERNAME=root
+      - DB_QUARTZ_PASSWORD=root
+      
+      
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      
+      
+      - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+      
+    volumes:
+      - payment-service-log:/var/log/payment-service
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8084/actuator/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - atlas-network
+
+  notification-service:
+    container_name: notification-service
+    image: atlas-notification-service
+    ports:
+      - "8085:8085"
+    depends_on:
+      - eureka-server
+      
+      - redis
+      
+      
+      - kafka
+      
+      
+    environment:
+      
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      
+      - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
+      
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      
+      
+      - MAIL_SERVER_HOST=smtp4dev
+      
+      
+      - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+      
+    volumes:
+      - notification-service-log:/var/log/notification-service
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8085/actuator/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - atlas-network
+
+  <!-- API Gateway -->
+
+  api-gateway:
+    container_name: api-gateway
+    image: atlas-api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      
+      - redis
+      
+      - eureka-server
+      - user-service
+      - product-service
+      - order-service
+      - payment-service
+      - notification-service
+    environment:
+      - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
+      
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      
+      - JWK_SET_URI=http://user-service:8081/.well-known/jwks.json
+      
+      - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+      
+    volumes:
+      - api-gateway-log:/var/log/api-gateway
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - atlas-network
+
+  <!-- Reverse Proxy -->
+
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./config/nginx/conf.d/atlas.conf:/etc/nginx/conf.d/atlas.conf:ro
+      - nginx-logs:/var/log/nginx
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - atlas-network
+
+networks:
+  atlas-network:
+    driver: bridge
+    name: atlas-network
+
+volumes:
+  eureka-server-log:
+  user-service-log:
+  product-service-log:
+  order-service-log:
+  payment-service-log:
+  notification-service-log:
+  api-gateway-log:
+  nginx-logs:
+  mysql-data:
+  
+  
+  redis-data:
+  
+  kafka-data:
+  
+  
+  minio-data:
+  
+  prometheus-data:
+  
+  grafana-data:
+  
+  smtp4dev-data:
+  
+
+# (All configuration files are now provided via templates under config/)

@@ -135,14 +135,11 @@ echo
 # PLATFORM CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Platform Configuration${NC}"
-select_option "On-Premise (Docker Compose) ${YELLOW}(default)${NC}" "On-Premise (Kubernetes)" "AWS (ECS)"
+select_option "On-Premise (Docker Compose) ${YELLOW}(default)${NC}" "On-Premise (Kubernetes)"
 platform_choice=$((1 + $?))
 case $platform_choice in
     2)
         platform="onprem-k8s"
-        ;;
-    3)
-        platform="aws-ecs"
         ;;
     *)
         platform="onprem-compose"
@@ -215,26 +212,12 @@ echo
 # DISCOVERY CLIENT CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Discovery Client Configuration${NC}"
-if [[ "$platform" == "aws-ecs" ]]; then
-    discovery_client="none"
-    echo -e "  ${CYAN}▶ ${GREEN}1${NC}) AWS Built-in Service Discovery ${YELLOW}(default)${NC}"
-elif [[ "$platform" == "onprem-k8s" ]]; then
+if [[ "$platform" == "onprem-k8s" ]]; then
     discovery_client="kubernetes"
     echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Kubernetes Built-in DNS ${YELLOW}(default)${NC}"
-elif [[ "$platform" == "onprem-compose" ]]; then
+else
     discovery_client="eureka"
     echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Eureka ${YELLOW}(default)${NC}"
-else
-    select_option "Eureka ${YELLOW}(default)${NC}" "Kubernetes"
-    discovery_client_choice=$((1 + $?))
-    case $discovery_client_choice in
-        2)
-            discovery_client="kubernetes"
-            ;;
-        *)
-            discovery_client="eureka"
-            ;;
-    esac
 fi
 echo
 
@@ -274,22 +257,8 @@ echo
 # KV CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}KV Configuration${NC}"
-if [[ "$platform" == aws-* ]]; then
-    select_option "Redis ${YELLOW}(default)${NC}" "DynamoDB"
-    kv_choice=$((1 + $?))
-
-    case $kv_choice in
-        2)
-            kv="dynamodb"
-            ;;
-        *)
-            kv="redis"
-            ;;
-    esac
-else
-    echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Redis ${YELLOW}(default)${NC}"
-    kv="redis"
-fi
+echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Redis ${YELLOW}(default)${NC}"
+kv="redis"
 echo
 
 # =============================================================================
@@ -304,22 +273,16 @@ echo
 # MESSAGING CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Messaging Configuration${NC}"
-if [[ "$platform" == aws-* ]]; then
-    echo -e "  ${CYAN}▶ ${GREEN}1${NC}) AWS MSK ${YELLOW}(default)${NC}"
-    messaging="kafka"
-else
-    select_option "Apache Kafka ${YELLOW}(default)${NC}" "RabbitMQ"
-    messaging_choice=$((1 + $?))
-
-    case $messaging_choice in
-        2)
-            messaging="rabbitmq"
-            ;;
-        *)
-            messaging="kafka"
-            ;;
-    esac
-fi
+select_option "Apache Kafka ${YELLOW}(default)${NC}" "RabbitMQ"
+messaging_choice=$((1 + $?))
+case $messaging_choice in
+    2)
+        messaging="rabbitmq"
+        ;;
+    *)
+        messaging="kafka"
+        ;;
+esac
 echo
 
 # =============================================================================
@@ -334,52 +297,32 @@ echo
 # EMAIL NOTIFICATION CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Email Notification Configuration${NC}"
-if [[ "$platform" == aws-* ]]; then
-    select_option "AWS SES ${YELLOW}(default)${NC}" "SendGrid"
-    email_choice=$((1 + $?))
-
-    case $email_choice in
-        2)
-            notification_email="sendgrid"
-            ;;
-        *)
-            notification_email="ses"
-            ;;
-    esac
-else
-    select_option "Spring ${YELLOW}(default)${NC}" "SendGrid"
-    email_choice=$((1 + $?))
-
-    case $email_choice in
-        2)
-            notification_email="sendgrid"
-            ;;
-        *)
-            notification_email="spring"
-            ;;
-    esac
-fi
+select_option "Spring ${YELLOW}(default)${NC}" "SendGrid"
+email_choice=$((1 + $?))
+case $email_choice in
+    2)
+        notification_email="sendgrid"
+        ;;
+    *)
+        notification_email="spring"
+        ;;
+esac
 echo
 
 # =============================================================================
 # OBSERVABILITY LOGGING STACK CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Observability Logging Stack Configuration${NC}"
-if [[ "$platform" == aws-* ]]; then
-    echo -e "  ${CYAN}▶ ${GREEN}AWS CloudWatch Logs${NC} ${YELLOW}(default)${NC}"
-    logging_stack="none"
-else
-    select_option "Loki ${YELLOW}(default)${NC}" "None"
-    logging_choice=$((1 + $?))
-    case $logging_choice in
-        2)
-            logging_stack="none"
-            ;;
-        *)
-            logging_stack="loki"
-            ;;
-    esac
-fi
+select_option "Loki ${YELLOW}(default)${NC}" "None"
+logging_choice=$((1 + $?))
+case $logging_choice in
+    2)
+        logging_stack="none"
+        ;;
+    *)
+        logging_stack="loki"
+        ;;
+esac
 echo
 
 # =============================================================================
@@ -394,55 +337,48 @@ echo
 # OBSERVABILITY METRICS CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Observability Metrics Configuration${NC}"
-if [[ "$platform" == aws-* ]]; then
-    echo -e "  ${CYAN}▶ ${GREEN}1${NC}) CloudWatch ${YELLOW}(default)${NC}"
-    metrics="cloudwatch"
-else
-    echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Prometheus ${YELLOW}(default)${NC}"
-    metrics="prometheus"
-fi
+select_option "Prometheus ${YELLOW}(default)${NC}" "None"
+metrics_choice=$((1 + $?))
+case $metrics_choice in
+    2)
+        metrics="none"
+        ;;
+    *)
+        metrics="prometheus"
+        ;;
+esac
 echo
 
 # =============================================================================
 # OBSERVABILITY TRACING CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Observability Tracing Configuration${NC}"
-if [[ "$platform" == aws-* ]]; then
-    echo -e "  ${CYAN}▶ ${GREEN}1${NC}) AWS X-Ray ${YELLOW}(default)${NC}"
-    tracing="none"
-else
-    echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Zipkin ${YELLOW}(default)${NC}"
-    tracing="zipkin"
-fi
+select_option "Zipkin ${YELLOW}(default)${NC}" "None"
+tracing_choice=$((1 + $?))
+case $tracing_choice in
+    2)
+        tracing="none"
+        ;;
+    *)
+        tracing="zipkin"
+        ;;
+esac
 echo
 
 # =============================================================================
 # REDIS CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Redis Deployment Configuration${NC}"
-if [[ "$platform" == aws-* ]]; then
-    select_option "Standalone" "Cluster ${YELLOW}(default)${NC}"
-    redis_choice=$((1 + $?))
-    case $redis_choice in
-        1)
-            redis="standalone"
-            ;;
-        *)
-            redis="cluster"
-            ;;
-    esac
-else
-    select_option "Standalone ${YELLOW}(default)${NC}" "Cluster"
-    redis_choice=$((1 + $?))
-    case $redis_choice in
-        2)
-            redis="cluster"
-            ;;
-        *)
-            redis="standalone"
-            ;;
-    esac
-fi
+select_option "Standalone ${YELLOW}(default)${NC}" "Cluster"
+redis_choice=$((1 + $?))
+case $redis_choice in
+    2)
+        redis="cluster"
+        ;;
+    *)
+        redis="standalone"
+        ;;
+esac
 echo
 
 # =============================================================================
@@ -465,23 +401,17 @@ echo
 # STORAGE CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Storage Configuration${NC}"
-if [[ "$platform" == aws-* ]]; then
-    # For AWS platforms, only show S3
-    echo -e "  ${CYAN}▶ ${GREEN}1${NC}) S3 ${YELLOW}(default)${NC}"
-    storage="s3"
-else
-    # For onprem platforms, show Filesystem and MinIO options
-    select_option "Filesystem ${YELLOW}(default)${NC}" "MinIO"
-    storage_choice=$((1 + $?))
-    case $storage_choice in
-        2)
-            storage="minio"
-            ;;
-        *)
-            storage="filesystem"
-            ;;
-    esac
-fi
+# On-Premise options: Filesystem and MinIO
+select_option "Filesystem ${YELLOW}(default)${NC}" "MinIO"
+storage_choice=$((1 + $?))
+case $storage_choice in
+    2)
+        storage="minio"
+        ;;
+    *)
+        storage="filesystem"
+        ;;
+esac
 echo
 
 # =============================================================================

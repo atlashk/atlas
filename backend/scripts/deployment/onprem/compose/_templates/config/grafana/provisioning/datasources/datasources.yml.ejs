@@ -1,0 +1,59 @@
+<%
+  const obsLog = (stack.OBSERVABILITY_LOGGING_STACK || (stack.observability && stack.observability.logging && stack.observability.logging.stack) || '').toLowerCase();
+  const obsMetrics = (stack.OBSERVABILITY_METRICS || (stack.observability && stack.observability.metrics) || '').toLowerCase();
+  const obsTracing = (stack.OBSERVABILITY_TRACING || (stack.observability && stack.observability.tracing) || '').toLowerCase();
+
+  const hasLoki = obsLog === 'loki';
+  const hasPrometheus = obsMetrics === 'prometheus';
+  const hasZipkin = obsTracing === 'zipkin';
+%>
+
+apiVersion: 1
+
+datasources:
+<% if (hasPrometheus) { %>
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    uid: DS_PROMETHEUS
+    isDefault: true
+    editable: true
+    jsonData:
+      timeInterval: 5s
+      queryTimeout: 60s
+      httpMethod: POST
+    secureJsonData: {}
+<% } %>
+
+<% if (hasLoki) { %>
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    uid: DS_LOKI
+    editable: true
+    jsonData:
+      maxLines: 1000
+<% if (hasZipkin) { %>
+      derivedFields:
+        - datasourceUid: DS_ZIPKIN
+          matcherRegex: "traceID=(\\w+)"
+          name: TraceID
+          url: "$${__value.raw}"
+<% } %>
+    secureJsonData: {}
+<% } %>
+
+<% if (hasZipkin) { %>
+  - name: Zipkin
+    type: zipkin
+    access: proxy
+    url: http://zipkin:9411
+    uid: DS_ZIPKIN
+    editable: true
+    jsonData:
+      nodeGraph:
+        enabled: true
+    secureJsonData: {}
+<% } %>
