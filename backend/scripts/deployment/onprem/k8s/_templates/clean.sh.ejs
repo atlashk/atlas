@@ -1,0 +1,75 @@
+<%
+  const reverseProxy = (stack.reverseProxy || '').toLowerCase();
+  const hasNginx = reverseProxy === 'nginx';
+%>
+#!/usr/bin/env bash
+set -euo pipefail
+
+# =============================================================================
+# Atlas OnPrem K8s Clean Script (Template, Simplified)
+# =============================================================================
+# Removes Atlas namespace resources and the NGINX Ingress Controller (if used)
+# =============================================================================
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NAMESPACE="atlas-onprem-k8s"
+
+show_help() {
+  echo "Usage: $0"
+  echo "Atlas Kubernetes Cleanup Script - Removes Atlas resources"
+}
+
+check_prerequisites() {
+  echo "Checking prerequisites..."
+  if ! command -v kubectl >/dev/null 2>&1; then
+    echo "kubectl is not installed" >&2; exit 1
+  fi
+  if ! kubectl cluster-info >/dev/null 2>&1; then
+    echo "Cannot connect to Kubernetes cluster" >&2; exit 1
+  fi
+  echo "Prerequisites check passed"
+}
+
+remove_namespace() {
+  echo "Deleting namespace '$NAMESPACE' (this will remove all resources within)..."
+  kubectl delete namespace "$NAMESPACE" --ignore-not-found=true
+  echo "Waiting for namespace deletion..."
+  local timeout=120
+  while kubectl get namespace "$NAMESPACE" >/dev/null 2>&1 && [[ $timeout -gt 0 ]]; do
+    sleep 2; ((timeout-=2))
+  done
+  if kubectl get namespace "$NAMESPACE" >/dev/null 2>&1; then
+    echo "Namespace deletion is taking longer than expected"
+  else
+    echo "Namespace '$NAMESPACE' deleted"
+  fi
+}
+
+cleanup_ingress_controller() {
+  <% if (hasNginx) { %>
+  echo "Cleaning up NGINX Ingress Controller..."
+  if kubectl get namespace ingress-nginx >/dev/null 2>&1; then
+    kubectl delete namespace ingress-nginx --ignore-not-found=true
+    local timeout=60
+    while kubectl get namespace ingress-nginx >/dev/null 2>&1 && [[ $timeout -gt 0 ]]; do
+      sleep 2; ((timeout-=2))
+    done
+    echo "NGINX Ingress Controller removed"
+  else
+    echo "NGINX Ingress Controller not found"
+  fi
+  <% } else { %>
+  echo "Reverse proxy not set to NGINX; skipping ingress controller cleanup"
+  <% } %>
+}
+
+main() {
+  check_prerequisites
+  echo "Atlas On-Premise Kubernetes Platform - Cleaning up..."
+  echo "Namespace: $NAMESPACE"
+  remove_namespace
+  cleanup_ingress_controller
+  echo "Atlas platform resources cleanup completed successfully!"
+}
+
+main "$@"

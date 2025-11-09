@@ -15,6 +15,7 @@ public interface OrderMapper {
 
   OrderMapper INSTANCE = Mappers.getMapper(OrderMapper.class);
 
+  @Mapping(target = "userId", ignore = true)
   CheckoutInput toCheckoutInput(CheckoutRequest request);
 
   GetOrderStatusResponse toGetOrderStatusResponse(GetOrderStatusOutput output);

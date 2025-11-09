@@ -44,7 +44,12 @@ function parseCfg(content) {
 }
 
 async function renderFile(templatePath, outPath, stack) {
-  const rendered = await ejs.renderFile(templatePath, { stack, env: process.env }, { async: true });
+  // Render with whitespace trimming to avoid blank lines from EJS control tags
+  const rendered = await ejs.renderFile(
+    templatePath,
+    { stack, env: process.env },
+    { async: true }
+  );
   let content = rendered.trim();
 
   // Extract embedded file blocks from the rendered output.
@@ -66,6 +71,14 @@ async function renderFile(templatePath, outPath, stack) {
   }
   // Remove all embedded blocks from the final compose content
   content = content.replace(fileBlockRegex, '');
+
+  // Normalize whitespace in the final output:
+  // - Strip trailing spaces at end of lines
+  // - Remove whitespace-only lines
+  // - Collapse multiple blank lines to a single blank line
+  content = content.replace(/[ \t]+(\r?\n)/g, '$1');
+  content = content.replace(/^\s+$/gm, '');
+  content = content.replace(/(\r?\n){2,}/g, '\n\n');
 
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, content, 'utf8');

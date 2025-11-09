@@ -18,6 +18,8 @@ WIZARD_SCRIPT="$BACKEND_DIR/scripts/app-stack-config.sh"
 TEMPLATE_GENERATOR="$BACKEND_DIR/scripts/template-generator.mjs"
 COMPOSE_TEMPLATES_DIR="$BACKEND_DIR/scripts/deployment/onprem/compose/_templates"
 OUTPUT_DIR="$BACKEND_DIR/scripts/deployment/onprem/compose"
+K8S_TEMPLATES_DIR="$BACKEND_DIR/scripts/deployment/onprem/k8s/_templates"
+K8S_OUTPUT_DIR="$BACKEND_DIR/scripts/deployment/onprem/k8s"
 
 info() { printf "[INFO] %s\n" "$*"; }
 warn() { printf "[WARN] %s\n" "$*"; }
@@ -133,6 +135,19 @@ render_onprem_compose_files() {
     --cfg "$APP_STACK_FILE"
 }
 
+render_onprem_k8s_files() {
+  ensure_template_deps
+  if [[ ! -d "$K8S_TEMPLATES_DIR" ]]; then
+    err "Kubernetes templates directory not found: $K8S_TEMPLATES_DIR"
+    exit 1
+  fi
+  info "Rendering on-premise Kubernetes files from $K8S_TEMPLATES_DIR to $K8S_OUTPUT_DIR"
+  node "$TEMPLATE_GENERATOR" \
+    --dir "$K8S_TEMPLATES_DIR" \
+    --out-dir "$K8S_OUTPUT_DIR" \
+    --cfg "$APP_STACK_FILE"
+}
+
 main() {
   info "Atlas on-premise setup starting..."
 
@@ -158,6 +173,15 @@ main() {
   case "$platform" in
     onprem-compose)
       render_onprem_compose_files
+      next_dir="$OUTPUT_DIR"
+      next_deploy_script="deploy.sh"
+      next_cleanup_script="clean.sh"
+      ;;
+    onprem-k8s)
+      render_onprem_k8s_files
+      next_dir="$K8S_OUTPUT_DIR"
+      next_deploy_script="deploy.sh"
+      next_cleanup_script="clean.sh"
       ;;
     *)
       warn "Platform '$platform' is not yet supported by this simple setup."
@@ -167,9 +191,9 @@ main() {
 
   info "Setup completed."
   info "Next steps:"
-  info "  - Review generated files in: $OUTPUT_DIR"
-  info "  - Run: $OUTPUT_DIR/deploy.sh to start services"
-  info "  - Run: $OUTPUT_DIR/clean.sh to stop and cleanup"
+  info "  - Review generated files in: ${next_dir:-$OUTPUT_DIR}"
+  info "  - Run: ${next_dir:-$OUTPUT_DIR}/${next_deploy_script:-deploy.sh} to start services"
+  info "  - Run: ${next_dir:-$OUTPUT_DIR}/${next_cleanup_script:-cleanup.sh} to stop and cleanup"
 }
 
 main "$@"

@@ -164,6 +164,22 @@ esac
 echo
 
 # =============================================================================
+# REVERSE PROXY CONFIGURATION
+# =============================================================================
+echo -e "${BLUE}${BOLD}Reverse Proxy Configuration${NC}"
+select_option "Nginx ${YELLOW}(default)${NC}" "None"
+reverse_proxy_choice=$((1 + $?))
+case $reverse_proxy_choice in
+    2)
+        reverse_proxy="none"
+        ;;
+    *)
+        reverse_proxy="nginx"
+        ;;
+esac
+echo
+
+# =============================================================================
 # API CLIENT CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}API Client Configuration${NC}"
@@ -437,6 +453,7 @@ sleep 2
 cat > "$APP_STACK_FILE_PATH" << EOF
 api-server=$api_server
 api-client=$api_client
+reverse-proxy=$reverse_proxy
 kv=$kv
 config=yaml
 datasource=$datasource
@@ -473,6 +490,7 @@ echo -e "${CYAN}${BOLD}Configuration Summary:${NC}"
 echo -e "  ${BLUE}Platform:${NC} ${platform}"
 echo -e "  ${BLUE}API Client:${NC} ${api_client}"
 echo -e "  ${BLUE}API Server:${NC} ${api_server}"
+echo -e "  ${BLUE}Reverse Proxy:${NC} ${reverse_proxy}"
 echo -e "  ${BLUE}Datasource:${NC} ${datasource}"
 echo -e "  ${BLUE}Discovery Client:${NC} ${discovery_client}"
 echo -e "  ${BLUE}Email:${NC} ${notification_email}"

@@ -1,18 +1,11 @@
 package org.atlas.framework.storage.model;
 
 import java.util.Map;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Getter
-@Setter
 @EqualsAndHashCode(callSuper = false)
 public class UploadFileRequest extends BaseRequest {
 
@@ -23,5 +16,19 @@ public class UploadFileRequest extends BaseRequest {
   public UploadFileRequest(String bucket, String objectKey, byte[] fileContent) {
     super(bucket, objectKey);
     this.fileContent = fileContent;
+  }
+
+  public UploadFileRequest(String bucket, String objectKey, byte[] fileContent, String contentType) {
+    super(bucket, objectKey);
+    this.fileContent = fileContent;
+    this.contentType = contentType;
+  }
+
+  public UploadFileRequest(String bucket, String objectKey, byte[] fileContent, String contentType,
+      Map<String, String> metadata) {
+    super(bucket, objectKey);
+    this.fileContent = fileContent;
+    this.contentType = contentType;
+    this.metadata = metadata;
   }
 }

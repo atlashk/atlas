@@ -1,30 +1,24 @@
-# =============================================================================
-# Atlas Microservices Platform - Single Compose Template (Generated)
-# =============================================================================
-# This template renders one docker-compose.yml and writes required service
-# configuration files from embedded blocks. It mirrors deploy.sh logic for
-# service inclusion and env variables via generated env_file entries.
-# =============================================================================
-
 <%
-  const ds = (stack.DATASOURCE || stack.datasource || '').toLowerCase();
-  const msg = (stack.MESSAGING || stack.messaging || '').toLowerCase();
-  const stor = (stack.STORAGE || stack.storage || '').toLowerCase();
-  const notifEmail = (stack.NOTIFICATION_EMAIL || (stack.notification && stack.notification.email) || '').toLowerCase();
-  const obsLog = (stack.OBSERVABILITY_LOGGING_STACK || (stack.observability && stack.observability.logging && stack.observability.logging.stack) || '').toLowerCase();
-  const obsMetrics = (stack.OBSERVABILITY_METRICS || (stack.observability && stack.observability.metrics) || '').toLowerCase();
-  const obsTracing = (stack.OBSERVABILITY_TRACING || (stack.observability && stack.observability.tracing) || '').toLowerCase();
+  const datasource = (stack.datasource || '').toLowerCase();
+  const messaging = (stack.messaging || '').toLowerCase();
+  const storage = (stack.storage || '').toLowerCase();
+  const notificationEmail = (stack.notificationEmail || (stack.notification && stack.notification.email) || '').toLowerCase();
+  const observabilityLoggingStack = (stack.observabilityLoggingStack || (stack.observability && stack.observability.logging && stack.observability.logging.stack) || '').toLowerCase();
+  const observabilityMetrics = (stack.observabilityMetrics || (stack.observability && stack.observability.metrics) || '').toLowerCase();
+  const observabilityTracing = (stack.observabilityTracing || (stack.observability && stack.observability.tracing) || '').toLowerCase();
+  const reverseProxy = (stack.reverseProxy || '').toLowerCase();
 
   const hasRedis = true; // Always included per deploy.sh
-  const hasMysql = ds === 'mysql';
-  const hasPostgres = ds === 'postgres' || ds === 'postgresql';
-  const hasKafka = msg === 'kafka';
-  const hasRabbit = msg === 'rabbitmq';
-  const hasMinio = stor === 'minio';
-  const hasSmtp4dev = notifEmail === 'spring';
-  const hasLoki = obsLog === 'loki';
-  const hasPrometheus = obsMetrics === 'prometheus';
-  const hasZipkin = obsTracing === 'zipkin';
+  const hasMysql = datasource === 'mysql';
+  const hasPostgres = datasource === 'postgres' || datasource === 'postgresql';
+  const hasKafka = messaging === 'kafka';
+  const hasRabbit = messaging === 'rabbitmq';
+  const hasMinio = storage === 'minio';
+  const hasSmtp4dev = notificationEmail === 'spring';
+  const hasLoki = observabilityLoggingStack === 'loki';
+  const hasPrometheus = observabilityMetrics === 'prometheus';
+  const hasZipkin = observabilityTracing === 'zipkin';
+  const hasNginx = reverseProxy === 'nginx';
   const hasGrafana = hasLoki || hasPrometheus || hasZipkin;
   const apiClientRaw = (stack.API_CLIENT || stack['api-client'] || 'rest-restclient').toLowerCase();
   const apiClientPrefix = (apiClientRaw.split('-')[0] || 'rest');
@@ -33,9 +27,7 @@
 version: "3.8"
 services:
 
-  <!-- Database -->
-
-  <% if (hasMysql) { %>
+  <%_ if (hasMysql) { -%>
   mysql:
     container_name: mysql
     image: mysql:8.0
@@ -55,9 +47,9 @@ services:
       start_period: 30s
     networks:
       - atlas-network
-  <% } %>
+  <%_ } -%>
 
-  <% if (hasPostgres) { %>
+  <%_ if (hasPostgres) { -%>
   postgres:
     container_name: postgres
     image: postgres:14
@@ -77,11 +69,9 @@ services:
       start_period: 30s
     networks:
       - atlas-network
-  <% } %>
+  <%_ } -%>
 
-  <!-- Key-value Store -->
-
-  <% if (hasRedis) { %>
+  <%_ if (hasRedis) { -%>
   redis:
     container_name: redis
     image: redis:7
@@ -97,11 +87,9 @@ services:
       start_period: 10s
     networks:
       - atlas-network
-  <% } %>
+  <%_ } -%>
 
-  <!-- Messaging -->
-
-  <% if (hasKafka) { %>
+  <%_ if (hasKafka) { -%>
   kafka:
     container_name: kafka
     image: confluentinc/cp-kafka:7.9.0
@@ -135,9 +123,9 @@ services:
       start_period: 60s
     networks:
       - atlas-network
-  <% } %>
+  <%_ } -%>
 
-  <% if (hasRabbit) { %>
+  <%_ if (hasRabbit) { -%>
   rabbitmq:
     container_name: rabbitmq
     build:
@@ -156,11 +144,9 @@ services:
       start_period: 30s
     networks:
       - atlas-network
-  <% } %>
+  <%_ } -%>
 
-  <!-- Storage -->
-
-  <% if (hasMinio) { %>
+  <%_ if (hasMinio) { -%>
   minio:
     container_name: minio
     image: minio/minio:latest
@@ -181,11 +167,9 @@ services:
       start_period: 20s
     networks:
       - atlas-network
-  <% } %>
+  <%_ } -%>
 
-  <!-- Email -->
-
-  <% if (hasSmtp4dev) { %>
+  <%_ if (hasSmtp4dev) { -%>
   smtp4dev:
     container_name: smtp4dev
     image: rnwood/smtp4dev
@@ -203,11 +187,9 @@ services:
       start_period: 30s
     networks:
       - atlas-network
-  <% } %>
+  <%_ } -%>
 
-  <!-- Observability -->
-
-  <% if (hasPrometheus) { %>
+  <%_ if (hasPrometheus) { -%>
   prometheus:
     container_name: prometheus
     image: prom/prometheus:main
@@ -231,9 +213,9 @@ services:
       start_period: 30s
     networks:
       - atlas-network
-  <% } %>
+  <%_ } -%>
 
-  <% if (hasLoki) { %>
+  <%_ if (hasLoki) { -%>
   loki:
     container_name: loki
     image: grafana/loki:main
@@ -242,15 +224,15 @@ services:
     command: -config.file=/etc/loki/local-config.yaml
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1"]
-    interval: 10s
+      interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
     networks:
       - atlas-network
-  <% } %>
+  <%_ } -%>
 
-  <% if (hasLoki) { %>
+  <%_ if (hasLoki) { -%>
   promtail:
     container_name: promtail
     image: grafana/promtail:main
@@ -272,9 +254,9 @@ services:
       start_period: 30s
     networks:
       - atlas-network
-  <% } %>
+  <%_ } -%>
 
-  <% if (hasZipkin) { %>
+  <%_ if (hasZipkin) { -%>
   zipkin:
     container_name: zipkin
     image: openzipkin/zipkin
@@ -290,9 +272,9 @@ services:
       start_period: 30s
     networks:
       - atlas-network
-  <% } %>
+  <%_ } -%>
 
-  <% if (hasGrafana) { %>
+  <%_ if (hasGrafana) { -%>
   grafana:
     container_name: grafana
     image: grafana/grafana-oss:main
@@ -315,9 +297,7 @@ services:
       start_period: 60s
     networks:
       - atlas-network
-  <% } %>
-
-  <!-- Service Discovery -->
+  <%_ } -%>
 
   eureka-server:
     container_name: eureka-server
@@ -335,8 +315,6 @@ services:
     networks:
       - atlas-network
 
-  <!-- Application Services -->
-
   user-service:
     container_name: user-service
     image: atlas-user-service
@@ -344,53 +322,53 @@ services:
       - "8081:8081"
     depends_on:
       - eureka-server
-      <% if (hasRedis) { %>
+      <%_ if (hasRedis) { -%>
       - redis
-      <% } %>
-      <% if (hasKafka) { %>
+      <%_ } -%>
+      <%_ if (hasKafka) { -%>
       - kafka
-      <% } %>
-      <% if (hasRabbit) { %>
+      <%_ } -%>
+      <%_ if (hasRabbit) { -%>
       - rabbitmq
-      <% } %>
-      <% if (hasMysql) { %>
+      <%_ } -%>
+      <%_ if (hasMysql) { -%>
       - mysql
-      <% } %>
-      <% if (hasPostgres) { %>
+      <%_ } -%>
+      <%_ if (hasPostgres) { -%>
       - postgres
-      <% } %>
+      <%_ } -%>
     environment:
-      <% if (hasRedis) { %>
+      <%_ if (hasRedis) { -%>
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      <% } %>
+      <%_ } -%>
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
-      <% if (hasMysql) { %>
+      <%_ if (hasMysql) { -%>
       - DB_URL=jdbc:mysql://mysql:3306/db_user?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_USERNAME=root
       - DB_PASSWORD=root
       - DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_QUARTZ_USERNAME=root
       - DB_QUARTZ_PASSWORD=root
-      <% } else if (hasPostgres) { %>
+      <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_user
       - DB_USERNAME=root
       - DB_PASSWORD=root
       - DB_QUARTZ_URL=jdbc:postgresql://postgres:5432/db_quartz
       - DB_QUARTZ_USERNAME=root
       - DB_QUARTZ_PASSWORD=root
-      <% } %>
-      <% if (hasKafka) { %>
+      <%_ } -%>
+      <%_ if (hasKafka) { -%>
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      <% } else if (hasRabbit) { %>
+      <%_ } else if (hasRabbit) { -%>
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
       - RABBITMQ_USERNAME=guest
       - RABBITMQ_PASSWORD=guest
-      <% } %>
-      <% if (hasZipkin) { %>
+      <%_ } -%>
+      <%_ if (hasZipkin) { -%>
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
-      <% } %>
+      <%_ } -%>
     volumes:
       - user-service-log:/var/log/user-service
     healthcheck:
@@ -409,58 +387,58 @@ services:
       - "8082:8082"
     depends_on:
       - eureka-server
-      <% if (hasRedis) { %>
+      <%_ if (hasRedis) { -%>
       - redis
-      <% } %>
-      <% if (hasKafka) { %>
+      <%_ } -%>
+      <%_ if (hasKafka) { -%>
       - kafka
-      <% } %>
-      <% if (hasRabbit) { %>
+      <%_ } -%>
+      <%_ if (hasRabbit) { -%>
       - rabbitmq
-      <% } %>
-      <% if (hasMysql) { %>
+      <%_ } -%>
+      <%_ if (hasMysql) { -%>
       - mysql
-      <% } %>
-      <% if (hasPostgres) { %>
+      <%_ } -%>
+      <%_ if (hasPostgres) { -%>
       - postgres
-      <% } %>
+      <%_ } -%>
     environment:
-      <% if (hasRedis) { %>
+      <%_ if (hasRedis) { -%>
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      <% } %>
+      <%_ } -%>
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
-      <% if (hasMysql) { %>
+      <%_ if (hasMysql) { -%>
       - DB_URL=jdbc:mysql://mysql:3306/db_product?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_USERNAME=root
       - DB_PASSWORD=root
       - DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_QUARTZ_USERNAME=root
       - DB_QUARTZ_PASSWORD=root
-      <% } else if (hasPostgres) { %>
+      <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_product
       - DB_USERNAME=root
       - DB_PASSWORD=root
       - DB_QUARTZ_URL=jdbc:postgresql://postgres:5432/db_quartz
       - DB_QUARTZ_USERNAME=root
       - DB_QUARTZ_PASSWORD=root
-      <% } %>
-      <% if (hasKafka) { %>
+      <%_ } -%>
+      <%_ if (hasKafka) { -%>
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      <% } else if (hasRabbit) { %>
+      <%_ } else if (hasRabbit) { -%>
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
       - RABBITMQ_USERNAME=guest
       - RABBITMQ_PASSWORD=guest
-      <% } %>
-      <% if (hasMinio) { %>
+      <%_ } -%>
+      <%_ if (hasMinio) { -%>
       - MINIO_ENDPOINT=http://minio:9000
       - MINIO_ACCESS_KEY=admin
       - MINIO_SECRET_KEY=admin123
-      <% } %>
-      <% if (hasZipkin) { %>
+      <%_ } -%>
+      <%_ if (hasZipkin) { -%>
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
-      <% } %>
+      <%_ } -%>
     volumes:
       - product-service-log:/var/log/product-service
     healthcheck:
@@ -479,60 +457,60 @@ services:
       - "8083:8083"
     depends_on:
       - eureka-server
-      <% if (hasRedis) { %>
+      <%_ if (hasRedis) { -%>
       - redis
-      <% } %>
-      <% if (hasKafka) { %>
+      <%_ } -%>
+      <%_ if (hasKafka) { -%>
       - kafka
-      <% } %>
-      <% if (hasRabbit) { %>
+      <%_ } -%>
+      <%_ if (hasRabbit) { -%>
       - rabbitmq
-      <% } %>
-      <% if (hasMysql) { %>
+      <%_ } -%>
+      <%_ if (hasMysql) { -%>
       - mysql
-      <% } %>
-      <% if (hasPostgres) { %>
+      <%_ } -%>
+      <%_ if (hasPostgres) { -%>
       - postgres
-      <% } %>
+      <%_ } -%>
     environment:
-      <% if (hasRedis) { %>
+      <%_ if (hasRedis) { -%>
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      <% } %>
+      <%_ } -%>
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
-      <% if (hasMysql) { %>
+      <%_ if (hasMysql) { -%>
       - DB_URL=jdbc:mysql://mysql:3306/db_order?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_USERNAME=root
       - DB_PASSWORD=root
       - DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_QUARTZ_USERNAME=root
       - DB_QUARTZ_PASSWORD=root
-      <% } else if (hasPostgres) { %>
+      <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_order
       - DB_USERNAME=root
       - DB_PASSWORD=root
       - DB_QUARTZ_URL=jdbc:postgresql://postgres:5432/db_quartz
       - DB_QUARTZ_USERNAME=root
       - DB_QUARTZ_PASSWORD=root
-      <% } %>
-      <% if (hasKafka) { %>
+      <%_ } -%>
+      <%_ if (hasKafka) { -%>
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      <% } else if (hasRabbit) { %>
+      <%_ } else if (hasRabbit) { -%>
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
       - RABBITMQ_USERNAME=guest
       - RABBITMQ_PASSWORD=guest
-      <% } %>
-      <% if (apiClientPrefix === 'grpc') { %>
+      <%_ } -%>
+      <%_ if (apiClientPrefix === 'grpc') { -%>
       - GRPC_CLIENT_USER_ADDRESS=static://user-service:50051
       - GRPC_CLIENT_PRODUCT_ADDRESS=static://product-service:50052
-      <% } else { %>
+      <%_ } else { -%>
       - API_CLIENT_REST_USER_SERVICE_BASE_URL=http://user-service:8081
       - API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL=http://product-service:8082
-      <% } %>
-      <% if (hasZipkin) { %>
+      <%_ } -%>
+      <%_ if (hasZipkin) { -%>
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
-      <% } %>
+      <%_ } -%>
     volumes:
       - order-service-log:/var/log/order-service
     healthcheck:
@@ -551,53 +529,53 @@ services:
       - "8084:8084"
     depends_on:
       - eureka-server
-      <% if (hasRedis) { %>
+      <%_ if (hasRedis) { -%>
       - redis
-      <% } %>
-      <% if (hasKafka) { %>
+      <%_ } -%>
+      <%_ if (hasKafka) { -%>
       - kafka
-      <% } %>
-      <% if (hasRabbit) { %>
+      <%_ } -%>
+      <%_ if (hasRabbit) { -%>
       - rabbitmq
-      <% } %>
-      <% if (hasMysql) { %>
+      <%_ } -%>
+      <%_ if (hasMysql) { -%>
       - mysql
-      <% } %>
-      <% if (hasPostgres) { %>
+      <%_ } -%>
+      <%_ if (hasPostgres) { -%>
       - postgres
-      <% } %>
+      <%_ } -%>
     environment:
-      <% if (hasRedis) { %>
+      <%_ if (hasRedis) { -%>
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      <% } %>
+      <%_ } -%>
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
-      <% if (hasMysql) { %>
+      <%_ if (hasMysql) { -%>
       - DB_URL=jdbc:mysql://mysql:3306/db_payment?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_USERNAME=root
       - DB_PASSWORD=root
       - DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_QUARTZ_USERNAME=root
       - DB_QUARTZ_PASSWORD=root
-      <% } else if (hasPostgres) { %>
+      <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_payment
       - DB_USERNAME=root
       - DB_PASSWORD=root
       - DB_QUARTZ_URL=jdbc:postgresql://postgres:5432/db_quartz
       - DB_QUARTZ_USERNAME=root
       - DB_QUARTZ_PASSWORD=root
-      <% } %>
-      <% if (hasKafka) { %>
+      <%_ } -%>
+      <%_ if (hasKafka) { -%>
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      <% } else if (hasRabbit) { %>
+      <%_ } else if (hasRabbit) { -%>
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
       - RABBITMQ_USERNAME=guest
       - RABBITMQ_PASSWORD=guest
-      <% } %>
-      <% if (hasZipkin) { %>
+      <%_ } -%>
+      <%_ if (hasZipkin) { -%>
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
-      <% } %>
+      <%_ } -%>
     volumes:
       - payment-service-log:/var/log/payment-service
     healthcheck:
@@ -616,35 +594,35 @@ services:
       - "8085:8085"
     depends_on:
       - eureka-server
-      <% if (hasRedis) { %>
+      <%_ if (hasRedis) { -%>
       - redis
-      <% } %>
-      <% if (hasKafka) { %>
+      <%_ } -%>
+      <%_ if (hasKafka) { -%>
       - kafka
-      <% } %>
-      <% if (hasRabbit) { %>
+      <%_ } -%>
+      <%_ if (hasRabbit) { -%>
       - rabbitmq
-      <% } %>
+      <%_ } -%>
     environment:
-      <% if (hasRedis) { %>
+      <%_ if (hasRedis) { -%>
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      <% } %>
+      <%_ } -%>
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
-      <% if (hasKafka) { %>
+      <%_ if (hasKafka) { -%>
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      <% } else if (hasRabbit) { %>
+      <%_ } else if (hasRabbit) { -%>
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
       - RABBITMQ_USERNAME=guest
       - RABBITMQ_PASSWORD=guest
-      <% } %>
-      <% if (hasSmtp4dev) { %>
+      <%_ } -%>
+      <%_ if (hasSmtp4dev) { -%>
       - MAIL_SERVER_HOST=smtp4dev
-      <% } %>
-      <% if (hasZipkin) { %>
+      <%_ } -%>
+      <%_ if (hasZipkin) { -%>
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
-      <% } %>
+      <%_ } -%>
     volumes:
       - notification-service-log:/var/log/notification-service
     healthcheck:
@@ -656,17 +634,15 @@ services:
     networks:
       - atlas-network
 
-  <!-- API Gateway -->
-
   api-gateway:
     container_name: api-gateway
     image: atlas-api-gateway
     ports:
       - "8080:8080"
     depends_on:
-      <% if (hasRedis) { %>
+      <%_ if (hasRedis) { -%>
       - redis
-      <% } %>
+      <%_ } -%>
       - eureka-server
       - user-service
       - product-service
@@ -675,14 +651,14 @@ services:
       - notification-service
     environment:
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
-      <% if (hasRedis) { %>
+      <%_ if (hasRedis) { -%>
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      <% } %>
+      <%_ } -%>
       - JWK_SET_URI=http://user-service:8081/.well-known/jwks.json
-      <% if (hasZipkin) { %>
+      <%_ if (hasZipkin) { -%>
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
-      <% } %>
+      <%_ } -%>
     volumes:
       - api-gateway-log:/var/log/api-gateway
     healthcheck:
@@ -694,8 +670,7 @@ services:
     networks:
       - atlas-network
 
-  <!-- Reverse Proxy -->
-
+  <%_ if (hasNginx) { -%>
   nginx:
     container_name: nginx
     image: nginx:latest
@@ -713,6 +688,7 @@ services:
       start_period: 30s
     networks:
       - atlas-network
+  <%_ } -%>
 
 networks:
   atlas-network:
@@ -727,24 +703,35 @@ volumes:
   payment-service-log:
   notification-service-log:
   api-gateway-log:
+  <%_ if (hasNginx) { -%>
   nginx-logs:
-  <% if (hasMysql) { %>mysql-data:
-  <% } %>
-  <% if (hasPostgres) { %>postgres-data:
-  <% } %>
-  <% if (hasRedis) { %>redis-data:
-  <% } %>
-  <% if (hasKafka) { %>kafka-data:
-  <% } %>
-  <% if (hasRabbit) { %>rabbitmq-data:
-  <% } %>
-  <% if (hasMinio) { %>minio-data:
-  <% } %>
-  <% if (hasPrometheus) { %>prometheus-data:
-  <% } %>
-  <% if (hasGrafana) { %>grafana-data:
-  <% } %>
-  <% if (hasSmtp4dev) { %>smtp4dev-data:
-  <% } %>
+  <%_ } -%>
+  <%_ if (hasMysql) { -%>
+  mysql-data:
+  <%_ } -%>
+  <%_ if (hasPostgres) { -%>
+  postgres-data:
+  <%_ } -%>
+  <%_ if (hasRedis) { -%>
+  redis-data:
+  <%_ } -%>
+  <%_ if (hasKafka) { -%>
+  kafka-data:
+  <%_ } -%>
+  <%_ if (hasRabbit) { -%>
+  rabbitmq-data:
+  <%_ } -%>
+  <%_ if (hasMinio) { -%>
+  minio-data:
+  <%_ } -%>
+  <%_ if (hasPrometheus) { -%>
+  prometheus-data:
+  <%_ } -%>
+  <%_ if (hasGrafana) { -%>
+  grafana-data:
+  <%_ } -%>
+  <%_ if (hasSmtp4dev) { -%>
+  smtp4dev-data:
+  <%_ } -%>
 
 # (All configuration files are now provided via templates under config/)

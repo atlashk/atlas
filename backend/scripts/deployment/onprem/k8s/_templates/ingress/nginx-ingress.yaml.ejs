@@ -1,0 +1,105 @@
+<%
+  const reverseProxy = (stack.reverseProxy || '').toLowerCase();
+  const notificationEmail = (stack.notificationEmail || (stack.notification && stack.notification.email) || '').toLowerCase();
+  const observabilityLoggingStack = (stack.observabilityLoggingStack || (stack.observability && stack.observability.logging && stack.observability.logging.stack) || '').toLowerCase();
+  const observabilityMetrics = (stack.observabilityMetrics || (stack.observability && stack.observability.metrics) || '').toLowerCase();
+  const observabilityTracing = (stack.observabilityTracing || (stack.observability && stack.observability.tracing) || '').toLowerCase();
+
+  const hasNginx = reverseProxy === 'nginx';
+  const hasLoki = observabilityLoggingStack === 'loki';
+  const hasPrometheus = observabilityMetrics === 'prometheus';
+  const hasZipkin = observabilityTracing === 'zipkin';
+  const hasGrafana = hasLoki || hasPrometheus || hasZipkin;
+  const hasSmtp4dev = notificationEmail === 'spring';
+%>
+<% if (hasNginx) { -%>
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: atlas-ingress
+  labels:
+    app: atlas-ingress
+    tier: ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/upstream-vhost: $http_host
+    nginx.ingress.kubernetes.io/proxy-set-headers: "atlas-proxy-headers"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: api.atlas.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 8080
+<% if (hasGrafana) { -%>
+    - host: grafana.atlas.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana
+                port:
+                  number: 3000
+<% } -%>
+<% if (hasPrometheus) { -%>
+    - host: prometheus.atlas.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prometheus
+                port:
+                  number: 9090
+<% } -%>
+<% if (hasZipkin) { -%>
+    - host: zipkin.atlas.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: zipkin
+                port:
+                  number: 9411
+<% } -%>
+<% if (hasSmtp4dev) { -%>
+    - host: smtp4dev.atlas.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: smtp4dev
+                port:
+                  number: 80
+<% } -%>
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: atlas-proxy-headers
+  labels:
+    app: atlas-ingress
+    tier: ingress
+data:
+  X-Forwarded-Host: $http_host
+  X-Forwarded-Proto: $scheme
+  X-Real-IP: $remote_addr
+  X-Forwarded-For: $proxy_add_x_forwarded_for
+  Host: $http_host
+<% } -%>

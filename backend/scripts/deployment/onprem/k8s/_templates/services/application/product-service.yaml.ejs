@@ -1,0 +1,110 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: product-service-logs
+  labels:
+    app: product-service
+    tier: application
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: hostpath
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-service
+  labels:
+    app: product-service
+    tier: application
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-service
+  template:
+    metadata:
+      labels:
+        app: product-service
+        tier: application
+    spec:
+      containers:
+        - name: product-service
+          image: atlas-product-service:latest
+          imagePullPolicy: Never
+          envFrom:
+            - configMapRef:
+                name: product-service-config
+            - secretRef:
+                name: product-service-secret
+          ports:
+            - containerPort: 8082
+              name: http
+            - containerPort: 50052
+              name: grpc
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8082
+              scheme: HTTP
+            initialDelaySeconds: 240
+            periodSeconds: 45
+            timeoutSeconds: 15
+            failureThreshold: 10
+            successThreshold: 1
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8082
+              scheme: HTTP
+            initialDelaySeconds: 180
+            periodSeconds: 5
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 6
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 18
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          volumeMounts:
+            - name: product-service-logs
+              mountPath: /var/log/product-service
+      volumes:
+        - name: product-service-logs
+          persistentVolumeClaim:
+            claimName: product-service-logs
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-service
+  labels:
+    app: product-service
+    tier: application
+spec:
+  selector:
+    app: product-service
+  ports:
+    - port: 8082
+      targetPort: 8082
+      name: http
+    - port: 50052
+      targetPort: 50052
+      name: grpc
+  type: ClusterIP
