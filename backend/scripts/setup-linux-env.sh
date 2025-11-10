@@ -202,6 +202,51 @@ install_docker() {
     fi
 }
 
+# Install Node.js 20+
+install_node20() {
+    echo "INFO: Installing Node.js 20+..."
+
+    if command -v node &> /dev/null; then
+        NODE_VERSION=$(node -v | sed 's/^v//')
+        NODE_MAJOR=${NODE_VERSION%%.*}
+        if [[ $NODE_MAJOR -ge 20 ]]; then
+            echo "SUCCESS: Node.js ${NODE_VERSION} is already installed (>=20)"
+            return 0
+        else
+            echo "WARNING: Different Node.js version detected: v${NODE_VERSION}. Installing Node.js 20..."
+        fi
+    fi
+
+    case $DISTRO in
+        ubuntu|debian)
+            curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+            sudo apt-get install -y nodejs
+            ;;
+        centos|rhel|fedora)
+            curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo -E bash -
+            if command -v dnf &> /dev/null; then
+                sudo dnf install -y nodejs
+            else
+                sudo yum install -y nodejs
+            fi
+            ;;
+        arch|manjaro)
+            sudo pacman -S --noconfirm nodejs npm
+            ;;
+        *)
+            echo "ERROR: Unsupported distribution for Node.js installation: $DISTRO"
+            return 1
+            ;;
+    esac
+
+    if command -v node &> /dev/null; then
+        echo "SUCCESS: Node.js installed successfully: $(node -v)"
+    else
+        echo "ERROR: Node.js installation failed"
+        return 1
+    fi
+}
+
 # Verify installations
 verify_installations() {
     echo "INFO: Verifying installations..."
@@ -222,6 +267,19 @@ verify_installations() {
         echo "SUCCESS: ✓ Java: $JAVA_VERSION"
     else
         echo "ERROR: ✗ Java: Not found"
+        all_good=false
+    fi
+
+    # Check Node.js
+    if command -v node &> /dev/null; then
+        echo "SUCCESS: ✓ Node.js: $(node -v)"
+        if command -v npm &> /dev/null; then
+            echo "SUCCESS: ✓ npm: $(npm -v)"
+        else
+            echo "WARNING: ⚠ npm: Not found"
+        fi
+    else
+        echo "ERROR: ✗ Node.js: Not found"
         all_good=false
     fi
 
@@ -254,6 +312,8 @@ main() {
     install_git
     echo
     install_java17
+    echo
+    install_node20
     echo
     install_docker
     echo

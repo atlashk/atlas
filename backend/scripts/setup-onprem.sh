@@ -128,10 +128,10 @@ render_onprem_compose_files() {
     err "Compose templates directory not found: $COMPOSE_TEMPLATES_DIR"
     exit 1
   fi
-  info "Rendering on-premise compose files from $COMPOSE_TEMPLATES_DIR to $OUTPUT_DIR"
+  info "Rendering on-premise compose files from $COMPOSE_TEMPLATES_DIR to $COMPOSE_OUTPUT_DIR"
   node "$TEMPLATE_GENERATOR" \
     --dir "$COMPOSE_TEMPLATES_DIR" \
-    --out-dir "$OUTPUT_DIR" \
+    --out-dir "$COMPOSE_OUTPUT_DIR" \
     --cfg "$APP_STACK_FILE"
 }
 
