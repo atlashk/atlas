@@ -3,5 +3,5 @@ app:
     elasticsearch:
       host: ${ELASTICSEARCH_HOST:localhost}
       port: ${ELASTICSEARCH_PORT:9200}
-      username: ${ELASTICSEARCH_USERNAME:admin}
-      password: ${ELASTICSEARCH_PASSWORD:admin}
+      username: ${ELASTICSEARCH_USERNAME:elastic}
+      password: ${ELASTICSEARCH_PASSWORD:123456}

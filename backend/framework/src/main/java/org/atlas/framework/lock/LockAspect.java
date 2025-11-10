@@ -27,7 +27,7 @@ public class LockAspect {
     // Try to acquire the lock
     boolean lockAcquired = lockService.acquireLock(key, waitTime, leaseTime);
     if (!lockAcquired) {
-      throw new RuntimeException("Failed to acquire lock for key: " + key);
+      throw new LockAcquisitionException("Failed to acquire lock for key: " + key);
     }
 
     try {

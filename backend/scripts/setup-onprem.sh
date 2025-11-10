@@ -6,7 +6,7 @@ set -euo pipefail
 #  1) Step 1: If app-stack.default.cfg exists, show its content and confirm with user.
 #             If not found, prompt user to input information.
 #             Then generate backend/app-stack.cfg file.
-#  2) Generate deployment files from EJS templates into backend/scripts/deployment/onprem
+#  2) Generate deployment files from EJS templates into backend/scripts/deployment/templates/onprem
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -16,10 +16,9 @@ APP_STACK_FILE="$BACKEND_DIR/app-stack.cfg"
 DEFAULT_APP_STACK_FILE="$BACKEND_DIR/app-stack.default.cfg"
 WIZARD_SCRIPT="$BACKEND_DIR/scripts/app-stack-config.sh"
 TEMPLATE_GENERATOR="$BACKEND_DIR/scripts/template-generator.mjs"
-COMPOSE_TEMPLATES_DIR="$BACKEND_DIR/scripts/deployment/onprem/compose/_templates"
-COMPOSE_OUTPUT_DIR="$BACKEND_DIR/scripts/deployment/onprem/compose"
-K8S_NATIVE_TEMPLATES_DIR="$BACKEND_DIR/scripts/deployment/onprem/k8s/native/_templates"
-K8S_NATIVE_OUTPUT_DIR="$BACKEND_DIR/scripts/deployment/onprem/k8s/native"
+COMPOSE_TEMPLATES_DIR="$BACKEND_DIR/scripts/deployment/templates/onprem/compose"
+K8S_NATIVE_TEMPLATES_DIR="$BACKEND_DIR/scripts/deployment/templates/onprem/k8s/native"
+DEPLOYMENT_OUTPUT_DIR="$BACKEND_DIR/scripts/deployment/output"
 
 info() { printf "[INFO] %s\n" "$*"; }
 warn() { printf "[WARN] %s\n" "$*"; }
@@ -128,10 +127,10 @@ render_onprem_compose_files() {
     err "Compose templates directory not found: $COMPOSE_TEMPLATES_DIR"
     exit 1
   fi
-  info "Rendering on-premise compose files from $COMPOSE_TEMPLATES_DIR to $COMPOSE_OUTPUT_DIR"
+  info "Rendering on-premise compose files from $COMPOSE_TEMPLATES_DIR to $DEPLOYMENT_OUTPUT_DIR"
   node "$TEMPLATE_GENERATOR" \
     --dir "$COMPOSE_TEMPLATES_DIR" \
-    --out-dir "$COMPOSE_OUTPUT_DIR" \
+    --out-dir "$DEPLOYMENT_OUTPUT_DIR" \
     --cfg "$APP_STACK_FILE"
 }
 
@@ -141,10 +140,10 @@ render_onprem_k8s_native_files() {
     err "Kubernetes native templates directory not found: $K8S_NATIVE_TEMPLATES_DIR"
     exit 1
   fi
-  info "Rendering on-premise Kubernetes native files from $K8S_NATIVE_TEMPLATES_DIR to $K8S_NATIVE_OUTPUT_DIR"
+  info "Rendering on-premise Kubernetes native files from $K8S_NATIVE_TEMPLATES_DIR to $DEPLOYMENT_OUTPUT_DIR"
   node "$TEMPLATE_GENERATOR" \
     --dir "$K8S_NATIVE_TEMPLATES_DIR" \
-    --out-dir "$K8S_NATIVE_OUTPUT_DIR" \
+    --out-dir "$DEPLOYMENT_OUTPUT_DIR" \
     --cfg "$APP_STACK_FILE"
 }
 
@@ -173,15 +172,9 @@ main() {
   case "$platform" in
     onprem-compose)
       render_onprem_compose_files
-      next_dir="$COMPOSE_OUTPUT_DIR"
-      next_deploy_script="deploy.sh"
-      next_cleanup_script="clean.sh"
       ;;
     onprem-k8s-native)
       render_onprem_k8s_native_files
-      next_dir="$K8S_NATIVE_OUTPUT_DIR"
-      next_deploy_script="deploy.sh"
-      next_cleanup_script="clean.sh"
       ;;
     *)
       warn "Platform '$platform' is not yet supported by this simple setup."
@@ -191,9 +184,9 @@ main() {
 
   info "Setup completed."
   info "Next steps:"
-  info "  - Review generated files in: ${next_dir:-$OUTPUT_DIR}"
-  info "  - Run: ${next_dir:-$OUTPUT_DIR}/${next_deploy_script:-deploy.sh} to start services"
-  info "  - Run: ${next_dir:-$OUTPUT_DIR}/${next_cleanup_script:-cleanup.sh} to stop and cleanup"
+  info "  - Review generated files in: ${$DEPLOYMENT_OUTPUT_DIR}"
+  info "  - Run: ${$DEPLOYMENT_OUTPUT_DIR}/deploy.sh to start services"
+  info "  - Run: ${$DEPLOYMENT_OUTPUT_DIR}/clean.sh to stop and cleanup"
 }
 
 main "$@"

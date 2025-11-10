@@ -81,33 +81,49 @@ public class ReserveProductCommandHandler {
         applicationConfigService.getConfigAsClass("product.decrease-quantity-strategy",
             DecreaseQuantityStrategy.class, DecreaseQuantityStrategy.CONSTRAINT);
     switch (decreaseQuantityStrategy) {
-      case CONSTRAINT -> productRepository.decreaseQuantityWithConstraint(productId, quantity);
-      case PESSIMISTIC_LOCK ->
-          productRepository.decreaseQuantityWithPessimisticLock(productId, quantity);
-      case OPTIMISTIC_LOCK ->
-          productRepository.decreaseQuantityWithOptimisticLock(productId, quantity);
-      case DISTRIBUTED_LOCK -> {
-        final String lockKey = String.format("product:%d:decrease-quantity", productId);
-        final Duration waitTime = Duration.ofSeconds(5);
-        final Duration leaseTime = Duration.ofSeconds(15);
-        try {
-          boolean acquiredLock = lockService.acquireLock(lockKey, waitTime, leaseTime);
-          if (!acquiredLock) {
-            throw new LockAcquisitionException("Failed to acquire lock: " + lockKey);
-          }
-          Product product = productRepository.findById(productId)
-              .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
-          if (product.getQuantity() < quantity) {
-            throw new OutOfStockException();
-          }
-          product.setQuantity(product.getQuantity() - quantity);
-          productRepository.update(product);
-        } finally {
-          lockService.releaseLock(lockKey);
-        }
-      }
+      case CONSTRAINT -> decreaseQuantityWithConstraint(productId, quantity);
+      case PESSIMISTIC_LOCK -> decreaseQuantityWithPessimisticLock(productId, quantity);
+      case OPTIMISTIC_LOCK -> decreaseQuantityWithOptimisticLock(productId, quantity);
+      case DISTRIBUTED_LOCK -> decreaseQuantityWithDistributedLock(productId, quantity);
       default -> throw new UnsupportedOperationException(
           "Unsupported decrease quantity strategy: " + decreaseQuantityStrategy);
+    }
+  }
+
+  private void decreaseQuantityWithConstraint(Integer productId, Integer quantity)
+      throws OutOfStockException {
+    productRepository.decreaseQuantityWithConstraint(productId, quantity);
+  }
+
+  private void decreaseQuantityWithPessimisticLock(Integer productId, Integer quantity)
+      throws OutOfStockException {
+    productRepository.decreaseQuantityWithPessimisticLock(productId, quantity);
+  }
+
+  private void decreaseQuantityWithOptimisticLock(Integer productId, Integer quantity)
+      throws OutOfStockException {
+    productRepository.decreaseQuantityWithOptimisticLock(productId, quantity);
+  }
+
+  private void decreaseQuantityWithDistributedLock(Integer productId, Integer quantity)
+      throws OutOfStockException {
+    final String lockKey = String.format("product:%d:decrease-quantity", productId);
+    final Duration waitTime = Duration.ofSeconds(5);
+    final Duration leaseTime = Duration.ofSeconds(15);
+    try {
+      boolean acquiredLock = lockService.acquireLock(lockKey, waitTime, leaseTime);
+      if (!acquiredLock) {
+        throw new LockAcquisitionException("Failed to acquire lock: " + lockKey);
+      }
+      Product product = productRepository.findById(productId)
+          .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
+      if (product.getQuantity() < quantity) {
+        throw new OutOfStockException();
+      }
+      product.setQuantity(product.getQuantity() - quantity);
+      productRepository.update(product);
+    } finally {
+      lockService.releaseLock(lockKey);
     }
   }
 

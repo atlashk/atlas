@@ -58,13 +58,6 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
     }
-    switch (rootProject.ext.appStack['cache']) {
-        case 'redis':
-            implementation project(':infrastructure.cache.redis')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['cache']}")
-    }
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
             implementation project(':infrastructure.datasource.mysql.impl.product')
@@ -111,19 +104,12 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['file.pdf']}")
     }
-    switch (rootProject.ext.appStack['kv']) {
+    switch (rootProject.ext.appStack['kv-store']) {
         case 'redis':
-            implementation project(':infrastructure.kv.redis.parent')
+            implementation project(':infrastructure.kv-store.redis.parent')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['kv']}")
-    }
-    switch (rootProject.ext.appStack['lock']) {
-        case 'redisson':
-            implementation project(':infrastructure.lock.redisson')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['lock']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['kv-store']}")
     }
     switch (rootProject.ext.appStack['messaging']) {
         case 'kafka':
@@ -194,6 +180,15 @@ dependencies {
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['scheduler']}")
+    }
+    switch (rootProject.ext.appStack['search']) {
+        case 'database':
+            // Skipped
+        case 'elasticsearch':
+            implementation project(':infrastructure.search.elasticsearch.impl.product')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['search']}")
     }
     switch (rootProject.ext.appStack['storage']) {
         case 'filesystem':

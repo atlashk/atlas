@@ -1,16 +1,39 @@
 package org.atlas.framework.cache;
 
+import java.time.Duration;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.atlas.framework.kvstore.KvStoreService;
+import org.springframework.stereotype.Service;
 
-public interface CacheService {
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class CacheService {
 
-  void put(ApplicationCache cache, String key, Object value, long ttl);
+  private final KvStoreService kvStoreService;
 
-  default void put(ApplicationCache cache, String key, Object value) {
-    put(cache, key, value, cache.getTtl());
+  public void put(ApplicationCache cache, String key, Object value, long ttl) {
+    kvStoreService.put(cache.getName(), key, value, Duration.ofSeconds(ttl));
+    log.info("Cache put: {}:{}={}", cache.getName(), key, value);
   }
 
-  Optional<Object> get(ApplicationCache cache, String key);
+  public Optional<Object> get(ApplicationCache cache, String key) {
+    Optional<Object> value = kvStoreService.get(cache.getName(), key);
+    if (value.isPresent()) {
+      log.info("Cache hit: {}:{}={}", cache.getName(), key, value.get());
+    } else {
+      log.info("Cache miss: {}:{}", cache.getName(), key);
+    }
+    return value;
+  }
 
-  boolean evict(ApplicationCache cache, String key);
+  public boolean evict(ApplicationCache cache, String key) {
+    boolean deleted = kvStoreService.delete(cache.getName(), key);
+    if (deleted) {
+      log.info("Cache evict: {}:{}", cache.getName(), key);
+    }
+    return deleted;
+  }
 }

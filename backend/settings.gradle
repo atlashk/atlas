@@ -93,10 +93,6 @@ project(':infrastructure.auth-client.keycloak').projectDir = file('infrastructur
 include(':infrastructure.auth-server')
 project(':infrastructure.auth-server').projectDir = file('infrastructure/auth-server')
 
-// Cache
-include(':infrastructure.cache.redis')
-project(':infrastructure.cache.redis').projectDir = file('infrastructure/cache/cache-redis')
-
 // Datasource
 
 // Datasource::MySQL
@@ -194,18 +190,14 @@ project(':infrastructure.internal-api.user.rest.resttemplate').projectDir = file
 // Key-Value Store
 
 // Key-Value Store::Redis
-include(':infrastructure.kv.redis.parent')
-project(':infrastructure.kv.redis.parent').projectDir = file('infrastructure/kv/redis/kv-redis-parent')
-include(':infrastructure.kv.redis.connector.cluster')
-project(':infrastructure.kv.redis.connector.cluster').projectDir = file('infrastructure/kv/redis/kv-redis-connector-cluster')
-include(':infrastructure.kv.redis.connector.standalone')
-project(':infrastructure.kv.redis.connector.standalone').projectDir = file('infrastructure/kv/redis/kv-redis-connector-standalone')
-include(':infrastructure.kv.redis.ops')
-project(':infrastructure.kv.redis.ops').projectDir = file('infrastructure/kv/redis/kv-redis-ops')
-
-// Lock
-include(':infrastructure.lock.redisson')
-project(':infrastructure.lock.redisson').projectDir = file('infrastructure/lock/lock-redisson')
+include(':infrastructure.kv-store.redis.parent')
+project(':infrastructure.kv-store.redis.parent').projectDir = file('infrastructure/kv-store/redis/kv-store-redis-parent')
+include(':infrastructure.kv-store.redis.connector.cluster')
+project(':infrastructure.kv-store.redis.connector.cluster').projectDir = file('infrastructure/kv-store/redis/kv-store-redis-connector-cluster')
+include(':infrastructure.kv-store.redis.connector.standalone')
+project(':infrastructure.kv-store.redis.connector.standalone').projectDir = file('infrastructure/kv-store/redis/kv-store-redis-connector-standalone')
+include(':infrastructure.kv-store.redis.ops')
+project(':infrastructure.kv-store.redis.ops').projectDir = file('infrastructure/kv-store/redis/kv-store-redis-ops')
 
 // Messaging
 

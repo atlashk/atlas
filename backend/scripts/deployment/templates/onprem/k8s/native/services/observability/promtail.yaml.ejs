@@ -1,0 +1,123 @@
+<%
+  const observabilityLoggingStack = (stack.observabilityLoggingStack || (stack.observability && stack.observability.logging && stack.observability.logging.stack) || '').toLowerCase();
+  const hasLoki = observabilityLoggingStack === 'loki';
+%>
+<% if (hasLoki) { -%>
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: promtail-config
+  labels:
+    app: promtail
+    tier: observability
+data:
+  promtail.yml: |
+    server:
+      http_listen_port: 9080
+      grpc_listen_port: 0
+
+    positions:
+      filename: /var/log/positions.yaml
+
+    clients:
+      - url: http://loki:3100/loki/api/v1/push
+
+    scrape_configs:
+      # Scrape logs from Kubernetes pods
+      - job_name: kubernetes-pods
+        kubernetes_sd_configs:
+          - role: pod
+        pipeline_stages:
+          - docker: {}
+        relabel_configs:
+          - source_labels: ['__meta_kubernetes_pod_controller_name']
+            target_label: 'controller'
+          - source_labels: ['__meta_kubernetes_pod_label_app']
+            target_label: 'app'
+          - source_labels: ['__meta_kubernetes_pod_name']
+            target_label: 'pod'
+          - source_labels: ['__meta_kubernetes_namespace']
+            target_label: 'namespace'
+          - source_labels: ['__meta_kubernetes_pod_node_name']
+            target_label: 'node'
+        selectors:
+          - action: keep
+            source_labels: ['__meta_kubernetes_pod_label_app']
+            regex: .*  # Keep all apps
+
+      # Scrape logs from containers not managed by Kubernetes (fallback)
+      - job_name: other-containers
+        static_configs:
+          - targets:
+            - localhost
+            labels:
+              job: varlogs
+              __path__: /var/log/*
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: promtail
+  labels:
+    app: promtail
+    tier: observability
+spec:
+  selector:
+    matchLabels:
+      app: promtail
+  template:
+    metadata:
+      labels:
+        app: promtail
+        tier: observability
+    spec:
+      containers:
+        - name: promtail
+          image: grafana/promtail:main
+          args:
+            - -config.file=/etc/promtail/promtail.yml
+          env:
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          ports:
+            - containerPort: 9080
+              name: http
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: 9080
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 9080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+          volumeMounts:
+            - name: promtail-config
+              mountPath: /etc/promtail
+            - name: varlog
+              mountPath: /var/log
+      volumes:
+        - name: promtail-config
+          configMap:
+            name: promtail-config
+        - name: varlog
+          hostPath:
+            path: /var/log
+            type: Directory
+<% } -%>

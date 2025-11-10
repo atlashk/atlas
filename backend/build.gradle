@@ -1,7 +1,17 @@
 // Load app stack configs
 def loadAppStack() {
     def appStackFileName = project.findProperty('appStackFile') ?: System.getProperty('appStackFile')
-    def appStackFile = appStackFileName ? new File(rootDir, appStackFileName) : new File(rootDir, "app-stack.cfg")
+    File appStackFile
+    if (appStackFileName) {
+        // Respect explicit override; do not fallback when user specifies a file
+        appStackFile = new File(rootDir, appStackFileName)
+    } else {
+        // Default to app-stack.cfg, fallback to app-stack.default.cfg if missing
+        appStackFile = new File(rootDir, "app-stack.cfg")
+        if (!appStackFile.exists()) {
+            appStackFile = new File(rootDir, "app-stack.default.cfg")
+        }
+    }
     if (!appStackFile.exists()) {
         throw new GradleException("App stack config file not found: ${appStackFile.absolutePath}")
     }

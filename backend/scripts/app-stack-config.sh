@@ -279,22 +279,32 @@ echo
 sleep 0.3
 
 # =============================================================================
-# KV CONFIGURATION
+# KEY-VALUE STORE CONFIGURATION
 # =============================================================================
-echo -e "${BLUE}${BOLD}KV Configuration${NC}"
+echo -e "${BLUE}${BOLD}Key-Value Store Configuration${NC}"
 echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Redis ${YELLOW}(default)${NC}"
-kv="redis"
+kv_store="redis"
 echo
 sleep 0.3
 
 # =============================================================================
-# DISTRIBUTED LOCK CONFIGURATION
+# REDIS CONFIGURATION
 # =============================================================================
-echo -e "${BLUE}${BOLD}Distributed Lock Configuration${NC}"
-echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Redisson ${YELLOW}(default)${NC}"
-lock="redisson"
-echo
-sleep 0.3
+if [[ "$kv_store" == "redis" ]]; then
+    echo -e "${BLUE}${BOLD}Redis Deployment Configuration${NC}"
+    select_option "Standalone ${YELLOW}(default)${NC}" "Cluster"
+    redis_choice=$((1 + $?))
+    case $redis_choice in
+        2)
+            redis="cluster"
+            ;;
+        *)
+            redis="standalone"
+            ;;
+    esac
+    echo
+    sleep 0.3
+fi
 
 # =============================================================================
 # MESSAGING CONFIGURATION
@@ -400,23 +410,6 @@ echo
 sleep 0.3
 
 # =============================================================================
-# REDIS CONFIGURATION
-# =============================================================================
-echo -e "${BLUE}${BOLD}Redis Deployment Configuration${NC}"
-select_option "Standalone ${YELLOW}(default)${NC}" "Cluster"
-redis_choice=$((1 + $?))
-case $redis_choice in
-    2)
-        redis="cluster"
-        ;;
-    *)
-        redis="standalone"
-        ;;
-esac
-echo
-sleep 0.3
-
-# =============================================================================
 # SCHEDULER CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Scheduler Configuration${NC}"
@@ -428,6 +421,23 @@ case $scheduler_choice in
         ;;
     *)
         scheduler="quartz"
+        ;;
+esac
+echo
+sleep 0.3
+
+# =============================================================================
+# SEARCH CONFIGURATION
+# =============================================================================
+echo -e "${BLUE}${BOLD}Search Configuration${NC}"
+select_option "Database ${YELLOW}(default)${NC}" "Elasticsearch"
+search_choice=$((1 + $?))
+case $search_choice in
+    2)
+        search="elasticsearch"
+        ;;
+    *)
+        search="database"
         ;;
 esac
 echo
@@ -476,14 +486,13 @@ cat > "$APP_STACK_FILE_PATH" << EOF
 api-server=$api_server
 api-client=$api_client
 reverse-proxy=$reverse_proxy
-kv=$kv
+kv-store=$kv_store
 config=yaml
 datasource=$datasource
 discovery-client=$discovery_client
 file.csv=$file_csv
 file.excel=$file_excel
 file.pdf=$file_pdf
-lock=$lock
 messaging=$messaging
 migration=$migration
 notification.email=$notification_email
@@ -493,8 +502,8 @@ observability.metrics=$metrics
 observability.tracing=$tracing
 persistence=jpa
 platform=$platform
-redis=$redis
 scheduler=$scheduler
+search=$search
 storage=$storage
 template=$template
 EOF
