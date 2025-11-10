@@ -135,17 +135,18 @@ echo
 # PLATFORM CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Platform Configuration${NC}"
-select_option "On-Premise (Docker Compose) ${YELLOW}(default)${NC}" "On-Premise (Kubernetes)"
+select_option "On-Premise (Docker Compose) ${YELLOW}(default)${NC}" "On-Premise (Kubernetes Native)"
 platform_choice=$((1 + $?))
 case $platform_choice in
     2)
-        platform="onprem-k8s"
+        platform="onprem-k8s-native"
         ;;
     *)
         platform="onprem-compose"
         ;;
 esac
 echo
+sleep 0.3
 
 # =============================================================================
 # API SERVER CONFIGURATION
@@ -162,6 +163,7 @@ case $api_server_choice in
         ;;
 esac
 echo
+sleep 0.3
 
 # =============================================================================
 # REVERSE PROXY CONFIGURATION
@@ -178,6 +180,7 @@ case $reverse_proxy_choice in
         ;;
 esac
 echo
+sleep 0.3
 
 # =============================================================================
 # API CLIENT CONFIGURATION
@@ -207,6 +210,7 @@ else
     esac
 fi
 echo
+sleep 0.3
 
 # =============================================================================
 # DATASOURCE CONFIGURATION
@@ -223,12 +227,13 @@ case $datasource_choice in
         ;;
 esac
 echo
+sleep 0.3
 
 # =============================================================================
 # DISCOVERY CLIENT CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Discovery Client Configuration${NC}"
-if [[ "$platform" == "onprem-k8s" ]]; then
+if [[ "$platform" == onprem-k8s* ]]; then
     discovery_client="kubernetes"
     echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Kubernetes Built-in DNS ${YELLOW}(default)${NC}"
 else
@@ -236,6 +241,7 @@ else
     echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Eureka ${YELLOW}(default)${NC}"
 fi
 echo
+sleep 0.3
 
 # =============================================================================
 # FILE - CSV CONFIGURATION
@@ -244,6 +250,7 @@ echo -e "${BLUE}${BOLD}File - CSV Configuration${NC}"
 echo -e "  ${CYAN}▶ ${GREEN}1${NC}) OpenCSV ${YELLOW}(default)${NC}"
 file_csv="opencsv"
 echo
+sleep 0.3
 
 # =============================================================================
 # FILE - EXCEL CONFIGURATION
@@ -260,6 +267,7 @@ case $excel_choice in
         ;;
 esac
 echo
+sleep 0.3
 
 # =============================================================================
 # FILE - PDF CONFIGURATION
@@ -268,6 +276,7 @@ echo -e "${BLUE}${BOLD}File - PDF Configuration${NC}"
 echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Apache PDFBox ${YELLOW}(default)${NC}"
 file_pdf="pdfbox"
 echo
+sleep 0.3
 
 # =============================================================================
 # KV CONFIGURATION
@@ -276,6 +285,7 @@ echo -e "${BLUE}${BOLD}KV Configuration${NC}"
 echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Redis ${YELLOW}(default)${NC}"
 kv="redis"
 echo
+sleep 0.3
 
 # =============================================================================
 # DISTRIBUTED LOCK CONFIGURATION
@@ -284,6 +294,7 @@ echo -e "${BLUE}${BOLD}Distributed Lock Configuration${NC}"
 echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Redisson ${YELLOW}(default)${NC}"
 lock="redisson"
 echo
+sleep 0.3
 
 # =============================================================================
 # MESSAGING CONFIGURATION
@@ -300,6 +311,7 @@ case $messaging_choice in
         ;;
 esac
 echo
+sleep 0.3
 
 # =============================================================================
 # MIGRATION CONFIGURATION
@@ -308,6 +320,7 @@ echo -e "${BLUE}${BOLD}Migration Configuration${NC}"
 echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Flyway ${YELLOW}(default)${NC}"
 migration="flyway"
 echo
+sleep 0.3
 
 # =============================================================================
 # EMAIL NOTIFICATION CONFIGURATION
@@ -324,6 +337,7 @@ case $email_choice in
         ;;
 esac
 echo
+sleep 0.3
 
 # =============================================================================
 # OBSERVABILITY LOGGING STACK CONFIGURATION
@@ -340,6 +354,7 @@ case $logging_choice in
         ;;
 esac
 echo
+sleep 0.3
 
 # =============================================================================
 # OBSERVABILITY LOGGING FRAMEWORK CONFIGURATION
@@ -348,6 +363,7 @@ echo -e "${BLUE}${BOLD}Observability Logging Framework Configuration${NC}"
 echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Logback ${YELLOW}(default)${NC}"
 logging_framework="logback"
 echo
+sleep 0.3
 
 # =============================================================================
 # OBSERVABILITY METRICS CONFIGURATION
@@ -364,6 +380,7 @@ case $metrics_choice in
         ;;
 esac
 echo
+sleep 0.3
 
 # =============================================================================
 # OBSERVABILITY TRACING CONFIGURATION
@@ -380,6 +397,7 @@ case $tracing_choice in
         ;;
 esac
 echo
+sleep 0.3
 
 # =============================================================================
 # REDIS CONFIGURATION
@@ -396,6 +414,7 @@ case $redis_choice in
         ;;
 esac
 echo
+sleep 0.3
 
 # =============================================================================
 # SCHEDULER CONFIGURATION
@@ -412,6 +431,7 @@ case $scheduler_choice in
         ;;
 esac
 echo
+sleep 0.3
 
 # =============================================================================
 # STORAGE CONFIGURATION
@@ -429,6 +449,7 @@ case $storage_choice in
         ;;
 esac
 echo
+sleep 0.3
 
 # =============================================================================
 # TEMPLATE ENGINE CONFIGURATION
@@ -445,6 +466,7 @@ case $template_choice in
         ;;
 esac
 echo
+sleep 0.3
 
 echo -e "${PURPLE}${BOLD}Generating ${APP_STACK_FILE} file...${NC}"
 sleep 2
@@ -483,33 +505,3 @@ if [ $? -ne 0 ] || [ ! -f "$APP_STACK_FILE_PATH" ]; then
     echo -e "${RED}Please check if the directory exists and you have write permissions.${NC}"
     exit 1
 fi
-
-echo -e "${GREEN}${BOLD}Configuration file created successfully!${NC}"
-echo
-echo -e "${CYAN}${BOLD}Configuration Summary:${NC}"
-echo -e "  ${BLUE}Platform:${NC} ${platform}"
-echo -e "  ${BLUE}API Client:${NC} ${api_client}"
-echo -e "  ${BLUE}API Server:${NC} ${api_server}"
-echo -e "  ${BLUE}Reverse Proxy:${NC} ${reverse_proxy}"
-echo -e "  ${BLUE}Datasource:${NC} ${datasource}"
-echo -e "  ${BLUE}Discovery Client:${NC} ${discovery_client}"
-echo -e "  ${BLUE}Email:${NC} ${notification_email}"
-echo -e "  ${BLUE}File - CSV:${NC} ${file_csv}"
-echo -e "  ${BLUE}File - Excel:${NC} ${file_excel}"
-echo -e "  ${BLUE}File - PDF:${NC} ${file_pdf}"
-echo -e "  ${BLUE}Lock:${NC} ${lock}"
-echo -e "  ${BLUE}Key-Value Store:${NC} ${kv}"
-echo -e "  ${BLUE}Messaging:${NC} ${messaging}"
-echo -e "  ${BLUE}Migration:${NC} ${migration}"
-echo -e "  ${BLUE}Observability - Logging Stack:${NC} ${logging_stack}"
-echo -e "  ${BLUE}Observability - Logging Framework:${NC} ${logging_framework}"
-echo -e "  ${BLUE}Observability - Metrics:${NC} ${metrics}"
-echo -e "  ${BLUE}Observability - Tracing:${NC} ${tracing}"
-echo -e "  ${BLUE}Redis:${NC} ${redis}"
-echo -e "  ${BLUE}Scheduler:${NC} ${scheduler}"
-echo -e "  ${BLUE}Storage:${NC} ${storage}"
-echo -e "  ${BLUE}Template:${NC} ${template}"
-echo
-
-sleep 2
-echo -e "${GREEN}${BOLD}Setup complete! Your Atlas stack is ready to go!${NC}"

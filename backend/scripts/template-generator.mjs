@@ -80,6 +80,18 @@ async function renderFile(templatePath, outPath, stack) {
   content = content.replace(/^\s+$/gm, '');
   content = content.replace(/(\r?\n){2,}/g, '\n\n');
 
+  // Skip writing if content is empty after normalization
+  if (!content.trim()) {
+    if (fs.existsSync(outPath)) {
+      try {
+        fs.unlinkSync(outPath);
+      } catch (_) {
+        // ignore deletion errors
+      }
+    }
+    return false;
+  }
+
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, content, 'utf8');
   return true;
@@ -125,8 +137,8 @@ function collectTemplates(dir) {
   if (args.template && args.out) {
     const templatePath = path.resolve(cwd, args.template);
     const outPath = path.resolve(cwd, args.out);
-    await renderFile(templatePath, outPath, stack);
-    console.log(`Generated: ${outPath}`);
+    const written = await renderFile(templatePath, outPath, stack);
+    console.log(written ? `Generated: ${outPath}` : `Skipped empty output: ${outPath}`);
     return;
   }
 
@@ -138,8 +150,9 @@ function collectTemplates(dir) {
   for (const t of templates) {
     const outRel = path.relative(templateDir, t).replace(/\.ejs$/, '');
     const outPath = path.join(outDir, outRel);
-    await renderFile(t, outPath, stack);
-    count++;
+    if (await renderFile(t, outPath, stack)) {
+      count++;
+    }
   }
   console.log(`Rendered ${count} file(s)`);
 })();

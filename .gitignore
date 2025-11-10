@@ -70,13 +70,14 @@ coverage/
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # =============================================================================
-# On-Prem Compose — track only `_templates`
+# Deployments — track only `_templates`
 # =============================================================================
-# Ignore everything in `backend/scripts/deployment/onprem/compose`
 backend/scripts/deployment/onprem/compose/**
-# But keep the `_templates` folder and its contents
 !backend/scripts/deployment/onprem/compose/_templates/
 !backend/scripts/deployment/onprem/compose/_templates/**
+backend/scripts/deployment/onprem/k8s/native/**
+!backend/scripts/deployment/onprem/k8s/native/_templates/
+!backend/scripts/deployment/onprem/k8s/native/_templates/**
 
 # =============================================================================
 # IDEs and Editors

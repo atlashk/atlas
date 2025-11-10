@@ -17,9 +17,9 @@ DEFAULT_APP_STACK_FILE="$BACKEND_DIR/app-stack.default.cfg"
 WIZARD_SCRIPT="$BACKEND_DIR/scripts/app-stack-config.sh"
 TEMPLATE_GENERATOR="$BACKEND_DIR/scripts/template-generator.mjs"
 COMPOSE_TEMPLATES_DIR="$BACKEND_DIR/scripts/deployment/onprem/compose/_templates"
-OUTPUT_DIR="$BACKEND_DIR/scripts/deployment/onprem/compose"
-K8S_TEMPLATES_DIR="$BACKEND_DIR/scripts/deployment/onprem/k8s/_templates"
-K8S_OUTPUT_DIR="$BACKEND_DIR/scripts/deployment/onprem/k8s"
+COMPOSE_OUTPUT_DIR="$BACKEND_DIR/scripts/deployment/onprem/compose"
+K8S_NATIVE_TEMPLATES_DIR="$BACKEND_DIR/scripts/deployment/onprem/k8s/native/_templates"
+K8S_NATIVE_OUTPUT_DIR="$BACKEND_DIR/scripts/deployment/onprem/k8s/native"
 
 info() { printf "[INFO] %s\n" "$*"; }
 warn() { printf "[WARN] %s\n" "$*"; }
@@ -135,16 +135,16 @@ render_onprem_compose_files() {
     --cfg "$APP_STACK_FILE"
 }
 
-render_onprem_k8s_files() {
+render_onprem_k8s_native_files() {
   ensure_template_deps
-  if [[ ! -d "$K8S_TEMPLATES_DIR" ]]; then
-    err "Kubernetes templates directory not found: $K8S_TEMPLATES_DIR"
+  if [[ ! -d "$K8S_NATIVE_TEMPLATES_DIR" ]]; then
+    err "Kubernetes native templates directory not found: $K8S_NATIVE_TEMPLATES_DIR"
     exit 1
   fi
-  info "Rendering on-premise Kubernetes files from $K8S_TEMPLATES_DIR to $K8S_OUTPUT_DIR"
+  info "Rendering on-premise Kubernetes native files from $K8S_NATIVE_TEMPLATES_DIR to $K8S_NATIVE_OUTPUT_DIR"
   node "$TEMPLATE_GENERATOR" \
-    --dir "$K8S_TEMPLATES_DIR" \
-    --out-dir "$K8S_OUTPUT_DIR" \
+    --dir "$K8S_NATIVE_TEMPLATES_DIR" \
+    --out-dir "$K8S_NATIVE_OUTPUT_DIR" \
     --cfg "$APP_STACK_FILE"
 }
 
@@ -173,13 +173,13 @@ main() {
   case "$platform" in
     onprem-compose)
       render_onprem_compose_files
-      next_dir="$OUTPUT_DIR"
+      next_dir="$COMPOSE_OUTPUT_DIR"
       next_deploy_script="deploy.sh"
       next_cleanup_script="clean.sh"
       ;;
-    onprem-k8s)
-      render_onprem_k8s_files
-      next_dir="$K8S_OUTPUT_DIR"
+    onprem-k8s-native)
+      render_onprem_k8s_native_files
+      next_dir="$K8S_NATIVE_OUTPUT_DIR"
       next_deploy_script="deploy.sh"
       next_cleanup_script="clean.sh"
       ;;
