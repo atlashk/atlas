@@ -27,6 +27,7 @@ public class Cart extends DomainEntity {
 
   private Integer userId;
 
+  @Builder.Default
   private List<CartItem> cartItems = new ArrayList<>();
 
   public Cart(Integer userId) {
