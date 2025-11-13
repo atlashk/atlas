@@ -34,6 +34,9 @@ COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
 
 # Docker Compose command (will be set by check_docker_compose)
 DOCKER_COMPOSE_CMD="docker-compose"
+ 
+# Default flags
+SKIP_BUILD=false
 
 # =============================================================================
 # PREREQUISITE CHECKS
@@ -103,6 +106,34 @@ check_prerequisites() {
     check_docker_compose || exit 1
     echo "Prerequisites check passed"
     echo
+}
+
+# =============================================================================
+# ARGUMENT PARSING
+# =============================================================================
+
+show_usage() {
+    echo "Usage: $(basename "$0") [options]"
+    echo
+    echo "Options:"
+    echo "  --skip-build      Skip service build step"
+    echo "  -h, --help        Show this help and exit"
+}
+
+parse_args() {
+    for arg in "$@"; do
+        case "$arg" in
+            --skip-build|skip-build)
+                SKIP_BUILD=true
+                ;;
+            -h|--help)
+                show_usage
+                exit 0
+                ;;
+            *)
+                ;;
+        esac
+    done
 }
 
 # =============================================================================
@@ -201,13 +232,18 @@ show_management_commands() {
 # =============================================================================
 
 main() {
+    parse_args "$@"
     check_prerequisites
 
     local start_time=$(date +%s)
 
     echo "Atlas Docker Compose Platform - Starting..."
 
-    build_services
+    if [[ "$SKIP_BUILD" == "true" ]]; then
+        echo "Skip build enabled; skipping build step"
+    else
+        build_services
+    fi
 
     start_current_stack
 
