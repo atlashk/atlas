@@ -37,7 +37,7 @@ services:
     ports:
       - "3306:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-123456}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-admin@123}
     volumes:
       - ./config/mysql/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql:ro
       - mysql-data:/var/lib/mysql
@@ -60,7 +60,7 @@ services:
       - "5432:5432"
     environment:
       - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-123456}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-admin@123}
     volumes:
       - ./config/postgres/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql:ro
       - postgres-data:/var/lib/postgresql/data
@@ -139,7 +139,7 @@ services:
       - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: "admin"
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-123456}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-admin@123}
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
     healthcheck:
@@ -161,7 +161,7 @@ services:
       - "9001:9001"
     environment:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-admin}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-123456}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-admin@123}
     command: server /data --console-address ":9001"
     volumes:
       - minio-data:/data
@@ -371,17 +371,17 @@ services:
       <%_ if (hasMysql) { -%>
       - DB_URL=jdbc:mysql://mysql:3306/db_user?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_USERNAME=root
-      - DB_PASSWORD=${DB_PASSWORD:-123456}
+      - DB_PASSWORD=${DB_PASSWORD:-admin@123}
       - DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_QUARTZ_USERNAME=root
-      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-123456}
+      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-admin@123}
       <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_user
       - DB_USERNAME=root
-      - DB_PASSWORD=${DB_PASSWORD:-123456}
+      - DB_PASSWORD=${DB_PASSWORD:-admin@123}
       - DB_QUARTZ_URL=jdbc:postgresql://postgres:5432/db_quartz
       - DB_QUARTZ_USERNAME=root
-      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-123456}
+      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-admin@123}
       <%_ } -%>
       <%_ if (hasRedis) { -%>
       - REDIS_HOST=redis
@@ -393,7 +393,7 @@ services:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
       - RABBITMQ_USERNAME=admin
-      - RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS:-123456}
+      - RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS:-admin@123}
       <%_ } -%>
       <%_ if (hasZipkin) { -%>
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
@@ -439,17 +439,17 @@ services:
       <%_ if (hasMysql) { -%>
       - DB_URL=jdbc:mysql://mysql:3306/db_product?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_USERNAME=root
-      - DB_PASSWORD=${DB_PASSWORD:-123456}
+      - DB_PASSWORD=${DB_PASSWORD:-admin@123}
       - DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_QUARTZ_USERNAME=root
-      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-123456}
+      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-admin@123}
       <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_product
       - DB_USERNAME=root
-      - DB_PASSWORD=${DB_PASSWORD:-123456}
+      - DB_PASSWORD=${DB_PASSWORD:-admin@123}
       - DB_QUARTZ_URL=jdbc:postgresql://postgres:5432/db_quartz
       - DB_QUARTZ_USERNAME=root
-      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-123456}
+      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-admin@123}
       <%_ } -%>
       <%_ if (hasRedis) { -%>
       - REDIS_HOST=redis
@@ -461,18 +461,18 @@ services:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
       - RABBITMQ_USERNAME=admin
-      - RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS:-123456}
+      - RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS:-admin@123}
       <%_ } -%>
       <%_ if (hasElasticsearch) { -%>
       - ELASTICSEARCH_HOST=elasticsearch
       - ELASTICSEARCH_PORT=9200
       - ELASTICSEARCH_USERNAME=elastic
-      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD:-123456}
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD:-admin@123}
       <%_ } -%>
       <%_ if (hasMinio) { -%>
       - MINIO_ENDPOINT=http://minio:9000
       - MINIO_ACCESS_KEY=admin
-      - MINIO_SECRET_KEY=${MINIO_PASSWORD:-123456}
+      - MINIO_SECRET_KEY=${MINIO_PASSWORD:-admin@123}
       <%_ } -%>
       <%_ if (hasZipkin) { -%>
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
@@ -515,17 +515,17 @@ services:
       <%_ if (hasMysql) { -%>
       - DB_URL=jdbc:mysql://mysql:3306/db_order?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_USERNAME=root
-      - DB_PASSWORD=${DB_PASSWORD:-123456}
+      - DB_PASSWORD=${DB_PASSWORD:-admin@123}
       - DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_QUARTZ_USERNAME=root
-      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-123456}
+      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-admin@123}
       <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_order
       - DB_USERNAME=root
-      - DB_PASSWORD=${DB_PASSWORD:-123456}
+      - DB_PASSWORD=${DB_PASSWORD:-admin@123}
       - DB_QUARTZ_URL=jdbc:postgresql://postgres:5432/db_quartz
       - DB_QUARTZ_USERNAME=root
-      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-123456}
+      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-admin@123}
       <%_ } -%>
       <%_ if (hasRedis) { -%>
       - REDIS_HOST=redis
@@ -537,7 +537,7 @@ services:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
       - RABBITMQ_USERNAME=admin
-      - RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS:-123456}
+      - RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS:-admin@123}
       <%_ } -%>
       <%_ if (apiClientPrefix === 'grpc') { -%>
       - GRPC_CLIENT_USER_ADDRESS=static://user-service:50051
@@ -587,17 +587,17 @@ services:
       <%_ if (hasMysql) { -%>
       - DB_URL=jdbc:mysql://mysql:3306/db_payment?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_USERNAME=root
-      - DB_PASSWORD=${DB_PASSWORD:-123456}
+      - DB_PASSWORD=${DB_PASSWORD:-admin@123}
       - DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_QUARTZ_USERNAME=root
-      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-123456}
+      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-admin@123}
       <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_payment
       - DB_USERNAME=root
-      - DB_PASSWORD=${DB_PASSWORD:-123456}
+      - DB_PASSWORD=${DB_PASSWORD:-admin@123}
       - DB_QUARTZ_URL=jdbc:postgresql://postgres:5432/db_quartz
       - DB_QUARTZ_USERNAME=root
-      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-123456}
+      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-admin@123}
       <%_ } -%>
       <%_ if (hasRedis) { -%>
       - REDIS_HOST=redis
@@ -609,7 +609,7 @@ services:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
       - RABBITMQ_USERNAME=admin
-      - RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS:-123456}
+      - RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS:-admin@123}
       <%_ } -%>
       <%_ if (hasZipkin) { -%>
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
@@ -646,17 +646,17 @@ services:
       <%_ if (hasMysql) { -%>
       - DB_URL=jdbc:mysql://mysql:3306/db_payment?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_USERNAME=root
-      - DB_PASSWORD=${DB_PASSWORD:-123456}
+      - DB_PASSWORD=${DB_PASSWORD:-admin@123}
       - DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_QUARTZ_USERNAME=root
-      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-123456}
+      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-admin@123}
       <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_payment
       - DB_USERNAME=root
-      - DB_PASSWORD=${DB_PASSWORD:-123456}
+      - DB_PASSWORD=${DB_PASSWORD:-admin@123}
       - DB_QUARTZ_URL=jdbc:postgresql://postgres:5432/db_quartz
       - DB_QUARTZ_USERNAME=root
-      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-123456}
+      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-admin@123}
       <%_ } -%>
       <%_ if (hasRedis) { -%>
       - REDIS_HOST=redis
@@ -668,7 +668,7 @@ services:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
       - RABBITMQ_USERNAME=admin
-      - RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS:-123456}
+      - RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS:-admin@123}
       <%_ } -%>
       <%_ if (hasSmtp4dev) { -%>
       - MAIL_SERVER_HOST=smtp4dev
