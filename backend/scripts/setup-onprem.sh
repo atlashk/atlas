@@ -184,9 +184,9 @@ main() {
 
   info "Setup completed."
   info "Next steps:"
-  info "  - Review generated files in: ${$DEPLOYMENT_OUTPUT_DIR}"
-  info "  - Run: ${$DEPLOYMENT_OUTPUT_DIR}/deploy.sh to start services"
-  info "  - Run: ${$DEPLOYMENT_OUTPUT_DIR}/clean.sh to stop and cleanup"
+  info "  - Review generated files in: $DEPLOYMENT_OUTPUT_DIR"
+  info "  - Run: $DEPLOYMENT_OUTPUT_DIR/deploy.sh to start services"
+  info "  - Run: $DEPLOYMENT_OUTPUT_DIR/clean.sh to stop and cleanup"
 }
 
 main "$@"
