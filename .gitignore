@@ -72,12 +72,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 # =============================================================================
 # Deployments — track only `_templates`
 # =============================================================================
-backend/scripts/deployment/onprem/compose/**
-!backend/scripts/deployment/onprem/compose/_templates/
-!backend/scripts/deployment/onprem/compose/_templates/**
-backend/scripts/deployment/onprem/k8s/native/**
-!backend/scripts/deployment/onprem/k8s/native/_templates/
-!backend/scripts/deployment/onprem/k8s/native/_templates/**
+backend/scripts/deployment/generated/
 
 # =============================================================================
 # IDEs and Editors

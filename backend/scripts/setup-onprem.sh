@@ -18,7 +18,7 @@ WIZARD_SCRIPT="$BACKEND_DIR/scripts/app-stack-config.sh"
 TEMPLATE_GENERATOR="$BACKEND_DIR/scripts/template-generator.mjs"
 COMPOSE_TEMPLATES_DIR="$BACKEND_DIR/scripts/deployment/templates/onprem/compose"
 K8S_NATIVE_TEMPLATES_DIR="$BACKEND_DIR/scripts/deployment/templates/onprem/k8s/native"
-DEPLOYMENT_OUTPUT_DIR="$BACKEND_DIR/scripts/deployment/output"
+DEPLOYMENT_GENERATED_DIR="$BACKEND_DIR/scripts/deployment/generated"
 
 info() { printf "[INFO] %s\n" "$*"; }
 warn() { printf "[WARN] %s\n" "$*"; }
@@ -127,10 +127,10 @@ render_onprem_compose_files() {
     err "Compose templates directory not found: $COMPOSE_TEMPLATES_DIR"
     exit 1
   fi
-  info "Rendering on-premise compose files from $COMPOSE_TEMPLATES_DIR to $DEPLOYMENT_OUTPUT_DIR"
+  info "Rendering on-premise compose files from $COMPOSE_TEMPLATES_DIR to $DEPLOYMENT_GENERATED_DIR"
   node "$TEMPLATE_GENERATOR" \
     --dir "$COMPOSE_TEMPLATES_DIR" \
-    --out-dir "$DEPLOYMENT_OUTPUT_DIR" \
+    --out-dir "$DEPLOYMENT_GENERATED_DIR" \
     --cfg "$APP_STACK_FILE"
 }
 
@@ -140,10 +140,10 @@ render_onprem_k8s_native_files() {
     err "Kubernetes native templates directory not found: $K8S_NATIVE_TEMPLATES_DIR"
     exit 1
   fi
-  info "Rendering on-premise Kubernetes native files from $K8S_NATIVE_TEMPLATES_DIR to $DEPLOYMENT_OUTPUT_DIR"
+  info "Rendering on-premise Kubernetes native files from $K8S_NATIVE_TEMPLATES_DIR to $DEPLOYMENT_GENERATED_DIR"
   node "$TEMPLATE_GENERATOR" \
     --dir "$K8S_NATIVE_TEMPLATES_DIR" \
-    --out-dir "$DEPLOYMENT_OUTPUT_DIR" \
+    --out-dir "$DEPLOYMENT_GENERATED_DIR" \ 
     --cfg "$APP_STACK_FILE"
 }
 
@@ -184,9 +184,9 @@ main() {
 
   info "Setup completed."
   info "Next steps:"
-  info "  - Review generated files in: $DEPLOYMENT_OUTPUT_DIR"
-  info "  - Run: $DEPLOYMENT_OUTPUT_DIR/deploy.sh to start services"
-  info "  - Run: $DEPLOYMENT_OUTPUT_DIR/clean.sh to stop and cleanup"
+  info "  - Review generated files in: $DEPLOYMENT_GENERATED_DIR"
+  info "  - Run: $DEPLOYMENT_GENERATED_DIR/deploy.sh to start services"
+  info "  - Run: $DEPLOYMENT_GENERATED_DIR/clean.sh to stop and cleanup"
 }
 
 main "$@"
