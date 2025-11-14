@@ -14,6 +14,11 @@ public class CacheService {
 
   private final KvStoreService kvStoreService;
 
+  public void put(ApplicationCache cache, String key, Object value) {
+    // The default TTL is 1 hour
+    put(cache, key, value, 360);
+  }
+
   public void put(ApplicationCache cache, String key, Object value, long ttl) {
     kvStoreService.put(cache.getName(), key, value, Duration.ofSeconds(ttl));
     log.info("Cache put: {}:{}={}", cache.getName(), key, value);
