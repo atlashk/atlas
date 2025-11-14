@@ -17,9 +17,12 @@ import org.springframework.stereotype.Component;
 /**
  * Aspect to handle caching functionality for methods annotated with @Cache.
  * <p>
- * This aspect intercepts method calls and implements caching logic: 1. Check if cached value exists
- * for the given key 2. If exists, return cached value 3. If not exists, execute method and cache
- * the result
+ * This aspect intercepts method calls and implements caching logic:
+ * <ol>
+ *  <li>Check if cached value exists for the given key. </li>
+ *  <li>If exists, return cached value.</li>
+ *  <li>If not exists, execute method and cache the result.</li>
+ * </ol>
  */
 @Component
 @Aspect
