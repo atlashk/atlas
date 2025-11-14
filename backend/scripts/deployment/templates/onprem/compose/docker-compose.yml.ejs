@@ -37,7 +37,9 @@ services:
     ports:
       - "3306:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-admin@123}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root@123}
+      - MYSQL_USER=${MYSQL_USER:-atlas}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-atlas@123}
     volumes:
       - ./config/mysql/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql:ro
       - mysql-data:/var/lib/mysql
@@ -59,8 +61,8 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-admin@123}
+      - POSTGRES_USER=${POSTGRES_USER:-atlas}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-atlas@123}
     volumes:
       - ./config/postgres/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql:ro
       - postgres-data:/var/lib/postgresql/data
@@ -100,22 +102,22 @@ services:
       - "9092:9092"
       - "9101:9101"
     environment:
-      KAFKA_NODE_ID: 1
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092'
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_JMX_PORT: 9101
-      KAFKA_JMX_HOSTNAME: localhost
-      KAFKA_PROCESS_ROLES: 'broker,controller'
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
-      KAFKA_LISTENERS: 'PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:9092'
-      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
-      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
-      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
-      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+      - KAFKA_NODE_ID=1
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0
+      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_JMX_PORT=9101
+      - KAFKA_JMX_HOSTNAME=localhost
+      - KAFKA_PROCESS_ROLES=broker,controller
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:29093
+      - KAFKA_LISTENERS=PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:9092
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_LOG_DIRS=/tmp/kraft-combined-logs
+      - CLUSTER_ID=MkU3OEVBNTcwNTJENDM2Qk
     volumes:
       - kafka-data:/var/lib/kafka/data
     healthcheck:
@@ -138,8 +140,8 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: "admin"
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-admin@123}
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-atlas}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-atlas@123}
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
     healthcheck:
@@ -160,8 +162,8 @@ services:
       - "9000:9000"
       - "9001:9001"
     environment:
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-admin}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-admin@123}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-atlas}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-atlas@123}
     command: server /data --console-address ":9001"
     volumes:
       - minio-data:/data
@@ -185,7 +187,7 @@ services:
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=true
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD:-admin}
+      - ELASTIC_PASSWORD=${ELASTICSEARCH_PASSWORD:-atlas@123}
     volumes:
       - elasticsearch-data:/usr/share/elasticsearch/data
     healthcheck:
@@ -259,9 +261,7 @@ services:
       start_period: 30s
     networks:
       - atlas-network
-  <%_ } -%>
 
-  <%_ if (hasLoki) { -%>
   promtail:
     container_name: promtail
     image: grafana/promtail:main
@@ -292,8 +292,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD:-admin}
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-atlas}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-atlas@123}
       - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
       - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel,grafana-clock-panel
     volumes:
@@ -370,18 +370,18 @@ services:
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
       <%_ if (hasMysql) { -%>
       - DB_URL=jdbc:mysql://mysql:3306/db_user?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - DB_USERNAME=root
-      - DB_PASSWORD=${DB_PASSWORD:-admin@123}
+      - DB_USERNAME=${MYSQL_USERNAME:-atlas}
+      - DB_PASSWORD=${MYSQL_PASSWORD:-atlas@123}
       - DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - DB_QUARTZ_USERNAME=root
-      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-admin@123}
+      - DB_QUARTZ_USERNAME=${MYSQL_USERNAME:-atlas}
+      - DB_QUARTZ_PASSWORD=${MYSQL_PASSWORD:-atlas@123}
       <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_user
-      - DB_USERNAME=root
-      - DB_PASSWORD=${DB_PASSWORD:-admin@123}
+      - DB_USERNAME=${POSTGRES_USERNAME:-atlas}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-atlas@123}
       - DB_QUARTZ_URL=jdbc:postgresql://postgres:5432/db_quartz
-      - DB_QUARTZ_USERNAME=root
-      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-admin@123}
+      - DB_QUARTZ_USERNAME=${POSTGRES_USERNAME:-atlas}
+      - DB_QUARTZ_PASSWORD=${POSTGRES_PASSWORD:-atlas@123}
       <%_ } -%>
       <%_ if (hasRedis) { -%>
       - REDIS_HOST=redis
@@ -392,8 +392,8 @@ services:
       <%_ } else if (hasRabbit) { -%>
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
-      - RABBITMQ_USERNAME=admin
-      - RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS:-admin@123}
+      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-atlas}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-atlas@123}
       <%_ } -%>
       <%_ if (hasZipkin) { -%>
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
@@ -438,18 +438,18 @@ services:
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
       <%_ if (hasMysql) { -%>
       - DB_URL=jdbc:mysql://mysql:3306/db_product?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - DB_USERNAME=root
-      - DB_PASSWORD=${DB_PASSWORD:-admin@123}
+      - DB_USERNAME=${MYSQL_USERNAME:-atlas}
+      - DB_PASSWORD=${MYSQL_PASSWORD:-atlas@123}
       - DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - DB_QUARTZ_USERNAME=root
-      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-admin@123}
+      - DB_QUARTZ_USERNAME=${MYSQL_USERNAME:-atlas}
+      - DB_QUARTZ_PASSWORD=${MYSQL_PASSWORD:-atlas@123}
       <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_product
-      - DB_USERNAME=root
-      - DB_PASSWORD=${DB_PASSWORD:-admin@123}
+      - DB_USERNAME=${POSTGRES_USERNAME:-atlas}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-atlas@123}
       - DB_QUARTZ_URL=jdbc:postgresql://postgres:5432/db_quartz
-      - DB_QUARTZ_USERNAME=root
-      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-admin@123}
+      - DB_QUARTZ_USERNAME=${POSTGRES_USERNAME:-atlas}
+      - DB_QUARTZ_PASSWORD=${POSTGRES_PASSWORD:-atlas@123}
       <%_ } -%>
       <%_ if (hasRedis) { -%>
       - REDIS_HOST=redis
@@ -460,19 +460,19 @@ services:
       <%_ } else if (hasRabbit) { -%>
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
-      - RABBITMQ_USERNAME=admin
-      - RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS:-admin@123}
+      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-atlas}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-atlas@123}
       <%_ } -%>
       <%_ if (hasElasticsearch) { -%>
       - ELASTICSEARCH_HOST=elasticsearch
       - ELASTICSEARCH_PORT=9200
-      - ELASTICSEARCH_USERNAME=elastic
-      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD:-admin@123}
+      - ELASTICSEARCH_USERNAME=${ELASTICSEARCH_USERNAME:-elastic}
+      - ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD:-atlas@123}
       <%_ } -%>
       <%_ if (hasMinio) { -%>
       - MINIO_ENDPOINT=http://minio:9000
-      - MINIO_ACCESS_KEY=admin
-      - MINIO_SECRET_KEY=${MINIO_PASSWORD:-admin@123}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-atlas}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-atlas@123}
       <%_ } -%>
       <%_ if (hasZipkin) { -%>
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
@@ -514,18 +514,18 @@ services:
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
       <%_ if (hasMysql) { -%>
       - DB_URL=jdbc:mysql://mysql:3306/db_order?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - DB_USERNAME=root
-      - DB_PASSWORD=${DB_PASSWORD:-admin@123}
+      - DB_USERNAME=${MYSQL_USERNAME:-atlas}
+      - DB_PASSWORD=${MYSQL_PASSWORD:-atlas@123}
       - DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - DB_QUARTZ_USERNAME=root
-      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-admin@123}
+      - DB_QUARTZ_USERNAME=${MYSQL_USERNAME:-atlas}
+      - DB_QUARTZ_PASSWORD=${MYSQL_PASSWORD:-atlas@123}
       <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_order
-      - DB_USERNAME=root
-      - DB_PASSWORD=${DB_PASSWORD:-admin@123}
+      - DB_USERNAME=${POSTGRES_USERNAME:-atlas}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-atlas@123}
       - DB_QUARTZ_URL=jdbc:postgresql://postgres:5432/db_quartz
-      - DB_QUARTZ_USERNAME=root
-      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-admin@123}
+      - DB_QUARTZ_USERNAME=${POSTGRES_USERNAME:-atlas}
+      - DB_QUARTZ_PASSWORD=${POSTGRES_PASSWORD:-atlas@123}
       <%_ } -%>
       <%_ if (hasRedis) { -%>
       - REDIS_HOST=redis
@@ -536,8 +536,8 @@ services:
       <%_ } else if (hasRabbit) { -%>
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
-      - RABBITMQ_USERNAME=admin
-      - RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS:-admin@123}
+      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-atlas}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-atlas@123}
       <%_ } -%>
       <%_ if (apiClientPrefix === 'grpc') { -%>
       - GRPC_CLIENT_USER_ADDRESS=static://user-service:50051
@@ -586,18 +586,18 @@ services:
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
       <%_ if (hasMysql) { -%>
       - DB_URL=jdbc:mysql://mysql:3306/db_payment?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - DB_USERNAME=root
-      - DB_PASSWORD=${DB_PASSWORD:-admin@123}
+      - DB_USERNAME=${MYSQL_USERNAME:-atlas}
+      - DB_PASSWORD=${MYSQL_PASSWORD:-atlas@123}
       - DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - DB_QUARTZ_USERNAME=root
-      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-admin@123}
+      - DB_QUARTZ_USERNAME=${MYSQL_USERNAME:-atlas}
+      - DB_QUARTZ_PASSWORD=${MYSQL_PASSWORD:-atlas@123}
       <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_payment
-      - DB_USERNAME=root
-      - DB_PASSWORD=${DB_PASSWORD:-admin@123}
+      - DB_USERNAME=${POSTGRES_USERNAME:-atlas}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-atlas@123}
       - DB_QUARTZ_URL=jdbc:postgresql://postgres:5432/db_quartz
-      - DB_QUARTZ_USERNAME=root
-      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-admin@123}
+      - DB_QUARTZ_USERNAME=${POSTGRES_USERNAME:-atlas}
+      - DB_QUARTZ_PASSWORD=${POSTGRES_PASSWORD:-atlas@123}
       <%_ } -%>
       <%_ if (hasRedis) { -%>
       - REDIS_HOST=redis
@@ -608,8 +608,8 @@ services:
       <%_ } else if (hasRabbit) { -%>
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
-      - RABBITMQ_USERNAME=admin
-      - RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS:-admin@123}
+      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-atlas}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-atlas@123}
       <%_ } -%>
       <%_ if (hasZipkin) { -%>
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
@@ -645,18 +645,18 @@ services:
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
       <%_ if (hasMysql) { -%>
       - DB_URL=jdbc:mysql://mysql:3306/db_payment?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - DB_USERNAME=root
-      - DB_PASSWORD=${DB_PASSWORD:-admin@123}
+      - DB_USERNAME=${MYSQL_USERNAME:-atlas}
+      - DB_PASSWORD=${MYSQL_PASSWORD:-atlas@123}
       - DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - DB_QUARTZ_USERNAME=root
-      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-admin@123}
+      - DB_QUARTZ_USERNAME=${MYSQL_USERNAME:-atlas}
+      - DB_QUARTZ_PASSWORD=${MYSQL_PASSWORD:-atlas@123}
       <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_payment
-      - DB_USERNAME=root
-      - DB_PASSWORD=${DB_PASSWORD:-admin@123}
+      - DB_USERNAME=${POSTGRES_USERNAME:-atlas}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-atlas@123}
       - DB_QUARTZ_URL=jdbc:postgresql://postgres:5432/db_quartz
-      - DB_QUARTZ_USERNAME=root
-      - DB_QUARTZ_PASSWORD=${DB_PASSWORD:-admin@123}
+      - DB_QUARTZ_USERNAME=${POSTGRES_USERNAME:-atlas}
+      - DB_QUARTZ_PASSWORD=${POSTGRES_PASSWORD:-atlas@123}
       <%_ } -%>
       <%_ if (hasRedis) { -%>
       - REDIS_HOST=redis
@@ -667,8 +667,8 @@ services:
       <%_ } else if (hasRabbit) { -%>
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
-      - RABBITMQ_USERNAME=admin
-      - RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS:-admin@123}
+      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-atlas}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-atlas@123}
       <%_ } -%>
       <%_ if (hasSmtp4dev) { -%>
       - MAIL_SERVER_HOST=smtp4dev

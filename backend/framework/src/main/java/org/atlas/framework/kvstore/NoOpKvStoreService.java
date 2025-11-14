@@ -2,14 +2,16 @@ package org.atlas.framework.kvstore;
 
 import java.time.Duration;
 import java.util.Optional;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.stereotype.Service;
 
 @Service
+@ConditionalOnMissingBean(KvStoreService.class)
 public class NoOpKvStoreService implements KvStoreService {
 
   @Override
   public void put(String storeName, String key, Object value) {
-    
+
   }
 
   @Override
