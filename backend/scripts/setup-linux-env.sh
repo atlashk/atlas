@@ -13,6 +13,81 @@ check_root() {
     fi
 }
 
+# Install Docker Compose plugin
+install_docker_compose() {
+    echo "INFO: Installing Docker Compose..."
+
+    if docker compose version &> /dev/null; then
+        echo "SUCCESS: Docker Compose (plugin) is already installed: $(docker compose version | head -n 1)"
+        return 0
+    fi
+
+    if command -v docker-compose &> /dev/null; then
+        echo "WARNING: Docker Compose (standalone) detected: $(docker-compose --version)"
+    fi
+
+    case $DISTRO in
+        ubuntu|debian)
+            sudo apt-get update || true
+            sudo apt-get install -y docker-compose-plugin
+            ;;
+        centos|rhel|fedora)
+            if command -v dnf &> /dev/null; then
+                sudo dnf install -y docker-compose-plugin
+            else
+                sudo yum install -y docker-compose-plugin
+            fi
+            ;;
+        arch|manjaro)
+            if ! docker compose version &> /dev/null; then
+                sudo mkdir -p /usr/lib/docker/cli-plugins
+                ARCH=$(uname -m)
+                if [[ "$ARCH" == "x86_64" ]]; then
+                    COMPOSE_URL="https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64"
+                elif [[ "$ARCH" == "aarch64" || "$ARCH" == "arm64" ]]; then
+                    COMPOSE_URL="https://github.com/docker/compose/releases/latest/download/docker-compose-linux-aarch64"
+                elif [[ "$ARCH" == "armv7l" || "$ARCH" == "arm" ]]; then
+                    COMPOSE_URL="https://github.com/docker/compose/releases/latest/download/docker-compose-linux-armv7"
+                else
+                    COMPOSE_URL=""
+                fi
+                if [[ -n "$COMPOSE_URL" ]]; then
+                    sudo curl -L "$COMPOSE_URL" -o /usr/lib/docker/cli-plugins/docker-compose
+                    sudo chmod +x /usr/lib/docker/cli-plugins/docker-compose
+                fi
+            fi
+            ;;
+        *)
+            sudo mkdir -p /usr/lib/docker/cli-plugins
+            ARCH=$(uname -m)
+            if [[ "$ARCH" == "x86_64" ]]; then
+                COMPOSE_URL="https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64"
+            elif [[ "$ARCH" == "aarch64" || "$ARCH" == "arm64" ]]; then
+                COMPOSE_URL="https://github.com/docker/compose/releases/latest/download/docker-compose-linux-aarch64"
+            elif [[ "$ARCH" == "armv7l" || "$ARCH" == "arm" ]]; then
+                COMPOSE_URL="https://github.com/docker/compose/releases/latest/download/docker-compose-linux-armv7"
+            else
+                COMPOSE_URL=""
+            fi
+            if [[ -n "$COMPOSE_URL" ]]; then
+                sudo curl -L "$COMPOSE_URL" -o /usr/lib/docker/cli-plugins/docker-compose
+                sudo chmod +x /usr/lib/docker/cli-plugins/docker-compose
+            fi
+            ;;
+    esac
+
+    if docker compose version &> /dev/null; then
+        echo "SUCCESS: Docker Compose plugin installed: $(docker compose version | head -n 1)"
+        return 0
+    elif command -v docker-compose &> /dev/null; then
+        echo "WARNING: Docker Compose plugin not detected; using standalone: $(docker-compose --version)"
+        return 0
+    else
+        echo "ERROR: Docker Compose installation failed"
+        return 1
+    fi
+}
+
 # Detect Linux distribution
 detect_distro() {
     if [[ -f /etc/os-release ]]; then
@@ -291,6 +366,15 @@ verify_installations() {
         all_good=false
     fi
 
+    if docker compose version &> /dev/null; then
+        echo "SUCCESS: ✓ Docker Compose: $(docker compose version | head -n 1)"
+    elif command -v docker-compose &> /dev/null; then
+        echo "SUCCESS: ✓ Docker Compose (standalone): $(docker-compose --version)"
+    else
+        echo "ERROR: ✗ Docker Compose: Not found"
+        all_good=false
+    fi
+
     if $all_good; then
         echo "SUCCESS: All tools installed successfully!"
     else
@@ -316,6 +400,8 @@ main() {
     install_node20
     echo
     install_docker
+    echo
+    install_docker_compose
     echo
 
     # Reload shell environment
