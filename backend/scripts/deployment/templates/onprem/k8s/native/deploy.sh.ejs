@@ -133,7 +133,7 @@ show_access_information() {
   echo "Service Access URLs:"
   echo "  API Gateway:   http://api.atlas.local"
   <% if (hasGrafana) { %>
-  echo "  Grafana:       http://grafana.atlas.local (admin/admin@123)"
+  echo "  Grafana:       http://grafana.atlas.local (admin/secret123456)"
   <% } %>
   <% if (hasPrometheus) { %>
   echo "  Prometheus:    http://prometheus.atlas.local"
