@@ -4,9 +4,10 @@ import org.atlas.domain.user.entity.Cart;
 import org.atlas.domain.user.entity.CartItem;
 import org.atlas.infrastructure.api.server.rest.impl.user.front.model.CartResponse;
 import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface CartMapper {
 
   CartMapper INSTANCE = Mappers.getMapper(CartMapper.class);

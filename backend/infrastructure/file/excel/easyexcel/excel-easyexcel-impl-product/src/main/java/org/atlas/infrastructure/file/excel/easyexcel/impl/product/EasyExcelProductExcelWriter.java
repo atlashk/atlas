@@ -15,6 +15,7 @@ import org.atlas.domain.product.shared.ProductStatus;
 import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.file.excel.easyexcel.core.EasyExcelWriter;
 import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Component;
 
@@ -63,7 +64,7 @@ public class EasyExcelProductExcelWriter implements ProductExcelWriter {
     private String categoryIds;
   }
 
-  @Mapper
+  @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
   public interface ProductExcelRowMapper {
 
     ProductExcelRowMapper INSTANCE = Mappers.getMapper(ProductExcelRowMapper.class);

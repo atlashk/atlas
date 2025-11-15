@@ -18,6 +18,7 @@ import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.file.excel.easyexcel.core.EasyExcelReader;
 import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Component;
 
@@ -64,7 +65,7 @@ public class EasyExcelProductExcelReader implements ProductExcelReader {
     private String categoryIds;
   }
 
-  @Mapper
+  @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
   public interface ProductExcelRowMapper {
 
     ProductExcelRowMapper INSTANCE = Mappers.getMapper(ProductExcelRowMapper.class);

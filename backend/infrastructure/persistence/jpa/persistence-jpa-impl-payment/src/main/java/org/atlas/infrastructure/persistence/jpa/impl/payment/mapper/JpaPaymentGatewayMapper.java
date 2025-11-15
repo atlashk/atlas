@@ -3,9 +3,10 @@ package org.atlas.infrastructure.persistence.jpa.impl.payment.mapper;
 import org.atlas.domain.payment.entity.PaymentGateway;
 import org.atlas.infrastructure.persistence.jpa.impl.payment.entity.JpaPaymentGateway;
 import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface JpaPaymentGatewayMapper {
 
   JpaPaymentGatewayMapper INSTANCE = Mappers.getMapper(JpaPaymentGatewayMapper.class);

@@ -11,9 +11,10 @@ import org.atlas.infrastructure.api.server.grpc.protobuf.user.UserProto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface GrpcUserMapper {
 
   GrpcUserMapper INSTANCE = Mappers.getMapper(GrpcUserMapper.class);

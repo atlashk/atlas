@@ -5,9 +5,10 @@ import org.atlas.domain.user.usecase.front.model.RegisterInput;
 import org.atlas.infrastructure.api.server.rest.impl.user.front.model.ProfileResponse;
 import org.atlas.infrastructure.api.server.rest.impl.user.front.model.RegisterRequest;
 import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
 
   UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);

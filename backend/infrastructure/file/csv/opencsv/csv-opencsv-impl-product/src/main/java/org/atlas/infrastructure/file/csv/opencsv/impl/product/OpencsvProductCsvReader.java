@@ -18,6 +18,7 @@ import org.atlas.domain.product.shared.ProductStatus;
 import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.file.csv.opencsv.core.OpenCsvReader;
 import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Component;
 
@@ -71,7 +72,7 @@ public class OpencsvProductCsvReader implements ProductCsvReader {
     private String categoryIds;
   }
 
-  @Mapper
+  @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
   public interface ProductCsvRowMapper {
 
     ProductCsvRowMapper INSTANCE = Mappers.getMapper(ProductCsvRowMapper.class);

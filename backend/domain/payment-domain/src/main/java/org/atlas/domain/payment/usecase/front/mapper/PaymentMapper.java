@@ -3,9 +3,10 @@ package org.atlas.domain.payment.usecase.front.mapper;
 import org.atlas.domain.payment.entity.Payment;
 import org.atlas.domain.payment.usecase.front.model.GetPaymentNextActionOutput;
 import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface PaymentMapper {
 
   PaymentMapper INSTANCE = Mappers.getMapper(PaymentMapper.class);

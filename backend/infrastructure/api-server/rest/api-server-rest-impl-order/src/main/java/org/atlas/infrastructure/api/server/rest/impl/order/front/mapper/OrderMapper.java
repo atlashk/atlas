@@ -8,9 +8,10 @@ import org.atlas.infrastructure.api.server.rest.impl.order.front.model.GetOrderS
 import org.atlas.infrastructure.api.server.rest.impl.order.front.model.OrderResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface OrderMapper {
 
   OrderMapper INSTANCE = Mappers.getMapper(OrderMapper.class);
