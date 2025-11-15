@@ -48,6 +48,6 @@ public class JpaSagaCommand extends JpaBaseEntity {
   @Column(name = "completed_at")
   private Date completedAt;
 
-  @Column(name = "compensation_error_message")
-  private String compensationErrorMessage;
+  @Column(name = "compensation_error")
+  private String compensationError;
 }

@@ -26,7 +26,9 @@ public class AddCartItemUseCaseHandler {
         .orElseGet(() -> {
           // Create new cart
           try {
-            Cart newCart = new Cart(input.getUserId());
+            Cart newCart = Cart.builder()
+                .userId(input.getUserId())
+                .build();
             cartRepository.insert(newCart);
             return newCart;
           } catch (DataIntegrityViolationException e) {

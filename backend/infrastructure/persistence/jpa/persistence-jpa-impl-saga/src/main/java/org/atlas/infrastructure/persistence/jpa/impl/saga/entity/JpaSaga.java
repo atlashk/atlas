@@ -45,6 +45,6 @@ public class JpaSaga extends JpaBaseEntity {
   @Column(name = "completed_at")
   private Date completedAt;
 
-  @Column(name = "error_message")
-  private String errorMessage;
+  @Column(name = "error")
+  private String error;
 }

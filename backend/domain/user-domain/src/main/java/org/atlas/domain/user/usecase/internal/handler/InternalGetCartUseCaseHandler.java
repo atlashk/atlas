@@ -21,7 +21,9 @@ public class InternalGetCartUseCaseHandler {
     // Get or create cart for user
     Optional<Cart> cartOpt = cartRepository.findByUserId(input.getUserId());
     if (cartOpt.isEmpty()) {
-      return new Cart(input.getUserId());
+      return Cart.builder()
+          .userId(input.getUserId())
+          .build();
     }
     Cart cart = cartOpt.get();
 

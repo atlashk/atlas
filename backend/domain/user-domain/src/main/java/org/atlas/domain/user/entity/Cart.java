@@ -30,10 +30,6 @@ public class Cart extends DomainEntity {
   @Builder.Default
   private List<CartItem> cartItems = new ArrayList<>();
 
-  public Cart(Integer userId) {
-    this.userId = userId;
-  }
-
   public BigDecimal getTotalAmount() {
     if (CollectionUtil.isEmpty(cartItems)) {
       return BigDecimal.ZERO;
@@ -46,6 +42,9 @@ public class Cart extends DomainEntity {
   // Helper methods
 
   public synchronized void addCartItem(Integer productId, Integer quantity) {
+    if (cartItems == null) {
+      cartItems = new ArrayList<>();
+    }
     cartItems.stream()
         .filter(it -> it.getProduct().getId().equals(productId))
         .findFirst()
@@ -63,6 +62,9 @@ public class Cart extends DomainEntity {
   }
 
   public synchronized void setCartItemQuantity(Integer productId, Integer quantity) {
+    if (cartItems == null) {
+      cartItems = new ArrayList<>();
+    }
     cartItems.stream()
         .filter(it -> it.getProduct().getId().equals(productId))
         .findFirst()
@@ -99,6 +101,9 @@ public class Cart extends DomainEntity {
   }
 
   public List<Integer> collectProductIds() {
+    if (CollectionUtil.isEmpty(cartItems)) {
+      return java.util.Collections.emptyList();
+    }
     return cartItems.stream()
         .map(cartItemEntity -> cartItemEntity.getProduct().getId())
         .distinct()

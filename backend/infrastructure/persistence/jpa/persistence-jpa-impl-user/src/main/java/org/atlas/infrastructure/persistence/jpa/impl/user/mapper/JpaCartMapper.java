@@ -6,14 +6,13 @@ import org.atlas.framework.util.CollectionUtil;
 import org.atlas.infrastructure.persistence.jpa.impl.user.entity.JpaCart;
 import org.atlas.infrastructure.persistence.jpa.impl.user.entity.JpaCartItem;
 import org.mapstruct.AfterMapping;
-import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(builder = @Builder(disableBuilder = true), unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface JpaCartMapper {
 
   JpaCartMapper INSTANCE = Mappers.getMapper(JpaCartMapper.class);
@@ -42,5 +41,5 @@ public interface JpaCartMapper {
   Cart toCart(JpaCart jpaCart);
 
   @Mapping(target = "product.id", source = "productId")
-  CartItem toOrderItem(JpaCartItem jpaCartItem);
+  CartItem toCartItem(JpaCartItem jpaCartItem);
 }

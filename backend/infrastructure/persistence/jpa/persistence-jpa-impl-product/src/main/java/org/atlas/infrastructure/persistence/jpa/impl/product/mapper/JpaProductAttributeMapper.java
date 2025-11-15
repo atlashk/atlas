@@ -9,7 +9,7 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(builder = @Builder(disableBuilder = true), unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface JpaProductAttributeMapper {
 
   JpaProductAttributeMapper INSTANCE = Mappers.getMapper(JpaProductAttributeMapper.class);

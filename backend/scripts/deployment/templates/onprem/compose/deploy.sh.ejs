@@ -4,12 +4,14 @@
   const obsLog = (stack.OBSERVABILITY_LOGGING_STACK || (stack.observability && stack.observability.logging && stack.observability.logging.stack) || '').toLowerCase();
   const obsMetrics = (stack.OBSERVABILITY_METRICS || (stack.observability && stack.observability.metrics) || '').toLowerCase();
   const obsTracing = (stack.OBSERVABILITY_TRACING || (stack.observability && stack.observability.tracing) || '').toLowerCase();
+  const reverseProxy = (stack.REVERSE_PROXY || (stack.reverseProxy) || '').toLowerCase();
 
   const hasLoki = obsLog === 'loki';
   const hasPrometheus = obsMetrics === 'prometheus';
   const hasZipkin = obsTracing === 'zipkin';
   const hasGrafana = hasLoki || hasPrometheus || hasZipkin;
   const hasSmtp4dev = notifEmail === 'spring';
+  const hasNginx = reverseProxy === 'nginx';
 %>
 
 #!/usr/bin/env bash
@@ -202,18 +204,38 @@ show_deployment_summary() {
 
 show_access_information() {
     echo "Service Access URLs:"
+    <% if (hasNginx) { %>
     echo "  API Gateway:   http://api.atlas.local"
+    <% } else { %>
+    echo "  API Gateway:   http://localhost:8080"
+    <% } %>
     <% if (hasGrafana) { %>
-    echo "  Grafana:       http://grafana.atlas.local (admin/admin)"
+    <% if (hasNginx) { %>
+    echo "  Grafana:       http://grafana.atlas.local (atlas/secret123456)"
+    <% } else { %>
+    echo "  Grafana:       http://localhost:3000 (atlas/secret123456)"
+    <% } %>
     <% } %>
     <% if (hasPrometheus) { %>
+    <% if (hasNginx) { %>
     echo "  Prometheus:    http://prometheus.atlas.local"
+    <% } else { %>
+    echo "  Prometheus:    http://localhost:9090"
+    <% } %>
     <% } %>
     <% if (hasZipkin) { %>
+    <% if (hasNginx) { %>
     echo "  Zipkin:        http://zipkin.atlas.local"
+    <% } else { %>
+    echo "  Zipkin:        http://localhost:9411"
+    <% } %>
     <% } %>
     <% if (hasSmtp4dev) { %>
+    <% if (hasNginx) { %>
     echo "  SMTP4Dev:      http://smtp4dev.atlas.local"
+    <% } else { %>
+    echo "  SMTP4Dev:      http://localhost:5000"
+    <% } %>
     <% } %>
     echo
 }

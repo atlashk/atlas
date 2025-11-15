@@ -40,7 +40,7 @@ public class JpaCart extends JpaBaseEntity {
       mappedBy = "cart",
       orphanRemoval = true
   )
-  private List<JpaCartItem> cartItems;
+  private List<JpaCartItem> cartItems = new ArrayList<>();
 
   public void addCartItem(JpaCartItem cartItem) {
     if (cartItems == null) {
