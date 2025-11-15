@@ -1,3 +1,31 @@
+<%
+  const apiClient = (stack['api-client'] || 'rest-restclient').toLowerCase();
+  const apiClientPrefix = (apiClient.split('-')[0] || 'rest');
+  const datasource = (stack.datasource || '').toLowerCase();
+  const kvStore = (stack['kv-store'] || '').toLowerCase();
+  const messaging = (stack.messaging || '').toLowerCase();
+  const search = (stack.search || '').toLowerCase();
+  const storage = (stack.storage || '').toLowerCase();
+  const notificationEmail = ((stack.notification && stack.notification.email) || '').toLowerCase();
+  const observabilityLoggingStack = ((stack.observability && stack.observability.logging && stack.observability.logging.stack) || '').toLowerCase();
+  const observabilityMetrics = ((stack.observability && stack.observability.metrics) || '').toLowerCase();
+  const observabilityTracing = ((stack.observability && stack.observability.tracing) || '').toLowerCase();
+  const reverseProxy = (stack.reverseProxy || '').toLowerCase();
+
+  const hasMysql = datasource === 'mysql';
+  const hasPostgres = datasource === 'postgres' || datasource === 'postgresql';
+  const hasRedis = kvStore === 'redis';
+  const hasKafka = messaging === 'kafka';
+  const hasRabbit = messaging === 'rabbitmq';
+  const hasElasticsearch = search === 'elasticsearch';
+  const hasMinio = storage === 'minio';
+  const hasSmtp4dev = notificationEmail === 'spring';
+  const hasLoki = observabilityLoggingStack === 'loki';
+  const hasPrometheus = observabilityMetrics === 'prometheus';
+  const hasZipkin = observabilityTracing === 'zipkin';
+  const hasGrafana = hasLoki || hasPrometheus || hasZipkin;
+  const hasNginx = reverseProxy === 'nginx';
+%>
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -35,12 +63,20 @@ spec:
         - name: api-gateway
           image: atlas-api-gateway:latest
           imagePullPolicy: Never
-          envFrom:
-            - configMapRef:
-                name: api-gateway-config
           ports:
             - containerPort: 8080
               name: http
+          env:
+            <% if (hasRedis) { %>
+            - name: REDIS_HOST
+              value: "redis"
+            - name: REDIS_PORT
+              value: "6379"
+            <% } %>
+            <% if (hasZipkin) { %>
+            - name: ZIPKIN_ENDPOINT
+              value: "http://zipkin:9411/api/v2/spans"
+            <% } %>
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness

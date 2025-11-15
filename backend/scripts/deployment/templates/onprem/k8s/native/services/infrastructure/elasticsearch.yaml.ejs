@@ -12,7 +12,7 @@ metadata:
     tier: infrastructure
 type: Opaque
 data:
-  elastic-password: YWRtaW5AMTIz
+  elasticsearch-password: c2VjcmV0MTIzNDU2
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -46,7 +46,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: elasticsearch-secret
-                  key: elastic-password
+                  key: elasticsearch-password
           ports:
             - containerPort: 9200
               name: http

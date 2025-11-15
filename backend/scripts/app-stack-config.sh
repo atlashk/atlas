@@ -58,9 +58,9 @@ select_option() {
 
     # If only one option, auto-select it
     if [ $max_index -eq 1 ]; then
-        echo -e "  ${CYAN}▶ ${GREEN}1${NC}) "
-        echo -e "${options[0]}${NC}"
+        echo -e "  ${CYAN}▶ ${GREEN}1${NC}) ${options[0]}${NC}"
         echo
+        sleep 2
         return 0
     fi
 
@@ -123,6 +123,8 @@ select_option() {
         esac
     done
 
+    echo
+    sleep 1
     return $((selected-1))
 }
 
@@ -145,8 +147,6 @@ case $platform_choice in
         platform="onprem-compose"
         ;;
 esac
-echo
-sleep 0.3
 
 # =============================================================================
 # API SERVER CONFIGURATION
@@ -162,25 +162,6 @@ case $api_server_choice in
         api_server="rest"
         ;;
 esac
-echo
-sleep 0.3
-
-# =============================================================================
-# REVERSE PROXY CONFIGURATION
-# =============================================================================
-echo -e "${BLUE}${BOLD}Reverse Proxy Configuration${NC}"
-select_option "Nginx ${YELLOW}(default)${NC}" "None"
-reverse_proxy_choice=$((1 + $?))
-case $reverse_proxy_choice in
-    2)
-        reverse_proxy="none"
-        ;;
-    *)
-        reverse_proxy="nginx"
-        ;;
-esac
-echo
-sleep 0.3
 
 # =============================================================================
 # API CLIENT CONFIGURATION
@@ -210,7 +191,6 @@ else
     esac
 fi
 echo
-sleep 0.3
 
 # =============================================================================
 # DATASOURCE CONFIGURATION
@@ -226,8 +206,6 @@ case $datasource_choice in
         datasource="mysql"
         ;;
 esac
-echo
-sleep 0.3
 
 # =============================================================================
 # DISCOVERY CLIENT CONFIGURATION
@@ -235,22 +213,18 @@ sleep 0.3
 echo -e "${BLUE}${BOLD}Discovery Client Configuration${NC}"
 if [[ "$platform" == onprem-k8s* ]]; then
     discovery_client="kubernetes"
-    echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Kubernetes Built-in DNS ${YELLOW}(default)${NC}"
+    select_option "Kubernetes Built-in DNS ${YELLOW}(default)${NC}"
 else
     discovery_client="eureka"
-    echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Eureka ${YELLOW}(default)${NC}"
+    select_option "Eureka ${YELLOW}(default)${NC}"
 fi
-echo
-sleep 0.3
 
 # =============================================================================
 # FILE - CSV CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}File - CSV Configuration${NC}"
-echo -e "  ${CYAN}▶ ${GREEN}1${NC}) OpenCSV ${YELLOW}(default)${NC}"
+select_option "OpenCSV ${YELLOW}(default)${NC}"
 file_csv="opencsv"
-echo
-sleep 0.3
 
 # =============================================================================
 # FILE - EXCEL CONFIGURATION
@@ -266,44 +240,28 @@ case $excel_choice in
         file_excel="poi"
         ;;
 esac
-echo
-sleep 0.3
 
 # =============================================================================
 # FILE - PDF CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}File - PDF Configuration${NC}"
-echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Apache PDFBox ${YELLOW}(default)${NC}"
+select_option "Apache PDFBox ${YELLOW}(default)${NC}"
 file_pdf="pdfbox"
-echo
-sleep 0.3
 
 # =============================================================================
 # KEY-VALUE STORE CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Key-Value Store Configuration${NC}"
-echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Redis ${YELLOW}(default)${NC}"
+select_option "Redis ${YELLOW}(default)${NC}"
 kv_store="redis"
-echo
-sleep 0.3
 
 # =============================================================================
 # REDIS CONFIGURATION
 # =============================================================================
 if [[ "$kv_store" == "redis" ]]; then
     echo -e "${BLUE}${BOLD}Redis Deployment Configuration${NC}"
-    select_option "Standalone ${YELLOW}(default)${NC}" "Cluster"
-    redis_choice=$((1 + $?))
-    case $redis_choice in
-        2)
-            redis="cluster"
-            ;;
-        *)
-            redis="standalone"
-            ;;
-    esac
-    echo
-    sleep 0.3
+    select_option "Standalone ${YELLOW}(default)${NC}"
+    redis="standalone"
 fi
 
 # =============================================================================
@@ -320,17 +278,13 @@ case $messaging_choice in
         messaging="kafka"
         ;;
 esac
-echo
-sleep 0.3
 
 # =============================================================================
 # MIGRATION CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Migration Configuration${NC}"
-echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Flyway ${YELLOW}(default)${NC}"
+select_option "Flyway ${YELLOW}(default)${NC}"
 migration="flyway"
-echo
-sleep 0.3
 
 # =============================================================================
 # EMAIL NOTIFICATION CONFIGURATION
@@ -346,8 +300,6 @@ case $email_choice in
         notification_email="spring"
         ;;
 esac
-echo
-sleep 0.3
 
 # =============================================================================
 # OBSERVABILITY LOGGING STACK CONFIGURATION
@@ -363,17 +315,13 @@ case $logging_choice in
         logging_stack="loki"
         ;;
 esac
-echo
-sleep 0.3
 
 # =============================================================================
 # OBSERVABILITY LOGGING FRAMEWORK CONFIGURATION
 # =============================================================================
 echo -e "${BLUE}${BOLD}Observability Logging Framework Configuration${NC}"
-echo -e "  ${CYAN}▶ ${GREEN}1${NC}) Logback ${YELLOW}(default)${NC}"
+select_option "Logback ${YELLOW}(default)${NC}"
 logging_framework="logback"
-echo
-sleep 0.3
 
 # =============================================================================
 # OBSERVABILITY METRICS CONFIGURATION
@@ -389,8 +337,6 @@ case $metrics_choice in
         metrics="prometheus"
         ;;
 esac
-echo
-sleep 0.3
 
 # =============================================================================
 # OBSERVABILITY TRACING CONFIGURATION
@@ -406,8 +352,6 @@ case $tracing_choice in
         tracing="zipkin"
         ;;
 esac
-echo
-sleep 0.3
 
 # =============================================================================
 # SCHEDULER CONFIGURATION
@@ -423,8 +367,6 @@ case $scheduler_choice in
         scheduler="quartz"
         ;;
 esac
-echo
-sleep 0.3
 
 # =============================================================================
 # SEARCH CONFIGURATION
@@ -440,8 +382,6 @@ case $search_choice in
         search="database"
         ;;
 esac
-echo
-sleep 0.3
 
 # =============================================================================
 # STORAGE CONFIGURATION
@@ -458,8 +398,6 @@ case $storage_choice in
         storage="filesystem"
         ;;
 esac
-echo
-sleep 0.3
 
 # =============================================================================
 # TEMPLATE ENGINE CONFIGURATION
@@ -475,24 +413,41 @@ case $template_choice in
         template="freemarker"
         ;;
 esac
-echo
-sleep 0.3
+
+# =============================================================================
+# REVERSE PROXY CONFIGURATION
+# =============================================================================
+echo -e "${BLUE}${BOLD}Reverse Proxy Configuration${NC}"
+if [[ "$platform" == onprem-k8s* ]]; then
+    select_option "Nginx ${YELLOW}(default)${NC}"
+    reverse_proxy="nginx"
+else
+    select_option "Nginx ${YELLOW}(default)${NC}" "None"
+    reverse_proxy_choice=$((1 + $?))
+    case $reverse_proxy_choice in
+        2)
+            reverse_proxy="none"
+            ;;
+        *)
+            reverse_proxy="nginx"
+            ;;
+    esac
+fi
 
 echo -e "${PURPLE}${BOLD}Generating ${APP_STACK_FILE} file...${NC}"
 sleep 2
 
 # Create the configuration file
 cat > "$APP_STACK_FILE_PATH" << EOF
+platform=$platform
 api-server=$api_server
 api-client=$api_client
-reverse-proxy=$reverse_proxy
-kv-store=$kv_store
-config=yaml
 datasource=$datasource
 discovery-client=$discovery_client
 file.csv=$file_csv
 file.excel=$file_excel
 file.pdf=$file_pdf
+kv-store=$kv_store
 messaging=$messaging
 migration=$migration
 notification.email=$notification_email
@@ -501,7 +456,7 @@ observability.logging.framework=$logging_framework
 observability.metrics=$metrics
 observability.tracing=$tracing
 persistence=jpa
-platform=$platform
+reverse-proxy=$reverse_proxy
 scheduler=$scheduler
 search=$search
 storage=$storage

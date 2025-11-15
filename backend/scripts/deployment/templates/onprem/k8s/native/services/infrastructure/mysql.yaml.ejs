@@ -12,7 +12,8 @@ metadata:
     tier: infrastructure
 type: Opaque
 data:
-  mysql-root-password: YWRtaW5AMTIz
+  mysql-root-password: c2VjcmV0MTIzNDU2
+  mysql-password: c2VjcmV0MTIzNDU2
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -22,12 +23,22 @@ metadata:
     app: mysql
     tier: infrastructure
 data:
-  init_db.sql: |
+  initdb.sh: |
+    #!/bin/bash
+    set -e
+    cat <<EOF | mysql -uroot -p"${MYSQL_ROOT_PASSWORD}"
     CREATE DATABASE db_notification;
     CREATE DATABASE db_order;
     CREATE DATABASE db_payment;
     CREATE DATABASE db_product;
     CREATE DATABASE db_user;
+    GRANT ALL PRIVILEGES ON db_notification.* TO '${MYSQL_USER}'@'%';
+    GRANT ALL PRIVILEGES ON db_order.* TO '${MYSQL_USER}'@'%';
+    GRANT ALL PRIVILEGES ON db_payment.* TO '${MYSQL_USER}'@'%';
+    GRANT ALL PRIVILEGES ON db_product.* TO '${MYSQL_USER}'@'%';
+    GRANT ALL PRIVILEGES ON db_user.* TO '${MYSQL_USER}'@'%';
+    FLUSH PRIVILEGES;
+    EOF
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -57,6 +68,13 @@ spec:
                 secretKeyRef:
                   name: mysql-secret
                   key: mysql-root-password
+            - name: MYSQL_USER
+              value: "atlas"
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: mysql-password
           args:
             - --default-authentication-plugin=mysql_native_password
             - --character-set-server=utf8mb4
@@ -104,6 +122,7 @@ spec:
         - name: mysql-init
           configMap:
             name: mysql-init
+            defaultMode: 0755
   volumeClaimTemplates:
     - metadata:
         name: mysql-data

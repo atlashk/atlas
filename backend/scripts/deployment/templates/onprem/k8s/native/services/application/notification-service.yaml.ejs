@@ -1,27 +1,30 @@
 <%
+  const apiClient = (stack['api-client'] || 'rest-restclient').toLowerCase();
+  const apiClientPrefix = (apiClient.split('-')[0] || 'rest');
   const datasource = (stack.datasource || '').toLowerCase();
+  const kvStore = (stack['kv-store'] || '').toLowerCase();
   const messaging = (stack.messaging || '').toLowerCase();
-  const storage = (stack.storage || '').toLowerCase();
-  const notificationEmail = (stack.notificationEmail || (stack.notification && stack.notification.email) || '').toLowerCase();
-  const observabilityLoggingStack = (stack.observabilityLoggingStack || (stack.observability && stack.observability.logging && stack.observability.logging.stack) || '').toLowerCase();
-  const observabilityMetrics = (stack.observabilityMetrics || (stack.observability && stack.observability.metrics) || '').toLowerCase();
-  const observabilityTracing = (stack.observabilityTracing || (stack.observability && stack.observability.tracing) || '').toLowerCase();
-  const reverseProxy = (stack.reverseProxy || '').toLowerCase();
   const search = (stack.search || '').toLowerCase();
+  const storage = (stack.storage || '').toLowerCase();
+  const notificationEmail = ((stack.notification && stack.notification.email) || '').toLowerCase();
+  const observabilityLoggingStack = ((stack.observability && stack.observability.logging && stack.observability.logging.stack) || '').toLowerCase();
+  const observabilityMetrics = ((stack.observability && stack.observability.metrics) || '').toLowerCase();
+  const observabilityTracing = ((stack.observability && stack.observability.tracing) || '').toLowerCase();
+  const reverseProxy = (stack.reverseProxy || '').toLowerCase();
 
-  const hasRedis = true; // Always included per deploy.sh
   const hasMysql = datasource === 'mysql';
   const hasPostgres = datasource === 'postgres' || datasource === 'postgresql';
+  const hasRedis = kvStore === 'redis';
   const hasKafka = messaging === 'kafka';
   const hasRabbit = messaging === 'rabbitmq';
+  const hasElasticsearch = search === 'elasticsearch';
   const hasMinio = storage === 'minio';
   const hasSmtp4dev = notificationEmail === 'spring';
   const hasLoki = observabilityLoggingStack === 'loki';
   const hasPrometheus = observabilityMetrics === 'prometheus';
   const hasZipkin = observabilityTracing === 'zipkin';
-  const hasNginx = reverseProxy === 'nginx';
   const hasGrafana = hasLoki || hasPrometheus || hasZipkin;
-  const hasElasticsearch = search === 'elasticsearch';
+  const hasNginx = reverseProxy === 'nginx';
 %>
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -60,27 +63,25 @@ spec:
         - name: notification-service
           image: atlas-notification-service:latest
           imagePullPolicy: Never
-          envFrom:
-            - configMapRef:
-                name: notification-service-config
-            - secretRef:
-                name: notification-service-secret
+          ports:
+            - containerPort: 8085
+              name: http
           env:
             <% if (hasMysql) { %>
             - name: DB_URL
               value: "jdbc:mysql://mysql:3306/db_notification?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
             - name: DB_USERNAME
-              value: "root"
+              value: "atlas"
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: mysql-secret
-                  key: mysql-root-password
+                  key: mysql-password
             <% } else if (hasPostgres) { %>
             - name: DB_URL
               value: "jdbc:postgresql://postgres:5432/db_notification"
             - name: DB_USERNAME
-              value: "root"
+              value: "atlas"
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -102,20 +103,17 @@ spec:
             - name: RABBITMQ_PORT
               value: "5672"
             - name: RABBITMQ_USERNAME
-              value: "admin"
+              value: "atlas"
             - name: RABBITMQ_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: rabbitmq-secret
-                  key: rabbitmq-default-pass
+                  key: rabbitmq-password
             <% } %>
             <% if (hasZipkin) { %>
             - name: ZIPKIN_ENDPOINT
               value: "http://zipkin:9411/api/v2/spans"
             <% } %>
-          ports:
-            - containerPort: 8085
-              name: http
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness

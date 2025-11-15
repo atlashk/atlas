@@ -1,3 +1,8 @@
+<%
+  const kvStore = (stack['kv-store'] || '').toLowerCase();
+  const hasRedis = kvStore === 'redis';
+%>
+<% if (hasRedis) { -%>
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -82,3 +87,4 @@ spec:
       targetPort: 6379
       name: redis
   type: ClusterIP
+<% } -%>
