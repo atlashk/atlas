@@ -66,6 +66,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -162,6 +163,7 @@ credentials/
 config/secrets/
 *.secret
 .env.secrets
+!backend/infrastructure/auth-server/src/main/resources/secret/default.key
 
 # =============================================================================
 # Database
@@ -201,7 +203,6 @@ log/
 .temp/
 .tmp/
 *.tmp
-*.bak
 *.swp
 *~.nib
 .cache/

@@ -46,9 +46,6 @@ public class Cart extends DomainEntity {
       cartItems = new ArrayList<>();
     }
     cartItems.stream()
-        .filter(it -> it.getProduct().getId().equals(productId))
-        .findFirst()
-        .ifPresentOrElse(
             it -> it.setQuantity(it.getQuantity() + quantity),
             () -> {
               // Add new cart item
@@ -66,9 +63,6 @@ public class Cart extends DomainEntity {
       cartItems = new ArrayList<>();
     }
     cartItems.stream()
-        .filter(it -> it.getProduct().getId().equals(productId))
-        .findFirst()
-        .ifPresentOrElse(
             it -> it.setQuantity(quantity),
             () -> {
               // Add new cart item
@@ -105,8 +99,5 @@ public class Cart extends DomainEntity {
       return java.util.Collections.emptyList();
     }
     return cartItems.stream()
-        .map(cartItemEntity -> cartItemEntity.getProduct().getId())
-        .distinct()
-        .toList();
   }
 }
