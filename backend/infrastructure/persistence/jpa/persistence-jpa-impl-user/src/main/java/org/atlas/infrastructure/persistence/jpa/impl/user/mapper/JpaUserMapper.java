@@ -4,9 +4,10 @@ import org.atlas.domain.user.entity.User;
 import org.atlas.infrastructure.persistence.jpa.impl.user.entity.JpaUser;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(builder = @Builder(disableBuilder = true))
+@Mapper(builder = @Builder(disableBuilder = true), unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface JpaUserMapper {
 
   JpaUserMapper INSTANCE = Mappers.getMapper(JpaUserMapper.class);

@@ -10,9 +10,10 @@ import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(builder = @Builder(disableBuilder = true))
+@Mapper(builder = @Builder(disableBuilder = true), unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface JpaOrderMapper {
 
   JpaOrderMapper INSTANCE = Mappers.getMapper(JpaOrderMapper.class);

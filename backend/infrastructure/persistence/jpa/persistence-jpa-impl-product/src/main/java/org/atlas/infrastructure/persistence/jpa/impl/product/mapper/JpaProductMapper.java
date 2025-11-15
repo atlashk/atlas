@@ -10,6 +10,7 @@ import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
 @Mapper(
@@ -19,7 +20,9 @@ import org.mapstruct.factory.Mappers;
         JpaBrandMapper.class,
         JpaCategoryMapper.class
     },
-    builder = @Builder(disableBuilder = true))
+    builder = @Builder(disableBuilder = true),
+    unmappedTargetPolicy = ReportingPolicy.IGNORE
+)
 public interface JpaProductMapper {
 
   JpaProductMapper INSTANCE = Mappers.getMapper(JpaProductMapper.class);

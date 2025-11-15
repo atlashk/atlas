@@ -8,10 +8,9 @@ import org.atlas.domain.product.entity.ProductDetails;
 import org.atlas.infrastructure.search.elasticsearch.impl.product.document.ElasticsearchProduct;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
+import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ElasticsearchProductMapper {
 
   @Mapping(target = "productId", source = "id")

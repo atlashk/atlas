@@ -656,11 +656,11 @@ services:
     environment:
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
       <%_ if (hasMysql) { -%>
-      - DB_URL=jdbc:mysql://mysql:3306/db_payment?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
+      - DB_URL=jdbc:mysql://mysql:3306/db_notification?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_USERNAME=${MYSQL_USERNAME:-atlas}
       - DB_PASSWORD=${MYSQL_PASSWORD:-secret123456}
       <%_ } else if (hasPostgres) { -%>
-      - DB_URL=jdbc:postgresql://postgres:5432/db_payment
+      - DB_URL=jdbc:postgresql://postgres:5432/db_notification
       - DB_USERNAME=${POSTGRES_USERNAME:-atlas}
       - DB_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
       <%_ } -%>

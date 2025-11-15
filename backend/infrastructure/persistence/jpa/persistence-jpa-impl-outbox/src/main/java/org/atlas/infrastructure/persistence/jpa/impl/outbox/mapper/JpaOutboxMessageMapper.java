@@ -4,9 +4,10 @@ import org.atlas.framework.messaging.outbox.OutboxMessage;
 import org.atlas.infrastructure.persistence.jpa.impl.outbox.entity.JpaOutboxMessage;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(builder = @Builder(disableBuilder = true))
+@Mapper(builder = @Builder(disableBuilder = true), unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface JpaOutboxMessageMapper {
 
   JpaOutboxMessageMapper INSTANCE = Mappers.getMapper(JpaOutboxMessageMapper.class);
