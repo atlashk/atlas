@@ -40,11 +40,11 @@ services:
       - MYSQL_USER=${MYSQL_USER:-atlas}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD:-secret123456}
     volumes:
-      - ./config/mysql/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql:ro
+      - ./config/mysql/initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
       - mysql-data:/var/lib/mysql
     command: --default-authentication-plugin=mysql_native_password
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psecret123456"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p\"$MYSQL_ROOT_PASSWORD\" || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -63,10 +63,10 @@ services:
       - POSTGRES_USER=${POSTGRES_USER:-atlas}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
     volumes:
-      - ./config/postgres/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql:ro
+      - ./config/postgres/initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "root"]
+      test: ["CMD-SHELL", "pg_isready -U \"$POSTGRES_USER\" -h localhost || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -349,21 +349,27 @@ services:
     ports:
       - "8081:8081"
     depends_on:
-      - eureka-server
-      <%_ if (hasRedis) { -%>
-      - redis
-      <%_ } -%>
-      <%_ if (hasKafka) { -%>
-      - kafka
-      <%_ } -%>
-      <%_ if (hasRabbit) { -%>
-      - rabbitmq
-      <%_ } -%>
+      eureka-server:
+        condition: service_healthy
       <%_ if (hasMysql) { -%>
-      - mysql
+      mysql:
+        condition: service_healthy
       <%_ } -%>
       <%_ if (hasPostgres) { -%>
-      - postgres
+      postgres:
+        condition: service_healthy
+      <%_ } -%>
+      <%_ if (hasRedis) { -%>
+      redis:
+        condition: service_healthy
+      <%_ } -%>
+      <%_ if (hasKafka) { -%>
+      kafka:
+        condition: service_healthy
+      <%_ } -%>
+      <%_ if (hasRabbit) { -%>
+      rabbitmq:
+        condition: service_healthy
       <%_ } -%>
     environment:
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
@@ -371,16 +377,10 @@ services:
       - DB_URL=jdbc:mysql://mysql:3306/db_user?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_USERNAME=${MYSQL_USERNAME:-atlas}
       - DB_PASSWORD=${MYSQL_PASSWORD:-secret123456}
-      - DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - DB_QUARTZ_USERNAME=${MYSQL_USERNAME:-atlas}
-      - DB_QUARTZ_PASSWORD=${MYSQL_PASSWORD:-secret123456}
       <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_user
       - DB_USERNAME=${POSTGRES_USERNAME:-atlas}
       - DB_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
-      - DB_QUARTZ_URL=jdbc:postgresql://postgres:5432/db_quartz
-      - DB_QUARTZ_USERNAME=${POSTGRES_USERNAME:-atlas}
-      - DB_QUARTZ_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
       <%_ } -%>
       <%_ if (hasRedis) { -%>
       - REDIS_HOST=redis
@@ -414,24 +414,31 @@ services:
     ports:
       - "8082:8082"
     depends_on:
-      - eureka-server
-      <%_ if (hasRedis) { -%>
-      - redis
-      <%_ } -%>
-      <%_ if (hasKafka) { -%>
-      - kafka
-      <%_ } -%>
-      <%_ if (hasRabbit) { -%>
-      - rabbitmq
-      <%_ } -%>
-      <%_ if (hasElasticsearch) { -%>
-      - elasticsearch
-      <%_ } -%>
+      eureka-server:
+        condition: service_healthy
       <%_ if (hasMysql) { -%>
-      - mysql
+      mysql:
+        condition: service_healthy
       <%_ } -%>
       <%_ if (hasPostgres) { -%>
-      - postgres
+      postgres:
+        condition: service_healthy
+      <%_ } -%>
+      <%_ if (hasRedis) { -%>
+      redis:
+        condition: service_healthy
+      <%_ } -%>
+      <%_ if (hasKafka) { -%>
+      kafka:
+        condition: service_healthy
+      <%_ } -%>
+      <%_ if (hasRabbit) { -%>
+      rabbitmq:
+        condition: service_healthy
+      <%_ } -%>
+      <%_ if (hasElasticsearch) { -%>
+      elasticsearch:
+        condition: service_healthy
       <%_ } -%>
     environment:
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
@@ -439,16 +446,10 @@ services:
       - DB_URL=jdbc:mysql://mysql:3306/db_product?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_USERNAME=${MYSQL_USERNAME:-atlas}
       - DB_PASSWORD=${MYSQL_PASSWORD:-secret123456}
-      - DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - DB_QUARTZ_USERNAME=${MYSQL_USERNAME:-atlas}
-      - DB_QUARTZ_PASSWORD=${MYSQL_PASSWORD:-secret123456}
       <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_product
       - DB_USERNAME=${POSTGRES_USERNAME:-atlas}
       - DB_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
-      - DB_QUARTZ_URL=jdbc:postgresql://postgres:5432/db_quartz
-      - DB_QUARTZ_USERNAME=${POSTGRES_USERNAME:-atlas}
-      - DB_QUARTZ_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
       <%_ } -%>
       <%_ if (hasRedis) { -%>
       - REDIS_HOST=redis
@@ -493,21 +494,27 @@ services:
     ports:
       - "8083:8083"
     depends_on:
-      - eureka-server
-      <%_ if (hasRedis) { -%>
-      - redis
-      <%_ } -%>
-      <%_ if (hasKafka) { -%>
-      - kafka
-      <%_ } -%>
-      <%_ if (hasRabbit) { -%>
-      - rabbitmq
-      <%_ } -%>
+      eureka-server:
+        condition: service_healthy
       <%_ if (hasMysql) { -%>
-      - mysql
+      mysql:
+        condition: service_healthy
       <%_ } -%>
       <%_ if (hasPostgres) { -%>
-      - postgres
+      postgres:
+        condition: service_healthy
+      <%_ } -%>
+      <%_ if (hasRedis) { -%>
+      redis:
+        condition: service_healthy
+      <%_ } -%>
+      <%_ if (hasKafka) { -%>
+      kafka:
+        condition: service_healthy
+      <%_ } -%>
+      <%_ if (hasRabbit) { -%>
+      rabbitmq:
+        condition: service_healthy
       <%_ } -%>
     environment:
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
@@ -515,16 +522,10 @@ services:
       - DB_URL=jdbc:mysql://mysql:3306/db_order?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_USERNAME=${MYSQL_USERNAME:-atlas}
       - DB_PASSWORD=${MYSQL_PASSWORD:-secret123456}
-      - DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - DB_QUARTZ_USERNAME=${MYSQL_USERNAME:-atlas}
-      - DB_QUARTZ_PASSWORD=${MYSQL_PASSWORD:-secret123456}
       <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_order
       - DB_USERNAME=${POSTGRES_USERNAME:-atlas}
       - DB_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
-      - DB_QUARTZ_URL=jdbc:postgresql://postgres:5432/db_quartz
-      - DB_QUARTZ_USERNAME=${POSTGRES_USERNAME:-atlas}
-      - DB_QUARTZ_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
       <%_ } -%>
       <%_ if (hasRedis) { -%>
       - REDIS_HOST=redis
@@ -565,21 +566,27 @@ services:
     ports:
       - "8084:8084"
     depends_on:
-      - eureka-server
-      <%_ if (hasRedis) { -%>
-      - redis
-      <%_ } -%>
-      <%_ if (hasKafka) { -%>
-      - kafka
-      <%_ } -%>
-      <%_ if (hasRabbit) { -%>
-      - rabbitmq
-      <%_ } -%>
+      eureka-server:
+        condition: service_healthy
       <%_ if (hasMysql) { -%>
-      - mysql
+      mysql:
+        condition: service_healthy
       <%_ } -%>
       <%_ if (hasPostgres) { -%>
-      - postgres
+      postgres:
+        condition: service_healthy
+      <%_ } -%>
+      <%_ if (hasRedis) { -%>
+      redis:
+        condition: service_healthy
+      <%_ } -%>
+      <%_ if (hasKafka) { -%>
+      kafka:
+        condition: service_healthy
+      <%_ } -%>
+      <%_ if (hasRabbit) { -%>
+      rabbitmq:
+        condition: service_healthy
       <%_ } -%>
     environment:
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
@@ -587,16 +594,10 @@ services:
       - DB_URL=jdbc:mysql://mysql:3306/db_payment?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_USERNAME=${MYSQL_USERNAME:-atlas}
       - DB_PASSWORD=${MYSQL_PASSWORD:-secret123456}
-      - DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - DB_QUARTZ_USERNAME=${MYSQL_USERNAME:-atlas}
-      - DB_QUARTZ_PASSWORD=${MYSQL_PASSWORD:-secret123456}
       <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_payment
       - DB_USERNAME=${POSTGRES_USERNAME:-atlas}
       - DB_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
-      - DB_QUARTZ_URL=jdbc:postgresql://postgres:5432/db_quartz
-      - DB_QUARTZ_USERNAME=${POSTGRES_USERNAME:-atlas}
-      - DB_QUARTZ_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
       <%_ } -%>
       <%_ if (hasRedis) { -%>
       - REDIS_HOST=redis
@@ -630,15 +631,27 @@ services:
     ports:
       - "8085:8085"
     depends_on:
-      - eureka-server
+      eureka-server:
+        condition: service_healthy
+      <%_ if (hasMysql) { -%>
+      mysql:
+        condition: service_healthy
+      <%_ } -%>
+      <%_ if (hasPostgres) { -%>
+      postgres:
+        condition: service_healthy
+      <%_ } -%>
       <%_ if (hasRedis) { -%>
-      - redis
+      redis:
+        condition: service_healthy
       <%_ } -%>
       <%_ if (hasKafka) { -%>
-      - kafka
+      kafka:
+        condition: service_healthy
       <%_ } -%>
       <%_ if (hasRabbit) { -%>
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
       <%_ } -%>
     environment:
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
@@ -646,16 +659,10 @@ services:
       - DB_URL=jdbc:mysql://mysql:3306/db_payment?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
       - DB_USERNAME=${MYSQL_USERNAME:-atlas}
       - DB_PASSWORD=${MYSQL_PASSWORD:-secret123456}
-      - DB_QUARTZ_URL=jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - DB_QUARTZ_USERNAME=${MYSQL_USERNAME:-atlas}
-      - DB_QUARTZ_PASSWORD=${MYSQL_PASSWORD:-secret123456}
       <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_payment
       - DB_USERNAME=${POSTGRES_USERNAME:-atlas}
       - DB_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
-      - DB_QUARTZ_URL=jdbc:postgresql://postgres:5432/db_quartz
-      - DB_QUARTZ_USERNAME=${POSTGRES_USERNAME:-atlas}
-      - DB_QUARTZ_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
       <%_ } -%>
       <%_ if (hasRedis) { -%>
       - REDIS_HOST=redis

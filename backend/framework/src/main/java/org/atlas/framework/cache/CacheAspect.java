@@ -11,7 +11,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.spel.SpelParser;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
 /**
@@ -26,12 +26,11 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Aspect
-@ConditionalOnBean(CacheService.class)
 @RequiredArgsConstructor
 @Slf4j
 public class CacheAspect {
 
-  private final CacheService cacheService;
+  private final ObjectProvider<CacheService> cacheServiceProvider;
   private final SpelParser spelParser;
 
   /**
@@ -39,6 +38,13 @@ public class CacheAspect {
    */
   @Around("@annotation(cache)")
   public Object handleCaching(ProceedingJoinPoint joinPoint, Cache cache) throws Throwable {
+    // If CacheService is not available (e.g., due to KvStoreService missing), skip caching gracefully
+    CacheService cacheService = cacheServiceProvider.getIfAvailable();
+    if (cacheService == null) {
+      // No cache backend available; just proceed without caching
+      return joinPoint.proceed();
+    }
+
     // Evaluate SpEL
     MethodSignature signature = (MethodSignature) joinPoint.getSignature();
     Method method = signature.getMethod();

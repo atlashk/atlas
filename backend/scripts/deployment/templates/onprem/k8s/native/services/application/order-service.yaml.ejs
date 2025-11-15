@@ -78,30 +78,12 @@ spec:
                 secretKeyRef:
                   name: mysql-secret
                   key: mysql-root-password
-            - name: DB_QUARTZ_URL
-              value: "jdbc:mysql://mysql:3306/db_quartz?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
-            - name: DB_QUARTZ_USERNAME
-              value: "root"
-            - name: DB_QUARTZ_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mysql-secret
-                  key: mysql-root-password
             <% } else if (hasPostgres) { %>
             - name: DB_URL
               value: "jdbc:postgresql://postgres:5432/db_order"
             - name: DB_USERNAME
               value: "root"
             - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-secret
-                  key: postgres-password
-            - name: DB_QUARTZ_URL
-              value: "jdbc:postgresql://postgres:5432/db_quartz"
-            - name: DB_QUARTZ_USERNAME
-              value: "root"
-            - name: DB_QUARTZ_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: postgres-secret

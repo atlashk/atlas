@@ -1,0 +1,19 @@
+#!/bin/bash
+set -e
+
+echo "Initializing databases and granting privileges to ${MYSQL_USER}"
+
+cat <<EOF | mysql -uroot -p"${MYSQL_ROOT_PASSWORD}"
+CREATE DATABASE db_notification;
+CREATE DATABASE db_order;
+CREATE DATABASE db_payment;
+CREATE DATABASE db_product;
+CREATE DATABASE db_user;
+
+GRANT ALL PRIVILEGES ON db_notification.* TO '${MYSQL_USER}'@'%';
+GRANT ALL PRIVILEGES ON db_order.* TO '${MYSQL_USER}'@'%';
+GRANT ALL PRIVILEGES ON db_payment.* TO '${MYSQL_USER}'@'%';
+GRANT ALL PRIVILEGES ON db_product.* TO '${MYSQL_USER}'@'%';
+GRANT ALL PRIVILEGES ON db_user.* TO '${MYSQL_USER}'@'%';
+FLUSH PRIVILEGES;
+EOF

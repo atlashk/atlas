@@ -6,20 +6,26 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConditionalOnBean(LockService.class)
 @Aspect
 @RequiredArgsConstructor
 @Slf4j
 public class LockAspect {
 
-  private final LockService lockService;
+  private final ObjectProvider<LockService> lockServiceProvider;
 
   @Around("@annotation(lock)")
   public Object applyLock(ProceedingJoinPoint joinPoint, Lock lock) throws Throwable {
+    // If LockService is not available (e.g., due to KvStoreService missing), skip caching gracefully
+    LockService lockService = lockServiceProvider.getIfAvailable();
+    if (lockService == null) {
+      // No cache backend available; just proceed without caching
+      return joinPoint.proceed();
+    }
+
     String key = lock.key();
     Duration waitTime = Duration.of(lock.waitTime(), lock.timeUnit().toChronoUnit());
     Duration leaseTime = Duration.of(lock.leaseTime(), lock.timeUnit().toChronoUnit());

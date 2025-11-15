@@ -113,6 +113,20 @@ ensure_template_deps() {
   esac
 }
 
+normalize_line_endings_to_lf() {
+  local dir="$1"
+  if [[ -d "$dir" ]]; then
+    if command -v dos2unix >/dev/null 2>&1; then
+      find "$dir" -type f \( -name "*.sh" -o -name "*.sql" \) -exec dos2unix -q {} \;
+    else
+      while IFS= read -r -d '' f; do
+        awk '{ sub(/\r$/, ""); print }' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+      done < <(find "$dir" -type f \( -name "*.sh" -o -name "*.sql" \) -print0)
+    fi
+    find "$dir" -type f -name "*.sh" -exec chmod +x {} \;
+  fi
+}
+
 read_platform() {
   if [[ -f "$APP_STACK_FILE" ]]; then
     grep '^platform=' "$APP_STACK_FILE" | cut -d'=' -f2 | tr -d '[:space:]'
@@ -147,6 +161,13 @@ render_onprem_k8s_native_files() {
     --cfg "$APP_STACK_FILE"
 }
 
+reset_deployment_generated_dir() {
+  if [[ -d "$DEPLOYMENT_GENERATED_DIR" ]]; then
+    rm -rf "$DEPLOYMENT_GENERATED_DIR"
+  fi
+  mkdir -p "$DEPLOYMENT_GENERATED_DIR"
+}
+
 main() {
   info "Atlas on-premise setup starting..."
 
@@ -169,12 +190,15 @@ main() {
   info "Detected platform: $platform"
 
   # Step 2: Render templates
+  reset_deployment_generated_dir
   case "$platform" in
     onprem-compose)
       render_onprem_compose_files
+      normalize_line_endings_to_lf "$DEPLOYMENT_GENERATED_DIR"
       ;;
     onprem-k8s-native)
       render_onprem_k8s_native_files
+      normalize_line_endings_to_lf "$DEPLOYMENT_GENERATED_DIR"
       ;;
     *)
       warn "Platform '$platform' is not yet supported by this simple setup."

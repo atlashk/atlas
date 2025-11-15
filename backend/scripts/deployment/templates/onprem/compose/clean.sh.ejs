@@ -4,6 +4,7 @@ set -euo pipefail
 # Generated simple clean script (Compose)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
+PROJECT_NAME="atlas-onprem-compose"
 
 # Docker Compose command (will be set by check_docker_compose)
 DOCKER_COMPOSE_CMD="docker-compose"
@@ -31,7 +32,8 @@ check_docker_compose() {
 
 main() {
     check_docker_compose
-    $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" down -v
+    $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" -p "$PROJECT_NAME" down -v
+    echo "Cleanup completed successfully"
 }
 
 # Execute main function

@@ -183,7 +183,7 @@ dependencies {
     }
     switch (rootProject.ext.appStack['search']) {
         case 'database':
-            // Skipped
+            break
         case 'elasticsearch':
             implementation project(':infrastructure.search.elasticsearch.impl.product')
             break
