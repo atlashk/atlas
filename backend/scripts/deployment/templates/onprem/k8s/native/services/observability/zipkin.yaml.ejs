@@ -1,5 +1,5 @@
 <%
-  const observabilityTracing = ((stack.observability && stack.observability.tracing) || '').toLowerCase();
+  const observabilityTracing = (stack.observability.tracing || '').toLowerCase();
   const hasZipkin = observabilityTracing === 'zipkin';
 %>
 <% if (hasZipkin) { -%>

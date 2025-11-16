@@ -1,19 +1,18 @@
 <%
-  const reverseProxy = (stack.reverseProxy || '').toLowerCase();
-  const notificationEmail = (stack.notificationEmail || (stack.notification && stack.notification.email) || '').toLowerCase();
-  const observabilityLoggingStack = (stack.observabilityLoggingStack || (stack.observability && stack.observability.logging && stack.observability.logging.stack) || '').toLowerCase();
-  const observabilityMetrics = (stack.observabilityMetrics || (stack.observability && stack.observability.metrics) || '').toLowerCase();
-  const observabilityTracing = (stack.observabilityTracing || (stack.observability && stack.observability.tracing) || '').toLowerCase();
+  const reverseProxy = (stack['reverse-proxy'] || '').toLowerCase();
+  const notificationEmail = (stack.notification.email || '').toLowerCase();
+  const observabilityLoggingStack = (stack.observability.logging.stack || '').toLowerCase();
+  const observabilityMetrics = (stack.observability.metrics || '').toLowerCase();
+  const observabilityTracing = (stack.observability.tracing || '').toLowerCase();
 
   const hasNginx = reverseProxy === 'nginx';
+  const hasSmtp4dev = notificationEmail === 'spring';
   const hasLoki = observabilityLoggingStack === 'loki';
   const hasPrometheus = observabilityMetrics === 'prometheus';
   const hasZipkin = observabilityTracing === 'zipkin';
   const hasGrafana = hasLoki || hasPrometheus || hasZipkin;
-  const hasSmtp4dev = notificationEmail === 'spring';
 %>
 <% if (hasNginx) { -%>
-
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

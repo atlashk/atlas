@@ -1,23 +1,22 @@
 <%
-  const reverseProxy = (stack.reverseProxy || '').toLowerCase();
-  const notifEmail = (stack.notificationEmail || (stack.notification && stack.notification.email) || '').toLowerCase();
-  const obsLog = (stack.observabilityLoggingStack || (stack.observability && stack.observability.logging && stack.observability.logging.stack) || '').toLowerCase();
-  const obsMetrics = (stack.observabilityMetrics || (stack.observability && stack.observability.metrics) || '').toLowerCase();
-  const obsTracing = (stack.observabilityTracing || (stack.observability && stack.observability.tracing) || '').toLowerCase();
+  const notificationEmail = (stack.notification.email || '').toLowerCase();
+  const observabilityLoggingStack = (stack.observability.logging.stack || '').toLowerCase();
+  const observabilityMetrics = (stack.observability.metrics || '').toLowerCase();
+  const observabilityTracing = (stack.observability.tracing || '').toLowerCase();
+  const reverseProxy = (stack['reverse-proxy'] || '').toLowerCase();
 
-  const hasNginx = reverseProxy === 'nginx';
-  const hasLoki = obsLog === 'loki';
-  const hasPrometheus = obsMetrics === 'prometheus';
-  const hasZipkin = obsTracing === 'zipkin';
+  const hasSmtp4dev = notificationEmail === 'spring';
+  const hasLoki = observabilityLoggingStack === 'loki';
+  const hasPrometheus = observabilityMetrics === 'prometheus';
+  const hasZipkin = observabilityTracing === 'zipkin';
   const hasGrafana = hasLoki || hasPrometheus || hasZipkin;
-  const hasSmtp4dev = notifEmail === 'spring';
+  const hasNginx = reverseProxy === 'nginx';
 %>
-
 #!/usr/bin/env bash
 set -euo pipefail
 
 # =============================================================================
-# Atlas Kubernetes Deployment Script (Template, Simplified)
+# Atlas On-Premises Kubernetes Deployment Script (Template, Simplified)
 # =============================================================================
 # This script checks prerequisites, builds services (optional), creates the
 # namespace, installs NGINX Ingress (if selected), and applies the rendered
@@ -26,9 +25,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../../" && pwd)"
-PROJECT_NAME="atlas-onprem-k8s-native"
 NAMESPACE="atlas-onprem-k8s-native"
-BASE_DIR="$SCRIPT_DIR/services"
+SERVICES_DIR="$SCRIPT_DIR/services"
+INGRESS_DIR="$SCRIPT_DIR/ingress"
 
 SKIP_BUILD=false
 
@@ -98,6 +97,7 @@ create_namespace() {
 
 install_ingress_controller() {
   <% if (hasNginx) { %>
+  # Install NGINX Ingress Controller
   echo "Ensuring NGINX Ingress Controller is installed..."
   if kubectl get namespace ingress-nginx >/dev/null 2>&1; then
     echo "NGINX Ingress Controller already deployed"
@@ -108,6 +108,18 @@ install_ingress_controller() {
     echo "Waiting for NGINX Ingress Controller readiness..."
     kubectl wait --for=condition=ready pod -l app.kubernetes.io/component=controller -n ingress-nginx --timeout=300s || true
   fi
+  echo "Waiting for NGINX admission webhook readiness..."
+  kubectl wait -n ingress-nginx --for=condition=complete job/ingress-nginx-admission-create --timeout=300s || true
+  kubectl wait -n ingress-nginx --for=condition=complete job/ingress-nginx-admission-patch --timeout=300s || true
+  local _tries=60
+  while [[ $_tries -gt 0 ]]; do
+    local _eps
+    _eps="$(kubectl get endpoints ingress-nginx-controller-admission -n ingress-nginx -o jsonpath='{.subsets[*].addresses[*].ip}' 2>/dev/null || true)"
+    if [[ -n "$_eps" ]]; then
+      break
+    fi
+    sleep 2; ((_tries-=2))
+  done
   <% } else { %>
   echo "Reverse proxy not set to NGINX; skipping ingress controller install"
   <% } %>
@@ -115,17 +127,17 @@ install_ingress_controller() {
 
 apply_manifests() {
   echo "Applying Kubernetes manifests in namespace '$NAMESPACE'..."
-  if [[ -d "$BASE_DIR/infrastructure" ]]; then
-    kubectl apply -n "$NAMESPACE" -f "$BASE_DIR/infrastructure"
+  if [[ -d "$SERVICES_DIR/infrastructure" ]]; then
+    kubectl apply -n "$NAMESPACE" -f "$SERVICES_DIR/infrastructure"
   fi
-  if [[ -d "$BASE_DIR/observability" ]]; then
-    kubectl apply -n "$NAMESPACE" -f "$BASE_DIR/observability"
+  if [[ -d "$SERVICES_DIR/observability" ]]; then
+    kubectl apply -n "$NAMESPACE" -f "$SERVICES_DIR/observability"
   fi
-  if [[ -d "$BASE_DIR/application" ]]; then
-    kubectl apply -n "$NAMESPACE" -f "$BASE_DIR/application"
+  if [[ -d "$SERVICES_DIR/application" ]]; then
+    kubectl apply -n "$NAMESPACE" -f "$SERVICES_DIR/application"
   fi
-  if [[ -d "$BASE_DIR/ingress" ]]; then
-    kubectl apply -n "$NAMESPACE" -f "$BASE_DIR/ingress"
+  if [[ -d "$INGRESS_DIR" ]]; then
+    kubectl apply -n "$NAMESPACE" -f "$INGRESS_DIR"
   fi
 }
 

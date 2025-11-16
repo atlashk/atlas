@@ -1,5 +1,5 @@
 <%
-  const observabilityLoggingStack = ((stack.observability && stack.observability.logging && stack.observability.logging.stack) || '').toLowerCase();
+  const observabilityLoggingStack = (stack.observability.logging.stack || '').toLowerCase();
   const hasLoki = observabilityLoggingStack === 'loki';
 %>
 <% if (hasLoki) { -%>

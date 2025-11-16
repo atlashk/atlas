@@ -1,15 +1,15 @@
 <%
   // Derive flags similar to docker-compose.yml.ejs
-  const notifEmail = (stack.NOTIFICATION_EMAIL || (stack.notification && stack.notification.email) || '').toLowerCase();
-  const obsLog = (stack.OBSERVABILITY_LOGGING_STACK || (stack.observability && stack.observability.logging && stack.observability.logging.stack) || '').toLowerCase();
-  const obsMetrics = (stack.OBSERVABILITY_METRICS || (stack.observability && stack.observability.metrics) || '').toLowerCase();
-  const obsTracing = (stack.OBSERVABILITY_TRACING || (stack.observability && stack.observability.tracing) || '').toLowerCase();
+  const notificationEmail = (stack.notification.email || '').toLowerCase();
+  const observabilityLoggingStack = (stack.observability.logging.stack || '').toLowerCase();
+  const observabilityMetrics = (stack.observability.metrics || '').toLowerCase();
+  const observabilityTracing = (stack.observability.tracing || '').toLowerCase();
 
-  const hasLoki = obsLog === 'loki';
-  const hasPrometheus = obsMetrics === 'prometheus';
-  const hasZipkin = obsTracing === 'zipkin';
+  const hasSmtp4dev = notificationEmail === 'spring';
+  const hasLoki = observabilityLoggingStack === 'loki';
+  const hasPrometheus = observabilityMetrics === 'prometheus';
+  const hasZipkin = observabilityTracing === 'zipkin';
   const hasGrafana = hasLoki || hasPrometheus || hasZipkin;
-  const hasSmtp4dev = notifEmail === 'spring';
 %>
 
 # Atlas reverse proxy configuration

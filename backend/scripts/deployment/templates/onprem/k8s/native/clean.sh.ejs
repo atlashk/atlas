@@ -1,23 +1,18 @@
 <%
-  const reverseProxy = (stack.reverseProxy || '').toLowerCase();
+  const reverseProxy = (stack['reverse-proxy'] || '').toLowerCase();
   const hasNginx = reverseProxy === 'nginx';
 %>
 #!/usr/bin/env bash
 set -euo pipefail
 
 # =============================================================================
-# Atlas OnPrem K8s Clean Script (Template, Simplified)
+# Atlas On-Premises Kubernetes Clean Script (Template, Simplified)
 # =============================================================================
 # Removes Atlas namespace resources and the NGINX Ingress Controller (if used)
 # =============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-NAMESPACE="atlas-onprem-k8s"
-
-show_help() {
-  echo "Usage: $0"
-  echo "Atlas Kubernetes Cleanup Script - Removes Atlas resources"
-}
+NAMESPACE="atlas-onprem-k8s-native"
 
 check_prerequisites() {
   echo "Checking prerequisites..."
@@ -64,8 +59,8 @@ cleanup_ingress_controller() {
 }
 
 main() {
-  check_prerequisites
   echo "Atlas On-Premise Kubernetes Platform - Cleaning up..."
+  check_prerequisites
   echo "Namespace: $NAMESPACE"
   remove_namespace
   cleanup_ingress_controller

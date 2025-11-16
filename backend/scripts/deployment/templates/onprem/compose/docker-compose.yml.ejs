@@ -6,11 +6,11 @@
   const messaging = (stack.messaging || '').toLowerCase();
   const search = (stack.search || '').toLowerCase();
   const storage = (stack.storage || '').toLowerCase();
-  const notificationEmail = ((stack.notification && stack.notification.email) || '').toLowerCase();
-  const observabilityLoggingStack = ((stack.observability && stack.observability.logging && stack.observability.logging.stack) || '').toLowerCase();
-  const observabilityMetrics = ((stack.observability && stack.observability.metrics) || '').toLowerCase();
-  const observabilityTracing = ((stack.observability && stack.observability.tracing) || '').toLowerCase();
-  const reverseProxy = (stack.reverseProxy || '').toLowerCase();
+  const notificationEmail = (stack.notification.email || '').toLowerCase();
+  const observabilityLoggingStack = (stack.observability.logging.stack || '').toLowerCase();
+  const observabilityMetrics = (stack.observability.metrics || '').toLowerCase();
+  const observabilityTracing = (stack.observability.tracing || '').toLowerCase();
+  const reverseProxy = (stack['reverse-proxy'] || '').toLowerCase();
 
   const hasMysql = datasource === 'mysql';
   const hasPostgres = datasource === 'postgres' || datasource === 'postgresql';
