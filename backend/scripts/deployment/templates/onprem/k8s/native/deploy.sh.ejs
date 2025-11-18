@@ -101,31 +101,46 @@ install_ingress_controller() {
 
   # Detect cluster provider
   local provider="baremetal"
-  if kubectl get nodes -o name 2>/dev/null | grep -qi 'kind'; then
+  if kubectl get nodes -o jsonpath='{.items[0].metadata.labels}' 2>/dev/null | grep -q 'ingress-ready=true'; then
     provider="kind"
   fi
 
-  # Check if namespace exists
+  # Check if already installed
   if kubectl get namespace ingress-nginx >/dev/null 2>&1; then
-    echo "NGINX Ingress Controller already deployed"
-  else
-    if [[ "$provider" == "kind" ]]; then
-      echo "Installing NGINX Ingress Controller (Kind provider)..."
-      kubectl apply -f "https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml"
-    else
-      echo "Installing NGINX Ingress Controller (Cloud provider)..."
-      kubectl apply -f "https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml"
+    echo "NGINX Ingress Controller namespace exists, checking deployment..."
+    if kubectl get deployment ingress-nginx-controller -n ingress-nginx >/dev/null 2>&1; then
+      echo "NGINX Ingress Controller already deployed"
+      return 0
     fi
   fi
 
+  # Install based on provider
+  echo "Installing NGINX Ingress Controller ($provider provider)..."
+  local manifest_url
+  if [[ "$provider" == "kind" ]]; then
+    manifest_url="https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml"
+  else
+    manifest_url="https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml"
+  fi
+
+  if ! kubectl apply -f "$manifest_url"; then
+    echo "Failed to install NGINX Ingress Controller" >&2
+    exit 1
+  fi
+
   # Wait for readiness
-  echo "Waiting for NGINX Ingress Controller readiness..."
-  kubectl wait \
+  echo "Waiting for NGINX Ingress Controller readiness (up to 5 minutes)..."
+  if ! kubectl wait \
     --namespace ingress-nginx \
     --for=condition=ready pod \
     --selector=app.kubernetes.io/component=controller \
-    --timeout=300s || true
+    --timeout=300s; then
+    echo "Warning: NGINX Ingress Controller did not become ready within timeout" >&2
+    echo "Check status with: kubectl get pods -n ingress-nginx" >&2
+    exit 1
+  fi
 
+  echo "NGINX Ingress Controller is ready"
   <% } else { %>
   echo "Reverse proxy not set to NGINX; skipping ingress controller install"
   <% } %>
