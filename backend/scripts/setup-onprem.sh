@@ -132,7 +132,7 @@ run_custom_stack_interactive() {
 
   # API Server
   echo -e "${BLUE}${BOLD}API Server Configuration${NC}"
-  select_option "REST ${YELLOW}(default)${NC}" "gRPC"
+  select_option "REST ${YELLOW}${NC}" "gRPC"
   local api_server_choice=$SELECTED_INDEX
   local api_server
   case $api_server_choice in
@@ -146,7 +146,7 @@ run_custom_stack_interactive() {
   if [ "$api_server" = "grpc" ]; then
     api_client="grpc-netdevh"
   else
-    select_option "RestClient ${YELLOW}(default)${NC}" "Apache HttpClient" "Feign" "RestTemplate"
+    select_option "RestClient ${YELLOW}${NC}" "Apache HttpClient" "Feign" "RestTemplate"
     local api_client_choice=$SELECTED_INDEX
     case $api_client_choice in
       2) api_client="rest-apachehttpclient" ;;
@@ -158,7 +158,7 @@ run_custom_stack_interactive() {
 
   # Datasource
   echo -e "${BLUE}${BOLD}Datasource Configuration${NC}"
-  select_option "MySQL ${YELLOW}(default)${NC}" "PostgreSQL"
+  select_option "MySQL ${YELLOW}${NC}" "PostgreSQL"
   local datasource_choice=$SELECTED_INDEX
   local datasource
   case $datasource_choice in
@@ -179,7 +179,7 @@ run_custom_stack_interactive() {
 
   # File - Excel
   echo -e "${BLUE}${BOLD}File - Excel Configuration${NC}"
-  select_option "Apache POI ${YELLOW}(default)${NC}" "EasyExcel"
+  select_option "Apache POI ${YELLOW}${NC}" "EasyExcel"
   local file_excel_choice=$SELECTED_INDEX
   local file_excel
   case $file_excel_choice in
@@ -198,7 +198,7 @@ run_custom_stack_interactive() {
 
   # Messaging
   echo -e "${BLUE}${BOLD}Messaging Configuration${NC}"
-  select_option "Apache Kafka ${YELLOW}(default)${NC}" "RabbitMQ"
+  select_option "Apache Kafka ${YELLOW}${NC}" "RabbitMQ"
   local messaging_choice=$SELECTED_INDEX
   local messaging
   case $messaging_choice in
@@ -211,7 +211,7 @@ run_custom_stack_interactive() {
 
   # Notification - Email
   echo -e "${BLUE}${BOLD}Email Notification Configuration${NC}"
-  select_option "Spring ${YELLOW}(default)${NC}" "SendGrid"
+  select_option "Spring ${YELLOW}${NC}" "SendGrid"
   local email_choice=$SELECTED_INDEX
   local notification_email
   case $email_choice in
@@ -221,7 +221,7 @@ run_custom_stack_interactive() {
 
   # Notification - In-App
   echo -e "${BLUE}${BOLD}In-App Notification Configuration${NC}"
-  select_option "Server-Sent Events ${YELLOW}(default)${NC}" "WebSocket"
+  select_option "Server-Sent Events ${YELLOW}${NC}" "WebSocket"
   local notification_inapp_choice=$SELECTED_INDEX
   local notification_inapp
   case $notification_inapp_choice in
@@ -231,7 +231,7 @@ run_custom_stack_interactive() {
 
   # Observability Logging Stack
   echo -e "${BLUE}${BOLD}Observability Logging Stack Configuration${NC}"
-  select_option "Loki ${YELLOW}(default)${NC}" "None"
+  select_option "Loki ${YELLOW}${NC}" "None"
   local observability_logging_stack_choice=$SELECTED_INDEX
   local observability_logging_stack
   case $observability_logging_stack_choice in
@@ -244,7 +244,7 @@ run_custom_stack_interactive() {
 
   # Observability Metrics
   echo -e "${BLUE}${BOLD}Observability Metrics Configuration${NC}"
-  select_option "Prometheus ${YELLOW}(default)${NC}" "None"
+  select_option "Prometheus ${YELLOW}${NC}" "None"
   local observability_metrics_choice=$SELECTED_INDEX
   local observability_metrics
   case $observability_metrics_choice in
@@ -254,7 +254,7 @@ run_custom_stack_interactive() {
 
   # Observability Tracing
   echo -e "${BLUE}${BOLD}Observability Tracing Configuration${NC}"
-  select_option "Zipkin ${YELLOW}(default)${NC}" "None"
+  select_option "Zipkin ${YELLOW}${NC}" "None"
   local observability_tracing_choice=$SELECTED_INDEX
   local observability_tracing
   case $observability_tracing_choice in
@@ -271,7 +271,7 @@ run_custom_stack_interactive() {
   if [[ "$platform" == onprem-k8s* ]]; then
     reverse_proxy="nginx"
   else
-    select_option "Nginx ${YELLOW}(default)${NC}" "None"
+    select_option "Nginx ${YELLOW}${NC}" "None"
     local reverse_proxy_choice=$SELECTED_INDEX
     case $reverse_proxy_choice in
       2) reverse_proxy="none" ;;
@@ -281,7 +281,7 @@ run_custom_stack_interactive() {
 
   # Scheduler
   echo -e "${BLUE}${BOLD}Scheduler Configuration${NC}"
-  select_option "Quartz ${YELLOW}(default)${NC}" "Spring"
+  select_option "Quartz ${YELLOW}${NC}" "Spring"
   local scheduler_choice=$SELECTED_INDEX
   local scheduler
   case $scheduler_choice in
@@ -291,7 +291,7 @@ run_custom_stack_interactive() {
 
   # Search
   echo -e "${BLUE}${BOLD}Search Configuration${NC}"
-  select_option "Database ${YELLOW}(default)${NC}" "Elasticsearch"
+  select_option "Database ${YELLOW}${NC}" "Elasticsearch"
   local search_choice=$SELECTED_INDEX
   local search
   case $search_choice in
@@ -301,7 +301,7 @@ run_custom_stack_interactive() {
 
   # Storage
   echo -e "${BLUE}${BOLD}Storage Configuration${NC}"
-  select_option "Filesystem ${YELLOW}(default)${NC}" "MinIO"
+  select_option "Filesystem ${YELLOW}${NC}" "MinIO"
   local storage_choice=$SELECTED_INDEX
   local storage
   case $storage_choice in
@@ -311,7 +311,7 @@ run_custom_stack_interactive() {
 
   # Template Engine
   echo -e "${BLUE}${BOLD}Template Engine Configuration${NC}"
-  select_option "Freemarker ${YELLOW}(default)${NC}" "Thymeleaf"
+  select_option "Freemarker ${YELLOW}${NC}" "Thymeleaf"
   local template_choice=$SELECTED_INDEX
   local template
   case $template_choice in
@@ -450,7 +450,7 @@ main() {
 
   info "Atlas on-premise setup starting..."
   echo -e "${BLUE}${BOLD}Platform Configuration${NC}"
-  select_option "On-Premise (Docker Compose) ${YELLOW}(default)${NC}" "On-Premise (Kubernetes Native)"
+  select_option "On-Premise (Docker Compose) ${YELLOW}${NC}" "On-Premise (Kubernetes Native)"
   platform_choice=$SELECTED_INDEX
   case $platform_choice in
     2)
