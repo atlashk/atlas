@@ -18,6 +18,49 @@ spec:
       storage: 2Gi
   storageClassName: hostpath
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  labels:
+    app: prometheus
+    tier: observability
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 5s
+
+    scrape_configs:
+      - job_name: 'api-gateway'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['api-gateway:8080']
+
+      - job_name: 'user-service'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['user-service:8081']
+
+      - job_name: 'product-service'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['product-service:8082']
+
+      - job_name: 'order-service'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['order-service:8083']
+
+      - job_name: 'payment-service'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['payment-service:8084']
+
+      - job_name: 'notification-service'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['notification-service:8085']
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -98,47 +141,4 @@ spec:
       targetPort: 9090
       name: http
   type: ClusterIP
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: prometheus-config
-  labels:
-    app: prometheus
-    tier: observability
-data:
-  prometheus.yml: |
-    global:
-      scrape_interval: 5s
-
-    scrape_configs:
-      - job_name: 'api-gateway'
-        metrics_path: '/actuator/prometheus'
-        static_configs:
-          - targets: ['api-gateway:8080']
-
-      - job_name: 'user-service'
-        metrics_path: '/actuator/prometheus'
-        static_configs:
-          - targets: ['user-service:8081']
-
-      - job_name: 'product-service'
-        metrics_path: '/actuator/prometheus'
-        static_configs:
-          - targets: ['product-service:8082']
-
-      - job_name: 'order-service'
-        metrics_path: '/actuator/prometheus'
-        static_configs:
-          - targets: ['order-service:8083']
-
-      - job_name: 'payment-service'
-        metrics_path: '/actuator/prometheus'
-        static_configs:
-          - targets: ['payment-service:8084']
-
-      - job_name: 'notification-service'
-        metrics_path: '/actuator/prometheus'
-        static_configs:
-          - targets: ['notification-service:8085']
 <% } -%>

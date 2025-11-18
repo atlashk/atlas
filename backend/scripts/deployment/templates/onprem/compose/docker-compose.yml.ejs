@@ -201,7 +201,7 @@ services:
   <%_ if (hasSmtp4dev) { -%>
   smtp4dev:
     container_name: smtp4dev
-    image: rnwood/smtp4dev
+    image: rnwood/smtp4dev:latest
     ports:
       - "5000:80"
       - "25:25"
@@ -392,6 +392,11 @@ services:
       - RABBITMQ_PORT=5672
       - RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-atlas}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-secret123456}
+      <%_ } -%>
+      <%_ if (apiClientPrefix === 'grpc') { -%>
+      - GRPC_CLIENT_PRODUCT_ADDRESS=static://product-service:50052
+      <%_ } else { -%>
+      - API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL=http://product-service:8082
       <%_ } -%>
       <%_ if (hasZipkin) { -%>
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans

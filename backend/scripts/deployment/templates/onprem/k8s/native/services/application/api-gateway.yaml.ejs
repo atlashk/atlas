@@ -73,6 +73,8 @@ spec:
             - name: REDIS_PORT
               value: "6379"
             <% } %>
+            - name: JWK_SET_URI
+              value: "http://user-service:8081/.well-known/jwks.json"
             <% if (hasZipkin) { %>
             - name: ZIPKIN_ENDPOINT
               value: "http://zipkin:9411/api/v2/spans"

@@ -114,6 +114,13 @@ spec:
                   name: rabbitmq-secret
                   key: rabbitmq-password
             <% } %>
+            <% if (apiClientPrefix === 'grpc') { %>
+            - name: GRPC_CLIENT_PRODUCT_ADDRESS
+              value: "static://product-service:50052"
+            <% } else { %>
+            - name: API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL
+              value: "http://product-service:8082"
+            <% } %>
             <% if (hasZipkin) { %>
             - name: ZIPKIN_ENDPOINT
               value: "http://zipkin:9411/api/v2/spans"

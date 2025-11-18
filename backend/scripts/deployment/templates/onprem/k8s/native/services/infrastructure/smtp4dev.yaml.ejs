@@ -24,7 +24,8 @@ spec:
     spec:
       containers:
         - name: smtp4dev
-          image: rnwood/smtp4dev:v3
+          image: rnwood/smtp4dev:latest
+          imagePullPolicy: IfNotPresent
           env:
             - name: ServerOptions__HostName
               value: "smtp4dev"

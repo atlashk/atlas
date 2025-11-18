@@ -23,28 +23,22 @@ data:
       - url: http://loki:3100/loki/api/v1/push
 
     scrape_configs:
-      # Scrape logs from Kubernetes pods
       - job_name: kubernetes-pods
         kubernetes_sd_configs:
           - role: pod
         pipeline_stages:
           - docker: {}
         relabel_configs:
-          - source_labels: ['__meta_kubernetes_pod_controller_name']
-            target_label: 'controller'
           - source_labels: ['__meta_kubernetes_pod_label_app']
             target_label: 'app'
-          - source_labels: ['__meta_kubernetes_pod_name']
-            target_label: 'pod'
+          - source_labels: ['__meta_kubernetes_pod_label_tier']
+            target_label: 'tier'
           - source_labels: ['__meta_kubernetes_namespace']
             target_label: 'namespace'
+          - source_labels: ['__meta_kubernetes_pod_name']
+            target_label: 'pod'
           - source_labels: ['__meta_kubernetes_pod_node_name']
             target_label: 'node'
-        selectors:
-          - action: keep
-            source_labels: ['__meta_kubernetes_pod_label_app']
-            regex: .*  # Keep all apps
-
       # Scrape logs from containers not managed by Kubernetes (fallback)
       - job_name: other-containers
         static_configs:

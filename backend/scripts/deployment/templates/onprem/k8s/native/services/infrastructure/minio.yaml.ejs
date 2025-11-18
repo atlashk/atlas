@@ -37,6 +37,7 @@ spec:
       containers:
         - name: minio
           image: minio/minio:latest
+          imagePullPolicy: IfNotPresent
           args: ["server", "/data", "--console-address", ":9001"]
           env:
             - name: MINIO_ACCESS_KEY
