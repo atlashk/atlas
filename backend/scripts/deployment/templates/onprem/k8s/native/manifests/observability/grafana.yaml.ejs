@@ -29,7 +29,8 @@ spec:
     spec:
       containers:
         - name: grafana
-          image: grafana/grafana-oss:10.2.2
+          image: grafana/grafana-oss:main
+          imagePullPolicy: IfNotPresent
           env:
             - name: GF_SECURITY_ADMIN_USER
               value: "atlas"
@@ -122,7 +123,6 @@ spec:
   resources:
     requests:
       storage: 2Gi
-  storageClassName: hostpath
 ---
 apiVersion: v1
 kind: Secret

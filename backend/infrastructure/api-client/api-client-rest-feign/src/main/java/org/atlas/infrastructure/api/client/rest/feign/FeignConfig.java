@@ -33,7 +33,7 @@ public class FeignConfig {
 
     if (!sslEnabled) { // Note: Only for dev/test environments - security risk
       // Creates an SSL context that trusts all certificates
-      SSLContext sslContext = SSLUtil.createTrustAllSslContext();
+      SSLContext sslContext = SSLUtil.createTrustAllSSLContext();
 
       TlsSocketStrategy tlsSocketStrategy = (TlsSocketStrategy) ClientTlsStrategyBuilder.create()
           .setSslContext(sslContext)

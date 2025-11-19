@@ -11,7 +11,7 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class SSLUtil {
 
-  public static SSLContext createTrustAllSslContext()
+  public static SSLContext createTrustAllSSLContext()
       throws NoSuchAlgorithmException, KeyManagementException {
     TrustManager[] trustAllCerts = new TrustManager[]{
         new X509TrustManager() {

@@ -40,30 +40,11 @@ remove_namespace() {
   fi
 }
 
-cleanup_ingress_controller() {
-  <% if (hasNginx) { %>
-  echo "Cleaning up NGINX Ingress Controller..."
-  if kubectl get namespace ingress-nginx >/dev/null 2>&1; then
-    kubectl delete namespace ingress-nginx --ignore-not-found=true
-    local timeout=60
-    while kubectl get namespace ingress-nginx >/dev/null 2>&1 && [[ $timeout -gt 0 ]]; do
-      sleep 2; ((timeout-=2))
-    done
-    echo "NGINX Ingress Controller removed"
-  else
-    echo "NGINX Ingress Controller not found"
-  fi
-  <% } else { %>
-  echo "Reverse proxy not set to NGINX; skipping ingress controller cleanup"
-  <% } %>
-}
-
 main() {
   echo "Atlas On-Premise Kubernetes Platform - Cleaning up..."
   check_prerequisites
   echo "Namespace: $NAMESPACE"
   remove_namespace
-  cleanup_ingress_controller
   echo "Atlas platform resources cleanup completed successfully!"
 }
 

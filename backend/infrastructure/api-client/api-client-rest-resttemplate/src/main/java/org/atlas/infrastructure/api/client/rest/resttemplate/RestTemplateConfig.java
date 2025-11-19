@@ -62,7 +62,7 @@ public class RestTemplateConfig {
   private HttpComponentsClientHttpRequestFactory createTrustAllRequestFactory()
       throws NoSuchAlgorithmException, KeyManagementException {
     // Create an SSL context that trusts all certificates
-    SSLContext sslContext = SSLUtil.createTrustAllSslContext();
+    SSLContext sslContext = SSLUtil.createTrustAllSSLContext();
 
     // Create a TLS strategy with the trust-all SSL context
     DefaultClientTlsStrategy tlsStrategy = new DefaultClientTlsStrategy(sslContext,

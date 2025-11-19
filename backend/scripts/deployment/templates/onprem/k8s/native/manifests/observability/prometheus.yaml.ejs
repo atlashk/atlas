@@ -16,7 +16,6 @@ spec:
   resources:
     requests:
       storage: 2Gi
-  storageClassName: hostpath
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -81,7 +80,8 @@ spec:
     spec:
       containers:
         - name: prometheus
-          image: prom/prometheus:v2.48.0
+          image: prom/prometheus:main
+          imagePullPolicy: IfNotPresent
           args:
             - "--config.file=/etc/prometheus/prometheus.yml"
             - "--storage.tsdb.path=/prometheus"

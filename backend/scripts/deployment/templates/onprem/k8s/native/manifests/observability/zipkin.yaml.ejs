@@ -23,7 +23,8 @@ spec:
     spec:
       containers:
         - name: zipkin
-          image: openzipkin/zipkin
+          image: openzipkin/zipkin:latest
+          imagePullPolicy: IfNotPresent
           env:
             - name: STORAGE_TYPE
               value: "mem"

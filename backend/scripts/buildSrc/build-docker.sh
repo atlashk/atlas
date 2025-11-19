@@ -20,6 +20,43 @@ SERVICES=(
 
 # Default values
 SERVICE_FILTER=""
+CLUSTER_TYPE=""
+CLUSTER_NAME=""
+
+detect_cluster() {
+    if command -v kubectl >/dev/null 2>&1; then
+        local current_context
+        current_context="$(kubectl config current-context 2>/dev/null || true)"
+        case "$current_context" in
+            minikube)
+                if command -v minikube >/dev/null 2>&1; then
+                    CLUSTER_TYPE="minikube"
+                    CLUSTER_NAME="minikube"
+                fi
+                ;;
+            kind-*)
+                if command -v kind >/dev/null 2>&1; then
+                    CLUSTER_TYPE="kind"
+                    CLUSTER_NAME="${current_context#kind-}"
+                fi
+                ;;
+        esac
+    fi
+}
+
+load_image_into_cluster() {
+    local image="$1"
+    case "$CLUSTER_TYPE" in
+        minikube)
+            echo "Loading image $image into Minikube..."
+            minikube image load "$image"
+            ;;
+        kind)
+            echo "Loading image $image into Kind cluster \"$CLUSTER_NAME\"..."
+            kind load docker-image "$image" --name "$CLUSTER_NAME"
+            ;;
+    esac
+}
 
 # Usage function
 usage() {
@@ -28,6 +65,7 @@ usage() {
     echo "  --service=NAME          Build only specific service (optional)"
     echo "  -h, --help              Show this help message"
     echo ""
+    echo "Auto-load: If kubectl context is minikube or kind, images are loaded into cluster"
     echo "Available services:"
     for service in "${SERVICES[@]}"; do
         name="${service%%:*}"
@@ -60,6 +98,13 @@ done
 # Build Docker images
 echo "Starting Docker image builds..."
 
+detect_cluster
+if [ -n "$CLUSTER_TYPE" ]; then
+    echo "Detected Kubernetes context: $CLUSTER_TYPE ($CLUSTER_NAME). Images will be loaded into this cluster."
+else
+    echo "No supported Kubernetes context detected. Images will be built locally."
+fi
+
 # Validate services
 if [ "${#SERVICES[@]}" -eq 0 ]; then
     echo "No services specified to build." >&2
@@ -82,6 +127,10 @@ for service in "${SERVICES[@]}"; do
         exit 1
     fi
     echo "Built Docker image for $PROJECT_NAME-$name successfully."
+    if [ -n "$CLUSTER_TYPE" ]; then
+        load_image_into_cluster "$PROJECT_NAME-$name"
+        echo "Loaded image $PROJECT_NAME-$name into $CLUSTER_TYPE cluster."
+    fi
     echo
 done
 

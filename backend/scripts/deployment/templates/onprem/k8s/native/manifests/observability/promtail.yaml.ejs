@@ -79,6 +79,7 @@ spec:
       containers:
         - name: promtail
           image: grafana/promtail:main
+          imagePullPolicy: IfNotPresent
           args:
             - -config.file=/etc/promtail/promtail.yml
           env:

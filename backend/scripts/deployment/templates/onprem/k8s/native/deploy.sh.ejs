@@ -26,7 +26,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../../" && pwd)"
 NAMESPACE="atlas"
-MANIFESTS_DIR="$SCRIPT_DIR/services"
+MANIFESTS_DIR="$SCRIPT_DIR/manifests"
 
 SKIP_BUILD=false
 
@@ -69,6 +69,64 @@ check_prerequisites() {
     fi
   fi
   echo "Prerequisites check passed"
+}
+
+apply_and_wait() {
+  local dir="$1"
+  local label="$2"
+  if [[ ! -d "$dir" ]]; then
+    return 0
+  fi
+  echo "Applying ${label} manifests..."
+  local apply_output
+  apply_output=$(kubectl apply -n "$NAMESPACE" -f "$dir")
+  echo "$apply_output"
+  local resources
+  resources=$(echo "$apply_output" | awk '{print $1}')
+  local crd_names
+  crd_names=$(echo "$resources" | awk -F'/' '/^customresourcedefinition(\.apiextensions\.k8s\.io)?\//{print $2}')
+  if [[ -n "$crd_names" ]]; then
+    echo "Waiting for applied CRDs to be Established..."
+    local wait_args=()
+    while IFS= read -r name; do
+      [[ -z "$name" ]] && continue
+      wait_args+=("customresourcedefinition.apiextensions.k8s.io/$name")
+    done <<< "$crd_names"
+    if [[ ${#wait_args[@]} -gt 0 ]]; then
+      kubectl wait --for=condition=Established "${wait_args[@]}" --timeout=180s || {
+        echo "CRDs failed to become Established within timeout" >&2
+        exit 1
+      }
+    fi
+  fi
+  local workloads
+  workloads=$(echo "$resources" |
+    sed -E 's/^deployment(\.apps)?\//deployment\//; s/^statefulset(\.apps)?\//statefulset\//; s/^daemonset(\.apps)?\//daemonset\//' |
+    grep -E '^(deployment|statefulset|daemonset)/' || true)
+  if [[ -n "$workloads" ]]; then
+    echo "Waiting for ${label} workloads to finish rollout in namespace '$NAMESPACE'..."
+    while IFS= read -r res; do
+      [[ -z "$res" ]] && continue
+      kubectl -n "$NAMESPACE" rollout status "$res" --timeout=300s || {
+        echo "Rollout did not complete for $res" >&2
+        exit 1
+      }
+    done <<< "$workloads"
+  fi
+  local jobs
+  jobs=$(echo "$resources" |
+    sed -E 's/^job(\.batch)?\//job\//' |
+    grep -E '^job/' || true)
+  if [[ -n "$jobs" ]]; then
+    echo "Waiting for ${label} jobs to complete in namespace '$NAMESPACE'..."
+    while IFS= read -r res; do
+      [[ -z "$res" ]] && continue
+      kubectl -n "$NAMESPACE" wait --for=condition=complete "$res" --timeout=600s || {
+        echo "Job did not complete: $res" >&2
+        exit 1
+      }
+    done <<< "$jobs"
+  fi
 }
 
 build_services() {
@@ -147,18 +205,10 @@ install_ingress_controller() {
 
 apply_manifests() {
   echo "Applying Kubernetes manifests in namespace '$NAMESPACE'..."
-  if [[ -d "$MANIFESTS_DIR/infrastructure" ]]; then
-    kubectl apply -n "$NAMESPACE" -f "$MANIFESTS_DIR/infrastructure"
-  fi
-  if [[ -d "$MANIFESTS_DIR/observability" ]]; then
-    kubectl apply -n "$NAMESPACE" -f "$MANIFESTS_DIR/observability"
-  fi
-  if [[ -d "$MANIFESTS_DIR/application" ]]; then
-    kubectl apply -n "$NAMESPACE" -f "$MANIFESTS_DIR/application"
-  fi
-  if [[ -d "$MANIFESTS_DIR/ingress" ]]; then
-    kubectl apply -n "$NAMESPACE" -f "$MANIFESTS_DIR/ingress"
-  fi
+  apply_and_wait "$MANIFESTS_DIR/infrastructure" "infrastructure"
+  apply_and_wait "$MANIFESTS_DIR/application" "application"
+  apply_and_wait "$MANIFESTS_DIR/observability" "observability"
+  apply_and_wait "$MANIFESTS_DIR/ingress" "ingress"
 }
 
 show_access_information() {

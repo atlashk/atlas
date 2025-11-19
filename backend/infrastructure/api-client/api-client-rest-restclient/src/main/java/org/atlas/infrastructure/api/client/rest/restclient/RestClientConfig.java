@@ -28,7 +28,7 @@ public class RestClientConfig {
     if (!sslEnabled) { // Note: Only for dev/test environments - security risk
       try {
         // Create an SSL context that trusts all certificates
-        SSLContext sslContext = SSLUtil.createTrustAllSslContext();
+        SSLContext sslContext = SSLUtil.createTrustAllSSLContext();
 
         // Create a custom HostnameVerifier that trusts all hostnames
         HostnameVerifier allHostsValid = (hostname, session) -> true;
