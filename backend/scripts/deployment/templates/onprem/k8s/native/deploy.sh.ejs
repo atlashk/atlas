@@ -20,14 +20,13 @@ set -euo pipefail
 # =============================================================================
 # This script checks prerequisites, builds services (optional), creates the
 # namespace, installs NGINX Ingress (if selected), and applies the rendered
-# manifests under services/.
+# manifests.
 # =============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../../" && pwd)"
 NAMESPACE="atlas"
-SERVICES_DIR="$SCRIPT_DIR/services"
-INGRESS_DIR="$SCRIPT_DIR/ingress"
+MANIFESTS_DIR="$SCRIPT_DIR/services"
 
 SKIP_BUILD=false
 
@@ -148,17 +147,17 @@ install_ingress_controller() {
 
 apply_manifests() {
   echo "Applying Kubernetes manifests in namespace '$NAMESPACE'..."
-  if [[ -d "$SERVICES_DIR/infrastructure" ]]; then
-    kubectl apply -n "$NAMESPACE" -f "$SERVICES_DIR/infrastructure"
+  if [[ -d "$MANIFESTS_DIR/infrastructure" ]]; then
+    kubectl apply -n "$NAMESPACE" -f "$MANIFESTS_DIR/infrastructure"
   fi
-  if [[ -d "$SERVICES_DIR/observability" ]]; then
-    kubectl apply -n "$NAMESPACE" -f "$SERVICES_DIR/observability"
+  if [[ -d "$MANIFESTS_DIR/observability" ]]; then
+    kubectl apply -n "$NAMESPACE" -f "$MANIFESTS_DIR/observability"
   fi
-  if [[ -d "$SERVICES_DIR/application" ]]; then
-    kubectl apply -n "$NAMESPACE" -f "$SERVICES_DIR/application"
+  if [[ -d "$MANIFESTS_DIR/application" ]]; then
+    kubectl apply -n "$NAMESPACE" -f "$MANIFESTS_DIR/application"
   fi
-  if [[ -d "$INGRESS_DIR" ]]; then
-    kubectl apply -n "$NAMESPACE" -f "$INGRESS_DIR"
+  if [[ -d "$MANIFESTS_DIR/ingress" ]]; then
+    kubectl apply -n "$NAMESPACE" -f "$MANIFESTS_DIR/ingress"
   fi
 }
 

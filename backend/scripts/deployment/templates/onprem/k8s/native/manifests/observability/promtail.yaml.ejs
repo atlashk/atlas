@@ -29,6 +29,11 @@ data:
         pipeline_stages:
           - docker: {}
         relabel_configs:
+          # Keep only pods labeled tier=application
+          - action: keep
+            source_labels: ['__meta_kubernetes_pod_label_tier']
+            regex: application
+          # Attach useful labels
           - source_labels: ['__meta_kubernetes_pod_label_app']
             target_label: 'app'
           - source_labels: ['__meta_kubernetes_pod_label_tier']
@@ -39,14 +44,19 @@ data:
             target_label: 'pod'
           - source_labels: ['__meta_kubernetes_pod_node_name']
             target_label: 'node'
-      # Scrape logs from containers not managed by Kubernetes (fallback)
-      - job_name: other-containers
-        static_configs:
-          - targets:
-            - localhost
-            labels:
-              job: varlogs
-              __path__: /var/log/*
+          # Point Promtail to container log files for each pod/container
+          - source_labels: ['__meta_kubernetes_pod_uid','__meta_kubernetes_pod_container_name']
+            regex: (.*);(.*)
+            target_label: '__path__'
+            replacement: /var/log/pods/*$1/*/*.log
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: promtail
+  labels:
+    app: promtail
+    tier: observability
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -65,6 +75,7 @@ spec:
         app: promtail
         tier: observability
     spec:
+      serviceAccountName: promtail
       containers:
         - name: promtail
           image: grafana/promtail:main
