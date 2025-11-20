@@ -467,7 +467,7 @@ main() {
 
   show_stack_file "$PLATFORM_DEFAULT_STACK_FILE"
   if [[ -f "$PLATFORM_DEFAULT_STACK_FILE" ]] && confirm_use_stack "$PLATFORM_DEFAULT_STACK_FILE"; then
-    cp "$PLATFORM_DEFAULT_STACK_FILE" "$APP_STACK_FILE"
+    sudo cp "$PLATFORM_DEFAULT_STACK_FILE" "$APP_STACK_FILE"
     info "app-stack.cfg generated from selected platform default config."
   else
     run_custom_stack_interactive "$selected_platform"
