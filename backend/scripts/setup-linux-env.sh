@@ -1,10 +1,9 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # Development Environment Setup Script for Linux
 # This script installs Git, Java 17 (OpenJDK), and Docker
-
-set -e  # Exit on any error
-set -u  # Exit on undefined variables
 
 # Check if running as root
 check_root() {
