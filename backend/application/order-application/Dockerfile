@@ -1,11 +1,10 @@
 # Use multi-stage build for optimization
 FROM eclipse-temurin:17-jdk AS builder
-WORKDIR /workspace
+WORKDIR /app
 
 COPY ./build/libs/*.jar app.jar
 
-# Use the new Spring Boot 3.2+ layertools syntax
-RUN java -Djarmode=tools -jar app.jar extract
+RUN java -Djarmode=layertools -jar app.jar extract
 
 # Final runtime image
 FROM eclipse-temurin:17-jre
@@ -27,10 +26,10 @@ WORKDIR /app
 
 # Copy layers in order of least to most frequently changing
 # This optimizes Docker layer caching
-COPY --from=builder --chown=spring:spring /workspace/dependencies/ ./dependencies/
-COPY --from=builder --chown=spring:spring /workspace/spring-boot-loader/ ./spring-boot-loader/
-COPY --from=builder --chown=spring:spring /workspace/snapshot-dependencies/ ./snapshot-dependencies/
-COPY --from=builder --chown=spring:spring /workspace/application/ ./application/
+COPY --from=builder --chown=spring:spring /app/dependencies/ ./dependencies/
+COPY --from=builder --chown=spring:spring /app/spring-boot-loader/ ./spring-boot-loader/
+COPY --from=builder --chown=spring:spring /app/snapshot-dependencies/ ./snapshot-dependencies/
+COPY --from=builder --chown=spring:spring /app/application/ ./application/
 
 # Switch to non-root user
 USER spring:spring
@@ -59,5 +58,6 @@ ENTRYPOINT ["dumb-init", "--", "java", \
   "-Djava.security.egd=file:/dev/urandom", \
   # Spring Boot 3.x optimizations
   "-Dspring.jmx.enabled=false", \
-  # Use the Spring Boot launcher for layered structure
+  # Since Spring Boot 3.2.0, a new org.springframework.boot.loader.launch.JarLauncher has been introduced
+  # instead of org.springframework.boot.loader.JarLauncher
   "org.springframework.boot.loader.launch.JarLauncher"]
