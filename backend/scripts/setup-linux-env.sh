@@ -26,55 +26,8 @@ install_docker_compose() {
         echo "WARNING: Docker Compose (standalone) detected: $(docker-compose --version)"
     fi
 
-    case $DISTRO in
-        ubuntu|debian)
-            sudo apt-get update || true
-            sudo apt-get install -y docker-compose-plugin
-            ;;
-        centos|rhel|fedora)
-            if command -v dnf &> /dev/null; then
-                sudo dnf install -y docker-compose-plugin
-            else
-                sudo yum install -y docker-compose-plugin
-            fi
-            ;;
-        arch|manjaro)
-            if ! docker compose version &> /dev/null; then
-                sudo mkdir -p /usr/lib/docker/cli-plugins
-                ARCH=$(uname -m)
-                if [[ "$ARCH" == "x86_64" ]]; then
-                    COMPOSE_URL="https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64"
-                elif [[ "$ARCH" == "aarch64" || "$ARCH" == "arm64" ]]; then
-                    COMPOSE_URL="https://github.com/docker/compose/releases/latest/download/docker-compose-linux-aarch64"
-                elif [[ "$ARCH" == "armv7l" || "$ARCH" == "arm" ]]; then
-                    COMPOSE_URL="https://github.com/docker/compose/releases/latest/download/docker-compose-linux-armv7"
-                else
-                    COMPOSE_URL=""
-                fi
-                if [[ -n "$COMPOSE_URL" ]]; then
-                    sudo curl -L "$COMPOSE_URL" -o /usr/lib/docker/cli-plugins/docker-compose
-                    sudo chmod +x /usr/lib/docker/cli-plugins/docker-compose
-                fi
-            fi
-            ;;
-        *)
-            sudo mkdir -p /usr/lib/docker/cli-plugins
-            ARCH=$(uname -m)
-            if [[ "$ARCH" == "x86_64" ]]; then
-                COMPOSE_URL="https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64"
-            elif [[ "$ARCH" == "aarch64" || "$ARCH" == "arm64" ]]; then
-                COMPOSE_URL="https://github.com/docker/compose/releases/latest/download/docker-compose-linux-aarch64"
-            elif [[ "$ARCH" == "armv7l" || "$ARCH" == "arm" ]]; then
-                COMPOSE_URL="https://github.com/docker/compose/releases/latest/download/docker-compose-linux-armv7"
-            else
-                COMPOSE_URL=""
-            fi
-            if [[ -n "$COMPOSE_URL" ]]; then
-                sudo curl -L "$COMPOSE_URL" -o /usr/lib/docker/cli-plugins/docker-compose
-                sudo chmod +x /usr/lib/docker/cli-plugins/docker-compose
-            fi
-            ;;
-    esac
+    sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 -o /usr/lib/docker/cli-plugins/docker-compose
+    sudo chmod +x /usr/lib/docker/cli-plugins/docker-compose
 
     if docker compose version &> /dev/null; then
         echo "SUCCESS: Docker Compose plugin installed: $(docker compose version | head -n 1)"
@@ -84,6 +37,45 @@ install_docker_compose() {
         return 0
     else
         echo "ERROR: Docker Compose installation failed"
+        return 1
+    fi
+}
+
+# Install kubectl (curl binary method)
+install_kubectl() {
+    echo "INFO: Installing kubectl..."
+
+    if command -v kubectl &> /dev/null; then
+        echo "SUCCESS: kubectl is already installed: $(kubectl version --client --short 2>/dev/null || kubectl version --client 2>/dev/null | head -n 1)"
+        return 0
+    fi
+
+    # Download latest stable kubectl and checksum
+    STABLE=$(curl -L -s https://dl.k8s.io/release/stable.txt)
+    echo "INFO: Detected kubectl stable version: $STABLE"
+    curl -LO "https://dl.k8s.io/release/${STABLE}/bin/linux/amd64/kubectl"
+    curl -LO "https://dl.k8s.io/release/${STABLE}/bin/linux/amd64/kubectl.sha256"
+
+    # Optional checksum validation
+    if command -v sha256sum &> /dev/null; then
+        if echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check --status; then
+            echo "SUCCESS: kubectl checksum verified"
+        else
+            echo "ERROR: kubectl checksum validation failed"
+            rm -f kubectl kubectl.sha256
+            return 1
+        fi
+    else
+        echo "WARNING: sha256sum not found; skipping checksum validation"
+    fi
+
+    sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+    if command -v kubectl &> /dev/null; then
+        echo "SUCCESS: kubectl installed successfully: $(kubectl version --client --short 2>/dev/null || kubectl version --client 2>/dev/null | head -n 1)"
+        return 0
+    else
+        echo "ERROR: kubectl installation failed"
         return 1
     fi
 }
@@ -413,6 +405,14 @@ verify_installations() {
         all_good=false
     fi
 
+    # Check kubectl
+    if command -v kubectl &> /dev/null; then
+        echo "SUCCESS: ✓ kubectl: $(kubectl version --client --short 2>/dev/null || kubectl version --client 2>/dev/null | head -n 1)"
+    else
+        echo "ERROR: ✗ kubectl: Not found"
+        all_good=false
+    fi
+
     # Check Minikube
     if command -v minikube &> /dev/null; then
         echo "SUCCESS: ✓ Minikube: $(minikube version | head -n 1)"
@@ -448,6 +448,8 @@ main() {
     install_docker
     echo
     install_docker_compose
+    echo
+    install_kubectl
     echo
     install_minikube
     echo

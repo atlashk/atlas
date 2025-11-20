@@ -165,12 +165,11 @@ build_services() {
 }
 
 # =============================================================================
-# SERVICE STARTUP
+# DEPLOYMENT FUNCTIONS
 # =============================================================================
 
-start_current_stack() {
-    echo "Starting current Compose stack..."
-    echo "Using compose file: $COMPOSE_FILE"
+deploy_services() {
+    echo "Deploying services using compose file: $COMPOSE_FILE"
     if $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" -p "$PROJECT_NAME" up -d; then
         echo "Compose stack started"
     else
@@ -267,7 +266,7 @@ main() {
         build_services
     fi
 
-    start_current_stack
+    deploy_services
 
     show_deployment_summary "$start_time"
 }

@@ -71,6 +71,45 @@ check_prerequisites() {
   echo "Prerequisites check passed"
 }
 
+# =============================================================================
+# BUILD FUNCTIONS
+# =============================================================================
+
+build_services() {
+    echo "Building services..."
+
+    local build_script="$PROJECT_ROOT/backend/scripts/buildSrc/build.sh"
+    if [[ ! -f "$build_script" ]]; then
+        echo "Build script not found: $build_script" >&2
+        exit 1
+    fi
+
+    echo "Granting execute permissions to build scripts..."
+    chmod +x "$PROJECT_ROOT/backend/scripts/buildSrc/"*.sh
+
+    echo "Invoking build script..."
+    if "$build_script"; then
+        echo "Build completed successfully"
+    else
+        echo "Build failed" >&2
+        exit 1
+    fi
+    echo
+}
+
+# =============================================================================
+# DEPLOYMENT FUNCTIONS
+# =============================================================================
+
+create_namespace() {
+  if kubectl get namespace "$NAMESPACE" >/dev/null 2>&1; then
+    echo "Namespace '$NAMESPACE' already exists"
+  else
+    echo "Creating namespace '$NAMESPACE'"
+    kubectl create namespace "$NAMESPACE"
+  fi
+}
+
 apply_and_wait() {
   local dir="$1"
   local label="$2"
@@ -126,29 +165,6 @@ apply_and_wait() {
         exit 1
       }
     done <<< "$jobs"
-  fi
-}
-
-build_services() {
-  echo "Building services..."
-  local build_script="$PROJECT_ROOT/backend/scripts/buildSrc/build.sh"
-  if [[ ! -f "$build_script" ]]; then
-    echo "Build script not found: $build_script" >&2; exit 1
-  fi
-  chmod +x "$build_script" || true
-  if "$build_script"; then
-    echo "Build completed successfully"
-  else
-    echo "Build failed" >&2; exit 1
-  fi
-}
-
-create_namespace() {
-  if kubectl get namespace "$NAMESPACE" >/dev/null 2>&1; then
-    echo "Namespace '$NAMESPACE' already exists"
-  else
-    echo "Creating namespace '$NAMESPACE'"
-    kubectl create namespace "$NAMESPACE"
   fi
 }
 
@@ -211,6 +227,10 @@ apply_manifests() {
   apply_and_wait "$MANIFESTS_DIR/ingress" "ingress"
 }
 
+# =============================================================================
+# SUMMARY AND REPORTING
+# =============================================================================
+
 show_access_information() {
   echo "Service Access URLs:"
   echo "  API Gateway:   http://api.atlas.local"
@@ -227,6 +247,10 @@ show_access_information() {
   echo "  SMTP4Dev:      http://smtp4dev.atlas.local"
   <% } %>
 }
+
+# =============================================================================
+# MAIN EXECUTION
+# =============================================================================
 
 main() {
   parse_arguments "$@"
