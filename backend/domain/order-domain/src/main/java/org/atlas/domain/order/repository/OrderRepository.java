@@ -1,9 +1,11 @@
 package org.atlas.domain.order.repository;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import org.atlas.domain.order.entity.Order;
 import org.atlas.domain.order.repository.criteria.FindOrderCriteria;
+import org.atlas.domain.order.repository.model.MonthlyOrderAggregation;
 import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
@@ -15,6 +17,8 @@ public interface OrderRepository {
   Long countAll();
 
   BigDecimal sumAmountByStatus(OrderStatus status);
+
+  List<MonthlyOrderAggregation> aggregateMonthlyByStatus(OrderStatus status);
 
   Optional<Order> findById(Integer id);
 

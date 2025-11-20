@@ -1,9 +1,11 @@
 # Use multi-stage build for optimization
-FROM eclipse-temurin:17-jre AS builder
+FROM eclipse-temurin:17-jdk AS builder
 WORKDIR /workspace
+
 COPY ./build/libs/*.jar app.jar
+
 # Use the new Spring Boot 3.2+ layertools syntax
-RUN java -Djarmode=tools -jar app.jar extract --layers --launcher
+RUN java -Djarmode=tools -jar app.jar extract
 
 # Final runtime image
 FROM eclipse-temurin:17-jre
@@ -25,10 +27,10 @@ WORKDIR /app
 
 # Copy layers in order of least to most frequently changing
 # This optimizes Docker layer caching
-COPY --from=builder --chown=spring:spring /workspace/*/dependencies/ ./
-COPY --from=builder --chown=spring:spring /workspace/*/spring-boot-loader/ ./
-COPY --from=builder --chown=spring:spring /workspace/*/snapshot-dependencies/ ./
-COPY --from=builder --chown=spring:spring /workspace/*/application/ ./
+COPY --from=builder --chown=spring:spring /workspace/dependencies/ ./dependencies/
+COPY --from=builder --chown=spring:spring /workspace/spring-boot-loader/ ./spring-boot-loader/
+COPY --from=builder --chown=spring:spring /workspace/snapshot-dependencies/ ./snapshot-dependencies/
+COPY --from=builder --chown=spring:spring /workspace/application/ ./application/
 
 # Switch to non-root user
 USER spring:spring
@@ -38,7 +40,7 @@ EXPOSE 8081
 
 # Use dumb-init for proper signal handling and optimized JVM settings
 ENTRYPOINT ["dumb-init", "--", "java", \
-  # Memory settings - increased for user service
+  # Memory settings
   "-Xms512m", \
   "-Xmx1g", \
   # GC settings optimized for containers

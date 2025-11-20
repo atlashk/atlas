@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.domain.order.entity.Order;
 import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.repository.criteria.FindOrderCriteria;
+import org.atlas.domain.order.repository.model.MonthlyOrderAggregation;
 import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
@@ -57,6 +58,11 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
   @Override
   public BigDecimal sumAmountByStatus(OrderStatus status) {
     return jpaOrderRepository.sumAmountByStatus(status);
+  }
+
+  @Override
+  public List<MonthlyOrderAggregation> aggregateMonthlyByStatus(OrderStatus status) {
+    return jpaOrderRepository.aggregateMonthlyByStatus(status);
   }
 
   @Override

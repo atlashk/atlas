@@ -1,7 +1,9 @@
 package org.atlas.infrastructure.persistence.jpa.impl.order.repository;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
+import org.atlas.domain.order.repository.model.MonthlyOrderAggregation;
 import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.infrastructure.persistence.jpa.core.repository.JpaBaseRepository;
 import org.atlas.infrastructure.persistence.jpa.impl.order.entity.JpaOrder;
@@ -34,4 +36,15 @@ public interface JpaOrderRepository extends JpaBaseRepository<JpaOrder, Integer>
         where o.status = :status
       """)
   BigDecimal sumAmountByStatus(@Param("status") OrderStatus status);
+
+  @Query("""
+        select new org.atlas.domain.order.repository.model.MonthlyOrderAggregation(
+          year(o.createdAt), month(o.createdAt), count(o.id), coalesce(sum(o.amount), 0)
+        )
+        from JpaOrder o
+        where o.status = :status
+        group by year(o.createdAt), month(o.createdAt)
+        order by year(o.createdAt), month(o.createdAt)
+      """)
+  List<MonthlyOrderAggregation> aggregateMonthlyByStatus(@Param("status") OrderStatus status);
 }

@@ -1,9 +1,11 @@
 # Use multi-stage build for optimization
-FROM eclipse-temurin:17-jre AS builder
+FROM eclipse-temurin:17-jdk AS builder
 WORKDIR /workspace
+
 COPY ./build/libs/*.jar app.jar
+
 # Use the new Spring Boot 3.2+ layertools syntax
-RUN java -Djarmode=tools -jar app.jar extract --layers --launcher
+RUN java -Djarmode=tools -jar app.jar extract
 
 # Final runtime image
 FROM eclipse-temurin:17-jre
@@ -16,15 +18,19 @@ RUN groupadd -g 1001 spring && \
 RUN apt-get update && apt-get install -y --no-install-recommends dumb-init && \
     rm -rf /var/lib/apt/lists/*
 
+# Create log directory with proper permissions
+RUN mkdir -p /var/log/config-server && \
+    chown -R spring:spring /var/log/config-server
+
 # Set working directory
 WORKDIR /app
 
 # Copy layers in order of least to most frequently changing
 # This optimizes Docker layer caching
-COPY --from=builder --chown=spring:spring /workspace/*/dependencies/ ./
-COPY --from=builder --chown=spring:spring /workspace/*/spring-boot-loader/ ./
-COPY --from=builder --chown=spring:spring /workspace/*/snapshot-dependencies/ ./
-COPY --from=builder --chown=spring:spring /workspace/*/application/ ./
+COPY --from=builder --chown=spring:spring /workspace/dependencies/ ./dependencies/
+COPY --from=builder --chown=spring:spring /workspace/spring-boot-loader/ ./spring-boot-loader/
+COPY --from=builder --chown=spring:spring /workspace/snapshot-dependencies/ ./snapshot-dependencies/
+COPY --from=builder --chown=spring:spring /workspace/application/ ./application/
 
 # Switch to non-root user
 USER spring:spring
