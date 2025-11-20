@@ -88,6 +88,28 @@ install_docker_compose() {
     fi
 }
 
+# Install Minikube (amd64)
+install_minikube() {
+    echo "INFO: Installing Minikube..."
+
+    if command -v minikube &> /dev/null; then
+        echo "SUCCESS: Minikube is already installed: $(minikube version | head -n 1)"
+        return 0
+    fi
+
+    # Download and install Minikube using provided instructions
+    curl -LO https://github.com/kubernetes/minikube/releases/latest/download/minikube-linux-amd64
+    sudo install minikube-linux-amd64 /usr/local/bin/minikube && rm minikube-linux-amd64
+
+    if command -v minikube &> /dev/null; then
+        echo "SUCCESS: Minikube installed successfully: $(minikube version | head -n 1)"
+        return 0
+    else
+        echo "ERROR: Minikube installation failed"
+        return 1
+    fi
+}
+
 # Detect Linux distribution
 detect_distro() {
     if [[ -f /etc/os-release ]]; then
@@ -259,18 +281,29 @@ install_docker() {
             ;;
     esac
 
-    # Start and enable Docker service
-    sudo systemctl start docker
-    sudo systemctl enable docker
+    # Start and enable Docker service (if available)
+    if command -v systemctl &> /dev/null; then
+        sudo systemctl enable docker || true
+        sudo systemctl start docker || true
+    elif command -v service &> /dev/null; then
+        sudo service docker start || true
+    fi
 
-    # Add current user to docker group
-    sudo groupadd docker
-    sudo usermod -aG docker $USER
+    # Ensure 'docker' group exists and add current user if needed
+    if ! getent group docker >/dev/null; then
+        sudo groupadd docker
+    fi
+    if id -nG "$USER" | grep -qw docker; then
+        echo "INFO: User $USER already in 'docker' group"
+    else
+        sudo usermod -aG docker "$USER"
+        echo "WARNING: Please log out and log back in for Docker group changes to take effect"
+    fi
+    # Apply group changes without logging out
     newgrp docker
 
     if command -v docker &> /dev/null; then
         echo "SUCCESS: Docker installed successfully: $(docker --version)"
-        echo "WARNING: Please log out and log back in for Docker group changes to take effect"
     else
         echo "ERROR: Docker installation failed"
         return 1
@@ -361,6 +394,11 @@ verify_installations() {
     # Check Docker
     if command -v docker &> /dev/null; then
         echo "SUCCESS: ✓ Docker: $(docker --version)"
+        if docker ps -a >/dev/null 2>&1; then
+            echo "SUCCESS: ✓ Docker daemon accessible"
+        else
+            echo "WARNING: ⚠ Docker daemon not accessible (permission or service)."
+        fi
     else
         echo "ERROR: ✗ Docker: Not found"
         all_good=false
@@ -372,6 +410,14 @@ verify_installations() {
         echo "SUCCESS: ✓ Docker Compose (standalone): $(docker-compose --version)"
     else
         echo "ERROR: ✗ Docker Compose: Not found"
+        all_good=false
+    fi
+
+    # Check Minikube
+    if command -v minikube &> /dev/null; then
+        echo "SUCCESS: ✓ Minikube: $(minikube version | head -n 1)"
+    else
+        echo "ERROR: ✗ Minikube: Not found"
         all_good=false
     fi
 
@@ -402,6 +448,8 @@ main() {
     install_docker
     echo
     install_docker_compose
+    echo
+    install_minikube
     echo
 
     # Reload shell environment
