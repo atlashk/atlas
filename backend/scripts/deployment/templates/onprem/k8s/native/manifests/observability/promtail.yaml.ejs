@@ -44,11 +44,10 @@ data:
             target_label: 'pod'
           - source_labels: ['__meta_kubernetes_pod_node_name']
             target_label: 'node'
-          # Point Promtail to container log files for each pod/container
-          - source_labels: ['__meta_kubernetes_pod_uid','__meta_kubernetes_pod_container_name']
-            regex: (.*);(.*)
+          - source_labels: ['__meta_kubernetes_pod_label_app']
+            regex: (.*)
             target_label: '__path__'
-            replacement: /var/log/pods/*$1/*/*.log
+            replacement: /var/log/$1/$1.log
 ---
 apiVersion: v1
 kind: ServiceAccount
