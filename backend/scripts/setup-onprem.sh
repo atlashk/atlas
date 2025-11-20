@@ -436,7 +436,7 @@ render_templates() {
 reset_deployment_generated_dir() {
   # Clean and recreate generated directory to ensure a fresh output
   if [[ -d "$DEPLOYMENT_GENERATED_DIR" ]]; then
-    rm -rf "$DEPLOYMENT_GENERATED_DIR"
+    sudo rm -rf "$DEPLOYMENT_GENERATED_DIR"
   fi
   mkdir -p "$DEPLOYMENT_GENERATED_DIR"
 }
@@ -474,6 +474,7 @@ main() {
   fi
 
   reset_deployment_generated_dir
+
   local platform
   platform="$(read_platform)"
   case "$platform" in
