@@ -25,7 +25,6 @@ public class ElasticsearchSearchService implements SearchService {
 
   private final ElasticsearchProductRepository elasticsearchProductRepository;
   private final ElasticsearchOperations elasticsearchOperations;
-  private final ElasticsearchProductMapper elasticsearchProductMapper;
 
   @Override
   public boolean initializeIndex(SearchIndex index) {
@@ -70,7 +69,7 @@ public class ElasticsearchSearchService implements SearchService {
     }
 
     List<ElasticsearchProduct> elasticsearchProducts = products.stream()
-        .map(elasticsearchProductMapper::toProductDocument)
+        .map(ElasticsearchProductMapper.INSTANCE::toProductDocument)
         .toList();
 
     elasticsearchProductRepository.saveAll(elasticsearchProducts);
