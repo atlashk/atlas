@@ -224,6 +224,7 @@ apply_manifests() {
   apply_and_wait "$MANIFESTS_DIR/infrastructure" "infrastructure"
   apply_and_wait "$MANIFESTS_DIR/application" "application"
   apply_and_wait "$MANIFESTS_DIR/observability" "observability"
+  install_ingress_controller
   apply_and_wait "$MANIFESTS_DIR/ingress" "ingress"
 }
 
@@ -263,7 +264,6 @@ main() {
   fi
 
   create_namespace
-  install_ingress_controller
   apply_manifests
   show_access_information
   echo "Deployment completed successfully. Namespace: $NAMESPACE"
