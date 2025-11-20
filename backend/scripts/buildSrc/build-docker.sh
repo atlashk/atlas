@@ -129,7 +129,6 @@ for service in "${SERVICES[@]}"; do
     echo "Built Docker image for $PROJECT_NAME-$name successfully."
     if [ -n "$CLUSTER_TYPE" ]; then
         load_image_into_cluster "$PROJECT_NAME-$name"
-        echo "Loaded image $PROJECT_NAME-$name into $CLUSTER_TYPE cluster."
     fi
     echo
 done

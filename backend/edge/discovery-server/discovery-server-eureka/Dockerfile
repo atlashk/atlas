@@ -26,10 +26,10 @@ WORKDIR /app
 
 # Copy layers in order of least to most frequently changing
 # This optimizes Docker layer caching
-COPY --from=builder --chown=spring:spring /app/dependencies/ ./dependencies/
-COPY --from=builder --chown=spring:spring /app/spring-boot-loader/ ./spring-boot-loader/
-COPY --from=builder --chown=spring:spring /app/snapshot-dependencies/ ./snapshot-dependencies/
-COPY --from=builder --chown=spring:spring /app/application/ ./application/
+COPY --from=builder /app/dependencies/ ./dependencies/
+COPY --from=builder /app/spring-boot-loader/ ./spring-boot-loader/
+COPY --from=builder /app/snapshot-dependencies/ ./snapshot-dependencies/
+COPY --from=builder /app/application/ ./application/
 
 # Switch to non-root user
 USER spring:spring
