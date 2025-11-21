@@ -124,35 +124,40 @@ spec:
             - name: ZIPKIN_ENDPOINT
               value: "http://zipkin:9411/api/v2/spans"
             <% } %>
+          # startupProbe gives the Spring Boot app up to 5 min (30 × 10 s) to finish starting
+          # before liveness/readiness probes are allowed to run. This prevents premature restarts.
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8083
+              scheme: HTTP
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 30
+          # livenessProbe restarts the container if the app becomes unresponsive after startup.
+          # Quick failure detection (3 × 30 s) without being overly aggressive.
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
               port: 8083
               scheme: HTTP
-            initialDelaySeconds: 240
-            periodSeconds: 45
-            timeoutSeconds: 15
-            failureThreshold: 10
+            initialDelaySeconds: 0
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
             successThreshold: 1
+          # readinessProbe removes the pod from service endpoints while it is still starting
+          # or if it becomes temporarily unavailable. Checks every 10 s for fast traffic routing.
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: 8083
               scheme: HTTP
-            initialDelaySeconds: 180
-            periodSeconds: 5
+            initialDelaySeconds: 0
+            periodSeconds: 10
             timeoutSeconds: 3
             successThreshold: 1
-            failureThreshold: 6
-          startupProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8083
-              scheme: HTTP
-            initialDelaySeconds: 120
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 18
+            failureThreshold: 3
           resources:
             requests:
               cpu: "200m"
