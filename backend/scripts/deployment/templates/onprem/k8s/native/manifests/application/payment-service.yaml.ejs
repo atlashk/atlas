@@ -26,20 +26,8 @@
   const hasGrafana = hasLoki || hasPrometheus || hasZipkin;
   const hasNginx = reverseProxy === 'nginx';
 %>
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: payment-service-logs
-  labels:
-    app: payment-service
-    tier: application
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
----
+# Log volume changed to emptyDir for Promtail compatibility
+# PersistentVolumeClaim removed - logs now use emptyDir volume
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -157,10 +145,58 @@ spec:
           volumeMounts:
             - name: payment-service-logs
               mountPath: /var/log/payment-service
+        <% if (hasLoki) { %>
+        # Promtail sidecar for log collection
+        - name: promtail
+          image: grafana/promtail:main
+          imagePullPolicy: IfNotPresent
+          args:
+            - -config.file=/etc/promtail/promtail.yml
+            - -config.expand-env
+          env:
+            - name: APP_NAME
+              value: "payment-service"
+          ports:
+            - containerPort: 9080
+              name: http
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: 9080
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 9080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "100m"
+              memory: "128Mi"
+          volumeMounts:
+            - name: promtail-config
+              mountPath: /etc/promtail
+            - name: payment-service-logs
+              mountPath: /var/log/payment-service
+              readOnly: true
+        <% } %>
       volumes:
         - name: payment-service-logs
-          persistentVolumeClaim:
-            claimName: payment-service-logs
+          emptyDir: {}
+        <% if (hasLoki) { %>
+        - name: promtail-config
+          configMap:
+            name: promtail-config
+        <% } %>
       terminationGracePeriodSeconds: 30
 ---
 apiVersion: v1

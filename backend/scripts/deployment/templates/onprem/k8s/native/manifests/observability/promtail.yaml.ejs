@@ -3,6 +3,50 @@
   const hasLoki = observabilityLoggingStack === 'loki';
 %>
 <% if (hasLoki) { -%>
+---
+# Promtail Service Account
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: promtail
+  labels:
+    app: promtail
+    tier: observability
+  annotations:
+    description: "Service account for Promtail log collection"
+---
+# Promtail RBAC
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: promtail
+  labels:
+    app: promtail
+    tier: observability
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: promtail
+  labels:
+    app: promtail
+    tier: observability
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: promtail
+subjects:
+  - kind: ServiceAccount
+    name: promtail
+    namespace: default
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -15,114 +59,26 @@ data:
     server:
       http_listen_port: 9080
       grpc_listen_port: 0
-
+      log_level: info
+    
     positions:
-      filename: /var/log/positions.yaml
-
+      filename: /tmp/positions.yaml
+      sync_period: 10s
+    
     clients:
       - url: http://loki:3100/loki/api/v1/push
-
+        batchwait: 1s
+        batchsize: 1048576
+    
     scrape_configs:
-      - job_name: kubernetes-pods
-        kubernetes_sd_configs:
-          - role: pod
-        pipeline_stages:
-          - docker: {}
-        relabel_configs:
-          # Keep only pods labeled tier=application
-          - action: keep
-            source_labels: ['__meta_kubernetes_pod_label_tier']
-            regex: application
-          # Attach useful labels
-          - source_labels: ['__meta_kubernetes_pod_label_app']
-            target_label: 'app'
-          - source_labels: ['__meta_kubernetes_pod_label_tier']
-            target_label: 'tier'
-          - source_labels: ['__meta_kubernetes_namespace']
-            target_label: 'namespace'
-          - source_labels: ['__meta_kubernetes_pod_name']
-            target_label: 'pod'
-          - source_labels: ['__meta_kubernetes_pod_node_name']
-            target_label: 'node'
-          - source_labels: ['__meta_kubernetes_pod_label_app']
-            regex: (.*)
-            target_label: '__path__'
-            replacement: /var/log/$1/$1.log
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: promtail
-  labels:
-    app: promtail
-    tier: observability
----
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  name: promtail
-  labels:
-    app: promtail
-    tier: observability
-spec:
-  selector:
-    matchLabels:
-      app: promtail
-  template:
-    metadata:
-      labels:
-        app: promtail
-        tier: observability
-    spec:
-      serviceAccountName: promtail
-      containers:
-        - name: promtail
-          image: grafana/promtail:main
-          imagePullPolicy: IfNotPresent
-          args:
-            - -config.file=/etc/promtail/promtail.yml
-          env:
-            - name: HOSTNAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: spec.nodeName
-          ports:
-            - containerPort: 9080
-              name: http
-          livenessProbe:
-            httpGet:
-              path: /ready
-              port: 9080
-            initialDelaySeconds: 30
-            periodSeconds: 30
-            timeoutSeconds: 10
-            failureThreshold: 3
-          readinessProbe:
-            httpGet:
-              path: /ready
-              port: 9080
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 3
-          resources:
-            requests:
-              cpu: "100m"
-              memory: "128Mi"
-            limits:
-              cpu: "200m"
-              memory: "256Mi"
-          volumeMounts:
-            - name: promtail-config
-              mountPath: /etc/promtail
-            - name: varlog
-              mountPath: /var/log
-      volumes:
-        - name: promtail-config
-          configMap:
-            name: promtail-config
-        - name: varlog
-          hostPath:
-            path: /var/log
-            type: Directory
+      - job_name: application-logs
+        static_configs:
+          - targets:
+              - localhost
+            labels:
+              job: application-logs
+              app: ${APP_NAME}
+              tier: application
+              namespace: atlas
+              __path__: /var/log/${APP_NAME}/${APP_NAME}.log
 <% } -%>
