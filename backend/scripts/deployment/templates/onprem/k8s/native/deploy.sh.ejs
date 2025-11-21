@@ -222,8 +222,8 @@ install_ingress_controller() {
 apply_manifests() {
   echo "Applying Kubernetes manifests in namespace '$NAMESPACE'..."
   apply_and_wait "$MANIFESTS_DIR/infrastructure" "infrastructure"
-  apply_and_wait "$MANIFESTS_DIR/application" "application"
   apply_and_wait "$MANIFESTS_DIR/observability" "observability"
+  apply_and_wait "$MANIFESTS_DIR/application" "application"
   install_ingress_controller
   apply_and_wait "$MANIFESTS_DIR/ingress" "ingress"
 }
