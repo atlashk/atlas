@@ -1,6 +1,6 @@
 # Use multi-stage build for optimization
 FROM eclipse-temurin:17-jdk AS builder
-WORKDIR /app
+WORKDIR /extracted
 
 COPY ./build/libs/*.jar app.jar
 
@@ -26,10 +26,10 @@ WORKDIR /app
 
 # Copy layers in order of least to most frequently changing
 # This optimizes Docker layer caching
-COPY --from=builder --chown=spring:spring /app/dependencies/ ./dependencies/
-COPY --from=builder --chown=spring:spring /app/spring-boot-loader/ ./spring-boot-loader/
-COPY --from=builder --chown=spring:spring /app/snapshot-dependencies/ ./snapshot-dependencies/
-COPY --from=builder --chown=spring:spring /app/application/ ./application/
+COPY --from=builder /extracted/dependencies/ ./
+COPY --from=builder /extracted/spring-boot-loader/ ./
+COPY --from=builder /extracted/snapshot-dependencies/ ./
+COPY --from=builder /extracted/application/ ./
 
 # Switch to non-root user
 USER spring:spring
