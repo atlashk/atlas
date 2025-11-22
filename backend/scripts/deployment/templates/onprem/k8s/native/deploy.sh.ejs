@@ -146,7 +146,7 @@ apply_and_wait() {
     echo "Waiting for ${label} workloads to finish rollout in namespace '$NAMESPACE'..."
     while IFS= read -r res; do
       [[ -z "$res" ]] && continue
-      kubectl -n "$NAMESPACE" rollout status "$res" --timeout=300s || {
+      kubectl -n "$NAMESPACE" rollout status "$res" --timeout=900s || {
         echo "Rollout did not complete for $res" >&2
         exit 1
       }
@@ -160,7 +160,7 @@ apply_and_wait() {
     echo "Waiting for ${label} jobs to complete in namespace '$NAMESPACE'..."
     while IFS= read -r res; do
       [[ -z "$res" ]] && continue
-      kubectl -n "$NAMESPACE" wait --for=condition=complete "$res" --timeout=600s || {
+      kubectl -n "$NAMESPACE" wait --for=condition=complete "$res" --timeout=900s || {
         echo "Job did not complete: $res" >&2
         exit 1
       }
