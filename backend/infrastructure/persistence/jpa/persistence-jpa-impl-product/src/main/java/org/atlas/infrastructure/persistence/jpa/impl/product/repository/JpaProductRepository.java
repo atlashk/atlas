@@ -1,6 +1,7 @@
 package org.atlas.infrastructure.persistence.jpa.impl.product.repository;
 
 import jakarta.persistence.LockModeType;
+import java.util.List;
 import java.util.Optional;
 import org.atlas.infrastructure.persistence.jpa.core.repository.JpaBaseRepository;
 import org.atlas.infrastructure.persistence.jpa.impl.product.entity.JpaProduct;
@@ -12,6 +13,17 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface JpaProductRepository extends JpaBaseRepository<JpaProduct, Integer> {
+
+  @Query("""
+        select p
+        from JpaProduct p
+        left join fetch p.details
+        left join fetch p.attributes
+        left join fetch p.brand
+        left join fetch p.categories
+        where p.id in (:ids)
+      """)
+  List<JpaProduct> findAllByIdInWithAssociations(@Param("ids") List<Integer> ids);
 
   @Query("""
         select p

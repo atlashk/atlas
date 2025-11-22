@@ -66,7 +66,6 @@ The deployment supports multiple environments, each running in its own namespace
 After setting up Ingress, access services using local hostnames:
 - **API Gateway**: http://api.atlas.local
 - **Grafana**: http://grafana.atlas.local (admin/123456)
-- **Prometheus**: http://prometheus.atlas.local
 - **Zipkin**: http://zipkin.atlas.local
 - **SMTP4Dev**: http://smtp4dev.atlas.local
 

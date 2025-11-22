@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "org.atlas.infrastructure.api.server.rest.impl")
 @RequiredArgsConstructor
 @Slf4j
 public class RestExceptionHandler {

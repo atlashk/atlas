@@ -7,7 +7,9 @@ import org.atlas.framework.paging.PagingResult;
 
 public interface SearchService {
 
-  boolean initializeIndex(SearchIndex index);
+  boolean createIndex(SearchIndex index);
+
+  long countDocuments(SearchIndex index);
 
   /**
    * @return the IDs of products that match the search criteria
@@ -16,12 +18,14 @@ public interface SearchService {
 
   /**
    * Synchronize a batch of products to the search engine
+   *
    * @param products List of products to synchronize
    */
   void saveAll(List<Product> products);
 
   /**
    * Delete a product from the search engine
+   *
    * @param productId ID of the product to delete
    */
   void deleteProduct(Integer productId);

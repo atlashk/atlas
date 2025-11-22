@@ -27,7 +27,7 @@ public class ElasticsearchSearchService implements SearchService {
   private final ElasticsearchOperations elasticsearchOperations;
 
   @Override
-  public boolean initializeIndex(SearchIndex index) {
+  public boolean createIndex(SearchIndex index) {
     if (index == null) {
       throw new IllegalArgumentException("Search index cannot be null");
     }
@@ -48,11 +48,17 @@ public class ElasticsearchSearchService implements SearchService {
   }
 
   @Override
+  public long countDocuments(SearchIndex index) {
+    return elasticsearchProductRepository.count();
+  }
+
+  @Override
   public PagingResult<Integer> search(SearchProductCriteria criteria,
       PagingRequest pagingRequest) {
     Pageable pageable = PageRequest.of(pagingRequest.getPage(), pagingRequest.getSize());
 
-    SearchHits<ElasticsearchProduct> searchHits = elasticsearchProductRepository.search(criteria, pageable);
+    SearchHits<ElasticsearchProduct> searchHits = elasticsearchProductRepository.search(criteria,
+        pageable);
 
     List<Integer> matchedProductIds = searchHits.stream()
         .map(hit -> hit.getContent().getProductId())
@@ -77,7 +83,8 @@ public class ElasticsearchSearchService implements SearchService {
 
   @Override
   public void deleteProduct(Integer productId) {
-    ElasticsearchProduct elasticsearchProduct = elasticsearchProductRepository.findByProductId(productId)
+    ElasticsearchProduct elasticsearchProduct = elasticsearchProductRepository.findByProductId(
+            productId)
         .orElseThrow(() -> new IllegalArgumentException(
             String.format("Product %d does not exist in search index", productId)));
 

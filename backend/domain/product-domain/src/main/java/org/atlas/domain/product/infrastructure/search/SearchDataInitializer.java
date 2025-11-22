@@ -6,17 +6,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.product.entity.Product;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.repository.criteria.FindProductCriteria;
+import org.atlas.framework.hook.StartupHook;
+import org.atlas.framework.measurement.StopWatch;
 import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
 import org.atlas.framework.util.PagingUtil;
 import org.atlas.framework.util.SleepUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
 
-@Component
+@StartupHook
 @ConditionalOnBean(SearchService.class)
 @RequiredArgsConstructor
 @Slf4j
@@ -27,22 +25,26 @@ public class SearchDataInitializer {
 
   private static final int BATCH_SIZE = 100;
 
-  @Async
-  @EventListener(ApplicationReadyEvent.class)
-  public void init() {
-    if (searchService.initializeIndex(SearchIndex.PRODUCT)) {
-      log.info("Product index created successfully, starting data synchronization...");
-      synchronizeProductData();
-    }
+  public void handle() {
+    synchronizeProductData();
   }
 
   private void synchronizeProductData() {
-    long startTime = System.currentTimeMillis();
-    int synchronizedCount = 0;
+    // Create index if not exist
+    boolean createdIndex = searchService.createIndex(SearchIndex.PRODUCT);
+    if (!createdIndex) {
+      log.info("Index of product has been created");
+    }
 
-    log.info(
-        "Started synchronizing product data from database to Elasticsearch with batch size: {}",
-        BATCH_SIZE);
+    // Count documents to determine if synchronization is needed
+    long documentCount = searchService.countDocuments(SearchIndex.PRODUCT);
+    if (documentCount > 0) {
+      log.info("Product data has been already synchronized");
+      return;
+    }
+
+    StopWatch stopWatch = new StopWatch();
+    int synchronizedCount = 0;
 
     long totalProducts = productRepository.countAll();
     log.info("Total products to synchronize: {}", totalProducts);
@@ -51,6 +53,11 @@ public class SearchDataInitializer {
       log.info("No products found in database, synchronization completed");
       return;
     }
+
+    log.info(
+        "Started synchronizing product data from database to Elasticsearch with batch size: {}",
+        BATCH_SIZE);
+    stopWatch.start();
 
     int totalBatches = PagingUtil.calcTotalPages(totalProducts, BATCH_SIZE);
 
@@ -90,10 +97,9 @@ public class SearchDataInitializer {
       }
     }
 
-    long totalDuration = System.currentTimeMillis() - startTime;
-
+    stopWatch.stop();
     log.info(
         "Product data synchronization completed. Total synchronized: {}/{}. Total duration: {}ms",
-        synchronizedCount, totalProducts, totalDuration);
+        synchronizedCount, totalProducts, stopWatch.getElapsedTimeMs());
   }
 }

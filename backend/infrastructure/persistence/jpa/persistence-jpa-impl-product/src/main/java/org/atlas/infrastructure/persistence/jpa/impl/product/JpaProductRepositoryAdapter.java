@@ -48,7 +48,7 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
 
   @Override
   public List<Product> findByIdIn(List<Integer> ids) {
-    List<JpaProduct> jpaProducts = jpaProductRepository.findAllById(ids);
+    List<JpaProduct> jpaProducts = jpaProductRepository.findAllByIdInWithAssociations(ids);
     return ObjectMapperUtil.mapList(jpaProducts, JpaProductMapper.INSTANCE::toProduct);
   }
 

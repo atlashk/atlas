@@ -2,7 +2,7 @@ package org.atlas.framework.domain.event.handler.interceptor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.domain.event.DomainEvent;
-import org.atlas.framework.util.StopWatchUtil;
+import org.atlas.framework.measurement.StopWatch;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -11,21 +11,21 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class LoggingEventHandlerInterceptor implements EventHandlerInterceptor {
 
-  private static final ThreadLocal<StopWatchUtil> STOP_WATCH_THREAD_LOCAL =
-      ThreadLocal.withInitial(StopWatchUtil::new);
+  private static final ThreadLocal<StopWatch> STOP_WATCH_THREAD_LOCAL =
+      ThreadLocal.withInitial(StopWatch::new);
 
   @Override
   public void preHandle(DomainEvent event) {
-    StopWatchUtil stopWatchUtil = STOP_WATCH_THREAD_LOCAL.get();
-    stopWatchUtil.start();
+    StopWatch stopWatch = STOP_WATCH_THREAD_LOCAL.get();
+    stopWatch.start();
     log.debug("Started handling event {}", event);
   }
 
   @Override
   public void postHandle(DomainEvent event) {
-    StopWatchUtil stopWatchUtil = STOP_WATCH_THREAD_LOCAL.get();
-    stopWatchUtil.stop();
-    long elapsedTimeMs = stopWatchUtil.getElapsedTimeMs();
+    StopWatch stopWatch = STOP_WATCH_THREAD_LOCAL.get();
+    stopWatch.stop();
+    long elapsedTimeMs = stopWatch.getElapsedTimeMs();
     log.debug("Finished handling event {}. Elapsed time: {} ms",
         event.getEventId(), elapsedTimeMs);
     // Clean up: Reset the StopWatch and remove it from ThreadLocal

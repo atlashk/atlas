@@ -14,6 +14,7 @@
 %>
 #!/usr/bin/env bash
 set -euo pipefail
+SECONDS=0
 
 # =============================================================================
 # Atlas On-Premises Kubernetes Deployment Script (Template, Simplified)
@@ -132,8 +133,8 @@ apply_and_wait() {
       wait_args+=("customresourcedefinition.apiextensions.k8s.io/$name")
     done <<< "$crd_names"
     if [[ ${#wait_args[@]} -gt 0 ]]; then
-      kubectl wait --for=condition=Established "${wait_args[@]}" --timeout=180s || {
-        echo "CRDs failed to become Established within timeout" >&2
+      kubectl wait --for=condition=Established "${wait_args[@]}" --timeout=0s || {
+        echo "CRDs failed to become Established" >&2
         exit 1
       }
     fi
@@ -146,7 +147,7 @@ apply_and_wait() {
     echo "Waiting for ${label} workloads to finish rollout in namespace '$NAMESPACE'..."
     while IFS= read -r res; do
       [[ -z "$res" ]] && continue
-      kubectl -n "$NAMESPACE" rollout status "$res" --timeout=900s || {
+      kubectl -n "$NAMESPACE" rollout status "$res" --timeout=0s || {
         echo "Rollout did not complete for $res" >&2
         exit 1
       }
@@ -160,7 +161,7 @@ apply_and_wait() {
     echo "Waiting for ${label} jobs to complete in namespace '$NAMESPACE'..."
     while IFS= read -r res; do
       [[ -z "$res" ]] && continue
-      kubectl -n "$NAMESPACE" wait --for=condition=complete "$res" --timeout=900s || {
+      kubectl -n "$NAMESPACE" wait --for=condition=complete "$res" --timeout=0s || {
         echo "Job did not complete: $res" >&2
         exit 1
       }
@@ -202,13 +203,13 @@ install_ingress_controller() {
   fi
 
   # Wait for readiness
-  echo "Waiting for NGINX Ingress Controller readiness (up to 5 minutes)..."
+  echo "Waiting for NGINX Ingress Controller readiness..."
   if ! kubectl wait \
     --namespace ingress-nginx \
     --for=condition=ready pod \
     --selector=app.kubernetes.io/component=controller \
-    --timeout=300s; then
-    echo "Warning: NGINX Ingress Controller did not become ready within timeout" >&2
+    --timeout=0s; then
+    echo "Warning: NGINX Ingress Controller did not become ready" >&2
     echo "Check status with: kubectl get pods -n ingress-nginx" >&2
     exit 1
   fi
@@ -238,9 +239,6 @@ show_access_information() {
   <% if (hasGrafana) { %>
   echo "  Grafana:       http://grafana.atlas.local (admin/secret123456)"
   <% } %>
-  <% if (hasPrometheus) { %>
-  echo "  Prometheus:    http://prometheus.atlas.local"
-  <% } %>
   <% if (hasZipkin) { %>
   echo "  Zipkin:        http://zipkin.atlas.local"
   <% } %>
@@ -248,6 +246,15 @@ show_access_information() {
   echo "  SMTP4Dev:      http://smtp4dev.atlas.local"
   <% } %>
 }
+
+print_total_time() {
+  local d=$SECONDS
+  local h=$((d/3600))
+  local m=$(((d%3600)/60))
+  local s=$((d%60))
+  printf "Total runtime: %02d:%02d:%02d\n" "$h" "$m" "$s"
+}
+trap print_total_time EXIT
 
 # =============================================================================
 # MAIN EXECUTION

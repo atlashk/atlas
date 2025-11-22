@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.context.Contexts;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.i18n.I18nService;
-import org.atlas.framework.util.StopWatchUtil;
+import org.atlas.framework.measurement.StopWatch;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -18,14 +18,14 @@ public class LoggingUseCaseInterceptor implements UseCaseInterceptor {
   private final I18nService i18nService;
 
   // ThreadLocal to store StopWatch per thread
-  private static final ThreadLocal<StopWatchUtil> STOP_WATCH_THREAD_LOCAL =
-      ThreadLocal.withInitial(StopWatchUtil::new);
+  private static final ThreadLocal<StopWatch> STOP_WATCH_THREAD_LOCAL =
+      ThreadLocal.withInitial(StopWatch::new);
 
   @Override
   public void preHandle(Class<?> useCaseClass, Object input) {
     // Start the StopWatch
-    StopWatchUtil stopWatchUtil = STOP_WATCH_THREAD_LOCAL.get();
-    stopWatchUtil.start();
+    StopWatch stopWatch = STOP_WATCH_THREAD_LOCAL.get();
+    stopWatch.start();
 
     String user = Contexts.getUserInfo();
 
@@ -36,9 +36,9 @@ public class LoggingUseCaseInterceptor implements UseCaseInterceptor {
   @Override
   public void postHandle(Class<?> useCaseClass, Object input) {
     // Stop the StopWatch and get elapsed time
-    StopWatchUtil stopWatchUtil = STOP_WATCH_THREAD_LOCAL.get();
-    stopWatchUtil.stop();
-    long elapsedTimeMs = stopWatchUtil.getElapsedTimeMs();
+    StopWatch stopWatch = STOP_WATCH_THREAD_LOCAL.get();
+    stopWatch.stop();
+    long elapsedTimeMs = stopWatch.getElapsedTimeMs();
 
     // User info
     String user = Contexts.getUserInfo();

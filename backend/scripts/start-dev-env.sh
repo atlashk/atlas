@@ -3,10 +3,10 @@
 set -euo pipefail
 
 # -------------------------------------------------------------
-# Atlas Local Setup Script
+# Atlas Development Environment Start Script
 # -------------------------------------------------------------
 # Goal:
-# - Read 'backend/app-stack.local.cfg' and generate 'backend/app-stack.cfg'
+# - Start Atlas development environment using 'backend/app-stack.dev.cfg'
 # - Render on-premise Docker Compose deployment files (same as onprem-compose)
 # - No interactive selections; uses values from dev config
 #
@@ -17,7 +17,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-APP_STACK_DEV_FILE="$BACKEND_DIR/app-stack.local.cfg"
+APP_STACK_DEV_FILE="$BACKEND_DIR/app-stack.dev.cfg"
 APP_STACK_FILE="$BACKEND_DIR/app-stack.cfg"
 TEMPLATE_GENERATOR="$BACKEND_DIR/scripts/template-generator.mjs"
 COMPOSE_TEMPLATES_DIR="$BACKEND_DIR/scripts/deployment/templates/onprem/compose"
@@ -100,20 +100,12 @@ normalize_line_endings_to_lf() {
 }
 
 generate_app_stack_from_dev() {
-  # Generate app-stack.cfg from app-stack.local.cfg, forcing platform=onprem-compose
   if [[ ! -f "$APP_STACK_DEV_FILE" ]]; then
     err "Dev config not found: $APP_STACK_DEV_FILE"
     exit 1
   fi
   info "Reading dev config: $APP_STACK_DEV_FILE"
-  if grep -q '^platform=' "$APP_STACK_DEV_FILE"; then
-    sed -E 's/^platform=.*/platform=onprem-compose/' "$APP_STACK_DEV_FILE" > "$APP_STACK_FILE"
-  else
-    {
-      printf "platform=onprem-compose\n"
-      cat "$APP_STACK_DEV_FILE"
-    } > "$APP_STACK_FILE"
-  fi
+  cat "$APP_STACK_DEV_FILE" > "$APP_STACK_FILE"
   if [[ ! -f "$APP_STACK_FILE" ]]; then
     err "Failed to create $APP_STACK_FILE"
     exit 1
@@ -133,17 +125,21 @@ render_templates_compose() {
 }
 
 main() {
-  info "Atlas local setup starting..."
+  info "Starting Atlas development environment..."
   generate_app_stack_from_dev
   reset_deployment_generated_dir
   render_templates_compose
   normalize_line_endings_to_lf "$DEPLOYMENT_GENERATED_DIR"
 
-  info "Setup completed."
-  info "Next steps:"
-  info "  - Review generated files in: $DEPLOYMENT_GENERATED_DIR"
-  info "  - Run: $DEPLOYMENT_GENERATED_DIR/deploy.sh to start services"
-  info "  - Run: $DEPLOYMENT_GENERATED_DIR/clean.sh to stop and cleanup"
+  local deploy_script="$DEPLOYMENT_GENERATED_DIR/deploy.sh"
+  if [[ -f "$deploy_script" ]]; then
+    "$deploy_script" --dev-mode
+  else
+    err "deploy.sh not found: $deploy_script"
+    exit 1
+  fi
+
+  info "Atlas development environment started."
 }
 
 main "$@"

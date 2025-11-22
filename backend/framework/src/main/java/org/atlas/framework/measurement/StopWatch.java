@@ -1,11 +1,11 @@
-package org.atlas.framework.util;
+package org.atlas.framework.measurement;
 
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Thread-safe StopWatch
  */
-public class StopWatchUtil {
+public class StopWatch {
 
   private final ReentrantLock lock = new ReentrantLock();
   private long startTime = 0;

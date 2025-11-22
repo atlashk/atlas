@@ -437,7 +437,7 @@ render_templates() {
 reset_deployment_generated_dir() {
   # Clean and recreate generated directory to ensure a fresh output
   if [[ -d "$DEPLOYMENT_GENERATED_DIR" ]]; then
-    sudo rm -rf "$DEPLOYMENT_GENERATED_DIR"
+    rm -rf "$DEPLOYMENT_GENERATED_DIR"
   fi
   mkdir -p "$DEPLOYMENT_GENERATED_DIR"
 }
@@ -468,7 +468,7 @@ main() {
 
   show_stack_file "$PLATFORM_DEFAULT_STACK_FILE"
   if [[ -f "$PLATFORM_DEFAULT_STACK_FILE" ]] && confirm_use_stack "$PLATFORM_DEFAULT_STACK_FILE"; then
-    sudo cp "$PLATFORM_DEFAULT_STACK_FILE" "$APP_STACK_FILE"
+    cp "$PLATFORM_DEFAULT_STACK_FILE" "$APP_STACK_FILE"
     info "app-stack.cfg generated from selected platform default config."
   else
     run_custom_stack_interactive "$selected_platform"
