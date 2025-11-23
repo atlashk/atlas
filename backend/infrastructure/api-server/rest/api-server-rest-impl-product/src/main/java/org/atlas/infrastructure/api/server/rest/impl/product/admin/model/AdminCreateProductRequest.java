@@ -29,9 +29,6 @@ public class AdminCreateProductRequest {
   @Schema(description = "Price of the product", example = "19.99", requiredMode = RequiredMode.REQUIRED)
   private BigDecimal price;
 
-  @Schema(description = "Base64 string of the product's image", example = "data:image/jpeg;base64,...")
-  private String image;
-
   @NotNull
   @PositiveOrZero
   @Schema(description = "Quantity of the product available", example = "100", requiredMode = RequiredMode.REQUIRED)

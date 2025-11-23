@@ -39,7 +39,7 @@ public class AdminOrderStatisticsController {
   }
 
   @GetMapping("/monthly")
-  @Operation(summary = "Get monthly orders count and revenue")
+  @Operation(summary = "Get monthly revenue")
   public ApiResponseWrapper<List<MonthlyOrderAggregation>> getMonthlyStatistics() throws Exception {
     List<MonthlyOrderAggregation> responseData =
         adminGetMonthlyOrderStatisticsUseCaseHandler.handle();

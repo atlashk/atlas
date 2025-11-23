@@ -2,11 +2,13 @@ package org.atlas.domain.product.usecase.admin.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.Product;
+import org.atlas.domain.product.event.mapper.ProductEventMapper;
 import org.atlas.domain.product.infrastructure.messaging.ProductEventMessagePublisher;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.service.ProductImageService;
-import org.atlas.domain.product.usecase.admin.mapper.AdminProductMapper;
-import org.atlas.framework.domain.event.contract.product.ProductCreatedEvent;
+import org.atlas.domain.product.usecase.admin.model.AdminCreateProductInput;
+import org.atlas.framework.domain.event.DomainEventType;
+import org.atlas.framework.domain.event.contract.product.ProductEvent;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
 
 @UseCaseHandler
@@ -17,24 +19,21 @@ public class AdminCreateProductUseCaseHandler {
   private final ProductImageService productImageService;
   private final ProductEventMessagePublisher productEventMessagePublisher;
 
-  public Integer handle(Product product) throws Exception {
-    // Insert product into DB
+  public Integer handle(AdminCreateProductInput input) throws Exception {
+    Product product = input.getProduct();
     productRepository.insert(product);
 
-    // Upload image
-    productImageService.uploadImage(product.getId(), product.getImage());
+    productImageService.uploadImage(product.getId(), input.getImageBytes(),
+        input.getImageContentType());
 
-    // Publish event
     publishEvent(product);
 
-    // Return inserted ID
     return product.getId();
   }
 
   private void publishEvent(Product product) {
-    org.atlas.framework.domain.event.contract.product.model.Product productPayload =
-        AdminProductMapper.INSTANCE.toProduct(product);
-    ProductCreatedEvent event = new ProductCreatedEvent(productPayload);
+    ProductEvent event = new ProductEvent(DomainEventType.PRODUCT_CREATED);
+    ProductEventMapper.INSTANCE.merge(product, event);
     productEventMessagePublisher.publish(event);
   }
 }

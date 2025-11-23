@@ -4,9 +4,11 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.Date;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.framework.util.UUIDGenerator;
 
+@NoArgsConstructor
 @Getter
 @Setter
 public class DomainEvent implements Serializable {

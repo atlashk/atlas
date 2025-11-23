@@ -5,7 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.Product;
 import org.atlas.domain.product.infrastructure.file.csv.ProductCsvWriter;
 import org.atlas.domain.product.infrastructure.file.excel.ProductExcelWriter;
-import org.atlas.domain.product.infrastructure.file.model.write.ProductRow;
+import org.atlas.domain.product.infrastructure.file.mapper.ProductWriteRowMapper;
+import org.atlas.domain.product.infrastructure.file.model.ProductWriteRow;
 import org.atlas.domain.product.infrastructure.file.pdf.ProductPdfWriter;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.repository.criteria.FindProductCriteria;
@@ -31,8 +32,8 @@ public class AdminExportProductUseCaseHandler {
         PagingRequest.unpaged());
 
     // Use custom mapping method for complex attribute mapping
-    List<ProductRow> productRows = ObjectMapperUtil.mapList(products.getData(),
-        AdminProductMapper.INSTANCE::toProductRow);
+    List<ProductWriteRow> productRows = ObjectMapperUtil.mapList(products.getData(),
+        ProductWriteRowMapper.INSTANCE::toProductWriteRow);
 
     byte[] fileContent;
     switch (input.getFileType()) {

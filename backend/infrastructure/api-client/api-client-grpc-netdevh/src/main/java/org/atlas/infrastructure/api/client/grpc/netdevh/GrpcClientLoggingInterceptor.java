@@ -11,6 +11,7 @@ import io.grpc.MethodDescriptor;
 import io.grpc.Status;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.interceptor.GrpcGlobalClientInterceptor;
+import org.atlas.framework.measurement.StopWatch;
 
 @GrpcGlobalClientInterceptor
 @Slf4j
@@ -21,7 +22,10 @@ public class GrpcClientLoggingInterceptor implements ClientInterceptor {
       CallOptions callOptions,
       Channel next) {
     log.info("Received call to {}", method.getFullMethodName());
-    final long startTime = System.currentTimeMillis();
+
+    StopWatch stopWatch = new StopWatch();
+    stopWatch.start();
+
     return new ForwardingClientCall.SimpleForwardingClientCall<>(
         next.newCall(method, callOptions)) {
 
@@ -50,13 +54,14 @@ public class GrpcClientLoggingInterceptor implements ClientInterceptor {
 
               @Override
               public void onClose(Status status, Metadata trailers) {
-                long duration = System.currentTimeMillis() - startTime;
+                stopWatch.stop();
+                long elapsedTimeMs = stopWatch.getElapsedTimeMs();
                 if (status.isOk()) {
-                  log.info("Call to {} completed successfully in {}ms", method.getFullMethodName(),
-                      duration);
+                  log.info("Call to {} completed successfully in {}ms",
+                      method.getFullMethodName(), elapsedTimeMs);
                 } else {
                   log.error("Call to {} failed with status: {} after {}ms",
-                      method.getFullMethodName(), status, duration);
+                      method.getFullMethodName(), status, elapsedTimeMs);
                 }
                 log.debug("Trailers: {}", trailers);
                 super.onClose(status, trailers);

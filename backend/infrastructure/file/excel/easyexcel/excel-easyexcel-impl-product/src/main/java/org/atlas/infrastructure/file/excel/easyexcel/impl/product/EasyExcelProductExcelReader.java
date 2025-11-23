@@ -12,7 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.domain.product.infrastructure.file.excel.ProductExcelReader;
-import org.atlas.domain.product.infrastructure.file.model.read.ProductRow;
+import org.atlas.domain.product.infrastructure.file.model.ProductReadRow;
 import org.atlas.domain.product.shared.ProductStatus;
 import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.util.ObjectMapperUtil;
@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 public class EasyExcelProductExcelReader implements ProductExcelReader {
 
   @Override
-  public List<ProductRow> read(byte[] fileContent) throws IOException {
+  public List<ProductReadRow> read(byte[] fileContent) throws IOException {
     List<ProductExcelRow> excelRows =
         EasyExcelReader.read(fileContent, SHEET_NAME, ProductExcelRow.class);
     return ObjectMapperUtil.mapList(excelRows, ProductExcelRowMapper.INSTANCE::toProductRow);
@@ -70,6 +70,6 @@ public class EasyExcelProductExcelReader implements ProductExcelReader {
 
     ProductExcelRowMapper INSTANCE = Mappers.getMapper(ProductExcelRowMapper.class);
 
-    ProductRow toProductRow(ProductExcelRow productExcelRow);
+    ProductReadRow toProductRow(ProductExcelRow productExcelRow);
   }
 }

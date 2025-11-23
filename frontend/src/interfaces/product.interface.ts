@@ -62,7 +62,6 @@ export interface ListProductFilters {
 export interface CreateProductRequest {
   name: string;
   price: number;
-  image?: string;
   quantity: number;
   status: ProductStatus;
   availableFrom: string;
@@ -77,7 +76,6 @@ export interface UpdateProductRequest {
   id: number;
   name: string;
   price: number;
-  image?: string;
   quantity: number;
   status: ProductStatus;
   availableFrom: string;

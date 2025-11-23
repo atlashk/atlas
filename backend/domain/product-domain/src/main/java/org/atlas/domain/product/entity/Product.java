@@ -30,6 +30,7 @@ public class Product extends DomainEntity {
   @Builder.Default
   private BigDecimal price = BigDecimal.ZERO;
 
+  // Don't sync to DB
   private String image;
 
   private Integer quantity;

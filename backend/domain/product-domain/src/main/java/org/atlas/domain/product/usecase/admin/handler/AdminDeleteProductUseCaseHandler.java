@@ -2,14 +2,12 @@ package org.atlas.domain.product.usecase.admin.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.product.entity.Product;
+import org.atlas.domain.product.event.mapper.ProductEventMapper;
 import org.atlas.domain.product.infrastructure.messaging.ProductEventMessagePublisher;
 import org.atlas.domain.product.repository.ProductRepository;
-import org.atlas.domain.product.service.ProductImageService;
-import org.atlas.domain.product.usecase.admin.mapper.AdminProductMapper;
-import org.atlas.framework.cache.ApplicationCache;
-import org.atlas.framework.cache.CacheService;
 import org.atlas.framework.domain.error.DomainError;
-import org.atlas.framework.domain.event.contract.product.ProductDeletedEvent;
+import org.atlas.framework.domain.event.DomainEventType;
+import org.atlas.framework.domain.event.contract.product.ProductEvent;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
 
@@ -18,21 +16,13 @@ import org.atlas.framework.domain.usecase.UseCaseHandler;
 public class AdminDeleteProductUseCaseHandler {
 
   private final ProductRepository productRepository;
-  private final ProductImageService productImageService;
-  private final CacheService cacheService;
   private final ProductEventMessagePublisher productEventMessagePublisher;
 
   public Void handle(Integer productId) throws Exception {
-    // Delete product from DB
+    // Delete productPayload from DB
     Product product = productRepository.findById(productId)
         .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
     productRepository.delete(product.getId());
-
-    // Delete image
-    productImageService.deleteImage(product.getId());
-
-    // Evict cache
-    cacheService.evict(ApplicationCache.PRODUCT, String.valueOf(product.getId()));
 
     // Publish event
     publishEvent(product);
@@ -41,9 +31,8 @@ public class AdminDeleteProductUseCaseHandler {
   }
 
   private void publishEvent(Product product) {
-    org.atlas.framework.domain.event.contract.product.model.Product productPayload =
-        AdminProductMapper.INSTANCE.toProduct(product);
-    ProductDeletedEvent event = new ProductDeletedEvent(productPayload);
+    ProductEvent event = new ProductEvent(DomainEventType.PRODUCT_DELETED);
+    ProductEventMapper.INSTANCE.merge(product, event);
     productEventMessagePublisher.publish(event);
   }
 }

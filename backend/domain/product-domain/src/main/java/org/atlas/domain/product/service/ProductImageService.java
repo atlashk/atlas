@@ -20,42 +20,43 @@ public class ProductImageService {
 
   private final StorageService storageService;
 
-  public void uploadImage(Integer productId, String base64St) {
+  public void uploadImage(Integer productId, byte[] imageBytes, String imageContentType)
+      throws IOException {
     String bucket = StorageConstant.PRODUCT_IMAGE_BUCKET;
     String objectKey = getObjectKey(productId);
-    byte[] fileContent = ImageUtil.fromBase64(base64St);
-    UploadFileRequest storageRequest = new UploadFileRequest(bucket, objectKey, fileContent);
-    try {
-      storageService.uploadFile(storageRequest);
-    } catch (IOException e) {
-      log.error("Failed to upload image for product {}", productId, e);
-    }
+    UploadFileRequest storageRequest = UploadFileRequest.builder()
+        .bucket(bucket)
+        .objectKey(objectKey)
+        .bytes(imageBytes)
+        .contentType(imageContentType)
+        .build();
+    storageService.uploadFile(storageRequest);
+    log.info("Uploaded product image: productId={}", productId);
   }
 
-  public String getImage(Integer productId) {
+  public String getImage(Integer productId) throws IOException {
     String bucket = StorageConstant.PRODUCT_IMAGE_BUCKET;
     String objectKey = getObjectKey(productId);
-    GetFileRequest storageRequest = new GetFileRequest(bucket, objectKey);
-    try {
-      byte[] fileContent = storageService.getFile(storageRequest);
-      if (ArrayUtil.isEmpty(fileContent)) {
-        return StringUtil.EMPTY;
-      }
-      return ImageUtil.toBase64(fileContent);
-    } catch (IOException e) {
+    GetFileRequest storageRequest = GetFileRequest.builder()
+        .bucket(bucket)
+        .objectKey(objectKey)
+        .build();
+    byte[] fileContent = storageService.getFile(storageRequest);
+    if (ArrayUtil.isEmpty(fileContent)) {
       return StringUtil.EMPTY;
     }
+    return ImageUtil.toBase64(fileContent);
   }
 
-  public void deleteImage(Integer productId) {
+  public void deleteImage(Integer productId) throws IOException {
     String bucket = StorageConstant.PRODUCT_IMAGE_BUCKET;
     String objectKey = getObjectKey(productId);
-    DeleteFileRequest storageRequest = new DeleteFileRequest(bucket, objectKey);
-    try {
-      storageService.deleteFile(storageRequest);
-    } catch (IOException e) {
-      log.error("Failed to delete image for product {}", productId, e);
-    }
+    DeleteFileRequest storageRequest = DeleteFileRequest.builder()
+        .bucket(bucket)
+        .objectKey(objectKey)
+        .build();
+    storageService.deleteFile(storageRequest);
+    log.info("Deleted product image: productId={}", productId);
   }
 
   private String getObjectKey(Integer productId) {

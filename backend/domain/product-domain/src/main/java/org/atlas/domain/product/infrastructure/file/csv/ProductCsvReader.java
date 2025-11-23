@@ -1,9 +1,9 @@
 package org.atlas.domain.product.infrastructure.file.csv;
 
 import java.util.List;
-import org.atlas.domain.product.infrastructure.file.model.read.ProductRow;
+import org.atlas.domain.product.infrastructure.file.model.ProductReadRow;
 
 public interface ProductCsvReader {
 
-  List<ProductRow> read(byte[] fileContent) throws Exception;
+  List<ProductReadRow> read(byte[] fileContent) throws Exception;
 }

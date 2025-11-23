@@ -1,8 +1,8 @@
 package org.atlas.domain.user.infrastructure.messaging;
 
-import org.atlas.framework.domain.event.contract.user.BaseUserEvent;
+import org.atlas.framework.domain.event.contract.user.UserEvent;
 
 public interface UserEventMessagePublisher {
 
-  void publish(BaseUserEvent event);
+  void publish(UserEvent event);
 }

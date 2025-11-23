@@ -7,11 +7,12 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.atlas.framework.measurement.StopWatch;
 
 /**
  * Production-ready utility class for asynchronous operations with enhanced error handling,
@@ -23,7 +24,7 @@ public class AsyncUtil {
 
   private static final Duration DEFAULT_TIMEOUT = Duration.ofMinutes(15);
   private static final int DEFAULT_BATCH_SIZE = 100;
-  private static final Executor DEFAULT_EXECUTOR = ForkJoinPool.commonPool();
+  private static final Executor DEFAULT_EXECUTOR = Executors.newCachedThreadPool();
 
   // ========== Single Task Execution ==========
 
@@ -38,13 +39,15 @@ public class AsyncUtil {
    * Executes a single async task with custom executor.
    */
   public static void executeTask(AsyncTask task, Executor executor) {
-    long startTime = System.currentTimeMillis();
+    StopWatch stopWatch = new StopWatch();
     CompletableFuture.runAsync(() -> {
       try {
+        stopWatch.start();
         task.run();
-        logMetrics("single_task", 1, System.currentTimeMillis() - startTime, true);
+        stopWatch.stop();
+        logMetrics("single_task", 1, stopWatch.getElapsedTimeMs(), true);
       } catch (Exception e) {
-        logMetrics("single_task", 1, System.currentTimeMillis() - startTime, false);
+        logMetrics("single_task", 1, stopWatch.getElapsedTimeMs(), false);
         throw new CompletionException(e);
       }
     }, executor);
@@ -79,8 +82,9 @@ public class AsyncUtil {
       return CompletableFuture.completedFuture(null);
     }
 
-    long startTime = System.currentTimeMillis();
-    log.debug("Starting async execution for {} tasks with batch size {}", tasks.size(), batchSize);
+    log.debug("Started async execution for {} tasks with batch size {}", tasks.size(), batchSize);
+    StopWatch stopWatch = new StopWatch();
+    stopWatch.start();
 
     List<CompletableFuture<Void>> batchFutures = new ArrayList<>();
 
@@ -95,20 +99,21 @@ public class AsyncUtil {
     return CompletableFuture.allOf(batchFutures.toArray(new CompletableFuture[0]))
         .orTimeout(timeout.toMillis(), TimeUnit.MILLISECONDS)
         .whenComplete((result, error) -> {
-          long duration = System.currentTimeMillis() - startTime;
+          stopWatch.stop();
+          long elapsedTimeMs = stopWatch.getElapsedTimeMs();
           if (error != null) {
             if (error instanceof TimeoutException) {
               log.error("Task execution timed out after {}ms for {} tasks",
-                  duration, tasks.size());
+                  elapsedTimeMs, tasks.size());
             } else {
               log.error("Task execution failed after {}ms for {} tasks",
-                  duration, tasks.size(), error);
+                  elapsedTimeMs, tasks.size(), error);
             }
-            logMetrics("task_execution", tasks.size(), duration, false);
+            logMetrics("task_execution", tasks.size(), elapsedTimeMs, false);
           } else {
             log.debug("Task execution completed successfully in {}ms for {} tasks",
-                duration, tasks.size());
-            logMetrics("task_execution", tasks.size(), duration, true);
+                elapsedTimeMs, tasks.size());
+            logMetrics("task_execution", tasks.size(), elapsedTimeMs, true);
           }
         });
   }
@@ -136,10 +141,10 @@ public class AsyncUtil {
     return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
   }
 
-  private static void logMetrics(String operation, int itemCount, long durationMs,
+  private static void logMetrics(String operation, int itemCount, long elapsedTimeMs,
       boolean success) {
     log.info("AsyncUtil.{} - items: {}, duration: {}ms, success: {}",
-        operation, itemCount, durationMs, success);
+        operation, itemCount, elapsedTimeMs, success);
   }
 
   public interface AsyncTask extends Runnable {

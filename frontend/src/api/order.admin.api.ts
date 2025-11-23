@@ -37,6 +37,14 @@ export class OrderAdminApi extends BaseApi {
   async getTotalRevenue(): Promise<ApiResponse<number>> {
     return this.get<number>("/orders/statistics/total-revenue");
   }
+
+  async getMonthlyStatistics(): Promise<
+    ApiResponse<{ year: number; month: number; totalRevenue: number }[]>
+  > {
+    return this.get<{ year: number; month: number; totalRevenue: number }[]>(
+      "/orders/statistics/monthly"
+    );
+  }
 }
 
 export const orderAdminApi = new OrderAdminApi();

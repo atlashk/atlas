@@ -1,4 +1,4 @@
-package org.atlas.domain.product.infrastructure.file.model.write;
+package org.atlas.domain.product.infrastructure.file.model;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -14,9 +14,8 @@ import org.atlas.domain.product.shared.ProductStatus;
 @Builder
 @Getter
 @Setter
-public class ProductRow {
+public class ProductReadRow {
 
-  private Integer id;
   private String name;
   private BigDecimal price;
   private Integer quantity;
@@ -24,5 +23,5 @@ public class ProductRow {
   private Date availableFrom;
   private Boolean isActive;
   private Integer brandId;
-  private String categoryIds;
+  private String categoryIds; // Split by |
 }

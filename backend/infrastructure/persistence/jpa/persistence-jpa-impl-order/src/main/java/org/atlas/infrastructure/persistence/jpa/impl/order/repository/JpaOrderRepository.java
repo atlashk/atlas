@@ -39,7 +39,7 @@ public interface JpaOrderRepository extends JpaBaseRepository<JpaOrder, Integer>
 
   @Query("""
         select new org.atlas.domain.order.repository.model.MonthlyOrderAggregation(
-          year(o.createdAt), month(o.createdAt), count(o.id), coalesce(sum(o.amount), 0)
+          year(o.createdAt), month(o.createdAt), coalesce(sum(o.amount), 0)
         )
         from JpaOrder o
         where o.status = :status

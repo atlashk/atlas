@@ -16,9 +16,11 @@ import org.atlas.domain.product.usecase.admin.handler.AdminGetProductUseCaseHand
 import org.atlas.domain.product.usecase.admin.handler.AdminImportProductUseCaseHandler;
 import org.atlas.domain.product.usecase.admin.handler.AdminListProductUseCaseHandler;
 import org.atlas.domain.product.usecase.admin.handler.AdminUpdateProductUseCaseHandler;
+import org.atlas.domain.product.usecase.admin.model.AdminCreateProductInput;
 import org.atlas.domain.product.usecase.admin.model.AdminExportProductInput;
 import org.atlas.domain.product.usecase.admin.model.AdminImportProductInput;
 import org.atlas.domain.product.usecase.admin.model.AdminListProductInput;
+import org.atlas.domain.product.usecase.admin.model.AdminUpdateProductInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.file.FileType;
@@ -41,7 +43,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -119,27 +120,43 @@ public class AdminProductManagementController {
     return ApiResponseWrapper.success(response);
   }
 
-  @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(summary = "Create a new product")
   public ApiResponseWrapper<Integer> createProduct(
-      @Parameter(description = "Request object containing the details of the product to create", required = true)
-      @Valid @RequestBody AdminCreateProductRequest request) throws Exception {
+      @Parameter(description = "Request object containing product details", required = true)
+      @Valid @RequestPart("request") AdminCreateProductRequest request,
+      @Parameter(description = "Product image file")
+      @RequestPart(value = "image") MultipartFile imageFile) throws Exception {
     Product product = AdminProductMapper.INSTANCE.toProduct(request);
-    Integer productId = adminCreateProductUseCaseHandler.handle(product);
+    AdminCreateProductInput input = AdminCreateProductInput.builder()
+        .product(product)
+        .imageBytes(imageFile.getBytes())
+        .imageContentType(imageFile.getContentType())
+        .build();
+    Integer productId = adminCreateProductUseCaseHandler.handle(input);
     return ApiResponseWrapper.success(productId);
   }
 
-  @PutMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping(value = "/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Update an existing product by ID")
   public ApiResponseWrapper<Void> updateProduct(
       @Parameter(name = "productId", description = "The unique identifier of the product to update", example = "1")
       @PathVariable("productId") Integer productId,
       @Parameter(description = "Request object containing the new details for the product", required = true)
-      @Valid @RequestBody AdminUpdateProductRequest request) throws Exception {
+      @Valid @RequestPart("request") AdminUpdateProductRequest request,
+      @Parameter(description = "Product image file")
+      @RequestPart(value = "image", required = false) MultipartFile imageFile) throws Exception {
     Product product = AdminProductMapper.INSTANCE.toProduct(request);
     product.setId(productId);
-    adminUpdateProductUseCaseHandler.handle(product);
+    AdminUpdateProductInput input = AdminUpdateProductInput.builder()
+        .product(product)
+        .build();
+    if (imageFile != null) {
+      input.setImageBytes(imageFile.getBytes());
+      input.setImageContentType(imageFile.getContentType());
+    }
+    adminUpdateProductUseCaseHandler.handle(input);
 
     return ApiResponseWrapper.success();
   }

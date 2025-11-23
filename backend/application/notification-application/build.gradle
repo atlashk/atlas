@@ -115,6 +115,8 @@ dependencies {
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.logging.framework']}")
     }
     switch (rootProject.ext.appStack['observability.metrics']) {
+        case 'none':
+            break
         case 'prometheus':
             implementation project(':infrastructure.observability.metrics.prometheus')
             break

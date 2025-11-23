@@ -19,6 +19,4 @@ public interface UserMapper {
 
   @Mapping(target = "userId", source = "id")
   CreateAuthUserRequest toCreateAuthUserRequest(User user);
-
-  org.atlas.framework.domain.event.contract.user.model.User toUser(User user);
 }

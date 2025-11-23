@@ -44,15 +44,31 @@ export class ProductAdminApi extends BaseApi {
   }
 
   async createProduct(
-    data: CreateProductRequest
-  ): Promise<ApiResponse<Product>> {
-    return this.post<Product>("/products", data);
+    data: CreateProductRequest,
+    imageFile: File
+  ): Promise<ApiResponse<number>> {
+    const formData = new FormData();
+    formData.append(
+      "request",
+      new Blob([JSON.stringify(data)], { type: "application/json" })
+    );
+    formData.append("image", imageFile);
+    return this.post<number>("/products", formData);
   }
 
   async updateProduct(
-    data: UpdateProductRequest
+    data: UpdateProductRequest,
+    imageFile?: File
   ): Promise<ApiResponse<Product>> {
-    return this.put<Product>(`/products/${data.id}`, data);
+    const formData = new FormData();
+    formData.append(
+      "request",
+      new Blob([JSON.stringify(data)], { type: "application/json" })
+    );
+    if (imageFile) {
+      formData.append("image", imageFile);
+    }
+    return this.put<Product>(`/products/${data.id}`, formData);
   }
 
   async deleteProduct(productId: number): Promise<ApiResponse<void>> {

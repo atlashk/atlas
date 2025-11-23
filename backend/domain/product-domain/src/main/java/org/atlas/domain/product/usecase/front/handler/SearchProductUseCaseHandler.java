@@ -1,8 +1,10 @@
 package org.atlas.domain.product.usecase.front.handler;
 
 import jakarta.annotation.Nullable;
+import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.product.entity.Product;
 import org.atlas.domain.product.infrastructure.search.SearchProductCriteria;
 import org.atlas.domain.product.infrastructure.search.SearchService;
@@ -15,9 +17,11 @@ import org.atlas.domain.product.usecase.front.model.SearchProductInput;
 import org.atlas.framework.domain.usecase.ReadOnlyUseCaseHandler;
 import org.atlas.framework.paging.PagingResult;
 import org.atlas.framework.util.CollectionUtil;
+import org.atlas.framework.util.StringUtil;
 
 @ReadOnlyUseCaseHandler
 @RequiredArgsConstructor
+@Slf4j
 public class SearchProductUseCaseHandler {
 
   private final @Nullable SearchService searchService;
@@ -53,8 +57,15 @@ public class SearchProductUseCaseHandler {
 
     // Set image
     productPage.getData()
-        .forEach(product ->
-            product.setImage(productImageService.getImage(product.getId())));
+        .forEach(product -> {
+          try {
+            product.setImage(productImageService.getImage(product.getId()));
+          } catch (IOException e) {
+            log.error("Failed to get product image: productId={}, error={}",
+                product.getId(), e.getMessage());
+            product.setImage(StringUtil.EMPTY);
+          }
+        });
 
     return productPage;
   }

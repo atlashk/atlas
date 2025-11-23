@@ -4,15 +4,17 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.product.entity.Product;
+import org.atlas.domain.product.event.mapper.ProductEventMapper;
 import org.atlas.domain.product.infrastructure.file.csv.ProductCsvReader;
 import org.atlas.domain.product.infrastructure.file.excel.ProductExcelReader;
-import org.atlas.domain.product.infrastructure.file.model.read.ProductRow;
+import org.atlas.domain.product.infrastructure.file.mapper.ProductReadRowMapper;
+import org.atlas.domain.product.infrastructure.file.model.ProductReadRow;
 import org.atlas.domain.product.infrastructure.messaging.ProductEventMessagePublisher;
 import org.atlas.domain.product.repository.ProductRepository;
-import org.atlas.domain.product.usecase.admin.mapper.AdminProductMapper;
 import org.atlas.domain.product.usecase.admin.model.AdminImportProductInput;
 import org.atlas.framework.domain.error.DomainError;
-import org.atlas.framework.domain.event.contract.product.ProductCreatedEvent;
+import org.atlas.framework.domain.event.DomainEventType;
+import org.atlas.framework.domain.event.contract.product.ProductEvent;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
 import org.atlas.framework.util.CollectionUtil;
@@ -29,12 +31,12 @@ public class AdminImportProductUseCaseHandler {
 
   public Void handle(AdminImportProductInput input) throws Exception {
     // Read rows from file content
-    List<ProductRow> rows;
+    List<ProductReadRow> rows;
     switch (input.getFileType()) {
       case CSV -> rows = productCsvReader.read(input.getFileContent());
       case EXCEL -> rows = productExcelReader.read(input.getFileContent());
-      default -> throw new UnsupportedOperationException(
-          "Unsupported file type: " + input.getFileType());
+      default ->
+          throw new UnsupportedOperationException("Unsupported file type: " + input.getFileType());
     }
     if (CollectionUtil.isEmpty(rows)) {
       throw new DomainException(DomainError.NO_IMPORTED_PRODUCT);
@@ -43,7 +45,7 @@ public class AdminImportProductUseCaseHandler {
     // Sync into DB and publish events
     try {
       List<Product> products = rows.stream()
-          .map(this::toProduct)
+          .map(ProductReadRowMapper.INSTANCE::toProduct)
           .toList();
       productRepository.insertBatch(products);
       products.forEach(this::publishEvent);
@@ -54,14 +56,9 @@ public class AdminImportProductUseCaseHandler {
     }
   }
 
-  private Product toProduct(ProductRow row) {
-    return AdminProductMapper.INSTANCE.toProduct(row);
-  }
-
   private void publishEvent(Product product) {
-    org.atlas.framework.domain.event.contract.product.model.Product productPayload =
-        AdminProductMapper.INSTANCE.toProduct(product);
-    ProductCreatedEvent event = new ProductCreatedEvent(productPayload);
+    ProductEvent event = new ProductEvent(DomainEventType.PRODUCT_CREATED);
+    ProductEventMapper.INSTANCE.merge(product, event);
     productEventMessagePublisher.publish(event);
   }
 }

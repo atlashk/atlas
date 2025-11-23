@@ -16,17 +16,9 @@ public interface SearchService {
    */
   PagingResult<Integer> search(SearchProductCriteria criteria, PagingRequest pagingRequest);
 
-  /**
-   * Synchronize a batch of products to the search engine
-   *
-   * @param products List of products to synchronize
-   */
+  void save(Product product);
+
   void saveAll(List<Product> products);
 
-  /**
-   * Delete a product from the search engine
-   *
-   * @param productId ID of the product to delete
-   */
   void deleteProduct(Integer productId);
 }

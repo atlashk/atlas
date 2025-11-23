@@ -21,6 +21,7 @@ import org.atlas.infrastructure.api.server.rest.impl.user.front.mapper.CartMappe
 import org.atlas.infrastructure.api.server.rest.impl.user.front.model.AddCartItemRequest;
 import org.atlas.infrastructure.api.server.rest.impl.user.front.model.CartResponse;
 import org.atlas.infrastructure.api.server.rest.impl.user.front.model.UpdateCartItemRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,7 +64,13 @@ public class CartController {
         .productId(request.getProductId())
         .quantity(request.getQuantity())
         .build();
-    Cart cart = addCartItemUseCaseHandler.handle(input);
+    Cart cart;
+    try {
+      cart = addCartItemUseCaseHandler.handle(input);
+    } catch (DataIntegrityViolationException e) {
+      // Retry
+      cart = addCartItemUseCaseHandler.handle(input);
+    }
     CartResponse response = CartMapper.INSTANCE.toCartResponse(cart);
     return ApiResponseWrapper.success(response);
   }

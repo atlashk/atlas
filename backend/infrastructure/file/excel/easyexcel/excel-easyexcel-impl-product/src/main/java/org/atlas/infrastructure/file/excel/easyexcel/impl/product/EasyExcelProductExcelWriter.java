@@ -10,7 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.domain.product.infrastructure.file.excel.ProductExcelWriter;
-import org.atlas.domain.product.infrastructure.file.model.write.ProductRow;
+import org.atlas.domain.product.infrastructure.file.model.ProductWriteRow;
 import org.atlas.domain.product.shared.ProductStatus;
 import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.file.excel.easyexcel.core.EasyExcelWriter;
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 public class EasyExcelProductExcelWriter implements ProductExcelWriter {
 
   @Override
-  public byte[] write(List<ProductRow> productRows) throws Exception {
+  public byte[] write(List<ProductWriteRow> productRows) throws Exception {
     List<ProductExcelRow> csvRows = ObjectMapperUtil.mapList(productRows,
         ProductExcelRowMapper.INSTANCE::toProductExcelRow);
     return EasyExcelWriter.write(csvRows, SHEET_NAME, ProductExcelRow.class);
@@ -69,6 +69,6 @@ public class EasyExcelProductExcelWriter implements ProductExcelWriter {
 
     ProductExcelRowMapper INSTANCE = Mappers.getMapper(ProductExcelRowMapper.class);
 
-    ProductExcelRow toProductExcelRow(ProductRow productExcelRow);
+    ProductExcelRow toProductExcelRow(ProductWriteRow productExcelRow);
   }
 }

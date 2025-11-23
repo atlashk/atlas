@@ -245,25 +245,34 @@ show_access_information() {
     <% } else { %>
     echo "  API Gateway:   http://localhost:8080"
     <% } %>
+    <% if (hasSmtp4dev) { %>
+    <% if (hasNginx) { %>
+    echo "  SMTP4Dev:      http://smtp4dev.atlas.local"
+    <% } else { %>
+    echo "  SMTP4Dev:      http://localhost:5000"
+    <% } %>
+    <% } %>
+    <% if (hasMinio) { %>
+    <% if (hasNginx) { %>
+    echo "  MinIO Console: http://minio.atlas.local (atlas/secret123456)"
+    <% } else { %>
+    echo "  MinIO Console: http://localhost:9001 (atlas/secret123456)"
+    <% } %>
+    <% } %>
     <% if (hasGrafana) { %>
+    if [[ "$DEV_MODE" != "true" ]]; then
     <% if (hasNginx) { %>
     echo "  Grafana:       http://grafana.atlas.local (atlas/secret123456)"
     <% } else { %>
     echo "  Grafana:       http://localhost:3000 (atlas/secret123456)"
     <% } %>
+    fi
     <% } %>
     <% if (hasZipkin) { %>
     <% if (hasNginx) { %>
     echo "  Zipkin:        http://zipkin.atlas.local"
     <% } else { %>
     echo "  Zipkin:        http://localhost:9411"
-    <% } %>
-    <% } %>
-    <% if (hasSmtp4dev) { %>
-    <% if (hasNginx) { %>
-    echo "  SMTP4Dev:      http://smtp4dev.atlas.local"
-    <% } else { %>
-    echo "  SMTP4Dev:      http://localhost:5000"
     <% } %>
     <% } %>
     echo

@@ -13,7 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.domain.product.infrastructure.file.csv.ProductCsvReader;
-import org.atlas.domain.product.infrastructure.file.model.read.ProductRow;
+import org.atlas.domain.product.infrastructure.file.model.ProductReadRow;
 import org.atlas.domain.product.shared.ProductStatus;
 import org.atlas.framework.util.ObjectMapperUtil;
 import org.atlas.infrastructure.file.csv.opencsv.core.OpenCsvReader;
@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 public class OpencsvProductCsvReader implements ProductCsvReader {
 
   @Override
-  public List<ProductRow> read(byte[] fileContent) throws IOException {
+  public List<ProductReadRow> read(byte[] fileContent) throws IOException {
     List<ProductCsvRow> csvRows = OpenCsvReader.read(fileContent, ProductCsvRow.class);
     return ObjectMapperUtil.mapList(csvRows, ProductCsvRowMapper.INSTANCE::toProductRow);
   }
@@ -77,6 +77,6 @@ public class OpencsvProductCsvReader implements ProductCsvReader {
 
     ProductCsvRowMapper INSTANCE = Mappers.getMapper(ProductCsvRowMapper.class);
 
-    ProductRow toProductRow(ProductCsvRow productCsvRow);
+    ProductReadRow toProductRow(ProductCsvRow productCsvRow);
   }
 }

@@ -2,6 +2,7 @@ package org.atlas.domain.order.usecase.admin.handler;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,50 +12,67 @@ import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.repository.model.MonthlyOrderAggregation;
 import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.framework.domain.usecase.ReadOnlyUseCaseHandler;
+import org.atlas.framework.util.CollectionUtil;
 
+/**
+ * Use case handler that produces a contiguous time series of monthly order statistics for fulfilled
+ * orders. Missing months are filled with zero-valued aggregations so that consumers can render
+ * charts without gaps.
+ */
 @ReadOnlyUseCaseHandler
 @RequiredArgsConstructor
 public class AdminGetMonthlyOrderStatisticsUseCaseHandler {
 
   private final OrderRepository orderRepository;
 
+  /**
+   * Returns monthly aggregations from the earliest available month up to the current month. If the
+   * repository returns no data, a single zero aggregation for the current month is returned.
+   */
   public List<MonthlyOrderAggregation> handle() throws Exception {
-    List<MonthlyOrderAggregation> aggregated =
+    // Fetch aggregated stats for fulfilled orders. Treat null as empty for robustness.
+    List<MonthlyOrderAggregation> aggregations =
         orderRepository.aggregateMonthlyByStatus(OrderStatus.FULFILLED);
-    if (aggregated == null || aggregated.isEmpty()) {
+    if (CollectionUtil.isEmpty(aggregations)) {
       YearMonth now = YearMonth.now();
-      MonthlyOrderAggregation zero = MonthlyOrderAggregation.builder()
-          .year(now.getYear())
-          .month(now.getMonthValue())
-          .orderCount(0L)
-          .totalAmount(BigDecimal.ZERO)
-          .build();
-      return List.of(zero);
+      return List.of(zeroFor(now));
     }
-    List<MonthlyOrderAggregation> result = new ArrayList<>();
-    MonthlyOrderAggregation first = aggregated.get(0);
-    YearMonth start = YearMonth.of(first.getYear(), first.getMonth());
-    YearMonth end = YearMonth.now();
-    Map<String, MonthlyOrderAggregation> index = new HashMap<>();
-    for (MonthlyOrderAggregation m : aggregated) {
-      String key = m.getYear() + "-" + m.getMonth();
-      index.put(key, m);
-    }
-    YearMonth current = start;
-    while (!current.isAfter(end)) {
-      String key = current.getYear() + "-" + current.getMonthValue();
-      MonthlyOrderAggregation m = index.get(key);
-      if (m == null) {
-        m = MonthlyOrderAggregation.builder()
-            .year(current.getYear())
-            .month(current.getMonthValue())
-            .orderCount(0L)
-            .totalAmount(BigDecimal.ZERO)
-            .build();
+
+    // Index existing aggregations by YearMonth and find the earliest month present.
+    Map<YearMonth, MonthlyOrderAggregation> byMonth = new HashMap<>();
+    YearMonth earliest = null;
+    for (MonthlyOrderAggregation aggregation : aggregations) {
+      YearMonth ym = YearMonth.of(aggregation.getYear(), aggregation.getMonth());
+      byMonth.put(ym, aggregation);
+      if (earliest == null || ym.isBefore(earliest)) {
+        earliest = ym;
       }
-      result.add(m);
-      current = current.plusMonths(1);
+    }
+
+    YearMonth now = YearMonth.now();
+    // Guard against future-only data by starting at 'now' in that scenario.
+    assert earliest != null;
+    YearMonth start = !earliest.isAfter(now) ? earliest : now;
+
+    int months = (int) ChronoUnit.MONTHS.between(start, now) + 1;
+    List<MonthlyOrderAggregation> result = new ArrayList<>(months);
+
+    // Walk month-by-month and fill gaps with zero-valued aggregations.
+    for (YearMonth current = start; !current.isAfter(now); current = current.plusMonths(1)) {
+      MonthlyOrderAggregation m = byMonth.get(current);
+      result.add(m != null ? m : zeroFor(current));
     }
     return result;
+  }
+
+  /**
+   * Creates a zero-valued aggregation for the given month.
+   */
+  private static MonthlyOrderAggregation zeroFor(YearMonth ym) {
+    return MonthlyOrderAggregation.builder()
+        .year(ym.getYear())
+        .month(ym.getMonthValue())
+        .totalRevenue(BigDecimal.ZERO)
+        .build();
   }
 }

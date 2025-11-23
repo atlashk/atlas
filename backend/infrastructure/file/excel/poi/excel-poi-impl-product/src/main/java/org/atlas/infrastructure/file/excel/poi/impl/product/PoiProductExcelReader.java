@@ -10,7 +10,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.atlas.domain.product.infrastructure.file.excel.ProductExcelReader;
-import org.atlas.domain.product.infrastructure.file.model.read.ProductRow;
+import org.atlas.domain.product.infrastructure.file.model.ProductReadRow;
 import org.atlas.domain.product.shared.ProductStatus;
 import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.util.DateUtil;
@@ -23,11 +23,11 @@ public class PoiProductExcelReader implements ProductExcelReader {
   private static final int BATCH_SIZE = 100;
 
   @Override
-  public List<ProductRow> read(byte[] fileContent) throws IOException {
+  public List<ProductReadRow> read(byte[] fileContent) throws IOException {
     try (InputStream inputStream = new ByteArrayInputStream(fileContent);
         XSSFWorkbook workbook = new XSSFWorkbook(inputStream)) {
       XSSFSheet sheet = workbook.getSheet(SHEET_NAME);
-      List<ProductRow> excelRows = new ArrayList<>();
+      List<ProductReadRow> excelRows = new ArrayList<>();
       int totalRows = sheet.getLastRowNum();
       int currentRow = 1; // Ignore header
       while (currentRow <= totalRows) {
@@ -35,7 +35,7 @@ public class PoiProductExcelReader implements ProductExcelReader {
         for (int rowIndex = currentRow; rowIndex <= endRow; rowIndex++) {
           Row row = sheet.getRow(rowIndex);
           if (PoiUtil.isNotEmptyRow(row)) {
-            ProductRow product = readRow(row);
+            ProductReadRow product = readRow(row);
             excelRows.add(product);
           }
         }
@@ -45,8 +45,8 @@ public class PoiProductExcelReader implements ProductExcelReader {
     }
   }
 
-  private ProductRow readRow(Row row) {
-    ProductRow productRow = new ProductRow();
+  private ProductReadRow readRow(Row row) {
+    ProductReadRow productRow = new ProductReadRow();
     productRow.setName(row.getCell(0).getStringCellValue());
     productRow.setPrice(BigDecimal.valueOf(row.getCell(1).getNumericCellValue()));
     productRow.setQuantity((int) row.getCell(2).getNumericCellValue());

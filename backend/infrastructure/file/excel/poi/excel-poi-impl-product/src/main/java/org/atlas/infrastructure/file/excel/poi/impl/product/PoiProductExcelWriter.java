@@ -10,7 +10,7 @@ import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.atlas.domain.product.infrastructure.file.excel.ProductExcelWriter;
-import org.atlas.domain.product.infrastructure.file.model.write.ProductRow;
+import org.atlas.domain.product.infrastructure.file.model.ProductWriteRow;
 import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.util.DateUtil;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 public class PoiProductExcelWriter implements ProductExcelWriter {
 
   @Override
-  public byte[] write(List<ProductRow> productRows) throws Exception {
+  public byte[] write(List<ProductWriteRow> productRows) throws Exception {
     try (XSSFWorkbook workbook = new XSSFWorkbook();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
       XSSFSheet sheet = workbook.createSheet(SHEET_NAME);
@@ -78,9 +78,10 @@ public class PoiProductExcelWriter implements ProductExcelWriter {
     headerCell.setCellStyle(headerStyle);
   }
 
-  private void createRows(XSSFWorkbook workbook, XSSFSheet sheet, List<ProductRow> productRows) {
+  private void createRows(XSSFWorkbook workbook, XSSFSheet sheet,
+      List<ProductWriteRow> productRows) {
     int rowIndex = 1;
-    for (ProductRow productRow : productRows) {
+    for (ProductWriteRow productRow : productRows) {
       CellStyle style = workbook.createCellStyle();
       style.setAlignment(HorizontalAlignment.LEFT);
       style.setWrapText(true);

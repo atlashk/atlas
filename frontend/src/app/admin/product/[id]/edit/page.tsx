@@ -74,6 +74,7 @@ function AdminProductEditPage() {
   const isInitialized = useRef(false);
   const [isLoadingProduct, setIsLoadingProduct] = useState(true);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
 
   // Brands state
@@ -223,11 +224,11 @@ function AdminProductEditPage() {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setImageFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
         setImagePreview(result);
-        form.setValue("image", result);
       };
       reader.readAsDataURL(file);
     }
@@ -258,7 +259,7 @@ function AdminProductEditPage() {
         availableFrom: new Date(data.availableFrom).toISOString(),
       };
 
-      const response = await productAdminApi.updateProduct(formData);
+      const response = await productAdminApi.updateProduct(formData, imageFile ?? undefined);
 
       if (response.success) {
         toast.success("Product updated successfully!");

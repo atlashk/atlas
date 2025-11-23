@@ -4,6 +4,7 @@ import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.user.entity.User;
+import org.atlas.domain.user.event.mapper.UserEventMapper;
 import org.atlas.domain.user.infrastructure.messaging.UserEventMessagePublisher;
 import org.atlas.domain.user.repository.UserRepository;
 import org.atlas.domain.user.shared.Role;
@@ -13,7 +14,8 @@ import org.atlas.framework.auth.client.AuthClient;
 import org.atlas.framework.auth.client.model.CreateAuthUserRequest;
 import org.atlas.framework.cryptography.PasswordUtil;
 import org.atlas.framework.domain.error.DomainError;
-import org.atlas.framework.domain.event.contract.user.UserRegisteredEvent;
+import org.atlas.framework.domain.event.DomainEventType;
+import org.atlas.framework.domain.event.contract.user.UserEvent;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
 
@@ -64,9 +66,8 @@ public class RegisterUseCaseHandler {
   }
 
   private void publishEvent(User user) {
-    org.atlas.framework.domain.event.contract.user.model.User userPayload = UserMapper.INSTANCE.toUser(
-        user);
-    UserRegisteredEvent event = new UserRegisteredEvent(userPayload);
+    UserEvent event = new UserEvent(DomainEventType.USER_REGISTERED);
+    UserEventMapper.INSTANCE.merge(user, event);
     userEventMessagePublisher.publish(event);
   }
 }

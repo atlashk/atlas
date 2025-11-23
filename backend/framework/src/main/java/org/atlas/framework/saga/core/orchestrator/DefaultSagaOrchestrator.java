@@ -50,8 +50,7 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
   @Override
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public Integer runSaga(String sagaName, SagaContext sagaContext) {
-    log.info("Starting saga execution: sagaName={}, context={}", sagaName,
-        sagaContext);
+    log.info("Started saga execution: sagaName={}, context={}", sagaName, sagaContext);
 
     // Validate orchestrator exists
     if (!sagaRegistry.hasSagaMetadata(sagaName)) {
@@ -226,8 +225,7 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
   // -----------------------------------------------------------------------------------------------
 
   private void compensateSaga(SagaEntity saga) {
-    log.info("Starting compensation process: sagaId={}, sagaName={}",
-        saga.getId(), saga.getName());
+    log.info("Started compensation process: sagaId={}, sagaName={}", saga.getId(), saga.getName());
 
     // Get all completed commands for this saga that need compensation
     List<SagaCommandEntity> completedCommands = sagaCommandRepository.findBySagaId(

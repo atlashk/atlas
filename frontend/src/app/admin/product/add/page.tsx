@@ -49,7 +49,6 @@ const productSchema = z.object({
   categoryIds: z
     .array(z.number())
     .min(1, "Please select at least one category"),
-  image: z.string().optional(),
   details: z.object({
     description: z.string().min(1, "Description is required"),
   }),
@@ -66,6 +65,7 @@ type ProductFormData = z.infer<typeof productSchema>;
 function AdminProductAddPage() {
   const router = useRouter();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   
   // Brands state
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -138,7 +138,6 @@ function AdminProductAddPage() {
       isActive: true,
       brandId: 0,
       categoryIds: [],
-      image: "",
       details: {
         description: "",
       },
@@ -154,11 +153,11 @@ function AdminProductAddPage() {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setImageFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
         setImagePreview(result);
-        form.setValue("image", result);
       };
       reader.readAsDataURL(file);
     }
@@ -185,7 +184,7 @@ function AdminProductAddPage() {
         availableFrom: new Date(data.availableFrom).toISOString(),
       };
 
-      const response = await productAdminApi.createProduct(formData);
+      const response = await productAdminApi.createProduct(formData, imageFile ?? undefined);
 
       if (response.success) {
         toast.success("Product created successfully!");
@@ -443,34 +442,28 @@ function AdminProductAddPage() {
                   />
                 </div>
 
-                <FormField
-                  control={form.control}
-                  name="image"
-                  render={() => (
-                    <FormItem>
-                      <FormLabel>Product Image</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                        />
-                      </FormControl>
-                      {imagePreview && (
-                        <div className="mt-2">
-                          <Image
-                            src={imagePreview}
-                            alt="Preview"
-                            width={128}
-                            height={128}
-                            className="h-32 w-32 object-cover rounded-md"
-                          />
-                        </div>
-                      )}
-                      <FormMessage />
-                    </FormItem>
+                <FormItem>
+                  <FormLabel>Product Image</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                    />
+                  </FormControl>
+                  {imagePreview && (
+                    <div className="mt-2">
+                      <Image
+                        src={imagePreview}
+                        alt="Preview"
+                        width={128}
+                        height={128}
+                        className="h-32 w-32 object-cover rounded-md"
+                      />
+                    </div>
                   )}
-                />
+                  <FormMessage />
+                </FormItem>
               </CardContent>
             </Card>
 

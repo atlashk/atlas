@@ -32,7 +32,7 @@ public class MinioStorageService implements StorageService {
   public void uploadFile(UploadFileRequest request) throws IOException {
     String bucket = request.getBucket();
     String objectKey = request.getObjectKey();
-    byte[] content = request.getFileContent();
+    byte[] bytes = request.getBytes();
 
     try {
       boolean exists = minioClient.bucketExists(
@@ -42,16 +42,16 @@ public class MinioStorageService implements StorageService {
         log.info("Created bucket: {}", bucket);
       }
 
-      try (InputStream stream = new ByteArrayInputStream(content)) {
+      try (InputStream stream = new ByteArrayInputStream(bytes)) {
         minioClient.putObject(
             PutObjectArgs.builder()
                 .bucket(bucket)
                 .object(objectKey)
-                .stream(stream, content.length, -1)
+                .stream(stream, bytes.length, -1)
                 .contentType(request.getContentType())
                 .build());
       }
-      log.info("Uploaded object to MinIO: {}/{} ({} bytes)", bucket, objectKey, content.length);
+      log.info("Uploaded object to MinIO: {}/{} ({} bytes)", bucket, objectKey, bytes.length);
     } catch (Exception e) {
       throw new IOException("Failed to upload object to MinIO: " + bucket + "/" + objectKey, e);
     }

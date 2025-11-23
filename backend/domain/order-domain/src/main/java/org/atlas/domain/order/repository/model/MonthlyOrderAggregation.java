@@ -16,6 +16,5 @@ public class MonthlyOrderAggregation {
 
   private Integer year;
   private Integer month;
-  private Long orderCount;
-  private BigDecimal totalAmount;
+  private BigDecimal totalRevenue;
 }

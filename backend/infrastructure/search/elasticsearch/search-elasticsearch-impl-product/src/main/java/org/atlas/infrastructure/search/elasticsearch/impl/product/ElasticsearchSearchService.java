@@ -69,6 +69,13 @@ public class ElasticsearchSearchService implements SearchService {
   }
 
   @Override
+  public void save(Product product) {
+    ElasticsearchProduct elasticsearchProduct =
+        ElasticsearchProductMapper.INSTANCE.toProductDocument(product);
+    elasticsearchProductRepository.save(elasticsearchProduct);
+  }
+
+  @Override
   public void saveAll(List<Product> products) {
     if (CollectionUtil.isEmpty(products)) {
       return;

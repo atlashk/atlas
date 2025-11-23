@@ -7,7 +7,7 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
-import org.atlas.domain.product.infrastructure.file.model.write.ProductRow;
+import org.atlas.domain.product.infrastructure.file.model.ProductWriteRow;
 import org.atlas.domain.product.infrastructure.file.pdf.ProductPdfWriter;
 import org.atlas.framework.constant.CommonConstant;
 import org.atlas.framework.util.DateUtil;
@@ -34,7 +34,7 @@ public class PdfboxProductPdfWriter implements ProductPdfWriter {
   };
 
   @Override
-  public byte[] write(List<ProductRow> productRows) throws IOException {
+  public byte[] write(List<ProductWriteRow> productRows) throws IOException {
     try (PDDocument document = new PDDocument()) {
       PDPage page = createPage(document);
       PDPageContentStream contentStream = new PDPageContentStream(document, page);
@@ -120,13 +120,13 @@ public class PdfboxProductPdfWriter implements ProductPdfWriter {
   }
 
   private int drawDataRows(PDPageContentStream contentStream, PDType1Font font,
-      float[] cellWidths, List<ProductRow> productRows,
+      float[] cellWidths, List<ProductWriteRow> productRows,
       int startIndex, int maxRowsPerPage, int rowsOnPage, float y) throws IOException {
     contentStream.setFont(font, FONT_SIZE);
 
     for (; startIndex < productRows.size() && rowsOnPage < maxRowsPerPage;
         startIndex++, rowsOnPage++) {
-      ProductRow row = productRows.get(startIndex);
+      ProductWriteRow row = productRows.get(startIndex);
       String[] data = mapRowToData(row);
 
       float xOffset = MARGIN;
@@ -166,7 +166,7 @@ public class PdfboxProductPdfWriter implements ProductPdfWriter {
     contentStream.stroke();
   }
 
-  private String[] mapRowToData(ProductRow row) {
+  private String[] mapRowToData(ProductWriteRow row) {
     return new String[]{
         safeString(row.getId()),
         safeString(row.getName()),

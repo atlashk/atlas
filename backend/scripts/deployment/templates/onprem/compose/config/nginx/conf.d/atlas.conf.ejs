@@ -1,11 +1,13 @@
 <%
   // Derive flags similar to docker-compose.yml.ejs
   const notificationEmail = (stack.notification.email || '').toLowerCase();
+  const storage = (stack.storage || '').toLowerCase();
   const observabilityLoggingStack = (stack.observability.logging.stack || '').toLowerCase();
   const observabilityMetrics = (stack.observability.metrics || '').toLowerCase();
   const observabilityTracing = (stack.observability.tracing || '').toLowerCase();
 
   const hasSmtp4dev = notificationEmail === 'spring';
+  const hasMinio = storage === 'minio';
   const hasLoki = observabilityLoggingStack === 'loki';
   const hasPrometheus = observabilityMetrics === 'prometheus';
   const hasZipkin = observabilityTracing === 'zipkin';
@@ -26,6 +28,36 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
+
+<% if (hasSmtp4dev) { %>
+server {
+    listen 80;
+    server_name smtp4dev.atlas.local;
+
+    location / {
+        proxy_pass http://smtp4dev:80;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+<% } %>
+
+<% if (hasMinio) { %>
+server {
+    listen 80;
+    server_name minio.atlas.local;
+
+    location / {
+        proxy_pass http://minio:9001;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+<% } %>
 
 <% if (hasGrafana) { %>
 server {
@@ -49,21 +81,6 @@ server {
 
     location / {
         proxy_pass http://zipkin:9411;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-<% } %>
-
-<% if (hasSmtp4dev) { %>
-server {
-    listen 80;
-    server_name smtp4dev.atlas.local;
-
-    location / {
-        proxy_pass http://smtp4dev:80;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

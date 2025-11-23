@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.config.ApplicationConfigService;
+import org.atlas.framework.measurement.StopWatch;
 import org.atlas.framework.observability.metrics.ApiLatencyMetricsCollector;
 import org.springframework.core.annotation.Order;
 import org.springframework.lang.Nullable;
@@ -30,11 +31,14 @@ public class ApiLatencyFilter extends OncePerRequestFilter {
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
-    long start = System.currentTimeMillis();
+    StopWatch stopWatch = new StopWatch();
+    stopWatch.start();
     try {
       filterChain.doFilter(request, response);
     } finally {
-      long elapsedTimeMs = System.currentTimeMillis() - start;
+      stopWatch.stop();
+      long elapsedTimeMs = stopWatch.getElapsedTimeMs();
+
       String service = applicationConfigService.getApplicationName();
       String endpoint = request.getRequestURI();
       String method = request.getMethod();
