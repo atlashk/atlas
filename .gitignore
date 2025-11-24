@@ -14,19 +14,6 @@ build/
 !**/src/test/**/build/
 *.hprof
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
-!backend/scripts/deploy/aws/ecs/cdk/bin/
-
 app-stack.cfg
 
 # =============================================================================
@@ -53,10 +40,6 @@ out/
 
 # production
 build
-
-# misc
-.DS_Store
-*.pem
 
 # debug
 npm-debug.log*
@@ -88,7 +71,6 @@ backend/scripts/deployment/generated/
 *.iws
 *.iml
 *.ipr
-out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
@@ -106,13 +88,17 @@ nbdist/
 !.vscode/launch.json
 !.vscode/extensions.json
 
-### Eclipse ###
+### STS ###
+.apt_generated
 .classpath
 .factorypath
 .project
-.settings/
+.settings
 .springBeans
 .sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
 
 # =============================================================================
 # Operating System
@@ -163,7 +149,7 @@ credentials/
 config/secrets/
 *.secret
 .env.secrets
-!backend/infrastructure/auth-server/src/main/resources/secret/default.key
+!backend/edge/auth-server/auth-server-spring-security-jwt/src/main/resources/secret/default.key
 
 # =============================================================================
 # Database
