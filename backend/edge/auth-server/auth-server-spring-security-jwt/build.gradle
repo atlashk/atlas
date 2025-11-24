@@ -25,45 +25,24 @@ repositories {
 }
 
 dependencies {
+    // Framework
+    implementation project(':framework')
+
+    // Lib
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+
     // Domain
-    implementation project(':domain.user')
+    implementation project(':domain.auth')
 
     // Infrastructure
-    switch (rootProject.ext.appStack['api-client']) {
-        case 'grpc-netdevh':
-            implementation project(':infrastructure.internal-api.product.grpc.netdevh')
-            break
-        case 'rest-apachehttpclient':
-            implementation project(':infrastructure.internal-api.product.rest.apachehttpclient')
-            break
-        case 'rest-feign':
-            implementation project(':infrastructure.internal-api.product.rest.feign')
-            break
-        case 'rest-restclient':
-            implementation project(':infrastructure.internal-api.product.rest.restclient')
-            break
-        case 'rest-resttemplate':
-            implementation project(':infrastructure.internal-api.product.rest.resttemplate')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-client']}")
-    }
-    switch (rootProject.ext.appStack['api-server']) {
-        case 'rest':
-            implementation project(':infrastructure.api-server.rest.impl.user')
-            break
-        case 'grpc':
-            implementation project(':infrastructure.api-server.grpc.netdevh.impl.user')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
-    }
+    implementation project(':infrastructure.api-server.rest.core')
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
-            implementation project(':infrastructure.datasource.mysql.impl.user')
+            implementation project(':infrastructure.datasource.mysql.impl.auth')
             break
         case 'postgres':
-            implementation project(':infrastructure.datasource.postgres.impl.user')
+            implementation project(':infrastructure.datasource.postgres.impl.auth')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
@@ -87,26 +66,14 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['kv-store']}")
     }
-    switch (rootProject.ext.appStack['messaging']) {
-        case 'kafka':
-            implementation project(':infrastructure.messaging.kafka.impl.user')
-            break
-        case 'rabbitmq':
-            implementation project(':infrastructure.messaging.rabbitmq.impl.user')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['messaging']}")
-    }
     switch (rootProject.ext.appStack['migration']) {
         case 'flyway':
             switch (rootProject.ext.appStack['datasource']) {
                 case 'mysql':
-                    implementation project(':infrastructure.migration.flyway.mysql.impl.user')
-                    implementation project(':infrastructure.migration.flyway.mysql.impl.outbox')
+                    implementation project(':infrastructure.migration.flyway.mysql.impl.auth')
                     break
                 case 'postgres':
-                    implementation project(':infrastructure.migration.flyway.postgres.impl.user')
-                    implementation project(':infrastructure.migration.flyway.postgres.impl.outbox')
+                    implementation project(':infrastructure.migration.flyway.postgres.impl.auth')
                     break
                 default:
                     throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
@@ -143,30 +110,15 @@ dependencies {
     }
     switch (rootProject.ext.appStack['persistence']) {
         case 'jpa':
-            implementation project(':infrastructure.persistence.jpa.impl.user')
-            implementation project(':infrastructure.persistence.jpa.impl.outbox')
+            implementation project(':infrastructure.persistence.jpa.impl.auth')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['persistence']}")
-    }
-    switch (rootProject.ext.appStack['scheduler']) {
-        case 'spring':
-            implementation project(':infrastructure.scheduler.spring.impl.outbox')
-            break
-        case 'quartz':
-            implementation project(':infrastructure.scheduler.quartz.impl.outbox')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['scheduler']}")
     }
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-
-    // Testing
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 dependencyManagement {

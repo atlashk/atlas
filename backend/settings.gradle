@@ -9,6 +9,9 @@ project(':framework').projectDir = file('framework')
 // Domain
 // =================================================================================================
 
+include(':domain.auth')
+project(':domain.auth').projectDir = file('domain/auth-domain')
+
 include(':domain.notification')
 project(':domain.notification').projectDir = file('domain/notification-domain')
 
@@ -89,15 +92,13 @@ project(':infrastructure.api-server.rest.impl.user').projectDir = file('infrastr
 include(':infrastructure.auth-client.keycloak')
 project(':infrastructure.auth-client.keycloak').projectDir = file('infrastructure/auth-client/auth-client-keycloak')
 
-// Auth server
-include(':infrastructure.auth-server')
-project(':infrastructure.auth-server').projectDir = file('infrastructure/auth-server')
-
 // Datasource
 
 // Datasource::MySQL
 include(':infrastructure.datasource.mysql.core')
 project(':infrastructure.datasource.mysql.core').projectDir = file('infrastructure/datasource/mysql/datasource-mysql-core')
+include(':infrastructure.datasource.mysql.impl.auth')
+project(':infrastructure.datasource.mysql.impl.auth').projectDir = file('infrastructure/datasource/mysql/datasource-mysql-impl-auth')
 include(':infrastructure.datasource.mysql.impl.notification')
 project(':infrastructure.datasource.mysql.impl.notification').projectDir = file('infrastructure/datasource/mysql/datasource-mysql-impl-notification')
 include(':infrastructure.datasource.mysql.impl.order')
@@ -112,6 +113,8 @@ project(':infrastructure.datasource.mysql.impl.user').projectDir = file('infrast
 // Datasource::Postgres
 include(':infrastructure.datasource.postgres.core')
 project(':infrastructure.datasource.postgres.core').projectDir = file('infrastructure/datasource/postgres/datasource-postgres-core')
+include(':infrastructure.datasource.postgres.impl.auth')
+project(':infrastructure.datasource.postgres.impl.auth').projectDir = file('infrastructure/datasource/postgres/datasource-postgres-impl-auth')
 include(':infrastructure.datasource.postgres.impl.notification')
 project(':infrastructure.datasource.postgres.impl.notification').projectDir = file('infrastructure/datasource/postgres/datasource-postgres-impl-notification')
 include(':infrastructure.datasource.postgres.impl.order')
@@ -236,6 +239,8 @@ project(':infrastructure.messaging.rabbitmq.impl.user').projectDir = file('infra
 // Migration::Flyway::MySQL
 include(':infrastructure.migration.flyway.mysql.core')
 project(':infrastructure.migration.flyway.mysql.core').projectDir = file('infrastructure/migration/flyway/mysql/migration-flyway-mysql-core')
+include(':infrastructure.migration.flyway.mysql.impl.auth')
+project(':infrastructure.migration.flyway.mysql.impl.auth').projectDir = file('infrastructure/migration/flyway/mysql/migration-flyway-mysql-impl-auth')
 include(':infrastructure.migration.flyway.mysql.impl.notification')
 project(':infrastructure.migration.flyway.mysql.impl.notification').projectDir = file('infrastructure/migration/flyway/mysql/migration-flyway-mysql-impl-notification')
 include(':infrastructure.migration.flyway.mysql.impl.order')
@@ -256,6 +261,8 @@ project(':infrastructure.migration.flyway.mysql.impl.user').projectDir = file('i
 // Migration::Flyway::Postgres
 include(':infrastructure.migration.flyway.postgres.core')
 project(':infrastructure.migration.flyway.postgres.core').projectDir = file('infrastructure/migration/flyway/postgres/migration-flyway-postgres-core')
+include(':infrastructure.migration.flyway.postgres.impl.auth')
+project(':infrastructure.migration.flyway.postgres.impl.auth').projectDir = file('infrastructure/migration/flyway/postgres/migration-flyway-postgres-impl-auth')
 include(':infrastructure.migration.flyway.postgres.impl.notification')
 project(':infrastructure.migration.flyway.postgres.impl.notification').projectDir = file('infrastructure/migration/flyway/postgres/migration-flyway-postgres-impl-notification')
 include(':infrastructure.migration.flyway.postgres.impl.order')
@@ -330,6 +337,8 @@ project(':infrastructure.payment.stripe').projectDir = file('infrastructure/paym
 // Persistence::JPA
 include(':infrastructure.persistence.jpa.core')
 project(':infrastructure.persistence.jpa.core').projectDir = file('infrastructure/persistence/jpa/persistence-jpa-core')
+include(':infrastructure.persistence.jpa.impl.auth')
+project(':infrastructure.persistence.jpa.impl.auth').projectDir = file('infrastructure/persistence/jpa/persistence-jpa-impl-auth')
 include(':infrastructure.persistence.jpa.impl.notification')
 project(':infrastructure.persistence.jpa.impl.notification').projectDir = file('infrastructure/persistence/jpa/persistence-jpa-impl-notification')
 include(':infrastructure.persistence.jpa.impl.order')
@@ -421,6 +430,10 @@ project(':application.user').projectDir = file('application/user-application')
 // API gateway
 include(':edge.api-gateway.spring-cloud-gateway')
 project(':edge.api-gateway.spring-cloud-gateway').projectDir = file('edge/api-gateway/api-gateway-spring-cloud-gateway')
+
+// Auth server
+include(':edge.auth-server.auth-server-spring-security-jwt')
+project(':edge.auth-server.auth-server-spring-security-jwt').projectDir = file('edge/auth-server/auth-server-spring-security-jwt')
 
 // Config server
 include(':edge.config-server.spring-cloud-config')
