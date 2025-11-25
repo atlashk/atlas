@@ -1,0 +1,5 @@
+app:
+  api-client:
+    rest:
+      product-service:
+        base-url: ${API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL:http://localhost:8082}

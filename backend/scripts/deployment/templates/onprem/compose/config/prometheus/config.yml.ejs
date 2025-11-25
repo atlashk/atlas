@@ -1,8 +1,22 @@
+<%
+  const authServer = (stack['auth-server'] || '').toLowerCase();
+  const hasSpringSecurityJwt = authServer === 'spring-security-jwt';
+%>
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
 
 scrape_configs:
+  - job_name: 'eureka-server-metrics'
+    static_configs:
+      - targets: [ 'eureka-server:8761' ]
+    metrics_path: '/actuator/prometheus'
+  <%_ if (hasSpringSecurityJwt) { -%>
+  - job_name: 'auth-server-metrics'
+    static_configs:
+      - targets: [ 'auth-server:8091' ]
+    metrics_path: '/actuator/prometheus'
+  <%_ } -%>
   - job_name: 'user-service-metrics'
     static_configs:
       - targets: [ 'user-service:8081' ]

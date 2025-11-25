@@ -1,15 +1,25 @@
+<%
+  const authServer = (stack['auth-server'] || '').toLowerCase();
+  const hasSpringSecurityJwt = authServer === 'spring-security-jwt';
+%>
 #!/bin/bash
 set -e
 
 echo "Initializing databases and granting privileges to ${MYSQL_USER}"
 
 cat <<EOF | mysql -uroot -p"${MYSQL_ROOT_PASSWORD}"
+<%_ if (hasSpringSecurityJwt) { -%>
+CREATE DATABASE db_auth;
+<%_ } -%>
 CREATE DATABASE db_notification;
 CREATE DATABASE db_order;
 CREATE DATABASE db_payment;
 CREATE DATABASE db_product;
 CREATE DATABASE db_user;
 
+<%_ if (hasSpringSecurityJwt) { -%>
+GRANT ALL PRIVILEGES ON db_auth.* TO '${MYSQL_USER}'@'%';
+<%_ } -%>
 GRANT ALL PRIVILEGES ON db_notification.* TO '${MYSQL_USER}'@'%';
 GRANT ALL PRIVILEGES ON db_order.* TO '${MYSQL_USER}'@'%';
 GRANT ALL PRIVILEGES ON db_payment.* TO '${MYSQL_USER}'@'%';

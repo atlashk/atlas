@@ -157,6 +157,16 @@ run_custom_stack_interactive() {
     esac
   fi
 
+  # Auth Server
+  echo -e "${BLUE}${BOLD}Auth Server${NC}"
+  select_option "Spring Security JWT ${YELLOW}${NC}" "Keycloak"
+  local auth_server_choice=$SELECTED_INDEX
+  local auth_server
+  case $auth_server_choice in
+    2) auth_server="keycloak" ;;
+    *) auth_server="spring-security-jwt" ;;
+  esac
+
   # Datasource
   echo -e "${BLUE}${BOLD}Datasource Configuration${NC}"
   select_option "MySQL ${YELLOW}${NC}" "PostgreSQL"
@@ -326,6 +336,7 @@ run_custom_stack_interactive() {
 platform=$platform
 api-server=$api_server
 api-client=$api_client
+auth-server=$auth_server
 datasource=$datasource
 discovery-client=$discovery_client
 file.csv=$file_csv

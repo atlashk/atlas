@@ -2,7 +2,7 @@ package org.atlas.domain.user.usecase.front.mapper;
 
 import org.atlas.domain.user.entity.User;
 import org.atlas.domain.user.usecase.front.model.RegisterInput;
-import org.atlas.framework.auth.client.model.CreateAuthUserRequest;
+import org.atlas.framework.auth.client.model.CreateUserRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
@@ -18,5 +18,5 @@ public interface UserMapper {
   User toUser(RegisterInput input);
 
   @Mapping(target = "userId", source = "id")
-  CreateAuthUserRequest toCreateAuthUserRequest(User user);
+  CreateUserRequest toCreateUserRequest(User user);
 }

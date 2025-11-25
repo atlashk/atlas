@@ -68,6 +68,8 @@ project(':infrastructure.api-server.grpc.protobuf').projectDir = file('infrastru
 // API server::gRPC::netdevh
 include(':infrastructure.api-server.grpc.netdevh.core')
 project(':infrastructure.api-server.grpc.netdevh.core').projectDir = file('infrastructure/api-server/grpc/netdevh/api-server-grpc-netdevh-core')
+include(':infrastructure.api-server.grpc.netdevh.impl.auth')
+project(':infrastructure.api-server.grpc.netdevh.impl.auth').projectDir = file('infrastructure/api-server/grpc/netdevh/api-server-grpc-netdevh-impl-auth')
 include(':infrastructure.api-server.grpc.netdevh.impl.product')
 project(':infrastructure.api-server.grpc.netdevh.impl.product').projectDir = file('infrastructure/api-server/grpc/netdevh/api-server-grpc-netdevh-impl-product')
 include(':infrastructure.api-server.grpc.netdevh.impl.user')
@@ -76,6 +78,8 @@ project(':infrastructure.api-server.grpc.netdevh.impl.user').projectDir = file('
 // API server::REST
 include(':infrastructure.api-server.rest.core')
 project(':infrastructure.api-server.rest.core').projectDir = file('infrastructure/api-server/rest/api-server-rest-core')
+include(':infrastructure.api-server.rest.impl.auth')
+project(':infrastructure.api-server.rest.impl.auth').projectDir = file('infrastructure/api-server/rest/api-server-rest-impl-auth')
 include(':infrastructure.api-server.rest.impl.notification')
 project(':infrastructure.api-server.rest.impl.notification').projectDir = file('infrastructure/api-server/rest/api-server-rest-impl-notification')
 include(':infrastructure.api-server.rest.impl.order')
@@ -88,6 +92,11 @@ include(':infrastructure.api-server.rest.impl.user')
 project(':infrastructure.api-server.rest.impl.user').projectDir = file('infrastructure/api-server/rest/api-server-rest-impl-user')
 
 // Auth client
+
+// Auth client::Spring Security JWT
+include(':infrastructure.auth-client.springsecurityjwt')
+project(':infrastructure.auth-client.springsecurityjwt').projectDir = file('infrastructure/auth-client/auth-client-springsecurityjwt')
+
 // Auth client::Keycloak
 include(':infrastructure.auth-client.keycloak')
 project(':infrastructure.auth-client.keycloak').projectDir = file('infrastructure/auth-client/auth-client-keycloak')
@@ -165,6 +174,18 @@ include(':infrastructure.file.pdf.pdfbox.impl.product')
 project(':infrastructure.file.pdf.pdfbox.impl.product').projectDir = file('infrastructure/file/pdf/pdfbox/pdf-pdfbox-impl-product')
 
 // Internal API
+
+// Internal API::Auth API
+include(':infrastructure.internal-api.auth.grpc.netdevh')
+project(':infrastructure.internal-api.auth.grpc.netdevh').projectDir = file('infrastructure/internal-api/auth-api/auth-api-grpc-netdevh')
+include(':infrastructure.internal-api.auth.rest.apachehttpclient')
+project(':infrastructure.internal-api.auth.rest.apachehttpclient').projectDir = file('infrastructure/internal-api/auth-api/auth-api-rest-apachehttpclient')
+include(':infrastructure.internal-api.auth.rest.feign')
+project(':infrastructure.internal-api.auth.rest.feign').projectDir = file('infrastructure/internal-api/auth-api/auth-api-rest-feign')
+include(':infrastructure.internal-api.auth.rest.restclient')
+project(':infrastructure.internal-api.auth.rest.restclient').projectDir = file('infrastructure/internal-api/auth-api/auth-api-rest-restclient')
+include(':infrastructure.internal-api.auth.rest.resttemplate')
+project(':infrastructure.internal-api.auth.rest.resttemplate').projectDir = file('infrastructure/internal-api/auth-api/auth-api-rest-resttemplate')
 
 // Internal API::Product API
 include(':infrastructure.internal-api.product.grpc.netdevh')
@@ -428,16 +449,16 @@ project(':application.user').projectDir = file('application/user-application')
 // =================================================================================================
 
 // API gateway
-include(':edge.api-gateway.spring-cloud-gateway')
-project(':edge.api-gateway.spring-cloud-gateway').projectDir = file('edge/api-gateway/api-gateway-spring-cloud-gateway')
+include(':edge.api-gateway.springcloudgateway')
+project(':edge.api-gateway.springcloudgateway').projectDir = file('edge/api-gateway/api-gateway-springcloudgateway')
 
 // Auth server
-include(':edge.auth-server.auth-server-spring-security-jwt')
-project(':edge.auth-server.auth-server-spring-security-jwt').projectDir = file('edge/auth-server/auth-server-spring-security-jwt')
+include(':edge.auth-server.auth-server-springsecurityjwt')
+project(':edge.auth-server.auth-server-springsecurityjwt').projectDir = file('edge/auth-server/auth-server-springsecurityjwt')
 
 // Config server
-include(':edge.config-server.spring-cloud-config')
-project(':edge.config-server.spring-cloud-config').projectDir = file('edge/config-server/config-server-spring-cloud-config')
+include(':edge.config-server.springcloudconfig')
+project(':edge.config-server.springcloudconfig').projectDir = file('edge/config-server/config-server-springcloudconfig')
 
 // Discovery server
 include(':edge.discovery-server.eureka')

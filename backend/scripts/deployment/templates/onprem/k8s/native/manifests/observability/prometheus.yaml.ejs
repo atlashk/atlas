@@ -1,6 +1,9 @@
 <%
   const observabilityMetrics = (stack.observability.metrics || '').toLowerCase();
+  const authServer = (stack['auth-server'] || '').toLowerCase();
+
   const hasPrometheus = observabilityMetrics === 'prometheus';
+  const hasSpringSecurityJwt = authServer === 'spring-security-jwt';
 %>
 <% if (hasPrometheus) { -%>
 apiVersion: v1
@@ -34,27 +37,28 @@ data:
         metrics_path: '/actuator/prometheus'
         static_configs:
           - targets: ['api-gateway:8080']
-
+      <% if (hasSpringSecurityJwt) { %>
+      - job_name: 'auth-server'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['auth-server:8091']
+      <% } %>
       - job_name: 'user-service'
         metrics_path: '/actuator/prometheus'
         static_configs:
           - targets: ['user-service:8081']
-
       - job_name: 'product-service'
         metrics_path: '/actuator/prometheus'
         static_configs:
           - targets: ['product-service:8082']
-
       - job_name: 'order-service'
         metrics_path: '/actuator/prometheus'
         static_configs:
           - targets: ['order-service:8083']
-
       - job_name: 'payment-service'
         metrics_path: '/actuator/prometheus'
         static_configs:
           - targets: ['payment-service:8084']
-
       - job_name: 'notification-service'
         metrics_path: '/actuator/prometheus'
         static_configs:

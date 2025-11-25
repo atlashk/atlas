@@ -1,8 +1,8 @@
 package org.atlas.framework.auth.client;
 
-import org.atlas.framework.auth.client.model.CreateAuthUserRequest;
+import org.atlas.framework.auth.client.model.CreateUserRequest;
 
 public interface AuthClient {
 
-  void createAuthUser(CreateAuthUserRequest request);
+  void createUser(CreateUserRequest request);
 }

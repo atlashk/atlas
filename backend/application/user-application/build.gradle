@@ -58,6 +58,16 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
     }
+    switch (rootProject.ext.appStack['auth-server']) {
+        case 'spring-security-jwt':
+            implementation project(':infrastructure.auth-client.springsecurityjwt')
+            break
+        case 'keycloak':
+            implementation project(':infrastructure.auth-client.keycloak')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['auth-server']}")
+    }
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
             implementation project(':infrastructure.datasource.mysql.impl.user')

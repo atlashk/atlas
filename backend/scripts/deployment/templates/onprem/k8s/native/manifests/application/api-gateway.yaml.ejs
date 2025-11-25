@@ -1,30 +1,13 @@
 <%
-  const apiClient = (stack['api-client'] || 'rest-restclient').toLowerCase();
-  const apiClientPrefix = (apiClient.split('-')[0] || 'rest');
-  const datasource = (stack.datasource || '').toLowerCase();
+  const authServer = (stack['auth-server'] || '').toLowerCase();
   const kvStore = (stack['kv-store'] || '').toLowerCase();
-  const messaging = (stack.messaging || '').toLowerCase();
-  const search = (stack.search || '').toLowerCase();
-  const storage = (stack.storage || '').toLowerCase();
-  const notificationEmail = (stack.notification.email || '').toLowerCase();
   const observabilityLoggingStack = (stack.observability.logging.stack || '').toLowerCase();
-  const observabilityMetrics = (stack.observability.metrics || '').toLowerCase();
   const observabilityTracing = (stack.observability.tracing || '').toLowerCase();
-  const reverseProxy = (stack['reverse-proxy'] || '').toLowerCase();
 
-  const hasMysql = datasource === 'mysql';
-  const hasPostgres = datasource === 'postgres' || datasource === 'postgresql';
+  const hasSpringSecurityJwt = authServer === 'spring-security-jwt';
   const hasRedis = kvStore === 'redis';
-  const hasKafka = messaging === 'kafka';
-  const hasRabbit = messaging === 'rabbitmq';
-  const hasElasticsearch = search === 'elasticsearch';
-  const hasMinio = storage === 'minio';
-  const hasSmtp4dev = notificationEmail === 'spring';
   const hasLoki = observabilityLoggingStack === 'loki';
-  const hasPrometheus = observabilityMetrics === 'prometheus';
   const hasZipkin = observabilityTracing === 'zipkin';
-  const hasGrafana = hasLoki || hasPrometheus || hasZipkin;
-  const hasNginx = reverseProxy === 'nginx';
 %>
 # Log volume changed to emptyDir for Promtail compatibility
 # PersistentVolumeClaim removed - logs now use emptyDir volume
@@ -60,8 +43,10 @@ spec:
             - name: REDIS_PORT
               value: "6379"
             <% } %>
+            <% if (hasSpringSecurityJwt) { %>
             - name: JWK_SET_URI
-              value: "http://user-service:8081/.well-known/jwks.json"
+              value: "http://auth-server:8091/.well-known/jwks.json"
+            <% } %>
             <% if (hasZipkin) { %>
             - name: ZIPKIN_ENDPOINT
               value: "http://zipkin:9411/api/v2/spans"

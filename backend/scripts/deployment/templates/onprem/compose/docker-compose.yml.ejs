@@ -1,6 +1,7 @@
 <%
   const apiClient = (stack['api-client'] || 'rest-restclient').toLowerCase();
   const apiClientPrefix = (apiClient.split('-')[0] || 'rest');
+  const authServer = (stack['auth-server'] || '').toLowerCase();
   const datasource = (stack.datasource || '').toLowerCase();
   const kvStore = (stack['kv-store'] || '').toLowerCase();
   const messaging = (stack.messaging || '').toLowerCase();
@@ -12,6 +13,7 @@
   const observabilityTracing = (stack.observability.tracing || '').toLowerCase();
   const reverseProxy = (stack['reverse-proxy'] || '').toLowerCase();
 
+  const hasSpringSecurityJwt = authServer === 'spring-security-jwt';
   const hasMysql = datasource === 'mysql';
   const hasPostgres = datasource === 'postgres' || datasource === 'postgresql';
   const hasRedis = kvStore === 'redis';
@@ -266,6 +268,9 @@ services:
     command: -config.file=/etc/promtail/config.yml
     volumes:
       - ./config/promtail/config.yml:/etc/promtail/config.yml:ro
+      <%_ if (hasSpringSecurityJwt) { -%>
+      - auth-server-log:/var/log/auth-server
+      <%_ } -%>
       - user-service-log:/var/log/user-service
       - product-service-log:/var/log/product-service
       - order-service-log:/var/log/order-service
@@ -341,6 +346,57 @@ services:
       start_period: 60s
     networks:
       - atlas-network
+
+<%_ if (hasSpringSecurityJwt) { -%>
+  auth-server:
+    container_name: auth-server
+    image: atlas-auth-server
+    ports:
+      - "8091:8091"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      <%_ if (hasMysql) { -%>
+      mysql:
+        condition: service_healthy
+      <%_ } -%>
+      <%_ if (hasPostgres) { -%>
+      postgres:
+        condition: service_healthy
+      <%_ } -%>
+      <%_ if (hasRedis) { -%>
+      redis:
+        condition: service_healthy
+      <%_ } -%>
+    environment:
+      - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
+      <%_ if (hasMysql) { -%>
+      - DB_URL=jdbc:mysql://mysql:3306/db_auth?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
+      - DB_USERNAME=${MYSQL_USERNAME:-atlas}
+      - DB_PASSWORD=${MYSQL_PASSWORD:-secret123456}
+      <%_ } else if (hasPostgres) { -%>
+      - DB_URL=jdbc:postgresql://postgres:5432/db_auth
+      - DB_USERNAME=${POSTGRES_USERNAME:-atlas}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
+      <%_ } -%>
+      <%_ if (hasRedis) { -%>
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      <%_ } -%>
+      <%_ if (hasZipkin) { -%>
+      - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+      <%_ } -%>
+    volumes:
+      - auth-server-log:/var/log/auth-server
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8091/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - atlas-network
+<%_ } -%>
 
   user-service:
     container_name: user-service
@@ -707,6 +763,9 @@ services:
       - redis
       <%_ } -%>
       - eureka-server
+      <%_ if (hasSpringSecurityJwt) { -%>
+      - auth-server
+      <%_ } -%>
       - user-service
       - product-service
       - order-service
@@ -718,7 +777,9 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       <%_ } -%>
-      - JWK_SET_URI=http://user-service:8081/.well-known/jwks.json
+      <%_ if (hasSpringSecurityJwt) { -%>
+      - JWK_SET_URI=http://auth-server:8091/.well-known/jwks.json
+      <%_ } -%>
       <%_ if (hasZipkin) { -%>
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
       <%_ } -%>
@@ -760,6 +821,9 @@ networks:
 
 volumes:
   eureka-server-log:
+  <%_ if (hasSpringSecurityJwt) { -%>
+  auth-server-log:
+  <%_ } -%>
   user-service-log:
   product-service-log:
   order-service-log:

@@ -1,9 +1,16 @@
+<%
+  const authServer = (stack['auth-server'] || '').toLowerCase();
+  const hasSpringSecurityJwt = authServer === 'spring-security-jwt';
+%>
 #!/bin/bash
 set -e
 
 echo "Initializing PostgreSQL databases and setting owners to ${POSTGRES_USER}"
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
+<%_ if (hasSpringSecurityJwt) { -%>
+CREATE DATABASE db_auth OWNER "$POSTGRES_USER";
+<%_ } -%>
 CREATE DATABASE db_notification OWNER "$POSTGRES_USER";
 CREATE DATABASE db_order OWNER "$POSTGRES_USER";
 CREATE DATABASE db_payment OWNER "$POSTGRES_USER";

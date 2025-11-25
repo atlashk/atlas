@@ -11,7 +11,7 @@ import org.atlas.domain.user.shared.Role;
 import org.atlas.domain.user.usecase.front.mapper.UserMapper;
 import org.atlas.domain.user.usecase.front.model.RegisterInput;
 import org.atlas.framework.auth.client.AuthClient;
-import org.atlas.framework.auth.client.model.CreateAuthUserRequest;
+import org.atlas.framework.auth.client.model.CreateUserRequest;
 import org.atlas.framework.cryptography.PasswordUtil;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.event.DomainEventType;
@@ -58,8 +58,8 @@ public class RegisterUseCaseHandler {
 
   private void syncUser(User user) {
     if (authClient != null) {
-      CreateAuthUserRequest request = UserMapper.INSTANCE.toCreateAuthUserRequest(user);
-      authClient.createAuthUser(request);
+      CreateUserRequest request = UserMapper.INSTANCE.toCreateUserRequest(user);
+      authClient.createUser(request);
       log.info("Created auth user: userId={}, username={}",
           user.getId(), user.getUsername());
     }
