@@ -449,8 +449,15 @@ services:
       - RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-atlas}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-secret123456}
       <%_ } -%>
+      <%_ if (hasSpringSecurityJwt) { -%>
       <%_ if (apiClientPrefix === 'grpc') { -%>
-      - GRPC_CLIENT_PRODUCT_ADDRESS=static://product-service:50052
+      - API_CLIENT_GRPC_AUTH_SERVER_ADDRESS=static://auth-server:50061
+      <%_ } else { -%>
+      - API_CLIENT_REST_AUTH_SERVER_BASE_URL=http://auth-server:8091
+      <%_ } -%>
+      <%_ } -%>
+      <%_ if (apiClientPrefix === 'grpc') { -%>
+      - API_CLIENT_GRPC_PRODUCT_SERVICE_ADDRESS=static://product-service:50052
       <%_ } else { -%>
       - API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL=http://product-service:8082
       <%_ } -%>
@@ -600,8 +607,8 @@ services:
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-secret123456}
       <%_ } -%>
       <%_ if (apiClientPrefix === 'grpc') { -%>
-      - GRPC_CLIENT_USER_ADDRESS=static://user-service:50051
-      - GRPC_CLIENT_PRODUCT_ADDRESS=static://product-service:50052
+      - API_CLIENT_GRPC_USER_SERVICE_ADDRESS=static://user-service:50051
+      - API_CLIENT_GRPC_PRODUCT_SERVICE_ADDRESS=static://product-service:50052
       <%_ } else { -%>
       - API_CLIENT_REST_USER_SERVICE_BASE_URL=http://user-service:8081
       - API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL=http://product-service:8082

@@ -90,8 +90,17 @@ spec:
                   name: rabbitmq-secret
                   key: rabbitmq-password
             <% } %>
+            <% if (authServer === 'spring-security-jwt') { %>
             <% if (apiClientPrefix === 'grpc') { %>
-            - name: GRPC_CLIENT_PRODUCT_ADDRESS
+            - name: API_CLIENT_GRPC_AUTH_SERVER_ADDRESS
+              value: "static://auth-server:50061"
+            <% } else { %>
+            - name: API_CLIENT_REST_AUTH_SERVER_BASE_URL
+              value: "http://auth-server:8091"
+            <% } %>
+            <% } %>
+            <% if (apiClientPrefix === 'grpc') { %>
+            - name: API_CLIENT_GRPC_PRODUCT_SERVICE_ADDRESS
               value: "static://product-service:50052"
             <% } else { %>
             - name: API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL

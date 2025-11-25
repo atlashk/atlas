@@ -89,9 +89,9 @@ spec:
                   key: rabbitmq-password
             <% } %>
             <% if (apiClientPrefix === 'grpc') { %>
-            - name: GRPC_CLIENT_USER_ADDRESS
+            - name: API_CLIENT_GRPC_USER_SERVICE_ADDRESS
               value: "static://user-service:50051"
-            - name: GRPC_CLIENT_PRODUCT_ADDRESS
+            - name: API_CLIENT_GRPC_PRODUCT_SERVICE_ADDRESS
               value: "static://product-service:50052"
             <% } else { %>
             - name: API_CLIENT_REST_USER_SERVICE_BASE_URL
