@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.regex.Pattern;
 import org.atlas.domain.user.shared.Role;
-import org.atlas.framework.auth.enums.CustomClaim;
+import org.atlas.framework.security.CustomClaim;
 import org.atlas.framework.context.ContextInfo;
 import org.atlas.framework.context.Contexts;
 import org.atlas.framework.util.StringUtil;

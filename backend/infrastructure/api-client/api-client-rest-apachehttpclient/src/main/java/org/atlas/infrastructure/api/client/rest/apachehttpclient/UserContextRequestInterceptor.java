@@ -6,7 +6,7 @@ import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.HttpRequestInterceptor;
 import org.apache.hc.core5.http.protocol.HttpContext;
-import org.atlas.framework.auth.enums.CustomClaim;
+import org.atlas.framework.security.CustomClaim;
 import org.atlas.framework.context.ContextInfo;
 import org.atlas.framework.context.Contexts;
 

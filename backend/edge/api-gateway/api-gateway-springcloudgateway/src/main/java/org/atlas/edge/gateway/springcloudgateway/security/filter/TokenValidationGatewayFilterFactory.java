@@ -1,15 +1,14 @@
 package org.atlas.edge.gateway.springcloudgateway.security.filter;
 
-import java.time.Instant;
-import org.atlas.edge.gateway.springcloudgateway.security.jwt.JwtExtractor;
 import org.atlas.edge.gateway.springcloudgateway.util.HttpUtil;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
+import org.atlas.framework.cryptography.HashingUtil;
 import org.atlas.framework.domain.error.DomainError;
+import org.atlas.framework.kvstore.ReactiveKvStoreService;
 import org.atlas.framework.security.SecurityConstant;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
-import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
@@ -22,14 +21,11 @@ import reactor.core.publisher.Mono;
 public class TokenValidationGatewayFilterFactory extends
     AbstractGatewayFilterFactory<TokenValidationGatewayFilterFactory.Config> {
 
-  private final JwtExtractor jwtExtractor;
-  private final ReactiveStringRedisTemplate reactiveRedisTemplate;
+  private final ReactiveKvStoreService reactiveKvStoreService;
 
-  public TokenValidationGatewayFilterFactory(JwtExtractor jwtExtractor,
-      ReactiveStringRedisTemplate reactiveRedisTemplate) {
+  public TokenValidationGatewayFilterFactory(ReactiveKvStoreService reactiveKvStoreService) {
     super(Config.class);
-    this.jwtExtractor = jwtExtractor;
-    this.reactiveRedisTemplate = reactiveRedisTemplate;
+    this.reactiveKvStoreService = reactiveKvStoreService;
   }
 
   @Override
@@ -48,37 +44,17 @@ public class TokenValidationGatewayFilterFactory extends
 
   private Mono<Void> validateToken(Jwt jwt, ServerWebExchange exchange,
       GatewayFilterChain chain) {
-    // Extract userId from JWT claims
-    String userId = jwtExtractor.extractUserId(jwt);
-
-    // Build Redis key for last logout timestamp
-    String lastLogoutTsRedisKey = String.format(SecurityConstant.LAST_LOGOUT_TS_REDIS_KEY_FORMAT,
-        userId);
-
-    // Check if the JWT's issuedAt is before the user's last logout timestamp
-    Mono<Boolean> invalidIssuedAt = reactiveRedisTemplate.opsForValue()
-        .get(lastLogoutTsRedisKey)
-        .map(lastLogoutTsStr -> {
-          try {
-            long lastLogoutTs = Long.parseLong(lastLogoutTsStr);
-            assert jwt.getIssuedAt() != null;
-            // If the token was issued before last logout, session is invalid
-            return jwt.getIssuedAt().isBefore(Instant.ofEpochMilli(lastLogoutTs));
-          } catch (NumberFormatException e) {
-            // If parsing fails, treat session as valid
-            return false;
+    String hashedToken = HashingUtil.sha256ToHex(jwt.getTokenValue());
+    return reactiveKvStoreService.exists(SecurityConstant.TOKEN_BLACKLISTED_KV_STORE_NAME,
+            hashedToken)
+        .flatMap(isBlacklisted -> {
+          if (isBlacklisted) {
+            ApiResponseWrapper<Void> response = ApiResponseWrapper.error(
+                DomainError.UNAUTHORIZED.getErrorCode(), "Token has been inactivated");
+            return HttpUtil.respond(exchange, response, HttpStatus.UNAUTHORIZED);
           }
-        })
-        .defaultIfEmpty(false); // If no logout timestamp found, treat session as valid
-
-    return invalidIssuedAt.flatMap(isInvalidIssuedAt -> {
-      if (isInvalidIssuedAt) {
-        ApiResponseWrapper<Void> response = ApiResponseWrapper.error(
-            DomainError.UNAUTHORIZED.getErrorCode(), "Token has been inactivated");
-        return HttpUtil.respond(exchange, response, HttpStatus.UNAUTHORIZED);
-      }
-      return chain.filter(exchange);
-    });
+          return chain.filter(exchange);
+        });
   }
 
   public static class Config {

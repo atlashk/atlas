@@ -33,7 +33,7 @@ public class FilesystemStorageService implements StorageService {
 
     // Write file content
     try (OutputStream outputStream = Files.newOutputStream(filePath)) {
-      outputStream.write(request.getFileContent());
+      outputStream.write(request.getBytes());
     }
     log.info("Uploaded file successfully: {}", filePath);
   }

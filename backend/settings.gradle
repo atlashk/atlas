@@ -216,12 +216,16 @@ project(':infrastructure.internal-api.user.rest.resttemplate').projectDir = file
 // Key-Value Store::Redis
 include(':infrastructure.kv-store.redis.parent')
 project(':infrastructure.kv-store.redis.parent').projectDir = file('infrastructure/kv-store/redis/kv-store-redis-parent')
+include(':infrastructure.kv-store.redis.parent.reactive')
+project(':infrastructure.kv-store.redis.parent.reactive').projectDir = file('infrastructure/kv-store/redis/kv-store-redis-parent-reactive')
 include(':infrastructure.kv-store.redis.connector.cluster')
 project(':infrastructure.kv-store.redis.connector.cluster').projectDir = file('infrastructure/kv-store/redis/kv-store-redis-connector-cluster')
 include(':infrastructure.kv-store.redis.connector.standalone')
 project(':infrastructure.kv-store.redis.connector.standalone').projectDir = file('infrastructure/kv-store/redis/kv-store-redis-connector-standalone')
 include(':infrastructure.kv-store.redis.ops')
 project(':infrastructure.kv-store.redis.ops').projectDir = file('infrastructure/kv-store/redis/kv-store-redis-ops')
+include(':infrastructure.kv-store.redis.ops.reactive')
+project(':infrastructure.kv-store.redis.ops.reactive').projectDir = file('infrastructure/kv-store/redis/kv-store-redis-ops-reactive')
 
 // Messaging
 

@@ -59,6 +59,10 @@ public class DateUtil {
     return format(now(), pattern);
   }
 
+  public static long timestamp() {
+    return now().getTime();
+  }
+
   public static Date getTodayMidnight() {
     Calendar calendar = Calendar.getInstance();
     resetToMidnight(calendar);

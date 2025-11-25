@@ -1,7 +1,7 @@
 package org.atlas.edge.gateway.springcloudgateway.security.filter;
 
 import org.atlas.edge.gateway.springcloudgateway.security.jwt.JwtExtractor;
-import org.atlas.framework.auth.enums.CustomClaim;
+import org.atlas.framework.security.CustomClaim;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;

@@ -36,6 +36,16 @@ dependencies {
     implementation project(':domain.auth')
 
     // Infrastructure
+    switch (rootProject.ext.appStack['api-server']) {
+        case 'rest':
+            implementation project(':infrastructure.api-server.rest.impl.auth')
+            break
+        case 'grpc':
+            implementation project(':infrastructure.api-server.grpc.netdevh.impl.auth')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
+    }
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
             implementation project(':infrastructure.datasource.mysql.impl.auth')

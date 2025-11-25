@@ -5,7 +5,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.edge.auth.springsecurityjwt.security.UserDetailsImpl;
+import org.atlas.edge.auth.springsecurityjwt.core.UserDetailsImpl;
 import org.atlas.framework.cryptography.RsaKeyLoader;
 import org.atlas.framework.jwt.DecodeJwtInput;
 import org.atlas.framework.jwt.EncodeJwtInput;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 public class TokenService {
 
   public String issueAccessToken(UserDetailsImpl userDetails, Date issuedAt, Date expiresAt)
-      throws IOException, InvalidKeySpecException {
+      throws Exception {
     Jwt jwt = Jwt.builder()
         .issuer(SecurityConstant.TOKEN_ISSUER)
         .issuedAt(issuedAt)
@@ -38,7 +38,7 @@ public class TokenService {
   }
 
   public String issueRefreshToken(UserDetailsImpl userDetails, Date issuedAt, Date expiresAt)
-      throws IOException, InvalidKeySpecException {
+      throws Exception {
     Jwt jwt = Jwt.builder()
         .issuer(SecurityConstant.TOKEN_ISSUER)
         .issuedAt(issuedAt)

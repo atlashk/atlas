@@ -29,7 +29,7 @@ dependencies {
     api project(':framework')
 
     // Infrastructure
-        switch (rootProject.ext.appStack['api-client']) {
+    switch (rootProject.ext.appStack['api-client']) {
         case 'grpc-netdevh':
             implementation project(':infrastructure.internal-api.auth.grpc.netdevh')
             break

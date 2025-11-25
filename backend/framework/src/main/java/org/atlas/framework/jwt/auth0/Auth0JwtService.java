@@ -6,7 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.atlas.domain.user.shared.Role;
-import org.atlas.framework.auth.enums.CustomClaim;
+import org.atlas.framework.security.CustomClaim;
 import org.atlas.framework.jwt.DecodeJwtInput;
 import org.atlas.framework.jwt.EncodeJwtInput;
 import org.atlas.framework.jwt.InvalidJwtException;

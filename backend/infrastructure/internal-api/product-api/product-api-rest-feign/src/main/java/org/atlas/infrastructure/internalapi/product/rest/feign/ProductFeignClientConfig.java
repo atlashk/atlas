@@ -4,7 +4,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableFeignClients(basePackages = "org.atlas.infrastructure.internalapi.product.rest.feign.client")
+@EnableFeignClients(basePackages = "org.atlas.infrastructure.internalapi.auth.rest.feign.client")
 public class ProductFeignClientConfig {
 
 }

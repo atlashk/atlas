@@ -44,11 +44,11 @@ dependencies {
     api 'org.apache.commons:commons-lang3:3.18.0'
     api 'org.apache.commons:commons-collections4:4.4'
     api 'commons-io:commons-io:2.18.0'
+    api 'commons-codec:commons-codec:1.18.0'
     api 'com.google.guava:guava:33.3.1-jre'
 
-    // Security
-    api 'org.springframework.security:spring-security-crypto:6.4.4'
-    api 'commons-codec:commons-codec:1.18.0'
+    // Reactor
+    api "io.projectreactor:reactor-core:${ioProjectReactorVersion}"
 
     // JWT/JWKS
     api 'com.auth0:java-jwt:4.4.0'

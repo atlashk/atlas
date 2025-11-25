@@ -37,9 +37,6 @@ public class JpaUser extends JpaBaseEntity {
   @Column(name = "username")
   private String username;
 
-  @Column(name = "password")
-  private String password;
-
   @Column(name = "first_name")
   private String firstName;
 

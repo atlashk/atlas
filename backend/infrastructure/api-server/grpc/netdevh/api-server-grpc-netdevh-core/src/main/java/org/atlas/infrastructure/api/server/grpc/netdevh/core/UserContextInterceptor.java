@@ -7,7 +7,7 @@ import io.grpc.ServerInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.interceptor.GrpcGlobalServerInterceptor;
 import org.atlas.domain.user.shared.Role;
-import org.atlas.framework.auth.enums.CustomClaim;
+import org.atlas.framework.security.CustomClaim;
 import org.atlas.framework.context.ContextInfo;
 import org.atlas.framework.context.Contexts;
 import org.atlas.framework.util.StringUtil;

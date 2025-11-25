@@ -22,11 +22,6 @@ public class User extends DomainEntity {
 
   private String username;
 
-  private String plainPassword;
-
-  // Hashed password
-  private String password;
-
   private String firstName;
 
   private String lastName;

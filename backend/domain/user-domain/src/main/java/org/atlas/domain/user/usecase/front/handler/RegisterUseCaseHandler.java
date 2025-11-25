@@ -1,6 +1,5 @@
 package org.atlas.domain.user.usecase.front.handler;
 
-import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.user.entity.User;
@@ -10,14 +9,13 @@ import org.atlas.domain.user.repository.UserRepository;
 import org.atlas.domain.user.shared.Role;
 import org.atlas.domain.user.usecase.front.mapper.UserMapper;
 import org.atlas.domain.user.usecase.front.model.RegisterInput;
-import org.atlas.framework.auth.client.AuthClient;
-import org.atlas.framework.auth.client.model.CreateUserRequest;
-import org.atlas.framework.cryptography.PasswordUtil;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.event.DomainEventType;
 import org.atlas.framework.domain.event.contract.user.UserEvent;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
+import org.atlas.framework.internalapi.auth.AuthApiClient;
+import org.atlas.framework.internalapi.auth.model.CreateUserRequest;
 
 @UseCaseHandler
 @RequiredArgsConstructor
@@ -25,7 +23,7 @@ import org.atlas.framework.domain.usecase.UseCaseHandler;
 public class RegisterUseCaseHandler {
 
   private final UserRepository userRepository;
-  private final @Nullable AuthClient authClient;
+  private final AuthApiClient authApiClient;
   private final UserEventMessagePublisher userEventMessagePublisher;
 
   public Void handle(RegisterInput input) throws Exception {
@@ -50,16 +48,15 @@ public class RegisterUseCaseHandler {
 
   private User createUser(RegisterInput input) {
     User user = UserMapper.INSTANCE.toUser(input);
-    user.setPassword(PasswordUtil.hashPassword(input.getPassword()));
     user.setRole(Role.USER);
     userRepository.insert(user);
     return user;
   }
 
   private void syncUser(User user) {
-    if (authClient != null) {
+    if (authApiClient != null) {
       CreateUserRequest request = UserMapper.INSTANCE.toCreateUserRequest(user);
-      authClient.createUser(request);
+      authApiClient.createUser(request);
       log.info("Created auth user: userId={}, username={}",
           user.getId(), user.getUsername());
     }

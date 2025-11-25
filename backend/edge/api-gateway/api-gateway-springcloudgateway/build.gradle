@@ -49,7 +49,7 @@ dependencies {
     }
     switch (rootProject.ext.appStack['kv-store']) {
         case 'redis':
-            implementation project(':infrastructure.kv-store.redis.parent')
+            implementation project(':infrastructure.kv-store.redis.parent.reactive')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['kv-store']}")
