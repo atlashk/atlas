@@ -31,6 +31,19 @@ spring:
             pool:
               max-idle-time: 45m # Allow connections to stay idle longer for SSE/WebSocket
           routes:
+            # Auth server
+            - id: auth-server
+              uri: ${AUTH_SERVER_URI:lb://auth-server}
+              predicates:
+                - Path=/api/authentication/**
+              filters:
+                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+            - id: auth-server-api-docs
+              uri: ${AUTH_SERVER_URI:lb://auth-server}
+              predicates:
+                - Path=/api-docs/auth-server
+              filters:
+                - RewritePath=/api-docs/auth-server, /api-docs
             # User service
             - id: user-service
               uri: ${USER_SERVICE_URI:lb://user-service}
@@ -183,6 +196,8 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     urls:
+      - name: Auth Server
+        url: /api-docs/auth-server
       - name: User Service
         url: /api-docs/user-service
       - name: Product Service
