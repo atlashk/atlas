@@ -16,7 +16,7 @@ import org.atlas.domain.product.usecase.front.mapper.ProductMapper;
 import org.atlas.domain.product.usecase.front.model.SearchProductInput;
 import org.atlas.framework.domain.usecase.ReadOnlyUseCaseHandler;
 import org.atlas.framework.paging.PagingResult;
-import org.atlas.framework.util.CollectionUtil;
+import org.atlas.framework.collection.CollectionUtil;
 import org.atlas.framework.util.StringUtil;
 
 @ReadOnlyUseCaseHandler

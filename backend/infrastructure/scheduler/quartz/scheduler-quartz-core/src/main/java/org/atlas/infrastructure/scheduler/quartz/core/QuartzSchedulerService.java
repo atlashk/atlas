@@ -4,7 +4,7 @@ import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.scheduler.SchedulerService;
-import org.atlas.framework.util.UUIDGenerator;
+import org.atlas.framework.uuid.UUIDGenerator;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;

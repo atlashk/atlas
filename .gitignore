@@ -138,7 +138,7 @@ amplify/
 # =============================================================================
 *.pem
 *.key
-!backend/edge/auth-server/auth-server-springsecurityjwt/src/main/resources/secret/default.key
+!backend/edge/auth-server/auth-server-spring-security-jwt/src/main/resources/secret/default.key
 *.crt
 *.p12
 *.jks

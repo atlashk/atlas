@@ -4,7 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.domain.usecase.InvalidInputException;
-import org.atlas.framework.util.CollectionUtil;
+import org.atlas.framework.collection.CollectionUtil;
 import org.atlas.framework.validation.ValidationService;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;

@@ -2,7 +2,7 @@ package org.atlas.infrastructure.persistence.jpa.impl.user.mapper;
 
 import org.atlas.domain.user.entity.Cart;
 import org.atlas.domain.user.entity.CartItem;
-import org.atlas.framework.util.CollectionUtil;
+import org.atlas.framework.collection.CollectionUtil;
 import org.atlas.infrastructure.persistence.jpa.impl.user.entity.JpaCart;
 import org.atlas.infrastructure.persistence.jpa.impl.user.entity.JpaCartItem;
 import org.mapstruct.AfterMapping;

@@ -12,7 +12,7 @@ import org.atlas.domain.user.usecase.front.mapper.CartMapper;
 import org.atlas.framework.internalapi.product.ProductApiClient;
 import org.atlas.framework.internalapi.product.model.ListProductRequest;
 import org.atlas.framework.internalapi.product.model.ProductResponse;
-import org.atlas.framework.util.CollectionUtil;
+import org.atlas.framework.collection.CollectionUtil;
 import org.springframework.stereotype.Service;
 
 @Service

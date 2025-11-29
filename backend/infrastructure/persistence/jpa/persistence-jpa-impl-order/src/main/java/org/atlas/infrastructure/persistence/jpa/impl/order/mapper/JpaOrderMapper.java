@@ -2,11 +2,10 @@ package org.atlas.infrastructure.persistence.jpa.impl.order.mapper;
 
 import org.atlas.domain.order.entity.Order;
 import org.atlas.domain.order.entity.Order.OrderItem;
-import org.atlas.framework.util.CollectionUtil;
+import org.atlas.framework.collection.CollectionUtil;
 import org.atlas.infrastructure.persistence.jpa.impl.order.entity.JpaOrder;
 import org.atlas.infrastructure.persistence.jpa.impl.order.entity.JpaOrderItem;
 import org.mapstruct.AfterMapping;
-import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;

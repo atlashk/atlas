@@ -66,10 +66,6 @@ dependencies {
     // QR generator
     api 'com.google.zxing:core:3.5.3'
     api 'com.google.zxing:javase:3.5.3'
-
-    // Testing
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 bootJar {

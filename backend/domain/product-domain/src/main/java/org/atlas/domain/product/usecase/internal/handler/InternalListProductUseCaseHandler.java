@@ -10,7 +10,7 @@ import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.service.ProductImageService;
 import org.atlas.domain.product.usecase.internal.model.InternalListProductInput;
 import org.atlas.framework.domain.usecase.ReadOnlyUseCaseHandler;
-import org.atlas.framework.util.CollectionUtil;
+import org.atlas.framework.collection.CollectionUtil;
 import org.atlas.framework.util.StringUtil;
 
 @ReadOnlyUseCaseHandler

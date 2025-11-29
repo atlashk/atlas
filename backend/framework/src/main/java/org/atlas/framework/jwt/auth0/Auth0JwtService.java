@@ -12,7 +12,7 @@ import org.atlas.framework.jwt.EncodeJwtInput;
 import org.atlas.framework.jwt.InvalidJwtException;
 import org.atlas.framework.jwt.Jwt;
 import org.atlas.framework.jwt.JwtService;
-import org.atlas.framework.util.UUIDGenerator;
+import org.atlas.framework.uuid.UUIDGenerator;
 
 public class Auth0JwtService implements JwtService {
 

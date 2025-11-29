@@ -16,7 +16,7 @@ import org.atlas.framework.saga.core.annotation.SagaCommandHandler;
 import org.atlas.framework.saga.core.command.SagaCommandResult;
 import org.atlas.framework.saga.core.context.SagaContext;
 import org.atlas.framework.saga.core.messaging.payload.SagaCommand;
-import org.atlas.framework.util.CollectionUtil;
+import org.atlas.framework.collection.CollectionUtil;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -48,16 +48,19 @@ public class ClearCartCommandHandler {
       cart.clear();
       cartRepository.update(cart);
       log.info("Successfully cleared cart in DB: sagaId={}, orderId={}, userId={}",
-          sagaCommand.getSagaId(), checkoutSagaData.getOrderId(), checkoutSagaData.getUser().getId());
+          sagaCommand.getSagaId(), checkoutSagaData.getOrderId(),
+          checkoutSagaData.getUser().getId());
 
       // Clear cart in cache
       cacheService.evict(ApplicationCache.CART, String.valueOf(checkoutSagaData.getUser().getId()));
       log.info("Successfully cleared cart in cache: sagaId={}, orderId={}, userId={}",
-          sagaCommand.getSagaId(), checkoutSagaData.getOrderId(), checkoutSagaData.getUser().getId());
+          sagaCommand.getSagaId(), checkoutSagaData.getOrderId(),
+          checkoutSagaData.getUser().getId());
     } catch (Exception e) {
       // Don't compensate the previous steps
       log.error("Failed to clear cart: sagaId={}, orderId={}, userId={}, error={}",
-          sagaCommand.getSagaId(), checkoutSagaData.getOrderId(), checkoutSagaData.getUser().getId(),
+          sagaCommand.getSagaId(), checkoutSagaData.getOrderId(),
+          checkoutSagaData.getUser().getId(),
           e.getMessage(), e);
     }
 

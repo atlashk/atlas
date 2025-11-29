@@ -60,7 +60,7 @@ dependencies {
     }
     switch (rootProject.ext.appStack['auth-server']) {
         case 'spring-security-jwt':
-            implementation project(':infrastructure.auth-client.springsecurityjwt')
+            implementation project(':infrastructure.auth-client.spring-security-jwt')
             break
         case 'keycloak':
             implementation project(':infrastructure.auth-client.keycloak')
@@ -92,7 +92,7 @@ dependencies {
     }
     switch (rootProject.ext.appStack['kv-store']) {
         case 'redis':
-            implementation project(':infrastructure.kv-store.redis.parent')
+            implementation project(':infrastructure.kv-store.redis')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['kv-store']}")

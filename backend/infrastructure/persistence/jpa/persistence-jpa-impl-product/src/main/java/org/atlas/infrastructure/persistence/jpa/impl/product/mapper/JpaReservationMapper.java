@@ -2,7 +2,6 @@ package org.atlas.infrastructure.persistence.jpa.impl.product.mapper;
 
 import org.atlas.domain.product.entity.Reservation;
 import org.atlas.infrastructure.persistence.jpa.impl.product.entity.JpaReservation;
-import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;

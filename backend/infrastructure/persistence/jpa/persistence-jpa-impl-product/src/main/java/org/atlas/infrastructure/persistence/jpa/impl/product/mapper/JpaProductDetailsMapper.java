@@ -2,7 +2,6 @@ package org.atlas.infrastructure.persistence.jpa.impl.product.mapper;
 
 import org.atlas.domain.product.entity.ProductDetails;
 import org.atlas.infrastructure.persistence.jpa.impl.product.entity.JpaProductDetails;
-import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;

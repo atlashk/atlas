@@ -22,7 +22,7 @@ import org.atlas.framework.saga.core.annotation.SagaCommandHandler;
 import org.atlas.framework.saga.core.command.SagaCommandResult;
 import org.atlas.framework.saga.core.context.SagaContext;
 import org.atlas.framework.saga.core.messaging.payload.SagaCommand;
-import org.atlas.framework.util.ErrorUtil;
+import org.atlas.framework.error.ErrorUtil;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;

@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.framework.notification.inapp.SendInAppRequest.Payload;
-import org.atlas.framework.util.UUIDGenerator;
+import org.atlas.framework.uuid.UUIDGenerator;
 
 @NoArgsConstructor
 @AllArgsConstructor

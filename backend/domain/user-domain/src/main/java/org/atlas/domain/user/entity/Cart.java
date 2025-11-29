@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.domain.user.entity.CartItem.Product;
 import org.atlas.framework.domain.entity.DomainEntity;
-import org.atlas.framework.util.CollectionUtil;
+import org.atlas.framework.collection.CollectionUtil;
 
 @NoArgsConstructor
 @AllArgsConstructor

@@ -8,7 +8,7 @@ import java.util.concurrent.ScheduledFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.scheduler.SchedulerService;
-import org.atlas.framework.util.UUIDGenerator;
+import org.atlas.framework.uuid.UUIDGenerator;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 

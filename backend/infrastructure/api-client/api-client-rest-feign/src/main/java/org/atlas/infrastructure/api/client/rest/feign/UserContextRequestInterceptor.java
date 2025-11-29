@@ -2,9 +2,9 @@ package org.atlas.infrastructure.api.client.rest.feign;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
-import org.atlas.framework.security.CustomClaim;
 import org.atlas.framework.context.ContextInfo;
 import org.atlas.framework.context.Contexts;
+import org.atlas.framework.security.CustomClaim;
 import org.springframework.stereotype.Component;
 
 @Component

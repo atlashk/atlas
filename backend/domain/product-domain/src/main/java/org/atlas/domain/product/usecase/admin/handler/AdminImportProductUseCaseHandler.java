@@ -17,7 +17,7 @@ import org.atlas.framework.domain.event.DomainEventType;
 import org.atlas.framework.domain.event.contract.product.ProductEvent;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
-import org.atlas.framework.util.CollectionUtil;
+import org.atlas.framework.collection.CollectionUtil;
 
 @UseCaseHandler
 @RequiredArgsConstructor

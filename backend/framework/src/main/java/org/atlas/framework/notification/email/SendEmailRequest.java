@@ -3,7 +3,7 @@ package org.atlas.framework.notification.email;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
-import org.atlas.framework.util.CollectionUtil;
+import org.atlas.framework.collection.CollectionUtil;
 import org.atlas.framework.util.StringUtil;
 
 @Getter

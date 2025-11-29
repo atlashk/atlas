@@ -1,7 +1,7 @@
 package org.atlas.infrastructure.persistence.jpa.impl.product.mapper;
 
 import org.atlas.domain.product.entity.Product;
-import org.atlas.framework.util.CollectionUtil;
+import org.atlas.framework.collection.CollectionUtil;
 import org.atlas.infrastructure.persistence.jpa.impl.product.entity.JpaProduct;
 import org.atlas.infrastructure.persistence.jpa.impl.product.entity.JpaProductAttribute;
 import org.atlas.infrastructure.persistence.jpa.impl.product.entity.JpaProductDetails;

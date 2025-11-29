@@ -1,5 +1,5 @@
 // =================================================================================================
-// Shared Library
+// Framework
 // =================================================================================================
 
 include(':framework')
@@ -38,10 +38,6 @@ project(':domain.user.shared').projectDir = file('domain/user-domain-shared')
 // =================================================================================================
 // Infrastructure
 // =================================================================================================
-
-// -------------------------------------------------------------------------------------------------
-// Infrastructure::Spring Boot
-// -------------------------------------------------------------------------------------------------
 
 // API client
 include(':infrastructure.api-client.grpc.netdevh')
@@ -94,8 +90,8 @@ project(':infrastructure.api-server.rest.impl.user').projectDir = file('infrastr
 // Auth client
 
 // Auth client::Spring Security JWT
-include(':infrastructure.auth-client.springsecurityjwt')
-project(':infrastructure.auth-client.springsecurityjwt').projectDir = file('infrastructure/auth-client/auth-client-springsecurityjwt')
+include(':infrastructure.auth-client.spring-security-jwt')
+project(':infrastructure.auth-client.spring-security-jwt').projectDir = file('infrastructure/auth-client/auth-client-spring-security-jwt')
 
 // Auth client::Keycloak
 include(':infrastructure.auth-client.keycloak')
@@ -214,18 +210,14 @@ project(':infrastructure.internal-api.user.rest.resttemplate').projectDir = file
 // Key-Value Store
 
 // Key-Value Store::Redis
-include(':infrastructure.kv-store.redis.parent')
-project(':infrastructure.kv-store.redis.parent').projectDir = file('infrastructure/kv-store/redis/kv-store-redis-parent')
-include(':infrastructure.kv-store.redis.parent.reactive')
-project(':infrastructure.kv-store.redis.parent.reactive').projectDir = file('infrastructure/kv-store/redis/kv-store-redis-parent-reactive')
+include(':infrastructure.kv-store.redis')
+project(':infrastructure.kv-store.redis').projectDir = file('infrastructure/kv-store/redis/kv-store-redis')
+include(':infrastructure.kv-store.redis-reactive')
+project(':infrastructure.kv-store.redis-reactive').projectDir = file('infrastructure/kv-store/redis/kv-store-redis-reactive')
 include(':infrastructure.kv-store.redis.connector.cluster')
 project(':infrastructure.kv-store.redis.connector.cluster').projectDir = file('infrastructure/kv-store/redis/kv-store-redis-connector-cluster')
 include(':infrastructure.kv-store.redis.connector.standalone')
 project(':infrastructure.kv-store.redis.connector.standalone').projectDir = file('infrastructure/kv-store/redis/kv-store-redis-connector-standalone')
-include(':infrastructure.kv-store.redis.ops')
-project(':infrastructure.kv-store.redis.ops').projectDir = file('infrastructure/kv-store/redis/kv-store-redis-ops')
-include(':infrastructure.kv-store.redis.ops.reactive')
-project(':infrastructure.kv-store.redis.ops.reactive').projectDir = file('infrastructure/kv-store/redis/kv-store-redis-ops-reactive')
 
 // Messaging
 
@@ -429,10 +421,6 @@ project(':infrastructure.template.thymeleaf').projectDir = file('infrastructure/
 // Application
 // =================================================================================================
 
-// -------------------------------------------------------------------------------------------------
-// Application::Spring Boot
-// -------------------------------------------------------------------------------------------------
-
 include(':application.notification')
 project(':application.notification').projectDir = file('application/notification-application')
 
@@ -452,18 +440,26 @@ project(':application.user').projectDir = file('application/user-application')
 // Edge
 // =================================================================================================
 
-// API gateway
-include(':edge.api-gateway.springcloudgateway')
-project(':edge.api-gateway.springcloudgateway').projectDir = file('edge/api-gateway/api-gateway-springcloudgateway')
+// API Gateway
 
-// Auth server
-include(':edge.auth-server.auth-server-springsecurityjwt')
-project(':edge.auth-server.auth-server-springsecurityjwt').projectDir = file('edge/auth-server/auth-server-springsecurityjwt')
+// API Gateway::Spring Cloud Gateway
+include(':edge.api-gateway.spring-cloud-gateway.server')
+project(':edge.api-gateway.spring-cloud-gateway.server').projectDir = file('edge/api-gateway/spring-cloud-gateway/spring-cloud-gateway-server')
+include(':edge.api-gateway.spring-cloud-gateway.security.core')
+project(':edge.api-gateway.spring-cloud-gateway.security.core').projectDir = file('edge/api-gateway/spring-cloud-gateway/spring-cloud-gateway-security-core')
+include(':edge.api-gateway.spring-cloud-gateway.security.spring-security-jwt')
+project(':edge.api-gateway.spring-cloud-gateway.security.spring-security-jwt').projectDir = file('edge/api-gateway/spring-cloud-gateway/spring-cloud-gateway-security-spring-security-jwt')
+include(':edge.api-gateway.spring-cloud-gateway.security.keycloak')
+project(':edge.api-gateway.spring-cloud-gateway.security.keycloak').projectDir = file('edge/api-gateway/spring-cloud-gateway/spring-cloud-gateway-security-keycloak')
 
-// Config server
-include(':edge.config-server.springcloudconfig')
-project(':edge.config-server.springcloudconfig').projectDir = file('edge/config-server/config-server-springcloudconfig')
+// Auth Server
+include(':edge.auth-server.auth-server-spring-security-jwt')
+project(':edge.auth-server.auth-server-spring-security-jwt').projectDir = file('edge/auth-server/auth-server-spring-security-jwt')
 
-// Discovery server
+// Config Server
+include(':edge.config-server.spring-cloud-config')
+project(':edge.config-server.spring-cloud-config').projectDir = file('edge/config-server/config-server-spring-cloud-config')
+
+// Discovery Server
 include(':edge.discovery-server.eureka')
 project(':edge.discovery-server.eureka').projectDir = file('edge/discovery-server/discovery-server-eureka')

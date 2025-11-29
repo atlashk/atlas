@@ -3,7 +3,7 @@ package org.atlas.infrastructure.payment.simulator;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.util.ExecutorUtil;
+import org.atlas.framework.concurrent.ExecutorUtil;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

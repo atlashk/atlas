@@ -20,7 +20,7 @@ import org.atlas.framework.saga.core.annotation.StartSaga;
 import org.atlas.framework.saga.core.command.SagaCommandResult;
 import org.atlas.framework.saga.core.entity.SagaEntity;
 import org.atlas.framework.saga.core.orchestrator.SagaOrchestrator;
-import org.atlas.framework.util.AsyncUtil;
+import org.atlas.framework.concurrent.AsyncUtil;
 
 @Saga(
     sagaName = "checkout",

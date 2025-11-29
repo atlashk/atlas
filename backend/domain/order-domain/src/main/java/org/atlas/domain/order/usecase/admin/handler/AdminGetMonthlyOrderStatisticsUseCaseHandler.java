@@ -12,7 +12,7 @@ import org.atlas.domain.order.repository.OrderRepository;
 import org.atlas.domain.order.repository.model.MonthlyOrderAggregation;
 import org.atlas.domain.order.shared.OrderStatus;
 import org.atlas.framework.domain.usecase.ReadOnlyUseCaseHandler;
-import org.atlas.framework.util.CollectionUtil;
+import org.atlas.framework.collection.CollectionUtil;
 
 /**
  * Use case handler that produces a contiguous time series of monthly order statistics for fulfilled

@@ -18,7 +18,7 @@ import org.atlas.framework.payment.model.HandleWebhookRequest;
 import org.atlas.framework.payment.model.HandleWebhookResponse;
 import org.atlas.framework.payment.model.HandleWebhookResponse.Result;
 import org.atlas.framework.payment.model.nextaction.UsePaymentElement;
-import org.atlas.framework.util.RandomUtil;
+import org.atlas.framework.random.RandomUtil;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

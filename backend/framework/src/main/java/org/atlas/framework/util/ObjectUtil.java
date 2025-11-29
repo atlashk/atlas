@@ -16,9 +16,6 @@ public class ObjectUtil {
    * @param <T>    the type of the object to clone
    * @param object the object to be deeply cloned, or null
    * @return a deep copy of the input object, or null if the input is null
-   * @throws java.io.IOException    if an I/O error occurs during serialization or deserialization
-   * @throws ClassNotFoundException if a class in the object graph cannot be found during
-   *                                deserialization
    */
   public static <T extends Serializable> T deepClone(T object) {
     return SerializationUtils.clone(object);

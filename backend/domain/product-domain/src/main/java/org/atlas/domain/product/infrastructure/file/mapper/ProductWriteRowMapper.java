@@ -4,7 +4,7 @@ import java.util.stream.Collectors;
 import org.atlas.domain.product.entity.Category;
 import org.atlas.domain.product.entity.Product;
 import org.atlas.domain.product.infrastructure.file.model.ProductWriteRow;
-import org.atlas.framework.util.CollectionUtil;
+import org.atlas.framework.collection.CollectionUtil;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

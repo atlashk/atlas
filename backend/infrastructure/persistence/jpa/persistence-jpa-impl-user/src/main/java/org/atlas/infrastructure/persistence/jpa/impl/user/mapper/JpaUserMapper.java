@@ -2,7 +2,6 @@ package org.atlas.infrastructure.persistence.jpa.impl.user.mapper;
 
 import org.atlas.domain.user.entity.User;
 import org.atlas.infrastructure.persistence.jpa.impl.user.entity.JpaUser;
-import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;

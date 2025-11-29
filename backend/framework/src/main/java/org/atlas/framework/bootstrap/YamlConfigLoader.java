@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.util.MapUtil;
+import org.atlas.framework.collection.MapUtil;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;

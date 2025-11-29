@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.framework.util.ErrorUtil;
+import org.atlas.framework.error.ErrorUtil;
 
 @NoArgsConstructor
 @AllArgsConstructor

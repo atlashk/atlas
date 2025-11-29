@@ -7,7 +7,7 @@ import net.devh.boot.grpc.server.service.GrpcService;
 import org.atlas.domain.user.entity.User;
 import org.atlas.domain.user.usecase.internal.handler.InternalListUserUseCaseHandler;
 import org.atlas.domain.user.usecase.internal.model.InternalListUserInput;
-import org.atlas.framework.util.CollectionUtil;
+import org.atlas.framework.collection.CollectionUtil;
 import org.atlas.infrastructure.api.server.grpc.protobuf.user.ListUserRequestProto;
 import org.atlas.infrastructure.api.server.grpc.protobuf.user.ListUserResponseProto;
 import org.atlas.infrastructure.api.server.grpc.protobuf.user.UserProto;

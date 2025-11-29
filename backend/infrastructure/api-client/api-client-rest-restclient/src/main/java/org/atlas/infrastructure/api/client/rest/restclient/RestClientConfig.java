@@ -3,7 +3,7 @@ package org.atlas.infrastructure.api.client.rest.restclient;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import org.atlas.framework.util.SSLUtil;
+import org.atlas.framework.security.SSLUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

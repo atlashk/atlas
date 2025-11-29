@@ -29,7 +29,7 @@ dependencies {
     api project(':framework')
 
     // Infrastructure
-    api project(':infrastructure.kv-store.redis.parent')
+    api project(':infrastructure.kv-store.redis')
 
     // Lib
     // Distributed lock in case the schedulers run on multi-instance application

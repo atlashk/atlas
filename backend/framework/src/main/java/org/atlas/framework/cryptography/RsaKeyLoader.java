@@ -11,7 +11,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import lombok.experimental.UtilityClass;
-import org.atlas.framework.util.FileUtil;
+import org.atlas.framework.file.FileUtil;
 
 @UtilityClass
 public class RsaKeyLoader {

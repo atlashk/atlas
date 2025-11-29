@@ -12,7 +12,7 @@ import org.atlas.framework.saga.core.exception.SagaConfigException;
 import org.atlas.framework.saga.core.messaging.SagaMessagePublisher;
 import org.atlas.framework.saga.core.messaging.payload.SagaCompensation;
 import org.atlas.framework.saga.core.messaging.payload.SagaCompensationReply;
-import org.atlas.framework.util.ErrorUtil;
+import org.atlas.framework.error.ErrorUtil;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationContext;

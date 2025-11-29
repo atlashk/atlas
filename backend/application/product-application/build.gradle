@@ -106,7 +106,7 @@ dependencies {
     }
     switch (rootProject.ext.appStack['kv-store']) {
         case 'redis':
-            implementation project(':infrastructure.kv-store.redis.parent')
+            implementation project(':infrastructure.kv-store.redis')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['kv-store']}")
@@ -206,10 +206,6 @@ dependencies {
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-
-    // Testing
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 dependencyManagement {

@@ -29,7 +29,7 @@ import org.atlas.framework.saga.core.context.SagaContext;
 import org.atlas.framework.saga.core.orchestrator.SagaOrchestrator;
 import org.atlas.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.framework.sequencegenerator.SequenceType;
-import org.atlas.framework.util.CollectionUtil;
+import org.atlas.framework.collection.CollectionUtil;
 
 @UseCaseHandler
 @RequiredArgsConstructor

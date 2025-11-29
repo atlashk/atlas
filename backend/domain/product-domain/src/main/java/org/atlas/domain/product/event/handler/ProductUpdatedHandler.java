@@ -10,7 +10,7 @@ import org.atlas.framework.cache.CacheService;
 import org.atlas.framework.domain.event.DomainEventType;
 import org.atlas.framework.domain.event.contract.product.ProductEvent;
 import org.atlas.framework.domain.event.handler.DomainEventHandler;
-import org.atlas.framework.util.AsyncUtil;
+import org.atlas.framework.concurrent.AsyncUtil;
 
 @DomainEventHandler(type = DomainEventType.PRODUCT_UPDATED)
 @RequiredArgsConstructor

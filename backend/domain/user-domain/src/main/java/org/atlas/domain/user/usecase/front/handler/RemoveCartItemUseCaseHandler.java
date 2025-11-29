@@ -10,7 +10,7 @@ import org.atlas.framework.cache.CacheService;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
-import org.atlas.framework.util.CollectionUtil;
+import org.atlas.framework.collection.CollectionUtil;
 
 @UseCaseHandler
 @RequiredArgsConstructor

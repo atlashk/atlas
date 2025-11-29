@@ -9,7 +9,7 @@ import org.atlas.framework.storage.model.DeleteFileRequest;
 import org.atlas.framework.storage.model.GetFileRequest;
 import org.atlas.framework.storage.model.UploadFileRequest;
 import org.atlas.framework.util.ArrayUtil;
-import org.atlas.framework.util.ImageUtil;
+import org.atlas.framework.image.ImageUtil;
 import org.atlas.framework.util.StringUtil;
 import org.springframework.stereotype.Service;
 

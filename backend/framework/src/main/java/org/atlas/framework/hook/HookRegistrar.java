@@ -4,7 +4,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.measurement.StopWatch;
-import org.atlas.framework.util.MapUtil;
+import org.atlas.framework.collection.MapUtil;
 import org.atlas.framework.util.ReflectionUtil;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
