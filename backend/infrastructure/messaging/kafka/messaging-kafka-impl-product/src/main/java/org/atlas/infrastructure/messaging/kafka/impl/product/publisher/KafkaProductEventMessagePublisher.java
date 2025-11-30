@@ -7,6 +7,7 @@ import org.atlas.framework.domain.event.contract.product.ProductEvent;
 import org.atlas.framework.json.JsonUtil;
 import org.atlas.framework.messaging.publisher.Message;
 import org.atlas.framework.messaging.publisher.MessagePublisher;
+import org.atlas.infrastructure.messaging.kafka.core.constant.KafkaTopics;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,7 +19,7 @@ public class KafkaProductEventMessagePublisher implements ProductEventMessagePub
   @Override
   public void publish(ProductEvent event) {
     Message message = Message.builder()
-        .destination("product_events")
+        .destination(KafkaTopics.PRODUCT_EVENTS)
         .routingAttributes(Map.of("messageKey", event.getProductId()))
         .payload(JsonUtil.getInstance().toJson(event))
         .build();

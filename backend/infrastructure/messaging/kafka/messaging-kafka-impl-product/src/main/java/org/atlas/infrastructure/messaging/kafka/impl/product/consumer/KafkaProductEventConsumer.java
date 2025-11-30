@@ -1,11 +1,10 @@
-package org.atlas.infrastructure.messaging.kafka.impl.notification.consumer;
+package org.atlas.infrastructure.messaging.kafka.impl.product.consumer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.atlas.framework.json.JsonUtil;
-import org.atlas.framework.saga.core.command.SagaCommandDispatcher;
-import org.atlas.framework.saga.core.messaging.payload.SagaCommand;
+import org.atlas.framework.domain.event.handler.DomainEventDispatcher;
+import org.atlas.infrastructure.messaging.kafka.core.constant.KafkaTopics;
 import org.atlas.infrastructure.messaging.kafka.core.consumer.BaseKafkaMessageConsumer;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
@@ -17,12 +16,12 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class KafkaSagaCheckoutCommandConsumer extends BaseKafkaMessageConsumer {
+public class KafkaProductEventConsumer extends BaseKafkaMessageConsumer {
 
-  private final SagaCommandDispatcher dispatcher;
+  private final DomainEventDispatcher dispatcher;
 
   @KafkaListener(
-      topics = "saga.checkout.command.notification",
+      topics = KafkaTopics.PRODUCT_EVENTS,
       containerFactory = "defaultContainerFactory"
   )
   // Non-blocking retry
@@ -32,14 +31,12 @@ public class KafkaSagaCheckoutCommandConsumer extends BaseKafkaMessageConsumer {
       topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE,
       backoff = @Backoff(delay = 1000, multiplier = 2, random = true)
   )
-  public void consumeCheckoutCommand(ConsumerRecord<String, Object> record, Acknowledgment ack) {
+  public void consumeProductEvent(ConsumerRecord<String, Object> record, Acknowledgment ack) {
     super.consumeMessage(record, ack);
   }
 
   @Override
   protected void handleMessage(Object payload) {
-    SagaCommand sagaCommand =
-        JsonUtil.getInstance().toObject((String) payload, SagaCommand.class);
-    dispatcher.dispatch(sagaCommand);
+    dispatcher.dispatch(payload);
   }
 }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Component
+@ShutdownHook
 public @interface ShutdownHook {
 
 }

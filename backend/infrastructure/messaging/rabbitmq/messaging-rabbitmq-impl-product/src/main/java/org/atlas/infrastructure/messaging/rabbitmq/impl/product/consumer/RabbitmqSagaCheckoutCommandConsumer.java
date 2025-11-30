@@ -4,7 +4,7 @@ import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.json.JsonUtil;
-import org.atlas.framework.saga.core.command.SagaCommandHandlerDispatcher;
+import org.atlas.framework.saga.core.command.SagaCommandDispatcher;
 import org.atlas.framework.saga.core.messaging.payload.SagaCommand;
 import org.atlas.infrastructure.messaging.rabbitmq.core.consumer.BaseRabbitmqMessageConsumer;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class RabbitmqSagaCheckoutCommandConsumer extends BaseRabbitmqMessageConsumer {
 
-  private final SagaCommandHandlerDispatcher dispatcher;
+  private final SagaCommandDispatcher dispatcher;
 
   @RabbitListener(
       queues = "saga.checkout.command.product",

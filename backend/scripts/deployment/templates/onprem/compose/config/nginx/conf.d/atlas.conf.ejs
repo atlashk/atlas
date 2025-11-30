@@ -1,11 +1,13 @@
 <%
   // Derive flags similar to docker-compose.yml.ejs
+  const authServer = (stack['auth-server'] || '').toLowerCase();
   const notificationEmail = (stack.notification.email || '').toLowerCase();
   const storage = (stack.storage || '').toLowerCase();
   const observabilityLoggingStack = (stack.observability.logging.stack || '').toLowerCase();
   const observabilityMetrics = (stack.observability.metrics || '').toLowerCase();
   const observabilityTracing = (stack.observability.tracing || '').toLowerCase();
 
+  const hasKeycloak = authServer === 'keycloak'
   const hasSmtp4dev = notificationEmail === 'spring';
   const hasMinio = storage === 'minio';
   const hasLoki = observabilityLoggingStack === 'loki';
@@ -28,6 +30,21 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
+
+<% if (hasKeycloak) { %>
+server {
+    listen 80;
+    server_name keycloak.atlas.local;
+
+    location / {
+        proxy_pass http://keycloak:8443;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+<% } %>
 
 <% if (hasSmtp4dev) { %>
 server {
@@ -59,13 +76,13 @@ server {
 }
 <% } %>
 
-<% if (hasGrafana) { %>
+<% if (hasPrometheus) { %>
 server {
     listen 80;
-    server_name grafana.atlas.local;
+    server_name prometheus.atlas.local;
 
     location / {
-        proxy_pass http://grafana:3000;
+        proxy_pass http://prometheus:9090;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -87,4 +104,19 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
+
+<% if (hasGrafana) { %>
+server {
+    listen 80;
+    server_name grafana.atlas.local;
+
+    location / {
+        proxy_pass http://grafana:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+<% } %>
 <% } %>

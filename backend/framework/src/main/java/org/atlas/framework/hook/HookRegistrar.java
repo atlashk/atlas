@@ -41,9 +41,14 @@ public class HookRegistrar implements InitializingBean, DisposableBean {
       log.info("Started hook {}", hookBeanName);
       StopWatch stopWatch = new StopWatch();
       stopWatch.start();
-      ReflectionUtil.invokeMethod(hookBean, "handle");
-      stopWatch.stop();
-      log.info("Finished hook {} in {} ms", hookBeanName, stopWatch.getElapsedTimeMs());
+      try {
+        ReflectionUtil.invokeMethod(hookBean, "handle");
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      } finally {
+        stopWatch.stop();
+        log.info("Finished hook {} in {} ms", hookBeanName, stopWatch.getElapsedTimeMs());
+      }
     });
   }
 }

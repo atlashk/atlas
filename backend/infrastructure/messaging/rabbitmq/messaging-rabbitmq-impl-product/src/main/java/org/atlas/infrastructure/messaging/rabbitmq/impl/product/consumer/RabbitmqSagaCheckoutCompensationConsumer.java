@@ -4,7 +4,7 @@ import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.json.JsonUtil;
-import org.atlas.framework.saga.core.compensation.SagaCompensationHandlerDispatcher;
+import org.atlas.framework.saga.core.compensation.SagaCompensationDispatcher;
 import org.atlas.framework.saga.core.messaging.payload.SagaCompensation;
 import org.atlas.infrastructure.messaging.rabbitmq.core.consumer.BaseRabbitmqMessageConsumer;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class RabbitmqSagaCheckoutCompensationConsumer extends BaseRabbitmqMessageConsumer {
 
-  private final SagaCompensationHandlerDispatcher dispatcher;
+  private final SagaCompensationDispatcher dispatcher;
 
   @RabbitListener(
       queues = "saga.checkout.compensation.product",

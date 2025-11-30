@@ -1,4 +1,4 @@
-package org.atlas.framework.saga.core.compensation;
+package org.atlas.framework.saga.core.command;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -7,11 +7,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.saga.core.annotation.SagaCompensationHandler;
+import org.atlas.framework.saga.core.annotation.SagaCommandHandler;
 import org.atlas.framework.saga.core.exception.SagaConfigException;
 import org.atlas.framework.saga.core.messaging.SagaMessagePublisher;
-import org.atlas.framework.saga.core.messaging.payload.SagaCompensation;
-import org.atlas.framework.saga.core.messaging.payload.SagaCompensationReply;
+import org.atlas.framework.saga.core.messaging.payload.SagaCommand;
+import org.atlas.framework.saga.core.messaging.payload.SagaCommandReply;
 import org.atlas.framework.error.ErrorUtil;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -19,26 +19,42 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 /**
- * Unified dispatcher for {@link SagaCompensation} that routes events to
- * {@link SagaCompensationHandler} methods and publishes {@link SagaCompensationReply} after
- * execution.
+ * Unified dispatcher for SagaCommandEvent that routes events to @SagaCommandHandler methods and
+ * publishes SagaCommandReplyEvent after execution.
+ *
+ * <p>This component combines event dispatching and reply publishing in a single component:
+ * <ul>
+ *   <li>Routes incoming SagaCommandEvent to the appropriate handler method</li>
+ *   <li>Executes the handler with simplified argument resolution</li>
+ *   <li>Publishes SagaCommandReplyEvent with success/failure status</li>
+ *   <li>Supports exactly one handler per command for simplified architecture</li>
+ * </ul>
+ *
+ * <p><strong>Handler Method Constraints:</strong>
+ * <ul>
+ *   <li>Handler methods can accept at most one parameter</li>
+ *   <li>The parameter must be of type {@link SagaCommand} (optional)</li>
+ *   <li>Methods with no parameters are also supported</li>
+ * </ul>
+ *
+ * @see SagaCommandHandler
  */
 @Component
 @ConditionalOnBean(SagaMessagePublisher.class)
 @RequiredArgsConstructor
 @Slf4j
-public class SagaCompensationHandlerDispatcher {
+public class SagaCommandDispatcher {
 
   private final SagaMessagePublisher sagaMessagePublisher;
   private final ApplicationContext applicationContext;
 
-  // One compensation handler per command
+  // One handler per command - using ConcurrentHashMap for thread safety
   private final Map<String, CachedHandlerMethod> cachedHandlerMethods = new ConcurrentHashMap<>();
   private volatile boolean initialized = false;
 
   /**
-   * Initializes the compensation handler methods by scanning all beans for
-   * {@link SagaCompensationHandler} annotations. Uses double-checked locking for thread safety.
+   * Initializes the handler methods by scanning all beans for @SagaCommandHandler annotations. Uses
+   * lazy initialization with double-checked locking for thread safety.
    */
   private void initializeHandlers() {
     if (!initialized) {
@@ -59,16 +75,15 @@ public class SagaCompensationHandlerDispatcher {
       Class<?> beanClass = AopUtils.getTargetClass(bean);
 
       for (Method method : beanClass.getDeclaredMethods()) {
-        if (method.isAnnotationPresent(SagaCompensationHandler.class)) {
-          SagaCompensationHandler annotation = method.getAnnotation(
-              SagaCompensationHandler.class);
+        if (method.isAnnotationPresent(SagaCommandHandler.class)) {
+          SagaCommandHandler annotation = method.getAnnotation(SagaCommandHandler.class);
           String sagaCommandName = annotation.command();
 
-          // Check if compensation handler already exists for this command name
+          // Check if handler already exists for this command name
           if (cachedHandlerMethods.containsKey(sagaCommandName)) {
             throw new SagaConfigException(
-                "Multiple compensation handlers found for command: " + sagaCommandName +
-                    ". Only one compensation handler per command is supported.");
+                "Multiple handlers found for command: " + sagaCommandName +
+                    ". Only one handler per command is supported.");
           }
 
           // Validate method parameters and determine if it takes a parameter
@@ -76,7 +91,7 @@ public class SagaCompensationHandlerDispatcher {
           CachedHandlerMethod cachedHandlerMethod = new CachedHandlerMethod(bean, method,
               takesParameter);
           cachedHandlerMethods.put(sagaCommandName, cachedHandlerMethod);
-          log.debug("Registered compensation handler {}.{} for command {}",
+          log.debug("Registered command handler method {}.{} for command: {}",
               beanClass.getSimpleName(), method.getName(), sagaCommandName);
         }
       }
@@ -84,54 +99,52 @@ public class SagaCompensationHandlerDispatcher {
   }
 
   /**
-   * Dispatches a {@link SagaCompensation} to the appropriate compensation handler method and
-   * publishes reply event.
+   * Dispatches a SagaCommandEvent to the appropriate handler method and publishes reply.
    */
-  public void dispatch(SagaCompensation sagaCompensation) {
+  public void dispatch(SagaCommand sagaCommand) {
+    // Ensure handlers are initialized before dispatching
     initializeHandlers();
 
     CachedHandlerMethod cachedHandlerMethod = cachedHandlerMethods.get(
-        sagaCompensation.getSagaCommandName());
+        sagaCommand.getSagaCommandName());
     if (cachedHandlerMethod == null) {
-      log.warn("No compensation handler found for saga command {}",
-          sagaCompensation.getSagaCommandName());
+      log.warn("No cached handler found for saga command {}", sagaCommand.getSagaCommandName());
       return;
     }
 
-    SagaCompensationResult sagaCompensationResult;
+    SagaCommandResult sagaCommandResult;
     try {
-      log.debug("Dispatching saga compensation {} to handler {}",
-          sagaCompensation.getSagaCommandName(),
+      log.debug("Dispatching saga command {} to handler {}", sagaCommand.getSagaCommandName(),
           cachedHandlerMethod.methodSignature);
-      sagaCompensationResult = (SagaCompensationResult) cachedHandlerMethod.invoke(
-          sagaCompensation);
-      if (sagaCompensationResult.isSuccess()) {
-        log.info("Successfully executed saga compensation handler {}",
+      sagaCommandResult = (SagaCommandResult) cachedHandlerMethod.invoke(sagaCommand);
+      if (sagaCommandResult.isSuccess()) {
+        log.info("Successfully executed saga command handler {}",
             cachedHandlerMethod.methodSignature);
       } else {
-        log.error("Failed to execute saga compensation handler {}: {}",
-            cachedHandlerMethod.methodSignature, sagaCompensationResult.getError());
+        log.error("Failed to execute saga command handler {}: {}",
+            cachedHandlerMethod.methodSignature, sagaCommandResult.getError());
       }
     } catch (Exception e) {
       Throwable cause = ErrorUtil.getRootCause(e);
-      sagaCompensationResult = SagaCompensationResult.failure(cause);
-      log.error("Failed to execute saga compensation handler {}: {}",
-          cachedHandlerMethod.methodSignature, sagaCompensationResult.getError(), cause);
+      sagaCommandResult = SagaCommandResult.failure(
+          ErrorUtil.sanitizeErrorMessage(cause.getMessage()));
+      log.error("Failed to execute saga command handler {}: {}",
+          cachedHandlerMethod.methodSignature, sagaCommandResult.getError(), cause);
     }
 
-    // Publish compensation reply
-    SagaCompensationReply reply = SagaCompensationReply.builder()
-        .sagaId(sagaCompensation.getSagaId())
-        .sagaName(sagaCompensation.getSagaName())
-        .sagaCommandName(sagaCompensation.getSagaCommandName())
-        .result(sagaCompensationResult)
+    // Publish command reply
+    SagaCommandReply reply = SagaCommandReply.builder()
+        .sagaId(sagaCommand.getSagaId())
+        .sagaName(sagaCommand.getSagaName())
+        .sagaCommandName(sagaCommand.getSagaCommandName())
+        .sagaCommandResult(sagaCommandResult)
         .build();
     sagaMessagePublisher.publish(reply);
   }
 
   /**
-   * Validates method parameters and returns whether the method takes a parameter. Compensation
-   * handler methods can accept only one optional parameter: {@link SagaCompensation}.
+   * Validates method parameters and returns whether the method takes a parameter. Handler methods
+   * can accept only one optional parameter: {@link SagaCommand}.
    */
   private boolean validateAndCheckParameters(Method method) {
     Parameter[] parameters = method.getParameters();
@@ -141,19 +154,18 @@ public class SagaCompensationHandlerDispatcher {
       return false;
     }
 
-    // Validate that there's only one parameter and it's SagaCompensation
+    // Validate that there's only one parameter and it's SagaCommand
     if (parameters.length > 1) {
       throw new SagaConfigException(
           String.format(
-              "Compensation handler method %s.%s can accept at most one parameter of type SagaCompensation, but found %d parameters",
+              "Handler method %s.%s can accept at most one parameter of type SagaCommand, but found %d parameters",
               method.getDeclaringClass().getSimpleName(), method.getName(), parameters.length));
     }
 
     Parameter parameter = parameters[0];
-    if (parameter.getType() != SagaCompensation.class) {
+    if (parameter.getType() != SagaCommand.class) {
       throw new SagaConfigException(
-          String.format(
-              "Compensation handler method %s.%s parameter must be of type SagaCompensation, but found: %s",
+          String.format("Handler method %s.%s parameter must be of type SagaCommand, but found: %s",
               method.getDeclaringClass().getSimpleName(), method.getName(),
               parameter.getType().getName()));
     }
@@ -162,7 +174,7 @@ public class SagaCompensationHandlerDispatcher {
   }
 
   /**
-   * Cached compensation handler method with simplified parameter handling.
+   * Cached handler method with simplified parameter handling.
    */
   @Getter
   private static class CachedHandlerMethod {
@@ -181,9 +193,9 @@ public class SagaCompensationHandlerDispatcher {
       method.setAccessible(true);
     }
 
-    public Object invoke(SagaCompensation sagaCompensation) throws Exception {
+    public Object invoke(SagaCommand sagaCommand) throws Exception {
       if (takesParameter) {
-        return method.invoke(bean, sagaCompensation);
+        return method.invoke(bean, sagaCommand);
       } else {
         return method.invoke(bean);
       }

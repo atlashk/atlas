@@ -2,6 +2,7 @@
   const datasource = (stack.datasource || '').toLowerCase();
   const kvStore = (stack['kv-store'] || '').toLowerCase();
   const messaging = (stack.messaging || '').toLowerCase();
+  const authServer = (stack['auth-server'] || '').toLowerCase();
   const search = (stack.search || '').toLowerCase();
   const storage = (stack.storage || '').toLowerCase();
   const notificationEmail = (stack.notification.email || '').toLowerCase();
@@ -15,6 +16,7 @@
   const hasRedis = kvStore === 'redis';
   const hasKafka = messaging === 'kafka';
   const hasRabbitmq = messaging === 'rabbitmq';
+  const hasKeycloak = authServer === 'keycloak'
   const hasElasticsearch = search === 'elasticsearch';
   const hasMinio = storage === 'minio';
   const hasLoki = observabilityLoggingStack === 'loki';
@@ -31,6 +33,7 @@
   if (hasRedis) servicesForDevMode.push('redis');
   if (hasKafka) servicesForDevMode.push('kafka');
   if (hasRabbitmq) servicesForDevMode.push('rabbitmq');
+  if (hasKeycloak) servicesForDevMode.push('keycloak');
   if (hasElasticsearch) servicesForDevMode.push('elasticsearch');
   if (hasMinio) servicesForDevMode.push('minio');
   if (hasSmtp4dev) servicesForDevMode.push('smtp4dev');
@@ -241,15 +244,22 @@ show_deployment_summary() {
 show_access_information() {
     echo "Service Access URLs:"
     <% if (hasNginx) { %>
-    echo "  API Gateway:   http://api.atlas.local"
+    echo "  API Gateway: http://api.atlas.local"
     <% } else { %>
-    echo "  API Gateway:   http://localhost:8080"
+    echo "  API Gateway: http://localhost:8080"
+    <% } %>
+    <% if (hasKeycloak) { %>
+    <% if (hasNginx) { %>
+    echo "  Keycloak Admin Console: http://keycloak.atlas.local (atlas/secret123456)"
+    <% } else { %>
+    echo "  Keycloak Admin Console: http://localhost:8443 (atlas/secret123456)"
+    <% } %>
     <% } %>
     <% if (hasSmtp4dev) { %>
     <% if (hasNginx) { %>
-    echo "  SMTP4Dev:      http://smtp4dev.atlas.local"
+    echo "  SMTP4Dev: http://smtp4dev.atlas.local"
     <% } else { %>
-    echo "  SMTP4Dev:      http://localhost:5000"
+    echo "  SMTP4Dev: http://localhost:5000"
     <% } %>
     <% } %>
     <% if (hasMinio) { %>
@@ -259,21 +269,21 @@ show_access_information() {
     echo "  MinIO Console: http://localhost:9001 (atlas/secret123456)"
     <% } %>
     <% } %>
+    <% if (hasZipkin) { %>
+    <% if (hasNginx) { %>
+    echo "  Zipkin: http://zipkin.atlas.local"
+    <% } else { %>
+    echo "  Zipkin: http://localhost:9411"
+    <% } %>
+    <% } %>
     <% if (hasGrafana) { %>
     if [[ "$DEV_MODE" != "true" ]]; then
     <% if (hasNginx) { %>
-    echo "  Grafana:       http://grafana.atlas.local (atlas/secret123456)"
+    echo "  Grafana: http://grafana.atlas.local (atlas/secret123456)"
     <% } else { %>
-    echo "  Grafana:       http://localhost:3000 (atlas/secret123456)"
+    echo "  Grafana: http://localhost:3000 (atlas/secret123456)"
     <% } %>
     fi
-    <% } %>
-    <% if (hasZipkin) { %>
-    <% if (hasNginx) { %>
-    echo "  Zipkin:        http://zipkin.atlas.local"
-    <% } else { %>
-    echo "  Zipkin:        http://localhost:9411"
-    <% } %>
     <% } %>
     echo
 }

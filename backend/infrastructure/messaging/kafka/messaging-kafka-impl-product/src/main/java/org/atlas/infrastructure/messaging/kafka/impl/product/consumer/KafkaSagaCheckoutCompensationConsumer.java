@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.atlas.framework.json.JsonUtil;
-import org.atlas.framework.saga.core.compensation.SagaCompensationHandlerDispatcher;
+import org.atlas.framework.saga.core.compensation.SagaCompensationDispatcher;
 import org.atlas.framework.saga.core.messaging.payload.SagaCompensation;
 import org.atlas.infrastructure.messaging.kafka.core.consumer.BaseKafkaMessageConsumer;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class KafkaSagaCheckoutCompensationConsumer extends BaseKafkaMessageConsumer {
 
-  private final SagaCompensationHandlerDispatcher dispatcher;
+  private final SagaCompensationDispatcher dispatcher;
 
   @KafkaListener(
       topics = "saga.checkout.compensation.product",

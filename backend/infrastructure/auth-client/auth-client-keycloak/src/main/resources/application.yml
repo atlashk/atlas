@@ -1,7 +1,7 @@
 app:
   auth-client:
     keycloak:
-      base-url: ${AUTH_CLIENT_KEYCLOAK_BASE_URL:http://localhost:8443}
-      admin-username: ${AUTH_CLIENT_KEYCLOAK_ADMIN_USERNAME:admin}
-      admin-password: ${AUTH_CLIENT_KEYCLOAK_ADMIN_PASSWORD:admin}
+      base-url: ${KEYCLOAK_BASE_URL:http://localhost:8443}
+      admin-username: ${KEYCLOAK_ADMIN_USERNAME:atlas}
+      admin-password: ${KEYCLOAK_ADMIN_PASSWORD:secret123456}
       realm-name: atlas

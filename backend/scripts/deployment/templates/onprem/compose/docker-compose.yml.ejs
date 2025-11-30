@@ -14,6 +14,7 @@
   const reverseProxy = (stack['reverse-proxy'] || '').toLowerCase();
 
   const hasSpringSecurityJwt = authServer === 'spring-security-jwt';
+  const hasKeycloak = authServer == 'keycloak';
   const hasMysql = datasource === 'mysql';
   const hasPostgres = datasource === 'postgres' || datasource === 'postgresql';
   const hasRedis = kvStore === 'redis';
@@ -150,6 +151,47 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+    networks:
+      - atlas-network
+  <%_ } -%>
+
+  <%_ if (hasKeycloak) { -%>
+  keycloak:
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:26.0.7
+    ports:
+      - "8443:8080"
+    <%_ if (hasMysql) { -%>
+    depends_on:
+      mysql:
+        condition: service_healthy
+    <%_ } else if (hasPostgres) { -%>
+    depends_on:
+      postgres:
+        condition: service_healthy
+    <%_ } -%>
+    environment:
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN:-atlas}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-secret123456}
+      <%_ if (hasMysql) { -%>
+      - KC_DB=mysql
+      - KC_DB_URL=jdbc:mysql://mysql:3306/db_keycloak?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
+      - KC_DB_USERNAME=${MYSQL_USERNAME:-atlas}
+      - KC_DB_PASSWORD=${MYSQL_PASSWORD:-secret123456}
+      <%_ } else if (hasPostgres) { -%>
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://postgres:5432/db_keycloak
+      - KC_DB_USERNAME=${POSTGRES_USERNAME:-atlas}
+      - KC_DB_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
+      <%_ } -%>
+    command:
+      - start-dev
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/realms/master || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     networks:
       - atlas-network
   <%_ } -%>
@@ -773,6 +815,9 @@ services:
       <%_ if (hasSpringSecurityJwt) { -%>
       - auth-server
       <%_ } -%>
+      <%_ if (hasKeycloak) { -%>
+      - keycloak
+      <%_ } -%>
       - user-service
       - product-service
       - order-service
@@ -786,6 +831,9 @@ services:
       <%_ } -%>
       <%_ if (hasSpringSecurityJwt) { -%>
       - JWK_SET_URI=http://auth-server:8091/.well-known/jwks.json
+      <%_ } -%>
+      <%_ if (hasKeycloak) { -%>
+      - ISSUER_URI=http://keycloak:8080/realms/atlas
       <%_ } -%>
       <%_ if (hasZipkin) { -%>
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans

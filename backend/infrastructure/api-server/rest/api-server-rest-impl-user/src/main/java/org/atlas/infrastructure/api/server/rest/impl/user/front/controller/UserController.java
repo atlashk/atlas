@@ -6,9 +6,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.user.entity.User;
 import org.atlas.domain.user.usecase.front.handler.GetProfileUseCaseHandler;
-import org.atlas.domain.user.usecase.front.handler.RegisterUseCaseHandler;
+import org.atlas.domain.user.usecase.front.handler.CreateUserUseCaseHandler;
+import org.atlas.domain.user.usecase.front.model.CreateUserInput;
 import org.atlas.domain.user.usecase.front.model.GetProfileInput;
-import org.atlas.domain.user.usecase.front.model.RegisterInput;
 import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.context.Contexts;
 import org.atlas.infrastructure.api.server.rest.impl.user.front.mapper.UserMapper;
@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserController {
 
-  private final RegisterUseCaseHandler registerUseCaseHandler;
+  private final CreateUserUseCaseHandler createUserUseCaseHandler;
   private final GetProfileUseCaseHandler getProfileUseCaseHandler;
 
   @PostMapping(value = "/register", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -36,8 +36,8 @@ public class UserController {
   public ApiResponseWrapper<Void> register(
       @Parameter(description = "Request object containing the needed information to register a user", required = true)
       @Valid @RequestBody RegisterRequest request) throws Exception {
-    RegisterInput input = UserMapper.INSTANCE.toRegisterInput(request);
-    registerUseCaseHandler.handle(input);
+    CreateUserInput input = UserMapper.INSTANCE.toRegisterInput(request);
+    createUserUseCaseHandler.handle(input);
     return ApiResponseWrapper.success();
   }
 
