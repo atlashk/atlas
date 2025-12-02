@@ -13,7 +13,7 @@ public class JwtExtractorImpl implements JwtExtractor {
   @Override
   public String extractUserId(Jwt jwt) {
     return Optional.ofNullable(jwt.getSubject())
-        .orElseThrow(() -> new IllegalArgumentException(""));
+        .orElseThrow(() -> new IllegalArgumentException("Invalid JWT. Missing subject"));
   }
 
   @Override

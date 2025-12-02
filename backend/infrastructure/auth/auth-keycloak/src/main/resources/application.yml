@@ -1,5 +1,5 @@
 app:
-  auth-client:
+  auth:
     keycloak:
       base-url: ${KEYCLOAK_BASE_URL:http://localhost:8443}
       admin-username: ${KEYCLOAK_ADMIN_USERNAME:atlas}

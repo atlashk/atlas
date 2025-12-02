@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = "app.auth-client.keycloak")
+@ConfigurationProperties(prefix = "app.auth.keycloak")
 @Getter
 @Setter
 public class KeycloakProps {

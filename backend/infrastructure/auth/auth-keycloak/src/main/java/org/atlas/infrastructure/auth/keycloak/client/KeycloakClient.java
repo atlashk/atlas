@@ -16,6 +16,8 @@ import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.MediaType;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -83,16 +85,16 @@ public class KeycloakClient {
   public TokenResponse login(String username, String password) {
     String url = String.format("%s/realms/%s/protocol/openid-connect/token",
         keycloakProps.getBaseUrl(), keycloakProps.getRealmName());
+    MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+    form.add("grant_type", "password");
+    form.add("client_id", keycloakProps.getClientId());
+    form.add("client_secret", keycloakProps.getClientSecret());
+    form.add("username", username);
+    form.add("password", password);
     return restClient.post()
         .uri(url)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-        .body(Map.of(
-            "grant_type", "password",
-            "client_id", keycloakProps.getClientId(),
-            "client_secret", keycloakProps.getClientSecret(),
-            "username", username,
-            "password", password
-        ))
+        .body(form)
         .retrieve()
         .toEntity(TokenResponse.class)
         .getBody();
@@ -101,15 +103,15 @@ public class KeycloakClient {
   public TokenResponse refreshToken(String refreshToken) {
     String url = String.format("%s/realms/%s/protocol/openid-connect/token",
         keycloakProps.getBaseUrl(), keycloakProps.getRealmName());
+    MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+    form.add("grant_type", "refresh_token");
+    form.add("client_id", keycloakProps.getClientId());
+    form.add("client_secret", keycloakProps.getClientSecret());
+    form.add("refresh_token", refreshToken);
     return restClient.post()
         .uri(url)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-        .body(Map.of(
-            "grant_type", "refresh_token",
-            "client_id", keycloakProps.getClientId(),
-            "client_secret", keycloakProps.getClientSecret(),
-            "refresh_token", refreshToken
-        ))
+        .body(form)
         .retrieve()
         .toEntity(TokenResponse.class)
         .getBody();
@@ -118,15 +120,15 @@ public class KeycloakClient {
   public void revokeAccessToken(String accessToken) {
     String url = String.format("%s/realms/%s/protocol/openid-connect/revoke",
         keycloakProps.getBaseUrl(), keycloakProps.getRealmName());
+    MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+    form.add("client_id", keycloakProps.getClientId());
+    form.add("client_secret", keycloakProps.getClientSecret());
+    form.add("token", accessToken);
+    form.add("token_type_hint", "access_token");
     restClient.post()
         .uri(url)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-        .body(Map.of(
-            "client_id", keycloakProps.getClientId(),
-            "client_secret", keycloakProps.getClientSecret(),
-            "token", accessToken,
-            "token_type_hint", "access_token"
-        ))
+        .body(form)
         .retrieve()
         .toBodilessEntity();
   }

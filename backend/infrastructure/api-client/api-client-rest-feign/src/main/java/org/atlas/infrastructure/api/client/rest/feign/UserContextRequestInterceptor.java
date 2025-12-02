@@ -14,10 +14,14 @@ public class UserContextRequestInterceptor implements RequestInterceptor {
   public void apply(RequestTemplate requestTemplate) {
     ContextInfo contextInfo = Contexts.get();
     if (contextInfo != null) {
-      requestTemplate.header(CustomClaim.USER_ID.getHeader(),
-          String.valueOf(contextInfo.getUserId()));
-      requestTemplate.header(CustomClaim.USER_ROLE.getHeader(),
-          contextInfo.getUserRole().name());
+      if (contextInfo.getUserId() != null) {
+        requestTemplate.header(CustomClaim.USER_ID.getHeader(),
+            String.valueOf(contextInfo.getUserId()));
+      }
+      if (contextInfo.getUserRole() != null) {
+        requestTemplate.header(CustomClaim.USER_ROLE.getHeader(),
+            contextInfo.getUserRole().name());
+      }
     }
   }
 }

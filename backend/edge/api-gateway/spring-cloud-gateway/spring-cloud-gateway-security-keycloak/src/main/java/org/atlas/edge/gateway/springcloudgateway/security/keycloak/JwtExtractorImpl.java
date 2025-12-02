@@ -5,12 +5,10 @@ import java.util.List;
 import java.util.Map;
 import org.atlas.domain.user.shared.Role;
 import org.atlas.edge.gateway.springcloudgateway.security.core.JwtExtractor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 @Service
-@ConditionalOnProperty(name = "app.api-gateway.auth-server", havingValue = "keycloak")
 public class JwtExtractorImpl implements JwtExtractor {
 
   @Override

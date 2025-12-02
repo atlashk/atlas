@@ -16,10 +16,14 @@ public class UserContextRequestInterceptor implements ClientHttpRequestIntercept
       ClientHttpRequestExecution execution) throws IOException {
     ContextInfo contextInfo = Contexts.get();
     if (contextInfo != null) {
-      request.getHeaders().add(CustomClaim.USER_ID.getHeader(),
-          String.valueOf(contextInfo.getUserId()));
-      request.getHeaders().add(CustomClaim.USER_ROLE.getHeader(),
-          contextInfo.getUserRole().name());
+      if (contextInfo.getUserId() != null) {
+        request.getHeaders().add(CustomClaim.USER_ID.getHeader(),
+            String.valueOf(contextInfo.getUserId()));
+      }
+      if (contextInfo.getUserRole() != null) {
+        request.getHeaders().add(CustomClaim.USER_ROLE.getHeader(),
+            contextInfo.getUserRole().name());
+      }
     }
     return execution.execute(request, body);
   }
