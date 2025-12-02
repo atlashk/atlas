@@ -32,27 +32,8 @@ dependencies {
     implementation project(':domain.auth')
 
     // Infrastructure
-    switch (rootProject.ext.appStack['api-server']) {
-        case 'rest':
-            implementation project(':infrastructure.api-server.rest.impl.auth')
-            break
-        case 'grpc':
-            implementation project(':infrastructure.api-server.grpc.netdevh.impl.auth')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
-    }
+    implementation project(':infrastructure.api-server.rest.core')
     implementation project(':infrastructure.auth.keycloak')
-    switch (rootProject.ext.appStack['datasource']) {
-        case 'mysql':
-            implementation project(':infrastructure.datasource.mysql.impl.auth')
-            break
-        case 'postgres':
-            implementation project(':infrastructure.datasource.postgres.impl.auth')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
-    }
     switch (rootProject.ext.appStack['discovery-client']) {
         case 'none':
             break
@@ -64,29 +45,6 @@ dependencies {
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['discovery-client']}")
-    }
-    switch (rootProject.ext.appStack['kv-store']) {
-        case 'redis':
-            implementation project(':infrastructure.kv-store.redis')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['kv-store']}")
-    }
-    switch (rootProject.ext.appStack['migration']) {
-        case 'flyway':
-            switch (rootProject.ext.appStack['datasource']) {
-                case 'mysql':
-                    implementation project(':infrastructure.migration.flyway.mysql.impl.auth')
-                    break
-                case 'postgres':
-                    implementation project(':infrastructure.migration.flyway.postgres.impl.auth')
-                    break
-                default:
-                    throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
-            }
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['migration']}")
     }
     implementation project(':infrastructure.observability.actuator')
     switch (rootProject.ext.appStack['observability.logging.framework']) {
@@ -114,17 +72,14 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.tracing']}")
     }
-    switch (rootProject.ext.appStack['persistence']) {
-        case 'jpa':
-            implementation project(':infrastructure.persistence.jpa.impl.auth')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['persistence']}")
-    }
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+
+    // Mapstruct
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 }
 
 dependencyManagement {

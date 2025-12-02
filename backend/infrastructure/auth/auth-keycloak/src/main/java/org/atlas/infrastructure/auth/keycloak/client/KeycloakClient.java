@@ -5,20 +5,19 @@ import java.util.Collections;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.framework.collection.CollectionUtil;
 import org.atlas.framework.collection.MapUtil;
 import org.atlas.infrastructure.auth.keycloak.config.KeycloakProps;
 import org.atlas.infrastructure.auth.keycloak.model.CreateUserRequest;
 import org.atlas.infrastructure.auth.keycloak.model.TokenResponse;
-import org.atlas.infrastructure.api.client.rest.resttemplate.RestTemplateService;
-import org.springframework.http.HttpHeaders;
 import org.keycloak.admin.client.CreatedResponseUtil;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClient;
 
 @Component
 @RequiredArgsConstructor
@@ -27,7 +26,7 @@ public class KeycloakClient {
 
   private final Keycloak keycloak;
   private final KeycloakProps keycloakProps;
-  private final RestTemplateService restTemplateService;
+  private final RestClient restClient;
 
   public void createUser(CreateUserRequest request) {
     Response response = null;
@@ -84,40 +83,51 @@ public class KeycloakClient {
   public TokenResponse login(String username, String password) {
     String url = String.format("%s/realms/%s/protocol/openid-connect/token",
         keycloakProps.getBaseUrl(), keycloakProps.getRealmName());
-    return restTemplateService.doPost(url,
-        Collections.singletonMap(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded"),
-        Map.of(
+    return restClient.post()
+        .uri(url)
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        .body(Map.of(
             "grant_type", "password",
             "client_id", keycloakProps.getClientId(),
             "client_secret", keycloakProps.getClientSecret(),
             "username", username,
             "password", password
-        ), TokenResponse.class);
+        ))
+        .retrieve()
+        .toEntity(TokenResponse.class)
+        .getBody();
   }
 
   public TokenResponse refreshToken(String refreshToken) {
     String url = String.format("%s/realms/%s/protocol/openid-connect/token",
         keycloakProps.getBaseUrl(), keycloakProps.getRealmName());
-    return restTemplateService.doPost(url,
-        Collections.singletonMap(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded"),
-        Map.of(
+    return restClient.post()
+        .uri(url)
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        .body(Map.of(
             "grant_type", "refresh_token",
             "client_id", keycloakProps.getClientId(),
             "client_secret", keycloakProps.getClientSecret(),
             "refresh_token", refreshToken
-        ), TokenResponse.class);
+        ))
+        .retrieve()
+        .toEntity(TokenResponse.class)
+        .getBody();
   }
 
   public void revokeAccessToken(String accessToken) {
     String url = String.format("%s/realms/%s/protocol/openid-connect/revoke",
         keycloakProps.getBaseUrl(), keycloakProps.getRealmName());
-    restTemplateService.doPost(url,
-        Collections.singletonMap(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded"),
-        Map.of(
+    restClient.post()
+        .uri(url)
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        .body(Map.of(
             "client_id", keycloakProps.getClientId(),
             "client_secret", keycloakProps.getClientSecret(),
             "token", accessToken,
             "token_type_hint", "access_token"
-        ), Void.class);
+        ))
+        .retrieve()
+        .toBodilessEntity();
   }
 }

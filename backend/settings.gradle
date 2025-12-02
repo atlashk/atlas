@@ -64,8 +64,6 @@ project(':infrastructure.api-server.grpc.protobuf').projectDir = file('infrastru
 // API server::gRPC::netdevh
 include(':infrastructure.api-server.grpc.netdevh.core')
 project(':infrastructure.api-server.grpc.netdevh.core').projectDir = file('infrastructure/api-server/grpc/netdevh/api-server-grpc-netdevh-core')
-include(':infrastructure.api-server.grpc.netdevh.impl.auth')
-project(':infrastructure.api-server.grpc.netdevh.impl.auth').projectDir = file('infrastructure/api-server/grpc/netdevh/api-server-grpc-netdevh-impl-auth')
 include(':infrastructure.api-server.grpc.netdevh.impl.product')
 project(':infrastructure.api-server.grpc.netdevh.impl.product').projectDir = file('infrastructure/api-server/grpc/netdevh/api-server-grpc-netdevh-impl-product')
 include(':infrastructure.api-server.grpc.netdevh.impl.user')
@@ -92,10 +90,6 @@ project(':infrastructure.api-server.rest.impl.user').projectDir = file('infrastr
 // Auth::Keycloak
 include(':infrastructure.auth.keycloak')
 project(':infrastructure.auth.keycloak').projectDir = file('infrastructure/auth/auth-keycloak')
-
-// Auth::Internal
-include(':infrastructure.auth.internal')
-project(':infrastructure.auth.internal').projectDir = file('infrastructure/auth/auth-internal')
 
 // Datasource
 
@@ -172,8 +166,6 @@ project(':infrastructure.file.pdf.pdfbox.impl.product').projectDir = file('infra
 // Internal API
 
 // Internal API::Auth API
-include(':infrastructure.internal-api.auth.grpc.netdevh')
-project(':infrastructure.internal-api.auth.grpc.netdevh').projectDir = file('infrastructure/internal-api/auth-api/auth-api-grpc-netdevh')
 include(':infrastructure.internal-api.auth.rest.apachehttpclient')
 project(':infrastructure.internal-api.auth.rest.apachehttpclient').projectDir = file('infrastructure/internal-api/auth-api/auth-api-rest-apachehttpclient')
 include(':infrastructure.internal-api.auth.rest.feign')

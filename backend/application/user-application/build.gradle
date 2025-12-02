@@ -34,15 +34,19 @@ dependencies {
             implementation project(':infrastructure.internal-api.product.grpc.netdevh')
             break
         case 'rest-apachehttpclient':
+            implementation project(':infrastructure.internal-api.auth.rest.apachehttpclient')
             implementation project(':infrastructure.internal-api.product.rest.apachehttpclient')
             break
         case 'rest-feign':
+            implementation project(':infrastructure.internal-api.auth.rest.feign')
             implementation project(':infrastructure.internal-api.product.rest.feign')
             break
         case 'rest-restclient':
+            implementation project(':infrastructure.internal-api.auth.rest.restclient')
             implementation project(':infrastructure.internal-api.product.rest.restclient')
             break
         case 'rest-resttemplate':
+            implementation project(':infrastructure.internal-api.auth.rest.resttemplate')
             implementation project(':infrastructure.internal-api.product.rest.resttemplate')
             break
         default:
@@ -57,16 +61,6 @@ dependencies {
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
-    }
-    switch (rootProject.ext.appStack['auth-server']) {
-        case 'spring-security-jwt':
-            implementation project(':infrastructure.auth.internal')
-            break
-        case 'keycloak':
-            implementation project(':infrastructure.auth.keycloak')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['auth-server']}")
     }
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':

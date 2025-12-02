@@ -230,6 +230,7 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=true
       - ELASTIC_PASSWORD=${ELASTICSEARCH_PASSWORD:-secret123456}
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g
     volumes:
       - elasticsearch-data:/usr/share/elasticsearch/data
     healthcheck:

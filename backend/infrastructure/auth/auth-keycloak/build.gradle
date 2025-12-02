@@ -32,15 +32,11 @@ dependencies {
     api 'org.keycloak:keycloak-admin-client:26.0.7'
 
     // REST client
-    implementation project(':infrastructure.api-client.rest.resttemplate')
+    implementation project(':infrastructure.api-client.rest.restclient')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-
-    // Mapstruct
-    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
-    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 }
 
 dependencyManagement {

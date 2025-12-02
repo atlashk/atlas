@@ -4,3 +4,6 @@ server:
 spring:
   application:
     name: auth-server
+
+springdoc:
+  packages-to-scan: org.atlas.infrastructure.api.server.rest.impl.auth

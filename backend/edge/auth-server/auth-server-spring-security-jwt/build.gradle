@@ -30,22 +30,12 @@ dependencies {
 
     // Lib
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-cache'
 
     // Domain
     implementation project(':domain.auth')
 
     // Infrastructure
-    switch (rootProject.ext.appStack['api-server']) {
-        case 'rest':
-            implementation project(':infrastructure.api-server.rest.impl.auth')
-            break
-        case 'grpc':
-            implementation project(':infrastructure.api-server.grpc.netdevh.impl.auth')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
-    }
+    implementation project(':infrastructure.api-server.rest.core')
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
             implementation project(':infrastructure.datasource.mysql.impl.auth')
@@ -128,6 +118,10 @@ dependencies {
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+
+    // Mapstruct
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 }
 
 dependencyManagement {

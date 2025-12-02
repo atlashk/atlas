@@ -30,6 +30,7 @@ public class RestClientAuthApiClient implements AuthApiClient {
         .uri(url)
         .contentType(MediaType.APPLICATION_JSON)
         .body(request)
-        .retrieve();
+        .retrieve()
+        .toBodilessEntity();
   }
 }

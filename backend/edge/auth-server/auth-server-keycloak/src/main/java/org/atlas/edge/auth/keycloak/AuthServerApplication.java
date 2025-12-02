@@ -1,4 +1,4 @@
-package org.atlas.edge.auth.springsecurityjwt;
+package org.atlas.edge.auth.keycloak;
 
 import org.atlas.framework.bootstrap.YamlConfigLoader;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

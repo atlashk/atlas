@@ -12,10 +12,10 @@ public class KeycloakConfig {
   private final KeycloakProps keycloakProps;
 
   @Bean
-  public Keycloak keycloakClient() {
+  public Keycloak keycloak() {
     return Keycloak.getInstance(
         keycloakProps.getBaseUrl(),
-        "master",
+        keycloakProps.getRealmName(),
         keycloakProps.getAdminUsername(),
         keycloakProps.getAdminPassword(),
         "admin-cli");
