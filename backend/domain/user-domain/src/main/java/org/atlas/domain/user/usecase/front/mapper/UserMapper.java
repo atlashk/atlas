@@ -2,7 +2,7 @@ package org.atlas.domain.user.usecase.front.mapper;
 
 import org.atlas.domain.user.entity.User;
 import org.atlas.domain.user.usecase.front.model.CreateUserInput;
-import org.atlas.framework.internalapi.auth.model.CreateUserRequest;
+import org.atlas.framework.auth.model.CreateUserRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;

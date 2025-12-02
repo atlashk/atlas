@@ -3,7 +3,7 @@ package org.atlas.edge.auth.springsecurityjwt.usecase.authentication.handler;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.atlas.domain.auth.usecase.authentication.handler.LogoutUseCase;
-import org.atlas.edge.auth.springsecurityjwt.service.TokenService;
+import org.atlas.edge.auth.springsecurityjwt.core.TokenService;
 import org.atlas.framework.cryptography.HashingUtil;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;

@@ -7,7 +7,7 @@ import org.atlas.domain.auth.repository.UserRepository;
 import org.atlas.domain.auth.usecase.authentication.handler.RefreshTokenUseCase;
 import org.atlas.domain.auth.usecase.authentication.model.RefreshTokenInput;
 import org.atlas.domain.auth.usecase.authentication.model.RefreshTokenOutput;
-import org.atlas.edge.auth.springsecurityjwt.service.TokenService;
+import org.atlas.edge.auth.springsecurityjwt.core.TokenService;
 import org.atlas.edge.auth.springsecurityjwt.core.UserDetailsImpl;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;

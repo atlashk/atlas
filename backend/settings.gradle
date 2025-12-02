@@ -87,15 +87,15 @@ project(':infrastructure.api-server.rest.impl.product').projectDir = file('infra
 include(':infrastructure.api-server.rest.impl.user')
 project(':infrastructure.api-server.rest.impl.user').projectDir = file('infrastructure/api-server/rest/api-server-rest-impl-user')
 
-// Auth client
+// Auth
 
-// Auth client::Spring Security JWT
-include(':infrastructure.auth-client.spring-security-jwt')
-project(':infrastructure.auth-client.spring-security-jwt').projectDir = file('infrastructure/auth-client/auth-client-spring-security-jwt')
+// Auth::Keycloak
+include(':infrastructure.auth.keycloak')
+project(':infrastructure.auth.keycloak').projectDir = file('infrastructure/auth/auth-keycloak')
 
-// Auth client::Keycloak
-include(':infrastructure.auth-client.keycloak')
-project(':infrastructure.auth-client.keycloak').projectDir = file('infrastructure/auth-client/auth-client-keycloak')
+// Auth::Internal
+include(':infrastructure.auth.internal')
+project(':infrastructure.auth.internal').projectDir = file('infrastructure/auth/auth-internal')
 
 // Datasource
 
@@ -453,8 +453,10 @@ include(':edge.api-gateway.spring-cloud-gateway.security.keycloak')
 project(':edge.api-gateway.spring-cloud-gateway.security.keycloak').projectDir = file('edge/api-gateway/spring-cloud-gateway/spring-cloud-gateway-security-keycloak')
 
 // Auth Server
-include(':edge.auth-server.auth-server-spring-security-jwt')
-project(':edge.auth-server.auth-server-spring-security-jwt').projectDir = file('edge/auth-server/auth-server-spring-security-jwt')
+include(':edge.auth-server.keycloak')
+project(':edge.auth-server.keycloak').projectDir = file('edge/auth-server/auth-server-keycloak')
+include(':edge.auth-server.spring-security-jwt')
+project(':edge.auth-server.spring-security-jwt').projectDir = file('edge/auth-server/auth-server-spring-security-jwt')
 
 // Config Server
 include(':edge.config-server.spring-cloud-config')

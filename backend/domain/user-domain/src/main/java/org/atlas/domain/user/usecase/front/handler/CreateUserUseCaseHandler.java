@@ -9,13 +9,13 @@ import org.atlas.domain.user.repository.UserRepository;
 import org.atlas.domain.user.shared.Role;
 import org.atlas.domain.user.usecase.front.mapper.UserMapper;
 import org.atlas.domain.user.usecase.front.model.CreateUserInput;
+import org.atlas.framework.auth.model.CreateUserRequest;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.event.DomainEventType;
 import org.atlas.framework.domain.event.contract.user.UserEvent;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.domain.usecase.UseCaseHandler;
-import org.atlas.framework.internalapi.auth.AuthApiClient;
-import org.atlas.framework.internalapi.auth.model.CreateUserRequest;
+import org.atlas.framework.auth.AuthService;
 
 @UseCaseHandler
 @RequiredArgsConstructor
@@ -23,13 +23,13 @@ import org.atlas.framework.internalapi.auth.model.CreateUserRequest;
 public class CreateUserUseCaseHandler {
 
   private final UserRepository userRepository;
-  private final AuthApiClient authApiClient;
+  private final AuthService authService;
   private final UserEventMessagePublisher userEventMessagePublisher;
 
   public Void handle(CreateUserInput input) throws Exception {
     checkValidity(input);
     User user = createUser(input);
-    syncUser(user);
+    syncUser(user, input.getPassword());
     publishEvent(user);
     return null;
   }
@@ -53,9 +53,10 @@ public class CreateUserUseCaseHandler {
     return user;
   }
 
-  private void syncUser(User user) {
+  private void syncUser(User user, String password) {
     CreateUserRequest request = UserMapper.INSTANCE.toCreateUserRequest(user);
-    authApiClient.createUser(request);
+    request.setPassword(password);
+    authService.createUser(request);
     log.info("Created auth user: userId={}, username={}", user.getId(), user.getUsername());
   }
 

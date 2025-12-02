@@ -1,0 +1,16 @@
+server:
+  port: 8091
+
+spring:
+  application:
+    name: auth-server
+
+app:
+  auth-client:
+    keycloak:
+      base-url: ${KEYCLOAK_BASE_URL:http://localhost:8080}
+      realm-name: ${KEYCLOAK_REALM_NAME:atlas}
+      admin-username: ${KEYCLOAK_ADMIN_USERNAME:atlas}
+      admin-password: ${KEYCLOAK_ADMIN_PASSWORD:secret123456}
+      client-id: ${KEYCLOAK_CLIENT_ID:atlas}
+      client-secret: ${KEYCLOAK_CLIENT_SECRET:secret123456}
