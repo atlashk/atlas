@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/internal/users")
+@RequestMapping("api/internal/users")
 @Validated
 @RequiredArgsConstructor
 public class UserController {
@@ -24,7 +24,7 @@ public class UserController {
 
   @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "User creation")
-  public ApiResponseWrapper<Void> register(
+  public ApiResponseWrapper<Void> createUser(
       @Parameter(description = "Request object containing the needed information to create a user", required = true)
       @Valid @RequestBody CreateUserRequest request) throws Exception {
     userService.createUser(request);

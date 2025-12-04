@@ -6,6 +6,7 @@ import org.atlas.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.framework.domain.error.DomainError;
 import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.framework.i18n.I18nService;
+import org.atlas.framework.util.StringUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -15,7 +16,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice(basePackages = "org.atlas.infrastructure.api.server.rest.impl")
+@RestControllerAdvice(basePackages = {
+    "org.atlas.infrastructure.api.server.rest.impl",
+    "org.atlas.edge.auth"
+})
 @RequiredArgsConstructor
 @Slf4j
 public class RestExceptionHandler {
@@ -24,8 +28,8 @@ public class RestExceptionHandler {
 
   @ExceptionHandler(DomainException.class)
   public ResponseEntity<ApiResponseWrapper<Void>> handle(DomainException e) {
-    String errorMessage = e.getMessage() != null ? e.getMessage() :
-        i18nService.getMessage(e.getMessage(), "Unknown error");
+    String errorMessage = StringUtil.isNotBlank(e.getMessage()) ? e.getMessage() :
+        i18nService.getMessage(e.getMessageCode(), "Unknown error");
     ApiResponseWrapper<Void> body = ApiResponseWrapper.error(e.getErrorCode(), errorMessage);
     int status = e.getErrorCode() < 1000 ? e.getErrorCode() :
         HttpStatus.INTERNAL_SERVER_ERROR.value();

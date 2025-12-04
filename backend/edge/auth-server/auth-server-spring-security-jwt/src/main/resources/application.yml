@@ -6,4 +6,4 @@ spring:
     name: auth-server
 
 springdoc:
-  packages-to-scan: org.atlas.infrastructure.api.server.rest.impl.auth
+  packages-to-scan: org.atlas.edge.auth.springsecurityjwt.api

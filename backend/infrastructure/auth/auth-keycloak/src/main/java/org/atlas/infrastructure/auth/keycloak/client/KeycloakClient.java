@@ -2,10 +2,11 @@ package org.atlas.infrastructure.auth.keycloak.client;
 
 import jakarta.ws.rs.core.Response;
 import java.util.Collections;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.framework.collection.MapUtil;
+import org.atlas.framework.domain.error.DomainError;
+import org.atlas.framework.domain.exception.DomainException;
 import org.atlas.infrastructure.auth.keycloak.config.KeycloakProps;
 import org.atlas.infrastructure.auth.keycloak.model.CreateUserRequest;
 import org.atlas.infrastructure.auth.keycloak.model.TokenResponse;
@@ -15,10 +16,11 @@ import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 @Component
@@ -96,8 +98,10 @@ public class KeycloakClient {
         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
         .body(form)
         .retrieve()
-        .toEntity(TokenResponse.class)
-        .getBody();
+        .onStatus(HttpStatusCode::isError, (request, response) -> {
+          throw new DomainException(DomainError.UNAUTHORIZED);
+        })
+        .body(TokenResponse.class);
   }
 
   public TokenResponse refreshToken(String refreshToken) {

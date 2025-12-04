@@ -72,8 +72,6 @@ project(':infrastructure.api-server.grpc.netdevh.impl.user').projectDir = file('
 // API server::REST
 include(':infrastructure.api-server.rest.core')
 project(':infrastructure.api-server.rest.core').projectDir = file('infrastructure/api-server/rest/api-server-rest-core')
-include(':infrastructure.api-server.rest.impl.auth')
-project(':infrastructure.api-server.rest.impl.auth').projectDir = file('infrastructure/api-server/rest/api-server-rest-impl-auth')
 include(':infrastructure.api-server.rest.impl.notification')
 project(':infrastructure.api-server.rest.impl.notification').projectDir = file('infrastructure/api-server/rest/api-server-rest-impl-notification')
 include(':infrastructure.api-server.rest.impl.order')
