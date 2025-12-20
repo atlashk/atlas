@@ -28,8 +28,10 @@ public class RestExceptionHandler {
 
   @ExceptionHandler(DomainException.class)
   public ResponseEntity<ApiResponseWrapper<Void>> handle(DomainException e) {
-    String errorMessage = StringUtil.isNotBlank(e.getMessage()) ? e.getMessage() :
-        i18nService.getMessage(e.getMessageCode(), "Unknown error");
+    // Extract error message
+    String i18nMessage = i18nService.getMessage(e.getMessage());
+    String errorMessage = StringUtil.isNotBlank(i18nMessage) ? i18nMessage : e.getMessage();
+
     ApiResponseWrapper<Void> body = ApiResponseWrapper.error(e.getErrorCode(), errorMessage);
     int status = e.getErrorCode() < 1000 ? e.getErrorCode() :
         HttpStatus.INTERNAL_SERVER_ERROR.value();

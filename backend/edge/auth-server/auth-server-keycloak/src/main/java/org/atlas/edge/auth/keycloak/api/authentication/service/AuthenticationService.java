@@ -5,7 +5,7 @@ import org.atlas.edge.auth.keycloak.api.authentication.model.LoginRequest;
 import org.atlas.edge.auth.keycloak.api.authentication.model.LoginResponse;
 import org.atlas.edge.auth.keycloak.api.authentication.model.RefreshTokenRequest;
 import org.atlas.edge.auth.keycloak.api.authentication.model.RefreshTokenResponse;
-import org.atlas.infrastructure.auth.keycloak.client.KeycloakClient;
+import org.atlas.infrastructure.auth.keycloak.client.AuthenticationClient;
 import org.atlas.infrastructure.auth.keycloak.model.TokenResponse;
 import org.springframework.stereotype.Service;
 
@@ -13,19 +13,22 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthenticationService {
 
-  private final KeycloakClient keycloakClient;
+  private final AuthenticationClient authenticationClient;
 
   public LoginResponse login(LoginRequest request) throws Exception {
-    TokenResponse res = keycloakClient.login(request.getUsername(), request.getPassword());
-    return new LoginResponse(res.getAccessToken(), res.getRefreshToken());
+    TokenResponse keycloakResponse = authenticationClient.login(
+        request.getUsername(), request.getPassword());
+    return new LoginResponse(keycloakResponse.getAccessToken(), keycloakResponse.getRefreshToken());
   }
 
   public RefreshTokenResponse refreshToken(RefreshTokenRequest request) throws Exception {
-    TokenResponse res = keycloakClient.refreshToken(request.getRefreshToken());
-    return new RefreshTokenResponse(res.getAccessToken(), res.getRefreshToken());
+    TokenResponse keycloakResponse = authenticationClient.refreshToken(
+        request.getRefreshToken());
+    return new RefreshTokenResponse(keycloakResponse.getAccessToken(),
+        keycloakResponse.getRefreshToken());
   }
 
   public void logout(String accessToken) throws Exception {
-    keycloakClient.revokeAccessToken(accessToken);
+    authenticationClient.revokeAccessToken(accessToken);
   }
 }

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.product.entity.Product;
 import org.atlas.domain.product.event.mapper.ProductEventMapper;
-import org.atlas.domain.product.infrastructure.search.SearchService;
+import org.atlas.domain.product.infrastructure.fulltextsearch.FullTextSearchService;
 import org.atlas.framework.cache.ApplicationCache;
 import org.atlas.framework.cache.CacheService;
 import org.atlas.framework.domain.event.DomainEventType;
@@ -17,14 +17,14 @@ import org.atlas.framework.concurrent.AsyncUtil;
 @Slf4j
 public class ProductUpdatedHandler {
 
-  private final SearchService searchService;
+  private final FullTextSearchService fullTextSearchService;
   private final CacheService cacheService;
 
   public void handle(ProductEvent event) {
     Product product = ProductEventMapper.INSTANCE.toProduct(event);
 
     AsyncUtil.executeTasks(
-        updateProductSearchDocument(product),
+        updateFullTextSearchDocument(product),
         evictProductCache(product)
     ).whenComplete((result, error) -> {
       if (error == null) {
@@ -33,21 +33,21 @@ public class ProductUpdatedHandler {
     });
   }
 
-  private AsyncUtil.AsyncTask updateProductSearchDocument(Product product) {
+  private AsyncUtil.AsyncTask updateFullTextSearchDocument(Product product) {
     return new AsyncUtil.AsyncTask() {
       @Override
       public void run() {
-        searchService.save(product);
+        fullTextSearchService.save(product);
       }
 
       @Override
       public void onSuccess() {
-        log.info("Updated product search document: productId={}", product.getId());
+        log.info("Updated full-text search document: productId={}", product.getId());
       }
 
       @Override
       public void onError(Throwable e) {
-        log.error("Failed to update product search document: productId={}, error={}",
+        log.error("Failed to update full-text search document: productId={}, error={}",
             product.getId(), e.getMessage(), e);
       }
     };

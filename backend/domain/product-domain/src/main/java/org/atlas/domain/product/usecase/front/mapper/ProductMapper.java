@@ -1,6 +1,6 @@
 package org.atlas.domain.product.usecase.front.mapper;
 
-import org.atlas.domain.product.infrastructure.search.SearchProductCriteria;
+import org.atlas.domain.product.infrastructure.fulltextsearch.SearchProductCriteria;
 import org.atlas.domain.product.repository.criteria.FindProductCriteria;
 import org.atlas.domain.product.usecase.front.model.SearchProductInput;
 import org.mapstruct.Mapper;

@@ -13,4 +13,5 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public @interface StartupHook {
 
+  int order() default 0;
 }

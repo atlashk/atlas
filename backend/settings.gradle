@@ -161,6 +161,14 @@ project(':infrastructure.file.pdf.pdfbox.core').projectDir = file('infrastructur
 include(':infrastructure.file.pdf.pdfbox.impl.product')
 project(':infrastructure.file.pdf.pdfbox.impl.product').projectDir = file('infrastructure/file/pdf/pdfbox/pdf-pdfbox-impl-product')
 
+// Full-text Search
+
+// Full-text Search::Elasticsearch
+include(':infrastructure.full-text-search.elasticsearch.core')
+project(':infrastructure.full-text-search.elasticsearch.core').projectDir = file('infrastructure/full-text-search/elasticsearch/full-text-search-elasticsearch-core')
+include(':infrastructure.full-text-search.elasticsearch.impl.product')
+project(':infrastructure.full-text-search.elasticsearch.impl.product').projectDir = file('infrastructure/full-text-search/elasticsearch/full-text-search-elasticsearch-impl-product')
+
 // Internal API
 
 // Internal API::Auth API
@@ -382,14 +390,6 @@ include(':infrastructure.scheduler.quartz.jobstore.postgres')
 project(':infrastructure.scheduler.quartz.jobstore.postgres').projectDir = file('infrastructure/scheduler/quartz/scheduler-quartz-jobstore-postgres')
 include(':infrastructure.scheduler.quartz.impl.outbox')
 project(':infrastructure.scheduler.quartz.impl.outbox').projectDir = file('infrastructure/scheduler/quartz/scheduler-quartz-impl-outbox')
-
-// Search
-
-// Search::Elasticsearch
-include(':infrastructure.search.elasticsearch.core')
-project(':infrastructure.search.elasticsearch.core').projectDir = file('infrastructure/search/elasticsearch/search-elasticsearch-core')
-include(':infrastructure.search.elasticsearch.impl.product')
-project(':infrastructure.search.elasticsearch.impl.product').projectDir = file('infrastructure/search/elasticsearch/search-elasticsearch-impl-product')
 
 // Sequence generator
 include(':infrastructure.sequence-generator')

@@ -2,30 +2,25 @@ package org.atlas.edge.auth.keycloak.api.internal.service;
 
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.atlas.edge.auth.keycloak.api.internal.mapper.UserMapper;
 import org.atlas.edge.auth.keycloak.api.internal.model.CreateUserRequest;
-import org.atlas.infrastructure.auth.keycloak.client.KeycloakClient;
+import org.atlas.infrastructure.auth.keycloak.client.UserClient;
+import org.atlas.infrastructure.auth.keycloak.constant.Attributes;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class UserService {
 
-  private final KeycloakClient keycloakClient;
+  private final UserClient userClient;
 
   public void createUser(CreateUserRequest request) {
-    org.atlas.infrastructure.auth.keycloak.model.CreateUserRequest keycloakRequest = org.atlas.infrastructure.auth.keycloak.model.CreateUserRequest.builder()
-        .username(request.getUsername())
-        .password(request.getPassword())
-        .firstName(request.getFirstName())
-        .lastName(request.getLastName())
-        .email(request.getEmail())
-        .build();
+    org.atlas.infrastructure.auth.keycloak.model.CreateUserRequest keycloakRequest =
+        UserMapper.INSTANCE.toKeycloakCreateUserRequest(request);
     keycloakRequest.setAttributes(Map.of(
-        "userId", String.valueOf(request.getUserId()),
-        "phoneNumber", request.getPhoneNumber()
+        Attributes.USER_ID, String.valueOf(request.getUserId()),
+        Attributes.PHONE_NUMBER, request.getPhoneNumber()
     ));
-    keycloakClient.createUser(keycloakRequest);
+    userClient.createUser(keycloakRequest);
   }
 }

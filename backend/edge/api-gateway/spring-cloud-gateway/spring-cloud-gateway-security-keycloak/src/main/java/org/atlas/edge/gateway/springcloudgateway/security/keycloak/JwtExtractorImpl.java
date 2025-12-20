@@ -13,7 +13,7 @@ public class JwtExtractorImpl implements JwtExtractor {
 
   @Override
   public String extractUserId(Jwt jwt) {
-    return jwt.getSubject();
+    return jwt.getClaim("user_id").toString();
   }
 
   @Override
@@ -23,8 +23,8 @@ public class JwtExtractorImpl implements JwtExtractor {
         realmAccess != null && realmAccess.get("roles") instanceof List
             ? (List<String>) realmAccess.get("roles")
             : Collections.emptyList();
-    for (String r : roles) {
-      if ("ADMIN".equalsIgnoreCase(r)) {
+    for (String role : roles) {
+      if (role.equalsIgnoreCase(Role.ADMIN.name())) {
         return Role.ADMIN;
       }
     }

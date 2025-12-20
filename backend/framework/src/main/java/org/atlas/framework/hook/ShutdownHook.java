@@ -12,4 +12,5 @@ import org.springframework.stereotype.Component;
 @ShutdownHook
 public @interface ShutdownHook {
 
+  int order() default 0;
 }

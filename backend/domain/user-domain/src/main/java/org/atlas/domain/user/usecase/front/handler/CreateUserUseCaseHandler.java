@@ -48,7 +48,6 @@ public class CreateUserUseCaseHandler {
 
   private User createUser(CreateUserInput input) {
     User user = UserMapper.INSTANCE.toUser(input);
-    user.setRole(Role.USER);
     userRepository.insert(user);
     return user;
   }

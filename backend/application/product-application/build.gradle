@@ -183,14 +183,14 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['scheduler']}")
     }
-    switch (rootProject.ext.appStack['search']) {
-        case 'database':
+    switch (rootProject.ext.appStack['full-text-search']) {
+        case 'none':
             break
         case 'elasticsearch':
-            implementation project(':infrastructure.search.elasticsearch.impl.product')
+            implementation project(':infrastructure.full-text-search.elasticsearch.impl.product')
             break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['search']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['full-text-search']}")
     }
     switch (rootProject.ext.appStack['storage']) {
         case 'filesystem':

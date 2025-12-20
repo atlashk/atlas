@@ -4,8 +4,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.domain.product.entity.Product;
-import org.atlas.domain.product.infrastructure.search.SearchIndex;
-import org.atlas.domain.product.infrastructure.search.SearchService;
+import org.atlas.domain.product.infrastructure.fulltextsearch.FullTextSearchService;
+import org.atlas.domain.product.infrastructure.fulltextsearch.SearchIndex;
 import org.atlas.domain.product.repository.ProductRepository;
 import org.atlas.domain.product.repository.criteria.FindProductCriteria;
 import org.atlas.framework.hook.StartupHook;
@@ -14,32 +14,38 @@ import org.atlas.framework.paging.PagingRequest;
 import org.atlas.framework.paging.PagingResult;
 import org.atlas.framework.util.PagingUtil;
 import org.atlas.framework.util.SleepUtil;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 
 @StartupHook
-@ConditionalOnBean(SearchService.class)
+@ConditionalOnBean(FullTextSearchService.class)
 @RequiredArgsConstructor
 @Slf4j
 public class ProductDataInitializer {
 
-  private final SearchService searchService;
+  private final ObjectProvider<FullTextSearchService> fullTextSearchServiceProvider;
   private final ProductRepository productRepository;
 
   private static final int BATCH_SIZE = 100;
 
   public void handle() {
-    synchronizeProductData();
+    FullTextSearchService fullTextSearchService = fullTextSearchServiceProvider.getIfAvailable();
+    if (fullTextSearchService != null) {
+      synchronizeFullTextSearchData();
+    }
   }
 
-  private void synchronizeProductData() {
+  private void synchronizeFullTextSearchData() {
+    FullTextSearchService fullTextSearchService = fullTextSearchServiceProvider.getObject();
+
     // Create index if not exist
-    boolean createdIndex = searchService.createIndex(SearchIndex.PRODUCT);
+    boolean createdIndex = fullTextSearchService.createIndex(SearchIndex.PRODUCT);
     if (!createdIndex) {
-      log.info("Index of productPayload has been created");
+      log.info("Index of product has been created");
     }
 
     // Count documents to determine if synchronization is needed
-    long documentCount = searchService.countDocuments(SearchIndex.PRODUCT);
+    long documentCount = fullTextSearchService.countDocuments(SearchIndex.PRODUCT);
     if (documentCount > 0) {
       log.info("Product data has been already synchronized");
       return;
@@ -81,7 +87,7 @@ public class ProductDataInitializer {
         }
 
         // Synchronize batch to Elasticsearch
-        searchService.saveAll(products);
+        fullTextSearchService.saveAll(products);
         synchronizedCount += products.size();
 
         batchStopWatch.stop();

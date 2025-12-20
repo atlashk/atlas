@@ -22,7 +22,7 @@ public class UserController {
 
   private final UserService userService;
 
-  @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "User creation")
   public ApiResponseWrapper<Void> createUser(
       @Parameter(description = "Request object containing the needed information to create a user", required = true)

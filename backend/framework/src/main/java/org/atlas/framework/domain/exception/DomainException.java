@@ -9,17 +9,15 @@ import org.atlas.framework.domain.error.DomainError;
 public class DomainException extends RuntimeException {
 
   private int errorCode;
-  private String messageCode;
 
   public DomainException(DomainError error) {
+    super(error.getMessageCode());
     this.errorCode = error.getErrorCode();
-    this.messageCode = error.getMessageCode();
   }
 
   public DomainException(DomainError error, Throwable cause) {
-    super(cause);
+    super(error.getMessageCode(), cause);
     this.errorCode = error.getErrorCode();
-    this.messageCode = error.getMessageCode();
   }
 
   public DomainException(DomainError error, String errorMessage) {

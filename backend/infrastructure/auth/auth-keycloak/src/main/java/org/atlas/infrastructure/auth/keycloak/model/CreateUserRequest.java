@@ -21,5 +21,6 @@ public class CreateUserRequest {
   private String lastName;
   private String email;
   private Role role;
+  // User profile attributes
   private Map<String, String> attributes;
 }

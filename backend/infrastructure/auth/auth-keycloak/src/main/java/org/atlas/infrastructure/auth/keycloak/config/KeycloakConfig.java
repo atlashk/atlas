@@ -15,9 +15,9 @@ public class KeycloakConfig {
   public Keycloak keycloak() {
     return Keycloak.getInstance(
         keycloakProps.getBaseUrl(),
-        keycloakProps.getRealmName(),
+        keycloakProps.getAdminRealm(),
         keycloakProps.getAdminUsername(),
         keycloakProps.getAdminPassword(),
-        "admin-cli");
+        keycloakProps.getAdminClientId());
   }
 }
