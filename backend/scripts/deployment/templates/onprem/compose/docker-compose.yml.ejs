@@ -14,7 +14,7 @@
   const reverseProxy = (stack['reverse-proxy'] || '').toLowerCase();
 
   const hasSpringSecurityJwt = authServer === 'spring-security-jwt';
-  const hasKeycloak = authServer == 'keycloak';
+  const hasKeycloak = authServer === 'keycloak';
   const hasMysql = datasource === 'mysql';
   const hasPostgres = datasource === 'postgres' || datasource === 'postgresql';
   const hasRedis = kvStore === 'redis';
@@ -831,10 +831,10 @@ services:
       - REDIS_PORT=6379
       <%_ } -%>
       <%_ if (hasSpringSecurityJwt) { -%>
-      - JWK_SET_URI=http://auth-server:8091/.well-known/jwks.json
+      - AUTH_SERVER_URI=http://auth-server:8091
       <%_ } -%>
       <%_ if (hasKeycloak) { -%>
-      - ISSUER_URI=http://keycloak:8080/realms/atlas
+      - KEYCLOAK_BASE_URL=http://keycloak:8443
       <%_ } -%>
       <%_ if (hasZipkin) { -%>
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans

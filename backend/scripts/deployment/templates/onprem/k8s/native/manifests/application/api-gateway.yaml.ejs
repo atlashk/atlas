@@ -5,6 +5,7 @@
   const observabilityTracing = (stack.observability.tracing || '').toLowerCase();
 
   const hasSpringSecurityJwt = authServer === 'spring-security-jwt';
+  const hasKeycloak = authServer === 'keycloak';
   const hasRedis = kvStore === 'redis';
   const hasLoki = observabilityLoggingStack === 'loki';
   const hasZipkin = observabilityTracing === 'zipkin';
@@ -44,8 +45,12 @@ spec:
               value: "6379"
             <% } %>
             <% if (hasSpringSecurityJwt) { %>
-            - name: JWK_SET_URI
-              value: "http://auth-server:8091/.well-known/jwks.json"
+            - name: AUTH_SERVER_URI
+              value: "http://auth-server:8091"
+            <% } %>
+            <% if (hasKeycloak) { %>
+              - name: KEYCLOAK_BASE_URL
+              value: "http://keycloak:8443"
             <% } %>
             <% if (hasZipkin) { %>
             - name: ZIPKIN_ENDPOINT
