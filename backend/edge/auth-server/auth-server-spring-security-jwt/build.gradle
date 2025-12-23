@@ -38,10 +38,10 @@ dependencies {
     implementation project(':infrastructure.api-server.rest.core')
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
-            implementation project(':infrastructure.datasource.mysql.impl.auth')
+            implementation project(':infrastructure.datasource.mysql.adapter.auth')
             break
         case 'postgres':
-            implementation project(':infrastructure.datasource.postgres.impl.auth')
+            implementation project(':infrastructure.datasource.postgres.adapter.auth')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
@@ -69,10 +69,10 @@ dependencies {
         case 'flyway':
             switch (rootProject.ext.appStack['datasource']) {
                 case 'mysql':
-                    implementation project(':infrastructure.migration.flyway.mysql.impl.auth')
+                    implementation project(':infrastructure.migration.flyway.mysql.adapter.auth')
                     break
                 case 'postgres':
-                    implementation project(':infrastructure.migration.flyway.postgres.impl.auth')
+                    implementation project(':infrastructure.migration.flyway.postgres.adapter.auth')
                     break
                 default:
                     throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
@@ -109,7 +109,7 @@ dependencies {
     }
     switch (rootProject.ext.appStack['persistence']) {
         case 'jpa':
-            implementation project(':infrastructure.persistence.jpa.impl.auth')
+            implementation project(':infrastructure.persistence.jpa.adapter.auth')
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['persistence']}")

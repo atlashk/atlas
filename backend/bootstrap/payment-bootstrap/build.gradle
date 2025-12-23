@@ -1,0 +1,162 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version "${springBootPluginVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagementPluginVersion}"
+    id 'idea'
+}
+
+group = 'org.atlas'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Application (included Domain)
+    implementation project(':application.payment')
+
+    // Infrastructure
+    switch (rootProject.ext.appStack['api-server']) {
+        case 'rest':
+            implementation project(':infrastructure.api-server.rest.adapter.payment')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
+    }
+    switch (rootProject.ext.appStack['datasource']) {
+        case 'mysql':
+            implementation project(':infrastructure.datasource.mysql.adapter.payment')
+            break
+        case 'postgres':
+            implementation project(':infrastructure.datasource.postgres.adapter.payment')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
+    }
+    switch (rootProject.ext.appStack['discovery-client']) {
+        case 'none':
+            break
+        case 'eureka':
+            implementation project(':infrastructure.discovery-client.eureka')
+            break
+        case 'kubernetes':
+            implementation project(':infrastructure.discovery-client.kubernetes')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['discovery-client']}")
+    }
+    switch (rootProject.ext.appStack['kv-store']) {
+        case 'redis':
+            implementation project(':infrastructure.kv-store.redis')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['kv-store']}")
+    }
+    switch (rootProject.ext.appStack['messaging']) {
+        case 'kafka':
+            implementation project(':infrastructure.messaging.kafka.adapter.payment')
+            break
+        case 'rabbitmq':
+            implementation project(':infrastructure.messaging.rabbitmq.adapter.payment')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['messaging']}")
+    }
+    switch (rootProject.ext.appStack['migration']) {
+        case 'flyway':
+            switch (rootProject.ext.appStack['datasource']) {
+                case 'mysql':
+                    implementation project(':infrastructure.migration.flyway.mysql.adapter.payment')
+                    implementation project(':infrastructure.migration.flyway.mysql.adapter.outbox')
+                    break
+                case 'postgres':
+                    implementation project(':infrastructure.migration.flyway.postgres.adapter.payment')
+                    implementation project(':infrastructure.migration.flyway.postgres.adapter.outbox')
+                    break
+                default:
+                    throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
+            }
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['migration']}")
+    }
+    implementation project(':infrastructure.observability.actuator')
+    switch (rootProject.ext.appStack['observability.logging.framework']) {
+        case 'logback':
+            implementation project(':infrastructure.observability.logging.logback')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.logging.framework']}")
+    }
+    switch (rootProject.ext.appStack['observability.metrics']) {
+        case 'none':
+            break
+        case 'prometheus':
+            implementation project(':infrastructure.observability.metrics.prometheus')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.metrics']}")
+    }
+    switch (rootProject.ext.appStack['observability.tracing']) {
+        case 'none':
+            break
+        case 'zipkin':
+            implementation project(':infrastructure.observability.tracing.zipkin')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['observability.tracing']}")
+    }
+    implementation project(':infrastructure.payment.parent')
+    switch (rootProject.ext.appStack['persistence']) {
+        case 'jpa':
+            implementation project(':infrastructure.persistence.jpa.adapter.payment')
+            implementation project(':infrastructure.persistence.jpa.adapter.outbox')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['persistence']}")
+    }
+    switch (rootProject.ext.appStack['scheduler']) {
+        case 'spring':
+            implementation project(':infrastructure.scheduler.spring.adapter.outbox')
+            break
+        case 'quartz':
+            implementation project(':infrastructure.scheduler.quartz.adapter.outbox')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['scheduler']}")
+    }
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}

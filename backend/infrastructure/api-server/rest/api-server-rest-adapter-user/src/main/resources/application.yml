@@ -1,0 +1,2 @@
+springdoc:
+  packages-to-scan: org.atlas.infrastructure.api.server.rest.adapter.user
