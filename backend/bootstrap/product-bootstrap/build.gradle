@@ -29,34 +29,9 @@ dependencies {
     implementation project(':application.product')
 
     // Infrastructure
-    switch (rootProject.ext.appStack['api-client']) {
-        case 'grpc-netdevh':
-            implementation project(':infrastructure.internal-api.product.grpc.netdevh')
-            break
-        case 'rest-apachehttpclient':
-            implementation project(':infrastructure.internal-api.product.rest.apachehttpclient')
-            break
-        case 'rest-feign':
-            implementation project(':infrastructure.internal-api.product.rest.feign')
-            break
-        case 'rest-restclient':
-            implementation project(':infrastructure.internal-api.product.rest.restclient')
-            break
-        case 'rest-resttemplate':
-            implementation project(':infrastructure.internal-api.product.rest.resttemplate')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-client']}")
-    }
-    switch (rootProject.ext.appStack['api-server']) {
-        case 'rest':
-            implementation project(':infrastructure.api-server.rest.adapter.product')
-            break
-        case 'grpc':
-            implementation project(':infrastructure.api-server.grpc.netdevh.adapter.product')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
+    implementation project(':infrastructure.api-server.rest.adapter.product')
+    if (rootProject.ext.appStack['internal-api'] == 'grpc') {
+        implementation project(':infrastructure.api-server.grpc.adapter.product')
     }
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':

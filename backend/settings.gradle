@@ -58,9 +58,9 @@ project(':application.user').projectDir = file('application/user-application')
 // Infrastructure
 // =================================================================================================
 
-// API client
-include(':infrastructure.api-client.grpc.netdevh')
-project(':infrastructure.api-client.grpc.netdevh').projectDir = file('infrastructure/api-client/api-client-grpc-netdevh')
+// API Client
+include(':infrastructure.api-client.grpc')
+project(':infrastructure.api-client.grpc').projectDir = file('infrastructure/api-client/api-client-grpc')
 include(':infrastructure.api-client.rest.apachehttpclient')
 project(':infrastructure.api-client.rest.apachehttpclient').projectDir = file('infrastructure/api-client/api-client-rest-apachehttpclient')
 include(':infrastructure.api-client.rest.feign')
@@ -72,23 +72,19 @@ project(':infrastructure.api-client.rest.restclient').projectDir = file('infrast
 include(':infrastructure.api-client.rest.resttemplate')
 project(':infrastructure.api-client.rest.resttemplate').projectDir = file('infrastructure/api-client/api-client-rest-resttemplate')
 
-// API server
+// API Server
 
-// API server::gRPC
+// API Server::gRPC
 
-// API server::gRPC::Protobuf
-include(':infrastructure.api-server.grpc.protobuf')
-project(':infrastructure.api-server.grpc.protobuf').projectDir = file('infrastructure/api-server/grpc/protobuf')
+// API Server::gRPC
+include(':infrastructure.api-server.grpc.core')
+project(':infrastructure.api-server.grpc.core').projectDir = file('infrastructure/api-server/grpc/api-server-grpc-core')
+include(':infrastructure.api-server.grpc.adapter.product')
+project(':infrastructure.api-server.grpc.adapter.product').projectDir = file('infrastructure/api-server/grpc/api-server-grpc-adapter-product')
+include(':infrastructure.api-server.grpc.adapter.user')
+project(':infrastructure.api-server.grpc.adapter.user').projectDir = file('infrastructure/api-server/grpc/api-server-grpc-adapter-user')
 
-// API server::gRPC::netdevh
-include(':infrastructure.api-server.grpc.netdevh.core')
-project(':infrastructure.api-server.grpc.netdevh.core').projectDir = file('infrastructure/api-server/grpc/netdevh/api-server-grpc-netdevh-core')
-include(':infrastructure.api-server.grpc.netdevh.adapter.product')
-project(':infrastructure.api-server.grpc.netdevh.adapter.product').projectDir = file('infrastructure/api-server/grpc/netdevh/api-server-grpc-netdevh-adapter-product')
-include(':infrastructure.api-server.grpc.netdevh.adapter.user')
-project(':infrastructure.api-server.grpc.netdevh.adapter.user').projectDir = file('infrastructure/api-server/grpc/netdevh/api-server-grpc-netdevh-adapter-user')
-
-// API server::REST
+// API Server::REST
 include(':infrastructure.api-server.rest.core')
 project(':infrastructure.api-server.rest.core').projectDir = file('infrastructure/api-server/rest/api-server-rest-core')
 include(':infrastructure.api-server.rest.adapter.notification')
@@ -101,12 +97,6 @@ include(':infrastructure.api-server.rest.adapter.product')
 project(':infrastructure.api-server.rest.adapter.product').projectDir = file('infrastructure/api-server/rest/api-server-rest-adapter-product')
 include(':infrastructure.api-server.rest.adapter.user')
 project(':infrastructure.api-server.rest.adapter.user').projectDir = file('infrastructure/api-server/rest/api-server-rest-adapter-user')
-
-// Auth
-
-// Auth::Keycloak
-include(':infrastructure.auth.keycloak')
-project(':infrastructure.auth.keycloak').projectDir = file('infrastructure/auth/auth-keycloak')
 
 // Datasource
 
@@ -188,41 +178,29 @@ project(':infrastructure.full-text-search.elasticsearch.core').projectDir = file
 include(':infrastructure.full-text-search.elasticsearch.adapter.product')
 project(':infrastructure.full-text-search.elasticsearch.adapter.product').projectDir = file('infrastructure/full-text-search/elasticsearch/full-text-search-elasticsearch-adapter-product')
 
+// IAM
+
+// IAM::Keycloak
+include(':infrastructure.iam.keycloak')
+project(':infrastructure.iam.keycloak').projectDir = file('infrastructure/iam/iam-keycloak')
+
 // Internal API
 
 // Internal API::Auth API
-include(':infrastructure.internal-api.auth.rest.apachehttpclient')
-project(':infrastructure.internal-api.auth.rest.apachehttpclient').projectDir = file('infrastructure/internal-api/auth-api/auth-api-rest-apachehttpclient')
-include(':infrastructure.internal-api.auth.rest.feign')
-project(':infrastructure.internal-api.auth.rest.feign').projectDir = file('infrastructure/internal-api/auth-api/auth-api-rest-feign')
-include(':infrastructure.internal-api.auth.rest.restclient')
-project(':infrastructure.internal-api.auth.rest.restclient').projectDir = file('infrastructure/internal-api/auth-api/auth-api-rest-restclient')
-include(':infrastructure.internal-api.auth.rest.resttemplate')
-project(':infrastructure.internal-api.auth.rest.resttemplate').projectDir = file('infrastructure/internal-api/auth-api/auth-api-rest-resttemplate')
+include(':infrastructure.internal-api.auth.rest')
+project(':infrastructure.internal-api.auth.rest').projectDir = file('infrastructure/internal-api/auth-api/auth-api-rest')
 
 // Internal API::Product API
-include(':infrastructure.internal-api.product.grpc.netdevh')
-project(':infrastructure.internal-api.product.grpc.netdevh').projectDir = file('infrastructure/internal-api/product-api/product-api-grpc-netdevh')
-include(':infrastructure.internal-api.product.rest.apachehttpclient')
-project(':infrastructure.internal-api.product.rest.apachehttpclient').projectDir = file('infrastructure/internal-api/product-api/product-api-rest-apachehttpclient')
-include(':infrastructure.internal-api.product.rest.feign')
-project(':infrastructure.internal-api.product.rest.feign').projectDir = file('infrastructure/internal-api/product-api/product-api-rest-feign')
-include(':infrastructure.internal-api.product.rest.restclient')
-project(':infrastructure.internal-api.product.rest.restclient').projectDir = file('infrastructure/internal-api/product-api/product-api-rest-restclient')
-include(':infrastructure.internal-api.product.rest.resttemplate')
-project(':infrastructure.internal-api.product.rest.resttemplate').projectDir = file('infrastructure/internal-api/product-api/product-api-rest-resttemplate')
+include(':infrastructure.internal-api.product.grpc')
+project(':infrastructure.internal-api.product.grpc').projectDir = file('infrastructure/internal-api/product-api/product-api-grpc')
+include(':infrastructure.internal-api.product.rest')
+project(':infrastructure.internal-api.product.rest').projectDir = file('infrastructure/internal-api/product-api/product-api-rest')
 
 // Internal API::User API
-include(':infrastructure.internal-api.user.grpc.netdevh')
-project(':infrastructure.internal-api.user.grpc.netdevh').projectDir = file('infrastructure/internal-api/user-api/user-api-grpc-netdevh')
-include(':infrastructure.internal-api.user.rest.apachehttpclient')
-project(':infrastructure.internal-api.user.rest.apachehttpclient').projectDir = file('infrastructure/internal-api/user-api/user-api-rest-apachehttpclient')
-include(':infrastructure.internal-api.user.rest.feign')
-project(':infrastructure.internal-api.user.rest.feign').projectDir = file('infrastructure/internal-api/user-api/user-api-rest-feign')
-include(':infrastructure.internal-api.user.rest.restclient')
-project(':infrastructure.internal-api.user.rest.restclient').projectDir = file('infrastructure/internal-api/user-api/user-api-rest-restclient')
-include(':infrastructure.internal-api.user.rest.resttemplate')
-project(':infrastructure.internal-api.user.rest.resttemplate').projectDir = file('infrastructure/internal-api/user-api/user-api-rest-resttemplate')
+include(':infrastructure.internal-api.user.grpc')
+project(':infrastructure.internal-api.user.grpc').projectDir = file('infrastructure/internal-api/user-api/user-api-grpc')
+include(':infrastructure.internal-api.user.rest')
+project(':infrastructure.internal-api.user.rest').projectDir = file('infrastructure/internal-api/user-api/user-api-rest')
 
 // Key-Value Store
 
@@ -387,6 +365,10 @@ include(':infrastructure.persistence.jpa.adapter.saga')
 project(':infrastructure.persistence.jpa.adapter.saga').projectDir = file('infrastructure/persistence/jpa/persistence-jpa-adapter-saga')
 include(':infrastructure.persistence.jpa.adapter.user')
 project(':infrastructure.persistence.jpa.adapter.user').projectDir = file('infrastructure/persistence/jpa/persistence-jpa-adapter-user')
+
+// Protobuf
+include(':infrastructure.protobuf')
+project(':infrastructure.protobuf').projectDir = file('infrastructure/protobuf')
 
 // Resilience
 include(':infrastructure.resilience.resilience4j')

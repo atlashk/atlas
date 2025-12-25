@@ -1,5 +1,0 @@
-app:
-  api-client:
-    rest:
-      user-service:
-        base-url: ${API_CLIENT_REST_USER_SERVICE_BASE_URL:http://localhost:8081}

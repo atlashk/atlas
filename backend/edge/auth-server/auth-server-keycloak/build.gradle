@@ -33,7 +33,6 @@ dependencies {
 
     // Infrastructure
     implementation project(':infrastructure.api-server.rest.core')
-    implementation project(':infrastructure.auth.keycloak')
     switch (rootProject.ext.appStack['discovery-client']) {
         case 'none':
             break
@@ -46,6 +45,7 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['discovery-client']}")
     }
+    implementation project(':infrastructure.iam.keycloak')
     implementation project(':infrastructure.observability.actuator')
     switch (rootProject.ext.appStack['observability.logging.framework']) {
         case 'logback':

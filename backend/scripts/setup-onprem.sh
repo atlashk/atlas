@@ -131,32 +131,6 @@ run_custom_stack_interactive() {
   local platform
   platform="$platform_chosen"
 
-  # API Server
-  echo -e "${BLUE}${BOLD}API Server Configuration${NC}"
-  select_option "REST ${YELLOW}${NC}" "gRPC"
-  local api_server_choice=$SELECTED_INDEX
-  local api_server
-  case $api_server_choice in
-    2) api_server="grpc" ;;
-    *) api_server="rest" ;;
-  esac
-
-  # API Client
-  echo -e "${BLUE}${BOLD}API Client Configuration${NC}"
-  local api_client
-  if [ "$api_server" = "grpc" ]; then
-    api_client="grpc-netdevh"
-  else
-    select_option "RestClient ${YELLOW}${NC}" "Apache HttpClient" "Feign" "RestTemplate"
-    local api_client_choice=$SELECTED_INDEX
-    case $api_client_choice in
-      2) api_client="rest-apachehttpclient" ;;
-      3) api_client="rest-feign" ;;
-      4) api_client="rest-resttemplate" ;;
-      *) api_client="rest-restclient" ;;
-    esac
-  fi
-
   # Auth Server
   echo -e "${BLUE}${BOLD}Auth Server${NC}"
   select_option "Spring Security JWT ${YELLOW}${NC}" "Keycloak"
@@ -200,6 +174,16 @@ run_custom_stack_interactive() {
 
   # File - PDF
   local file_pdf="pdfbox"
+
+  # Internal API
+  echo -e "${BLUE}${BOLD}Internal API Configuration${NC}"
+  select_option "RESTful ${YELLOW}${NC}" "gRPC"
+  local internal_api_choice=$SELECTED_INDEX
+  local internal_api
+  case $internal_api_choice in
+    2) internal_api="grpc" ;;
+    *) internal_api="rest" ;;
+  esac
 
   # Key-Value Store
   local kv_store="redis"
@@ -334,14 +318,13 @@ run_custom_stack_interactive() {
   sleep 2
   cat > "$APP_STACK_FILE" << EOF
 platform=$platform
-api-server=$api_server
-api-client=$api_client
 auth-server=$auth_server
 datasource=$datasource
 discovery-client=$discovery_client
 file.csv=$file_csv
 file.excel=$file_excel
 file.pdf=$file_pdf
+internal-api=$internal_api
 kv-store=$kv_store
 messaging=$messaging
 migration=$migration

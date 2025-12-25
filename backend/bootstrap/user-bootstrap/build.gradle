@@ -29,38 +29,9 @@ dependencies {
     implementation project(':application.user')
 
     // Infrastructure
-    switch (rootProject.ext.appStack['api-client']) {
-        case 'grpc-netdevh':
-            implementation project(':infrastructure.internal-api.product.grpc.netdevh')
-            break
-        case 'rest-apachehttpclient':
-            implementation project(':infrastructure.internal-api.auth.rest.apachehttpclient')
-            implementation project(':infrastructure.internal-api.product.rest.apachehttpclient')
-            break
-        case 'rest-feign':
-            implementation project(':infrastructure.internal-api.auth.rest.feign')
-            implementation project(':infrastructure.internal-api.product.rest.feign')
-            break
-        case 'rest-restclient':
-            implementation project(':infrastructure.internal-api.auth.rest.restclient')
-            implementation project(':infrastructure.internal-api.product.rest.restclient')
-            break
-        case 'rest-resttemplate':
-            implementation project(':infrastructure.internal-api.auth.rest.resttemplate')
-            implementation project(':infrastructure.internal-api.product.rest.resttemplate')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-client']}")
-    }
-    switch (rootProject.ext.appStack['api-server']) {
-        case 'rest':
-            implementation project(':infrastructure.api-server.rest.adapter.user')
-            break
-        case 'grpc':
-            implementation project(':infrastructure.api-server.grpc.netdevh.adapter.user')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-server']}")
+    implementation project(':infrastructure.api-server.rest.adapter.user')
+    if (rootProject.ext.appStack['internal-api'] == 'grpc') {
+        implementation project(':infrastructure.api-server.grpc.adapter.user')
     }
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
@@ -83,6 +54,18 @@ dependencies {
             break
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['discovery-client']}")
+    }
+    switch (rootProject.ext.appStack['internal-api']) {
+        case 'grpc':
+            implementation project(':infrastructure.internal-api.auth.grpc')
+            implementation project(':infrastructure.internal-api.product.grpc')
+            break
+        case 'rest':
+            implementation project(':infrastructure.internal-api.auth.rest')
+            implementation project(':infrastructure.internal-api.product.rest')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['internal-api']}")
     }
     switch (rootProject.ext.appStack['kv-store']) {
         case 'redis':

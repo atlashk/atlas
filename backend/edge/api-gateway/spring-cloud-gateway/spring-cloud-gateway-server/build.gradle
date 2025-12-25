@@ -33,15 +33,15 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.6'
 
     // Infrastructure
-    switch (rootProject.ext.appStack['auth-server']) {
-        case 'spring-security-jwt':
-            implementation project(':edge.api-gateway.spring-cloud-gateway.security.spring-security-jwt')
-            break
+    switch (rootProject.ext.appStack['auth']) {
         case 'keycloak':
             implementation project(':edge.api-gateway.spring-cloud-gateway.security.keycloak')
             break
+        case 'spring-security-jwt':
+            implementation project(':edge.api-gateway.spring-cloud-gateway.security.spring-security-jwt')
+            break
         default:
-            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['auth-server']}")
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['auth']}")
     }
     switch (rootProject.ext.appStack['discovery-client']) {
         case 'none':

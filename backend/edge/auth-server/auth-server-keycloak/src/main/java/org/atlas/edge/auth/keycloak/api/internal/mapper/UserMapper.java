@@ -9,6 +9,6 @@ public interface UserMapper {
 
   UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
-  org.atlas.infrastructure.auth.keycloak.model.CreateUserRequest toKeycloakCreateUserRequest(
+  org.atlas.infrastructure.iam.keycloak.model.CreateUserRequest toKeycloakCreateUserRequest(
       CreateUserRequest request);
 }
