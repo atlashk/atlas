@@ -1,0 +1,48 @@
+package org.atlas.user.application.internal.service;
+
+import java.util.List;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.atlas.user.application.aggregator.CartAggregator;
+import org.atlas.user.application.internal.model.InternalRetrieveUserListInput;
+import org.atlas.user.application.port.repository.CartRepository;
+import org.atlas.user.application.port.repository.UserRepository;
+import org.atlas.user.domain.entity.Cart;
+import org.atlas.user.domain.entity.User;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class InternalUserServiceImpl implements InternalUserService {
+
+  private final CartRepository cartRepository;
+  private final UserRepository userRepository;
+  private final CartAggregator cartAggregator;
+
+  @Override
+  public Cart retrieveCart(Integer userId) {
+    // Get or create cart for user
+    Optional<Cart> cartOpt = cartRepository.findByUserId(userId);
+    if (cartOpt.isEmpty()) {
+      return Cart.builder()
+          .userId(userId)
+          .build();
+    }
+    Cart cart = cartOpt.get();
+
+    // Fetch products
+    boolean allProductsAreValid = cartAggregator.aggregate(cart);
+
+    // Update cart if necessary
+    if (!allProductsAreValid) {
+      cartRepository.update(cart);
+    }
+
+    return cart;
+  }
+
+  @Override
+  public List<User> retrieveUserList(InternalRetrieveUserListInput input) {
+    return userRepository.findByIdIn(input.getIds());
+  }
+}

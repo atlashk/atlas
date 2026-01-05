@@ -1,0 +1,129 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version "${springBootPluginVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagementPluginVersion}"
+    id 'idea'
+}
+
+group = 'org.atlas'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Application (included Domain)
+    implementation project(':order.application')
+
+    // Infrastructure
+    implementation project(':order.api-server.rest')
+    switch (rootProject.ext.appStack['datasource']) {
+        case 'mysql':
+            implementation project(':order.datasource.mysql')
+            break
+        case 'postgres':
+            implementation project(':order.datasource.postgres')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
+    }
+    switch (rootProject.ext.appStack['discovery-client']) {
+        case 'none':
+            break
+        case 'eureka':
+            implementation project(':discovery-client.eureka')
+            break
+        case 'kubernetes':
+            implementation project(':discovery-client.kubernetes')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['discovery-client']}")
+    }
+    switch (rootProject.ext.appStack['internal-api']) {
+        case 'grpc':
+            implementation project(':internal-api.product.grpc')
+            implementation project(':internal-api.user.grpc')
+            break
+        case 'rest':
+            implementation project(':internal-api.product.rest')
+            implementation project(':internal-api.user.rest')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['api-client']}")
+    }
+    switch (rootProject.ext.appStack['kv-store']) {
+        case 'redis':
+            implementation project(':kv-store.redis')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['kv-store']}")
+    }
+    switch (rootProject.ext.appStack['messaging']) {
+        case 'kafka':
+            implementation project(':order.messaging.kafka')
+            break
+        case 'rabbitmq':
+            implementation project(':order.messaging.rabbitmq')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['messaging']}")
+    }
+    switch (rootProject.ext.appStack['migration']) {
+        case 'flyway':
+            switch (rootProject.ext.appStack['datasource']) {
+                case 'mysql':
+                    implementation project(':order.migration.flyway.mysql')
+                    break
+                case 'postgres':
+                    implementation project(':order.migration.flyway.postgres')
+                    break
+                default:
+                    throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['datasource']}")
+            }
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['migration']}")
+    }
+    implementation project(':observability')
+    implementation project(':outbox')
+    switch (rootProject.ext.appStack['persistence']) {
+        case 'jpa':
+            implementation project(':order.persistence.jpa')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['persistence']}")
+    }
+    implementation project(':saga')
+    implementation project(':sequence-generator')
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}

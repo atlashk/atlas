@@ -1,0 +1,81 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version "${springBootPluginVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagementPluginVersion}"
+    id 'idea'
+}
+
+group = 'org.atlas'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Lib
+    implementation 'org.springframework.cloud:spring-cloud-starter-gateway-server-webflux'
+    implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.6'
+
+    // Infrastructure
+    switch (rootProject.ext.appStack['auth']) {
+        case 'keycloak':
+            implementation project(':api-gateway.spring-cloud-gateway.security.keycloak')
+            break
+        case 'spring-security-jwt':
+            implementation project(':api-gateway.spring-cloud-gateway.security.spring-security-jwt')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['auth']}")
+    }
+    switch (rootProject.ext.appStack['discovery-client']) {
+        case 'none':
+            break
+        case 'eureka':
+            implementation project(':discovery-client.eureka')
+            break
+        case 'kubernetes':
+            implementation project(':discovery-client.kubernetes')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['discovery-client']}")
+    }
+    switch (rootProject.ext.appStack['kv-store']) {
+        case 'redis':
+            implementation project(':kv-store.redis-reactive')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['kv-store']}")
+    }
+    implementation project(':observability')
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}

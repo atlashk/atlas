@@ -1,0 +1,33 @@
+package org.atlas.common.framework.jwt;
+
+import java.util.Date;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import org.atlas.common.framework.domain.user.Role;
+
+@Getter
+@Setter
+@Builder
+public class Jwt {
+
+  // 'jti' claim
+  private String jwtId;
+  // 'iss' claim
+  private String issuer;
+  // 'iat' claim
+  private Date issuedAt;
+  // 'sub' claim (userId)
+  private String subject;
+  // 'aud' claim
+  private String audience;
+  // 'exp' claim
+  private Date expiresAt;
+  // Custom claims
+  private Role userRole;
+  private String sessionId;
+
+  public Integer getUserId() {
+    return Integer.valueOf(subject);
+  }
+}
