@@ -1,15 +1,15 @@
 <%
+  const authServer = (stack['auth-server'] || '').toLowerCase();
   const datasource = (stack.datasource || '').toLowerCase();
+  const fullTextSearch = (stack['full-text-search'] || '').toLowerCase();
   const kvStore = (stack['kv-store'] || '').toLowerCase();
   const messaging = (stack.messaging || '').toLowerCase();
-  const authServer = (stack['auth-server'] || '').toLowerCase();
-  const search = (stack.search || '').toLowerCase();
-  const storage = (stack.storage || '').toLowerCase();
   const notificationEmail = (stack.notification.email || '').toLowerCase();
   const observabilityLoggingStack = (stack.observability.logging.stack || '').toLowerCase();
   const observabilityMetrics = (stack.observability.metrics || '').toLowerCase();
   const observabilityTracing = (stack.observability.tracing || '').toLowerCase();
   const reverseProxy = (stack['reverse-proxy'] || '').toLowerCase();
+  const storage = (stack.storage || '').toLowerCase();
 
   const hasMysql = datasource === 'mysql';
   const hasPostgres = datasource === 'postgres';
@@ -17,7 +17,7 @@
   const hasKafka = messaging === 'kafka';
   const hasRabbitmq = messaging === 'rabbitmq';
   const hasKeycloak = authServer === 'keycloak'
-  const hasElasticsearch = search === 'elasticsearch';
+  const hasElasticsearch = fullTextSearch === 'elasticsearch';
   const hasMinio = storage === 'minio';
   const hasLoki = observabilityLoggingStack === 'loki';
   const hasPrometheus = observabilityMetrics === 'prometheus';
@@ -238,7 +238,6 @@ show_deployment_summary() {
     echo "Atlas platform deployment completed successfully!"
     echo
     show_access_information
-    show_management_commands
 }
 
 show_access_information() {
@@ -286,15 +285,6 @@ show_access_information() {
     fi
     <% } %>
     echo
-}
-
-show_management_commands() {
-    echo "Management commands:"
-    echo "  Status:        $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME ps"
-    echo "  Services:      $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME ps --services"
-    echo "  Logs:          $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME logs -f [service_name]"
-    echo "  Stop:          $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME down"
-    echo "  Restart:       $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME restart [service_name]"
 }
 
 print_total_time() {

@@ -6,13 +6,17 @@ import org.atlas.common.framework.collection.CollectionUtil;
 import org.atlas.order.persistence.jpa.entity.JpaOrder;
 import org.atlas.order.persistence.jpa.entity.JpaOrderItem;
 import org.mapstruct.AfterMapping;
+import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(
+    unmappedTargetPolicy = ReportingPolicy.IGNORE,
+    builder = @Builder(disableBuilder = true)
+)
 public interface JpaOrderMapper {
 
   JpaOrderMapper INSTANCE = Mappers.getMapper(JpaOrderMapper.class);

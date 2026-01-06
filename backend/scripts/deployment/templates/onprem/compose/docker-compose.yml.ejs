@@ -1,17 +1,16 @@
 <%
-  const apiClient = (stack['api-client'] || 'rest-restclient').toLowerCase();
-  const apiClientPrefix = (apiClient.split('-')[0] || 'rest');
   const authServer = (stack['auth-server'] || '').toLowerCase();
   const datasource = (stack.datasource || '').toLowerCase();
+  const fullTextSearch = (stack['full-text-search'] || '').toLowerCase();
+  const internalApi = (stack['internal-api'] || '').toLowerCase();
   const kvStore = (stack['kv-store'] || '').toLowerCase();
   const messaging = (stack.messaging || '').toLowerCase();
-  const search = (stack.search || '').toLowerCase();
-  const storage = (stack.storage || '').toLowerCase();
   const notificationEmail = (stack.notification.email || '').toLowerCase();
   const observabilityLoggingStack = (stack.observability.logging.stack || '').toLowerCase();
   const observabilityMetrics = (stack.observability.metrics || '').toLowerCase();
   const observabilityTracing = (stack.observability.tracing || '').toLowerCase();
   const reverseProxy = (stack['reverse-proxy'] || '').toLowerCase();
+  const storage = (stack.storage || '').toLowerCase();
 
   const hasSpringSecurityJwt = authServer === 'spring-security-jwt';
   const hasKeycloak = authServer === 'keycloak';
@@ -20,7 +19,7 @@
   const hasRedis = kvStore === 'redis';
   const hasKafka = messaging === 'kafka';
   const hasRabbit = messaging === 'rabbitmq';
-  const hasElasticsearch = search === 'elasticsearch';
+  const hasElasticsearch = fullTextSearch === 'elasticsearch';
   const hasMinio = storage === 'minio';
   const hasSmtp4dev = notificationEmail === 'spring';
   const hasLoki = observabilityLoggingStack === 'loki';
@@ -176,12 +175,12 @@ services:
       <%_ if (hasMysql) { -%>
       - KC_DB=mysql
       - KC_DB_URL=jdbc:mysql://mysql:3306/db_keycloak?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - KC_DB_USERNAME=${MYSQL_USERNAME:-atlas}
+      - KC_DB_USERNAME=${MYSQL_USER:-atlas}
       - KC_DB_PASSWORD=${MYSQL_PASSWORD:-secret123456}
       <%_ } else if (hasPostgres) { -%>
       - KC_DB=postgres
       - KC_DB_URL=jdbc:postgresql://postgres:5432/db_keycloak
-      - KC_DB_USERNAME=${POSTGRES_USERNAME:-atlas}
+      - KC_DB_USERNAME=${POSTGRES_USER:-atlas}
       - KC_DB_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
       <%_ } -%>
     command:
@@ -415,11 +414,11 @@ services:
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
       <%_ if (hasMysql) { -%>
       - DB_URL=jdbc:mysql://mysql:3306/db_auth?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - DB_USERNAME=${MYSQL_USERNAME:-atlas}
+      - DB_USERNAME=${MYSQL_USER:-atlas}
       - DB_PASSWORD=${MYSQL_PASSWORD:-secret123456}
       <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_auth
-      - DB_USERNAME=${POSTGRES_USERNAME:-atlas}
+      - DB_USERNAME=${POSTGRES_USER:-atlas}
       - DB_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
       <%_ } -%>
       <%_ if (hasRedis) { -%>
@@ -473,11 +472,11 @@ services:
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
       <%_ if (hasMysql) { -%>
       - DB_URL=jdbc:mysql://mysql:3306/db_user?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - DB_USERNAME=${MYSQL_USERNAME:-atlas}
+      - DB_USERNAME=${MYSQL_USER:-atlas}
       - DB_PASSWORD=${MYSQL_PASSWORD:-secret123456}
       <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_user
-      - DB_USERNAME=${POSTGRES_USERNAME:-atlas}
+      - DB_USERNAME=${POSTGRES_USER:-atlas}
       - DB_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
       <%_ } -%>
       <%_ if (hasRedis) { -%>
@@ -493,13 +492,13 @@ services:
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-secret123456}
       <%_ } -%>
       <%_ if (hasSpringSecurityJwt) { -%>
-      <%_ if (apiClientPrefix === 'grpc') { -%>
+      <%_ if (internalApi === 'grpc') { -%>
       - API_CLIENT_GRPC_AUTH_SERVER_ADDRESS=static://auth-server:50061
       <%_ } else { -%>
       - API_CLIENT_REST_AUTH_SERVER_BASE_URL=http://auth-server:8091
       <%_ } -%>
       <%_ } -%>
-      <%_ if (apiClientPrefix === 'grpc') { -%>
+      <%_ if (internalApi === 'grpc') { -%>
       - API_CLIENT_GRPC_PRODUCT_SERVICE_ADDRESS=static://product-service:50052
       <%_ } else { -%>
       - API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL=http://product-service:8082
@@ -554,11 +553,11 @@ services:
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
       <%_ if (hasMysql) { -%>
       - DB_URL=jdbc:mysql://mysql:3306/db_product?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - DB_USERNAME=${MYSQL_USERNAME:-atlas}
+      - DB_USERNAME=${MYSQL_USER:-atlas}
       - DB_PASSWORD=${MYSQL_PASSWORD:-secret123456}
       <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_product
-      - DB_USERNAME=${POSTGRES_USERNAME:-atlas}
+      - DB_USERNAME=${POSTGRES_USER:-atlas}
       - DB_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
       <%_ } -%>
       <%_ if (hasRedis) { -%>
@@ -630,11 +629,11 @@ services:
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
       <%_ if (hasMysql) { -%>
       - DB_URL=jdbc:mysql://mysql:3306/db_order?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - DB_USERNAME=${MYSQL_USERNAME:-atlas}
+      - DB_USERNAME=${MYSQL_USER:-atlas}
       - DB_PASSWORD=${MYSQL_PASSWORD:-secret123456}
       <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_order
-      - DB_USERNAME=${POSTGRES_USERNAME:-atlas}
+      - DB_USERNAME=${POSTGRES_USER:-atlas}
       - DB_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
       <%_ } -%>
       <%_ if (hasRedis) { -%>
@@ -649,7 +648,7 @@ services:
       - RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-atlas}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-secret123456}
       <%_ } -%>
-      <%_ if (apiClientPrefix === 'grpc') { -%>
+      <%_ if (internalApi === 'grpc') { -%>
       - API_CLIENT_GRPC_USER_SERVICE_ADDRESS=static://user-service:50051
       - API_CLIENT_GRPC_PRODUCT_SERVICE_ADDRESS=static://product-service:50052
       <%_ } else { -%>
@@ -702,11 +701,11 @@ services:
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
       <%_ if (hasMysql) { -%>
       - DB_URL=jdbc:mysql://mysql:3306/db_payment?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - DB_USERNAME=${MYSQL_USERNAME:-atlas}
+      - DB_USERNAME=${MYSQL_USER:-atlas}
       - DB_PASSWORD=${MYSQL_PASSWORD:-secret123456}
       <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_payment
-      - DB_USERNAME=${POSTGRES_USERNAME:-atlas}
+      - DB_USERNAME=${POSTGRES_USER:-atlas}
       - DB_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
       <%_ } -%>
       <%_ if (hasRedis) { -%>
@@ -767,11 +766,11 @@ services:
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
       <%_ if (hasMysql) { -%>
       - DB_URL=jdbc:mysql://mysql:3306/db_notification?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - DB_USERNAME=${MYSQL_USERNAME:-atlas}
+      - DB_USERNAME=${MYSQL_USER:-atlas}
       - DB_PASSWORD=${MYSQL_PASSWORD:-secret123456}
       <%_ } else if (hasPostgres) { -%>
       - DB_URL=jdbc:postgresql://postgres:5432/db_notification
-      - DB_USERNAME=${POSTGRES_USERNAME:-atlas}
+      - DB_USERNAME=${POSTGRES_USER:-atlas}
       - DB_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
       <%_ } -%>
       <%_ if (hasRedis) { -%>

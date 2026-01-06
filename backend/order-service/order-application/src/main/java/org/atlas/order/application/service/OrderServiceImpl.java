@@ -62,7 +62,7 @@ public class OrderServiceImpl implements OrderService {
     Order order = orderRepository.findById(orderId)
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
 
-    if (!Objects.equals(order.getCreatedBy(), userId)) {
+    if (!Objects.equals(order.getUser().getId(), userId)) {
       throw new DomainException(DomainError.FORBIDDEN);
     }
 

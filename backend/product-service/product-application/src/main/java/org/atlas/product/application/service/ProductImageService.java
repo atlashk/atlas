@@ -7,7 +7,7 @@ public interface ProductImageService {
   void uploadImage(Integer productId, byte[] imageBytes, String imageContentType)
       throws IOException;
 
-  String getImage(Integer productId) throws IOException;
+  String getImage(Integer productId);
 
-  void deleteImage(Integer productId) throws IOException;
+  void deleteImage(Integer productId);
 }

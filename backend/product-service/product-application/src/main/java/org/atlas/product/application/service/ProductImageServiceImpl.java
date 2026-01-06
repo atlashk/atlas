@@ -37,14 +37,19 @@ public class ProductImageServiceImpl implements
   }
 
   @Override
-  public String getImage(Integer productId) throws IOException {
+  public String getImage(Integer productId) {
     String bucket = StorageConstant.PRODUCT_IMAGE_BUCKET;
     String objectKey = getObjectKey(productId);
     GetFileRequest storageRequest = GetFileRequest.builder()
         .bucket(bucket)
         .objectKey(objectKey)
         .build();
-    byte[] fileContent = storageService.getFile(storageRequest);
+    byte[] fileContent;
+    try {
+      fileContent = storageService.getFile(storageRequest);
+    } catch (IOException e) {
+      return StringUtil.EMPTY;
+    }
     if (ArrayUtil.isEmpty(fileContent)) {
       return StringUtil.EMPTY;
     }
@@ -52,15 +57,19 @@ public class ProductImageServiceImpl implements
   }
 
   @Override
-  public void deleteImage(Integer productId) throws IOException {
+  public void deleteImage(Integer productId) {
     String bucket = StorageConstant.PRODUCT_IMAGE_BUCKET;
     String objectKey = getObjectKey(productId);
     DeleteFileRequest storageRequest = DeleteFileRequest.builder()
         .bucket(bucket)
         .objectKey(objectKey)
         .build();
-    storageService.deleteFile(storageRequest);
-    log.info("Deleted product image: productId={}", productId);
+    try {
+      storageService.deleteFile(storageRequest);
+      log.info("Deleted product image: productId={}", productId);
+    } catch (IOException e) {
+      log.error("Failed to delete image: productId={}", productId);
+    }
   }
 
   private String getObjectKey(Integer productId) {

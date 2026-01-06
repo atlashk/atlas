@@ -41,6 +41,13 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['migration']}")
     }
+    switch (rootProject.ext.appStack['persistence']) {
+        case 'jpa':
+            implementation project(':outbox.persistence.jpa')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported ${rootProject.ext.appStack['persistence']}")
+    }
     switch (rootProject.ext.appStack['scheduler']) {
         case 'spring':
             implementation project(':outbox.scheduler.spring')

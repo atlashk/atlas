@@ -1,4 +1,4 @@
-package org.atlas.common.infrastructure.saga.persistence.jpa;
+package org.atlas.common.infrastructure.saga.persistence.jpa.adapter;
 
 import java.util.List;
 import java.util.Optional;

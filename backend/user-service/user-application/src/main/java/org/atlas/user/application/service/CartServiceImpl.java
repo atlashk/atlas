@@ -25,7 +25,7 @@ public class CartServiceImpl implements CartService {
   private final CacheService cacheService;
 
   @Override
-  @Cache(cacheName = "cart", key = "#input.userId")
+  @Cache(cacheName = "cart", key = "#userId")
   @Transactional(readOnly = true)
   public Cart retrieveCart(Integer userId) {
     // Get or create cart for user

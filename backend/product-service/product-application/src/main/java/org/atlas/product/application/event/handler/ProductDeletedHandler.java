@@ -1,18 +1,17 @@
 package org.atlas.product.application.event.handler;
 
-import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.product.application.event.mapper.ProductEventMapper;
-import org.atlas.product.application.port.fulltextsearch.FullTextSearchService;
-import org.atlas.product.application.service.ProductImageService;
-import org.atlas.product.domain.entity.Product;
 import org.atlas.common.framework.cache.ApplicationCache;
 import org.atlas.common.framework.cache.CacheService;
 import org.atlas.common.framework.concurrent.AsyncUtil;
 import org.atlas.common.framework.domain.common.event.DomainEventType;
 import org.atlas.common.framework.domain.common.event.contract.product.ProductEvent;
 import org.atlas.common.framework.domain.common.event.handler.DomainEventHandler;
+import org.atlas.product.application.event.mapper.ProductEventMapper;
+import org.atlas.product.application.port.fulltextsearch.FullTextSearchService;
+import org.atlas.product.application.service.ProductImageService;
+import org.atlas.product.domain.entity.Product;
 import org.springframework.beans.factory.ObjectProvider;
 
 @DomainEventHandler(type = DomainEventType.PRODUCT_DELETED)
@@ -42,11 +41,7 @@ public class ProductDeletedHandler {
     return new AsyncUtil.AsyncTask() {
       @Override
       public void run() {
-        try {
-          productImageService.deleteImage(product.getId());
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        }
+        productImageService.deleteImage(product.getId());
       }
 
       @Override

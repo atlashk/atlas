@@ -6,13 +6,17 @@ import org.atlas.common.framework.collection.CollectionUtil;
 import org.atlas.user.persistence.jpa.entity.JpaCart;
 import org.atlas.user.persistence.jpa.entity.JpaCartItem;
 import org.mapstruct.AfterMapping;
+import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(
+    unmappedTargetPolicy = ReportingPolicy.IGNORE,
+    builder = @Builder(disableBuilder = true)
+)
 public interface JpaCartMapper {
 
   JpaCartMapper INSTANCE = Mappers.getMapper(JpaCartMapper.class);

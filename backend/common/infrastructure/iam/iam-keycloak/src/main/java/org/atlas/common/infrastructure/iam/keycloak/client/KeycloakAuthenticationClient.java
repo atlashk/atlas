@@ -6,6 +6,7 @@ import org.atlas.common.framework.domain.common.error.DomainError;
 import org.atlas.common.framework.domain.common.exception.DomainException;
 import org.atlas.common.infrastructure.iam.keycloak.config.KeycloakProps;
 import org.atlas.common.infrastructure.iam.keycloak.model.TokenResponse;
+import org.keycloak.OAuth2Constants;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -25,7 +26,7 @@ public class KeycloakAuthenticationClient {
     String url = String.format("%s/realms/%s/protocol/openid-connect/token",
         keycloakProps.getBaseUrl(), keycloakProps.getRealm());
     MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
-    form.add("grant_type", "password");
+    form.add("grant_type", OAuth2Constants.PASSWORD);
     form.add("client_id", keycloakProps.getClientId());
     form.add("client_secret", keycloakProps.getClientSecret());
     form.add("username", username);
@@ -45,7 +46,7 @@ public class KeycloakAuthenticationClient {
     String url = String.format("%s/realms/%s/protocol/openid-connect/token",
         keycloakProps.getBaseUrl(), keycloakProps.getRealm());
     MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
-    form.add("grant_type", "refresh_token");
+    form.add("grant_type", OAuth2Constants.REFRESH_TOKEN);
     form.add("client_id", keycloakProps.getClientId());
     form.add("client_secret", keycloakProps.getClientSecret());
     form.add("refresh_token", refreshToken);
@@ -65,7 +66,7 @@ public class KeycloakAuthenticationClient {
     form.add("client_id", keycloakProps.getClientId());
     form.add("client_secret", keycloakProps.getClientSecret());
     form.add("token", accessToken);
-    form.add("token_type_hint", "access_token");
+    form.add("token_type_hint", OAuth2Constants.ACCESS_TOKEN);
     restClient.post()
         .uri(url)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED)

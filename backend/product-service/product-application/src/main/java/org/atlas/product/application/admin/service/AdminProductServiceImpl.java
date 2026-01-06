@@ -1,9 +1,17 @@
 package org.atlas.product.application.admin.service;
 
-import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.atlas.common.framework.collection.CollectionUtil;
+import org.atlas.common.framework.domain.common.error.DomainError;
+import org.atlas.common.framework.domain.common.event.DomainEventType;
+import org.atlas.common.framework.domain.common.event.contract.product.ProductEvent;
+import org.atlas.common.framework.domain.common.exception.DomainException;
+import org.atlas.common.framework.paging.PagingRequest;
+import org.atlas.common.framework.paging.PagingResult;
+import org.atlas.common.framework.util.ArrayUtil;
+import org.atlas.common.framework.util.ObjectMapperUtil;
 import org.atlas.product.application.admin.mapper.AdminProductMapper;
 import org.atlas.product.application.admin.model.AdminCreateProductInput;
 import org.atlas.product.application.admin.model.AdminExportProductInput;
@@ -24,16 +32,6 @@ import org.atlas.product.application.port.repository.ProductRepository;
 import org.atlas.product.application.port.repository.criteria.FindProductCriteria;
 import org.atlas.product.application.service.ProductImageService;
 import org.atlas.product.domain.entity.Product;
-import org.atlas.common.framework.collection.CollectionUtil;
-import org.atlas.common.framework.domain.common.error.DomainError;
-import org.atlas.common.framework.domain.common.event.DomainEventType;
-import org.atlas.common.framework.domain.common.event.contract.product.ProductEvent;
-import org.atlas.common.framework.domain.common.exception.DomainException;
-import org.atlas.common.framework.paging.PagingRequest;
-import org.atlas.common.framework.paging.PagingResult;
-import org.atlas.common.framework.util.ArrayUtil;
-import org.atlas.common.framework.util.ObjectMapperUtil;
-import org.atlas.common.framework.util.StringUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,15 +57,7 @@ public class AdminProductServiceImpl implements AdminProductService {
 
     // Set image
     productPage.getData()
-        .forEach(product -> {
-          try {
-            product.setImage(productImageService.getImage(product.getId()));
-          } catch (IOException e) {
-            log.error("Failed to get product image: productId={}, error={}",
-                product.getId(), e.getMessage());
-            product.setImage(StringUtil.EMPTY);
-          }
-        });
+        .forEach(product -> product.setImage(productImageService.getImage(product.getId())));
 
     return productPage;
   }

@@ -61,14 +61,6 @@ public class SecurityConfig {
           corsConfig.setMaxAge(
               applicationConfigService.getConfigAsLong("cors.max-age", 0L));
 
-          log.debug(
-              "CORS Configuration - Allowed Origins: {}, Allowed Methods: {}, Allowed Headers: {}, Exposed Headers: {}, Allow Credentials: {}, Max Age: {}",
-              corsConfig.getAllowedOrigins(),
-              corsConfig.getAllowedMethods(),
-              corsConfig.getAllowedHeaders(),
-              corsConfig.getExposedHeaders(),
-              corsConfig.getAllowCredentials(),
-              corsConfig.getMaxAge());
           return corsConfig;
         }))
         .oauth2ResourceServer(oauth2 -> oauth2

@@ -1,4 +1,4 @@
-package org.atlas.common.infrastructure.saga.persistence.jpa;
+package org.atlas.common.infrastructure.saga.persistence.jpa.adapter;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;

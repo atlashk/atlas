@@ -1,4 +1,4 @@
-package org.atlas.common.infrastructure.outbox.persistence.jpa;
+package org.atlas.common.infrastructure.outbox.persistence.jpa.adapter;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;

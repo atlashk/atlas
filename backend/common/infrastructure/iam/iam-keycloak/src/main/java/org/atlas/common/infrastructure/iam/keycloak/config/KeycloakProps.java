@@ -12,9 +12,12 @@ import org.springframework.context.annotation.Configuration;
 public class KeycloakProps {
 
   private String baseUrl;
-  private String realm;
+  private String adminRealm;
   private String adminUsername;
   private String adminPassword;
+  private String adminClientId;
+  private String adminClientSecret;
+  private String realm;
   private String clientId;
   private String clientSecret;
 }

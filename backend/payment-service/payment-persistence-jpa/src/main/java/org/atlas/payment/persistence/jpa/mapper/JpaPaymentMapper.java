@@ -11,13 +11,17 @@ import org.atlas.common.framework.payment.model.nextaction.UsePaymentElement;
 import org.atlas.common.framework.util.StringUtil;
 import org.atlas.payment.persistence.jpa.entity.JpaPayment;
 import org.mapstruct.AfterMapping;
+import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(
+    unmappedTargetPolicy = ReportingPolicy.IGNORE,
+    builder = @Builder(disableBuilder = true)
+)
 public interface JpaPaymentMapper {
 
   JpaPaymentMapper INSTANCE = Mappers.getMapper(JpaPaymentMapper.class);

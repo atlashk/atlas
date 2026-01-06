@@ -1,10 +1,14 @@
 package org.atlas.product.application.service;
 
-import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.atlas.common.framework.cache.Cache;
+import org.atlas.common.framework.collection.CollectionUtil;
+import org.atlas.common.framework.domain.common.error.DomainError;
+import org.atlas.common.framework.domain.common.exception.DomainException;
 import org.atlas.common.framework.domain.product.ProductStatus;
+import org.atlas.common.framework.paging.PagingResult;
 import org.atlas.product.application.mapper.ProductMapper;
 import org.atlas.product.application.model.RetrieveProductListInput;
 import org.atlas.product.application.port.fulltextsearch.FullTextSearchService;
@@ -12,12 +16,6 @@ import org.atlas.product.application.port.fulltextsearch.SearchProductCriteria;
 import org.atlas.product.application.port.repository.ProductRepository;
 import org.atlas.product.application.port.repository.criteria.FindProductCriteria;
 import org.atlas.product.domain.entity.Product;
-import org.atlas.common.framework.cache.Cache;
-import org.atlas.common.framework.collection.CollectionUtil;
-import org.atlas.common.framework.domain.common.error.DomainError;
-import org.atlas.common.framework.domain.common.exception.DomainException;
-import org.atlas.common.framework.paging.PagingResult;
-import org.atlas.common.framework.util.StringUtil;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
@@ -62,15 +60,7 @@ public class ProductServiceImpl implements ProductService {
 
     // Set image
     productPage.getData()
-        .forEach(product -> {
-          try {
-            product.setImage(productImageService.getImage(product.getId()));
-          } catch (IOException e) {
-            log.error("Failed to get product image: productId={}, error={}",
-                product.getId(), e.getMessage());
-            product.setImage(StringUtil.EMPTY);
-          }
-        });
+        .forEach(product -> product.setImage(productImageService.getImage(product.getId())));
 
     return productPage;
   }

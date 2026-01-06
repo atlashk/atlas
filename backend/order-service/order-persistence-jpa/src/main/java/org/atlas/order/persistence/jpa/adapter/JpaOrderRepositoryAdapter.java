@@ -1,4 +1,4 @@
-package org.atlas.order.persistence.jpa;
+package org.atlas.order.persistence.jpa.adapter;
 
 import java.math.BigDecimal;
 import java.util.List;
