@@ -1,0 +1,42 @@
+package {{basePackage}}.service;
+
+import {{basePackage}}.entity.{{entity.name}};
+import {{basePackage}}.repository.{{entity.name}}Repository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class {{entity.name}}Service {
+
+    private final {{entity.name}}Repository {{lowerCamel entity.name}}Repository;
+
+    public List<{{entity.name}}> getAll() {
+        return {{lowerCamel entity.name}}Repository.findAll();
+    }
+
+    public Optional<{{entity.name}}> getById({{entityIdJavaType entity}} id) {
+        return {{lowerCamel entity.name}}Repository.findById(id);
+    }
+
+    public {{entity.name}} create({{entity.name}} entity) {
+        return {{lowerCamel entity.name}}Repository.save(entity);
+    }
+
+    public {{entity.name}} update({{entity.name}} entity) {
+        return {{lowerCamel entity.name}}Repository.save(entity);
+    }
+
+    public boolean deleteById({{entityIdJavaType entity}} id) {
+        if (!{{lowerCamel entity.name}}Repository.existsById(id)) {
+            return false;
+        }
+        {{lowerCamel entity.name}}Repository.deleteById(id);
+        return true;
+    }
+}

@@ -1,0 +1,33 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: {{projectName}}
+  {{#if (eq stack.database 'postgresql')}}
+  datasource:
+    url: jdbc:postgresql://localhost:5432/{{projectName}}
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+  {{/if}}
+  {{#if (eq stack.database 'mysql')}}
+  datasource:
+    url: jdbc:mysql://localhost:3306/{{projectName}}
+    username: root
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  {{/if}}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        {{#if (eq stack.database 'postgresql')}}
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        {{/if}}
+        {{#if (eq stack.database 'mysql')}}
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        {{/if}}
+    show-sql: true
