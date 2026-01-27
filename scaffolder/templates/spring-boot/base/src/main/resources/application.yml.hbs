@@ -31,3 +31,11 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         {{/if}}
     show-sql: true
+
+{{#if (eq stack.authentication 'jwt')}}
+{{#if (eq jwt.signingAlgorithm 'HS256')}}
+app:
+  jwt:
+    hs256Secret: "{{jwt.hs256Secret}}"
+{{/if}}
+{{/if}}

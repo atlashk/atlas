@@ -5,6 +5,10 @@ import { FileSystemService } from '../infrastructure/FileSystemService';
 
 type TemplateContext = ProjectConfig & {
   basePackagePath: string;
+  jwtUserEntityName?: string;
+  jwtUsernameFieldName?: string;
+  jwtPasswordFieldName?: string;
+  jwtRoleFieldName?: string;
 };
 
 export class ProjectOrchestrator {
@@ -24,16 +28,48 @@ export class ProjectOrchestrator {
     // 2. Generate Stack
     await this.generateStack(fileSystem, context, config);
 
-    // 3. Generate Entities
+    // 3. Generate Authentication
+    await this.generateAuthentication(fileSystem, context);
+
+    // 4. Generate Entities
     await this.generateEntities(fileSystem, context, config);
 
     return fileSystem.getTree();
   }
 
   private prepareContext(config: ProjectConfig): TemplateContext {
+    const normalizeValue = (value: string) => value.trim().toLowerCase();
+    const resolveEntity = (name: string) =>
+      (config.entities ?? []).find((e) => normalizeValue(e.name) === normalizeValue(name));
+    const resolveFieldName = (entity: EntityConfig, name: string) =>
+      (entity.fields ?? []).find((f) => normalizeValue(f.name) === normalizeValue(name))?.name;
+
+    const jwt = config.stack.authentication === 'jwt' ? config.jwt : undefined;
+    const jwtUsernameEntity = jwt?.fieldMapping?.username?.entityName?.trim()
+      ? resolveEntity(jwt.fieldMapping.username.entityName)
+      : undefined;
+    const jwtUserEntityName = jwtUsernameEntity?.name;
+
+    const jwtUsernameFieldName =
+      jwtUsernameEntity && jwt?.fieldMapping?.username?.fieldName
+        ? resolveFieldName(jwtUsernameEntity, jwt.fieldMapping.username.fieldName)
+        : undefined;
+    const jwtPasswordFieldName =
+      jwtUsernameEntity && jwt?.fieldMapping?.password?.fieldName
+        ? resolveFieldName(jwtUsernameEntity, jwt.fieldMapping.password.fieldName)
+        : undefined;
+    const jwtRoleFieldName =
+      jwtUsernameEntity && jwt?.fieldMapping?.role?.fieldName
+        ? resolveFieldName(jwtUsernameEntity, jwt.fieldMapping.role.fieldName)
+        : undefined;
+
     return {
       ...config,
       basePackagePath: config.basePackage.replace(/\./g, '/'),
+      jwtUserEntityName,
+      jwtUsernameFieldName,
+      jwtPasswordFieldName,
+      jwtRoleFieldName,
     };
   }
 
@@ -99,6 +135,35 @@ export class ProjectOrchestrator {
           const serviceContent = await this.templateEngine.render('spring-boot/deployment/kubernetes/service.yaml.hbs', context);
           fs.addFile(`k8s/service.yaml`, serviceContent);
       }
+  }
+
+  private async generateAuthentication(fs: FileSystemService, context: TemplateContext) {
+    if (context.stack.authentication !== 'jwt') return;
+
+    const baseDir = `src/main/java/${context.basePackagePath}/security`;
+    const templates = [
+      { template: 'spring-boot/auth/jwt/src/main/java/security/SecurityConstant.java.hbs', out: `${baseDir}/SecurityConstant.java` },
+      { template: 'spring-boot/auth/jwt/src/main/java/security/JwtKeyProvider.java.hbs', out: `${baseDir}/JwtKeyProvider.java` },
+      { template: 'spring-boot/auth/jwt/src/main/java/security/JwtTokenService.java.hbs', out: `${baseDir}/JwtTokenService.java` },
+      { template: 'spring-boot/auth/jwt/src/main/java/security/JwtPrincipal.java.hbs', out: `${baseDir}/JwtPrincipal.java` },
+      { template: 'spring-boot/auth/jwt/src/main/java/security/JwtAuthenticationFilter.java.hbs', out: `${baseDir}/JwtAuthenticationFilter.java` },
+      { template: 'spring-boot/auth/jwt/src/main/java/security/SecurityConfig.java.hbs', out: `${baseDir}/SecurityConfig.java` },
+      { template: 'spring-boot/auth/jwt/src/main/java/security/CustomAuthenticationEntryPoint.java.hbs', out: `${baseDir}/CustomAuthenticationEntryPoint.java` },
+      { template: 'spring-boot/auth/jwt/src/main/java/security/CustomAccessDeniedHandler.java.hbs', out: `${baseDir}/CustomAccessDeniedHandler.java` },
+      { template: 'spring-boot/auth/jwt/src/main/java/security/AuthExceptionHandler.java.hbs', out: `${baseDir}/AuthExceptionHandler.java` },
+      { template: 'spring-boot/auth/jwt/src/main/java/security/CookieService.java.hbs', out: `${baseDir}/CookieService.java` },
+      { template: 'spring-boot/auth/jwt/src/main/java/security/UserDetailsImpl.java.hbs', out: `${baseDir}/UserDetailsImpl.java` },
+      { template: 'spring-boot/auth/jwt/src/main/java/security/UserDetailsServiceImpl.java.hbs', out: `${baseDir}/UserDetailsServiceImpl.java` },
+      { template: 'spring-boot/auth/jwt/src/main/java/security/AuthController.java.hbs', out: `${baseDir}/AuthController.java` },
+      { template: 'spring-boot/auth/jwt/src/main/java/security/dto/LoginRequest.java.hbs', out: `${baseDir}/dto/LoginRequest.java` },
+      { template: 'spring-boot/auth/jwt/src/main/java/security/dto/RefreshRequest.java.hbs', out: `${baseDir}/dto/RefreshRequest.java` },
+      { template: 'spring-boot/auth/jwt/src/main/java/security/dto/TokenResponse.java.hbs', out: `${baseDir}/dto/TokenResponse.java` },
+    ];
+
+    for (const item of templates) {
+      const content = await this.templateEngine.render(item.template, context);
+      fs.addFile(item.out, content);
+    }
   }
 
   private async generateEntities(fs: FileSystemService, context: TemplateContext, config: ProjectConfig) {

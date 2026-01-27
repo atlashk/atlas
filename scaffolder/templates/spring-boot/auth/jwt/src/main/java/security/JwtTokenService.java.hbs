@@ -1,0 +1,70 @@
+package {{basePackage}}.security;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.SecureDigestAlgorithm;
+import java.time.Instant;
+import java.util.Date;
+import org.springframework.stereotype.Service;
+
+@Service
+public class JwtTokenService {
+
+  private final JwtKeyProvider keyProvider;
+
+  public JwtTokenService(JwtKeyProvider keyProvider) {
+    this.keyProvider = keyProvider;
+  }
+
+  public String issueAccessToken(UserDetailsImpl user, Instant issuedAt) {
+    Instant expiresAt = issuedAt.plusSeconds(SecurityConstant.ACCESS_TOKEN_TTL_SECONDS);
+    return Jwts.builder()
+        .issuer(SecurityConstant.ISSUER)
+        .audience().add(SecurityConstant.AUDIENCE).and()
+        .issuedAt(Date.from(issuedAt))
+        .expiration(Date.from(expiresAt))
+        .subject(user.getUsername())
+        .claim("token_type", "access")
+        .claim("role", user.getRole())
+        .signWith(signingKey(), signingAlg())
+        .compact();
+  }
+
+  public String issueRefreshToken(UserDetailsImpl user, Instant issuedAt) {
+    Instant expiresAt = issuedAt.plusSeconds(SecurityConstant.REFRESH_TOKEN_TTL_SECONDS);
+    return Jwts.builder()
+        .issuer(SecurityConstant.ISSUER)
+        .audience().add(SecurityConstant.AUDIENCE).and()
+        .issuedAt(Date.from(issuedAt))
+        .expiration(Date.from(expiresAt))
+        .subject(user.getUsername())
+        .claim("token_type", "refresh")
+        .signWith(signingKey(), signingAlg())
+        .compact();
+  }
+
+  public Claims parseAndVerify(String token) {
+    if (keyProvider.isRs256()) {
+      return Jwts.parser()
+          .verifyWith(keyProvider.publicKey())
+          .requireIssuer(SecurityConstant.ISSUER)
+          .build()
+          .parseSignedClaims(token)
+          .getPayload();
+    }
+    return Jwts.parser()
+        .verifyWith(keyProvider.hmacKey())
+        .requireIssuer(SecurityConstant.ISSUER)
+        .build()
+        .parseSignedClaims(token)
+        .getPayload();
+  }
+
+  private SecureDigestAlgorithm<?, ?> signingAlg() {
+    return keyProvider.isRs256() ? Jwts.SIG.RS256 : Jwts.SIG.HS256;
+  }
+
+  private java.security.Key signingKey() {
+    return keyProvider.isRs256() ? keyProvider.privateKey() : keyProvider.hmacKey();
+  }
+}

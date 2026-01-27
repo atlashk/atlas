@@ -1,0 +1,28 @@
+package {{basePackage}}.security;
+
+import {{basePackage}}.entity.{{jwtUserEntityName}};
+import {{basePackage}}.repository.{{jwtUserEntityName}}Repository;
+import java.util.Optional;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService {
+
+  private final {{jwtUserEntityName}}Repository userRepository;
+
+  public UserDetailsServiceImpl({{jwtUserEntityName}}Repository userRepository) {
+    this.userRepository = userRepository;
+  }
+
+  @Override
+  public org.springframework.security.core.userdetails.UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    Optional<{{jwtUserEntityName}}> userOptional = userRepository.findBy{{capitalize jwtUsernameFieldName}}(username);
+    {{jwtUserEntityName}} user = userOptional.orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+    String actualUsername = user.get{{capitalize jwtUsernameFieldName}}();
+    String password = user.get{{capitalize jwtPasswordFieldName}}();
+    String role = user.get{{capitalize jwtRoleFieldName}}();
+    return new UserDetails(actualUsername, password, role);
+  }
+}

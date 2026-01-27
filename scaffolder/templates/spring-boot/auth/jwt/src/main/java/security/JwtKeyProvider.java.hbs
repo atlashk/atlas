@@ -1,0 +1,59 @@
+package {{basePackage}}.security;
+
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import javax.crypto.SecretKey;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Component
+public class JwtKeyProvider {
+
+  private final String hs256Secret;
+
+  private KeyPair rsaKeyPair;
+  private SecretKey hmacKey;
+
+  public JwtKeyProvider(@Value("${app.jwt.hs256Secret:}") String hs256Secret) {
+    this.hs256Secret = hs256Secret;
+  }
+
+  @PostConstruct
+  void init() throws Exception {
+    if (isRs256()) {
+      KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+      generator.initialize(2048);
+      this.rsaKeyPair = generator.generateKeyPair();
+      return;
+    }
+    if (hs256Secret == null || hs256Secret.isBlank()) {
+      throw new IllegalStateException("HS256 secret is required");
+    }
+    this.hmacKey = Keys.hmacShaKeyFor(hs256Secret.getBytes(StandardCharsets.UTF_8));
+  }
+
+  public boolean isRs256() {
+    return "RS256".equalsIgnoreCase(SecurityConstant.SIGNING_ALGORITHM);
+  }
+
+  public PrivateKey privateKey() {
+    if (rsaKeyPair == null) throw new IllegalStateException("RSA key pair is not initialized");
+    return rsaKeyPair.getPrivate();
+  }
+
+  public PublicKey publicKey() {
+    if (rsaKeyPair == null) throw new IllegalStateException("RSA key pair is not initialized");
+    return rsaKeyPair.getPublic();
+  }
+
+  public SecretKey hmacKey() {
+    if (hmacKey == null) throw new IllegalStateException("HMAC key is not initialized");
+    return hmacKey;
+  }
+}
+

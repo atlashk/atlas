@@ -1,9 +1,26 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FileText, Database, Layers } from 'lucide-react';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
+  const shouldWarnBeforeUnload =
+    location.pathname === '/project' || location.pathname === '/entities' || location.pathname === '/stack';
+
+  useEffect(() => {
+    if (!shouldWarnBeforeUnload) return;
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = 'Reloading will clear your current configuration.';
+      return event.returnValue;
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [shouldWarnBeforeUnload]);
 
   const navItems = [
     { type: 'link' as const, path: '/project', label: 'Project', icon: FileText },

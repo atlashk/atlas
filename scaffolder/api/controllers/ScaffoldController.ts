@@ -81,6 +81,9 @@ export class ScaffoldController {
         if (alg === 'HS256' && !jwt.hs256Secret?.trim()) {
           errors.push('JWT HS256 secret is required');
         }
+        if (alg === 'HS256' && jwt.hs256Secret?.trim() && jwt.hs256Secret.trim().length < 32) {
+          errors.push('JWT HS256 secret must be at least 32 characters');
+        }
 
         const fieldMapping = jwt.fieldMapping;
         if (!fieldMapping) {
@@ -97,6 +100,14 @@ export class ScaffoldController {
             if (!mapping.value?.fieldName?.trim()) errors.push(`JWT ${mapping.label} mapping field is required`);
           }
 
+          const mappedEntities = mappings
+            .map((m) => m.value?.entityName?.trim())
+            .filter((v): v is string => !!v)
+            .map((v) => normalizeValue(v));
+          if (mappedEntities.length === 3 && new Set(mappedEntities).size > 1) {
+            errors.push('JWT username/password/role mappings must target the same entity');
+          }
+
           const entities = config.entities ?? [];
           for (const mapping of mappings) {
             const entityName = mapping.value?.entityName?.trim();
@@ -108,9 +119,13 @@ export class ScaffoldController {
               errors.push(`JWT ${mapping.label} mapping entity does not exist: ${entityName}`);
               continue;
             }
-            const fieldExists = (entity.fields ?? []).some((f) => normalizeValue(f.name) === normalizeValue(fieldName));
-            if (!fieldExists) {
+            const field = (entity.fields ?? []).find((f) => normalizeValue(f.name) === normalizeValue(fieldName));
+            if (!field) {
               errors.push(`JWT ${mapping.label} mapping field does not exist: ${entityName}.${fieldName}`);
+              continue;
+            }
+            if (field.type !== 'string') {
+              errors.push(`JWT ${mapping.label} mapping field must be type string: ${entityName}.${field.name}`);
             }
           }
         }
