@@ -1,0 +1,28 @@
+deployment: onprem-compose
+auth-server: spring-security-jwt
+datasource: mysql
+file:
+  csv: opencsv
+  excel: poi
+  pdf: pdfbox
+full-text-search: elasticsearch
+internal-api: rest
+kv-store: redis
+messaging: kafka
+migration: flyway
+notification:
+  email: spring
+  in-app: sse
+observability:
+  logging:
+    stack: loki
+    framework: logback
+  metrics: prometheus
+  tracing: zipkin
+persistence: jpa
+redis: standalone
+reverse-proxy: none
+scheduler: quartz
+service-discovery: eureka
+storage: minio
+template: freemarker

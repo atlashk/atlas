@@ -1,33 +1,73 @@
+import org.yaml.snakeyaml.Yaml
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.yaml:snakeyaml:2.5'
+    }
+}
+
 // Load app stack configs
 def loadAppStack() {
     def appStackFileName = project.findProperty('appStackFile') ?: System.getProperty('appStackFile')
     File appStackFile
     if (appStackFileName) {
         // Respect explicit override; do not fallback when user specifies a file
-        appStackFile = new File(rootDir, appStackFileName)
+        appStackFile = new File(rootDir, "config/${appStackFileName}")
     } else {
-        appStackFile = new File(rootDir, "app-stack.cfg")
+        appStackFile = new File(rootDir, "config/app-stack.yml")
         if (!appStackFile.exists()) {
-            appStackFile = new File(rootDir, "app-stack.dev.cfg")
+            appStackFile = new File(rootDir, "config/app-stack.dev.yml")
         }
     }
     if (!appStackFile.exists()) {
         throw new GradleException("App stack config file not found: ${appStackFile.absolutePath}")
     }
 
+    // Parse YAML file
+    def yaml = new Yaml()
     def appStack = [:]
-    appStackFile.eachLine('UTF-8') { line ->
-        line = line.trim()
-        if (line && !line.startsWith('#')) {
-            def parts = line.split('=', 2).collect { it.trim() }
-            if (parts.size() == 2 && parts[1]) {
-                appStack[parts[0]] = parts[1]
+    try {
+        appStackFile.withInputStream { inputStream ->
+            def yamlData = yaml.load(inputStream)
+            if (yamlData instanceof Map) {
+                // Flatten nested structure to maintain compatibility with existing code
+                appStack = flattenMap(yamlData)
             } else {
-                throw new GradleException("Invalid line in ${appStackFile.name}: '${line}'")
+                throw new GradleException("Invalid YAML structure in ${appStackFile.name}: expected a map")
             }
         }
+    } catch (Exception e) {
+        throw new GradleException("Failed to parse YAML file ${appStackFile.name}: ${e.message}")
     }
+
+    printf("Loaded app stack configuration from %s: %s%n", appStackFile.absolutePath, appStack)
+
     return appStack
+}
+
+// Helper function to flatten nested maps with dot notation
+static Map<String, Object> flattenMap(Map<?, ?> map, String prefix = '') {
+    Map<String, Object> result = [:]
+
+    if (!map) {
+        return result
+    }
+
+    map.each { k, v ->
+        String key = k.toString()
+        String newKey = prefix ? "${prefix}.${key}" : key
+
+        if (v instanceof Map) {
+            result.putAll(flattenMap((Map) v, newKey))
+        } else {
+            result[newKey] = v
+        }
+    }
+
+    return result
 }
 
 ext {

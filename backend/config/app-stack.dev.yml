@@ -1,0 +1,28 @@
+deployment: onprem-compose
+auth-server: keycloak
+datasource: mysql
+file:
+  csv: opencsv
+  excel: poi
+  pdf: pdfbox
+full-text-search: database
+internal-api: rest
+kv-store: redis
+messaging: kafka
+migration: flyway
+notification:
+  email: spring
+  in-app: sse
+observability:
+  logging:
+    stack: none
+    framework: logback
+  metrics: none
+  tracing: zipkin
+persistence: jpa
+redis: standalone
+reverse-proxy: none
+scheduler: quartz
+service-discovery: eureka
+storage: filesystem
+template: freemarker

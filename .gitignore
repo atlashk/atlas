@@ -14,8 +14,6 @@ build/
 !**/src/test/**/build/
 *.hprof
 
-app-stack.cfg
-
 # =============================================================================
 # Frontend
 # =============================================================================
@@ -132,24 +130,6 @@ aws-exports.js
 amplify/
 .amplify/
 .serverless/
-
-# =============================================================================
-# Security & Credentials
-# =============================================================================
-*.pem
-*.key
-!backend/edge/auth-server/auth-server-spring-security-jwt/src/main/resources/secret/default.key
-*.crt
-*.p12
-*.jks
-*.keystore
-secrets/
-credentials/
-.secrets/
-.credentials/
-config/secrets/
-*.secret
-.env.secrets
 
 # =============================================================================
 # Database
