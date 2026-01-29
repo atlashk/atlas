@@ -1,0 +1,70 @@
+package org.atlas.libs.framework.paging;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.atlas.libs.framework.collection.CollectionUtil;
+import org.atlas.libs.framework.util.PagingUtil;
+
+@Getter
+@Setter
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class PagingResult<T> {
+
+  protected List<T> data;
+  protected Pagination pagination;
+
+  public static <T> PagingResult<T> empty() {
+    return new PagingResult<>(Collections.emptyList(), Pagination.empty());
+  }
+
+  public static <T> PagingResult<T> of(List<T> data, Pagination pagination) {
+    return new PagingResult<>(data, pagination);
+  }
+
+  public static <T> PagingResult<T> of(List<T> data, long totalRecords,
+      PagingRequest pagingRequest) {
+    return new PagingResult<>(data, Pagination.of(totalRecords, pagingRequest));
+  }
+
+  public boolean checkEmpty() {
+    return CollectionUtil.isEmpty(data) || pagination.getTotalRecords() == 0L;
+  }
+
+  public <U> PagingResult<U> map(Function<? super T, ? extends U> mapper) {
+    List<U> mappedData = data.stream()
+        .map(mapper)
+        .collect(Collectors.toList());
+    return new PagingResult<>(mappedData, pagination);
+  }
+
+  @Getter
+  @Setter
+  public static class Pagination {
+
+    private int currentPage;
+    private int pageSize;
+    private int totalPages;
+    private long totalRecords;
+
+    public static Pagination empty() {
+      return new Pagination();
+    }
+
+    public static Pagination of(long totalRecords, PagingRequest pagingRequest) {
+      Pagination pagination = new Pagination();
+      pagination.setCurrentPage(pagingRequest.getPage());
+      pagination.setPageSize(pagingRequest.getSize());
+      pagination.setTotalPages(PagingUtil.calcTotalPages(totalRecords, pagination.getPageSize()));
+      pagination.setTotalRecords(totalRecords);
+      return pagination;
+    }
+  }
+}

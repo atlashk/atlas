@@ -1,4 +1,4 @@
-package org.atlas.common.infrastructure.file.pdf.pdfbox;
+package org.atlas.libs.file.pdf.pdfbox;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

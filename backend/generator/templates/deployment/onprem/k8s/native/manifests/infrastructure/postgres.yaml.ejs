@@ -3,7 +3,7 @@
   const authServer = (stack['auth-server'] || '').toLowerCase();
 
   const hasPostgres = datasource === 'postgres' || datasource === 'postgresql';
-  const hasSpringSecurityJwt = authServer === 'spring-security-jwt';
+  const hasJwt = authServer === 'jwt';
 %>
 <% if (hasPostgres) { -%>
 apiVersion: v1
@@ -30,7 +30,7 @@ data:
     #!/bin/bash
     set -e
     psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
-    <%_ if (hasSpringSecurityJwt) { -%>
+    <%_ if (hasJwt) { -%>
     CREATE DATABASE db_auth OWNER "$POSTGRES_USER";
     <%_ } -%>
     CREATE DATABASE db_notification OWNER "$POSTGRES_USER";

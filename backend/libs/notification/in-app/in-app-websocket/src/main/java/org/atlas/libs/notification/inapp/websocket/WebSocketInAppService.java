@@ -1,0 +1,22 @@
+package org.atlas.libs.notification.inapp.websocket;
+
+import lombok.RequiredArgsConstructor;
+import org.atlas.libs.framework.notification.inapp.InAppService;
+import org.atlas.libs.framework.notification.inapp.SendInAppRequest;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+public class WebSocketInAppService implements InAppService {
+
+  private final SimpMessagingTemplate messagingTemplate;
+
+  @Override
+  public void send(SendInAppRequest request) {
+    WebSocketEvent event = WebSocketEvent.of(request.getPayload());
+    // Send to broker-managed destination under /topic
+    String destination = "/topic/inapp/" + request.getReceiverUserId();
+    messagingTemplate.convertAndSend(destination, event);
+  }
+}

@@ -7,7 +7,7 @@
   <appender class="ch.qos.logback.core.ConsoleAppender" name="CONSOLE">
     <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
       <layout
-        class="org.atlas.common.infrastructure.observability.logging.logback.MaskingPatternLayout">
+        class="org.atlas.libs.observability.logging.logback.MaskingPatternLayout">
         <Pattern>${CONSOLE_LOG_PATTERN}</Pattern>
       </layout>
     </encoder>
@@ -15,7 +15,7 @@
   <appender class="ch.qos.logback.core.rolling.RollingFileAppender" name="FILE">
     <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
       <layout
-        class="org.atlas.common.infrastructure.observability.logging.logback.MaskingPatternLayout">
+        class="org.atlas.libs.observability.logging.logback.MaskingPatternLayout">
         <pattern>${FILE_LOG_PATTERN}</pattern>
       </layout>
     </encoder>

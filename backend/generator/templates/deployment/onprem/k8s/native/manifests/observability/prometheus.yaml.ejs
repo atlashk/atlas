@@ -3,7 +3,7 @@
   const authServer = (stack['auth-server'] || '').toLowerCase();
 
   const hasPrometheus = observabilityMetrics === 'prometheus';
-  const hasSpringSecurityJwt = authServer === 'spring-security-jwt';
+  const hasJwt = authServer === 'jwt';
 %>
 <% if (hasPrometheus) { -%>
 apiVersion: v1
@@ -37,7 +37,7 @@ data:
         metrics_path: '/actuator/prometheus'
         static_configs:
           - targets: ['api-gateway:8080']
-      <% if (hasSpringSecurityJwt) { %>
+      <% if (hasJwt) { %>
       - job_name: 'auth-server'
         metrics_path: '/actuator/prometheus'
         static_configs:

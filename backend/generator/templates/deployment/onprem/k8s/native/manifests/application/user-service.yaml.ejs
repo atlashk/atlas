@@ -90,7 +90,7 @@ spec:
                   name: rabbitmq-secret
                   key: rabbitmq-password
             <% } %>
-            <% if (authServer === 'spring-security-jwt') { %>
+            <% if (authServer === 'jwt') { %>
             <% if (apiClientPrefix === 'grpc') { %>
             - name: API_CLIENT_GRPC_AUTH_SERVER_ADDRESS
               value: "static://auth-server:50061"

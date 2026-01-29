@@ -12,7 +12,7 @@
   const reverseProxy = (stack['reverse-proxy'] || '').toLowerCase();
   const storage = (stack.storage || '').toLowerCase();
 
-  const hasSpringSecurityJwt = authServer === 'spring-security-jwt';
+  const hasJwt = authServer === 'jwt';
   const hasKeycloak = authServer === 'keycloak';
   const hasMysql = datasource === 'mysql';
   const hasPostgres = datasource === 'postgres' || datasource === 'postgresql';
@@ -310,7 +310,7 @@ services:
     command: -config.file=/etc/promtail/config.yml
     volumes:
       - ./config/promtail/config.yml:/etc/promtail/config.yml:ro
-      <%_ if (hasSpringSecurityJwt) { -%>
+      <%_ if (hasJwt) { -%>
       - auth-server-log:/var/log/auth-server
       <%_ } -%>
       - user-service-log:/var/log/user-service
@@ -389,7 +389,7 @@ services:
     networks:
       - atlas-network
 
-<%_ if (hasSpringSecurityJwt) { -%>
+<%_ if (hasJwt) { -%>
   auth-server:
     container_name: auth-server
     image: atlas-auth-server
@@ -491,7 +491,7 @@ services:
       - RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-atlas}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-secret123456}
       <%_ } -%>
-      <%_ if (hasSpringSecurityJwt) { -%>
+      <%_ if (hasJwt) { -%>
       <%_ if (internalApi === 'grpc') { -%>
       - API_CLIENT_GRPC_AUTH_SERVER_ADDRESS=static://auth-server:50061
       <%_ } else { -%>
@@ -812,7 +812,7 @@ services:
       - redis
       <%_ } -%>
       - eureka-server
-      <%_ if (hasSpringSecurityJwt) { -%>
+      <%_ if (hasJwt) { -%>
       - auth-server
       <%_ } -%>
       <%_ if (hasKeycloak) { -%>
@@ -829,7 +829,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       <%_ } -%>
-      <%_ if (hasSpringSecurityJwt) { -%>
+      <%_ if (hasJwt) { -%>
       - AUTH_SERVER_URI=http://auth-server:8091
       <%_ } -%>
       <%_ if (hasKeycloak) { -%>
@@ -876,7 +876,7 @@ networks:
 
 volumes:
   eureka-server-log:
-  <%_ if (hasSpringSecurityJwt) { -%>
+  <%_ if (hasJwt) { -%>
   auth-server-log:
   <%_ } -%>
   user-service-log:

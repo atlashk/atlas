@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-option java_package = "org.atlas.common.infrastructure.protobuf.user";
+option java_package = "org.atlas.libs.protobuf.user";
 
 import "google/protobuf/empty.proto";
 

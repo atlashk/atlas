@@ -1,2 +1,2 @@
 springdoc:
-  packages-to-scan: org.atlas.payment.api.server.rest
+  packages-to-scan: org.atlas.services.payment.api.server.rest

@@ -1,5 +1,5 @@
 deployment: onprem-k8s-native
-auth-server: spring-security-jwt
+auth-server: jwt
 datasource: mysql
 file:
   csv: opencsv

@@ -4,7 +4,7 @@
   const observabilityLoggingStack = (stack.observability.logging.stack || '').toLowerCase();
   const observabilityTracing = (stack.observability.tracing || '').toLowerCase();
 
-  const hasSpringSecurityJwt = authServer === 'spring-security-jwt';
+  const hasJwt = authServer === 'jwt';
   const hasKeycloak = authServer === 'keycloak';
   const hasRedis = kvStore === 'redis';
   const hasLoki = observabilityLoggingStack === 'loki';
@@ -44,7 +44,7 @@ spec:
             - name: REDIS_PORT
               value: "6379"
             <% } %>
-            <% if (hasSpringSecurityJwt) { %>
+            <% if (hasJwt) { %>
             - name: AUTH_SERVER_URI
               value: "http://auth-server:8091"
             <% } %>

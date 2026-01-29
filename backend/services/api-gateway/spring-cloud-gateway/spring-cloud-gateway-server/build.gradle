@@ -34,8 +34,8 @@ dependencies {
         case 'keycloak':
             implementation project(':api-gateway.spring-cloud-gateway.security.keycloak')
             break
-        case 'spring-security-jwt':
-            implementation project(':api-gateway.spring-cloud-gateway.security.spring-security-jwt')
+        case 'jwt':
+            implementation project(':api-gateway.spring-cloud-gateway.security.jwt')
             break
         default:
             throw new IllegalArgumentException("Unsupported auth-server: ${rootProject.ext.appStack['auth-server']}")

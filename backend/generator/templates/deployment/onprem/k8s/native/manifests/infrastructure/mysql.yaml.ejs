@@ -3,7 +3,7 @@
   const authServer = (stack['auth-server'] || '').toLowerCase();
 
   const hasMysql = datasource === 'mysql';
-  const hasSpringSecurityJwt = authServer === 'spring-security-jwt';
+  const hasJwt = authServer === 'jwt';
 %>
 <% if (hasMysql) { -%>
 apiVersion: v1
@@ -30,7 +30,7 @@ data:
     #!/bin/bash
     set -e
     cat <<EOF | mysql -uroot -p"${MYSQL_ROOT_PASSWORD}"
-    <%_ if (hasSpringSecurityJwt) { -%>
+    <%_ if (hasJwt) { -%>
     CREATE DATABASE db_auth;
     <%_ } -%>
     CREATE DATABASE db_notification;
@@ -39,7 +39,7 @@ data:
     CREATE DATABASE db_product;
     CREATE DATABASE db_user;
 
-    <%_ if (hasSpringSecurityJwt) { -%>
+    <%_ if (hasJwt) { -%>
     GRANT ALL PRIVILEGES ON db_auth.* TO '${MYSQL_USER}'@'%';
     <%_ } -%>
     GRANT ALL PRIVILEGES ON db_notification.* TO '${MYSQL_USER}'@'%';

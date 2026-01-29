@@ -1,6 +1,6 @@
 <%
   const authServer = (stack['auth-server'] || '').toLowerCase();
-  const hasSpringSecurityJwt = authServer === 'spring-security-jwt';
+  const hasJwt = authServer === 'jwt';
   const hasKeycloak = authServer === 'keycloak'
 %>
 #!/bin/bash
@@ -9,7 +9,7 @@ set -e
 echo "Initializing PostgreSQL databases and setting owners to ${POSTGRES_USER}"
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --set=db_owner="$POSTGRES_USER" <<-EOSQL
-<%_ if (hasSpringSecurityJwt) { -%>
+<%_ if (hasJwt) { -%>
 SELECT format('CREATE DATABASE %I OWNER %I;', 'db_auth', :'db_owner')
 WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'db_auth')\gexec
 <%_ } -%>

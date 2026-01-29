@@ -1,5 +1,5 @@
 deployment: onprem-compose
-auth-server: spring-security-jwt
+auth-server: jwt
 datasource: mysql
 file:
   csv: opencsv

@@ -1,6 +1,6 @@
 <%
   const authServer = (stack['auth-server'] || '').toLowerCase();
-  const hasSpringSecurityJwt = authServer === 'spring-security-jwt';
+  const hasJwt = authServer === 'jwt';
 %>
 server:
   http_listen_port: 9080
@@ -20,7 +20,7 @@ scrape_configs:
         labels:
           service_name: eureka-server
           __path__: /var/log/eureka-server/*.log
-  <%_ if (hasSpringSecurityJwt) { -%>
+  <%_ if (hasJwt) { -%>
   - job_name: auth-server
     static_configs:
       - targets:
