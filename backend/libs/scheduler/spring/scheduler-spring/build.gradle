@@ -26,10 +26,10 @@ repositories {
 
 dependencies {
     // Framework
-    api project(':framework')
+    api project(':libs.framework')
 
     // Infrastructure
-    api project(':kv-store.redis')
+    api project(':libs.kv-store.redis')
 
     // Lib
     // Distributed lock in case the schedulers run on multi-instance application

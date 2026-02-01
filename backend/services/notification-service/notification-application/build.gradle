@@ -25,8 +25,8 @@ repositories {
 }
 
 dependencies {
-    // Domain
-    api project(':notification.domain')
+    // Port
+    api project(':services.notification.port')
 
     // Lombok
     compileOnly "org.projectlombok:lombok:${lombokVersion}"

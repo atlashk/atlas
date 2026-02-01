@@ -25,8 +25,9 @@ repositories {
 }
 
 dependencies {
-    api project(':payment.simulator')
-    api project(':payment.stripe')
+    // Libs
+    api project(':libs.payment.simulator')
+    api project(':libs.payment.stripe')
 }
 
 bootJar {

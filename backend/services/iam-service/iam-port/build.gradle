@@ -26,7 +26,7 @@ repositories {
 
 dependencies {
     // Domain
-    api project(':iam.domain')
+    api project(':services.iam.domain')
 
     // Lombok
     compileOnly "org.projectlombok:lombok:${lombokVersion}"

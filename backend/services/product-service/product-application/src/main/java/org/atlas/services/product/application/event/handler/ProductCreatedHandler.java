@@ -7,7 +7,7 @@ import org.atlas.libs.framework.domain.common.event.DomainEventType;
 import org.atlas.libs.framework.domain.common.event.contract.product.ProductEvent;
 import org.atlas.libs.framework.domain.common.event.handler.DomainEventHandler;
 import org.atlas.services.product.application.event.mapper.ProductEventMapper;
-import org.atlas.services.product.application.port.fulltextsearch.FullTextSearchService;
+import org.atlas.services.product.port.out.fulltextsearch.FullTextSearchService;
 import org.atlas.services.product.domain.entity.Product;
 import org.springframework.beans.factory.ObjectProvider;
 

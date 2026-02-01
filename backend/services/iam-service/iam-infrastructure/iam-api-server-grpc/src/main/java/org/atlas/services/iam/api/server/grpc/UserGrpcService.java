@@ -34,7 +34,7 @@ public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
   }
 
   private InternalRetrieveUserListInput map(ListUserRequestProto requestProto) {
-    return new InternalRetrieveUserListInput(requestProto.getIdList());
+    return new InternalRetrieveUserListInput(requestProto.getUserIdList());
   }
 
   private ListUserResponseProto map(List<InternalUserOutput> users) {
@@ -48,7 +48,7 @@ public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
 
   private UserProto map(InternalUserOutput user) {
     return UserProto.newBuilder()
-        .setId(user.getId())
+        .setUserId(user.getUserId())
         .setUsername(user.getUsername())
         .setFirstName(user.getFirstName())
         .setLastName(user.getLastName())

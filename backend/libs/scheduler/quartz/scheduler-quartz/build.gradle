@@ -26,15 +26,15 @@ repositories {
 
 dependencies {
     // Framework
-    api project(':framework')
+    api project(':libs.framework')
 
     // Infrastructure
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
-            api project(':scheduler.quartz.jobstore.mysql')
+            api project(':libs.scheduler.quartz.jobstore.mysql')
             break
         case 'postgres':
-            api project(':scheduler.quartz.jobstore.postgres')
+            api project(':libs.scheduler.quartz.jobstore.postgres')
             break
         default:
             throw new IllegalArgumentException("Unsupported datasource: ${rootProject.ext.appStack['datasource']}")

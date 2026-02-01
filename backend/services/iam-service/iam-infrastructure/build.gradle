@@ -1,0 +1,121 @@
+plugins {
+    id 'java-library'
+    id 'org.springframework.boot' version "${springBootPluginVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagementPluginVersion}"
+    id 'idea'
+}
+
+group = 'org.atlas'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // API server
+    implementation project(':services.iam.api.server.rest')
+    if (rootProject.ext.appStack['internal-api'] == 'grpc') {
+        implementation project(':services.iam.api.server.grpc')
+    }
+
+    // Datasource
+    switch (rootProject.ext.appStack['datasource']) {
+        case 'mysql':
+            implementation project(':services.iam.datasource.mysql')
+            break
+        case 'postgres':
+            implementation project(':services.iam.datasource.postgres')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported datasource: ${rootProject.ext.appStack['datasource']}")
+    }
+
+    // Key-value store
+    switch (rootProject.ext.appStack['kv-store']) {
+        case 'redis':
+            implementation project(':libs.kv-store.redis')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported kv-store: ${rootProject.ext.appStack['kv-store']}")
+    }
+
+    // Migration
+    switch (rootProject.ext.appStack['migration']) {
+        case 'flyway':
+            switch (rootProject.ext.appStack['datasource']) {
+                case 'mysql':
+                    implementation project(':services.iam.migration.flyway.mysql')
+                    break
+                case 'postgres':
+                    implementation project(':services.iam.migration.flyway.postgres')
+                    break
+                default:
+                    throw new IllegalArgumentException("Unsupported datasource: ${rootProject.ext.appStack['datasource']}")
+            }
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported migration: ${rootProject.ext.appStack['migration']}")
+    }
+
+    // Observability
+    implementation project(':libs.observability')
+
+    // Persistence
+    switch (rootProject.ext.appStack.persistence) {
+        case 'jpa':
+            implementation project(':services.iam.persistence.jpa')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported persistence: ${rootProject.ext.appStack.persistence}")
+    }
+
+    // Service discovery
+    switch (rootProject.ext.appStack['service-discovery']) {
+        case 'none':
+            break
+        case 'eureka':
+            implementation project(':libs.discovery-client.eureka')
+            break
+        case 'kubernetes':
+            implementation project(':libs.discovery-client.kubernetes')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported service-discovery: ${rootProject.ext.appStack['service-discovery']}")
+    }
+
+    // Lombok
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    // Mapstruct
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+}
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}

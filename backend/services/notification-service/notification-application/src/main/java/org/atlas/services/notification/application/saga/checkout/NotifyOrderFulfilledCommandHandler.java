@@ -14,6 +14,7 @@ import org.atlas.libs.framework.config.ApplicationConfigService;
 import org.atlas.libs.framework.error.ErrorUtil;
 import org.atlas.libs.framework.file.FileUtil;
 import org.atlas.libs.framework.json.JsonUtil;
+import org.atlas.libs.framework.json.jackson.JacksonService;
 import org.atlas.libs.framework.notification.email.Attachment;
 import org.atlas.libs.framework.notification.email.EmailService;
 import org.atlas.libs.framework.notification.email.SendEmailException;
@@ -29,13 +30,13 @@ import org.atlas.libs.framework.saga.core.context.SagaContext;
 import org.atlas.libs.framework.saga.core.messaging.payload.SagaCommand;
 import org.atlas.libs.framework.template.ResolveTemplateException;
 import org.atlas.libs.framework.template.TemplateService;
-import org.atlas.services.notification.application.service.InAppNotificationService;
-import org.atlas.services.notification.application.service.NotificationService;
 import org.atlas.services.notification.domain.entity.DeliveryStatus;
 import org.atlas.services.notification.domain.entity.Notification;
 import org.atlas.services.notification.domain.entity.NotificationChannel;
 import org.atlas.services.notification.domain.entity.NotificationType;
 import org.atlas.services.notification.domain.entity.metadata.OrderFulfilledMetadata;
+import org.atlas.services.notification.port.in.service.InAppNotificationService;
+import org.atlas.services.notification.port.in.service.NotificationService;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -53,8 +54,8 @@ public class NotifyOrderFulfilledCommandHandler {
   @SagaCommandHandler(command = CheckoutCommand.NOTIFY_ORDER_FULFILLED)
   public SagaCommandResult notifyOrderFulfilled(SagaCommand sagaCommand) {
     SagaContext sagaContext = SagaContext.deserialize(sagaCommand.getSagaContext());
-    CheckoutSagaData checkoutSagaData = JsonUtil.getInstance().toObject(
-        sagaContext.get("data", LinkedHashMap.class), CheckoutSagaData.class);
+    CheckoutSagaData checkoutSagaData = JacksonService.OBJECT_MAPPER.convertValue(
+        sagaContext.get("data"), CheckoutSagaData.class);
     if (checkoutSagaData == null) {
       throw new IllegalArgumentException("Checkout data is required in the saga context");
     }

@@ -1,8 +1,9 @@
 package org.atlas.services.notification.application.service;
 
 import lombok.RequiredArgsConstructor;
-import org.atlas.services.notification.application.port.repository.NotificationRepository;
 import org.atlas.services.notification.domain.entity.Notification;
+import org.atlas.services.notification.port.in.service.NotificationService;
+import org.atlas.services.notification.port.out.repository.NotificationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;

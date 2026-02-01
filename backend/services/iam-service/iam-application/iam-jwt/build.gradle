@@ -26,11 +26,11 @@ repositories {
 
 dependencies {
     // Port
-    api project(':iam.port')
+    api project(':services.iam.port')
 
     // Libs
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation project(':api.server.rest')
+    implementation project(':libs.api.server.rest')
 
     // Lombok
     compileOnly "org.projectlombok:lombok:${lombokVersion}"

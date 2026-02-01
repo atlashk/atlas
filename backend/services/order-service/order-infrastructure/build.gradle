@@ -1,0 +1,149 @@
+plugins {
+    id 'java-library'
+    id 'org.springframework.boot' version "${springBootPluginVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagementPluginVersion}"
+    id 'idea'
+}
+
+group = 'org.atlas'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // API server
+    implementation project(':services.order.api.server.rest')
+
+    // Datasource
+    switch (rootProject.ext.appStack['datasource']) {
+        case 'mysql':
+            implementation project(':services.order.datasource.mysql')
+            break
+        case 'postgres':
+            implementation project(':services.order.datasource.postgres')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported datasource: ${rootProject.ext.appStack['datasource']}")
+    }
+
+    // Internal API
+    switch (rootProject.ext.appStack['internal-api']) {
+        case 'grpc':
+            implementation project(':libs.internal-api.iam.grpc')
+            implementation project(':libs.internal-api.catalog.grpc')
+            break
+        case 'rest':
+            implementation project(':libs.internal-api.iam.rest')
+            implementation project(':libs.internal-api.catalog.rest')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported internal-api: ${rootProject.ext.appStack['internal-api']}")
+    }
+
+    // KV store
+    switch (rootProject.ext.appStack['kv-store']) {
+        case 'redis':
+            implementation project(':libs.kv-store.redis')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported kv-store: ${rootProject.ext.appStack['kv-store']}")
+    }
+
+    // Messaging
+    switch (rootProject.ext.appStack['messaging']) {
+        case 'kafka':
+            implementation project(':services.order.messaging.kafka')
+            break
+        case 'rabbitmq':
+            implementation project(':services.order.messaging.rabbitmq')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported messaging: ${rootProject.ext.appStack['messaging']}")
+    }
+
+    // Migration
+    switch (rootProject.ext.appStack['migration']) {
+        case 'flyway':
+            switch (rootProject.ext.appStack['datasource']) {
+                case 'mysql':
+                    implementation project(':services.order.migration.flyway.mysql')
+                    break
+                case 'postgres':
+                    implementation project(':services.order.migration.flyway.postgres')
+                    break
+                default:
+                    throw new IllegalArgumentException("Unsupported datasource: ${rootProject.ext.appStack['datasource']}")
+            }
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported migration: ${rootProject.ext.appStack['migration']}")
+    }
+
+    // Observability
+    implementation project(':libs.observability')
+
+    // Outbox
+    implementation project(':libs.outbox')
+
+    // Persistence
+    switch (rootProject.ext.appStack.persistence) {
+        case 'jpa':
+            implementation project(':services.order.persistence.jpa')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported persistence: ${rootProject.ext.appStack.persistence}")
+    }
+
+    // Saga
+    implementation project(':libs.saga')
+
+    // Service discovery
+    switch (rootProject.ext.appStack['service-discovery']) {
+        case 'none':
+            break
+        case 'eureka':
+            implementation project(':libs.discovery-client.eureka')
+            break
+        case 'kubernetes':
+            implementation project(':libs.discovery-client.kubernetes')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported service-discovery: ${rootProject.ext.appStack['service-discovery']}")
+    }
+
+    // Sequence generator
+    implementation project(':libs.sequence-generator')
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+}
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}

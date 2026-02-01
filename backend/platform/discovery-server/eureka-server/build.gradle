@@ -26,13 +26,13 @@ repositories {
 
 dependencies {
     // Framework
-    implementation project(':framework')
+    implementation project(':libs.framework')
 
     // Lib
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
 
     // Infrastructure
-    implementation project(':observability')
+    implementation project(':libs.observability')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

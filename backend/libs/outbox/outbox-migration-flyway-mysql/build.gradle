@@ -25,7 +25,8 @@ repositories {
 }
 
 dependencies {
-    api project(':migration.flyway.mysql')
+    // Libs
+    api project(':libs.migration.flyway.mysql')
 }
 
 bootJar {

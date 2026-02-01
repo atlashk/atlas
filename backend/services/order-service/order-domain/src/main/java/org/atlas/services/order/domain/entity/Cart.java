@@ -30,6 +30,10 @@ public class Cart extends DomainEntity {
   @Builder.Default
   private List<CartItem> cartItems = new ArrayList<>();
 
+  public boolean isEmpty() {
+    return CollectionUtil.isEmpty(cartItems);
+  }
+
   public BigDecimal getTotalAmount() {
     if (CollectionUtil.isEmpty(cartItems)) {
       return BigDecimal.ZERO;

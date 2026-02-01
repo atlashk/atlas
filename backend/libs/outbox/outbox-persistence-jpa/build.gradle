@@ -25,11 +25,9 @@ repositories {
 }
 
 dependencies {
-    // Framework
-    api project(':framework')
-
-    // Infrastructure
-    api project(':persistence.jpa')
+    // Libs
+    api project(':libs.framework')
+    api project(':libs.persistence.jpa')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

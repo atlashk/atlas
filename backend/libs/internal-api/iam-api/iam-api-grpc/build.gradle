@@ -26,9 +26,9 @@ repositories {
 
 dependencies {
     // Infrastructure
-    api project(':api.client.grpc')
-    api project(':protobuf')
-    api project(':resilience.resilience4j')
+    api project(':libs.api.client.grpc')
+    api project(':libs.protobuf')
+    api project(':libs.resilience.resilience4j')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

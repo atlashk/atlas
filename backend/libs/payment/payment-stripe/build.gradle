@@ -26,7 +26,7 @@ repositories {
 
 dependencies {
     // Framework
-    api project(':framework')
+    api project(':libs.framework')
 
     // Lib
     implementation 'com.stripe:stripe-java:29.5.0'

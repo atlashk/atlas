@@ -25,14 +25,15 @@ repositories {
 }
 
 dependencies {
+    // Libs
     switch (rootProject.ext.appStack['migration']) {
         case 'flyway':
             switch (rootProject.ext.appStack['datasource']) {
                 case 'mysql':
-                    implementation project(':saga.migration.flyway.mysql')
+                    implementation project(':libs.saga.migration.flyway.mysql')
                     break
                 case 'postgres':
-                    implementation project(':saga.migration.flyway.postgres')
+                    implementation project(':libs.saga.migration.flyway.postgres')
                     break
                 default:
                     throw new IllegalArgumentException("Unsupported datasource: ${rootProject.ext.appStack['datasource']}")
@@ -43,7 +44,7 @@ dependencies {
     }
     switch (rootProject.ext.appStack.persistence) {
         case 'jpa':
-            implementation project(':saga.persistence.jpa')
+            implementation project(':libs.saga.persistence.jpa')
             break
         default:
             throw new IllegalArgumentException("Unsupported persistence: ${rootProject.ext.appStack.persistence}")

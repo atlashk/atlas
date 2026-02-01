@@ -26,12 +26,12 @@ repositories {
 
 dependencies {
     // Actuator
-    implementation project(':observability.actuator')
+    implementation project(':libs.observability.actuator')
 
     // Logging
     switch (rootProject.ext.appStack['observability.logging.framework']) {
         case 'logback':
-            implementation project(':observability.logging.logback')
+            implementation project(':libs.observability.logging.logback')
             break
         default:
             throw new IllegalArgumentException("Unsupported observability.logging.framework: ${rootProject.ext.appStack['observability.logging.framework']}")
@@ -42,7 +42,7 @@ dependencies {
         case 'none':
             break;
         case 'prometheus':
-            implementation project(':observability.metrics.prometheus')
+            implementation project(':libs.observability.metrics.prometheus')
             break
         default:
             throw new IllegalArgumentException("Unsupported observability.metrics: ${rootProject.ext.appStack['observability.metrics']}")
@@ -53,7 +53,7 @@ dependencies {
         case 'none':
             break
         case 'zipkin':
-            implementation project(':observability.tracing.zipkin')
+            implementation project(':libs.observability.tracing.zipkin')
             break
         default:
             throw new IllegalArgumentException("Unsupported observability.tracing: ${rootProject.ext.appStack['observability.tracing']}")

@@ -25,7 +25,8 @@ repositories {
 }
 
 dependencies {
-    api project(':framework')
+    // Libs
+    api project(':libs.framework')
 
     // Lombok
     compileOnly "org.projectlombok:lombok:${lombokVersion}"

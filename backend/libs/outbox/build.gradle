@@ -29,10 +29,10 @@ dependencies {
         case 'flyway':
             switch (rootProject.ext.appStack['datasource']) {
                 case 'mysql':
-                    implementation project(':outbox.migration.flyway.mysql')
+                    implementation project(':libs.outbox.migration.flyway.mysql')
                     break
                 case 'postgres':
-                    implementation project(':outbox.migration.flyway.postgres')
+                    implementation project(':libs.outbox.migration.flyway.postgres')
                     break
                 default:
                     throw new IllegalArgumentException("Unsupported datasource: ${rootProject.ext.appStack['datasource']}")
@@ -43,17 +43,17 @@ dependencies {
     }
     switch (rootProject.ext.appStack.persistence) {
         case 'jpa':
-            implementation project(':outbox.persistence.jpa')
+            implementation project(':libs.outbox.persistence.jpa')
             break
         default:
             throw new IllegalArgumentException("Unsupported persistence: ${rootProject.ext.appStack.persistence}")
     }
     switch (rootProject.ext.appStack['scheduler']) {
         case 'spring':
-            implementation project(':outbox.scheduler.spring')
+            implementation project(':libs.outbox.scheduler.spring')
             break
         case 'quartz':
-            implementation project(':outbox.scheduler.quartz')
+            implementation project(':libs.outbox.scheduler.quartz')
             break
         default:
             throw new IllegalArgumentException("Unsupported scheduler: ${rootProject.ext.appStack['scheduler']}")

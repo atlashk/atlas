@@ -32,30 +32,30 @@ dependencies {
     // Infrastructure
     switch (rootProject.ext.appStack['iam']) {
         case 'keycloak':
-            implementation project(':api-gateway.spring-cloud-gateway.security.keycloak')
+            implementation project(':services.api-gateway.spring-cloud-gateway.security.keycloak')
             break
         case 'jwt':
-            implementation project(':api-gateway.spring-cloud-gateway.security.jwt')
+            implementation project(':services.api-gateway.spring-cloud-gateway.security.jwt')
             break
         default:
             throw new IllegalArgumentException("Unsupported IAM: ${rootProject.ext.appStack['iam']}")
     }
     switch (rootProject.ext.appStack['kv-store']) {
         case 'redis':
-            implementation project(':kv-store.redis-reactive')
+            implementation project(':libs.kv-store.redis-reactive')
             break
         default:
             throw new IllegalArgumentException("Unsupported kv-store: ${rootProject.ext.appStack['kv-store']}")
     }
-    implementation project(':observability')
+    implementation project(':libs.observability')
     switch (rootProject.ext.appStack['service-discovery']) {
         case 'none':
             break
         case 'eureka':
-            implementation project(':discovery-client.eureka')
+            implementation project(':libs.discovery-client.eureka')
             break
         case 'kubernetes':
-            implementation project(':discovery-client.kubernetes')
+            implementation project(':libs.discovery-client.kubernetes')
             break
         default:
             throw new IllegalArgumentException("Unsupported service-discovery: ${rootProject.ext.appStack['service-discovery']}")

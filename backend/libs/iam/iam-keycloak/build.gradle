@@ -25,14 +25,10 @@ repositories {
 }
 
 dependencies {
-    // Lib
+    // Libs
+    api project(':libs.framework')
+    api project(':libs.api.client.rest.restclient')
     api 'org.keycloak:keycloak-admin-client:26.0.7'
-
-    // Framework
-    api project(':framework')
-
-    // Infrastructure
-    implementation project(':api.client.rest.restclient')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

@@ -26,7 +26,7 @@ repositories {
 
 dependencies {
     // Framework
-    api project(':framework')
+    api project(':libs.framework')
 
     // Lib
     api 'org.springframework.boot:spring-boot-starter-amqp'
@@ -36,7 +36,7 @@ dependencies {
         case 'none':
             break
         case 'zipkin':
-            implementation project(':observability.tracing.zipkin')
+            implementation project(':libs.observability.tracing.zipkin')
             break
         default:
             throw new IllegalArgumentException("Unsupported observability.tracing: ${rootProject.ext.appStack['observability.tracing']}")

@@ -25,11 +25,9 @@ repositories {
 }
 
 dependencies {
-    // Framework
-    api project(':framework')
-
-    // Infrastructure
-    api project(':scheduler.quartz')
+    // Libs
+    api project(':libs.framework')
+    api project(':libs.scheduler.quartz')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

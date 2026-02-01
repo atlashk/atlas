@@ -3,219 +3,215 @@
 // =================================================================================================
 
 // Framework
-include(':framework')
-project(':framework').projectDir = file('libs/framework')
+include(':libs.framework')
+project(':libs.framework').projectDir = file('libs/framework')
 
 // API Client
-include(':api.client.grpc')
-project(':api.client.grpc').projectDir = file('libs/api-client/api-client-grpc')
-include(':api.client.rest.apachehttpclient')
-project(':api.client.rest.apachehttpclient').projectDir = file('libs/api-client/api-client-rest-apachehttpclient')
-include(':api.client.rest.feign')
-project(':api.client.rest.feign').projectDir = file('libs/api-client/api-client-rest-feign')
-include(':api.client.rest.model')
-project(':api.client.rest.model').projectDir = file('libs/api-client/api-client-rest-model')
-include(':api.client.rest.restclient')
-project(':api.client.rest.restclient').projectDir = file('libs/api-client/api-client-rest-restclient')
-include(':api.client.rest.resttemplate')
-project(':api.client.rest.resttemplate').projectDir = file('libs/api-client/api-client-rest-resttemplate')
+include(':libs.api.client.grpc')
+project(':libs.api.client.grpc').projectDir = file('libs/api-client/api-client-grpc')
+include(':libs.api.client.rest.apachehttpclient')
+project(':libs.api.client.rest.apachehttpclient').projectDir = file('libs/api-client/api-client-rest-apachehttpclient')
+include(':libs.api.client.rest.feign')
+project(':libs.api.client.rest.feign').projectDir = file('libs/api-client/api-client-rest-feign')
+include(':libs.api.client.rest.model')
+project(':libs.api.client.rest.model').projectDir = file('libs/api-client/api-client-rest-model')
+include(':libs.api.client.rest.restclient')
+project(':libs.api.client.rest.restclient').projectDir = file('libs/api-client/api-client-rest-restclient')
+include(':libs.api.client.rest.resttemplate')
+project(':libs.api.client.rest.resttemplate').projectDir = file('libs/api-client/api-client-rest-resttemplate')
 
 // API Server
 
-include(':api.server.rest')
-project(':api.server.rest').projectDir = file('libs/api-server/api-server-rest')
-include(':api.server.grpc')
-project(':api.server.grpc').projectDir = file('libs/api-server/api-server-grpc')
+include(':libs.api.server.rest')
+project(':libs.api.server.rest').projectDir = file('libs/api-server/api-server-rest')
+include(':libs.api.server.grpc')
+project(':libs.api.server.grpc').projectDir = file('libs/api-server/api-server-grpc')
 
 // Datasource
 
-include(':datasource.mysql')
-project(':datasource.mysql').projectDir = file('libs/datasource/datasource-mysql')
-include(':datasource.postgres')
-project(':datasource.postgres').projectDir = file('libs/datasource/datasource-postgres')
+include(':libs.datasource.mysql')
+project(':libs.datasource.mysql').projectDir = file('libs/datasource/datasource-mysql')
+include(':libs.datasource.postgres')
+project(':libs.datasource.postgres').projectDir = file('libs/datasource/datasource-postgres')
 
 // Discovery client
-include(':discovery-client.eureka')
-project(':discovery-client.eureka').projectDir = file('libs/discovery-client/discovery-client-eureka')
-include(':discovery-client.kubernetes')
-project(':discovery-client.kubernetes').projectDir = file('libs/discovery-client/discovery-client-kubernetes')
+include(':libs.discovery-client.eureka')
+project(':libs.discovery-client.eureka').projectDir = file('libs/discovery-client/discovery-client-eureka')
+include(':libs.discovery-client.kubernetes')
+project(':libs.discovery-client.kubernetes').projectDir = file('libs/discovery-client/discovery-client-kubernetes')
 
 // File
 
 // File::CSV
-include(':file.csv.opencsv')
-project(':file.csv.opencsv').projectDir = file('libs/file/csv/csv-opencsv')
+include(':libs.file.csv.opencsv')
+project(':libs.file.csv.opencsv').projectDir = file('libs/file/csv/csv-opencsv')
 
 // File::Excel
-include(':file.excel.easyexcel')
-project(':file.excel.easyexcel').projectDir = file('libs/file/excel/excel-easyexcel')
-include(':file.excel.poi')
-project(':file.excel.poi').projectDir = file('libs/file/excel/excel-poi')
+include(':libs.file.excel.easyexcel')
+project(':libs.file.excel.easyexcel').projectDir = file('libs/file/excel/excel-easyexcel')
+include(':libs.file.excel.poi')
+project(':libs.file.excel.poi').projectDir = file('libs/file/excel/excel-poi')
 
 // File::PDF
-include(':file.pdf.pdfbox')
-project(':file.pdf.pdfbox').projectDir = file('libs/file/pdf/pdf-pdfbox')
+include(':libs.file.pdf.pdfbox')
+project(':libs.file.pdf.pdfbox').projectDir = file('libs/file/pdf/pdf-pdfbox')
 
 // Full-text Search
-include(':full-text-search.elasticsearch')
-project(':full-text-search.elasticsearch').projectDir = file('libs/full-text-search/full-text-search-elasticsearch')
-
-// IAM
-include(':iam.keycloak')
-project(':iam.keycloak').projectDir = file('libs/iam/iam-keycloak')
+include(':libs.full-text-search.elasticsearch')
+project(':libs.full-text-search.elasticsearch').projectDir = file('libs/full-text-search/full-text-search-elasticsearch')
 
 // Internal API
 
 // Internal API::IAM
-include(':internal-api.iam.grpc')
-project(':internal-api.iam.grpc').projectDir = file('libs/internal-api/iam-api/iam-api-grpc')
-include(':internal-api.iam.rest')
-project(':internal-api.iam.rest').projectDir = file('libs/internal-api/iam-api/iam-api-rest')
+include(':libs.internal-api.iam.grpc')
+project(':libs.internal-api.iam.grpc').projectDir = file('libs/internal-api/iam-api/iam-api-grpc')
+include(':libs.internal-api.iam.rest')
+project(':libs.internal-api.iam.rest').projectDir = file('libs/internal-api/iam-api/iam-api-rest')
 
 // Internal API::Catalog
-include(':internal-api.catalog.grpc')
-project(':internal-api.catalog.grpc').projectDir = file('libs/internal-api/catalog-api/catalog-api-grpc')
-include(':internal-api.catalog.rest')
-project(':internal-api.catalog.rest').projectDir = file('libs/internal-api/catalog-api/catalog-api-rest')
+include(':libs.internal-api.catalog.grpc')
+project(':libs.internal-api.catalog.grpc').projectDir = file('libs/internal-api/catalog-api/catalog-api-grpc')
+include(':libs.internal-api.catalog.rest')
+project(':libs.internal-api.catalog.rest').projectDir = file('libs/internal-api/catalog-api/catalog-api-rest')
 
 // Key-Value Store
 
 // Key-Value Store::Redis
-include(':kv-store.redis')
-project(':kv-store.redis').projectDir = file('libs/kv-store/kv-store-redis')
-include(':kv-store.redis-reactive')
-project(':kv-store.redis-reactive').projectDir = file('libs/kv-store/kv-store-redis-reactive')
-include(':kv-store.redis.connector.cluster')
-project(':kv-store.redis.connector.cluster').projectDir = file('libs/kv-store/kv-store-redis-connector-cluster')
-include(':kv-store.redis.connector.standalone')
-project(':kv-store.redis.connector.standalone').projectDir = file('libs/kv-store/kv-store-redis-connector-standalone')
+include(':libs.kv-store.redis')
+project(':libs.kv-store.redis').projectDir = file('libs/kv-store/kv-store-redis')
+include(':libs.kv-store.redis-reactive')
+project(':libs.kv-store.redis-reactive').projectDir = file('libs/kv-store/kv-store-redis-reactive')
+include(':libs.kv-store.redis.connector.cluster')
+project(':libs.kv-store.redis.connector.cluster').projectDir = file('libs/kv-store/kv-store-redis-connector-cluster')
+include(':libs.kv-store.redis.connector.standalone')
+project(':libs.kv-store.redis.connector.standalone').projectDir = file('libs/kv-store/kv-store-redis-connector-standalone')
 
 // Messaging
-include(':messaging.kafka')
-project(':messaging.kafka').projectDir = file('libs/messaging/messaging-kafka')
-include(':messaging.rabbitmq')
-project(':messaging.rabbitmq').projectDir = file('libs/messaging/messaging-rabbitmq')
+include(':libs.messaging.kafka')
+project(':libs.messaging.kafka').projectDir = file('libs/messaging/messaging-kafka')
+include(':libs.messaging.rabbitmq')
+project(':libs.messaging.rabbitmq').projectDir = file('libs/messaging/messaging-rabbitmq')
 
 // Migration
 
 // Migration::Flyway
-include(':migration.flyway.mysql')
-project(':migration.flyway.mysql').projectDir = file('libs/migration/flyway/migration-flyway-mysql')
-include(':migration.flyway.postgres')
-project(':migration.flyway.postgres').projectDir = file('libs/migration/flyway/migration-flyway-postgres')
+include(':libs.migration.flyway.mysql')
+project(':libs.migration.flyway.mysql').projectDir = file('libs/migration/flyway/migration-flyway-mysql')
+include(':libs.migration.flyway.postgres')
+project(':libs.migration.flyway.postgres').projectDir = file('libs/migration/flyway/migration-flyway-postgres')
 
 // Notification
 
 // Notification::Email
-include(':notification.email.spring')
-project(':notification.email.spring').projectDir = file('libs/notification/email/email-spring')
-include(':notification.email.sendgrid')
-project(':notification.email.sendgrid').projectDir = file('libs/notification/email/email-sendgrid')
+include(':libs.notification.email.spring')
+project(':libs.notification.email.spring').projectDir = file('libs/notification/email/email-spring')
+include(':libs.notification.email.sendgrid')
+project(':libs.notification.email.sendgrid').projectDir = file('libs/notification/email/email-sendgrid')
 
 // Notification::In-App
-include(':notification.in-app.sse')
-project(':notification.in-app.sse').projectDir = file('libs/notification/in-app/in-app-sse')
-include(':notification.in-app.websocket')
-project(':notification.in-app.websocket').projectDir = file('libs/notification/in-app/in-app-websocket')
+include(':libs.notification.in-app.sse')
+project(':libs.notification.in-app.sse').projectDir = file('libs/notification/in-app/in-app-sse')
+include(':libs.notification.in-app.websocket')
+project(':libs.notification.in-app.websocket').projectDir = file('libs/notification/in-app/in-app-websocket')
 
 // Observability
 
-include(':observability')
-project(':observability').projectDir = file('libs/observability')
+include(':libs.observability')
+project(':libs.observability').projectDir = file('libs/observability')
 
 // Observability::Actuator
-include(':observability.actuator')
-project(':observability.actuator').projectDir = file('libs/observability/actuator')
+include(':libs.observability.actuator')
+project(':libs.observability.actuator').projectDir = file('libs/observability/actuator')
 
 // Observability::Logging
-include(':observability.logging.logback')
-project(':observability.logging.logback').projectDir = file('libs/observability/logging/logging-logback')
+include(':libs.observability.logging.logback')
+project(':libs.observability.logging.logback').projectDir = file('libs/observability/logging/logging-logback')
 
 // Observability::Metrics
-include(':observability.metrics.prometheus')
-project(':observability.metrics.prometheus').projectDir = file('libs/observability/metrics/metrics-prometheus')
+include(':libs.observability.metrics.prometheus')
+project(':libs.observability.metrics.prometheus').projectDir = file('libs/observability/metrics/metrics-prometheus')
 
 // Observability::Tracing
-include(':observability.tracing.zipkin')
-project(':observability.tracing.zipkin').projectDir = file('libs/observability/tracing/tracing-zipkin')
+include(':libs.observability.tracing.zipkin')
+project(':libs.observability.tracing.zipkin').projectDir = file('libs/observability/tracing/tracing-zipkin')
 
 // Outbox
-include(':outbox')
-project(':outbox').projectDir = file('libs/outbox')
-include(':outbox.migration.flyway.mysql')
-project(':outbox.migration.flyway.mysql').projectDir = file('libs/outbox/outbox-migration-flyway-mysql')
-include(':outbox.migration.flyway.postgres')
-project(':outbox.migration.flyway.postgres').projectDir = file('libs/outbox/outbox-migration-flyway-postgres')
-include(':outbox.persistence.jpa')
-project(':outbox.persistence.jpa').projectDir = file('libs/outbox/outbox-persistence-jpa')
-include(':outbox.scheduler.quartz')
-project(':outbox.scheduler.quartz').projectDir = file('libs/outbox/outbox-scheduler-quartz')
-include(':outbox.scheduler.spring')
-project(':outbox.scheduler.spring').projectDir = file('libs/outbox/outbox-scheduler-spring')
+include(':libs.outbox')
+project(':libs.outbox').projectDir = file('libs/outbox')
+include(':libs.outbox.migration.flyway.mysql')
+project(':libs.outbox.migration.flyway.mysql').projectDir = file('libs/outbox/outbox-migration-flyway-mysql')
+include(':libs.outbox.migration.flyway.postgres')
+project(':libs.outbox.migration.flyway.postgres').projectDir = file('libs/outbox/outbox-migration-flyway-postgres')
+include(':libs.outbox.persistence.jpa')
+project(':libs.outbox.persistence.jpa').projectDir = file('libs/outbox/outbox-persistence-jpa')
+include(':libs.outbox.scheduler.quartz')
+project(':libs.outbox.scheduler.quartz').projectDir = file('libs/outbox/outbox-scheduler-quartz')
+include(':libs.outbox.scheduler.spring')
+project(':libs.outbox.scheduler.spring').projectDir = file('libs/outbox/outbox-scheduler-spring')
 
 // Payment
-include(':payment')
-project(':payment').projectDir = file('libs/payment')
-include(':payment.simulator')
-project(':payment.simulator').projectDir = file('libs/payment/payment-simulator')
-include(':payment.stripe')
-project(':payment.stripe').projectDir = file('libs/payment/payment-stripe')
+include(':libs.payment')
+project(':libs.payment').projectDir = file('libs/payment')
+include(':libs.payment.simulator')
+project(':libs.payment.simulator').projectDir = file('libs/payment/payment-simulator')
+include(':libs.payment.stripe')
+project(':libs.payment.stripe').projectDir = file('libs/payment/payment-stripe')
 
 // Persistence
-include(':persistence.jpa')
-project(':persistence.jpa').projectDir = file('libs/persistence/persistence-jpa')
+include(':libs.persistence.jpa')
+project(':libs.persistence.jpa').projectDir = file('libs/persistence/persistence-jpa')
 
 // Protobuf
-include(':protobuf')
-project(':protobuf').projectDir = file('libs/protobuf')
+include(':libs.protobuf')
+project(':libs.protobuf').projectDir = file('libs/protobuf')
 
 // Resilience
-include(':resilience.resilience4j')
-project(':resilience.resilience4j').projectDir = file('libs/resilience/resilience-resilience4j')
+include(':libs.resilience.resilience4j')
+project(':libs.resilience.resilience4j').projectDir = file('libs/resilience/resilience-resilience4j')
 
 // Saga
-include(':saga')
-project(':saga').projectDir = file('libs/saga')
-include(':saga.migration.flyway.mysql')
-project(':saga.migration.flyway.mysql').projectDir = file('libs/saga/saga-migration-flyway-mysql')
-include(':saga.migration.flyway.postgres')
-project(':saga.migration.flyway.postgres').projectDir = file('libs/saga/saga-migration-flyway-postgres')
-include(':saga.persistence.jpa')
-project(':saga.persistence.jpa').projectDir = file('libs/saga/saga-persistence-jpa')
+include(':libs.saga')
+project(':libs.saga').projectDir = file('libs/saga')
+include(':libs.saga.migration.flyway.mysql')
+project(':libs.saga.migration.flyway.mysql').projectDir = file('libs/saga/saga-migration-flyway-mysql')
+include(':libs.saga.migration.flyway.postgres')
+project(':libs.saga.migration.flyway.postgres').projectDir = file('libs/saga/saga-migration-flyway-postgres')
+include(':libs.saga.persistence.jpa')
+project(':libs.saga.persistence.jpa').projectDir = file('libs/saga/saga-persistence-jpa')
 
 // Scheduler
 
 // Scheduler::Spring
-include(':scheduler.spring')
-project(':scheduler.spring').projectDir = file('libs/scheduler/spring/scheduler-spring')
+include(':libs.scheduler.spring')
+project(':libs.scheduler.spring').projectDir = file('libs/scheduler/spring/scheduler-spring')
 
 // Scheduler::Quartz
-include(':scheduler.quartz')
-project(':scheduler.quartz').projectDir = file('libs/scheduler/quartz/scheduler-quartz')
-include(':scheduler.quartz.jobstore.mysql')
-project(':scheduler.quartz.jobstore.mysql').projectDir = file('libs/scheduler/quartz/scheduler-quartz-jobstore-mysql')
-include(':scheduler.quartz.jobstore.postgres')
-project(':scheduler.quartz.jobstore.postgres').projectDir = file('libs/scheduler/quartz/scheduler-quartz-jobstore-postgres')
-include(':scheduler.quartz.migration.flyway.mysql')
-project(':scheduler.quartz.migration.flyway.mysql').projectDir = file('libs/scheduler/quartz/scheduler-quartz-migration-flyway-mysql')
-include(':scheduler.quartz.migration.flyway.postgres')
-project(':scheduler.quartz.migration.flyway.postgres').projectDir = file('libs/scheduler/quartz/scheduler-quartz-migration-flyway-postgres')
+include(':libs.scheduler.quartz')
+project(':libs.scheduler.quartz').projectDir = file('libs/scheduler/quartz/scheduler-quartz')
+include(':libs.scheduler.quartz.jobstore.mysql')
+project(':libs.scheduler.quartz.jobstore.mysql').projectDir = file('libs/scheduler/quartz/scheduler-quartz-jobstore-mysql')
+include(':libs.scheduler.quartz.jobstore.postgres')
+project(':libs.scheduler.quartz.jobstore.postgres').projectDir = file('libs/scheduler/quartz/scheduler-quartz-jobstore-postgres')
+include(':libs.scheduler.quartz.migration.flyway.mysql')
+project(':libs.scheduler.quartz.migration.flyway.mysql').projectDir = file('libs/scheduler/quartz/scheduler-quartz-migration-flyway-mysql')
+include(':libs.scheduler.quartz.migration.flyway.postgres')
+project(':libs.scheduler.quartz.migration.flyway.postgres').projectDir = file('libs/scheduler/quartz/scheduler-quartz-migration-flyway-postgres')
 
 // Sequence generator
-include(':sequence-generator')
-project(':sequence-generator').projectDir = file('libs/sequence-generator')
+include(':libs.sequence-generator')
+project(':libs.sequence-generator').projectDir = file('libs/sequence-generator')
 
 // Storage
-include(':storage.filesystem')
-project(':storage.filesystem').projectDir = file('libs/storage/storage-filesystem')
-include(':storage.minio')
-project(':storage.minio').projectDir = file('libs/storage/storage-minio')
+include(':libs.storage.filesystem')
+project(':libs.storage.filesystem').projectDir = file('libs/storage/storage-filesystem')
+include(':libs.storage.minio')
+project(':libs.storage.minio').projectDir = file('libs/storage/storage-minio')
 
 // Template
-include(':template.freemarker')
-project(':template.freemarker').projectDir = file('libs/template/template-freemarker')
-include(':template.thymeleaf')
-project(':template.thymeleaf').projectDir = file('libs/template/template-thymeleaf')
+include(':libs.template.freemarker')
+project(':libs.template.freemarker').projectDir = file('libs/template/template-freemarker')
+include(':libs.template.thymeleaf')
+project(':libs.template.thymeleaf').projectDir = file('libs/template/template-thymeleaf')
 
 // =================================================================================================
 // Services
@@ -225,180 +221,204 @@ project(':template.thymeleaf').projectDir = file('libs/template/template-thymele
 // IAM Service
 // -------------------------------------------------------------------------------------------------
 
-include(':iam.domain')
-project(':iam.domain').projectDir = file('services/iam-service/iam-domain')
+include(':services.iam.domain')
+project(':services.iam.domain').projectDir = file('services/iam-service/iam-domain')
 
-include(':iam.port')
-project(':iam.port').projectDir = file('services/iam-service/iam-port')
+include(':services.iam.port')
+project(':services.iam.port').projectDir = file('services/iam-service/iam-port')
 
-include(':iam.jwt')
-project(':iam.jwt').projectDir = file('services/iam-service/iam-application/iam-jwt')
-include(':iam.keycloak')
-project(':iam.keycloak').projectDir = file('services/iam-service/iam-application/iam-keycloak')
+include(':services.iam.application')
+project(':services.iam.application').projectDir = file('services/iam-service/iam-application')
+include(':services.iam.jwt')
+project(':services.iam.jwt').projectDir = file('services/iam-service/iam-application/iam-jwt')
+include(':services.iam.keycloak')
+project(':services.iam.keycloak').projectDir = file('services/iam-service/iam-application/iam-keycloak')
 
-include(':iam.api.server.grpc')
-project(':iam.api.server.grpc').projectDir = file('services/iam-service/iam-infrastructure/iam-api-server-grpc')
-include(':iam.api.server.rest')
-project(':iam.api.server.rest').projectDir = file('services/iam-service/iam-infrastructure/iam-api-server-rest')
-include(':iam.datasource.mysql')
-project(':iam.datasource.mysql').projectDir = file('services/iam-service/iam-infrastructure/iam-datasource-mysql')
-include(':iam.datasource.postgres')
-project(':iam.datasource.postgres').projectDir = file('services/iam-service/iam-infrastructure/iam-datasource-postgres')
-include(':iam.migration.flyway.mysql')
-project(':iam.migration.flyway.mysql').projectDir = file('services/iam-service/iam-infrastructure/iam-migration-flyway-mysql')
-include(':iam.migration.flyway.postgres')
-project(':iam.migration.flyway.postgres').projectDir = file('services/iam-service/iam-infrastructure/iam-migration-flyway-postgres')
-include(':iam.persistence.jpa')
-project(':iam.persistence.jpa').projectDir = file('services/iam-service/iam-infrastructure/iam-persistence-jpa')
+include(':services.iam.infrastructure')
+project(':services.iam.infrastructure').projectDir = file('services/iam-service/iam-infrastructure')
+include(':services.iam.api.server.grpc')
+project(':services.iam.api.server.grpc').projectDir = file('services/iam-service/iam-infrastructure/iam-api-server-grpc')
+include(':services.iam.api.server.rest')
+project(':services.iam.api.server.rest').projectDir = file('services/iam-service/iam-infrastructure/iam-api-server-rest')
+include(':services.iam.datasource.mysql')
+project(':services.iam.datasource.mysql').projectDir = file('services/iam-service/iam-infrastructure/iam-datasource-mysql')
+include(':services.iam.datasource.postgres')
+project(':services.iam.datasource.postgres').projectDir = file('services/iam-service/iam-infrastructure/iam-datasource-postgres')
+include(':services.iam.migration.flyway.mysql')
+project(':services.iam.migration.flyway.mysql').projectDir = file('services/iam-service/iam-infrastructure/iam-migration-flyway-mysql')
+include(':services.iam.migration.flyway.postgres')
+project(':services.iam.migration.flyway.postgres').projectDir = file('services/iam-service/iam-infrastructure/iam-migration-flyway-postgres')
+include(':services.iam.persistence.jpa')
+project(':services.iam.persistence.jpa').projectDir = file('services/iam-service/iam-infrastructure/iam-persistence-jpa')
 
-include(':iam.bootstrap')
-project(':iam.bootstrap').projectDir = file('services/iam-service/iam-bootstrap')
+include(':services.iam.bootstrap')
+project(':services.iam.bootstrap').projectDir = file('services/iam-service/iam-bootstrap')
 
 // -------------------------------------------------------------------------------------------------
 // Product Service
 // -------------------------------------------------------------------------------------------------
 
-include(':product.domain')
-project(':product.domain').projectDir = file('services/product-service/product-domain')
+include(':services.product.domain')
+project(':services.product.domain').projectDir = file('services/product-service/product-domain')
 
-include(':product.application')
-project(':product.application').projectDir = file('services/product-service/product-application')
+include(':services.product.port')
+project(':services.product.port').projectDir = file('services/product-service/product-port')
 
-include(':product.api.server.grpc')
-project(':product.api.server.grpc').projectDir = file('services/product-service/product-api-server-grpc')
-include(':product.api.server.rest')
-project(':product.api.server.rest').projectDir = file('services/product-service/product-api-server-rest')
-include(':product.datasource.mysql')
-project(':product.datasource.mysql').projectDir = file('services/product-service/product-datasource-mysql')
-include(':product.datasource.postgres')
-project(':product.datasource.postgres').projectDir = file('services/product-service/product-datasource-postgres')
-include(':product.file.csv.opencsv')
-project(':product.file.csv.opencsv').projectDir = file('services/product-service/product-file-csv-opencsv')
-include(':product.file.excel.easyexcel')
-project(':product.file.excel.easyexcel').projectDir = file('services/product-service/product-file-excel-easyexcel')
-include(':product.file.excel.poi')
-project(':product.file.excel.poi').projectDir = file('services/product-service/product-file-excel-poi')
-include(':product.file.pdf.pdfbox')
-project(':product.file.pdf.pdfbox').projectDir = file('services/product-service/product-file-pdf-pdfbox')
-include(':product.full-text-search.elasticsearch')
-project(':product.full-text-search.elasticsearch').projectDir = file('services/product-service/product-full-text-search-elasticsearch')
-include(':product.messaging.kafka')
-project(':product.messaging.kafka').projectDir = file('services/product-service/product-messaging-kafka')
-include(':product.messaging.rabbitmq')
-project(':product.messaging.rabbitmq').projectDir = file('services/product-service/product-messaging-rabbitmq')
-include(':product.migration.flyway.mysql')
-project(':product.migration.flyway.mysql').projectDir = file('services/product-service/product-migration-flyway-mysql')
-include(':product.migration.flyway.postgres')
-project(':product.migration.flyway.postgres').projectDir = file('services/product-service/product-migration-flyway-postgres')
-include(':product.persistence.jpa')
-project(':product.persistence.jpa').projectDir = file('services/product-service/product-persistence-jpa')
+include(':services.product.application')
+project(':services.product.application').projectDir = file('services/product-service/product-application')
 
-include(':product.bootstrap')
-project(':product.bootstrap').projectDir = file('services/product-service/product-bootstrap')
+include(':services.product.infrastructure')
+project(':services.product.infrastructure').projectDir = file('services/product-service/product-infrastructure')
+include(':services.product.api.server.grpc')
+project(':services.product.api.server.grpc').projectDir = file('services/product-service/product-infrastructure/product-api-server-grpc')
+include(':services.product.api.server.rest')
+project(':services.product.api.server.rest').projectDir = file('services/product-service/product-infrastructure/product-api-server-rest')
+include(':services.product.datasource.mysql')
+project(':services.product.datasource.mysql').projectDir = file('services/product-service/product-infrastructure/product-datasource-mysql')
+include(':services.product.datasource.postgres')
+project(':services.product.datasource.postgres').projectDir = file('services/product-service/product-infrastructure/product-datasource-postgres')
+include(':services.product.file.csv.opencsv')
+project(':services.product.file.csv.opencsv').projectDir = file('services/product-service/product-infrastructure/product-file-csv-opencsv')
+include(':services.product.file.excel.easyexcel')
+project(':services.product.file.excel.easyexcel').projectDir = file('services/product-service/product-infrastructure/product-file-excel-easyexcel')
+include(':services.product.file.excel.poi')
+project(':services.product.file.excel.poi').projectDir = file('services/product-service/product-infrastructure/product-file-excel-poi')
+include(':services.product.file.pdf.pdfbox')
+project(':services.product.file.pdf.pdfbox').projectDir = file('services/product-service/product-infrastructure/product-file-pdf-pdfbox')
+include(':services.product.full-text-search.elasticsearch')
+project(':services.product.full-text-search.elasticsearch').projectDir = file('services/product-service/product-infrastructure/product-full-text-search-elasticsearch')
+include(':services.product.messaging.kafka')
+project(':services.product.messaging.kafka').projectDir = file('services/product-service/product-infrastructure/product-messaging-kafka')
+include(':services.product.messaging.rabbitmq')
+project(':services.product.messaging.rabbitmq').projectDir = file('services/product-service/product-infrastructure/product-messaging-rabbitmq')
+include(':services.product.migration.flyway.mysql')
+project(':services.product.migration.flyway.mysql').projectDir = file('services/product-service/product-infrastructure/product-migration-flyway-mysql')
+include(':services.product.migration.flyway.postgres')
+project(':services.product.migration.flyway.postgres').projectDir = file('services/product-service/product-infrastructure/product-migration-flyway-postgres')
+include(':services.product.persistence.jpa')
+project(':services.product.persistence.jpa').projectDir = file('services/product-service/product-infrastructure/product-persistence-jpa')
+
+include(':services.product.bootstrap')
+project(':services.product.bootstrap').projectDir = file('services/product-service/product-bootstrap')
 
 // -------------------------------------------------------------------------------------------------
 // Order Service
 // -------------------------------------------------------------------------------------------------
 
-include(':order.domain')
-project(':order.domain').projectDir = file('services/order-service/order-domain')
+include(':services.order.domain')
+project(':services.order.domain').projectDir = file('services/order-service/order-domain')
 
-include(':order.application')
-project(':order.application').projectDir = file('services/order-service/order-application')
+include(':services.order.port')
+project(':services.order.port').projectDir = file('services/order-service/order-port')
 
-include(':order.api.server.rest')
-project(':order.api.server.rest').projectDir = file('services/order-service/order-api-server-rest')
-include(':order.datasource.mysql')
-project(':order.datasource.mysql').projectDir = file('services/order-service/order-datasource-mysql')
-include(':order.datasource.postgres')
-project(':order.datasource.postgres').projectDir = file('services/order-service/order-datasource-postgres')
-include(':order.messaging.kafka')
-project(':order.messaging.kafka').projectDir = file('services/order-service/order-messaging-kafka')
-include(':order.messaging.rabbitmq')
-project(':order.messaging.rabbitmq').projectDir = file('services/order-service/order-messaging-rabbitmq')
-include(':order.migration.flyway.mysql')
-project(':order.migration.flyway.mysql').projectDir = file('services/order-service/order-migration-flyway-mysql')
-include(':order.migration.flyway.postgres')
-project(':order.migration.flyway.postgres').projectDir = file('services/order-service/order-migration-flyway-postgres')
-include(':order.persistence.jpa')
-project(':order.persistence.jpa').projectDir = file('services/order-service/order-persistence-jpa')
+include(':services.order.application')
+project(':services.order.application').projectDir = file('services/order-service/order-application')
 
-include(':order.bootstrap')
-project(':order.bootstrap').projectDir = file('services/order-service/order-bootstrap')
+include(':services.order.infrastructure')
+project(':services.order.infrastructure').projectDir = file('services/order-service/order-infrastructure')
+include(':services.order.api.server.rest')
+project(':services.order.api.server.rest').projectDir = file('services/order-service/order-infrastructure/order-api-server-rest')
+include(':services.order.datasource.mysql')
+project(':services.order.datasource.mysql').projectDir = file('services/order-service/order-infrastructure/order-datasource-mysql')
+include(':services.order.datasource.postgres')
+project(':services.order.datasource.postgres').projectDir = file('services/order-service/order-infrastructure/order-datasource-postgres')
+include(':services.order.messaging.kafka')
+project(':services.order.messaging.kafka').projectDir = file('services/order-service/order-infrastructure/order-messaging-kafka')
+include(':services.order.messaging.rabbitmq')
+project(':services.order.messaging.rabbitmq').projectDir = file('services/order-service/order-infrastructure/order-messaging-rabbitmq')
+include(':services.order.migration.flyway.mysql')
+project(':services.order.migration.flyway.mysql').projectDir = file('services/order-service/order-infrastructure/order-migration-flyway-mysql')
+include(':services.order.migration.flyway.postgres')
+project(':services.order.migration.flyway.postgres').projectDir = file('services/order-service/order-infrastructure/order-migration-flyway-postgres')
+include(':services.order.persistence.jpa')
+project(':services.order.persistence.jpa').projectDir = file('services/order-service/order-infrastructure/order-persistence-jpa')
+
+include(':services.order.bootstrap')
+project(':services.order.bootstrap').projectDir = file('services/order-service/order-bootstrap')
 
 // =================================================================================================
 // Payment Service
 // =================================================================================================
 
-include(':payment.domain')
-project(':payment.domain').projectDir = file('services/payment-service/payment-domain')
+include(':services.payment.domain')
+project(':services.payment.domain').projectDir = file('services/payment-service/payment-domain')
 
-include(':payment.application')
-project(':payment.application').projectDir = file('services/payment-service/payment-application')
+include(':services.payment.port')
+project(':services.payment.port').projectDir = file('services/payment-service/payment-port')
 
-include(':payment.api.server.rest')
-project(':payment.api.server.rest').projectDir = file('services/payment-service/payment-api-server-rest')
-include(':payment.datasource.mysql')
-project(':payment.datasource.mysql').projectDir = file('services/payment-service/payment-datasource-mysql')
-include(':payment.datasource.postgres')
-project(':payment.datasource.postgres').projectDir = file('services/payment-service/payment-datasource-postgres')
-include(':payment.messaging.kafka')
-project(':payment.messaging.kafka').projectDir = file('services/payment-service/payment-messaging-kafka')
-include(':payment.messaging.rabbitmq')
-project(':payment.messaging.rabbitmq').projectDir = file('services/payment-service/payment-messaging-rabbitmq')
-include(':payment.migration.flyway.mysql')
-project(':payment.migration.flyway.mysql').projectDir = file('services/payment-service/payment-migration-flyway-mysql')
-include(':payment.migration.flyway.postgres')
-project(':payment.migration.flyway.postgres').projectDir = file('services/payment-service/payment-migration-flyway-postgres')
-include(':payment.persistence.jpa')
-project(':payment.persistence.jpa').projectDir = file('services/payment-service/payment-persistence-jpa')
+include(':services.payment.application')
+project(':services.payment.application').projectDir = file('services/payment-service/payment-application')
 
-include(':payment.bootstrap')
-project(':payment.bootstrap').projectDir = file('services/payment-service/payment-bootstrap')
+include(':services.payment.infrastructure')
+project(':services.payment.infrastructure').projectDir = file('services/payment-service/payment-infrastructure')
+include(':services.payment.api.server.rest')
+project(':services.payment.api.server.rest').projectDir = file('services/payment-service/payment-infrastructure/payment-api-server-rest')
+include(':services.payment.datasource.mysql')
+project(':services.payment.datasource.mysql').projectDir = file('services/payment-service/payment-infrastructure/payment-datasource-mysql')
+include(':services.payment.datasource.postgres')
+project(':services.payment.datasource.postgres').projectDir = file('services/payment-service/payment-infrastructure/payment-datasource-postgres')
+include(':services.payment.messaging.kafka')
+project(':services.payment.messaging.kafka').projectDir = file('services/payment-service/payment-infrastructure/payment-messaging-kafka')
+include(':services.payment.messaging.rabbitmq')
+project(':services.payment.messaging.rabbitmq').projectDir = file('services/payment-service/payment-infrastructure/payment-messaging-rabbitmq')
+include(':services.payment.migration.flyway.mysql')
+project(':services.payment.migration.flyway.mysql').projectDir = file('services/payment-service/payment-infrastructure/payment-migration-flyway-mysql')
+include(':services.payment.migration.flyway.postgres')
+project(':services.payment.migration.flyway.postgres').projectDir = file('services/payment-service/payment-infrastructure/payment-migration-flyway-postgres')
+include(':services.payment.persistence.jpa')
+project(':services.payment.persistence.jpa').projectDir = file('services/payment-service/payment-infrastructure/payment-persistence-jpa')
+
+include(':services.payment.bootstrap')
+project(':services.payment.bootstrap').projectDir = file('services/payment-service/payment-bootstrap')
 
 // -------------------------------------------------------------------------------------------------
 // Notification Service
 // -------------------------------------------------------------------------------------------------
 
-include(':notification.domain')
-project(':notification.domain').projectDir = file('services/notification-service/notification-domain')
+include(':services.notification.domain')
+project(':services.notification.domain').projectDir = file('services/notification-service/notification-domain')
 
-include(':notification.application')
-project(':notification.application').projectDir = file('services/notification-service/notification-application')
+include(':services.notification.port')
+project(':services.notification.port').projectDir = file('services/notification-service/notification-port')
 
-include(':notification.api.server.rest')
-project(':notification.api.server.rest').projectDir = file('services/notification-service/notification-api-server-rest')
-include(':notification.datasource.mysql')
-project(':notification.datasource.mysql').projectDir = file('services/notification-service/notification-datasource-mysql')
-include(':notification.datasource.postgres')
-project(':notification.datasource.postgres').projectDir = file('services/notification-service/notification-datasource-postgres')
-include(':notification.messaging.kafka')
-project(':notification.messaging.kafka').projectDir = file('services/notification-service/notification-messaging-kafka')
-include(':notification.messaging.rabbitmq')
-project(':notification.messaging.rabbitmq').projectDir = file('services/notification-service/notification-messaging-rabbitmq')
-include(':notification.migration.flyway.mysql')
-project(':notification.migration.flyway.mysql').projectDir = file('services/notification-service/notification-migration-flyway-mysql')
-include(':notification.migration.flyway.postgres')
-project(':notification.migration.flyway.postgres').projectDir = file('services/notification-service/notification-migration-flyway-postgres')
-include(':notification.persistence.jpa')
-project(':notification.persistence.jpa').projectDir = file('services/notification-service/notification-persistence-jpa')
+include(':services.notification.application')
+project(':services.notification.application').projectDir = file('services/notification-service/notification-application')
 
-include(':notification.bootstrap')
-project(':notification.bootstrap').projectDir = file('services/notification-service/notification-bootstrap')
+include(':services.notification.infrastructure')
+project(':services.notification.infrastructure').projectDir = file('services/notification-service/notification-infrastructure')
+include(':services.notification.api.server.rest')
+project(':services.notification.api.server.rest').projectDir = file('services/notification-service/notification-infrastructure/notification-api-server-rest')
+include(':services.notification.datasource.mysql')
+project(':services.notification.datasource.mysql').projectDir = file('services/notification-service/notification-infrastructure/notification-datasource-mysql')
+include(':services.notification.datasource.postgres')
+project(':services.notification.datasource.postgres').projectDir = file('services/notification-service/notification-infrastructure/notification-datasource-postgres')
+include(':services.notification.messaging.kafka')
+project(':services.notification.messaging.kafka').projectDir = file('services/notification-service/notification-infrastructure/notification-messaging-kafka')
+include(':services.notification.messaging.rabbitmq')
+project(':services.notification.messaging.rabbitmq').projectDir = file('services/notification-service/notification-infrastructure/notification-messaging-rabbitmq')
+include(':services.notification.migration.flyway.mysql')
+project(':services.notification.migration.flyway.mysql').projectDir = file('services/notification-service/notification-infrastructure/notification-migration-flyway-mysql')
+include(':services.notification.migration.flyway.postgres')
+project(':services.notification.migration.flyway.postgres').projectDir = file('services/notification-service/notification-infrastructure/notification-migration-flyway-postgres')
+include(':services.notification.persistence.jpa')
+project(':services.notification.persistence.jpa').projectDir = file('services/notification-service/notification-infrastructure/notification-persistence-jpa')
+
+include(':services.notification.bootstrap')
+project(':services.notification.bootstrap').projectDir = file('services/notification-service/notification-bootstrap')
 
 // -------------------------------------------------------------------------------------------------
 // API Gateway
 // -------------------------------------------------------------------------------------------------
 
 // API Gateway::Spring Cloud Gateway
-include(':api-gateway.spring-cloud-gateway.server')
-project(':api-gateway.spring-cloud-gateway.server').projectDir = file('services/api-gateway/spring-cloud-gateway/spring-cloud-gateway-server')
-include(':api-gateway.spring-cloud-gateway.security.core')
-project(':api-gateway.spring-cloud-gateway.security.core').projectDir = file('services/api-gateway/spring-cloud-gateway/spring-cloud-gateway-security-core')
-include(':api-gateway.spring-cloud-gateway.security.jwt')
-project(':api-gateway.spring-cloud-gateway.security.jwt').projectDir = file('services/api-gateway/spring-cloud-gateway/spring-cloud-gateway-security-jwt')
-include(':api-gateway.spring-cloud-gateway.security.keycloak')
-project(':api-gateway.spring-cloud-gateway.security.keycloak').projectDir = file('services/api-gateway/spring-cloud-gateway/spring-cloud-gateway-security-keycloak')
+include(':services.api-gateway.spring-cloud-gateway.server')
+project(':services.api-gateway.spring-cloud-gateway.server').projectDir = file('services/api-gateway/spring-cloud-gateway/spring-cloud-gateway-server')
+include(':services.api-gateway.spring-cloud-gateway.security.core')
+project(':services.api-gateway.spring-cloud-gateway.security.core').projectDir = file('services/api-gateway/spring-cloud-gateway/spring-cloud-gateway-security-core')
+include(':services.api-gateway.spring-cloud-gateway.security.jwt')
+project(':services.api-gateway.spring-cloud-gateway.security.jwt').projectDir = file('services/api-gateway/spring-cloud-gateway/spring-cloud-gateway-security-jwt')
+include(':services.api-gateway.spring-cloud-gateway.security.keycloak')
+project(':services.api-gateway.spring-cloud-gateway.security.keycloak').projectDir = file('services/api-gateway/spring-cloud-gateway/spring-cloud-gateway-security-keycloak')
 
 // =================================================================================================
 // Platform
@@ -408,12 +428,12 @@ project(':api-gateway.spring-cloud-gateway.security.keycloak').projectDir = file
 // Discovery Server
 // -------------------------------------------------------------------------------------------------
 
-include(':discovery-server.eureka-server')
-project(':discovery-server.eureka-server').projectDir = file('platform/discovery-server/eureka-server')
+include(':platform.discovery-server.eureka-server')
+project(':platform.discovery-server.eureka-server').projectDir = file('platform/discovery-server/eureka-server')
 
 // -------------------------------------------------------------------------------------------------
 // Config Server
 // -------------------------------------------------------------------------------------------------
 
-include(':config-server.spring-cloud-config')
-project(':config-server.spring-cloud-config').projectDir = file('platform/config-server/spring-cloud-config')
+include(':platform.config-server.spring-cloud-config')
+project(':platform.config-server.spring-cloud-config').projectDir = file('platform/config-server/spring-cloud-config')

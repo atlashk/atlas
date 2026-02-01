@@ -26,10 +26,10 @@ repositories {
 
 dependencies {
     // Framework
-    api project(':framework')
+    api project(':libs.framework')
 
     // Infrastructure
-    api project(':api.client.rest.restclient')
+    api project(':libs.api.client.rest.restclient')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

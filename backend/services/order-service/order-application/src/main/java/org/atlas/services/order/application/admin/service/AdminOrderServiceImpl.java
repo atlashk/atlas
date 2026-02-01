@@ -13,10 +13,10 @@ import org.atlas.libs.framework.collection.CollectionUtil;
 import org.atlas.libs.framework.domain.order.OrderStatus;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.services.order.application.admin.mapper.AdminOrderMapper;
-import org.atlas.services.order.application.admin.model.AdminMonthlyOrderAggregation;
-import org.atlas.services.order.application.admin.model.AdminRetrieveOrderListInput;
-import org.atlas.services.order.application.port.repository.OrderRepository;
-import org.atlas.services.order.application.port.repository.criteria.FindOrderCriteria;
+import org.atlas.services.order.port.in.admin.model.AdminMonthlyOrderAggregation;
+import org.atlas.services.order.port.in.admin.model.AdminRetrieveOrderListInput;
+import org.atlas.services.order.port.out.repository.OrderRepository;
+import org.atlas.services.order.port.out.repository.criteria.FindOrderCriteria;
 import org.atlas.services.order.domain.entity.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AdminOrderServiceImpl implements AdminOrderService {
+public class AdminOrderServiceImpl implements
+    org.atlas.services.order.port.in.admin.service.AdminOrderService {
 
   private final OrderRepository orderRepository;
 

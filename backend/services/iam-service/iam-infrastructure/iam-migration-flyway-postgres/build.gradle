@@ -26,7 +26,7 @@ repositories {
 
 dependencies {
     // Infrastructure
-    api project(':migration.flyway.postgres')
+    api project(':libs.migration.flyway.postgres')
 }
 
 bootJar {

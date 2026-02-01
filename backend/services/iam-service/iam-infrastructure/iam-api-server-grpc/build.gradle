@@ -26,11 +26,11 @@ repositories {
 
 dependencies {
     // Port
-    api project(':iam.port')
+    api project(':services.iam.port')
 
     // Libs
-    api project(':api.server.grpc')
-    api project(':protobuf')
+    api project(':libs.api.server.grpc')
+    api project(':libs.protobuf')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

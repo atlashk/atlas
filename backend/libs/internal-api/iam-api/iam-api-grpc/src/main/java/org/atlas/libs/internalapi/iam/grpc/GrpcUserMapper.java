@@ -22,7 +22,7 @@ public interface GrpcUserMapper {
   /**
    * Maps ListUserRequest to ListUserRequestProto
    */
-  @Mapping(source = "ids", target = "idList")
+  @Mapping(source = "userIds", target = "userIdList")
   ListUserRequestProto map(ListUserRequest request);
 
   /**

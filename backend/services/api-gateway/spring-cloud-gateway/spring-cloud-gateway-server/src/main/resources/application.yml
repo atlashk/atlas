@@ -58,13 +58,13 @@ spring:
               filters:
                 - RewritePath=/api-docs/iam-service, /api-docs
             # Product service
-            - id: product-service
+            - id: product-service-front
               uri: ${PRODUCT_SERVICE_URI:lb://product-service}
               predicates:
-                - Path=/services/product/api/**
+                - Path=/services/product/api/front/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-                - RewritePath=/services/product/api/(?<segment>.*), /api/${segment}
+                - RewritePath=/services/product/api/front/(?<segment>.*), /api/front/${segment}
             - id: product-service-admin
               uri: ${PRODUCT_SERVICE_URI:lb://product-service}
               predicates:
@@ -82,15 +82,15 @@ spring:
               filters:
                 - RewritePath=/api-docs/product-service, /api-docs
             # Order service
-            - id: order-service
+            - id: order-service-front
               uri: ${ORDER_SERVICE_URI:lb://order-service}
               predicates:
-                - Path=/services/order/api/**
+                - Path=/services/order/api/front/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
                 - TokenValidation
                 - TokenRelay
-                - RewritePath=/services/order/api/(?<segment>.*), /api/${segment}
+                - RewritePath=/services/order/api/front/(?<segment>.*), /api/front/${segment}
             - id: order-service-admin
               uri: ${ORDER_SERVICE_URI:lb://order-service}
               predicates:
@@ -108,15 +108,15 @@ spring:
               filters:
                 - RewritePath=/api-docs/order-service, /api-docs
             # Payment service
-            - id: payment-service
+            - id: payment-service-front
               uri: ${PAYMENT_SERVICE_URI:lb://payment-service}
               predicates:
-                - Path=/services/payment/api/**
+                - Path=/services/payment/api/front/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
                 - TokenValidation
                 - TokenRelay
-                - RewritePath=/services/payment/api/(?<segment>.*), /api/${segment}
+                - RewritePath=/services/payment/api/front/(?<segment>.*), /api/front/${segment}
             - id: payment-service-webhook
               uri: ${PAYMENT_SERVICE_URI:lb://payment-service}
               predicates:

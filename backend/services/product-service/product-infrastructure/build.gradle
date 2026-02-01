@@ -1,0 +1,168 @@
+plugins {
+    id 'java-library'
+    id 'org.springframework.boot' version "${springBootPluginVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagementPluginVersion}"
+    id 'idea'
+}
+
+group = 'org.atlas'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Libs
+    switch (rootProject.ext.appStack['storage']) {
+        case 'filesystem':
+            implementation project(':libs.storage.filesystem')
+            break
+        case 'minio':
+            implementation project(':libs.storage.minio')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported storage: ${rootProject.ext.appStack['storage']}")
+    }
+    switch (rootProject.ext.appStack['kv-store']) {
+        case 'redis':
+            implementation project(':libs.kv-store.redis')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported kv-store: ${rootProject.ext.appStack['kv-store']}")
+    }
+    implementation project(':libs.observability')
+    implementation project(':libs.outbox')
+    implementation project(':libs.saga')
+    switch (rootProject.ext.appStack['service-discovery']) {
+        case 'none':
+            break
+        case 'eureka':
+            implementation project(':libs.discovery-client.eureka')
+            break
+        case 'kubernetes':
+            implementation project(':libs.discovery-client.kubernetes')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported service-discovery: ${rootProject.ext.appStack['service-discovery']}")
+    }
+
+    // Infrastructure
+    implementation project(':services.product.api.server.rest')
+    if (rootProject.ext.appStack['internal-api'] == 'grpc') {
+        implementation project(':services.product.api.server.grpc')
+    }
+    switch (rootProject.ext.appStack['datasource']) {
+        case 'mysql':
+            implementation project(':services.product.datasource.mysql')
+            break
+        case 'postgres':
+            implementation project(':services.product.datasource.postgres')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported datasource: ${rootProject.ext.appStack['datasource']}")
+    }
+    switch (rootProject.ext.appStack['file.csv']) {
+        case 'opencsv':
+            implementation project(':services.product.file.csv.opencsv')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported file.csv: ${rootProject.ext.appStack['file.csv']}")
+    }
+    switch (rootProject.ext.appStack['file.excel']) {
+        case 'easyexcel':
+            implementation project(':services.product.file.excel.easyexcel')
+            break
+        case 'poi':
+            implementation project(':services.product.file.excel.poi')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported file.excel: ${rootProject.ext.appStack['file.excel']}")
+    }
+    switch (rootProject.ext.appStack['file.pdf']) {
+        case 'pdfbox':
+            implementation project(':services.product.file.pdf.pdfbox')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported file.pdf: ${rootProject.ext.appStack['file.pdf']}")
+    }
+    switch (rootProject.ext.appStack['full-text-search']) {
+        case 'none':
+        case 'database':
+            break
+        case 'elasticsearch':
+            implementation project(':services.product.full-text-search.elasticsearch')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported full-text-search: ${rootProject.ext.appStack['full-text-search']}")
+    }
+    switch (rootProject.ext.appStack['messaging']) {
+        case 'kafka':
+            implementation project(':services.product.messaging.kafka')
+            break
+        case 'rabbitmq':
+            implementation project(':services.product.messaging.rabbitmq')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported messaging: ${rootProject.ext.appStack['messaging']}")
+    }
+    switch (rootProject.ext.appStack['migration']) {
+        case 'flyway':
+            switch (rootProject.ext.appStack['datasource']) {
+                case 'mysql':
+                    implementation project(':services.product.migration.flyway.mysql')
+                    break
+                case 'postgres':
+                    implementation project(':services.product.migration.flyway.postgres')
+                    break
+                default:
+                    throw new IllegalArgumentException("Unsupported datasource: ${rootProject.ext.appStack['datasource']}")
+            }
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported migration: ${rootProject.ext.appStack['migration']}")
+    }
+    switch (rootProject.ext.appStack.persistence) {
+        case 'jpa':
+            implementation project(':services.product.persistence.jpa')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported persistence: ${rootProject.ext.appStack.persistence}")
+    }
+
+    // Lombok
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    // Mapstruct
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+}
+
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}

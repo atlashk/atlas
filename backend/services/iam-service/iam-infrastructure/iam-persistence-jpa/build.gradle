@@ -26,10 +26,10 @@ repositories {
 
 dependencies {
     // Port
-    api project(':iam.port')
+    api project(':services.iam.port')
 
     // Libs
-    api project(':persistence.jpa')
+    api project(':libs.persistence.jpa')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

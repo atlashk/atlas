@@ -25,99 +25,11 @@ repositories {
 }
 
 dependencies {
-    // Application (included Domain)
-    implementation project(':notification.application')
+    // Application
+    implementation project(':services.notification.application')
 
     // Infrastructure
-    implementation project(':notification.api.server.rest')
-    switch (rootProject.ext.appStack['datasource']) {
-        case 'mysql':
-            implementation project(':notification.datasource.mysql')
-            break
-        case 'postgres':
-            implementation project(':notification.datasource.postgres')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported datasource: ${rootProject.ext.appStack['datasource']}")
-    }
-    switch (rootProject.ext.appStack['messaging']) {
-        case 'kafka':
-            implementation project(':notification.messaging.kafka')
-            break
-        case 'rabbitmq':
-            implementation project(':notification.messaging.rabbitmq')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported messaging: ${rootProject.ext.appStack['messaging']}")
-    }
-    switch (rootProject.ext.appStack['migration']) {
-        case 'flyway':
-            switch (rootProject.ext.appStack['datasource']) {
-                case 'mysql':
-                    implementation project(':notification.migration.flyway.mysql')
-                    break
-                case 'postgres':
-                    implementation project(':notification.migration.flyway.postgres')
-                    break
-                default:
-                    throw new IllegalArgumentException("Unsupported datasource: ${rootProject.ext.appStack['datasource']}")
-            }
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported migration: ${rootProject.ext.appStack['migration']}")
-    }
-    switch (rootProject.ext.appStack['notification.email']) {
-        case 'spring':
-            implementation project(':notification.email.spring')
-            break
-        case 'sendgrid':
-            implementation project(':notification.email.sendgrid')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported notification.email: ${rootProject.ext.appStack['notification.email']}")
-    }
-    switch (rootProject.ext.appStack['notification.in-app']) {
-        case 'sse':
-            implementation project(':notification.in-app.sse')
-            break
-        case 'websocket':
-            implementation project(':notification.in-app.websocket')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported notification.in-app: ${rootProject.ext.appStack['notification.in-app']}")
-    }
-    implementation project(':observability')
-    implementation project(':outbox')
-    switch (rootProject.ext.appStack['persistence']) {
-        case 'jpa':
-            implementation project(':notification.persistence.jpa')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported persistence: ${rootProject.ext.appStack['persistence']}")
-    }
-    implementation project(':saga')
-    switch (rootProject.ext.appStack['service-discovery']) {
-        case 'none':
-            break
-        case 'eureka':
-            implementation project(':discovery-client.eureka')
-            break
-        case 'kubernetes':
-            implementation project(':discovery-client.kubernetes')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported service-discovery: ${rootProject.ext.appStack['service-discovery']}")
-    }
-    switch (rootProject.ext.appStack['template']) {
-        case 'freemarker':
-            implementation project(':template.freemarker')
-            break
-        case 'thymeleaf':
-            implementation project(':template.thymeleaf')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported template: ${rootProject.ext.appStack['template']}")
-    }
+    implementation project(':services.notification.infrastructure')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

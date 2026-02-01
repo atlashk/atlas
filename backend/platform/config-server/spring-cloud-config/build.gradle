@@ -25,14 +25,10 @@ repositories {
 }
 
 dependencies {
-    // Lib
+    // Libs
+    implementation project(':libs.framework')
+    implementation project(':libs.observability')
     implementation 'org.springframework.cloud:spring-cloud-config-server'
-
-    // Framework
-    implementation project(':framework')
-
-    // Infrastructure
-    implementation project(':observability')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

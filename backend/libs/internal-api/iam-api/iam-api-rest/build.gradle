@@ -26,8 +26,8 @@ repositories {
 
 dependencies {
     // Infrastructure
-    api project(':api.client.rest.restclient')
-    api project(':resilience.resilience4j')
+    api project(':libs.api.client.rest.restclient')
+    api project(':libs.resilience.resilience4j')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

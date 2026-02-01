@@ -3,7 +3,7 @@ package org.atlas.services.iam.application.jwt.core;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.atlas.services.iam.domain.entity.User;
-import org.atlas.services.iam.domain.repository.UserRepository;
+import org.atlas.services.iam.port.out.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

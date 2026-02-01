@@ -26,15 +26,15 @@ repositories {
 
 dependencies {
     // Framework
-    api project(':framework')
+    api project(':libs.framework')
 
     // Infrastructure
     switch (rootProject.ext.appStack['redis']) {
         case 'standalone':
-            api project(':kv-store.redis.connector.standalone')
+            api project(':libs.kv-store.redis.connector.standalone')
             break
         case 'cluster':
-            api project(':kv-store.redis.connector.cluster')
+            api project(':libs.kv-store.redis.connector.cluster')
             break
         default:
             throw new IllegalArgumentException("Unsupported redis: ${rootProject.ext.appStack['redis']}")

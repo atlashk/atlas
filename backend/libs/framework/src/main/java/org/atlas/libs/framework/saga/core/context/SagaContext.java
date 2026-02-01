@@ -19,19 +19,8 @@ public class SagaContext {
     data.put(key, value);
   }
 
-  public <T> T get(String key, Class<T> clazz) {
-    Object value = data.get(key);
-    if (value == null) {
-      return null;
-    }
-
-    if (clazz.isInstance(value)) {
-      return clazz.cast(value);
-    }
-
-    throw new SagaExecutionException(
-        String.format("Value for key '%s' is of type %s, but expected type %s",
-            key, value.getClass().getSimpleName(), clazz.getSimpleName()));
+  public Object get(String key) {
+    return data.get(key);
   }
 
   public void remove(String key) {
