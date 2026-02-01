@@ -1,5 +1,5 @@
 <%
-  const authServer = (stack['auth-server'] || '').toLowerCase();
+  const authServer = (stack['iam'] || '').toLowerCase();
   const hasJwt = authServer === 'jwt';
 %>
 server:
@@ -20,22 +20,13 @@ scrape_configs:
         labels:
           service_name: eureka-server
           __path__: /var/log/eureka-server/*.log
-  <%_ if (hasJwt) { -%>
-  - job_name: auth-server
+  - job_name: iam-service
     static_configs:
       - targets:
           - localhost
         labels:
-          service_name: auth-server
-          __path__: /var/log/auth-server/*.log
-  <%_ } -%>
-  - job_name: user-service
-    static_configs:
-      - targets:
-          - localhost
-        labels:
-          service_name: user-service
-          __path__: /var/log/user-service/*.log
+          service_name: iam-service
+          __path__: /var/log/iam-service/*.log
   - job_name: product-service
     static_configs:
       - targets:

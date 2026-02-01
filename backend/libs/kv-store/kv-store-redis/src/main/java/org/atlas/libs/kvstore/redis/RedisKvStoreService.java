@@ -3,6 +3,7 @@ package org.atlas.libs.kvstore.redis;
 import java.time.Duration;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.atlas.libs.framework.json.jackson.JacksonService;
 import org.atlas.libs.framework.kvstore.KvStoreService;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -16,32 +17,37 @@ public class RedisKvStoreService implements KvStoreService {
   @Override
   public void put(String storeName, String key, Object value) {
     String finalKey = buildKey(storeName, key);
-    redisTemplate.opsForValue().set(finalKey, value);
+    redisTemplate.opsForValue()
+        .set(finalKey, value);
   }
 
   @Override
   public void put(String storeName, String key, Object value, Duration expiration) {
     String finalKey = buildKey(storeName, key);
-    redisTemplate.opsForValue().set(finalKey, value, expiration);
+    redisTemplate.opsForValue()
+        .set(finalKey, value, expiration);
   }
 
   @Override
   public boolean putIfAbsent(String storeName, String key, Object value) {
     String finalKey = buildKey(storeName, key);
-    return Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(finalKey, value));
+    return Boolean.TRUE.equals(redisTemplate.opsForValue()
+            .setIfAbsent(finalKey, value));
   }
 
   @Override
   public boolean putIfAbsent(String storeName, String key, Object value, Duration expiration) {
     String finalKey = buildKey(storeName, key);
-    return Boolean.TRUE.equals(
-        redisTemplate.opsForValue().setIfAbsent(finalKey, value, expiration));
+    return Boolean.TRUE.equals(redisTemplate.opsForValue()
+            .setIfAbsent(finalKey, value, expiration));
   }
 
   @Override
-  public Optional<Object> get(String storeName, String key) {
+  public <T> Optional<T> get(String storeName, String key, Class<T> clazz) {
     String finalKey = buildKey(storeName, key);
-    return Optional.ofNullable(redisTemplate.opsForValue().get(finalKey));
+    Object value = redisTemplate.opsForValue()
+        .get(finalKey);
+    return Optional.ofNullable(JacksonService.OBJECT_MAPPER.convertValue(value, clazz));
   }
 
   @Override

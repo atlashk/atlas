@@ -2,21 +2,21 @@ package org.atlas.libs.framework.context;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.atlas.libs.framework.domain.user.Role;
+import org.atlas.libs.framework.domain.user.UserRole;
 
 @Getter
 @Setter
 public class ContextInfo {
 
   private Integer userId;
-  private Role userRole;
+  private UserRole userRole;
   private String ipAddress;
 
   public boolean isAdmin() {
-    return Role.ADMIN.equals(userRole);
+    return UserRole.ADMIN.equals(userRole);
   }
 
   public boolean isUser() {
-    return Role.USER.equals(userRole);
+    return UserRole.USER.equals(userRole);
   }
 }

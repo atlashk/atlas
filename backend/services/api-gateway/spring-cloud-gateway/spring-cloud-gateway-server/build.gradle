@@ -30,7 +30,7 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.6'
 
     // Infrastructure
-    switch (rootProject.ext.appStack['auth-server']) {
+    switch (rootProject.ext.appStack['iam']) {
         case 'keycloak':
             implementation project(':api-gateway.spring-cloud-gateway.security.keycloak')
             break
@@ -38,7 +38,7 @@ dependencies {
             implementation project(':api-gateway.spring-cloud-gateway.security.jwt')
             break
         default:
-            throw new IllegalArgumentException("Unsupported auth-server: ${rootProject.ext.appStack['auth-server']}")
+            throw new IllegalArgumentException("Unsupported IAM: ${rootProject.ext.appStack['iam']}")
     }
     switch (rootProject.ext.appStack['kv-store']) {
         case 'redis':

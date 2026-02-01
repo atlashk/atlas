@@ -10,7 +10,7 @@ import org.atlas.libs.api.server.rest.util.HttpUtil;
 import org.atlas.libs.api.server.rest.util.IpAddressUtil;
 import org.atlas.libs.framework.context.ContextInfo;
 import org.atlas.libs.framework.context.Contexts;
-import org.atlas.libs.framework.domain.user.Role;
+import org.atlas.libs.framework.domain.user.UserRole;
 import org.atlas.libs.framework.security.CustomClaim;
 import org.atlas.libs.framework.util.StringUtil;
 import org.springframework.core.annotation.Order;
@@ -40,7 +40,7 @@ public class UserContextFilter extends OncePerRequestFilter {
     if (StringUtil.isNotBlank(userIdHeader) &&
         StringUtil.isNotBlank(userRoleHeader)) {
       contextInfo.setUserId(Integer.parseInt(userIdHeader));
-      contextInfo.setUserRole(Role.valueOf(userRoleHeader));
+      contextInfo.setUserRole(UserRole.valueOf(userRoleHeader));
     }
 
     try {

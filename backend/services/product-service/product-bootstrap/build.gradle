@@ -29,9 +29,9 @@ dependencies {
     implementation project(':product.application')
 
     // Infrastructure
-    implementation project(':product.api-server.rest')
+    implementation project(':product.api.server.rest')
     if (rootProject.ext.appStack['internal-api'] == 'grpc') {
-        implementation project(':product.api-server.grpc')
+        implementation project(':product.api.server.grpc')
     }
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':

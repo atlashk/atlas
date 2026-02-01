@@ -1,7 +1,6 @@
 package org.atlas.services.order.application.mapper;
 
-import org.atlas.libs.framework.internalapi.user.model.CartResponse;
-import org.atlas.libs.framework.internalapi.user.model.UserResponse;
+import org.atlas.libs.framework.internalapi.iam.model.UserResponse;
 import org.atlas.libs.framework.saga.checkout.CheckoutSagaData;
 import org.atlas.services.order.application.model.CheckoutInput;
 import org.atlas.services.order.application.model.RetrieveOrderListInput;

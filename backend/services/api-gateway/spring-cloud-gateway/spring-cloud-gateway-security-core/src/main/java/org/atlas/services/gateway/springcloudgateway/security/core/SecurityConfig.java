@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.collection.CollectionUtil;
 import org.atlas.libs.framework.config.ApplicationConfigService;
-import org.atlas.libs.framework.domain.user.Role;
+import org.atlas.libs.framework.domain.user.UserRole;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -83,7 +83,7 @@ public class SecurityConfig {
   public ReactiveJwtAuthenticationConverter jwtAuthenticationConverter() {
     ReactiveJwtAuthenticationConverter converter = new ReactiveJwtAuthenticationConverter();
     converter.setJwtGrantedAuthoritiesConverter(jwt -> {
-      Role role = jwtExtractor.extractUserRole(jwt);
+      UserRole role = jwtExtractor.extractUserRole(jwt);
       if (role != null) {
         return Flux.just(new SimpleGrantedAuthority(role.name()));
       }

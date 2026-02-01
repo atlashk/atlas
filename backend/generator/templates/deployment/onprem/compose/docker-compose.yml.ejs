@@ -1,5 +1,5 @@
 <%
-  const authServer = (stack['auth-server'] || '').toLowerCase();
+  const iam = (stack['iam'] || '').toLowerCase();
   const datasource = (stack.datasource || '').toLowerCase();
   const fullTextSearch = (stack['full-text-search'] || '').toLowerCase();
   const internalApi = (stack['internal-api'] || '').toLowerCase();
@@ -12,8 +12,8 @@
   const reverseProxy = (stack['reverse-proxy'] || '').toLowerCase();
   const storage = (stack.storage || '').toLowerCase();
 
-  const hasJwt = authServer === 'jwt';
-  const hasKeycloak = authServer === 'keycloak';
+  const hasJwt = iam === 'jwt';
+  const hasKeycloak = iam === 'keycloak';
   const hasMysql = datasource === 'mysql';
   const hasPostgres = datasource === 'postgres' || datasource === 'postgresql';
   const hasRedis = kvStore === 'redis';
@@ -310,10 +310,7 @@ services:
     command: -config.file=/etc/promtail/config.yml
     volumes:
       - ./config/promtail/config.yml:/etc/promtail/config.yml:ro
-      <%_ if (hasJwt) { -%>
-      - auth-server-log:/var/log/auth-server
-      <%_ } -%>
-      - user-service-log:/var/log/user-service
+      - iam-service-log:/var/log/iam-service
       - product-service-log:/var/log/product-service
       - order-service-log:/var/log/order-service
       - payment-service-log:/var/log/payment-service
@@ -389,60 +386,9 @@ services:
     networks:
       - atlas-network
 
-<%_ if (hasJwt) { -%>
-  auth-server:
-    container_name: auth-server
-    image: atlas-auth-server
-    ports:
-      - "8091:8091"
-    depends_on:
-      eureka-server:
-        condition: service_healthy
-      <%_ if (hasMysql) { -%>
-      mysql:
-        condition: service_healthy
-      <%_ } -%>
-      <%_ if (hasPostgres) { -%>
-      postgres:
-        condition: service_healthy
-      <%_ } -%>
-      <%_ if (hasRedis) { -%>
-      redis:
-        condition: service_healthy
-      <%_ } -%>
-    environment:
-      - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
-      <%_ if (hasMysql) { -%>
-      - DB_URL=jdbc:mysql://mysql:3306/db_auth?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-      - DB_USERNAME=${MYSQL_USER:-atlas}
-      - DB_PASSWORD=${MYSQL_PASSWORD:-secret123456}
-      <%_ } else if (hasPostgres) { -%>
-      - DB_URL=jdbc:postgresql://postgres:5432/db_auth
-      - DB_USERNAME=${POSTGRES_USER:-atlas}
-      - DB_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
-      <%_ } -%>
-      <%_ if (hasRedis) { -%>
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      <%_ } -%>
-      <%_ if (hasZipkin) { -%>
-      - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
-      <%_ } -%>
-    volumes:
-      - auth-server-log:/var/log/auth-server
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8091/actuator/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
-    networks:
-      - atlas-network
-<%_ } -%>
-
-  user-service:
-    container_name: user-service
-    image: atlas-user-service
+  iam-service:
+    container_name: iam-service
+    image: atlas-iam-service
     ports:
       - "8081:8081"
     depends_on:
@@ -460,14 +406,6 @@ services:
       redis:
         condition: service_healthy
       <%_ } -%>
-      <%_ if (hasKafka) { -%>
-      kafka:
-        condition: service_healthy
-      <%_ } -%>
-      <%_ if (hasRabbit) { -%>
-      rabbitmq:
-        condition: service_healthy
-      <%_ } -%>
     environment:
       - EUREKA_DEFAULT_ZONE=http://eureka-server:8761/eureka
       <%_ if (hasMysql) { -%>
@@ -483,31 +421,11 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       <%_ } -%>
-      <%_ if (hasKafka) { -%>
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      <%_ } else if (hasRabbit) { -%>
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
-      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-atlas}
-      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-secret123456}
-      <%_ } -%>
-      <%_ if (hasJwt) { -%>
-      <%_ if (internalApi === 'grpc') { -%>
-      - API_CLIENT_GRPC_AUTH_SERVER_ADDRESS=static://auth-server:50061
-      <%_ } else { -%>
-      - API_CLIENT_REST_AUTH_SERVER_BASE_URL=http://auth-server:8091
-      <%_ } -%>
-      <%_ } -%>
-      <%_ if (internalApi === 'grpc') { -%>
-      - API_CLIENT_GRPC_PRODUCT_SERVICE_ADDRESS=static://product-service:50052
-      <%_ } else { -%>
-      - API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL=http://product-service:8082
-      <%_ } -%>
       <%_ if (hasZipkin) { -%>
       - ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
       <%_ } -%>
     volumes:
-      - user-service-log:/var/log/user-service
+      - iam-service-log:/var/log/iam-service
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8081/actuator/health || exit 1"]
       interval: 30s
@@ -649,10 +567,10 @@ services:
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-secret123456}
       <%_ } -%>
       <%_ if (internalApi === 'grpc') { -%>
-      - API_CLIENT_GRPC_USER_SERVICE_ADDRESS=static://user-service:50051
+      - API_CLIENT_GRPC_USER_SERVICE_ADDRESS=static://iam-service:50051
       - API_CLIENT_GRPC_PRODUCT_SERVICE_ADDRESS=static://product-service:50052
       <%_ } else { -%>
-      - API_CLIENT_REST_USER_SERVICE_BASE_URL=http://user-service:8081
+      - API_CLIENT_REST_USER_SERVICE_BASE_URL=http://iam-service:8081
       - API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL=http://product-service:8082
       <%_ } -%>
       <%_ if (hasZipkin) { -%>
@@ -812,13 +730,10 @@ services:
       - redis
       <%_ } -%>
       - eureka-server
-      <%_ if (hasJwt) { -%>
-      - auth-server
-      <%_ } -%>
       <%_ if (hasKeycloak) { -%>
       - keycloak
       <%_ } -%>
-      - user-service
+      - iam-service
       - product-service
       - order-service
       - payment-service
@@ -830,7 +745,7 @@ services:
       - REDIS_PORT=6379
       <%_ } -%>
       <%_ if (hasJwt) { -%>
-      - AUTH_SERVER_URI=http://auth-server:8091
+      - IAM_SERVICE_URI=http://iam-service:8081
       <%_ } -%>
       <%_ if (hasKeycloak) { -%>
       - KEYCLOAK_BASE_URL=http://keycloak:8443
@@ -876,10 +791,7 @@ networks:
 
 volumes:
   eureka-server-log:
-  <%_ if (hasJwt) { -%>
-  auth-server-log:
-  <%_ } -%>
-  user-service-log:
+  iam-service-log:
   product-service-log:
   order-service-log:
   payment-service-log:

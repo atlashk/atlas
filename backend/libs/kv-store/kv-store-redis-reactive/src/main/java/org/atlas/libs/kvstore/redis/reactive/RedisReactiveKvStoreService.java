@@ -2,6 +2,7 @@ package org.atlas.libs.kvstore.redis.reactive;
 
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
+import org.atlas.libs.framework.json.jackson.JacksonService;
 import org.atlas.libs.framework.kvstore.ReactiveKvStoreService;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -16,34 +17,42 @@ public class RedisReactiveKvStoreService implements ReactiveKvStoreService {
   @Override
   public Mono<Void> put(String storeName, String key, Object value) {
     String finalKey = buildKey(storeName, key);
-    return reactiveRedisTemplate.opsForValue().set(finalKey, value).then();
+    return reactiveRedisTemplate.opsForValue()
+        .set(finalKey, value)
+        .then();
   }
 
   @Override
   public Mono<Void> put(String storeName, String key, Object value, Duration expiration) {
     String finalKey = buildKey(storeName, key);
-    return reactiveRedisTemplate.opsForValue().set(finalKey, value, expiration).then();
+    return reactiveRedisTemplate.opsForValue()
+        .set(finalKey, value, expiration)
+        .then();
   }
 
   @Override
   public Mono<Boolean> putIfAbsent(String storeName, String key, Object value) {
     String finalKey = buildKey(storeName, key);
-    return reactiveRedisTemplate.opsForValue().setIfAbsent(finalKey, value)
-        .map(Boolean::booleanValue);
+    return reactiveRedisTemplate.opsForValue()
+        .setIfAbsent(finalKey, value)
+        .map(Boolean.TRUE::equals);
   }
 
   @Override
   public Mono<Boolean> putIfAbsent(String storeName, String key, Object value,
       Duration expiration) {
     String finalKey = buildKey(storeName, key);
-    return reactiveRedisTemplate.opsForValue().setIfAbsent(finalKey, value, expiration)
-        .map(Boolean::booleanValue);
+    return reactiveRedisTemplate.opsForValue()
+        .setIfAbsent(finalKey, value, expiration)
+        .map(Boolean.TRUE::equals);
   }
 
   @Override
-  public Mono<Object> get(String storeName, String key) {
+  public <T> Mono<T> get(String storeName, String key, Class<T> clazz) {
     String finalKey = buildKey(storeName, key);
-    return reactiveRedisTemplate.opsForValue().get(finalKey);
+    return reactiveRedisTemplate.opsForValue()
+        .get(finalKey)
+        .map(value -> JacksonService.OBJECT_MAPPER.convertValue(value, clazz));
   }
 
   @Override
@@ -55,7 +64,8 @@ public class RedisReactiveKvStoreService implements ReactiveKvStoreService {
   @Override
   public Mono<Boolean> delete(String storeName, String key) {
     String finalKey = buildKey(storeName, key);
-    return reactiveRedisTemplate.delete(finalKey).map(count -> count != null && count > 0);
+    return reactiveRedisTemplate.delete(finalKey)
+        .map(count -> count != null && count > 0);
   }
 
   private String buildKey(String storeName, String key) {

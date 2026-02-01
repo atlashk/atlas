@@ -54,9 +54,10 @@ public interface KvStoreService {
    *
    * @param storeName the store name to specify which store to use
    * @param key       the key to look up
+   * @param clazz     the class of the expected value
    * @return an Optional containing the value if found, empty otherwise
    */
-  Optional<Object> get(String storeName, String key);
+  <T> Optional<T> get(String storeName, String key, Class<T> clazz);
 
   /**
    * Checks if a key exists in the store.

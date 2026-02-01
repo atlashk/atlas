@@ -1,9 +1,0 @@
-server:
-  port: 8091
-
-spring:
-  application:
-    name: auth-server
-
-springdoc:
-  packages-to-scan: org.atlas.edge.auth.keycloak.api

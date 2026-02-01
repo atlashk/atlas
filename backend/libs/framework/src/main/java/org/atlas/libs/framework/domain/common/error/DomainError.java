@@ -21,6 +21,7 @@ public enum DomainError {
   USERNAME_ALREADY_EXISTS(1001, "error.user.username_already_exists"),
   EMAIL_ALREADY_EXISTS(1002, "error.user.email_already_exists"),
   PHONE_NUMBER_ALREADY_EXISTS(1003, "error.user.phone_number_already_exists"),
+  PASSWORD_NOT_MATCH(1004, "error.user.password_not_match"),
 
   // Product-related errors
   PRODUCT_NOT_FOUND(2000, "error.product.not_found"),

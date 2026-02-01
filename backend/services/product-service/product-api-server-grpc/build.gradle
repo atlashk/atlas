@@ -29,7 +29,7 @@ dependencies {
     api project(':product.application')
 
     // Infrastructure
-    api project(':api-server.grpc')
+    api project(':api.server.grpc')
     api project(':protobuf')
 
     // Lombok

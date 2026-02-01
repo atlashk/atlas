@@ -33,42 +33,32 @@ public class GsonService implements JsonService {
   }
 
   @Override
-  public Object toObject(String source) {
-    return JsonParser.parseString(source);
+  public Object toObject(String json) {
+    return JsonParser.parseString(json);
   }
 
   @Override
-  public <T> T toObject(String source, Class<T> objectClass) {
-    return gson.fromJson(source, objectClass);
+  public <T> T toObject(String json, Class<T> objectClass) {
+    return gson.fromJson(json, objectClass);
   }
 
   @Override
-  public <T> T toObject(LinkedHashMap<?, ?> source, Class<T> type) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public <T> List<T> toList(String source, Class<T> type) {
+  public <T> List<T> toList(String json, Class<T> type) {
     Type listType = new TypeToken<ArrayList<T>>() {
     }.getType();
-    return gson.fromJson(source, listType);
+    return gson.fromJson(json, listType);
   }
 
   @Override
-  public Map<String, Object> toMap(String source) {
+  public Map<String, Object> toMap(String json) {
     Type mapType = new TypeToken<Map<String, Object>>() {
     }.getType();
-    return gson.fromJson(source, mapType);
+    return gson.fromJson(json, mapType);
   }
 
   @Override
-  public String toJson(Object source) {
-    return gson.toJson(source);
-  }
-
-  @Override
-  public String getAsString(String source, String key) {
-    JsonObject jsonObject = JsonParser.parseString(source).getAsJsonObject();
+  public String getAsString(String json, String key) {
+    JsonObject jsonObject = JsonParser.parseString(json).getAsJsonObject();
     boolean hasKey = jsonObject.has(key);
     if (hasKey) {
       var jsonElement = jsonObject.get(key);
@@ -95,8 +85,8 @@ public class GsonService implements JsonService {
   }
 
   @Override
-  public Integer getAsInt(String source, String key) {
-    String plainStr = getAsString(source, key);
+  public Integer getAsInt(String json, String key) {
+    String plainStr = getAsString(json, key);
     if (StringUtil.isBlank(plainStr)) {
       return null;
     }
@@ -104,14 +94,19 @@ public class GsonService implements JsonService {
   }
 
   @Override
-  public String compact(String source) {
+  public String compact(String json) {
     try {
       // Parse the JSON string to validate it and then write it back compactly
-      JsonElement jsonElement = JsonParser.parseString(source);
+      JsonElement jsonElement = JsonParser.parseString(json);
       return gson.toJson(jsonElement);
     } catch (JsonSyntaxException e) {
       log.error("Failed to compact JSON", e);
-      return source;
+      return json;
     }
+  }
+
+  @Override
+  public String toJson(Object source) {
+    return gson.toJson(source);
   }
 }

@@ -29,7 +29,7 @@ dependencies {
     implementation project(':order.application')
 
     // Infrastructure
-    implementation project(':order.api-server.rest')
+    implementation project(':order.api.server.rest')
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
             implementation project(':order.datasource.mysql')
@@ -42,15 +42,15 @@ dependencies {
     }
     switch (rootProject.ext.appStack['internal-api']) {
         case 'grpc':
-            implementation project(':internal-api.product.grpc')
-            implementation project(':internal-api.user.grpc')
+            implementation project(':internal-api.iam.grpc')
+            implementation project(':internal-api.catalog.grpc')
             break
         case 'rest':
-            implementation project(':internal-api.product.rest')
-            implementation project(':internal-api.user.rest')
+            implementation project(':internal-api.iam.rest')
+            implementation project(':internal-api.catalog.rest')
             break
         default:
-            throw new IllegalArgumentException("Unsupported api-client: ${rootProject.ext.appStack['api-client']}")
+            throw new IllegalArgumentException("Unsupported internal-api: ${rootProject.ext.appStack['internal-api']}")
     }
     switch (rootProject.ext.appStack['kv-store']) {
         case 'redis':

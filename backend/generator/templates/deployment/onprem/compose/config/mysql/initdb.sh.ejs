@@ -1,5 +1,5 @@
 <%
-  const authServer = (stack['auth-server'] || '').toLowerCase();
+  const authServer = (stack['iam'] || '').toLowerCase();
   const hasJwt = authServer === 'jwt';
   const hasKeycloak = authServer === 'keycloak'
 %>
@@ -10,7 +10,7 @@ echo "Initializing databases and granting privileges to ${MYSQL_USER}"
 
 cat <<EOF | mysql -uroot -p"${MYSQL_ROOT_PASSWORD}"
 <%_ if (hasJwt) { -%>
-CREATE DATABASE IF NOT EXISTS db_auth;
+CREATE DATABASE IF NOT EXISTS db_iam;
 <%_ } -%>
 <%_ if (hasKeycloak) { -%>
 CREATE DATABASE IF NOT EXISTS db_keycloak;
@@ -25,7 +25,7 @@ CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
 ALTER USER '${MYSQL_USER}'@'%' IDENTIFIED WITH mysql_native_password BY '${MYSQL_PASSWORD}';
 
 <%_ if (hasJwt) { -%>
-GRANT ALL PRIVILEGES ON db_auth.* TO '${MYSQL_USER}'@'%';
+GRANT ALL PRIVILEGES ON db_iam.* TO '${MYSQL_USER}'@'%';
 <%_ } -%>
 <%_ if (hasKeycloak) { -%>
 GRANT ALL PRIVILEGES ON db_keycloak.* TO '${MYSQL_USER}'@'%';

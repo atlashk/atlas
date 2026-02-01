@@ -1,5 +1,0 @@
-app:
-  api-client:
-    rest:
-      auth-server:
-        base-url: ${API_CLIENT_REST_AUTH_SERVER_BASE_URL:http://localhost:8091}

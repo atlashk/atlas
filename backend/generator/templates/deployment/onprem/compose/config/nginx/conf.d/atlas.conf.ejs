@@ -1,6 +1,6 @@
 <%
   // Derive flags similar to docker-compose.yml.ejs
-  const authServer = (stack['auth-server'] || '').toLowerCase();
+  const authServer = (stack['iam'] || '').toLowerCase();
   const notificationEmail = (stack.notification.email || '').toLowerCase();
   const storage = (stack.storage || '').toLowerCase();
   const observabilityLoggingStack = (stack.observability.logging.stack || '').toLowerCase();

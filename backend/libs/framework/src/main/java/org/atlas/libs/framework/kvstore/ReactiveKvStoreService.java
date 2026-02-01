@@ -13,7 +13,7 @@ public interface ReactiveKvStoreService {
 
   Mono<Boolean> putIfAbsent(String storeName, String key, Object value, Duration expiration);
 
-  Mono<Object> get(String storeName, String key);
+  <T> Mono<T> get(String storeName, String key, Class<T> clazz);
 
   Mono<Boolean> exists(String storeName, String key);
 

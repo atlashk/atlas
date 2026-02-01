@@ -1,11 +1,11 @@
 <%
-  const authServer = (stack['auth-server'] || '').toLowerCase();
+  const iam = (stack['iam'] || '').toLowerCase();
   const kvStore = (stack['kv-store'] || '').toLowerCase();
   const observabilityLoggingStack = (stack.observability.logging.stack || '').toLowerCase();
   const observabilityTracing = (stack.observability.tracing || '').toLowerCase();
 
-  const hasJwt = authServer === 'jwt';
-  const hasKeycloak = authServer === 'keycloak';
+  const hasJwt = iam === 'jwt';
+  const hasKeycloak = iam === 'keycloak';
   const hasRedis = kvStore === 'redis';
   const hasLoki = observabilityLoggingStack === 'loki';
   const hasZipkin = observabilityTracing === 'zipkin';
@@ -45,8 +45,8 @@ spec:
               value: "6379"
             <% } %>
             <% if (hasJwt) { %>
-            - name: AUTH_SERVER_URI
-              value: "http://auth-server:8091"
+            - name: IAM_SERVICE_URI
+              value: "http://iam-service:8081"
             <% } %>
             <% if (hasKeycloak) { %>
               - name: KEYCLOAK_BASE_URL

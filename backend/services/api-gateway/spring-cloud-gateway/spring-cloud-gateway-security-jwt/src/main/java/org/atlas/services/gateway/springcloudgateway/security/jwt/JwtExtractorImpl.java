@@ -1,7 +1,7 @@
 package org.atlas.services.gateway.springcloudgateway.security.jwt;
 
 import java.util.Optional;
-import org.atlas.libs.framework.domain.user.Role;
+import org.atlas.libs.framework.domain.user.UserRole;
 import org.atlas.libs.framework.security.CustomClaim;
 import org.atlas.services.gateway.springcloudgateway.security.core.JwtExtractor;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -17,12 +17,12 @@ public class JwtExtractorImpl implements JwtExtractor {
   }
 
   @Override
-  public Role extractUserRole(Jwt jwt) {
+  public UserRole extractUserRole(Jwt jwt) {
     String claim = jwt.getClaimAsString(CustomClaim.USER_ROLE.getClaim());
     if (claim == null) {
       throw new IllegalArgumentException(
           "Invalid JWT. Missing claim " + CustomClaim.USER_ROLE.getClaim());
     }
-    return Role.valueOf(claim);
+    return UserRole.valueOf(claim);
   }
 }

@@ -31,45 +31,32 @@ spring:
             pool:
               max-idle-time: 45m # Allow connections to stay idle longer for SSE/WebSocket
           routes:
-            # Auth server
-            - id: auth-server
-              uri: ${AUTH_SERVER_URI:lb://auth-server}
+            # IAM service
+            - id: iam-service-front
+              uri: ${IAM_SERVICE_URI:lb://iam-service}
               predicates:
-                - Path=/api/authentication/**
-              filters:
-                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-            - id: auth-server-api-docs
-              uri: ${AUTH_SERVER_URI:lb://auth-server}
-              predicates:
-                - Path=/api-docs/auth-server
-              filters:
-                - RewritePath=/api-docs/auth-server, /api-docs
-            # User service
-            - id: user-service
-              uri: ${USER_SERVICE_URI:lb://user-service}
-              predicates:
-                - Path=/services/user/api/**
+                - Path=/services/iam/api/front/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
                 - TokenValidation
                 - TokenRelay
-                - RewritePath=/services/user/api/(?<segment>.*), /api/${segment}
-            - id: user-service-admin
-              uri: ${USER_SERVICE_URI:lb://user-service}
+                - RewritePath=/services/iam/api/front/(?<segment>.*), /api/front/${segment}
+            - id: iam-service-admin
+              uri: ${IAM_SERVICE_URI:lb://iam-service}
               predicates:
-                - Path=/services/user/api/admin/**
+                - Path=/services/iam/api/admin/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
                 - TokenValidation
                 - Authorization=ADMIN
                 - TokenRelay
-                - RewritePath=/services/user/api/admin/(?<segment>.*), /api/admin/${segment}
-            - id: user-service-api-docs
-              uri: ${USER_SERVICE_URI:lb://user-service}
+                - RewritePath=/services/iam/api/admin/(?<segment>.*), /api/admin/${segment}
+            - id: iam-service-api-docs
+              uri: ${IAM_SERVICE_URI:lb://iam-service}
               predicates:
-                - Path=/api-docs/user-service
+                - Path=/api-docs/iam-service
               filters:
-                - RewritePath=/api-docs/user-service, /api-docs
+                - RewritePath=/api-docs/iam-service, /api-docs
             # Product service
             - id: product-service
               uri: ${PRODUCT_SERVICE_URI:lb://product-service}
@@ -187,10 +174,8 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     urls:
-      - name: Auth Server
-        url: /api-docs/auth-server
-      - name: User Service
-        url: /api-docs/user-service
+      - name: IAM Service
+        url: /api-docs/iam-service
       - name: Product Service
         url: /api-docs/product-service
       - name: Order Service

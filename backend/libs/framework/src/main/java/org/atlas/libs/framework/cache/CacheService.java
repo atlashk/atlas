@@ -24,8 +24,8 @@ public class CacheService {
     put(cache, key, value, cache.getTtl());
   }
 
-  public Optional<Object> get(ApplicationCache cache, String key) {
-    return kvStoreService.get(cache.getName(), key);
+  public <T> Optional<T> get(ApplicationCache cache, String key, Class<T> clazz) {
+    return kvStoreService.get(cache.getName(), key, clazz);
   }
 
   public boolean evict(ApplicationCache cache, String key) {

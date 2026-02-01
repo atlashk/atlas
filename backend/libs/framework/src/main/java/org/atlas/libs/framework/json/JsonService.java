@@ -1,26 +1,23 @@
 package org.atlas.libs.framework.json;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public interface JsonService {
 
-  Object toObject(String source);
+  Object toObject(String json);
 
-  <T> T toObject(String source, Class<T> type);
+  <T> T toObject(String json, Class<T> type);
 
-  <T> T toObject(LinkedHashMap<?, ?> source, Class<T> type);
+  <T> List<T> toList(String json, Class<T> type);
 
-  <T> List<T> toList(String source, Class<T> type);
+  Map<String, Object> toMap(String json);
 
-  Map<String, Object> toMap(String source);
+  String getAsString(String json, String key);
+
+  Integer getAsInt(String json, String key);
+
+  String compact(String json);
 
   String toJson(Object source);
-
-  String getAsString(String source, String key);
-
-  Integer getAsInt(String source, String key);
-
-  String compact(String source);
 }

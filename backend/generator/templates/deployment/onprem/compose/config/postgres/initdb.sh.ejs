@@ -1,5 +1,5 @@
 <%
-  const authServer = (stack['auth-server'] || '').toLowerCase();
+  const authServer = (stack['iam'] || '').toLowerCase();
   const hasJwt = authServer === 'jwt';
   const hasKeycloak = authServer === 'keycloak'
 %>
@@ -10,8 +10,8 @@ echo "Initializing PostgreSQL databases and setting owners to ${POSTGRES_USER}"
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --set=db_owner="$POSTGRES_USER" <<-EOSQL
 <%_ if (hasJwt) { -%>
-SELECT format('CREATE DATABASE %I OWNER %I;', 'db_auth', :'db_owner')
-WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'db_auth')\gexec
+SELECT format('CREATE DATABASE %I OWNER %I;', 'db_iam', :'db_owner')
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'db_iam')\gexec
 <%_ } -%>
 <%_ if (hasKeycloak) { -%>
 SELECT format('CREATE DATABASE %I OWNER %I;', 'db_keycloak', :'db_owner')

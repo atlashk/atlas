@@ -1,11 +1,11 @@
 deployment: onprem-compose
-auth-server: keycloak
 datasource: mysql
 file:
   csv: opencsv
   excel: poi
   pdf: pdfbox
 full-text-search: database
+iam: jwt
 internal-api: rest
 kv-store: redis
 messaging: kafka

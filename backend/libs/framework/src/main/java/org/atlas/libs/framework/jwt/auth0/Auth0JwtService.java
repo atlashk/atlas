@@ -5,7 +5,7 @@ import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import org.atlas.libs.framework.domain.user.Role;
+import org.atlas.libs.framework.domain.user.UserRole;
 import org.atlas.libs.framework.jwt.DecodeJwtInput;
 import org.atlas.libs.framework.jwt.EncodeJwtInput;
 import org.atlas.libs.framework.jwt.InvalidJwtException;
@@ -63,7 +63,7 @@ public class Auth0JwtService implements JwtService {
 
     // Custom claims
     builder.userRole(
-        Role.valueOf(decodedJWT.getClaim(CustomClaim.USER_ROLE.getClaim()).asString()));
+        UserRole.valueOf(decodedJWT.getClaim(CustomClaim.USER_ROLE.getClaim()).asString()));
 
     return builder.build();
   }

@@ -1,0 +1,5 @@
+app:
+  internal-api:
+    rest:
+      iam-service:
+        base-url: ${API_CLIENT_REST_IAM_SERVICE_BASE_URL:http://localhost:8081}

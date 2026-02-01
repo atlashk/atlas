@@ -1,6 +1,5 @@
 package org.atlas.services.order.application.saga.checkout;
 
-import java.util.LinkedHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.concurrent.AsyncUtil;
@@ -8,7 +7,7 @@ import org.atlas.libs.framework.constant.Services;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
 import org.atlas.libs.framework.domain.order.OrderStatus;
-import org.atlas.libs.framework.json.JsonUtil;
+import org.atlas.libs.framework.json.jackson.JacksonService;
 import org.atlas.libs.framework.saga.checkout.CheckoutCommand;
 import org.atlas.libs.framework.saga.checkout.InitializePaymentCommandMetadata;
 import org.atlas.libs.framework.saga.checkout.ProcessPaymentCommandMetadata;
@@ -67,9 +66,8 @@ public class CheckoutSaga {
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
 
     if (sagaCommandResult.isSuccess()) {
-      InitializePaymentCommandMetadata metadata = JsonUtil.getInstance().toObject(
-          (LinkedHashMap<?, ?>) sagaCommandResult.getMetadata(),
-          InitializePaymentCommandMetadata.class);
+      InitializePaymentCommandMetadata metadata = JacksonService.OBJECT_MAPPER.convertValue(
+          sagaCommandResult.getMetadata(), InitializePaymentCommandMetadata.class);
 
       // Update order status
       order.setStatus(OrderStatus.AWAITING_PAYMENT_PROCESSED);
@@ -101,8 +99,8 @@ public class CheckoutSaga {
     Order order = orderRepository.findBySagaId(saga.getId())
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
 
-    ProcessPaymentCommandMetadata metadata = JsonUtil.getInstance().toObject(
-        (LinkedHashMap<?, ?>) sagaCommandResult.getMetadata(), ProcessPaymentCommandMetadata.class);
+    ProcessPaymentCommandMetadata metadata = JacksonService.OBJECT_MAPPER.convertValue(
+        sagaCommandResult.getMetadata(), ProcessPaymentCommandMetadata.class);
 
     if (sagaCommandResult.isSuccess()) {
       // Update order status

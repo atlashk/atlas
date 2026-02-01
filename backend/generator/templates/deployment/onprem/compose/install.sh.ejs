@@ -1,5 +1,5 @@
 <%
-  const authServer = (stack['auth-server'] || '').toLowerCase();
+  const authServer = (stack['iam'] || '').toLowerCase();
   const datasource = (stack.datasource || '').toLowerCase();
   const fullTextSearch = (stack['full-text-search'] || '').toLowerCase();
   const kvStore = (stack['kv-store'] || '').toLowerCase();

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.framework.domain.common.event.DomainEvent;
 import org.atlas.libs.framework.domain.common.event.DomainEventType;
-import org.atlas.libs.framework.domain.user.Role;
+import org.atlas.libs.framework.domain.user.UserRole;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,7 +22,7 @@ public class UserEvent extends DomainEvent {
   private String lastName;
   private String email;
   private String phoneNumber;
-  private Role role;
+  private UserRole role;
 
   public UserEvent(DomainEventType eventType) {
     super(eventType);

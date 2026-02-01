@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.interceptor.GrpcGlobalServerInterceptor;
 import org.atlas.libs.framework.context.ContextInfo;
 import org.atlas.libs.framework.context.Contexts;
-import org.atlas.libs.framework.domain.user.Role;
+import org.atlas.libs.framework.domain.user.UserRole;
 import org.atlas.libs.framework.security.CustomClaim;
 import org.atlas.libs.framework.util.StringUtil;
 
@@ -31,7 +31,7 @@ public class UserContextInterceptor implements ServerInterceptor {
         StringUtil.isNotBlank(userRoleHeader)) {
       ContextInfo contextInfo = new ContextInfo();
       contextInfo.setUserId(Integer.parseInt(userIdHeader));
-      contextInfo.setUserRole(Role.valueOf(userRoleHeader));
+      contextInfo.setUserRole(UserRole.valueOf(userRoleHeader));
       Contexts.set(contextInfo);
     }
 

@@ -4,7 +4,7 @@ import java.util.Date;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.atlas.libs.framework.domain.user.Role;
+import org.atlas.libs.framework.domain.user.UserRole;
 
 @Getter
 @Setter
@@ -24,7 +24,7 @@ public class Jwt {
   // 'exp' claim
   private Date expiresAt;
   // Custom claims
-  private Role userRole;
+  private UserRole userRole;
   private String sessionId;
 
   public Integer getUserId() {

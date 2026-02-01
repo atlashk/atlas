@@ -29,7 +29,7 @@ dependencies {
     implementation project(':payment.application')
 
     // Infrastructure
-    implementation project(':payment.api-server.rest')
+    implementation project(':payment.api.server.rest')
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
             implementation project(':payment.datasource.mysql')

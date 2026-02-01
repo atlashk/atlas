@@ -29,7 +29,7 @@ dependencies {
     implementation project(':notification.application')
 
     // Infrastructure
-    implementation project(':notification.api-server.rest')
+    implementation project(':notification.api.server.rest')
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
             implementation project(':notification.datasource.mysql')

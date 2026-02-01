@@ -1,7 +1,6 @@
 package org.atlas.libs.framework.cache;
 
 import java.lang.reflect.Method;
-import java.util.LinkedHashMap;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +8,6 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.atlas.libs.framework.json.JsonUtil;
 import org.atlas.libs.framework.spel.SpelParser;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
@@ -50,19 +48,10 @@ public class CacheAspect {
     ApplicationCache applicationCache = ApplicationCache.requireByName(cache.cacheName());
 
     // Cache-aside pattern
-    Optional<Object> cachedValue = cacheService.get(applicationCache, cacheKey);
-    if (cachedValue.isPresent()) {
-      Object value = cachedValue.get();
-
-      // Get the return type of the method
-      Class<?> returnType = signature.getReturnType();
-
-      // If cached value is a LinkedHashMap (from JSON deserialization), convert it to the expected type
-      if (value instanceof LinkedHashMap<?, ?> && !returnType.equals(LinkedHashMap.class)) {
-        return JsonUtil.getInstance().toObject((LinkedHashMap<?, ?>) value, returnType);
-      } else {
-        return value;
-      }
+    Class<?> returnType = signature.getReturnType();
+    Optional<?> cachedValueOpt = cacheService.get(applicationCache, cacheKey, returnType);
+    if (cachedValueOpt.isPresent()) {
+      return cachedValueOpt.get();
     }
 
     Object result = joinPoint.proceed();

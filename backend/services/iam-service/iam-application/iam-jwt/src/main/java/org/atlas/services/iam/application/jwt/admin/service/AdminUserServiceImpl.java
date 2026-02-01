@@ -1,0 +1,97 @@
+package org.atlas.services.iam.application.jwt.admin.service;
+
+import java.util.Objects;
+import lombok.RequiredArgsConstructor;
+import org.atlas.libs.framework.domain.common.error.DomainError;
+import org.atlas.libs.framework.domain.common.exception.DomainException;
+import org.atlas.libs.framework.paging.PagingResult;
+import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.services.iam.application.jwt.admin.mapper.AdminUserMapper;
+import org.atlas.services.iam.application.jwt.event.service.UserEventService;
+import org.atlas.services.iam.domain.entity.User;
+import org.atlas.services.iam.port.in.admin.model.AdminCreateUserInput;
+import org.atlas.services.iam.port.in.admin.model.AdminRetrieveUserListInput;
+import org.atlas.services.iam.port.in.admin.model.AdminUpdateUserInput;
+import org.atlas.services.iam.port.in.admin.model.AdminUserOutput;
+import org.atlas.services.iam.port.in.admin.service.AdminUserService;
+import org.atlas.services.iam.port.out.repository.UserRepository;
+import org.atlas.services.iam.port.out.repository.criteria.FindUserCriteria;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+public class AdminUserServiceImpl implements AdminUserService {
+
+  private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
+  private final UserEventService userEventService;
+
+  @Override
+  @Transactional(readOnly = true)
+  public PagingResult<AdminUserOutput> retrieveUserList(AdminRetrieveUserListInput input) {
+    FindUserCriteria criteria = AdminUserMapper.INSTANCE.toFindUserCriteria(input);
+    PagingResult<User> userPage = userRepository.findByCriteria(criteria, input.getPagingRequest());
+    return ObjectMapperUtil.mapPage(userPage, AdminUserMapper.INSTANCE::toAdminUserOutput);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Long retrieveUserCount() {
+    return userRepository.countAll();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public AdminUserOutput retrieveUser(Integer userId) {
+    return userRepository.findById(userId)
+        .map(AdminUserMapper.INSTANCE::toAdminUserOutput)
+        .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
+  }
+
+  @Override
+  @Transactional
+  public void createUser(AdminCreateUserInput input) {
+    checkValidity(input);
+
+    User user = AdminUserMapper.INSTANCE.toUser(input);
+    user.setPassword(passwordEncoder.encode(input.getPassword()));
+    userRepository.insert(user);
+
+    userEventService.publishUserCreatedEvent(user);
+  }
+
+  @Override
+  @Transactional
+  public void updateUser(AdminUpdateUserInput input) {
+    User user = AdminUserMapper.INSTANCE.toUser(input);
+    user.setPassword(passwordEncoder.encode(input.getPassword()));
+    userRepository.update(user);
+
+    if (!Objects.equals(input.getFirstName(), user.getFirstName()) ||
+        !Objects.equals(input.getLastName(), user.getLastName())) {
+      userEventService.publishUserUpdatedEvent(user);
+    }
+  }
+
+  @Override
+  @Transactional
+  public void deleteUser(Integer userId) {
+    userRepository.deleteById(userId);
+
+    userEventService.publishUserDeletedEvent(userId);
+  }
+
+  private void checkValidity(AdminCreateUserInput input) {
+    if (userRepository.findByUsername(input.getUsername()).isPresent()) {
+      throw new DomainException(DomainError.USERNAME_ALREADY_EXISTS);
+    }
+    if (userRepository.findByEmail(input.getEmail()).isPresent()) {
+      throw new DomainException(DomainError.EMAIL_ALREADY_EXISTS);
+    }
+    if (userRepository.findByPhoneNumber(input.getPhoneNumber()).isPresent()) {
+      throw new DomainException(DomainError.PHONE_NUMBER_ALREADY_EXISTS);
+    }
+  }
+}

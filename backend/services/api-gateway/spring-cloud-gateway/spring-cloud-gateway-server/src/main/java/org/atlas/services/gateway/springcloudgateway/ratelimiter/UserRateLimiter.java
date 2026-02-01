@@ -2,7 +2,7 @@ package org.atlas.services.gateway.springcloudgateway.ratelimiter;
 
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.domain.user.Role;
+import org.atlas.libs.framework.domain.user.UserRole;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.gateway.filter.ratelimit.RateLimiter;
 import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
@@ -28,10 +28,10 @@ public class UserRateLimiter implements RateLimiter<String> {
   @Override
   public Mono<Response> isAllowed(String routeId, String key) {
     String normalizedKey = key != null ? key.toLowerCase() : "anonymous";
-    if (normalizedKey.startsWith(Role.ADMIN.name().toLowerCase())) {
+    if (normalizedKey.startsWith(UserRole.ADMIN.name().toLowerCase())) {
       // Skip limiting for admin
       return Mono.just(new Response(true, Map.of("X-RateLimit-Skip", "true")));
-    } else if (normalizedKey.startsWith(Role.USER.name().toLowerCase())) {
+    } else if (normalizedKey.startsWith(UserRole.USER.name().toLowerCase())) {
       return userRedisRateLimiter.isAllowed(routeId, key);
     } else {
       return anonymousRedisRateLimiter.isAllowed(routeId, key);

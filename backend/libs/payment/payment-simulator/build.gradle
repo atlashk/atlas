@@ -29,7 +29,7 @@ dependencies {
     api project(':framework')
 
     // Infrastructure
-    api project(':api-client.rest.restclient')
+    api project(':api.client.rest.restclient')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

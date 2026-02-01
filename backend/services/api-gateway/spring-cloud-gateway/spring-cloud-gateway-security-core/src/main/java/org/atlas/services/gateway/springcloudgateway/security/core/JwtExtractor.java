@@ -1,7 +1,7 @@
 package org.atlas.services.gateway.springcloudgateway.security.core;
 
 import jakarta.annotation.Nullable;
-import org.atlas.libs.framework.domain.user.Role;
+import org.atlas.libs.framework.domain.user.UserRole;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public interface JwtExtractor {
@@ -10,5 +10,5 @@ public interface JwtExtractor {
   String extractUserId(Jwt jwt);
 
   @Nullable
-  Role extractUserRole(Jwt jwt);
+  UserRole extractUserRole(Jwt jwt);
 }

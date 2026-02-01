@@ -7,25 +7,25 @@ include(':framework')
 project(':framework').projectDir = file('libs/framework')
 
 // API Client
-include(':api-client.grpc')
-project(':api-client.grpc').projectDir = file('libs/api-client/api-client-grpc')
-include(':api-client.rest.apachehttpclient')
-project(':api-client.rest.apachehttpclient').projectDir = file('libs/api-client/api-client-rest-apachehttpclient')
-include(':api-client.rest.feign')
-project(':api-client.rest.feign').projectDir = file('libs/api-client/api-client-rest-feign')
-include(':api-client.rest.model')
-project(':api-client.rest.model').projectDir = file('libs/api-client/api-client-rest-model')
-include(':api-client.rest.restclient')
-project(':api-client.rest.restclient').projectDir = file('libs/api-client/api-client-rest-restclient')
-include(':api-client.rest.resttemplate')
-project(':api-client.rest.resttemplate').projectDir = file('libs/api-client/api-client-rest-resttemplate')
+include(':api.client.grpc')
+project(':api.client.grpc').projectDir = file('libs/api-client/api-client-grpc')
+include(':api.client.rest.apachehttpclient')
+project(':api.client.rest.apachehttpclient').projectDir = file('libs/api-client/api-client-rest-apachehttpclient')
+include(':api.client.rest.feign')
+project(':api.client.rest.feign').projectDir = file('libs/api-client/api-client-rest-feign')
+include(':api.client.rest.model')
+project(':api.client.rest.model').projectDir = file('libs/api-client/api-client-rest-model')
+include(':api.client.rest.restclient')
+project(':api.client.rest.restclient').projectDir = file('libs/api-client/api-client-rest-restclient')
+include(':api.client.rest.resttemplate')
+project(':api.client.rest.resttemplate').projectDir = file('libs/api-client/api-client-rest-resttemplate')
 
 // API Server
 
-include(':api-server.rest')
-project(':api-server.rest').projectDir = file('libs/api-server/api-server-rest')
-include(':api-server.grpc')
-project(':api-server.grpc').projectDir = file('libs/api-server/api-server-grpc')
+include(':api.server.rest')
+project(':api.server.rest').projectDir = file('libs/api-server/api-server-rest')
+include(':api.server.grpc')
+project(':api.server.grpc').projectDir = file('libs/api-server/api-server-grpc')
 
 // Datasource
 
@@ -66,21 +66,17 @@ project(':iam.keycloak').projectDir = file('libs/iam/iam-keycloak')
 
 // Internal API
 
-// Internal API::Auth API
-include(':internal-api.auth.rest')
-project(':internal-api.auth.rest').projectDir = file('libs/internal-api/auth-api/auth-api-rest')
+// Internal API::IAM
+include(':internal-api.iam.grpc')
+project(':internal-api.iam.grpc').projectDir = file('libs/internal-api/iam-api/iam-api-grpc')
+include(':internal-api.iam.rest')
+project(':internal-api.iam.rest').projectDir = file('libs/internal-api/iam-api/iam-api-rest')
 
-// Internal API::Product API
-include(':internal-api.product.grpc')
-project(':internal-api.product.grpc').projectDir = file('libs/internal-api/product-api/product-api-grpc')
-include(':internal-api.product.rest')
-project(':internal-api.product.rest').projectDir = file('libs/internal-api/product-api/product-api-rest')
-
-// Internal API::User API
-include(':internal-api.user.grpc')
-project(':internal-api.user.grpc').projectDir = file('libs/internal-api/user-api/user-api-grpc')
-include(':internal-api.user.rest')
-project(':internal-api.user.rest').projectDir = file('libs/internal-api/user-api/user-api-rest')
+// Internal API::Catalog
+include(':internal-api.catalog.grpc')
+project(':internal-api.catalog.grpc').projectDir = file('libs/internal-api/catalog-api/catalog-api-grpc')
+include(':internal-api.catalog.rest')
+project(':internal-api.catalog.rest').projectDir = file('libs/internal-api/catalog-api/catalog-api-rest')
 
 // Key-Value Store
 
@@ -226,36 +222,37 @@ project(':template.thymeleaf').projectDir = file('libs/template/template-thymele
 // =================================================================================================
 
 // -------------------------------------------------------------------------------------------------
-// User Service
+// IAM Service
 // -------------------------------------------------------------------------------------------------
 
-include(':user.domain')
-project(':user.domain').projectDir = file('services/user-service/user-domain')
+include(':iam.domain')
+project(':iam.domain').projectDir = file('services/iam-service/iam-domain')
 
-include(':user.application')
-project(':user.application').projectDir = file('services/user-service/user-application')
+include(':iam.port')
+project(':iam.port').projectDir = file('services/iam-service/iam-port')
 
-include(':user.api-server.grpc')
-project(':user.api-server.grpc').projectDir = file('services/user-service/user-api-server-grpc')
-include(':user.api-server.rest')
-project(':user.api-server.rest').projectDir = file('services/user-service/user-api-server-rest')
-include(':user.datasource.mysql')
-project(':user.datasource.mysql').projectDir = file('services/user-service/user-datasource-mysql')
-include(':user.datasource.postgres')
-project(':user.datasource.postgres').projectDir = file('services/user-service/user-datasource-postgres')
-include(':user.messaging.kafka')
-project(':user.messaging.kafka').projectDir = file('services/user-service/user-messaging-kafka')
-include(':user.messaging.rabbitmq')
-project(':user.messaging.rabbitmq').projectDir = file('services/user-service/user-messaging-rabbitmq')
-include(':user.migration.flyway.mysql')
-project(':user.migration.flyway.mysql').projectDir = file('services/user-service/user-migration-flyway-mysql')
-include(':user.migration.flyway.postgres')
-project(':user.migration.flyway.postgres').projectDir = file('services/user-service/user-migration-flyway-postgres')
-include(':user.persistence.jpa')
-project(':user.persistence.jpa').projectDir = file('services/user-service/user-persistence-jpa')
+include(':iam.jwt')
+project(':iam.jwt').projectDir = file('services/iam-service/iam-application/iam-jwt')
+include(':iam.keycloak')
+project(':iam.keycloak').projectDir = file('services/iam-service/iam-application/iam-keycloak')
 
-include(':user.bootstrap')
-project(':user.bootstrap').projectDir = file('services/user-service/user-bootstrap')
+include(':iam.api.server.grpc')
+project(':iam.api.server.grpc').projectDir = file('services/iam-service/iam-infrastructure/iam-api-server-grpc')
+include(':iam.api.server.rest')
+project(':iam.api.server.rest').projectDir = file('services/iam-service/iam-infrastructure/iam-api-server-rest')
+include(':iam.datasource.mysql')
+project(':iam.datasource.mysql').projectDir = file('services/iam-service/iam-infrastructure/iam-datasource-mysql')
+include(':iam.datasource.postgres')
+project(':iam.datasource.postgres').projectDir = file('services/iam-service/iam-infrastructure/iam-datasource-postgres')
+include(':iam.migration.flyway.mysql')
+project(':iam.migration.flyway.mysql').projectDir = file('services/iam-service/iam-infrastructure/iam-migration-flyway-mysql')
+include(':iam.migration.flyway.postgres')
+project(':iam.migration.flyway.postgres').projectDir = file('services/iam-service/iam-infrastructure/iam-migration-flyway-postgres')
+include(':iam.persistence.jpa')
+project(':iam.persistence.jpa').projectDir = file('services/iam-service/iam-infrastructure/iam-persistence-jpa')
+
+include(':iam.bootstrap')
+project(':iam.bootstrap').projectDir = file('services/iam-service/iam-bootstrap')
 
 // -------------------------------------------------------------------------------------------------
 // Product Service
@@ -267,10 +264,10 @@ project(':product.domain').projectDir = file('services/product-service/product-d
 include(':product.application')
 project(':product.application').projectDir = file('services/product-service/product-application')
 
-include(':product.api-server.grpc')
-project(':product.api-server.grpc').projectDir = file('services/product-service/product-api-server-grpc')
-include(':product.api-server.rest')
-project(':product.api-server.rest').projectDir = file('services/product-service/product-api-server-rest')
+include(':product.api.server.grpc')
+project(':product.api.server.grpc').projectDir = file('services/product-service/product-api-server-grpc')
+include(':product.api.server.rest')
+project(':product.api.server.rest').projectDir = file('services/product-service/product-api-server-rest')
 include(':product.datasource.mysql')
 project(':product.datasource.mysql').projectDir = file('services/product-service/product-datasource-mysql')
 include(':product.datasource.postgres')
@@ -309,8 +306,8 @@ project(':order.domain').projectDir = file('services/order-service/order-domain'
 include(':order.application')
 project(':order.application').projectDir = file('services/order-service/order-application')
 
-include(':order.api-server.rest')
-project(':order.api-server.rest').projectDir = file('services/order-service/order-api-server-rest')
+include(':order.api.server.rest')
+project(':order.api.server.rest').projectDir = file('services/order-service/order-api-server-rest')
 include(':order.datasource.mysql')
 project(':order.datasource.mysql').projectDir = file('services/order-service/order-datasource-mysql')
 include(':order.datasource.postgres')
@@ -339,8 +336,8 @@ project(':payment.domain').projectDir = file('services/payment-service/payment-d
 include(':payment.application')
 project(':payment.application').projectDir = file('services/payment-service/payment-application')
 
-include(':payment.api-server.rest')
-project(':payment.api-server.rest').projectDir = file('services/payment-service/payment-api-server-rest')
+include(':payment.api.server.rest')
+project(':payment.api.server.rest').projectDir = file('services/payment-service/payment-api-server-rest')
 include(':payment.datasource.mysql')
 project(':payment.datasource.mysql').projectDir = file('services/payment-service/payment-datasource-mysql')
 include(':payment.datasource.postgres')
@@ -369,8 +366,8 @@ project(':notification.domain').projectDir = file('services/notification-service
 include(':notification.application')
 project(':notification.application').projectDir = file('services/notification-service/notification-application')
 
-include(':notification.api-server.rest')
-project(':notification.api-server.rest').projectDir = file('services/notification-service/notification-api-server-rest')
+include(':notification.api.server.rest')
+project(':notification.api.server.rest').projectDir = file('services/notification-service/notification-api-server-rest')
 include(':notification.datasource.mysql')
 project(':notification.datasource.mysql').projectDir = file('services/notification-service/notification-datasource-mysql')
 include(':notification.datasource.postgres')
@@ -420,26 +417,3 @@ project(':discovery-server.eureka-server').projectDir = file('platform/discovery
 
 include(':config-server.spring-cloud-config')
 project(':config-server.spring-cloud-config').projectDir = file('platform/config-server/spring-cloud-config')
-
-// -------------------------------------------------------------------------------------------------
-// Auth Server
-// -------------------------------------------------------------------------------------------------
-
-// Auth Server Shared Libs
-include(':auth-server.datasource.mysql')
-project(':auth-server.datasource.mysql').projectDir = file('platform/auth-server/auth-server-common/auth-server-datasource-mysql')
-include(':auth-server.datasource.postgres')
-project(':auth-server.datasource.postgres').projectDir = file('platform/auth-server/auth-server-common/auth-server-datasource-postgres')
-include(':auth-server.domain')
-project(':auth-server.domain').projectDir = file('platform/auth-server/auth-server-common/auth-server-domain')
-include(':auth-server.migration.flyway.mysql')
-project(':auth-server.migration.flyway.mysql').projectDir = file('platform/auth-server/auth-server-common/auth-server-migration-flyway-mysql')
-include(':auth-server.migration.postgres')
-project(':auth-server.migration.postgres').projectDir = file('platform/auth-server/auth-server-common/auth-server-migration-flyway-postgres')
-include(':auth-server.persistence.jpa')
-project(':auth-server.persistence.jpa').projectDir = file('platform/auth-server/auth-server-common/auth-server-persistence-jpa')
-
-include(':auth-server.jwt')
-project(':auth-server.jwt').projectDir = file('platform/auth-server/auth-server-jwt')
-include(':auth-server.keycloak')
-project(':auth-server.keycloak').projectDir = file('platform/auth-server/auth-server-keycloak')

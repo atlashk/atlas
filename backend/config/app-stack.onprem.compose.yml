@@ -1,11 +1,11 @@
 deployment: onprem-compose
-auth-server: jwt
 datasource: mysql
 file:
   csv: opencsv
   excel: poi
   pdf: pdfbox
 full-text-search: elasticsearch
+iam: keycloak
 internal-api: rest
 kv-store: redis
 messaging: kafka

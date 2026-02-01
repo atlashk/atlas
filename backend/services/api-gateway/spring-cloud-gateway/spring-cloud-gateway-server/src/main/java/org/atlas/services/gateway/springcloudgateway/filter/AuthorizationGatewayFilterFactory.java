@@ -7,7 +7,7 @@ import lombok.Setter;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.collection.CollectionUtil;
 import org.atlas.libs.framework.domain.common.error.DomainError;
-import org.atlas.libs.framework.domain.user.Role;
+import org.atlas.libs.framework.domain.user.UserRole;
 import org.atlas.services.gateway.springcloudgateway.security.core.HttpUtil;
 import org.atlas.services.gateway.springcloudgateway.security.core.JwtExtractor;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
@@ -48,7 +48,7 @@ public class AuthorizationGatewayFilterFactory extends
   private Mono<Void> checkRole(Jwt jwt, ServerWebExchange exchange,
       GatewayFilterChain chain, Config config) {
     // Extract user roles from JWT claims
-    Role userRole = jwtExtractor.extractUserRole(jwt);
+    UserRole userRole = jwtExtractor.extractUserRole(jwt);
 
     if (CollectionUtil.isNotEmpty(config.getRoles())) {
       boolean hasRole = config.getRoles()

@@ -127,8 +127,9 @@ public class LockService {
 
     try {
       // Verify we still own the lock before deleting
-      var currentValue = kvStoreService.get(STORE_NAME, key);
-      if (currentValue.isPresent() && expectedValue.equals(currentValue.get())) {
+      String currentValue = kvStoreService.get(STORE_NAME, key, String.class)
+          .orElse(null);
+      if (expectedValue.equals(currentValue)) {
         boolean deleted = kvStoreService.delete(STORE_NAME, key);
         if (deleted) {
           ownedLocks.remove(key);
@@ -174,8 +175,9 @@ public class LockService {
     }
 
     try {
-      var currentValue = kvStoreService.get(STORE_NAME, key);
-      return currentValue.isPresent() && expectedValue.equals(currentValue.get());
+      String currentValue = kvStoreService.get(STORE_NAME, key, String.class)
+          .orElse(null);
+      return expectedValue.equals(currentValue);
     } catch (Exception e) {
       log.warn("Error checking lock ownership for key: {}", key, e);
       return false;

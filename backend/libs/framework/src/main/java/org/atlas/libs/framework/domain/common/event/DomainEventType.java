@@ -4,6 +4,8 @@ public enum DomainEventType {
 
   // User event types
   USER_CREATED,
+  USER_UPDATED,
+  USER_DELETED,
 
   // Product event types
   PRODUCT_CREATED,
