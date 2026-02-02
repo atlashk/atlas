@@ -25,7 +25,7 @@ BACKEND_DIR="$SCRIPT_DIR"
 
 CONFIG_DIR="$BACKEND_DIR/config"
 GENERATOR_DIR="$BACKEND_DIR/deployment/generator"
-TEMPLATES_DIR="$GENERATOR_DIR/templates"
+TEMPLATES_DIR="$BACKEND_DIR/deployment/templates"
 BUILDSRC_TEMPLATES_DIR="$TEMPLATES_DIR/buildSrc"
 DEPLOYMENT_TEMPLATES_DIR="$TEMPLATES_DIR/deployment"
 DIST_DIR="$BACKEND_DIR/dist"
@@ -224,7 +224,7 @@ generate_templates() {
   if [[ -d "$BUILDSRC_TEMPLATES_DIR" ]]; then
     (
       cd "$GENERATOR_DIR" || exit 1
-      node generator.mjs --dir "templates/buildSrc" --out-dir "../dist" --cfg "$cfg_file"
+      node generator.mjs --dir "../templates/buildSrc" --out-dir "../dist" --cfg "$cfg_file"
     )
   else
     warn "buildSrc templates directory not found: $BUILDSRC_TEMPLATES_DIR"
@@ -236,11 +236,11 @@ generate_templates() {
   case "$deployment" in
     onprem-compose)
       deployment_template_dir="$DEPLOYMENT_TEMPLATES_DIR/onprem/compose"
-      deployment_template_rel_path="templates/deployment/onprem/compose"
+      deployment_template_rel_path="../templates/deployment/onprem/compose"
       ;;
     onprem-k8s-native)
       deployment_template_dir="$DEPLOYMENT_TEMPLATES_DIR/onprem/k8s"
-      deployment_template_rel_path="templates/deployment/onprem/k8s"
+      deployment_template_rel_path="../templates/deployment/onprem/k8s"
       ;;
     *)
       err "Unsupported deployment type: $deployment"
