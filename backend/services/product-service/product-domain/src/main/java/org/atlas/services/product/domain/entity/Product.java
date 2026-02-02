@@ -57,6 +57,12 @@ public class Product extends DomainEntity {
   // Many-To-Many
   private List<Category> categories;
 
+  public void setQuantity(Integer quantity) {
+    if (quantity == 0) {
+      status = ProductStatus.OUT_STOCK;
+    }
+  }
+
   public void addAttribute(ProductAttribute attribute) {
     if (attributes == null) {
       attributes = new ArrayList<>();

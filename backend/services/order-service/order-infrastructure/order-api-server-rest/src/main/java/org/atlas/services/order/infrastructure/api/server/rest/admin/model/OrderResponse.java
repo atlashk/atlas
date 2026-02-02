@@ -117,7 +117,7 @@ public class OrderResponse {
   @AllArgsConstructor
   public static class Product {
 
-    @Schema(description = "Unique identifier of the product in the catalog", example = "789")
+    @Schema(description = "Unique identifier of the product in the product", example = "789")
     private Integer id;
 
     @Schema(description = "Display name of the product", example = "iPhone 15 Pro Max 256GB")

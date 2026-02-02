@@ -1,6 +1,6 @@
 package org.atlas.services.order.application.front.mapper;
 
-import org.atlas.libs.framework.internalapi.catalog.model.ProductResponse;
+import org.atlas.libs.framework.internalapi.product.model.ProductResponse;
 import org.atlas.services.order.domain.entity.CartItem;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;

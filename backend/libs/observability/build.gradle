@@ -26,38 +26,16 @@ repositories {
 
 dependencies {
     // Actuator
-    implementation project(':libs.observability.actuator')
+    api project(':libs.observability.actuator')
 
     // Logging
-    switch (rootProject.ext.appStack['observability.logging.framework']) {
-        case 'logback':
-            implementation project(':libs.observability.logging.logback')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported observability.logging.framework: ${rootProject.ext.appStack['observability.logging.framework']}")
-    }
+    api project(':libs.observability.logging')
 
     // Metrics
-    switch (rootProject.ext.appStack['observability.metrics']) {
-        case 'none':
-            break;
-        case 'prometheus':
-            implementation project(':libs.observability.metrics.prometheus')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported observability.metrics: ${rootProject.ext.appStack['observability.metrics']}")
-    }
+    api project(':libs.observability.metrics')
 
     // Tracing
-    switch (rootProject.ext.appStack['observability.tracing']) {
-        case 'none':
-            break
-        case 'zipkin':
-            implementation project(':libs.observability.tracing.zipkin')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported observability.tracing: ${rootProject.ext.appStack['observability.tracing']}")
-    }
+    api project(':libs.observability.tracing')
 }
 
 bootJar {

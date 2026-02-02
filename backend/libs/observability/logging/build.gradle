@@ -25,18 +25,13 @@ repositories {
 }
 
 dependencies {
-    // Libs
-    api project(':libs.api.client.grpc')
-    api project(':libs.protobuf')
-    api project(':libs.resilience.resilience4j')
-
-    // Lombok
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-
-    // Mapstruct
-    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
-    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+    switch (rootProject.ext.appStack['observability.logging.framework']) {
+        case 'logback':
+            api project(':libs.observability.logging.logback')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported observability.logging.framework: ${rootProject.ext.appStack['observability.logging.framework']}")
+    }
 }
 
 bootJar {

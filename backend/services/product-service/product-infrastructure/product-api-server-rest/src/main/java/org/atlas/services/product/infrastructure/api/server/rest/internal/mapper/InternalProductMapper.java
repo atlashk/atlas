@@ -1,6 +1,6 @@
 package org.atlas.services.product.infrastructure.api.server.rest.internal.mapper;
 
-import org.atlas.libs.framework.internalapi.catalog.model.ProductResponse;
+import org.atlas.libs.framework.internalapi.product.model.ProductResponse;
 import org.atlas.services.product.infrastructure.api.server.rest.internal.model.InternalRetrieveProductListRequest;
 import org.atlas.services.product.port.in.internal.model.InternalRetrieveProductListInput;
 import org.atlas.services.product.domain.entity.Product;

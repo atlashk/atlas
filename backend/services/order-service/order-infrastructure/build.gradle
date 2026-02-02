@@ -44,11 +44,11 @@ dependencies {
     switch (rootProject.ext.appStack['internal-api']) {
         case 'grpc':
             implementation project(':libs.internal-api.iam.grpc')
-            implementation project(':libs.internal-api.catalog.grpc')
+            implementation project(':libs.internal-api.product.grpc')
             break
         case 'rest':
             implementation project(':libs.internal-api.iam.rest')
-            implementation project(':libs.internal-api.catalog.rest')
+            implementation project(':libs.internal-api.product.rest')
             break
         default:
             throw new IllegalArgumentException("Unsupported internal-api: ${rootProject.ext.appStack['internal-api']}")

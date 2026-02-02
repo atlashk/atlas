@@ -25,10 +25,10 @@ repositories {
 }
 
 dependencies {
-    // Framework
     api project(':libs.framework')
 
-    // Infrastructure
+    api 'org.springframework.boot:spring-boot-starter-data-redis'
+
     switch (rootProject.ext.appStack['redis']) {
         case 'standalone':
             api project(':libs.kv-store.redis.connector.standalone')
@@ -39,9 +39,6 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported redis: ${rootProject.ext.appStack['redis']}")
     }
-
-    // Lib
-    api 'org.springframework.boot:spring-boot-starter-data-redis'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

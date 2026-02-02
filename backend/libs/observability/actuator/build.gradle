@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-    // Lib
+    // Libs
     api 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
@@ -30,7 +30,6 @@ bootJar {
 jar {
     enabled = true
 }
-
 
 idea {
     module {
