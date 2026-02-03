@@ -116,28 +116,19 @@ project(':libs.notification.in-app.websocket').projectDir = file('libs/notificat
 
 // Observability
 
-include(':libs.observability')
-project(':libs.observability').projectDir = file('libs/observability')
-
 // Observability::Actuator
 include(':libs.observability.actuator')
 project(':libs.observability.actuator').projectDir = file('libs/observability/actuator')
 
 // Observability::Logging
-include(':libs.observability.logging')
-project(':libs.observability.logging').projectDir = file('libs/observability/logging')
 include(':libs.observability.logging.logback')
 project(':libs.observability.logging.logback').projectDir = file('libs/observability/logging/logging-logback')
 
 // Observability::Metrics
-include(':libs.observability.metrics')
-project(':libs.observability.metrics').projectDir = file('libs/observability/metrics')
 include(':libs.observability.metrics.prometheus')
 project(':libs.observability.metrics.prometheus').projectDir = file('libs/observability/metrics/metrics-prometheus')
 
 // Observability::Tracing
-include(':libs.observability.tracing')
-project(':libs.observability.tracing').projectDir = file('libs/observability/tracing')
 include(':libs.observability.tracing.zipkin')
 project(':libs.observability.tracing.zipkin').projectDir = file('libs/observability/tracing/tracing-zipkin')
 

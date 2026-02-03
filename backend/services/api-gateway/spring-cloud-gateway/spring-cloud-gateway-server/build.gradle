@@ -25,11 +25,49 @@ repositories {
 }
 
 dependencies {
-    // Lib
+    // Spring Cloud Gateway Server Webflux
     implementation 'org.springframework.cloud:spring-cloud-starter-gateway-server-webflux'
+
+    // API docs
     implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.6'
 
-    // Infrastructure
+    // KV store
+    switch (rootProject.ext.appStack['kv-store']) {
+        case 'redis':
+            implementation project(':libs.kv-store.redis-reactive')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported kv-store: ${rootProject.ext.appStack['kv-store']}")
+    }
+    
+    // Observability
+    switch (rootProject.ext.appStack['observability.logging.framework']) {
+        case 'logback':
+            implementation project(':libs.observability.logging.logback')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported observability.logging.framework: ${rootProject.ext.appStack['observability.logging.framework']}")
+    }
+    switch (rootProject.ext.appStack['observability.metrics']) {
+        case 'none':
+            break;
+        case 'prometheus':
+            implementation project(':libs.observability.metrics.prometheus')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported observability.metrics: ${rootProject.ext.appStack['observability.metrics']}")
+    }
+    switch (rootProject.ext.appStack['observability.tracing']) {
+        case 'none':
+            break
+        case 'zipkin':
+            implementation project(':libs.observability.tracing.zipkin')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported observability.tracing: ${rootProject.ext.appStack['observability.tracing']}")
+    }
+    
+    // Security
     switch (rootProject.ext.appStack['iam']) {
         case 'keycloak':
             implementation project(':services.api-gateway.spring-cloud-gateway.security.keycloak')
@@ -40,14 +78,8 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported IAM: ${rootProject.ext.appStack['iam']}")
     }
-    switch (rootProject.ext.appStack['kv-store']) {
-        case 'redis':
-            implementation project(':libs.kv-store.redis-reactive')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported kv-store: ${rootProject.ext.appStack['kv-store']}")
-    }
-    implementation project(':libs.observability')
+    
+    // Service discovery
     switch (rootProject.ext.appStack['service-discovery']) {
         case 'none':
             break
@@ -60,7 +92,7 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported service-discovery: ${rootProject.ext.appStack['service-discovery']}")
     }
-
+    
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

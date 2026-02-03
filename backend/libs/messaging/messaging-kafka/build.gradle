@@ -32,7 +32,15 @@ dependencies {
     api 'org.springframework.kafka:spring-kafka'
 
     // Tracing
-    api project(':libs.observability.tracing')
+    switch (rootProject.ext.appStack['observability.tracing']) {
+        case 'none':
+            break
+        case 'zipkin':
+            api project(':libs.observability.tracing.zipkin')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported observability.tracing: ${rootProject.ext.appStack['observability.tracing']}")
+    }
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

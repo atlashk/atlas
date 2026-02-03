@@ -26,15 +26,15 @@ repositories {
 
 dependencies {
     // API server
-    implementation project(':services.notification.api.server.rest')
+    api project(':services.notification.api.server.rest')
 
     // Datasource
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
-            implementation project(':services.notification.datasource.mysql')
+            api project(':services.notification.datasource.mysql')
             break
         case 'postgres':
-            implementation project(':services.notification.datasource.postgres')
+            api project(':services.notification.datasource.postgres')
             break
         default:
             throw new IllegalArgumentException("Unsupported datasource: ${rootProject.ext.appStack['datasource']}")
@@ -43,10 +43,10 @@ dependencies {
     // Messaging
     switch (rootProject.ext.appStack['messaging']) {
         case 'kafka':
-            implementation project(':services.notification.messaging.kafka')
+            api project(':services.notification.messaging.kafka')
             break
         case 'rabbitmq':
-            implementation project(':services.notification.messaging.rabbitmq')
+            api project(':services.notification.messaging.rabbitmq')
             break
         default:
             throw new IllegalArgumentException("Unsupported messaging: ${rootProject.ext.appStack['messaging']}")
@@ -57,10 +57,10 @@ dependencies {
         case 'flyway':
             switch (rootProject.ext.appStack['datasource']) {
                 case 'mysql':
-                    implementation project(':services.notification.migration.flyway.mysql')
+                    api project(':services.notification.migration.flyway.mysql')
                     break
                 case 'postgres':
-                    implementation project(':services.notification.migration.flyway.postgres')
+                    api project(':services.notification.migration.flyway.postgres')
                     break
                 default:
                     throw new IllegalArgumentException("Unsupported datasource: ${rootProject.ext.appStack['datasource']}")
@@ -73,10 +73,10 @@ dependencies {
     // Notification::Email
     switch (rootProject.ext.appStack['notification.email']) {
         case 'spring':
-            implementation project(':libs.notification.email.spring')
+            api project(':libs.notification.email.spring')
             break
         case 'sendgrid':
-            implementation project(':libs.notification.email.sendgrid')
+            api project(':libs.notification.email.sendgrid')
             break
         default:
             throw new IllegalArgumentException("Unsupported notification.email: ${rootProject.ext.appStack['notification.email']}")
@@ -85,42 +85,66 @@ dependencies {
     // Notification::In-App
     switch (rootProject.ext.appStack['notification.in-app']) {
         case 'sse':
-            implementation project(':libs.notification.in-app.sse')
+            api project(':libs.notification.in-app.sse')
             break
         case 'websocket':
-            implementation project(':libs.notification.in-app.websocket')
+            api project(':libs.notification.in-app.websocket')
             break
         default:
             throw new IllegalArgumentException("Unsupported notification.in-app: ${rootProject.ext.appStack['notification.in-app']}")
     }
 
     // Observability
-    implementation project(':libs.observability')
+    switch (rootProject.ext.appStack['observability.logging.framework']) {
+        case 'logback':
+            api project(':libs.observability.logging.logback')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported observability.logging.framework: ${rootProject.ext.appStack['observability.logging.framework']}")
+    }
+    switch (rootProject.ext.appStack['observability.metrics']) {
+        case 'none':
+            break;
+        case 'prometheus':
+            api project(':libs.observability.metrics.prometheus')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported observability.metrics: ${rootProject.ext.appStack['observability.metrics']}")
+    }
+    switch (rootProject.ext.appStack['observability.tracing']) {
+        case 'none':
+            break
+        case 'zipkin':
+            api project(':libs.observability.tracing.zipkin')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported observability.tracing: ${rootProject.ext.appStack['observability.tracing']}")
+    }
 
     // Outbox
-    implementation project(':libs.outbox')
+    api project(':libs.outbox')
 
     // Persistence
     switch (rootProject.ext.appStack['persistence']) {
         case 'jpa':
-            implementation project(':services.notification.persistence.jpa')
+            api project(':services.notification.persistence.jpa')
             break
         default:
             throw new IllegalArgumentException("Unsupported persistence: ${rootProject.ext.appStack['persistence']}")
     }
 
     // Saga
-    implementation project(':libs.saga')
+    api project(':libs.saga')
 
     // Service discovery
     switch (rootProject.ext.appStack['service-discovery']) {
         case 'none':
             break
         case 'eureka':
-            implementation project(':libs.discovery-client.eureka')
+            api project(':libs.discovery-client.eureka')
             break
         case 'kubernetes':
-            implementation project(':libs.discovery-client.kubernetes')
+            api project(':libs.discovery-client.kubernetes')
             break
         default:
             throw new IllegalArgumentException("Unsupported service-discovery: ${rootProject.ext.appStack['service-discovery']}")
@@ -129,22 +153,14 @@ dependencies {
     // Template
     switch (rootProject.ext.appStack['template']) {
         case 'freemarker':
-            implementation project(':libs.template.freemarker')
+            api project(':libs.template.freemarker')
             break
         case 'thymeleaf':
-            implementation project(':libs.template.thymeleaf')
+            api project(':libs.template.thymeleaf')
             break
         default:
             throw new IllegalArgumentException("Unsupported template: ${rootProject.ext.appStack['template']}")
     }
-
-    // Lombok
-    compileOnly "org.projectlombok:lombok:${lombokVersion}"
-    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
-
-    // Mapstruct
-    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
-    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 }
 
 bootJar {
