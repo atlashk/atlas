@@ -25,11 +25,11 @@ repositories {
 }
 
 dependencies {
-    // Libs
-    api project(':libs.api.server.rest')
-
     // Port
     api project(':services.payment.port')
+    
+    // REST server
+    api project(':libs.api.server.rest')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

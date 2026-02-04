@@ -28,7 +28,7 @@ dependencies {
     // Framework
     api project(':libs.framework')
 
-    // Lib
+    // Freemarker
     api 'org.springframework.boot:spring-boot-starter-freemarker'
 
     // Lombok

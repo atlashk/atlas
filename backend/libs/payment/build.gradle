@@ -25,7 +25,7 @@ repositories {
 }
 
 dependencies {
-    // Libs
+    // Payment gateway integrations
     api project(':libs.payment.simulator')
     api project(':libs.payment.stripe')
 }

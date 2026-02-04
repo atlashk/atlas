@@ -28,9 +28,6 @@ dependencies {
     // Framework
     api project(':libs.framework')
 
-    // Lib
-    api 'org.springframework.boot:spring-boot-starter'
-
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

@@ -28,8 +28,7 @@ dependencies {
     // Framework
     api project(':libs.framework')
 
-    // Lib
-    api 'org.springframework.boot:spring-boot-starter'
+    // Sendgrid
     implementation 'com.sendgrid:sendgrid-java:4.10.3'
 
     // Lombok

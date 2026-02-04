@@ -28,7 +28,7 @@ dependencies {
     // Framework
     api project(':libs.framework')
 
-    // Lib
+    // Thymeleaf
     api 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
     // Lombok

@@ -25,7 +25,7 @@ repositories {
 }
 
 dependencies {
-    // Libs
+    // DB migration
     switch (rootProject.ext.appStack['migration']) {
         case 'flyway':
             switch (rootProject.ext.appStack['datasource']) {
@@ -42,6 +42,8 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported migration: ${rootProject.ext.appStack['migration']}")
     }
+
+    // Persistence
     switch (rootProject.ext.appStack.persistence) {
         case 'jpa':
             implementation project(':libs.saga.persistence.jpa')

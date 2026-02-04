@@ -25,7 +25,6 @@ repositories {
 }
 
 dependencies {
-    // Application
     switch (rootProject.ext.appStack['iam']) {
         case 'jwt':
             implementation project(':services.iam.jwt')

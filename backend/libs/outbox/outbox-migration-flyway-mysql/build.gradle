@@ -25,7 +25,7 @@ repositories {
 }
 
 dependencies {
-    // Libs
+    // Flyway MySQL
     api project(':libs.migration.flyway.mysql')
 }
 

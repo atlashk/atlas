@@ -25,11 +25,13 @@ repositories {
 }
 
 dependencies {
-    // Application
-    api project(':services.product.application')
+    // Port
+    api project(':services.product.port')
 
-    // Infrastructure
+    // gRPC server
     api project(':libs.api.server.grpc')
+    
+    // Protobuf
     api project(':libs.protobuf')
 
     // Lombok

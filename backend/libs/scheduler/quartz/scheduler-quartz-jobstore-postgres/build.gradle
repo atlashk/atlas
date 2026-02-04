@@ -25,8 +25,14 @@ repositories {
 }
 
 dependencies {
-    // Infrastructure
-    api project(':libs.scheduler.quartz.migration.flyway.postgres')
+    // DB migration
+    switch (rootProject.ext.appStack['migration']) {
+        case 'flyway':
+            api project(':libs.scheduler.quartz.migration.flyway.postgres')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported migration: ${rootProject.ext.appStack['migration']}")
+    }
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

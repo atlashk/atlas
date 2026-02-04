@@ -25,8 +25,6 @@ repositories {
 }
 
 dependencies {
-    // Libs
-    api project(':libs.framework')
     api project(':services.api-gateway.spring-cloud-gateway.security.core')
 
     // Lombok

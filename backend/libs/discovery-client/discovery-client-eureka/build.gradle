@@ -25,7 +25,7 @@ repositories {
 }
 
 dependencies {
-    // Lib
+    // Spring Cloud Eureka Client
     api 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
     // Lombok

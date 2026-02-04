@@ -19,7 +19,6 @@ repositories {
 }
 
 dependencies {
-    // Libs
     api 'org.springframework.boot:spring-boot-starter-actuator'
 }
 

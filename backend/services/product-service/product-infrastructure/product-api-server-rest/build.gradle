@@ -25,10 +25,10 @@ repositories {
 }
 
 dependencies {
-    // Application
-    api project(':services.product.application')
+    // Port
+    api project(':services.product.port')
 
-    // Infrastructure
+    // REST server
     api project(':libs.api.server.rest')
 
     // Lombok

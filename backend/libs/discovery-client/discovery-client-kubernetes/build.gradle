@@ -25,7 +25,7 @@ repositories {
 }
 
 dependencies {
-    // Lib
+    // Spring Cloud Kubernetes Client
     api 'org.springframework.cloud:spring-cloud-starter-kubernetes-client-all:3.2.0'
 
     // Lombok

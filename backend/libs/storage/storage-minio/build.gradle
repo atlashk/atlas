@@ -28,8 +28,7 @@ dependencies {
     // Framework
     api project(':libs.framework')
 
-    // Lib
-    api 'org.springframework.boot:spring-boot-starter'
+    // MinIO
     api 'io.minio:minio:8.6.0'
 
     // Lombok

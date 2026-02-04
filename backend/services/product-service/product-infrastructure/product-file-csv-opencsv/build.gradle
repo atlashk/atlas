@@ -25,11 +25,11 @@ repositories {
 }
 
 dependencies {
-    // Libs
-    api project(':libs.file.csv.opencsv')
-
     // Port
     api project(':services.product.port')
+
+    // OpenCSV
+    api project(':libs.file.csv.opencsv')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

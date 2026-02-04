@@ -28,7 +28,7 @@ dependencies {
     // Framework
     api project(':libs.framework')
 
-    // Lib
+    // Spring Security & OAuth2 Resource Server
     api 'org.springframework.boot:spring-boot-starter-security'
     api 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 

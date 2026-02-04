@@ -25,11 +25,11 @@ repositories {
 }
 
 dependencies {
-    // Libs
-    api project(':libs.file.pdf.pdfbox')
-
     // Port
     api project(':services.product.port')
+
+    // PDFBox
+    api project(':libs.file.pdf.pdfbox')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

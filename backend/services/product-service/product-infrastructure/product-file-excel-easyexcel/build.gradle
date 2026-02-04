@@ -25,11 +25,11 @@ repositories {
 }
 
 dependencies {
-    // Libs
-    api project(':libs.file.excel.easyexcel')
-
     // Port
     api project(':services.product.port')
+    
+    // Alibaba EasyExcel
+    api project(':libs.file.excel.easyexcel')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

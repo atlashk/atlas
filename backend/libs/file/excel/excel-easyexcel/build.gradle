@@ -28,10 +28,7 @@ dependencies {
     // Framework
     api project(':libs.framework')
 
-    // Lib
-    api 'org.springframework.boot:spring-boot-starter'
-
-    // Lib
+    // Alibaba EasyExcel
     api 'com.alibaba:easyexcel:4.0.3'
 
     // Lombok

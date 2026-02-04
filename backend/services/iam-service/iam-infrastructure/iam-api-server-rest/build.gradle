@@ -28,7 +28,7 @@ dependencies {
     // Port
     api project(':services.iam.port')
 
-    // Libs
+    // REST server
     api project(':libs.api.server.rest')
 
     // Lombok

@@ -25,7 +25,7 @@ repositories {
 }
 
 dependencies {
-    // Infrastructure
+    // Flyway
     api 'org.flywaydb:flyway-core'
     api 'org.flywaydb:flyway-mysql'
 }

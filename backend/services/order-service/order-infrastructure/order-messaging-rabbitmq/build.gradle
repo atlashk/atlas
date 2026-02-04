@@ -25,11 +25,11 @@ repositories {
 }
 
 dependencies {
-    // Libs
-    api project(':libs.messaging.rabbitmq')
-
     // Port
     api project(':services.order.port')
+    
+    // RabbitMQ
+    api project(':libs.messaging.rabbitmq')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

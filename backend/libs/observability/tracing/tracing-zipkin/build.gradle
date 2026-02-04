@@ -25,7 +25,7 @@ repositories {
 }
 
 dependencies {
-    // Libs
+    // Micrometer Tracing with Brave and Zipkin
     api 'org.springframework.boot:spring-boot-starter-actuator'
     api 'io.micrometer:micrometer-tracing-bridge-brave'
     api 'io.zipkin.reporter2:zipkin-reporter-brave'

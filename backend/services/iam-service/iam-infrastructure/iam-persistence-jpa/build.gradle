@@ -28,7 +28,7 @@ dependencies {
     // Port
     api project(':services.iam.port')
 
-    // Libs
+    // JPA
     api project(':libs.persistence.jpa')
 
     // Lombok

@@ -25,11 +25,11 @@ repositories {
 }
 
 dependencies {
-    // Libs
-    api project(':libs.file.excel.poi')
-
     // Port
     api project(':services.product.port')
+    
+    // Apache POI
+    api project(':libs.file.excel.poi')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

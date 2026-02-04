@@ -25,11 +25,11 @@ repositories {
 }
 
 dependencies {
-    // Libs
-    api project(':libs.full-text-search.elasticsearch')
-
     // Port
     api project(':services.product.port')
+    
+    // Elasticsearch
+    api project(':libs.full-text-search.elasticsearch')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

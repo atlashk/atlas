@@ -28,7 +28,7 @@ dependencies {
     // Domain
     api project(':services.order.application')
 
-    // Infrastructure
+    // JPA
     api project(':libs.persistence.jpa')
 
     // Lombok

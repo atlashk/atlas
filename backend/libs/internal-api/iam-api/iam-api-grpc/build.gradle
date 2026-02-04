@@ -25,9 +25,13 @@ repositories {
 }
 
 dependencies {
-    // Libs
+    // gRPC client
     api project(':libs.api.client.grpc')
+    
+    // Protobuf
     api project(':libs.protobuf')
+    
+    // Resilience
     api project(':libs.resilience.resilience4j')
 
     // Lombok

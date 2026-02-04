@@ -28,7 +28,10 @@ dependencies {
     // Framework
     api project(':libs.framework')
 
-    // Infrastructure
+    // Quartz
+    api 'org.springframework.boot:spring-boot-starter-quartz'
+
+    // Quartz job store
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':
             api project(':libs.scheduler.quartz.jobstore.mysql')
@@ -39,9 +42,6 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported datasource: ${rootProject.ext.appStack['datasource']}")
     }
-
-    // Lib
-    api 'org.springframework.boot:spring-boot-starter-quartz'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

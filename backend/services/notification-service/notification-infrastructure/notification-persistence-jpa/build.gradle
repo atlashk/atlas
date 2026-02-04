@@ -25,10 +25,10 @@ repositories {
 }
 
 dependencies {
-    // Domain
-    api project(':services.notification.application')
+    // Port
+    api project(':services.notification.port')
 
-    // Infrastructure
+    // Persistence
     api project(':libs.persistence.jpa')
 
     // Lombok

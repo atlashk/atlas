@@ -28,7 +28,7 @@ dependencies {
     // Framework
     api project(':libs.framework')
 
-    // Lib
+    // gRPC client
     api 'net.devh:grpc-client-spring-boot-starter:3.1.0.RELEASE'
 
     // Lombok

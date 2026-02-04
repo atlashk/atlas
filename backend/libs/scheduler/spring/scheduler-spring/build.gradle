@@ -25,17 +25,13 @@ repositories {
 }
 
 dependencies {
-    // Framework
-    api project(':libs.framework')
-
-    // Infrastructure
-    api project(':libs.kv-store.redis')
-
-    // Lib
     // Distributed lock in case the schedulers run on multi-instance application
     api 'net.javacrumbs.shedlock:shedlock-spring:6.4.0'
     api 'net.javacrumbs.shedlock:shedlock-provider-redis-spring:6.4.0'
 
+    // Redis (required by ShedLock)
+    api project(':libs.kv-store.redis')
+    
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

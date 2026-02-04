@@ -28,7 +28,7 @@ dependencies {
     // Framework
     api project(':libs.framework')
 
-    // Lib
+    // resilience4j
     api 'io.github.resilience4j:resilience4j-spring-boot3:2.3.0'
 
     // Lombok

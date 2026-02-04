@@ -25,7 +25,6 @@ repositories {
 }
 
 dependencies {
-    // Lib
     runtimeOnly 'org.postgresql:postgresql'
 }
 

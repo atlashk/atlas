@@ -25,10 +25,7 @@ repositories {
 }
 
 dependencies {
-    // Framework
-    api project(':libs.framework')
-
-    // Infrastructure
+    // REST client
     api project(':libs.api.client.rest.restclient')
 
     // Lombok

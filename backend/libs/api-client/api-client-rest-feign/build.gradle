@@ -28,7 +28,7 @@ dependencies {
     // Framework
     api project(':libs.framework')
 
-    // Lib
+    // OpenFeign
     api 'org.springframework.cloud:spring-cloud-starter-openfeign'
     api 'io.github.openfeign:feign-hc5'
     api 'org.apache.httpcomponents.client5:httpclient5:5.4.1'

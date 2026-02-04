@@ -28,7 +28,7 @@ dependencies {
     // Framework
     api project(':libs.framework')
 
-    // Lib
+    // Spring Boot Mail
     implementation 'org.springframework.boot:spring-boot-starter-mail'
 
     // Lombok

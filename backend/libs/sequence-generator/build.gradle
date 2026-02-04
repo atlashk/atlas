@@ -28,7 +28,7 @@ dependencies {
     // Framework
     api project(':libs.framework')
 
-    // Lib
+    // JDBC
     api 'org.springframework.boot:spring-boot-starter-jdbc'
 
     // Lombok

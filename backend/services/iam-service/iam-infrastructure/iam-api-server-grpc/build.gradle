@@ -28,8 +28,10 @@ dependencies {
     // Port
     api project(':services.iam.port')
 
-    // Libs
+    // gRPC server
     api project(':libs.api.server.grpc')
+    
+    // Protobuf
     api project(':libs.protobuf')
 
     // Lombok

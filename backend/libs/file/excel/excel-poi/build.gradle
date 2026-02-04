@@ -28,10 +28,7 @@ dependencies {
     // Framework
     api project(':libs.framework')
 
-    // Lib
-    api 'org.springframework.boot:spring-boot-starter'
-
-    // Lib
+    // Apache POI
     api 'org.apache.poi:poi:5.3.0'
     api 'org.apache.poi:poi-ooxml:5.3.0'
 
