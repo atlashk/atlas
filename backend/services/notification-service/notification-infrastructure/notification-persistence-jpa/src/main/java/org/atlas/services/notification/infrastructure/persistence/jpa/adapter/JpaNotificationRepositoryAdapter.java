@@ -25,7 +25,7 @@ public class JpaNotificationRepositoryAdapter implements NotificationRepository 
 
   @Override
   public List<Notification> findByUserIdAndChannel(
-      Integer userId, NotificationChannel channel, PagingRequest pagingRequest) {
+      String userId, NotificationChannel channel, PagingRequest pagingRequest) {
     Pageable pageable = PagingConverter.convert(pagingRequest);
     List<JpaNotification> jpaNotifications = jpaNotificationRepository.findByUserIdAndChannel(
         userId, channel, pageable);
@@ -50,7 +50,7 @@ public class JpaNotificationRepositoryAdapter implements NotificationRepository 
   }
 
   @Override
-  public void markAsReadAll(Integer userId, NotificationChannel channel) {
+  public void markAsReadAll(String userId, NotificationChannel channel) {
     jpaNotificationRepository.markAsReadAll(userId, channel, DateUtil.now());
   }
 }

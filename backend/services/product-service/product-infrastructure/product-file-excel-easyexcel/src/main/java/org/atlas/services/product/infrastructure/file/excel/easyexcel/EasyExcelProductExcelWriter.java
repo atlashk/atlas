@@ -10,7 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.file.excel.easyexcel.EasyExcelWriter;
-import org.atlas.libs.framework.domain.product.ProductStatus;
+import org.atlas.libs.framework.domain.product.ProductStockStatus;
 import org.atlas.libs.framework.util.ObjectMapperUtil;
 import org.atlas.services.product.port.out.file.excel.ProductExcelWriter;
 import org.atlas.services.product.port.out.file.model.ProductWriteRow;
@@ -49,7 +49,7 @@ public class EasyExcelProductExcelWriter implements ProductExcelWriter {
     private Integer quantity;
 
     @ExcelProperty(value = "Status", converter = ProductStatusConverter.class)
-    private ProductStatus status;
+    private ProductStockStatus status;
 
     @ExcelProperty(value = "Available From")
     private Date availableFrom;

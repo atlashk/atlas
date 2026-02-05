@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
 public interface ElasticsearchProductRepository extends
     ElasticsearchRepository<ElasticsearchProduct, String>, CustomElasticsearchProductRepository {
 
-  Optional<ElasticsearchProduct> findByProductId(Integer productId);
+  Optional<ElasticsearchProduct> findByProductId(String productId);
 }

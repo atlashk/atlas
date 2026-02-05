@@ -16,7 +16,7 @@ import org.atlas.libs.framework.domain.user.UserRole;
 @Setter
 public class UserEvent extends DomainEvent {
 
-  private Integer userId;
+  private String userId;
   private String username;
   private String firstName;
   private String lastName;

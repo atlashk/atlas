@@ -31,7 +31,7 @@ public class HandleWebhookResponse {
   @Setter
   public static class Result {
 
-    private Integer paymentId;
+    private String paymentId;
     private String paymentMethod;
     private PaymentMethodDetails paymentMethodDetails;
     private PaymentStatus status;

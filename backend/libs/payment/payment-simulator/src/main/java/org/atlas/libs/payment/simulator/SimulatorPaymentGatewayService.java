@@ -118,7 +118,7 @@ public class SimulatorPaymentGatewayService implements PaymentGatewayService {
         .build();
   }
 
-  private void scheduleWebhookCall(Integer paymentId, String transactionId) {
+  private void scheduleWebhookCall(String paymentId, String transactionId) {
     int delaySeconds = RandomUtil.randomInt(10, 15);
     scheduledExecutorService.schedule(() -> {
       log.info("Executing scheduled webhook call for paymentId={}, transactionId={}",
@@ -127,7 +127,7 @@ public class SimulatorPaymentGatewayService implements PaymentGatewayService {
     }, delaySeconds, TimeUnit.SECONDS);
   }
 
-  private void sendWebhook(Integer paymentId) {
+  private void sendWebhook(String paymentId) {
     // Create webhook payload
     PaymentSimulatorWebhookPayload payload = PaymentSimulatorWebhookPayload.builder()
         .paymentId(paymentId)

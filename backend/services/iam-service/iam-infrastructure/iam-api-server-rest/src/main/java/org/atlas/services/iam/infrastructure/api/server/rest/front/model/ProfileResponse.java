@@ -19,7 +19,7 @@ import org.atlas.libs.framework.domain.user.UserRole;
 public class ProfileResponse {
 
   @Schema(description = "Unique identifier of the user", example = "1")
-  private Integer userId;
+  private String userId;
 
   @Schema(description = "Username of the user", example = "john_doe")
   private String username;

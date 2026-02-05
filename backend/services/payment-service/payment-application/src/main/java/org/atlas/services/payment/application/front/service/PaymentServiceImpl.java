@@ -10,7 +10,7 @@ import org.atlas.services.payment.application.front.mapper.PaymentMapper;
 import org.atlas.services.payment.port.in.front.model.RetrievePaymentNextActionOutput;
 import org.atlas.services.payment.port.in.front.service.PaymentService;
 import org.atlas.services.payment.port.out.repository.PaymentRepository;
-import org.atlas.services.payment.domain.entity.Payment;
+import org.atlas.services.payment.domain.entity.PaymentEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,9 +23,9 @@ public class PaymentServiceImpl implements PaymentService {
 
   @Override
   @Transactional(readOnly = true)
-  public RetrievePaymentNextActionOutput retrievePaymentNextAction(Integer orderId,
-      Integer userId) {
-    Payment payment = paymentRepository.findByOrderId(orderId)
+  public RetrievePaymentNextActionOutput retrievePaymentNextAction(String orderId,
+      String userId) {
+    PaymentEntity payment = paymentRepository.findByOrderId(orderId)
         .orElseThrow(() -> new DomainException(DomainError.PAYMENT_NOT_FOUND));
 
     if (!PaymentStatus.CREATED.equals(payment.getStatus())) {

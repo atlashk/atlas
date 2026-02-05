@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.file.excel.easyexcel.EasyExcelReader;
 import org.atlas.libs.framework.constant.CommonConstant;
-import org.atlas.libs.framework.domain.product.ProductStatus;
+import org.atlas.libs.framework.domain.product.ProductStockStatus;
 import org.atlas.libs.framework.util.ObjectMapperUtil;
 import org.atlas.services.product.port.out.file.excel.ProductExcelReader;
 import org.atlas.services.product.port.out.file.model.ProductReadRow;
@@ -49,7 +49,7 @@ public class EasyExcelProductExcelReader implements ProductExcelReader {
     private Integer quantity;
 
     @ExcelProperty(value = "Status")
-    private ProductStatus status;
+    private ProductStockStatus status;
 
     @ExcelProperty(value = "Available From")
     @DateTimeFormat(value = CommonConstant.DATE_TIME_FORMAT)

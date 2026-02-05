@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.libs.framework.domain.product.ProductStatus;
+import org.atlas.libs.framework.domain.product.ProductStockStatus;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -25,7 +25,7 @@ public class ElasticsearchProduct {
   private String id;
 
   @Field(type = FieldType.Integer)
-  private Integer productId;
+  private String productId;
 
   @Field(type = FieldType.Text, analyzer = "standard")
   private String name;
@@ -34,7 +34,7 @@ public class ElasticsearchProduct {
   private BigDecimal price;
 
   @Field(type = FieldType.Keyword)
-  private ProductStatus status;
+  private ProductStockStatus status;
 
   // Product Details
   @Field(type = FieldType.Nested)

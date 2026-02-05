@@ -28,6 +28,12 @@ dependencies {
     // Port
     api project(':services.iam.port')
 
+    // Keycloak Admin client
+    api 'org.keycloak:keycloak-admin-client:26.0.7'
+
+    // REST client
+    api project(':libs.api.client.rest.restclient')
+
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

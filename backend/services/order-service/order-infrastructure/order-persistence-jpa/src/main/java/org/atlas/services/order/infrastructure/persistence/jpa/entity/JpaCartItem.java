@@ -36,7 +36,7 @@ public class JpaCartItem extends JpaBaseEntity {
   private JpaCart cart;
 
   @Column(name = "product_id")
-  private Integer productId;
+  private String productId;
 
   @Column(name = "quantity")
   private Integer quantity;

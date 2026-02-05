@@ -2,11 +2,11 @@ package org.atlas.services.product.port.in.front.service;
 
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.services.product.port.in.front.model.RetrieveProductListInput;
-import org.atlas.services.product.domain.entity.Product;
+import org.atlas.services.product.domain.entity.ProductEntity;
 
 public interface ProductService {
 
-  PagingResult<Product> retrieveProductList(RetrieveProductListInput input);
+  PagingResult<ProductEntity> retrieveProductList(RetrieveProductListInput input);
 
-  Product retrieveProduct(Integer productId) throws Exception;
+  ProductEntity retrieveProduct(String productId) throws Exception;
 }

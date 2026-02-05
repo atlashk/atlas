@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.services.product.domain.entity.Product;
+import org.atlas.services.product.domain.entity.ProductEntity;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,7 +14,7 @@ import org.atlas.services.product.domain.entity.Product;
 @Setter
 public class AdminCreateProductInput {
 
-  private Product product;
+  private ProductEntity product;
   private byte[] imageBytes;
   private String imageContentType;
 }

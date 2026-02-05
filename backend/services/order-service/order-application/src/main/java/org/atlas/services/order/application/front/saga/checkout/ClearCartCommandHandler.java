@@ -1,6 +1,5 @@
 package org.atlas.services.order.application.front.saga.checkout;
 
-import java.util.LinkedHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.cache.ApplicationCache;
@@ -15,7 +14,7 @@ import org.atlas.libs.framework.saga.core.annotation.SagaCommandHandler;
 import org.atlas.libs.framework.saga.core.command.SagaCommandResult;
 import org.atlas.libs.framework.saga.core.context.SagaContext;
 import org.atlas.libs.framework.saga.core.messaging.payload.SagaCommand;
-import org.atlas.services.order.domain.entity.Cart;
+import org.atlas.services.order.domain.entity.CartEntity;
 import org.atlas.services.order.port.out.repository.CartRepository;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +36,7 @@ public class ClearCartCommandHandler {
     }
 
     try {
-      Cart cart = cartRepository.findByUserId(checkoutSagaData.getUser().getId())
+      CartEntity cart = cartRepository.findByUserId(checkoutSagaData.getUser().getId())
           .orElseThrow(() -> new DomainException(DomainError.CART_NOT_FOUND));
 
       if (CollectionUtil.isEmpty(cart.getCartItems())) {

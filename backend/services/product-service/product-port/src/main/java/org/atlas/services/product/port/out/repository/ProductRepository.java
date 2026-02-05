@@ -5,34 +5,34 @@ import java.util.Optional;
 import org.atlas.libs.framework.domain.common.exception.OutOfStockException;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
+import org.atlas.services.product.domain.entity.ProductEntity;
 import org.atlas.services.product.port.out.repository.criteria.FindProductCriteria;
-import org.atlas.services.product.domain.entity.Product;
 
 public interface ProductRepository {
 
-  PagingResult<Product> findByCriteria(FindProductCriteria criteria,
+  PagingResult<ProductEntity> findByCriteria(FindProductCriteria criteria,
       PagingRequest pagingRequest);
 
   Long countAll();
 
-  List<Product> findByIdIn(List<Integer> ids);
+  List<ProductEntity> findByProductIdIn(List<String> productIds);
 
-  Optional<Product> findById(Integer id);
+  Optional<ProductEntity> findByProductId(String productId);
 
-  void insert(Product product);
+  void insert(ProductEntity product);
 
-  void insertBatch(List<Product> products);
+  void insertBatch(List<ProductEntity> products);
 
-  void update(Product product);
+  void update(ProductEntity product);
 
-  void decreaseQuantityWithConstraint(Integer id, Integer decrement) throws OutOfStockException;
+  void decreaseQuantityWithConstraint(String productId, Integer decrement) throws OutOfStockException;
 
-  void decreaseQuantityWithPessimisticLock(Integer id, Integer decrement)
+  void decreaseQuantityWithPessimisticLock(String productId, Integer decrement)
       throws OutOfStockException;
 
-  void decreaseQuantityWithOptimisticLock(Integer id, Integer decrement) throws OutOfStockException;
+  void decreaseQuantityWithOptimisticLock(String productId, Integer decrement) throws OutOfStockException;
 
-  void increaseQuantity(Integer id, Integer increment);
+  void increaseQuantity(String productId, Integer increment);
 
-  void delete(Integer id);
+  void deleteByProductId(String productId);
 }

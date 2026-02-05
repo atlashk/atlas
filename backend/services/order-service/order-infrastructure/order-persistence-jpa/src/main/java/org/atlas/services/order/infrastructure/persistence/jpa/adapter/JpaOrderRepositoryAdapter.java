@@ -8,10 +8,10 @@ import org.atlas.libs.framework.domain.order.OrderStatus;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.services.order.domain.entity.OrderEntity;
 import org.atlas.services.order.port.in.admin.model.AdminMonthlyOrderAggregation;
 import org.atlas.services.order.port.out.repository.OrderRepository;
 import org.atlas.services.order.port.out.repository.criteria.FindOrderCriteria;
-import org.atlas.services.order.domain.entity.Order;
 import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaOrder;
 import org.atlas.services.order.infrastructure.persistence.jpa.mapper.JpaOrderMapper;
 import org.atlas.services.order.infrastructure.persistence.jpa.repository.CustomJpaOrderRepository;
@@ -26,7 +26,7 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
   private final CustomJpaOrderRepository customJpaOrderRepository;
 
   @Override
-  public PagingResult<Order> findByCriteria(FindOrderCriteria criteria,
+  public PagingResult<OrderEntity> findByCriteria(FindOrderCriteria criteria,
       PagingRequest pagingRequest) {
     long totalCount = customJpaOrderRepository.countByCriteria(criteria);
     if (totalCount == 0L) {
@@ -34,18 +34,18 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
     }
     List<JpaOrder> jpaOrders = customJpaOrderRepository.findByCriteria(criteria,
         pagingRequest);
-    List<Order> orders = ObjectMapperUtil.mapList(jpaOrders, JpaOrderMapper.INSTANCE::toOrder);
+    List<OrderEntity> orders = ObjectMapperUtil.mapList(jpaOrders, JpaOrderMapper.INSTANCE::toOrder);
     return PagingResult.of(orders, totalCount, pagingRequest);
   }
 
   @Override
-  public Optional<Order> findById(Integer id) {
-    return jpaOrderRepository.findByIdAndFetch(id)
+  public Optional<OrderEntity> findByOrderId(String orderId) {
+    return jpaOrderRepository.findByOrderIdAndFetch(orderId)
         .map(JpaOrderMapper.INSTANCE::toOrder);
   }
 
   @Override
-  public Optional<Order> findBySagaId(Integer sagaId) {
+  public Optional<OrderEntity> findBySagaId(Integer sagaId) {
     return jpaOrderRepository.findBySagaIdAndFetch(sagaId)
         .map(JpaOrderMapper.INSTANCE::toOrder);
   }
@@ -66,15 +66,15 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
   }
 
   @Override
-  public void insert(Order order) {
+  public void insert(OrderEntity order) {
     JpaOrder jpaOrder = JpaOrderMapper.INSTANCE.toJpaOrder(order);
     jpaOrderRepository.insert(jpaOrder);
-    order.setId(jpaOrder.getId());
+    order.setOrderId(jpaOrder.getOrderId());
     order.setCreatedAt(jpaOrder.getCreatedAt());
   }
 
   @Override
-  public void update(Order order) {
+  public void update(OrderEntity order) {
     JpaOrder jpaOrder = JpaOrderMapper.INSTANCE.toJpaOrder(order);
     jpaOrderRepository.save(jpaOrder);
   }

@@ -20,7 +20,7 @@ import lombok.Setter;
 @Setter
 public class CheckoutSagaData {
 
-  private Integer orderId;
+  private String orderId;
   private String orderCode;
   private User user;
   private Address address;

@@ -3,7 +3,7 @@ package org.atlas.services.product.port.out.fulltextsearch;
 import java.util.List;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
-import org.atlas.services.product.domain.entity.Product;
+import org.atlas.services.product.domain.entity.ProductEntity;
 
 public interface FullTextSearchService {
 
@@ -16,9 +16,9 @@ public interface FullTextSearchService {
    */
   PagingResult<Integer> search(SearchProductCriteria criteria, PagingRequest pagingRequest);
 
-  void save(Product product);
+  void save(ProductEntity product);
 
-  void saveAll(List<Product> products);
+  void saveAll(List<ProductEntity> products);
 
-  void deleteProduct(Integer productId);
+  void deleteProduct(String productId);
 }

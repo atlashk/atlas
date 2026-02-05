@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
 public interface JpaNotificationRepository extends JpaBaseRepository<JpaNotification, Integer> {
 
   List<JpaNotification> findByUserIdAndChannel(
-      Integer userId, NotificationChannel notificationChannel, Pageable pageable);
+      String userId, NotificationChannel notificationChannel, Pageable pageable);
 
   @Modifying
   @Query("""
@@ -25,7 +25,7 @@ public interface JpaNotificationRepository extends JpaBaseRepository<JpaNotifica
           and n.channel = :channel
       """)
   void markAsReadAll(
-      @Param("userId") Integer userId,
+      @Param("userId") String userId,
       @Param("channel") NotificationChannel channel,
       @Param("readAt") Date readAt);
 }

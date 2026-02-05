@@ -1,16 +1,16 @@
 package org.atlas.services.order.port.in.front.service;
 
-import org.atlas.services.order.domain.entity.Cart;
+import org.atlas.services.order.domain.entity.CartEntity;
 
 public interface CartService {
 
-  Cart retrieveCart(Integer userId);
+  CartEntity retrieveCart(String userId);
 
-  Cart addCartItem(Integer userId, Integer productId, Integer quantity);
+  CartEntity addCartItem(String userId, String productId, Integer quantity);
 
-  Cart updateQuantity(Integer userId, Integer productId, Integer quantity);
+  CartEntity updateQuantity(String userId, String productId, Integer quantity);
 
-  Cart removeCartItem(Integer userId, Integer productId);
+  CartEntity removeCartItem(String userId, String productId);
 
-  Cart clearCart(Integer userId);
+  CartEntity clearCart(String userId);
 }

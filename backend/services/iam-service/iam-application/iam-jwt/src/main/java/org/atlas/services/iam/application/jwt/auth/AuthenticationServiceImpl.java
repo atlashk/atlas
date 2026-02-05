@@ -14,7 +14,7 @@ import org.atlas.libs.framework.util.DateUtil;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.iam.application.jwt.core.TokenService;
 import org.atlas.services.iam.application.jwt.core.UserDetailsImpl;
-import org.atlas.services.iam.domain.entity.User;
+import org.atlas.services.iam.domain.entity.UserEntity;
 import org.atlas.services.iam.port.in.auth.model.GenerateOneTimeTokenInput;
 import org.atlas.services.iam.port.in.auth.model.GenerateOneTimeTokenOutput;
 import org.atlas.services.iam.port.in.auth.model.LoginInput;
@@ -64,7 +64,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     // Reissue tokens
-    User user = userRepository.findById(refreshTokenJwt.getUserId())
+    UserEntity user = userRepository.findById(refreshTokenJwt.getUserId())
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
     UserDetailsImpl userDetails = new UserDetailsImpl(user);
 

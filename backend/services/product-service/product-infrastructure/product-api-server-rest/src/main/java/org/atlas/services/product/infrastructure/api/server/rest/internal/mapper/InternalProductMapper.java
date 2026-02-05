@@ -3,7 +3,7 @@ package org.atlas.services.product.infrastructure.api.server.rest.internal.mappe
 import org.atlas.libs.framework.internalapi.product.model.ProductResponse;
 import org.atlas.services.product.infrastructure.api.server.rest.internal.model.InternalRetrieveProductListRequest;
 import org.atlas.services.product.port.in.internal.model.InternalRetrieveProductListInput;
-import org.atlas.services.product.domain.entity.Product;
+import org.atlas.services.product.domain.entity.ProductEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
@@ -16,5 +16,5 @@ public interface InternalProductMapper {
   InternalRetrieveProductListInput toInternalRetrieveProductListInput(
       InternalRetrieveProductListRequest request);
 
-  ProductResponse toProductResponse(Product product);
+  ProductResponse toProductResponse(ProductEntity product);
 }

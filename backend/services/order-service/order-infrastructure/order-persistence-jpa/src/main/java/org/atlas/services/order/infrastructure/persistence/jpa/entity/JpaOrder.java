@@ -35,21 +35,18 @@ import org.atlas.libs.persistence.jpa.entity.JpaBaseEntity;
 public class JpaOrder extends JpaBaseEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Integer id;
+  @Column(name = "order_id")
+  private String orderId;
 
   @Column(name = "saga_id")
   private Integer sagaId;
-
-  @Column(name = "code")
-  private String code;
 
   @Column(name = "status")
   @Enumerated(EnumType.STRING)
   private OrderStatus status;
 
   @Column(name = "user_id")
-  private Integer userId;
+  private String userId;
 
   @Column(name = "user_first_name")
   private String userFirstName;

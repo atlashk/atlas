@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.collection.CollectionUtil;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
-import org.atlas.services.product.domain.entity.Product;
+import org.atlas.services.product.domain.entity.ProductEntity;
 import org.atlas.services.product.infrastructure.fulltextsearch.elasticsearch.document.ElasticsearchProduct;
 import org.atlas.services.product.infrastructure.fulltextsearch.elasticsearch.mapper.ElasticsearchProductMapper;
 import org.atlas.services.product.infrastructure.fulltextsearch.elasticsearch.repository.ElasticsearchProductRepository;
@@ -69,14 +69,14 @@ public class ElasticsearchFullTextSearchService implements FullTextSearchService
   }
 
   @Override
-  public void save(Product product) {
+  public void save(ProductEntity product) {
     ElasticsearchProduct elasticsearchProduct =
         ElasticsearchProductMapper.INSTANCE.toProductDocument(product);
     elasticsearchProductRepository.save(elasticsearchProduct);
   }
 
   @Override
-  public void saveAll(List<Product> products) {
+  public void saveAll(List<ProductEntity> products) {
     if (CollectionUtil.isEmpty(products)) {
       return;
     }
@@ -89,7 +89,7 @@ public class ElasticsearchFullTextSearchService implements FullTextSearchService
   }
 
   @Override
-  public void deleteProduct(Integer productId) {
+  public void deleteProduct(String productId) {
     ElasticsearchProduct elasticsearchProduct = elasticsearchProductRepository.findByProductId(
             productId)
         .orElseThrow(() -> new IllegalArgumentException(

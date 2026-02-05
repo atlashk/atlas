@@ -8,11 +8,11 @@ import org.atlas.services.notification.domain.entity.NotificationChannel;
 public interface NotificationRepository {
 
   List<Notification> findByUserIdAndChannel(
-      Integer userId, NotificationChannel channel, PagingRequest pagingRequest);
+      String userId, NotificationChannel channel, PagingRequest pagingRequest);
 
   void insert(Notification notification);
 
   void update(Notification notification);
 
-  void markAsReadAll(Integer userId, NotificationChannel channel);
+  void markAsReadAll(String userId, NotificationChannel channel);
 }

@@ -33,7 +33,7 @@ public class JpaCart extends JpaBaseEntity {
   private Integer id;
 
   @Column(name = "user_id")
-  private Integer userId;
+  private String userId;
 
   @OneToMany(
       cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE},

@@ -16,7 +16,7 @@ import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.ObjectMapperUtil;
 import org.atlas.libs.framework.util.StringUtil;
-import org.atlas.services.iam.domain.entity.User;
+import org.atlas.services.iam.domain.entity.UserEntity;
 import org.atlas.services.iam.infrastructure.persistence.jpa.entity.JpaUser;
 import org.atlas.services.iam.infrastructure.persistence.jpa.mapper.JpaUserMapper;
 import org.atlas.services.iam.infrastructure.persistence.jpa.repository.JpaUserRepository;
@@ -34,19 +34,19 @@ public class JpaUserRepositoryAdapter implements UserRepository {
   private EntityManager entityManager;
 
   @Override
-  public PagingResult<User> findByCriteria(FindUserCriteria criteria, PagingRequest pagingRequest) {
+  public PagingResult<UserEntity> findByCriteria(FindUserCriteria criteria, PagingRequest pagingRequest) {
     long totalCount = countByCriteria(criteria);
     if (totalCount == 0L) {
       return PagingResult.empty();
     }
 
     List<JpaUser> jpaUsers = findJpaUsersByCriteria(criteria, pagingRequest);
-    List<User> users = ObjectMapperUtil.mapList(jpaUsers, JpaUserMapper.INSTANCE::toUser);
+    List<UserEntity> users = ObjectMapperUtil.mapList(jpaUsers, JpaUserMapper.INSTANCE::toUser);
     return PagingResult.of(users, totalCount, pagingRequest);
   }
 
   @Override
-  public List<User> findByIdIn(List<Integer> ids) {
+  public List<UserEntity> findByIdIn(List<String> ids) {
     if (CollectionUtil.isEmpty(ids)) {
       return List.of();
     }
@@ -55,25 +55,25 @@ public class JpaUserRepositoryAdapter implements UserRepository {
   }
 
   @Override
-  public Optional<User> findById(Integer id) {
+  public Optional<UserEntity> findById(String id) {
     return jpaUserRepository.findById(id)
         .map(JpaUserMapper.INSTANCE::toUser);
   }
 
   @Override
-  public Optional<User> findByUsername(String username) {
+  public Optional<UserEntity> findByUsername(String username) {
     return jpaUserRepository.findByUsername(username)
         .map(JpaUserMapper.INSTANCE::toUser);
   }
 
   @Override
-  public Optional<User> findByEmail(String email) {
+  public Optional<UserEntity> findByEmail(String email) {
     return jpaUserRepository.findByEmail(email)
         .map(JpaUserMapper.INSTANCE::toUser);
   }
 
   @Override
-  public Optional<User> findByPhoneNumber(String phoneNumber) {
+  public Optional<UserEntity> findByPhoneNumber(String phoneNumber) {
     return jpaUserRepository.findByPhoneNumber(phoneNumber)
         .map(JpaUserMapper.INSTANCE::toUser);
   }
@@ -84,20 +84,20 @@ public class JpaUserRepositoryAdapter implements UserRepository {
   }
 
   @Override
-  public void insert(User user) {
+  public void insert(UserEntity user) {
     JpaUser jpaUser = JpaUserMapper.INSTANCE.toJpaUser(user);
     jpaUserRepository.save(jpaUser);
     user.setUserId(jpaUser.getUserId());
   }
 
   @Override
-  public void update(User user) {
+  public void update(UserEntity user) {
     JpaUser jpaUser = JpaUserMapper.INSTANCE.toJpaUser(user);
     jpaUserRepository.save(jpaUser);
   }
 
   @Override
-  public void deleteById(Integer id) {
+  public void deleteById(String id) {
     jpaUserRepository.deleteById(id);
   }
 
@@ -152,15 +152,20 @@ public class JpaUserRepositoryAdapter implements UserRepository {
 
       List<Predicate> keywordPredicates = new ArrayList<>();
       keywordPredicates.add(
-          criteriaBuilder.like(criteriaBuilder.lower(root.<String>get("username")),
+          criteriaBuilder.like(criteriaBuilder.lower(root.get("username")),
               lowercaseKeyword));
-      keywordPredicates.add(criteriaBuilder.equal(root.get("email"), keyword));
-      keywordPredicates.add(criteriaBuilder.equal(root.get("phoneNumber"), keyword));
-      try {
-        Integer userId = Integer.valueOf(keyword);
-        keywordPredicates.add(criteriaBuilder.equal(root.get("userId"), userId));
-      } catch (NumberFormatException ignored) {
-      }
+      keywordPredicates.add(
+          criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")),
+              lowercaseKeyword));
+      keywordPredicates.add(
+          criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")),
+              lowercaseKeyword));
+      keywordPredicates.add(
+          criteriaBuilder.like(criteriaBuilder.lower(root.get("email")),
+              lowercaseKeyword));
+      keywordPredicates.add(
+          criteriaBuilder.like(criteriaBuilder.lower(root.get("phoneNumber")),
+              lowercaseKeyword));
 
       predicates.add(criteriaBuilder.or(keywordPredicates.toArray(new Predicate[0])));
     }

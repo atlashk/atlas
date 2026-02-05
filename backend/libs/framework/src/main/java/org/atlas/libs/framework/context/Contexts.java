@@ -17,7 +17,7 @@ public class Contexts {
     return contextInfoThreadLocal.get();
   }
 
-  public static Integer getUserId() {
+  public static String getUserId() {
     return require().getUserId();
   }
 
@@ -30,11 +30,11 @@ public class Contexts {
     if (contextInfo == null) {
       return "anonymous";
     }
-    Integer userId = contextInfo.getUserId();
+    String userId = contextInfo.getUserId();
     if (userId == null) {
       return contextInfo.getIpAddress();
     }
-    return userId.toString();
+    return userId;
   }
 
   /**

@@ -9,12 +9,13 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.constant.CommonConstant;
-import org.atlas.libs.framework.domain.product.ProductStatus;
+import org.atlas.libs.framework.domain.product.ProductStockStatus;
 import org.atlas.libs.framework.file.FileType;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.DateUtil;
 import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.services.product.domain.entity.ProductEntity;
 import org.atlas.services.product.infrastructure.api.server.rest.admin.mapper.AdminProductMapper;
 import org.atlas.services.product.infrastructure.api.server.rest.admin.model.AdminCreateProductRequest;
 import org.atlas.services.product.infrastructure.api.server.rest.admin.model.AdminProductResponse;
@@ -25,7 +26,6 @@ import org.atlas.services.product.port.in.admin.model.AdminImportProductInput;
 import org.atlas.services.product.port.in.admin.model.AdminRetrieveProductListInput;
 import org.atlas.services.product.port.in.admin.model.AdminUpdateProductInput;
 import org.atlas.services.product.port.in.admin.service.AdminProductService;
-import org.atlas.services.product.domain.entity.Product;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -64,7 +64,7 @@ public class AdminProductManagementController {
       @Parameter(name = "maxPrice", description = "Maximum price for filtering products", example = "100.00")
       @RequestParam(name = "maxPrice", required = false) BigDecimal maxPrice,
       @Parameter(name = "status", description = "Status of the product", example = "IN_STOCK")
-      @RequestParam(name = "status", required = false) ProductStatus status,
+      @RequestParam(name = "status", required = false) ProductStockStatus status,
       @Parameter(name = "availableFrom", description = "Date from which the product is available (ISO 8601 format)", example = "2023-01-01T00:00:00Z")
       @RequestParam(name = "availableFrom", required = false)
       @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date availableFrom,
@@ -91,7 +91,7 @@ public class AdminProductManagementController {
         .categoryIds(categoryIds)
         .pagingRequest(PagingRequest.of(page - 1, size))
         .build();
-    PagingResult<Product> productPage = adminProductService.retrieveProductList(input);
+    PagingResult<ProductEntity> productPage = adminProductService.retrieveProductList(input);
     PagingResult<AdminProductResponse> responseData = ObjectMapperUtil.mapPage(productPage,
         AdminProductMapper.INSTANCE::toProductResponse);
     return ApiResponseWrapper.successPage(responseData);
@@ -101,8 +101,8 @@ public class AdminProductManagementController {
   @Operation(summary = "Retrieve details of a specific product by ID")
   public ApiResponseWrapper<AdminProductResponse> retrieveProduct(
       @Parameter(name = "productId", description = "The unique identifier of the product", example = "1")
-      @PathVariable Integer productId) {
-    Product product = adminProductService.retrieveProduct(productId);
+      @PathVariable String productId) {
+    ProductEntity product = adminProductService.retrieveProduct(productId);
     AdminProductResponse response = AdminProductMapper.INSTANCE.toProductResponse(product);
     return ApiResponseWrapper.success(response);
   }
@@ -115,7 +115,7 @@ public class AdminProductManagementController {
       @Valid @RequestPart("request") AdminCreateProductRequest request,
       @Parameter(description = "Product image file")
       @RequestPart(value = "image") MultipartFile imageFile) throws Exception {
-    Product product = AdminProductMapper.INSTANCE.toProduct(request);
+    ProductEntity product = AdminProductMapper.INSTANCE.toProduct(request);
     AdminCreateProductInput input = AdminCreateProductInput.builder()
         .product(product)
         .imageBytes(imageFile.getBytes())
@@ -129,12 +129,12 @@ public class AdminProductManagementController {
   @Operation(summary = "Update an existing product by ID")
   public ApiResponseWrapper<Void> updateProduct(
       @Parameter(name = "productId", description = "The unique identifier of the product to update", example = "1")
-      @PathVariable Integer productId,
+      @PathVariable String productId,
       @Parameter(description = "Request object containing the new details for the product", required = true)
       @Valid @RequestPart("request") AdminUpdateProductRequest request,
       @Parameter(description = "Product image file")
       @RequestPart(value = "image", required = false) MultipartFile imageFile) throws Exception {
-    Product product = AdminProductMapper.INSTANCE.toProduct(request);
+    ProductEntity product = AdminProductMapper.INSTANCE.toProduct(request);
     product.setId(productId);
     AdminUpdateProductInput input = AdminUpdateProductInput.builder()
         .product(product)
@@ -151,7 +151,7 @@ public class AdminProductManagementController {
   @Operation(summary = "Delete a product by ID")
   public ApiResponseWrapper<Void> deleteProduct(
       @Parameter(name = "productId", description = "The unique identifier of the product to delete", example = "1")
-      @PathVariable Integer productId) {
+      @PathVariable String productId) {
     adminProductService.deleteProduct(productId);
     return ApiResponseWrapper.success();
   }
@@ -181,7 +181,7 @@ public class AdminProductManagementController {
       @Parameter(name = "maxPrice", description = "Maximum price for filtering products", example = "100.00")
       @RequestParam(name = "maxPrice", required = false) BigDecimal maxPrice,
       @Parameter(name = "status", description = "Status of the product", example = "IN_STOCK")
-      @RequestParam(name = "status", required = false) ProductStatus status,
+      @RequestParam(name = "status", required = false) ProductStockStatus status,
       @Parameter(name = "availableFrom", description = "Date from which the product is available (ISO 8601 format)", example = "2023-01-01T00:00:00Z")
       @RequestParam(name = "availableFrom", required = false) Date availableFrom,
       @Parameter(name = "isActive", description = "Indicates if the product is active", example = "true")

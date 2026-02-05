@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.libs.framework.domain.product.ProductStatus;
+import org.atlas.libs.framework.domain.product.ProductStockStatus;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,11 +17,11 @@ import org.atlas.libs.framework.domain.product.ProductStatus;
 @Setter
 public class FindProductCriteria {
 
-  private Integer id;
+  private String productId;
   private String keyword;
   private BigDecimal minPrice;
   private BigDecimal maxPrice;
-  private ProductStatus status;
+  private ProductStockStatus status;
   private Date availableFrom;
   private Boolean isActive;
   private Integer brandId;

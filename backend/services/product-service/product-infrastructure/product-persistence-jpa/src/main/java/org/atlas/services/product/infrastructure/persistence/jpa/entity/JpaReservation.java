@@ -30,10 +30,10 @@ public class JpaReservation extends JpaBaseEntity {
   private Integer id;
 
   @Column(name = "order_id")
-  private Integer orderId;
+  private String orderId;
 
   @Column(name = "product_id")
-  private Integer productId;
+  private String productId;
 
   @Column(name = "quantity")
   private Integer quantity;

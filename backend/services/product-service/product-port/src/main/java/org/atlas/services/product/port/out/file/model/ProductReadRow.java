@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.libs.framework.domain.product.ProductStatus;
+import org.atlas.libs.framework.domain.product.ProductStockStatus;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,7 +19,7 @@ public class ProductReadRow {
   private String name;
   private BigDecimal price;
   private Integer quantity;
-  private ProductStatus status;
+  private ProductStockStatus status;
   private Date availableFrom;
   private Boolean isActive;
   private Integer brandId;

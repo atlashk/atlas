@@ -6,12 +6,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.context.Contexts;
+import org.atlas.services.order.domain.entity.CartEntity;
 import org.atlas.services.order.infrastructure.api.server.rest.front.mapper.CartMapper;
 import org.atlas.services.order.infrastructure.api.server.rest.front.model.AddCartItemRequest;
 import org.atlas.services.order.infrastructure.api.server.rest.front.model.CartResponse;
 import org.atlas.services.order.infrastructure.api.server.rest.front.model.UpdateCartItemRequest;
 import org.atlas.services.order.port.in.front.service.CartService;
-import org.atlas.services.order.domain.entity.Cart;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +32,7 @@ public class CartController {
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve user cart", description = "Retrieve current user's cart with all items")
   public ApiResponseWrapper<CartResponse> retrieveCart() {
-    Cart cart = cartService.retrieveCart(Contexts.getUserId());
+    CartEntity cart = cartService.retrieveCart(Contexts.getUserId());
     CartResponse response = CartMapper.INSTANCE.toCartResponse(cart);
     return ApiResponseWrapper.success(response);
   }
@@ -42,7 +42,7 @@ public class CartController {
   public ApiResponseWrapper<CartResponse> addCartItem(
       @Parameter(description = "Request object containing product and quantity", required = true)
       @Valid @RequestBody AddCartItemRequest request) {
-    Cart cart = cartService.addCartItem(Contexts.getUserId(), request.getProductId(),
+    CartEntity cart = cartService.addCartItem(Contexts.getUserId(), request.getProductId(),
         request.getQuantity());
     CartResponse response = CartMapper.INSTANCE.toCartResponse(cart);
     return ApiResponseWrapper.success(response);
@@ -52,10 +52,10 @@ public class CartController {
   @Operation(summary = "Update cart item quantity", description = "Update the quantity of a specific item in cart")
   public ApiResponseWrapper<CartResponse> updateCartItem(
       @Parameter(description = "Product ID to remove", required = true)
-      @PathVariable Integer productId,
+      @PathVariable String productId,
       @Parameter(description = "Request object containing new quantity", required = true)
       @Valid @RequestBody UpdateCartItemRequest request) {
-    Cart cart = cartService.updateQuantity(Contexts.getUserId(), productId, request.getQuantity());
+    CartEntity cart = cartService.updateQuantity(Contexts.getUserId(), productId, request.getQuantity());
     CartResponse response = CartMapper.INSTANCE.toCartResponse(cart);
     return ApiResponseWrapper.success(response);
   }
@@ -64,8 +64,8 @@ public class CartController {
   @Operation(summary = "Remove item from cart", description = "Remove a specific product from the user's cart")
   public ApiResponseWrapper<CartResponse> removeCartItem(
       @Parameter(description = "Product ID to remove", required = true)
-      @PathVariable Integer productId) {
-    Cart cart = cartService.removeCartItem(Contexts.getUserId(), productId);
+      @PathVariable String productId) {
+    CartEntity cart = cartService.removeCartItem(Contexts.getUserId(), productId);
     CartResponse response = CartMapper.INSTANCE.toCartResponse(cart);
     return ApiResponseWrapper.success(response);
   }
@@ -73,7 +73,7 @@ public class CartController {
   @PostMapping(value = "/clear", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Clear cart", description = "Remove all items from the user's cart")
   public ApiResponseWrapper<CartResponse> clearCart() {
-    Cart cart = cartService.clearCart(Contexts.getUserId());
+    CartEntity cart = cartService.clearCart(Contexts.getUserId());
     CartResponse response = CartMapper.INSTANCE.toCartResponse(cart);
     return ApiResponseWrapper.success(response);
   }

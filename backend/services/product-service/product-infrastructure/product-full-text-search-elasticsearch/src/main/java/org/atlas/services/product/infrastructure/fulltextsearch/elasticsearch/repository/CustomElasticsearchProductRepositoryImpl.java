@@ -8,7 +8,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.domain.product.ProductStatus;
+import org.atlas.libs.framework.domain.product.ProductStockStatus;
 import org.atlas.services.product.infrastructure.fulltextsearch.elasticsearch.document.ElasticsearchProduct;
 import org.atlas.services.product.port.out.fulltextsearch.SearchProductCriteria;
 import org.springframework.data.domain.Pageable;
@@ -36,7 +36,7 @@ public class CustomElasticsearchProductRepositoryImpl implements
     // Add strong preference for IN_STOCK products (boost their relevance score significantly)
     boolQueryBuilder.should(QueryBuilders.term(t -> t
         .field("status")
-        .value(FieldValue.of(ProductStatus.IN_STOCK))
+        .value(FieldValue.of(ProductStockStatus.IN_STOCK))
         .boost(5.0f)  // High boost to strongly prefer in-stock products
     ));
 

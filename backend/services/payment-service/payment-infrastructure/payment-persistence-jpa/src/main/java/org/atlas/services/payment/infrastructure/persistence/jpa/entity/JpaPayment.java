@@ -29,15 +29,14 @@ import org.atlas.libs.persistence.jpa.entity.JpaBaseEntity;
 public class JpaPayment extends JpaBaseEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @EqualsAndHashCode.Include
-  private Integer id;
+  @Column(name = "payment_id")
+  private String paymentId;
 
   @Column(name = "user_id")
-  private Integer userId;
+  private String userId;
 
   @Column(name = "order_id")
-  private Integer orderId;
+  private String orderId;
 
   @Column(name = "saga_id")
   private Integer sagaId;

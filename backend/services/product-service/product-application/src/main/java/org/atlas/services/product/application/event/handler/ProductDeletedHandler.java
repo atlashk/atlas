@@ -9,9 +9,9 @@ import org.atlas.libs.framework.domain.common.event.DomainEventType;
 import org.atlas.libs.framework.domain.common.event.contract.product.ProductEvent;
 import org.atlas.libs.framework.domain.common.event.handler.DomainEventHandler;
 import org.atlas.services.product.application.event.mapper.ProductEventMapper;
+import org.atlas.services.product.domain.entity.ProductEntity;
 import org.atlas.services.product.port.out.fulltextsearch.FullTextSearchService;
 import org.atlas.services.product.port.in.front.service.ProductImageService;
-import org.atlas.services.product.domain.entity.Product;
 import org.springframework.beans.factory.ObjectProvider;
 
 @DomainEventHandler(type = DomainEventType.PRODUCT_DELETED)
@@ -24,7 +24,7 @@ public class ProductDeletedHandler {
   private final CacheService cacheService;
 
   public void handle(ProductEvent event) {
-    Product product = ProductEventMapper.INSTANCE.toProduct(event);
+    ProductEntity product = ProductEventMapper.INSTANCE.toProduct(event);
 
     AsyncUtil.executeTasks(
         deleteProductImage(product),
@@ -37,7 +37,7 @@ public class ProductDeletedHandler {
     });
   }
 
-  private AsyncUtil.AsyncTask deleteProductImage(Product product) {
+  private AsyncUtil.AsyncTask deleteProductImage(ProductEntity product) {
     return new AsyncUtil.AsyncTask() {
       @Override
       public void run() {
@@ -57,7 +57,7 @@ public class ProductDeletedHandler {
     };
   }
 
-  private AsyncUtil.AsyncTask deleteFullTextSearchDocument(Product product) {
+  private AsyncUtil.AsyncTask deleteFullTextSearchDocument(ProductEntity product) {
     return new AsyncUtil.AsyncTask() {
       @Override
       public void run() {
@@ -80,7 +80,7 @@ public class ProductDeletedHandler {
     };
   }
 
-  private AsyncUtil.AsyncTask evictProductCache(Product product) {
+  private AsyncUtil.AsyncTask evictProductCache(ProductEntity product) {
     return new AsyncUtil.AsyncTask() {
       @Override
       public void run() {

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.framework.domain.order.OrderStatus;
 import org.atlas.libs.framework.domain.payment.PaymentStatus;
-import org.atlas.services.order.domain.entity.Order.OrderItem;
+import org.atlas.services.order.domain.entity.OrderEntity.OrderItem;
 
 @NoArgsConstructor
 @AllArgsConstructor

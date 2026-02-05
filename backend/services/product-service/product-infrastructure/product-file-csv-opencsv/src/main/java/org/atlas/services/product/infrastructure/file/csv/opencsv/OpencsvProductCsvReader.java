@@ -13,7 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.file.csv.opencsv.OpenCsvReader;
-import org.atlas.libs.framework.domain.product.ProductStatus;
+import org.atlas.libs.framework.domain.product.ProductStockStatus;
 import org.atlas.libs.framework.util.ObjectMapperUtil;
 import org.atlas.services.product.port.out.file.csv.ProductCsvReader;
 import org.atlas.services.product.port.out.file.model.ProductReadRow;
@@ -52,7 +52,7 @@ public class OpencsvProductCsvReader implements ProductCsvReader {
 
     @CsvBindByName(column = "Status")
     @CsvBindByPosition(position = 3)
-    private ProductStatus status;
+    private ProductStockStatus status;
 
     @CsvBindByName(column = "Available From")
     @CsvBindByPosition(position = 4)

@@ -18,8 +18,8 @@ import org.atlas.libs.framework.saga.core.annotation.SagaCommandHandler;
 import org.atlas.libs.framework.saga.core.command.SagaCommandResult;
 import org.atlas.libs.framework.saga.core.context.SagaContext;
 import org.atlas.libs.framework.saga.core.messaging.payload.SagaCommand;
-import org.atlas.services.payment.domain.entity.Payment;
-import org.atlas.services.payment.domain.entity.PaymentGateway;
+import org.atlas.services.payment.domain.entity.PaymentEntity;
+import org.atlas.services.payment.domain.entity.PaymentGatewayEntity;
 import org.atlas.services.payment.port.out.repository.PaymentGatewayRepository;
 import org.atlas.services.payment.port.out.repository.PaymentRepository;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -45,7 +45,7 @@ public class InitializePaymentCommandHandler {
     }
 
     // Find payment gateway
-    PaymentGateway paymentGateway = paymentGatewayRepository.findById(
+    PaymentGatewayEntity paymentGateway = paymentGatewayRepository.findById(
             checkoutSagaData.getPaymentGatewayId())
         .orElseThrow(() -> {
           log.error("Payment gateway {} not found", checkoutSagaData.getPaymentGatewayId());
@@ -64,7 +64,7 @@ public class InitializePaymentCommandHandler {
     }
 
     // Insert new payment entity
-    Payment payment = new Payment();
+    PaymentEntity payment = new PaymentEntity();
     payment.setUserId(checkoutSagaData.getUser().getId());
     payment.setOrderId(checkoutSagaData.getOrderId());
     payment.setSagaId(sagaCommand.getSagaId());

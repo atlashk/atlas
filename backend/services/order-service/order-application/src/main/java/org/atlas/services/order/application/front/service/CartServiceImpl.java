@@ -10,8 +10,8 @@ import org.atlas.libs.framework.collection.CollectionUtil;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
 import org.atlas.services.order.application.front.aggregator.CartAggregator;
+import org.atlas.services.order.domain.entity.CartEntity;
 import org.atlas.services.order.port.out.repository.CartRepository;
-import org.atlas.services.order.domain.entity.Cart;
 import org.atlas.services.order.port.in.front.service.CartService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,15 +28,15 @@ public class CartServiceImpl implements CartService {
   @Override
   @Cache(cacheName = "cart", key = "#userId")
   @Transactional(readOnly = true)
-  public Cart retrieveCart(Integer userId) {
+  public CartEntity retrieveCart(String userId) {
     // Get or create cart for user
-    Optional<Cart> cartOpt = cartRepository.findByUserId(userId);
+    Optional<CartEntity> cartOpt = cartRepository.findByUserId(userId);
     if (cartOpt.isEmpty()) {
-      return Cart.builder()
+      return CartEntity.builder()
           .userId(userId)
           .build();
     }
-    Cart cart = cartOpt.get();
+    CartEntity cart = cartOpt.get();
 
     // Fetch products
     if (CollectionUtil.isNotEmpty(cart.getCartItems())) {
@@ -53,12 +53,12 @@ public class CartServiceImpl implements CartService {
 
   @Override
   @Transactional
-  public Cart addCartItem(Integer userId, Integer productId, Integer quantity) {
+  public CartEntity addCartItem(String userId, String productId, Integer quantity) {
     // Get or create cart for user
-    Cart cart = cartRepository.findByUserId(userId)
+    CartEntity cart = cartRepository.findByUserId(userId)
         .orElseGet(() -> {
           // Create new cart
-          Cart newCart = Cart.builder()
+          CartEntity newCart = CartEntity.builder()
               .userId(userId)
               .build();
           cartRepository.insert(newCart);
@@ -71,16 +71,16 @@ public class CartServiceImpl implements CartService {
 
     // Update cache
     cartAggregator.aggregate(cart);
-    cacheService.put(ApplicationCache.CART, String.valueOf(cart.getUserId()), cart);
+    cacheService.put(ApplicationCache.CART, cart.getUserId(), cart);
 
     return cart;
   }
 
   @Override
   @Transactional
-  public Cart updateQuantity(Integer userId, Integer productId, Integer quantity) {
+  public CartEntity updateQuantity(String userId, String productId, Integer quantity) {
     // Find cart
-    Cart cart = cartRepository.findByUserId(userId)
+    CartEntity cart = cartRepository.findByUserId(userId)
         .orElseThrow(() -> new DomainException(DomainError.CART_NOT_FOUND));
 
     // Update DB
@@ -100,9 +100,9 @@ public class CartServiceImpl implements CartService {
 
   @Override
   @Transactional
-  public Cart removeCartItem(Integer userId, Integer productId) {
+  public CartEntity removeCartItem(String userId, String productId) {
     // Find cart
-    Cart cart = cartRepository.findByUserId(userId)
+    CartEntity cart = cartRepository.findByUserId(userId)
         .orElseThrow(() -> new DomainException(DomainError.CART_NOT_FOUND));
 
     // Update DB
@@ -120,9 +120,9 @@ public class CartServiceImpl implements CartService {
 
   @Override
   @Transactional
-  public Cart clearCart(Integer userId) {
+  public CartEntity clearCart(String userId) {
     // Find cart
-    Cart cart = cartRepository.findByUserId(userId)
+    CartEntity cart = cartRepository.findByUserId(userId)
         .orElseThrow(() -> new DomainException(DomainError.CART_NOT_FOUND));
 
     // Update DB

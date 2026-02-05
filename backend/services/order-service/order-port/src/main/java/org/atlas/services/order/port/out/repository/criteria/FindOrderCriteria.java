@@ -15,9 +15,9 @@ import org.atlas.libs.framework.domain.order.OrderStatus;
 @Setter
 public class FindOrderCriteria {
 
-  private Integer orderId;
-  private Integer userId;
-  private Integer productId;
+  private String orderId;
+  private String userId;
+  private String productId;
   private OrderStatus status;
   private Date startDate;
   private Date endDate;

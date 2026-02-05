@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface JpaReservationRepository extends JpaBaseRepository<JpaReservation, Integer> {
 
-  Optional<JpaReservation> findByOrderIdAndProductId(Integer orderId, Integer productId);
+  Optional<JpaReservation> findByOrderIdAndProductId(String orderId, String productId);
 }

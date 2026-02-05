@@ -2,7 +2,7 @@ package org.atlas.services.payment.infrastructure.persistence.jpa.adapter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.services.payment.domain.entity.PaymentEvent;
+import org.atlas.services.payment.domain.entity.PaymentEventEntity;
 import org.atlas.services.payment.infrastructure.persistence.jpa.entity.JpaPaymentEvent;
 import org.atlas.services.payment.infrastructure.persistence.jpa.mapper.JpaPaymentEventMapper;
 import org.atlas.services.payment.infrastructure.persistence.jpa.repository.JpaPaymentEventRepository;
@@ -17,7 +17,7 @@ public class JpaPaymentEventRepositoryAdapter implements PaymentEventRepository 
   private final JpaPaymentEventRepository jpaPaymentEventRepository;
 
   @Override
-  public void insert(PaymentEvent paymentEvent) {
+  public void insert(PaymentEventEntity paymentEvent) {
     JpaPaymentEvent jpaPaymentEvent =
         JpaPaymentEventMapper.INSTANCE.toJpaPaymentEvent(paymentEvent);
     jpaPaymentEventRepository.insert(jpaPaymentEvent);
@@ -25,7 +25,7 @@ public class JpaPaymentEventRepositoryAdapter implements PaymentEventRepository 
   }
 
   @Override
-  public void update(PaymentEvent paymentEvent) {
+  public void update(PaymentEventEntity paymentEvent) {
     JpaPaymentEvent jpaPaymentEvent =
         JpaPaymentEventMapper.INSTANCE.toJpaPaymentEvent(paymentEvent);
     jpaPaymentEventRepository.save(jpaPaymentEvent);

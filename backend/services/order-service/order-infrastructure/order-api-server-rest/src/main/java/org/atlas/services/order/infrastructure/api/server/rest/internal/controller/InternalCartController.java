@@ -3,10 +3,10 @@ package org.atlas.services.order.infrastructure.api.server.rest.internal.control
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
+import org.atlas.services.order.domain.entity.CartEntity;
 import org.atlas.services.order.infrastructure.api.server.rest.front.model.CartResponse;
 import org.atlas.services.order.infrastructure.api.server.rest.internal.mapper.InternalCartMapper;
 import org.atlas.services.order.port.in.front.service.CartService;
-import org.atlas.services.order.domain.entity.Cart;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,8 +24,8 @@ public class InternalCartController {
 
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve cart")
-  public ApiResponseWrapper<CartResponse> retrieveCart(@RequestParam("userId") Integer userId) {
-    Cart cart = cartService.retrieveCart(userId);
+  public ApiResponseWrapper<CartResponse> retrieveCart(@RequestParam("userId") String userId) {
+    CartEntity cart = cartService.retrieveCart(userId);
     CartResponse cartResponse = InternalCartMapper.INSTANCE.toCartResponse(cart);
     return ApiResponseWrapper.success(cartResponse);
   }

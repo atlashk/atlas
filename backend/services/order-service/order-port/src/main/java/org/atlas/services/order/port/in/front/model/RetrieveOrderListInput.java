@@ -16,7 +16,7 @@ import org.atlas.libs.framework.paging.PagingRequest;
 @Setter
 public class RetrieveOrderListInput {
 
-  private Integer userId;
+  private String userId;
   private OrderStatus status;
   private Date startDate;
   private Date endDate;

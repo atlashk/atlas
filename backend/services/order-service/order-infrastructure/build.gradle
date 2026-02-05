@@ -153,6 +153,12 @@ dependencies {
     api project(':libs.sequence-generator')
 }
 
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
 bootJar {
     enabled = false
 }

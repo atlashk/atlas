@@ -1,13 +1,13 @@
 package org.atlas.services.order.port.out.repository;
 
 import java.util.Optional;
-import org.atlas.services.order.domain.entity.Cart;
+import org.atlas.services.order.domain.entity.CartEntity;
 
 public interface CartRepository {
 
-  Optional<Cart> findByUserId(Integer userId);
+  Optional<CartEntity> findByUserId(String userId);
 
-  void insert(Cart cart);
+  void insert(CartEntity cart);
 
-  void update(Cart cart);
+  void update(CartEntity cart);
 }

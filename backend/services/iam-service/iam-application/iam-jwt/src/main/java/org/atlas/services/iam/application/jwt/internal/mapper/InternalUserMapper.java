@@ -1,6 +1,6 @@
 package org.atlas.services.iam.application.jwt.internal.mapper;
 
-import org.atlas.services.iam.domain.entity.User;
+import org.atlas.services.iam.domain.entity.UserEntity;
 import org.atlas.services.iam.port.in.internal.model.InternalUserOutput;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
@@ -11,5 +11,5 @@ public interface InternalUserMapper {
 
   InternalUserMapper INSTANCE = Mappers.getMapper(InternalUserMapper.class);
 
-  InternalUserOutput toInternalUserOutput(User user);
+  InternalUserOutput toInternalUserOutput(UserEntity user);
 }

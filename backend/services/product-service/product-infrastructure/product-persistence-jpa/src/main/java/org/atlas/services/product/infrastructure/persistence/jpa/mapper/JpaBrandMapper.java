@@ -1,6 +1,6 @@
 package org.atlas.services.product.infrastructure.persistence.jpa.mapper;
 
-import org.atlas.services.product.domain.entity.Brand;
+import org.atlas.services.product.domain.entity.BrandEntity;
 import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaBrand;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
@@ -15,7 +15,7 @@ public interface JpaBrandMapper {
 
   JpaBrandMapper INSTANCE = Mappers.getMapper(JpaBrandMapper.class);
 
-  JpaBrand toJpaBrand(Brand brand);
+  JpaBrand toJpaBrand(BrandEntity brand);
 
-  Brand toBrand(JpaBrand jpaBrand);
+  BrandEntity toBrand(JpaBrand jpaBrand);
 }

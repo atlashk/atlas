@@ -13,6 +13,7 @@ import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.ArrayUtil;
 import org.atlas.libs.framework.util.ObjectMapperUtil;
 import org.atlas.services.product.application.admin.mapper.AdminProductMapper;
+import org.atlas.services.product.domain.entity.ProductEntity;
 import org.atlas.services.product.port.in.admin.model.AdminCreateProductInput;
 import org.atlas.services.product.port.in.admin.model.AdminExportProductInput;
 import org.atlas.services.product.port.in.admin.model.AdminImportProductInput;
@@ -32,7 +33,6 @@ import org.atlas.services.product.port.out.messaging.ProductEventMessagePublishe
 import org.atlas.services.product.port.out.repository.ProductRepository;
 import org.atlas.services.product.port.out.repository.criteria.FindProductCriteria;
 import org.atlas.services.product.port.in.front.service.ProductImageService;
-import org.atlas.services.product.domain.entity.Product;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,9 +51,9 @@ public class AdminProductServiceImpl implements AdminProductService {
   private final ProductPdfWriter productPdfWriter;
 
   @Override
-  public PagingResult<Product> retrieveProductList(AdminRetrieveProductListInput input) {
+  public PagingResult<ProductEntity> retrieveProductList(AdminRetrieveProductListInput input) {
     FindProductCriteria criteria = AdminProductMapper.INSTANCE.toFindProductCriteria(input);
-    PagingResult<Product> productPage = productRepository.findByCriteria(criteria,
+    PagingResult<ProductEntity> productPage = productRepository.findByCriteria(criteria,
         input.getPagingRequest());
 
     // Set image
@@ -65,7 +65,7 @@ public class AdminProductServiceImpl implements AdminProductService {
 
   @Override
   @Transactional(readOnly = true)
-  public Product retrieveProduct(Integer productId) {
+  public ProductEntity retrieveProduct(String productId) {
     return productRepository.findById(productId)
         .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
   }
@@ -79,7 +79,7 @@ public class AdminProductServiceImpl implements AdminProductService {
   @Override
   @Transactional
   public Integer createProduct(AdminCreateProductInput input) throws Exception {
-    Product product = input.getProduct();
+    ProductEntity product = input.getProduct();
     productRepository.insert(product);
 
     productImageService.uploadImage(product.getId(), input.getImageBytes(),
@@ -93,8 +93,8 @@ public class AdminProductServiceImpl implements AdminProductService {
   @Override
   @Transactional
   public void updateProduct(AdminUpdateProductInput input) throws Exception {
-    Product product = input.getProduct();
-    Product existingProduct = productRepository.findById(product.getId())
+    ProductEntity product = input.getProduct();
+    ProductEntity existingProduct = productRepository.findById(product.getId())
         .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
 
     AdminProductMapper.INSTANCE.merge(product, existingProduct);
@@ -110,9 +110,9 @@ public class AdminProductServiceImpl implements AdminProductService {
 
   @Override
   @Transactional
-  public void deleteProduct(Integer productId) {
+  public void deleteProduct(String productId) {
     // Delete product from DB
-    Product product = productRepository.findById(productId)
+    ProductEntity product = productRepository.findById(productId)
         .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
     productRepository.delete(product.getId());
 
@@ -136,7 +136,7 @@ public class AdminProductServiceImpl implements AdminProductService {
 
     // Sync into DB and publish events
     try {
-      List<Product> products = rows.stream()
+      List<ProductEntity> products = rows.stream()
           .map(ProductReadRowMapper.INSTANCE::toProduct)
           .toList();
       productRepository.insertBatch(products);
@@ -150,7 +150,7 @@ public class AdminProductServiceImpl implements AdminProductService {
   @Override
   public byte[] exportProduct(AdminExportProductInput input) throws Exception {
     FindProductCriteria criteria = AdminProductMapper.INSTANCE.toFindProductCriteria(input);
-    PagingResult<Product> products = productRepository.findByCriteria(criteria,
+    PagingResult<ProductEntity> products = productRepository.findByCriteria(criteria,
         PagingRequest.unpaged());
 
     // Use custom mapping method for complex attribute mapping
@@ -168,19 +168,19 @@ public class AdminProductServiceImpl implements AdminProductService {
     return fileContent;
   }
 
-  private void publishProductCreatedEvent(Product product) {
+  private void publishProductCreatedEvent(ProductEntity product) {
     ProductEvent event = new ProductEvent(DomainEventType.PRODUCT_CREATED);
     ProductEventMapper.INSTANCE.merge(product, event);
     productEventMessagePublisher.publish(event);
   }
 
-  private void publishProductUpdatedEvent(Product product) {
+  private void publishProductUpdatedEvent(ProductEntity product) {
     ProductEvent event = new ProductEvent(DomainEventType.PRODUCT_UPDATED);
     ProductEventMapper.INSTANCE.merge(product, event);
     productEventMessagePublisher.publish(event);
   }
 
-  private void publishProductDeletedEvent(Product product) {
+  private void publishProductDeletedEvent(ProductEntity product) {
     ProductEvent event = new ProductEvent(DomainEventType.PRODUCT_DELETED);
     ProductEventMapper.INSTANCE.merge(product, event);
     productEventMessagePublisher.publish(event);

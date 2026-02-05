@@ -37,7 +37,7 @@ public class JpaOrderItem extends JpaBaseEntity {
   private JpaOrder order;
 
   @Column(name = "product_id")
-  private Integer productId;
+  private String productId;
 
   @Column(name = "product_name")
   private String productName;

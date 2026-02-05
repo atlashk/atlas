@@ -1,6 +1,6 @@
 package org.atlas.services.iam.application.jwt.front.mapper;
 
-import org.atlas.services.iam.domain.entity.User;
+import org.atlas.services.iam.domain.entity.UserEntity;
 import org.atlas.services.iam.port.in.front.model.ProfileOutput;
 import org.atlas.services.iam.port.in.front.model.RegisterInput;
 import org.mapstruct.Mapper;
@@ -12,7 +12,7 @@ public interface UserMapper {
 
   UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
-  ProfileOutput toProfileOutput(User user);
+  ProfileOutput toProfileOutput(UserEntity user);
 
-  User toUser(RegisterInput input);
+  UserEntity toUser(RegisterInput input);
 }

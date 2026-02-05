@@ -28,7 +28,7 @@ public class PaymentController {
   @Operation(summary = "Get payment next action")
   public ApiResponseWrapper<RetrievePaymentNextActionResponse> getPaymentNextAction(
       @Parameter(name = "orderId", description = "Order ID associated with the payment", example = "1")
-      @PathVariable Integer orderId) throws Exception {
+      @PathVariable String orderId) throws Exception {
     RetrievePaymentNextActionOutput output = paymentService.retrievePaymentNextAction(orderId,
         Contexts.getUserId());
     RetrievePaymentNextActionResponse responseData =

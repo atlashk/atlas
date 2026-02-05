@@ -14,7 +14,7 @@ import lombok.Setter;
 @Setter
 public class CreatePaymentRequest {
 
-  private Integer paymentId;
+  private String paymentId;
   private BigDecimal amount;
   private String currency;
 }

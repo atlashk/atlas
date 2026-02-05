@@ -13,7 +13,7 @@ import org.atlas.services.product.port.out.fulltextsearch.FullTextSearchService;
 import org.atlas.services.product.port.out.fulltextsearch.SearchIndex;
 import org.atlas.services.product.port.out.repository.ProductRepository;
 import org.atlas.services.product.port.out.repository.criteria.FindProductCriteria;
-import org.atlas.services.product.domain.entity.Product;
+import org.atlas.services.product.domain.entity.ProductEntity;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 
@@ -77,9 +77,9 @@ public class ProductDataInitializer {
         PagingRequest pagingRequest = PagingRequest.of(batch, BATCH_SIZE);
         FindProductCriteria criteria = new FindProductCriteria();
 
-        PagingResult<Product> productPage = productRepository.findByCriteria(criteria,
+        PagingResult<ProductEntity> productPage = productRepository.findByCriteria(criteria,
             pagingRequest);
-        List<Product> products = productPage.getData();
+        List<ProductEntity> products = productPage.getData();
 
         if (products.isEmpty()) {
           log.warn("Empty batch encountered at page {}/{}", batch + 1, totalBatches);

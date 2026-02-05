@@ -9,9 +9,9 @@ import org.atlas.libs.protobuf.product.ListProductResponseProto;
 import org.atlas.libs.protobuf.product.ProductProto;
 import org.atlas.libs.protobuf.product.ProductServiceGrpc;
 import org.atlas.libs.framework.collection.CollectionUtil;
+import org.atlas.services.product.domain.entity.ProductEntity;
 import org.atlas.services.product.port.in.internal.model.InternalRetrieveProductListInput;
 import org.atlas.services.product.port.in.internal.service.InternalProductService;
-import org.atlas.services.product.domain.entity.Product;
 
 @GrpcService
 @RequiredArgsConstructor
@@ -24,7 +24,7 @@ public class ProductGrpcService extends ProductServiceGrpc.ProductServiceImplBas
       StreamObserver<ListProductResponseProto> responseObserver) {
     InternalRetrieveProductListInput input = map(requestProto);
     try {
-      List<Product> products = internalProductService.retrieveProductList(input);
+      List<ProductEntity> products = internalProductService.retrieveProductList(input);
       ListProductResponseProto productResponseProtoList = map(products);
       responseObserver.onNext(productResponseProtoList);
       responseObserver.onCompleted();
@@ -37,7 +37,7 @@ public class ProductGrpcService extends ProductServiceGrpc.ProductServiceImplBas
     return new InternalRetrieveProductListInput(requestProto.getIdList());
   }
 
-  private ListProductResponseProto map(List<Product> products) {
+  private ListProductResponseProto map(List<ProductEntity> products) {
     if (CollectionUtil.isEmpty(products)) {
       return ListProductResponseProto.getDefaultInstance();
     }
@@ -46,7 +46,7 @@ public class ProductGrpcService extends ProductServiceGrpc.ProductServiceImplBas
     return builder.build();
   }
 
-  private ProductProto map(Product product) {
+  private ProductProto map(ProductEntity product) {
     return ProductProto.newBuilder()
         .setId(product.getId())
         .setName(product.getName())

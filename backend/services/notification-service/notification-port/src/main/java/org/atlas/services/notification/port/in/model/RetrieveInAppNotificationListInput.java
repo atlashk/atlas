@@ -13,6 +13,6 @@ import lombok.Setter;
 @Setter
 public class RetrieveInAppNotificationListInput {
 
-  private Integer userId;
+  private String userId;
   private Integer limit;
 }

@@ -2,13 +2,13 @@ package org.atlas.services.payment.port.out.repository;
 
 import java.util.List;
 import java.util.Optional;
-import org.atlas.services.payment.domain.entity.PaymentGateway;
+import org.atlas.services.payment.domain.entity.PaymentGatewayEntity;
 
 public interface PaymentGatewayRepository {
 
-  List<PaymentGateway> findAll();
+  List<PaymentGatewayEntity> findAll();
 
-  Optional<PaymentGateway> findById(Integer id);
+  Optional<PaymentGatewayEntity> findById(Integer id);
 
-  Optional<PaymentGateway> findByCode(String code);
+  Optional<PaymentGatewayEntity> findByCode(String code);
 }

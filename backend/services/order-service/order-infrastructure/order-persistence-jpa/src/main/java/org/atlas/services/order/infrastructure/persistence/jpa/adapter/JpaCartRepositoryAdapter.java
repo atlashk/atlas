@@ -4,9 +4,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.atlas.services.order.domain.entity.CartEntity;
 import org.atlas.services.order.port.out.repository.CartRepository;
-import org.atlas.services.order.domain.entity.Cart;
-import org.atlas.services.order.domain.entity.CartItem;
 import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaCart;
 import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaCartItem;
 import org.atlas.services.order.infrastructure.persistence.jpa.mapper.JpaCartMapper;
@@ -20,19 +19,19 @@ public class JpaCartRepositoryAdapter implements CartRepository {
   private final JpaCartRepository jpaCartRepository;
 
   @Override
-  public Optional<Cart> findByUserId(Integer userId) {
+  public Optional<CartEntity> findByUserId(String userId) {
     return jpaCartRepository.findByUserIdAndFetch(userId).map(JpaCartMapper.INSTANCE::toCart);
   }
 
   @Override
-  public void insert(Cart cart) {
+  public void insert(CartEntity cart) {
     JpaCart jpaCart = JpaCartMapper.INSTANCE.toJpaCart(cart);
     jpaCartRepository.insert(jpaCart);
     cart.setId(jpaCart.getId());
   }
 
   @Override
-  public void update(Cart cart) {
+  public void update(CartEntity cart) {
     JpaCart jpaCart = JpaCartMapper.INSTANCE.toJpaCart(cart);
     JpaCart saved = jpaCartRepository.save(jpaCart);
 
@@ -41,8 +40,8 @@ public class JpaCartRepositoryAdapter implements CartRepository {
     if (saved.getCartItems() != null && cart.getCartItems() != null) {
       Map<Integer, Integer> savedCartItemIdByProductId = saved.getCartItems().stream()
           .collect(Collectors.toMap(JpaCartItem::getProductId, JpaCartItem::getId, (a, b) -> a));
-      for (CartItem cartItem : cart.getCartItems()) {
-        Integer productId = cartItem.getProduct() != null ? cartItem.getProduct().getId() : null;
+      for (CartItemEntity cartItem : cart.getCartItems()) {
+        String productId = cartItem.getProduct() != null ? cartItem.getProduct().getId() : null;
         if (productId != null) {
           cartItem.setId(savedCartItemIdByProductId.get(productId));
         }

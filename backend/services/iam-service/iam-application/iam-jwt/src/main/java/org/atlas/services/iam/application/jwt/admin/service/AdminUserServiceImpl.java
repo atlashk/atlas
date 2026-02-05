@@ -8,7 +8,7 @@ import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.ObjectMapperUtil;
 import org.atlas.services.iam.application.jwt.admin.mapper.AdminUserMapper;
 import org.atlas.services.iam.application.jwt.event.service.UserEventService;
-import org.atlas.services.iam.domain.entity.User;
+import org.atlas.services.iam.domain.entity.UserEntity;
 import org.atlas.services.iam.port.in.admin.model.AdminCreateUserInput;
 import org.atlas.services.iam.port.in.admin.model.AdminRetrieveUserListInput;
 import org.atlas.services.iam.port.in.admin.model.AdminUpdateUserInput;
@@ -32,7 +32,7 @@ public class AdminUserServiceImpl implements AdminUserService {
   @Transactional(readOnly = true)
   public PagingResult<AdminUserOutput> retrieveUserList(AdminRetrieveUserListInput input) {
     FindUserCriteria criteria = AdminUserMapper.INSTANCE.toFindUserCriteria(input);
-    PagingResult<User> userPage = userRepository.findByCriteria(criteria, input.getPagingRequest());
+    PagingResult<UserEntity> userPage = userRepository.findByCriteria(criteria, input.getPagingRequest());
     return ObjectMapperUtil.mapPage(userPage, AdminUserMapper.INSTANCE::toAdminUserOutput);
   }
 
@@ -44,7 +44,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
   @Override
   @Transactional(readOnly = true)
-  public AdminUserOutput retrieveUser(Integer userId) {
+  public AdminUserOutput retrieveUser(String userId) {
     return userRepository.findById(userId)
         .map(AdminUserMapper.INSTANCE::toAdminUserOutput)
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
@@ -55,7 +55,7 @@ public class AdminUserServiceImpl implements AdminUserService {
   public void createUser(AdminCreateUserInput input) {
     checkValidity(input);
 
-    User user = AdminUserMapper.INSTANCE.toUser(input);
+    UserEntity user = AdminUserMapper.INSTANCE.toUser(input);
     user.setPassword(passwordEncoder.encode(input.getPassword()));
     userRepository.insert(user);
 
@@ -65,7 +65,7 @@ public class AdminUserServiceImpl implements AdminUserService {
   @Override
   @Transactional
   public void updateUser(AdminUpdateUserInput input) {
-    User user = AdminUserMapper.INSTANCE.toUser(input);
+    UserEntity user = AdminUserMapper.INSTANCE.toUser(input);
     user.setPassword(passwordEncoder.encode(input.getPassword()));
     userRepository.update(user);
 
@@ -77,7 +77,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
   @Override
   @Transactional
-  public void deleteUser(Integer userId) {
+  public void deleteUser(String userId) {
     userRepository.deleteById(userId);
 
     userEventService.publishUserDeletedEvent(userId);

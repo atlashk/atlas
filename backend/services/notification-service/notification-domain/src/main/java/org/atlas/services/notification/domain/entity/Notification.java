@@ -19,7 +19,7 @@ public class Notification extends DomainEntity {
 
   @EqualsAndHashCode.Include
   private Integer id;
-  private Integer userId;
+  private String userId;
   private NotificationType type;
   private NotificationChannel channel;
   private String message;

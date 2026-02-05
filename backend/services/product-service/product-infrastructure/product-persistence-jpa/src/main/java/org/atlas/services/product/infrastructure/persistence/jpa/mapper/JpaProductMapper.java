@@ -1,7 +1,7 @@
 package org.atlas.services.product.infrastructure.persistence.jpa.mapper;
 
 import org.atlas.libs.framework.collection.CollectionUtil;
-import org.atlas.services.product.domain.entity.Product;
+import org.atlas.services.product.domain.entity.ProductEntity;
 import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaProduct;
 import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaProductAttribute;
 import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaProductDetails;
@@ -29,13 +29,13 @@ public interface JpaProductMapper {
 
   @Mapping(target = "details", ignore = true)
   @Mapping(target = "attributes", ignore = true)
-  JpaProduct toJpaProduct(Product product);
+  JpaProduct toJpaProduct(ProductEntity product);
 
   /**
-   * After mapping for {@link Product} to {@link JpaProduct} - handles bidirectional relationships
+   * After mapping for {@link ProductEntity} to {@link JpaProduct} - handles bidirectional relationships
    */
   @AfterMapping
-  default void afterToJpaProduct(@MappingTarget JpaProduct jpaProduct, Product product) {
+  default void afterToJpaProduct(@MappingTarget JpaProduct jpaProduct, ProductEntity product) {
     if (jpaProduct.getDetails() != null) {
       jpaProduct.getDetails().setProduct(jpaProduct);
     }
@@ -49,17 +49,17 @@ public interface JpaProductMapper {
     }
   }
 
-  Product toProduct(JpaProduct jpaProduct);
+  ProductEntity toProduct(JpaProduct jpaProduct);
 
   @Mapping(target = "details", ignore = true)
   @Mapping(target = "attributes", ignore = true)
-  void merge(Product product, @MappingTarget JpaProduct jpaProduct);
+  void merge(ProductEntity product, @MappingTarget JpaProduct jpaProduct);
 
   /**
    * After mapping for merge operation - handles complex relationship updates
    */
   @AfterMapping
-  default void afterMerge(@MappingTarget JpaProduct jpaProduct, Product product) {
+  default void afterMerge(@MappingTarget JpaProduct jpaProduct, ProductEntity product) {
     if (product.getDetails() != null) {
       if (jpaProduct.getDetails() != null) {
         // Merge into existing details

@@ -5,7 +5,7 @@ import java.util.Collections;
 import lombok.Getter;
 import lombok.Setter;
 import org.atlas.libs.framework.domain.user.UserRole;
-import org.atlas.services.iam.domain.entity.User;
+import org.atlas.services.iam.domain.entity.UserEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,12 +14,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Setter
 public class UserDetailsImpl implements UserDetails {
 
-  private Integer userId;
+  private String userId;
   private String username;
   private String password;
   private Collection<? extends GrantedAuthority> authorities;
 
-  public UserDetailsImpl(User user) {
+  public UserDetailsImpl(UserEntity user) {
     this.userId = user.getUserId();
     this.username = user.getUsername();
     this.password = user.getPassword();

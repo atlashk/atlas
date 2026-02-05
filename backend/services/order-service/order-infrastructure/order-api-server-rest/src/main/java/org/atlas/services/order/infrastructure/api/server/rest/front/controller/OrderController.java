@@ -14,7 +14,7 @@ import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingRequest.SortOrder;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.ObjectMapperUtil;
-import org.atlas.services.order.domain.entity.Order;
+import org.atlas.services.order.domain.entity.OrderEntity;
 import org.atlas.services.order.infrastructure.api.server.rest.front.mapper.OrderMapper;
 import org.atlas.services.order.infrastructure.api.server.rest.front.model.CheckoutRequest;
 import org.atlas.services.order.infrastructure.api.server.rest.front.model.CheckoutResponse;
@@ -68,7 +68,7 @@ public class OrderController {
         .endDate(endDate)
         .pagingRequest(PagingRequest.of(page - 1, size, "createdAt", SortOrder.DESC))
         .build();
-    PagingResult<Order> orderPage = orderService.retrieveOrderList(input);
+    PagingResult<OrderEntity> orderPage = orderService.retrieveOrderList(input);
     PagingResult<OrderResponse> responseData = ObjectMapperUtil.mapPage(orderPage,
         OrderMapper.INSTANCE::toOrderResponse);
     return ApiResponseWrapper.successPage(responseData);
@@ -81,7 +81,7 @@ public class OrderController {
       @Parameter(description = "Checkout request", required = true)
       @Valid @RequestBody CheckoutRequest request) {
     CheckoutInput input = OrderMapper.INSTANCE.toCheckoutInput(request);
-    Integer orderId = orderService.checkout(input);
+    String orderId = orderService.checkout(input);
     CheckoutResponse responseData = new CheckoutResponse(orderId);
     return ApiResponseWrapper.success(responseData);
   }
@@ -90,7 +90,7 @@ public class OrderController {
   @Operation(summary = "Get order status")
   public ApiResponseWrapper<RetrieveOrderStatusResponse> getOrderStatus(
       @Parameter(name = "orderId", description = "ID of the order to retrieve the status for", example = "123")
-      @PathVariable Integer orderId) {
+      @PathVariable String orderId) {
     RetrieveOrderStatusOutput output = orderService.retrieveOrderStatus(
         orderId, Contexts.getUserId());
     RetrieveOrderStatusResponse responseData = OrderMapper.INSTANCE.toGetOrderStatusResponse(

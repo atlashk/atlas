@@ -8,7 +8,7 @@ import org.atlas.libs.framework.domain.common.exception.DomainException;
 import org.atlas.libs.framework.domain.user.UserRole;
 import org.atlas.services.iam.application.jwt.event.service.UserEventService;
 import org.atlas.services.iam.application.jwt.front.mapper.UserMapper;
-import org.atlas.services.iam.domain.entity.User;
+import org.atlas.services.iam.domain.entity.UserEntity;
 import org.atlas.services.iam.port.in.front.model.ChangePasswordInput;
 import org.atlas.services.iam.port.in.front.model.ProfileOutput;
 import org.atlas.services.iam.port.in.front.model.RegisterInput;
@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional(readOnly = true)
   public ProfileOutput retrieveProfile() {
-    Integer userId = Contexts.getUserId();
+    String userId = Contexts.getUserId();
     return userRepository.findById(userId)
         .map(UserMapper.INSTANCE::toProfileOutput)
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
@@ -41,7 +41,7 @@ public class UserServiceImpl implements UserService {
   public void register(RegisterInput input) {
     checkValidity(input);
 
-    User user = UserMapper.INSTANCE.toUser(input);
+    UserEntity user = UserMapper.INSTANCE.toUser(input);
     user.setPassword(passwordEncoder.encode(input.getPassword()));
     user.setRole(UserRole.USER);
     userRepository.insert(user);
@@ -52,8 +52,8 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional
   public void changePassword(ChangePasswordInput input) {
-    Integer userId = Contexts.getUserId();
-    User user = userRepository.findById(userId)
+    String userId = Contexts.getUserId();
+    UserEntity user = userRepository.findById(userId)
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
 
     if (passwordEncoder.matches(input.getOldPassword(), user.getPassword())) {

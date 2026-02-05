@@ -36,7 +36,7 @@ public class JpaNotification extends JpaBaseEntity {
   private Integer id;
 
   @Column(name = "user_id")
-  private Integer userId;
+  private String userId;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "type")

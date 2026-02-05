@@ -29,7 +29,7 @@ public class JpaUser extends JpaBaseEntity {
 
   @Id
   @Column(name = "user_id")
-  private Integer userId;
+  private String userId;
 
   @Column(name = "username")
   private String username;

@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.libs.framework.domain.product.ProductStatus;
+import org.atlas.libs.framework.domain.product.ProductStockStatus;
 import org.atlas.libs.framework.paging.PagingRequest;
 
 @NoArgsConstructor
@@ -22,7 +22,7 @@ public class AdminRetrieveProductListInput {
   private String keyword;
   private BigDecimal minPrice;
   private BigDecimal maxPrice;
-  private ProductStatus status;
+  private ProductStockStatus status;
   private Date availableFrom;
   private Boolean isActive;
   private Integer brandId;

@@ -6,7 +6,7 @@ import org.atlas.services.payment.infrastructure.persistence.jpa.entity.JpaPayme
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface JpaPaymentRepository extends JpaBaseRepository<JpaPayment, Integer> {
+public interface JpaPaymentRepository extends JpaBaseRepository<JpaPayment, String> {
 
-  Optional<JpaPayment> findByOrderId(Integer orderId);
+  Optional<JpaPayment> findByOrderId(String orderId);
 }

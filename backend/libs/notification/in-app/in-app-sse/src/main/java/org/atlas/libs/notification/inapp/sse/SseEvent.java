@@ -19,7 +19,7 @@ public class SseEvent {
   private String eventKey;
   private Payload payload;
 
-  public static SseEvent of(Integer userId, Payload payload) {
+  public static SseEvent of(String userId, Payload payload) {
     return SseEvent.builder()
         .eventId(UUIDGenerator.generate())
         .eventKey(userId.toString())

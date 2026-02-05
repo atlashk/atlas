@@ -17,9 +17,9 @@ import org.atlas.libs.framework.saga.core.annotation.StartSaga;
 import org.atlas.libs.framework.saga.core.command.SagaCommandResult;
 import org.atlas.libs.framework.saga.core.entity.SagaEntity;
 import org.atlas.libs.framework.saga.core.orchestrator.SagaOrchestrator;
+import org.atlas.services.order.domain.entity.OrderEntity;
 import org.atlas.services.order.port.out.repository.OrderRepository;
-import org.atlas.services.order.domain.entity.Order;
-import org.atlas.services.order.domain.entity.Order.CancellationReason;
+import org.atlas.services.order.domain.entity.OrderEntity.CancellationReason;
 
 @Saga(
     sagaName = "checkout",
@@ -41,7 +41,7 @@ public class CheckoutSaga {
   @SagaCommandReplyHandler(command = CheckoutCommand.RESERVE_PRODUCT)
   public void handleReserveProductReply(SagaEntity saga, SagaCommandResult sagaCommandResult) {
     // Update order
-    Order order = orderRepository.findBySagaId(saga.getId())
+    OrderEntity order = orderRepository.findBySagaId(saga.getId())
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
     if (sagaCommandResult.isSuccess()) {
       order.setStatus(OrderStatus.AWAITING_PAYMENT_INITIALIZED);
@@ -62,7 +62,7 @@ public class CheckoutSaga {
 
   @SagaCommandReplyHandler(command = CheckoutCommand.INITIALIZE_PAYMENT)
   public void handleInitializePaymentReply(SagaEntity saga, SagaCommandResult sagaCommandResult) {
-    Order order = orderRepository.findBySagaId(saga.getId())
+    OrderEntity order = orderRepository.findBySagaId(saga.getId())
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
 
     if (sagaCommandResult.isSuccess()) {
@@ -96,7 +96,7 @@ public class CheckoutSaga {
   @SagaCommandReplyHandler(command = CheckoutCommand.PROCESS_PAYMENT)
   public void handleProcessPaymentReply(SagaEntity saga, SagaCommandResult sagaCommandResult) {
     // Update order
-    Order order = orderRepository.findBySagaId(saga.getId())
+    OrderEntity order = orderRepository.findBySagaId(saga.getId())
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
 
     ProcessPaymentCommandMetadata metadata = JacksonService.OBJECT_MAPPER.convertValue(

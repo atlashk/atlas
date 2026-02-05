@@ -8,7 +8,10 @@ import lombok.Getter;
 @Getter
 public enum SequenceType {
 
-  ORDER("order", "ORD", 4);
+  USER("user", "USR", 7),
+  PRODUCT("product", "PRD", 7),
+  ORDER("order", "ORD", 7),
+  PAYMENT("payment", "PAY", 7);
 
   private final String name;
   private final String prefix;

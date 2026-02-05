@@ -1,15 +1,15 @@
 package org.atlas.services.payment.port.out.repository;
 
 import java.util.Optional;
-import org.atlas.services.payment.domain.entity.Payment;
+import org.atlas.services.payment.domain.entity.PaymentEntity;
 
 public interface PaymentRepository {
 
-  Optional<Payment> findById(Integer id);
+  Optional<PaymentEntity> findById(Integer id);
 
-  Optional<Payment> findByOrderId(Integer orderId);
+  Optional<PaymentEntity> findByOrderId(String orderId);
 
-  void insert(Payment payment);
+  void insert(PaymentEntity payment);
 
-  void update(Payment payment);
+  void update(PaymentEntity payment);
 }

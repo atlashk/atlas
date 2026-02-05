@@ -8,7 +8,7 @@ import org.atlas.libs.framework.domain.user.UserRole;
 @Setter
 public class ContextInfo {
 
-  private Integer userId;
+  private String userId;
   private UserRole userRole;
   private String ipAddress;
 

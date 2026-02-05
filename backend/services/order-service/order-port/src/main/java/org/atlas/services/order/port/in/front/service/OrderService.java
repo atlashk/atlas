@@ -1,16 +1,16 @@
 package org.atlas.services.order.port.in.front.service;
 
 import org.atlas.libs.framework.paging.PagingResult;
+import org.atlas.services.order.domain.entity.OrderEntity;
 import org.atlas.services.order.port.in.front.model.CheckoutInput;
 import org.atlas.services.order.port.in.front.model.RetrieveOrderListInput;
 import org.atlas.services.order.port.in.front.model.RetrieveOrderStatusOutput;
-import org.atlas.services.order.domain.entity.Order;
 
 public interface OrderService {
 
-  PagingResult<Order> retrieveOrderList(RetrieveOrderListInput input);
+  PagingResult<OrderEntity> retrieveOrderList(RetrieveOrderListInput input);
 
-  RetrieveOrderStatusOutput retrieveOrderStatus(Integer orderId, Integer userId);
+  RetrieveOrderStatusOutput retrieveOrderStatus(String orderId, String userId);
 
-  Integer checkout(CheckoutInput input);
+  String checkout(CheckoutInput input);
 }

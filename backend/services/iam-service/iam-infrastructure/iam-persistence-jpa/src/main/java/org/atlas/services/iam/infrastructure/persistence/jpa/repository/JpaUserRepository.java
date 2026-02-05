@@ -6,7 +6,7 @@ import org.atlas.services.iam.infrastructure.persistence.jpa.entity.JpaUser;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface JpaUserRepository extends JpaBaseRepository<JpaUser, Integer> {
+public interface JpaUserRepository extends JpaBaseRepository<JpaUser, String> {
 
   Optional<JpaUser> findByUsername(String username);
 

@@ -14,7 +14,7 @@ import org.atlas.libs.framework.domain.user.UserRole;
 @AllArgsConstructor
 public class InternalUserOutput {
 
-  private Integer userId;
+  private String userId;
 
   private String username;
 

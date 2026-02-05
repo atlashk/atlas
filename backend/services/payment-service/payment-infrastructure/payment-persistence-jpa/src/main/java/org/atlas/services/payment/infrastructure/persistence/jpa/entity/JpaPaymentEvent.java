@@ -36,7 +36,7 @@ public class JpaPaymentEvent extends JpaBaseEntity {
   private Integer paymentGatewayId;
 
   @Column(name = "payment_id")
-  private Integer paymentId;
+  private String paymentId;
 
   @Column(name = "payload")
   private String payload;

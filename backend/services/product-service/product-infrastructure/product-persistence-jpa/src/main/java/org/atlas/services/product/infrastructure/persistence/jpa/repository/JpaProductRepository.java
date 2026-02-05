@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface JpaProductRepository extends JpaBaseRepository<JpaProduct, Integer> {
+public interface JpaProductRepository extends JpaBaseRepository<JpaProduct, String> {
 
   @Query("""
         select p
@@ -21,9 +21,9 @@ public interface JpaProductRepository extends JpaBaseRepository<JpaProduct, Inte
         left join fetch p.attributes
         left join fetch p.brand
         left join fetch p.categories
-        where p.id in (:ids)
+        where p.productId in (:productIds)
       """)
-  List<JpaProduct> findAllByIdInWithAssociations(@Param("ids") List<Integer> ids);
+  List<JpaProduct> findAllByProductIdInWithAssociations(@Param("productIds") List<String> productIds);
 
   @Query("""
         select p
@@ -32,33 +32,33 @@ public interface JpaProductRepository extends JpaBaseRepository<JpaProduct, Inte
         left join fetch p.attributes
         left join fetch p.brand
         left join fetch p.categories
-        where p.id = :id
+        where p.productId = :productId
       """)
-  Optional<JpaProduct> findByIdWithAssociations(@Param("id") Integer id);
+  Optional<JpaProduct> findByProductIdWithAssociations(@Param("productId") String productId);
 
   @Query("""
         select p
         from JpaProduct p
-        where p.id = :id
+        where p.productId = :productId
       """)
   @Lock(LockModeType.PESSIMISTIC_WRITE)
-  Optional<JpaProduct> findByIdWithLock(@Param("id") Integer id);
+  Optional<JpaProduct> findByProductIdWithLock(@Param("productId") String productId);
 
   @Modifying
   @Query("""
       update JpaProduct p
       set p.quantity = p.quantity - :decrement
-      where p.id = :id
+      where p.productId = :productId
       and p.quantity >= :decrement
       """)
-  int decreaseQuantityWithConstraint(@Param("id") Integer id,
+  int decreaseQuantityWithConstraint(@Param("productId") String productId,
       @Param("decrement") Integer decrement);
 
   @Modifying
   @Query("""
       update JpaProduct p
       set p.quantity = p.quantity + :increment
-      where p.id = :id
+      where p.productId = :productId
       """)
-  int increaseQuantity(@Param("id") Integer id, @Param("increment") Integer increment);
+  int increaseQuantity(@Param("productId") String productId, @Param("increment") Integer increment);
 }

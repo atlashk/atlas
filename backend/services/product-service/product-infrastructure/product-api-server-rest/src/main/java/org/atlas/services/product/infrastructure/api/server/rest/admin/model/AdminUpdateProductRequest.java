@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
-import org.atlas.libs.framework.domain.product.ProductStatus;
+import org.atlas.libs.framework.domain.product.ProductStockStatus;
 
 @Getter
 @Setter
@@ -38,7 +38,7 @@ public class AdminUpdateProductRequest {
 
   @NotNull
   @Schema(description = "Status of the product", example = "IN_STOCK")
-  private ProductStatus status;
+  private ProductStockStatus status;
 
   @NotNull
   @Schema(description = "Date and time the product becomes available in ISO 8601 format.", example = "2023-10-01T10:00:00Z")

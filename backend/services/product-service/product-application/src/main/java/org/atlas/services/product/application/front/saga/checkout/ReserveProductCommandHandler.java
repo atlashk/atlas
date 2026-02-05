@@ -22,8 +22,8 @@ import org.atlas.libs.framework.saga.core.messaging.payload.SagaCommand;
 import org.atlas.libs.framework.saga.core.messaging.payload.SagaCompensation;
 import org.atlas.services.product.port.out.repository.ProductRepository;
 import org.atlas.services.product.port.out.repository.ReservationRepository;
-import org.atlas.services.product.domain.entity.Product;
-import org.atlas.services.product.domain.entity.Reservation;
+import org.atlas.services.product.domain.entity.ProductEntity;
+import org.atlas.services.product.domain.entity.ReservationEntity;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -62,7 +62,7 @@ public class ReserveProductCommandHandler {
       }
 
       // Insert new reservation
-      Reservation reservation = Reservation.builder()
+      ReservationEntity reservation = ReservationEntity.builder()
           .orderId(checkoutSagaData.getOrderId())
           .productId(orderItem.getProduct().getId())
           .quantity(orderItem.getQuantity())
@@ -75,7 +75,7 @@ public class ReserveProductCommandHandler {
     return SagaCommandResult.success();
   }
 
-  private void decreaseQuantity(Integer productId, Integer quantity)
+  private void decreaseQuantity(String productId, Integer quantity)
       throws OutOfStockException {
     DecreaseQuantityStrategy decreaseQuantityStrategy =
         applicationConfigService.getConfigAsClass("product.decrease-quantity-strategy",
@@ -90,22 +90,22 @@ public class ReserveProductCommandHandler {
     }
   }
 
-  private void decreaseQuantityWithConstraint(Integer productId, Integer quantity)
+  private void decreaseQuantityWithConstraint(String productId, Integer quantity)
       throws OutOfStockException {
     productRepository.decreaseQuantityWithConstraint(productId, quantity);
   }
 
-  private void decreaseQuantityWithPessimisticLock(Integer productId, Integer quantity)
+  private void decreaseQuantityWithPessimisticLock(String productId, Integer quantity)
       throws OutOfStockException {
     productRepository.decreaseQuantityWithPessimisticLock(productId, quantity);
   }
 
-  private void decreaseQuantityWithOptimisticLock(Integer productId, Integer quantity)
+  private void decreaseQuantityWithOptimisticLock(String productId, Integer quantity)
       throws OutOfStockException {
     productRepository.decreaseQuantityWithOptimisticLock(productId, quantity);
   }
 
-  private void decreaseQuantityWithDistributedLock(Integer productId, Integer quantity)
+  private void decreaseQuantityWithDistributedLock(String productId, Integer quantity)
       throws OutOfStockException {
     final String lockKey = String.format("product:%d:decrease-quantity", productId);
     final Duration waitTime = Duration.ofSeconds(5);
@@ -115,7 +115,7 @@ public class ReserveProductCommandHandler {
       if (!acquiredLock) {
         throw new LockAcquisitionException("Failed to acquire lock: " + lockKey);
       }
-      Product product = productRepository.findById(productId)
+      ProductEntity product = productRepository.findById(productId)
           .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
       if (product.getQuantity() < quantity) {
         throw new OutOfStockException();
@@ -139,7 +139,7 @@ public class ReserveProductCommandHandler {
     checkoutSagaData.getOrderItems()
         .forEach(orderItem -> {
           // Check reservation exists or not
-          Reservation reservation = reservationRepository.findByOrderIdAndProductId(
+          ReservationEntity reservation = reservationRepository.findByOrderIdAndProductId(
                   checkoutSagaData.getOrderId(), orderItem.getProduct().getId())
               .orElseThrow(() -> new DomainException(DomainError.RESERVATION_NOT_FOUND));
 

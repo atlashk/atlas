@@ -14,7 +14,7 @@ public class AddCartItemRequest {
 
   @NotNull
   @Schema(description = "Product ID to add to cart", example = "1", requiredMode = RequiredMode.REQUIRED)
-  private Integer productId;
+  private String productId;
 
   @NotNull
   @Min(1)

@@ -8,7 +8,7 @@ import org.atlas.libs.framework.domain.common.event.contract.product.ProductEven
 import org.atlas.libs.framework.domain.common.event.handler.DomainEventHandler;
 import org.atlas.services.product.application.event.mapper.ProductEventMapper;
 import org.atlas.services.product.port.out.fulltextsearch.FullTextSearchService;
-import org.atlas.services.product.domain.entity.Product;
+import org.atlas.services.product.domain.entity.ProductEntity;
 import org.springframework.beans.factory.ObjectProvider;
 
 @DomainEventHandler(type = DomainEventType.PRODUCT_CREATED)
@@ -19,7 +19,7 @@ public class ProductCreatedHandler {
   private final ObjectProvider<FullTextSearchService> fullTextSearchServiceProvider;
 
   public void handle(ProductEvent event) {
-    Product product = ProductEventMapper.INSTANCE.toProduct(event);
+    ProductEntity product = ProductEventMapper.INSTANCE.toProduct(event);
 
     AsyncUtil.executeTasks(
         createFullTextSearchDocument(product)
@@ -30,7 +30,7 @@ public class ProductCreatedHandler {
     });
   }
 
-  private AsyncUtil.AsyncTask createFullTextSearchDocument(Product product) {
+  private AsyncUtil.AsyncTask createFullTextSearchDocument(ProductEntity product) {
     return new AsyncUtil.AsyncTask() {
       @Override
       public void run() {

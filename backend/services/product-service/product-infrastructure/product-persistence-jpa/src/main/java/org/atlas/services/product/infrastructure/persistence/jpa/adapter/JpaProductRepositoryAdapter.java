@@ -10,9 +10,9 @@ import org.atlas.libs.framework.domain.common.exception.OutOfStockException;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.services.product.domain.entity.ProductEntity;
 import org.atlas.services.product.port.out.repository.ProductRepository;
 import org.atlas.services.product.port.out.repository.criteria.FindProductCriteria;
-import org.atlas.services.product.domain.entity.Product;
 import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaOptimisticProduct;
 import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaProduct;
 import org.atlas.services.product.infrastructure.persistence.jpa.mapper.JpaProductMapper;
@@ -33,7 +33,7 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
   private final CustomJpaProductRepository customJpaProductRepository;
 
   @Override
-  public PagingResult<Product> findByCriteria(FindProductCriteria criteria,
+  public PagingResult<ProductEntity> findByCriteria(FindProductCriteria criteria,
       PagingRequest pagingRequest) {
     long totalCount = customJpaProductRepository.countByCriteria(criteria);
     if (totalCount == 0L) {
@@ -41,20 +41,20 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
     }
     List<JpaProduct> jpaProducts = customJpaProductRepository.findByCriteria(criteria,
         pagingRequest);
-    List<Product> products = ObjectMapperUtil.mapList(jpaProducts,
+    List<ProductEntity> products = ObjectMapperUtil.mapList(jpaProducts,
         JpaProductMapper.INSTANCE::toProduct);
     return PagingResult.of(products, totalCount, pagingRequest);
   }
 
   @Override
-  public List<Product> findByIdIn(List<Integer> ids) {
-    List<JpaProduct> jpaProducts = jpaProductRepository.findAllByIdInWithAssociations(ids);
+  public List<ProductEntity> findByProductIdIn(List<String> productIds) {
+    List<JpaProduct> jpaProducts = jpaProductRepository.findAllByProductIdInWithAssociations(productIds);
     return ObjectMapperUtil.mapList(jpaProducts, JpaProductMapper.INSTANCE::toProduct);
   }
 
   @Override
-  public Optional<Product> findById(Integer id) {
-    return jpaProductRepository.findByIdWithAssociations(id)
+  public Optional<ProductEntity> findByProductId(String productId) {
+    return jpaProductRepository.findByProductIdWithAssociations(productId)
         .map(JpaProductMapper.INSTANCE::toProduct);
   }
 
@@ -64,31 +64,31 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
   }
 
   @Override
-  public void insert(Product product) {
+  public void insert(ProductEntity product) {
     JpaProduct jpaProduct = JpaProductMapper.INSTANCE.toJpaProduct(product);
     jpaProductRepository.insert(jpaProduct);
-    product.setId(jpaProduct.getId());
+    product.setProductId(jpaProduct.getProductId());
   }
 
   @Override
-  public void insertBatch(List<Product> products) {
+  public void insertBatch(List<ProductEntity> products) {
     List<JpaProduct> jpaProducts =
         ObjectMapperUtil.mapList(products, JpaProductMapper.INSTANCE::toJpaProduct);
     jpaProductRepository.saveAll(jpaProducts);
   }
 
   @Override
-  public void update(Product product) {
-    JpaProduct jpaProduct = jpaProductRepository.findByIdWithAssociations(product.getId())
+  public void update(ProductEntity product) {
+    JpaProduct jpaProduct = jpaProductRepository.findByProductIdWithAssociations(product.getProductId())
         .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
     JpaProductMapper.INSTANCE.merge(product, jpaProduct);
     jpaProductRepository.save(jpaProduct);
   }
 
   @Override
-  public void decreaseQuantityWithConstraint(Integer id, Integer decrement)
+  public void decreaseQuantityWithConstraint(String productId, Integer decrement)
       throws OutOfStockException {
-    int updated = jpaProductRepository.decreaseQuantityWithConstraint(id, decrement);
+    int updated = jpaProductRepository.decreaseQuantityWithConstraint(productId, decrement);
     if (updated == 0) {
       throw new OutOfStockException();
     }
@@ -96,9 +96,9 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
 
   // TODO: Implement retry
   @Override
-  public void decreaseQuantityWithPessimisticLock(Integer id, Integer decrement)
+  public void decreaseQuantityWithPessimisticLock(String productId, Integer decrement)
       throws OutOfStockException {
-    JpaProduct product = jpaProductRepository.findByIdWithLock(id)
+    JpaProduct product = jpaProductRepository.findByProductIdWithLock(productId)
         .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
     if (product.getQuantity() < decrement) {
       throw new OutOfStockException();
@@ -114,10 +114,10 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
 
   // TODO: Implement retry
   @Override
-  public void decreaseQuantityWithOptimisticLock(Integer id, Integer decrement)
+  public void decreaseQuantityWithOptimisticLock(String productId, Integer decrement)
       throws OutOfStockException {
     JpaOptimisticProduct jpaOptimisticProduct =
-        jpaOptimisticProductRepository.findById(id)
+        jpaOptimisticProductRepository.findById(productId)
             .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
     if (jpaOptimisticProduct.getQuantity() < decrement) {
       throw new OutOfStockException();
@@ -132,12 +132,12 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
   }
 
   @Override
-  public void increaseQuantity(Integer id, Integer increment) {
-    jpaProductRepository.increaseQuantity(id, increment);
+  public void increaseQuantity(String productId, Integer increment) {
+    jpaProductRepository.increaseQuantity(productId, increment);
   }
 
   @Override
-  public void delete(Integer id) {
-    jpaProductRepository.deleteById(id);
+  public void deleteByProductId(String productId) {
+    jpaProductRepository.deleteById(productId);
   }
 }

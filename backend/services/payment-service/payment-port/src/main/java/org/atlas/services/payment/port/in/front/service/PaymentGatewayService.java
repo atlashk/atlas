@@ -1,9 +1,9 @@
 package org.atlas.services.payment.port.in.front.service;
 
 import java.util.List;
-import org.atlas.services.payment.domain.entity.PaymentGateway;
+import org.atlas.services.payment.domain.entity.PaymentGatewayEntity;
 
 public interface PaymentGatewayService {
 
-  List<PaymentGateway> retrievePaymentGatewayList();
+  List<PaymentGatewayEntity> retrievePaymentGatewayList();
 }

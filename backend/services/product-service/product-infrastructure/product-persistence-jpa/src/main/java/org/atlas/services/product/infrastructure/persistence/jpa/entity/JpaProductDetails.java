@@ -26,7 +26,7 @@ import org.atlas.libs.persistence.jpa.entity.JpaBaseEntity;
 public class JpaProductDetails extends JpaBaseEntity {
 
   @Id
-  private Integer productId;
+  private String productId;
 
   @OneToOne
   @MapsId

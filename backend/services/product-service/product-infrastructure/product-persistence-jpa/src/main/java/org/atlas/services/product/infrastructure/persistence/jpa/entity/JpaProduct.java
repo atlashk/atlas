@@ -6,8 +6,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
@@ -26,7 +24,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.libs.framework.domain.product.ProductStatus;
+import org.atlas.libs.framework.domain.product.ProductStockStatus;
 import org.atlas.libs.persistence.jpa.entity.JpaBaseEntity;
 
 @Entity
@@ -40,9 +38,8 @@ import org.atlas.libs.persistence.jpa.entity.JpaBaseEntity;
 public class JpaProduct extends JpaBaseEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @EqualsAndHashCode.Include
-  private Integer id;
+  @Column(name = "product_id")
+  private String productId;
 
   @Column(name = "name")
   private String name;
@@ -50,12 +47,12 @@ public class JpaProduct extends JpaBaseEntity {
   @Column(name = "price")
   private BigDecimal price;
 
+  @Column(name = "product_status")
+  @Enumerated(EnumType.STRING)
+  private ProductStockStatus productStatus;
+
   @Column(name = "quantity")
   private Integer quantity;
-
-  @Column(name = "status")
-  @Enumerated(EnumType.STRING)
-  private ProductStatus status;
 
   @Column(name = "available_from")
   private Date availableFrom;

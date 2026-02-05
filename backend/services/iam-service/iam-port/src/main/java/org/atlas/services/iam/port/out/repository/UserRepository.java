@@ -4,28 +4,28 @@ import java.util.List;
 import java.util.Optional;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
-import org.atlas.services.iam.domain.entity.User;
+import org.atlas.services.iam.domain.entity.UserEntity;
 import org.atlas.services.iam.port.out.repository.criteria.FindUserCriteria;
 
 public interface UserRepository {
 
-  PagingResult<User> findByCriteria(FindUserCriteria criteria, PagingRequest pagingRequest);
+  PagingResult<UserEntity> findByCriteria(FindUserCriteria criteria, PagingRequest pagingRequest);
 
-  List<User> findByIdIn(List<Integer> ids);
+  List<UserEntity> findByIdIn(List<String> ids);
 
-  Optional<User> findById(Integer id);
+  Optional<UserEntity> findById(String id);
 
-  Optional<User> findByUsername(String username);
+  Optional<UserEntity> findByUsername(String username);
 
-  Optional<User> findByEmail(String email);
+  Optional<UserEntity> findByEmail(String email);
 
-  Optional<User> findByPhoneNumber(String phoneNumber);
+  Optional<UserEntity> findByPhoneNumber(String phoneNumber);
 
   Long countAll();
 
-  void insert(User user);
+  void insert(UserEntity user);
 
-  void update(User user);
+  void update(UserEntity user);
 
-  void deleteById(Integer id);
+  void deleteById(String id);
 }

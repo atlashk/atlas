@@ -3,10 +3,10 @@ package org.atlas.services.product.port.out.file.mapper;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.atlas.libs.framework.util.StringUtil;
+import org.atlas.services.product.domain.entity.CategoryEntity;
 import org.atlas.services.product.port.out.file.model.ProductReadRow;
-import org.atlas.services.product.domain.entity.Brand;
-import org.atlas.services.product.domain.entity.Category;
-import org.atlas.services.product.domain.entity.Product;
+import org.atlas.services.product.domain.entity.BrandEntity;
+import org.atlas.services.product.domain.entity.ProductEntity;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
@@ -17,21 +17,21 @@ public interface ProductReadRowMapper {
 
   ProductReadRowMapper INSTANCE = Mappers.getMapper(ProductReadRowMapper.class);
 
-  Product toProduct(ProductReadRow row);
+  ProductEntity toProduct(ProductReadRow row);
 
   @AfterMapping
-  default void afterToProduct(ProductReadRow row, @MappingTarget Product product) {
+  default void afterToProduct(ProductReadRow row, @MappingTarget ProductEntity product) {
     // Brand
-    Brand brand = new Brand();
+    BrandEntity brand = new BrandEntity();
     brand.setId(row.getBrandId());
     product.setBrand(brand);
 
     // Categories
-    List<Category> categories = StringUtil.split(row.getCategoryIds(), "\\|")
+    List<CategoryEntity> categories = StringUtil.split(row.getCategoryIds(), "\\|")
         .stream()
         .filter(StringUtils::isNotBlank)
         .map(categoryIdStr -> {
-          Category category = new Category();
+          CategoryEntity category = new CategoryEntity();
           category.setId(Integer.parseInt(categoryIdStr.trim()));
           return category;
         })

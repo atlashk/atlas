@@ -6,13 +6,13 @@ import java.util.Optional;
 import org.atlas.libs.framework.domain.order.OrderStatus;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
+import org.atlas.services.order.domain.entity.OrderEntity;
 import org.atlas.services.order.port.in.admin.model.AdminMonthlyOrderAggregation;
 import org.atlas.services.order.port.out.repository.criteria.FindOrderCriteria;
-import org.atlas.services.order.domain.entity.Order;
 
 public interface OrderRepository {
 
-  PagingResult<Order> findByCriteria(FindOrderCriteria criteria, PagingRequest pagingRequest);
+  PagingResult<OrderEntity> findByCriteria(FindOrderCriteria criteria, PagingRequest pagingRequest);
 
   Long countAll();
 
@@ -20,11 +20,11 @@ public interface OrderRepository {
 
   List<AdminMonthlyOrderAggregation> aggregateMonthlyByStatus(OrderStatus status);
 
-  Optional<Order> findById(Integer id);
+  Optional<OrderEntity> findByOrderId(String orderId);
 
-  Optional<Order> findBySagaId(Integer sagaId);
+  Optional<OrderEntity> findBySagaId(Integer sagaId);
 
-  void insert(Order order);
+  void insert(OrderEntity order);
 
-  void update(Order order);
+  void update(OrderEntity order);
 }

@@ -12,7 +12,7 @@ import org.atlas.services.product.infrastructure.api.server.rest.internal.mapper
 import org.atlas.services.product.infrastructure.api.server.rest.internal.model.InternalRetrieveProductListRequest;
 import org.atlas.services.product.port.in.internal.model.InternalRetrieveProductListInput;
 import org.atlas.services.product.port.in.internal.service.InternalProductService;
-import org.atlas.services.product.domain.entity.Product;
+import org.atlas.services.product.domain.entity.ProductEntity;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,7 +35,7 @@ public class InternalProductController {
       @Valid @RequestBody InternalRetrieveProductListRequest request) {
     InternalRetrieveProductListInput input = InternalProductMapper.INSTANCE
         .toInternalRetrieveProductListInput(request);
-    List<Product> products = internalProductService.retrieveProductList(input);
+    List<ProductEntity> products = internalProductService.retrieveProductList(input);
     List<ProductResponse> responseData = ObjectMapperUtil.mapList(products,
         InternalProductMapper.INSTANCE::toProductResponse);
     return ApiResponseWrapper.success(responseData);

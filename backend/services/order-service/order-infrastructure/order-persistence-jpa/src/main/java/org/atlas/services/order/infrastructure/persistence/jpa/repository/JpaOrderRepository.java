@@ -18,9 +18,9 @@ public interface JpaOrderRepository extends JpaBaseRepository<JpaOrder, Integer>
       select o
       from JpaOrder o
       left join fetch o.orderItems
-      where o.id = :id
+      where o.orderId = :orderId
       """)
-  Optional<JpaOrder> findByIdAndFetch(@Param("id") Integer id);
+  Optional<JpaOrder> findByOrderIdAndFetch(@Param("orderId") String orderId);
 
   @Query("""
       select o
@@ -38,7 +38,7 @@ public interface JpaOrderRepository extends JpaBaseRepository<JpaOrder, Integer>
   BigDecimal sumAmountByStatus(@Param("status") OrderStatus status);
 
   @Query("""
-        select new org.atlas.services.order.application.admin.model.AdminMonthlyOrderAggregation(
+        select new org.atlas.services.order.port.in.admin.model.AdminMonthlyOrderAggregation(
           year(o.createdAt), month(o.createdAt), coalesce(sum(o.amount), 0)
         )
         from JpaOrder o

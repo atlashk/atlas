@@ -14,7 +14,7 @@ import org.atlas.libs.framework.domain.payment.PaymentStatus;
 @Setter
 public class PaymentSimulatorWebhookPayload {
 
-  private Integer paymentId;
+  private String paymentId;
   private String paymentMethod;
   private String paymentMethodDetails;
   private PaymentStatus status;

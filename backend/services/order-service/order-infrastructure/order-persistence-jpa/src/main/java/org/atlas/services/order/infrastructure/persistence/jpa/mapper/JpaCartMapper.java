@@ -1,8 +1,7 @@
 package org.atlas.services.order.infrastructure.persistence.jpa.mapper;
 
 import org.atlas.libs.framework.collection.CollectionUtil;
-import org.atlas.services.order.domain.entity.Cart;
-import org.atlas.services.order.domain.entity.CartItem;
+import org.atlas.services.order.domain.entity.CartEntity;
 import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaCart;
 import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaCartItem;
 import org.mapstruct.AfterMapping;
@@ -22,17 +21,17 @@ public interface JpaCartMapper {
   JpaCartMapper INSTANCE = Mappers.getMapper(JpaCartMapper.class);
 
   @Mapping(target = "cartItems", ignore = true)
-  JpaCart toJpaCart(Cart cart);
+  JpaCart toJpaCart(CartEntity cart);
 
   @Mapping(target = "cart", ignore = true)
   @Mapping(target = "productId", source = "product.id")
-  JpaCartItem toJpaCartItem(CartItem cartItem);
+  JpaCartItem toJpaCartItem(CartItemEntity cartItem);
 
   /**
-   * After mapping for {@link Cart} to {@link JpaCart} - handles bidirectional relationships
+   * After mapping for {@link CartEntity} to {@link JpaCart} - handles bidirectional relationships
    */
   @AfterMapping
-  default void afterToJpaCart(@MappingTarget JpaCart jpaCart, Cart cart) {
+  default void afterToJpaCart(@MappingTarget JpaCart jpaCart, CartEntity cart) {
     if (CollectionUtil.isNotEmpty(cart.getCartItems())) {
       cart.getCartItems().forEach(cartItem -> {
         JpaCartItem jpaCartItem = toJpaCartItem(cartItem);
@@ -42,8 +41,8 @@ public interface JpaCartMapper {
     }
   }
 
-  Cart toCart(JpaCart jpaCart);
+  CartEntity toCart(JpaCart jpaCart);
 
   @Mapping(target = "product.id", source = "productId")
-  CartItem toCartItem(JpaCartItem jpaCartItem);
+  CartItemEntity toCartItem(JpaCartItem jpaCartItem);
 }

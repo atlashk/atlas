@@ -1,10 +1,10 @@
 package org.atlas.services.payment.port.out.repository;
 
-import org.atlas.services.payment.domain.entity.PaymentEvent;
+import org.atlas.services.payment.domain.entity.PaymentEventEntity;
 
 public interface PaymentEventRepository {
 
-  void insert(PaymentEvent paymentEvent);
+  void insert(PaymentEventEntity paymentEvent);
 
-  void update(PaymentEvent paymentEvent);
+  void update(PaymentEventEntity paymentEvent);
 }

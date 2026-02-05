@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.framework.domain.common.event.DomainEvent;
 import org.atlas.libs.framework.domain.common.event.DomainEventType;
-import org.atlas.libs.framework.domain.product.ProductStatus;
+import org.atlas.libs.framework.domain.product.ProductStockStatus;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,10 +18,10 @@ import org.atlas.libs.framework.domain.product.ProductStatus;
 @Setter
 public class ProductEvent extends DomainEvent {
 
-  private Integer productId;
+  private String productId;
   private String name;
   private BigDecimal price;
-  private ProductStatus status;
+  private ProductStockStatus status;
   private ProductDetails details;
   private List<ProductAttribute> attributes;
   private Brand brand;

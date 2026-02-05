@@ -22,7 +22,7 @@ public class ProductImageServiceImpl implements ProductImageService {
   private final StorageService storageService;
 
   @Override
-  public void uploadImage(Integer productId, byte[] imageBytes, String imageContentType)
+  public void uploadImage(String productId, byte[] imageBytes, String imageContentType)
       throws IOException {
     String bucket = StorageConstant.PRODUCT_IMAGE_BUCKET;
     String objectKey = getObjectKey(productId);
@@ -37,7 +37,7 @@ public class ProductImageServiceImpl implements ProductImageService {
   }
 
   @Override
-  public String getImage(Integer productId) {
+  public String getImage(String productId) {
     String bucket = StorageConstant.PRODUCT_IMAGE_BUCKET;
     String objectKey = getObjectKey(productId);
     GetFileRequest storageRequest = GetFileRequest.builder()
@@ -57,7 +57,7 @@ public class ProductImageServiceImpl implements ProductImageService {
   }
 
   @Override
-  public void deleteImage(Integer productId) {
+  public void deleteImage(String productId) {
     String bucket = StorageConstant.PRODUCT_IMAGE_BUCKET;
     String objectKey = getObjectKey(productId);
     DeleteFileRequest storageRequest = DeleteFileRequest.builder()
@@ -72,7 +72,7 @@ public class ProductImageServiceImpl implements ProductImageService {
     }
   }
 
-  private String getObjectKey(Integer productId) {
+  private String getObjectKey(String productId) {
     return String.format("%d.jpg", productId);
   }
 }

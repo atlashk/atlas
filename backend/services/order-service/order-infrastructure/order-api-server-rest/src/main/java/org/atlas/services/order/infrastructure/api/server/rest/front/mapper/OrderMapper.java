@@ -1,6 +1,6 @@
 package org.atlas.services.order.infrastructure.api.server.rest.front.mapper;
 
-import org.atlas.services.order.domain.entity.Order;
+import org.atlas.services.order.domain.entity.OrderEntity;
 import org.atlas.services.order.infrastructure.api.server.rest.front.model.CheckoutRequest;
 import org.atlas.services.order.infrastructure.api.server.rest.front.model.OrderResponse;
 import org.atlas.services.order.infrastructure.api.server.rest.front.model.RetrieveOrderStatusResponse;
@@ -20,14 +20,14 @@ public interface OrderMapper {
 
   RetrieveOrderStatusResponse toGetOrderStatusResponse(RetrieveOrderStatusOutput output);
 
-  OrderResponse toOrderResponse(Order entity);
+  OrderResponse toOrderResponse(OrderEntity entity);
 
-  OrderResponse.Address toAddressResponse(Order.Address address);
+  OrderResponse.Address toAddressResponse(OrderEntity.Address address);
 
-  OrderResponse.OrderItem toOrderItemResponse(Order.OrderItem orderItem);
+  OrderResponse.OrderItem toOrderItemResponse(OrderEntity.OrderItem orderItem);
 
-  OrderResponse.Product toProductResponse(Order.ProductSnapshot product);
+  OrderResponse.Product toProductResponse(OrderEntity.ProductSnapshot product);
 
   @Mapping(target = "paymentGateway", source = "paymentGatewayName")
-  OrderResponse.Payment toPaymentResponse(Order.PaymentSnapshot payment);
+  OrderResponse.Payment toPaymentResponse(OrderEntity.PaymentSnapshot payment);
 }

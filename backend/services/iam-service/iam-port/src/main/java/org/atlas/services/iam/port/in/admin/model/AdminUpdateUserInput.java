@@ -14,7 +14,7 @@ import org.atlas.libs.framework.domain.user.UserRole;
 @Setter
 public class AdminUpdateUserInput {
 
-  private Integer userId;
+  private String userId;
 
   private String password;
 

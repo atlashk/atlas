@@ -11,7 +11,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.atlas.libs.file.excel.poi.PoiUtil;
 import org.atlas.libs.framework.constant.CommonConstant;
-import org.atlas.libs.framework.domain.product.ProductStatus;
+import org.atlas.libs.framework.domain.product.ProductStockStatus;
 import org.atlas.libs.framework.util.DateUtil;
 import org.atlas.services.product.port.out.file.excel.ProductExcelReader;
 import org.atlas.services.product.port.out.file.model.ProductReadRow;
@@ -50,7 +50,7 @@ public class PoiProductExcelReader implements ProductExcelReader {
     productRow.setName(row.getCell(0).getStringCellValue());
     productRow.setPrice(BigDecimal.valueOf(row.getCell(1).getNumericCellValue()));
     productRow.setQuantity((int) row.getCell(2).getNumericCellValue());
-    productRow.setStatus(ProductStatus.valueOf(row.getCell(3).getStringCellValue()));
+    productRow.setStatus(ProductStockStatus.valueOf(row.getCell(3).getStringCellValue()));
     productRow.setAvailableFrom(DateUtil.parse(row.getCell(4).getStringCellValue(),
         CommonConstant.DATE_TIME_FORMAT));
     productRow.setIsActive(row.getCell(5).getBooleanCellValue());

@@ -13,5 +13,5 @@ import lombok.Setter;
 @Setter
 public class MarkAsReadAllInput {
 
-  private Integer userId;
+  private String userId;
 }

@@ -14,7 +14,7 @@ import org.atlas.services.product.infrastructure.api.server.rest.front.mapper.Pr
 import org.atlas.services.product.infrastructure.api.server.rest.front.model.ProductResponse;
 import org.atlas.services.product.port.in.front.model.RetrieveProductListInput;
 import org.atlas.services.product.port.in.front.service.ProductService;
-import org.atlas.services.product.domain.entity.Product;
+import org.atlas.services.product.domain.entity.ProductEntity;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,7 +57,7 @@ public class ProductController {
         .categoryIds(categoryIds)
         .pagingRequest(PagingRequest.of(page - 1, size))
         .build();
-    PagingResult<Product> productPage = productService.retrieveProductList(input);
+    PagingResult<ProductEntity> productPage = productService.retrieveProductList(input);
     PagingResult<ProductResponse> responseData = ObjectMapperUtil.mapPage(productPage,
         ProductMapper.INSTANCE::toProductResponse);
     return ApiResponseWrapper.successPage(responseData);
@@ -67,8 +67,8 @@ public class ProductController {
   @Operation(summary = "Retrieve details of a specific product by ID")
   public ApiResponseWrapper<ProductResponse> retrieveProduct(
       @Parameter(name = "productId", description = "The unique identifier of the product.", example = "1", required = true)
-      @PathVariable Integer productId) throws Exception {
-    Product product = productService.retrieveProduct(productId);
+      @PathVariable String productId) throws Exception {
+    ProductEntity product = productService.retrieveProduct(productId);
     ProductResponse responseData = ProductMapper.INSTANCE.toProductResponse(product);
     return ApiResponseWrapper.success(responseData);
   }

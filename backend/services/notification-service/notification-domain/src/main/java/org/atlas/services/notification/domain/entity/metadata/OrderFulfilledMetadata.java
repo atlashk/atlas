@@ -13,5 +13,5 @@ import lombok.Setter;
 @Setter
 public class OrderFulfilledMetadata {
 
-  private Integer orderId;
+  private String orderId;
 }

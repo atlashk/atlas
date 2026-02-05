@@ -16,7 +16,7 @@ import org.atlas.services.order.infrastructure.api.server.rest.admin.mapper.Orde
 import org.atlas.services.order.infrastructure.api.server.rest.admin.model.OrderResponse;
 import org.atlas.services.order.port.in.admin.model.AdminRetrieveOrderListInput;
 import org.atlas.services.order.port.in.admin.service.AdminOrderService;
-import org.atlas.services.order.domain.entity.Order;
+import org.atlas.services.order.domain.entity.OrderEntity;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -37,11 +37,11 @@ public class AdminOrderManagementController {
   @Operation(summary = "Retrieve a list of orders with optional filtering and pagination")
   public ApiResponseWrapper<List<OrderResponse>> retrieveOrderList(
       @Parameter(name = "orderId", description = "Order ID", example = "1")
-      @RequestParam(name = "orderId", required = false) Integer orderId,
+      @RequestParam(name = "orderId", required = false) String orderId,
       @Parameter(name = "userId", description = "User ID", example = "1")
-      @RequestParam(name = "userId", required = false) Integer userId,
+      @RequestParam(name = "userId", required = false) String userId,
       @Parameter(name = "productId", description = "Product ID", example = "1")
-      @RequestParam(name = "productId", required = false) Integer productId,
+      @RequestParam(name = "productId", required = false) String productId,
       @Parameter(name = "status", description = "Order status")
       @RequestParam(name = "status", required = false) OrderStatus status,
       @Parameter(name = "startDate", description = "Start date")
@@ -64,7 +64,7 @@ public class AdminOrderManagementController {
         .endDate(endDate)
         .pagingRequest(PagingRequest.of(page - 1, size, "createdAt", SortOrder.DESC))
         .build();
-    PagingResult<Order> orderPage = adminOrderService.retrieveOrderList(input);
+    PagingResult<OrderEntity> orderPage = adminOrderService.retrieveOrderList(input);
     PagingResult<OrderResponse> responseData = ObjectMapperUtil.mapPage(orderPage,
         OrderMapper.INSTANCE::toOrderResponse);
     return ApiResponseWrapper.successPage(responseData);

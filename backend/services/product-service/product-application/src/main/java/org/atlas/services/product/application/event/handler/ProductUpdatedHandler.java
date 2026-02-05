@@ -9,8 +9,8 @@ import org.atlas.libs.framework.domain.common.event.DomainEventType;
 import org.atlas.libs.framework.domain.common.event.contract.product.ProductEvent;
 import org.atlas.libs.framework.domain.common.event.handler.DomainEventHandler;
 import org.atlas.services.product.application.event.mapper.ProductEventMapper;
+import org.atlas.services.product.domain.entity.ProductEntity;
 import org.atlas.services.product.port.out.fulltextsearch.FullTextSearchService;
-import org.atlas.services.product.domain.entity.Product;
 
 @DomainEventHandler(type = DomainEventType.PRODUCT_UPDATED)
 @RequiredArgsConstructor
@@ -21,7 +21,7 @@ public class ProductUpdatedHandler {
   private final CacheService cacheService;
 
   public void handle(ProductEvent event) {
-    Product product = ProductEventMapper.INSTANCE.toProduct(event);
+    ProductEntity product = ProductEventMapper.INSTANCE.toProduct(event);
 
     AsyncUtil.executeTasks(
         updateFullTextSearchDocument(product),
@@ -33,7 +33,7 @@ public class ProductUpdatedHandler {
     });
   }
 
-  private AsyncUtil.AsyncTask updateFullTextSearchDocument(Product product) {
+  private AsyncUtil.AsyncTask updateFullTextSearchDocument(ProductEntity product) {
     return new AsyncUtil.AsyncTask() {
       @Override
       public void run() {
@@ -53,7 +53,7 @@ public class ProductUpdatedHandler {
     };
   }
 
-  private AsyncUtil.AsyncTask evictProductCache(Product product) {
+  private AsyncUtil.AsyncTask evictProductCache(ProductEntity product) {
     return new AsyncUtil.AsyncTask() {
       @Override
       public void run() {

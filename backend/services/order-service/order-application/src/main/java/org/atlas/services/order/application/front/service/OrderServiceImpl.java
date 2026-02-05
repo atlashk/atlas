@@ -23,12 +23,11 @@ import org.atlas.libs.framework.saga.core.orchestrator.SagaOrchestrator;
 import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.services.order.application.front.mapper.OrderMapper;
-import org.atlas.services.order.domain.entity.Cart;
-import org.atlas.services.order.domain.entity.CartItem;
-import org.atlas.services.order.domain.entity.Order;
-import org.atlas.services.order.domain.entity.Order.OrderItem;
-import org.atlas.services.order.domain.entity.Order.PaymentSnapshot;
-import org.atlas.services.order.domain.entity.Order.ProductSnapshot;
+import org.atlas.services.order.domain.entity.CartEntity;
+import org.atlas.services.order.domain.entity.OrderEntity;
+import org.atlas.services.order.domain.entity.OrderEntity.OrderItem;
+import org.atlas.services.order.domain.entity.OrderEntity.PaymentSnapshot;
+import org.atlas.services.order.domain.entity.OrderEntity.ProductSnapshot;
 import org.atlas.services.order.port.in.front.model.CheckoutInput;
 import org.atlas.services.order.port.in.front.model.RetrieveOrderListInput;
 import org.atlas.services.order.port.in.front.model.RetrieveOrderStatusOutput;
@@ -53,15 +52,15 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   @Transactional(readOnly = true)
-  public PagingResult<Order> retrieveOrderList(RetrieveOrderListInput input) {
+  public PagingResult<OrderEntity> retrieveOrderList(RetrieveOrderListInput input) {
     FindOrderCriteria criteria = OrderMapper.INSTANCE.toFindOrderCriteria(input);
     return orderRepository.findByCriteria(criteria, input.getPagingRequest());
   }
 
   @Override
   @Transactional(readOnly = true)
-  public RetrieveOrderStatusOutput retrieveOrderStatus(Integer orderId, Integer userId) {
-    Order order = orderRepository.findById(orderId)
+  public RetrieveOrderStatusOutput retrieveOrderStatus(String orderId, String userId) {
+    OrderEntity order = orderRepository.findById(orderId)
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
 
     if (!Objects.equals(order.getUser().getId(), userId)) {
@@ -75,11 +74,11 @@ public class OrderServiceImpl implements OrderService {
   @Transactional
   public Integer checkout(CheckoutInput input) {
     // Retrieve user
-    Integer userId = Contexts.getUserId();
+    String userId = Contexts.getUserId();
     UserResponse userResponse = retrieveUser(userId);
 
     // Retrieve cart
-    Cart cart = cartService.retrieveCart(userId);
+    CartEntity cart = cartService.retrieveCart(userId);
     if (cart.isEmpty()) {
       throw new DomainException(DomainError.CART_EMPTY);
     }
@@ -96,7 +95,7 @@ public class OrderServiceImpl implements OrderService {
 
     try {
       // Insert new order into DB
-      Order order = newOrder(input, userResponse, cart);
+      OrderEntity order = newOrder(input, userResponse, cart);
       orderRepository.insert(order);
       log.info("Order created successfully for user {}", userId);
 
@@ -109,13 +108,13 @@ public class OrderServiceImpl implements OrderService {
       order.setSagaId(sagaId);
       orderRepository.update(order);
 
-      return order.getId();
+      return order.getOrderId();
     } finally {
       lockService.releaseLock(lockKey);
     }
   }
 
-  private UserResponse retrieveUser(Integer userId) {
+  private UserResponse retrieveUser(String userId) {
     ListUserRequest request = new ListUserRequest(List.of(userId));
     List<UserResponse> userResponses = userApiClient.call(request);
     if (CollectionUtil.isEmpty(userResponses)) {
@@ -124,7 +123,7 @@ public class OrderServiceImpl implements OrderService {
     return userResponses.get(0);
   }
 
-  private String obtainLockKey(CheckoutInput input, Cart cart) {
+  private String obtainLockKey(CheckoutInput input, CartEntity cart) {
     // Create a deterministic signature based on order items
     StringBuilder signature = new StringBuilder();
     cart.getCartItems().stream().sorted(
@@ -135,10 +134,10 @@ public class OrderServiceImpl implements OrderService {
     return String.format("checkout:%d:%s", cart.getUserId(), hash);
   }
 
-  private Order newOrder(CheckoutInput input, UserResponse userResponse, Cart cart) {
+  private OrderEntity newOrder(CheckoutInput input, UserResponse userResponse, CartEntity cart) {
     // Order
-    Order order = new Order();
-    order.setCode(sequenceGenerator.generate(SequenceType.ORDER));
+    OrderEntity order = new OrderEntity();
+    order.setOrderId(sequenceGenerator.generate(SequenceType.ORDER));
     order.setStatus(OrderStatus.AWAITING_PRODUCT_RESERVATION);
 
     // User
@@ -148,7 +147,7 @@ public class OrderServiceImpl implements OrderService {
     order.setAddress(OrderMapper.INSTANCE.toAddress(input.getAddress()));
 
     // Order items
-    for (CartItem cartItem : cart.getCartItems()) {
+    for (CartItemEntity cartItem : cart.getCartItems()) {
       // Product
       ProductSnapshot product = OrderMapper.INSTANCE.toProductSnapshot(cartItem.getProduct());
 

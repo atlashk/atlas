@@ -16,5 +16,5 @@ import lombok.Setter;
 public class CheckoutResponse {
 
   @Schema(description = "The identifier of the order")
-  private Integer orderId;
+  private String orderId;
 }

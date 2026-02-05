@@ -17,14 +17,14 @@ import org.atlas.libs.framework.saga.checkout.ProcessPaymentCommandMetadata;
 import org.atlas.libs.framework.saga.core.command.SagaCommandResult;
 import org.atlas.libs.framework.saga.core.messaging.SagaMessagePublisher;
 import org.atlas.libs.framework.saga.core.messaging.payload.SagaCommandReply;
+import org.atlas.services.payment.domain.entity.PaymentEventEntity;
+import org.atlas.services.payment.domain.entity.PaymentGatewayEntity;
 import org.atlas.services.payment.port.in.webhook.service.PaymentWebhookService;
 import org.atlas.services.payment.port.out.repository.PaymentEventRepository;
 import org.atlas.services.payment.port.out.repository.PaymentGatewayRepository;
 import org.atlas.services.payment.port.out.repository.PaymentRepository;
-import org.atlas.services.payment.domain.entity.Payment;
-import org.atlas.services.payment.domain.entity.PaymentEvent;
+import org.atlas.services.payment.domain.entity.PaymentEntity;
 import org.atlas.services.payment.domain.entity.PaymentEventStatus;
-import org.atlas.services.payment.domain.entity.PaymentGateway;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -49,7 +49,7 @@ public class PaymentWebhookServiceImpl implements PaymentWebhookService {
         paymentGatewayCode, rawPayload, headers);
 
     // Find payment gateway
-    PaymentGateway paymentGateway = paymentGatewayRepository.findByCode(
+    PaymentGatewayEntity paymentGateway = paymentGatewayRepository.findByCode(
             paymentGatewayCode.toUpperCase())
         .orElseThrow(() -> {
           log.error("Payment gateway {} not found", paymentGatewayCode);
@@ -68,7 +68,7 @@ public class PaymentWebhookServiceImpl implements PaymentWebhookService {
     }
 
     // Persist payment event
-    PaymentEvent paymentEvent = PaymentEvent.builder()
+    PaymentEventEntity paymentEvent = PaymentEventEntity.builder()
         .paymentGatewayId(paymentGateway.getId())
         .payload(JsonUtil.getInstance().compact(rawPayload))
         .headers(JsonUtil.getInstance().toJson(headers))
@@ -106,7 +106,7 @@ public class PaymentWebhookServiceImpl implements PaymentWebhookService {
       HandleWebhookResponse.Result handleResult = handleResponse.getResult();
       AsyncUtil.executeTask(() -> {
         // Update payment entity
-        Payment payment = paymentRepository.findById(handleResult.getPaymentId())
+        PaymentEntity payment = paymentRepository.findById(handleResult.getPaymentId())
             .orElseThrow(() -> new DomainException(DomainError.PAYMENT_NOT_FOUND));
         switch (handleResult.getStatus()) {
           case SUCCEEDED -> {

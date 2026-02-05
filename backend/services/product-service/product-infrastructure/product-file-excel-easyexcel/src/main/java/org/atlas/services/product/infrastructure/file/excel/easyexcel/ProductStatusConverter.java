@@ -4,9 +4,9 @@ import com.alibaba.excel.converters.Converter;
 import com.alibaba.excel.converters.WriteConverterContext;
 import com.alibaba.excel.enums.CellDataTypeEnum;
 import com.alibaba.excel.metadata.data.WriteCellData;
-import org.atlas.libs.framework.domain.product.ProductStatus;
+import org.atlas.libs.framework.domain.product.ProductStockStatus;
 
-public class ProductStatusConverter implements Converter<ProductStatus> {
+public class ProductStatusConverter implements Converter<ProductStockStatus> {
 
   @Override
   public CellDataTypeEnum supportExcelTypeKey() {
@@ -14,9 +14,9 @@ public class ProductStatusConverter implements Converter<ProductStatus> {
   }
 
   @Override
-  public WriteCellData<?> convertToExcelData(WriteConverterContext<ProductStatus> context)
+  public WriteCellData<?> convertToExcelData(WriteConverterContext<ProductStockStatus> context)
       throws Exception {
-    ProductStatus status = context.getValue();
+    ProductStockStatus status = context.getValue();
     return new WriteCellData<>(status.name());
   }
 }

@@ -1,8 +1,7 @@
 package org.atlas.services.order.infrastructure.api.server.rest.front.mapper;
 
+import org.atlas.services.order.domain.entity.CartEntity;
 import org.atlas.services.order.infrastructure.api.server.rest.front.model.CartResponse;
-import org.atlas.services.order.domain.entity.Cart;
-import org.atlas.services.order.domain.entity.CartItem;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
@@ -12,11 +11,11 @@ public interface CartMapper {
 
   CartMapper INSTANCE = Mappers.getMapper(CartMapper.class);
 
-  CartResponse toCartResponse(Cart cart);
+  CartResponse toCartResponse(CartEntity cart);
 
   // Don't remove it
-  CartResponse.CartItem toCartItem(CartItem cartItem);
+  CartResponse.CartItem toCartItem(CartItemEntity cartItem);
 
   // Don't remove it
-  CartResponse.Product toProduct(CartItem.Product product);
+  CartResponse.Product toProduct(CartItemEntity.Product product);
 }

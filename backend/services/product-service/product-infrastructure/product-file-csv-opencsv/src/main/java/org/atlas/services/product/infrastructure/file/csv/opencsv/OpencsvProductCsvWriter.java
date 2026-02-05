@@ -11,7 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.file.csv.opencsv.OpenCsvWriter;
-import org.atlas.libs.framework.domain.product.ProductStatus;
+import org.atlas.libs.framework.domain.product.ProductStockStatus;
 import org.atlas.libs.framework.util.ObjectMapperUtil;
 import org.atlas.services.product.port.out.file.csv.ProductCsvWriter;
 import org.atlas.services.product.port.out.file.model.ProductWriteRow;
@@ -55,7 +55,7 @@ public class OpencsvProductCsvWriter implements ProductCsvWriter {
 
     @CsvBindByName(column = "Status")
     @CsvBindByPosition(position = 4)
-    private ProductStatus status;
+    private ProductStockStatus status;
 
     @CsvBindByName(column = "Available From")
     @CsvBindByPosition(position = 5)

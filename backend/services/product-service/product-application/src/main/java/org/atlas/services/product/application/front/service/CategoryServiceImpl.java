@@ -4,7 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.services.product.port.in.front.service.CategoryService;
 import org.atlas.services.product.port.out.repository.CategoryRepository;
-import org.atlas.services.product.domain.entity.Category;
+import org.atlas.services.product.domain.entity.CategoryEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,7 +16,7 @@ public class CategoryServiceImpl implements CategoryService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<Category> retrieveAllCategory() {
+  public List<CategoryEntity> retrieveAllCategory() {
     return categoryRepository.findAll();
   }
 }
