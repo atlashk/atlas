@@ -14,7 +14,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ProductResponse {
 
-  private Integer id;
+  private String productId;
   private String name;
   private BigDecimal price;
   private String image;

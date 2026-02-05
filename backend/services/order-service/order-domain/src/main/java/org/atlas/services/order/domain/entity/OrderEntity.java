@@ -52,7 +52,7 @@ public class OrderEntity extends DomainEntity {
   @Setter
   public static class UserSnapshot {
 
-    private Integer id;
+    private String userId;
     private String firstName;
     private String lastName;
     private String email;
@@ -92,7 +92,7 @@ public class OrderEntity extends DomainEntity {
   @Setter
   public static class ProductSnapshot {
 
-    private Integer id;
+    private String productId;
     private String name;
     private BigDecimal price;
     private String image;

@@ -39,7 +39,7 @@ public class UserContextFilter extends OncePerRequestFilter {
     final String userRoleHeader = HttpUtil.getHeader(request, CustomClaim.USER_ROLE.getHeader());
     if (StringUtil.isNotBlank(userIdHeader) &&
         StringUtil.isNotBlank(userRoleHeader)) {
-      contextInfo.setUserId(Integer.parseInt(userIdHeader));
+      contextInfo.setUserId(userIdHeader);
       contextInfo.setUserRole(UserRole.valueOf(userRoleHeader));
     }
 

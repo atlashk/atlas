@@ -49,13 +49,13 @@ public class CartEntity extends DomainEntity {
       cartItems = new ArrayList<>();
     }
     cartItems.stream()
-        .filter(it -> it.getProduct().getId().equals(productId))
+        .filter(it -> it.getProduct().getProductId().equals(productId))
         .findFirst()
         .ifPresentOrElse(
             it -> it.setQuantity(it.getQuantity() + quantity),
             () -> {
               // Add new cart item
-              CartItemEntity cartItem = new CartItemEntity();
+              CartItem cartItem = new CartItem();
               Product product = new Product(productId);
               cartItem.setProduct(product);
               cartItem.setQuantity(quantity);
@@ -69,13 +69,13 @@ public class CartEntity extends DomainEntity {
       cartItems = new ArrayList<>();
     }
     cartItems.stream()
-        .filter(it -> it.getProduct().getId().equals(productId))
+        .filter(it -> it.getProduct().getProductId().equals(productId))
         .findFirst()
         .ifPresentOrElse(
             it -> it.setQuantity(quantity),
             () -> {
               // Add new cart item
-              CartItemEntity cartItem = new CartItemEntity();
+              CartItem cartItem = new CartItem();
               Product product = new Product(productId);
               cartItem.setProduct(product);
               cartItem.setQuantity(quantity);
@@ -86,10 +86,10 @@ public class CartEntity extends DomainEntity {
 
   public void removeCartItem(String productId) {
     if (CollectionUtil.isNotEmpty(cartItems)) {
-      Iterator<CartItemEntity> iterator = cartItems.iterator();
+      Iterator<CartItem> iterator = cartItems.iterator();
       while (iterator.hasNext()) {
-        CartItemEntity cartItemEntity = iterator.next();
-        if (cartItemEntity.getProduct().getId().equals(productId)) {
+        CartItem cartItem = iterator.next();
+        if (cartItem.getProduct().getProductId().equals(productId)) {
           iterator.remove();
           break;
         }
@@ -103,12 +103,12 @@ public class CartEntity extends DomainEntity {
     }
   }
 
-  public List<Integer> collectProductIds() {
+  public List<String> collectProductIds() {
     if (CollectionUtil.isEmpty(cartItems)) {
       return java.util.Collections.emptyList();
     }
     return cartItems.stream()
-        .map(it -> it.getProduct().getId())
+        .map(it -> it.getProduct().getProductId())
         .toList();
   }
 
@@ -119,7 +119,6 @@ public class CartEntity extends DomainEntity {
   @Setter
   public static class CartItem {
 
-    private Integer id;
     private Product product;
     private Integer quantity;
 
@@ -133,13 +132,13 @@ public class CartEntity extends DomainEntity {
   @Setter
   public static class Product {
 
-    private Integer id;
+    private String productId;
     private String name;
     private BigDecimal price;
     private String image;
 
-    public Product(Integer id) {
-      this.id = id;
+    public Product(String productId) {
+      this.productId = productId;
     }
   }
 }

@@ -14,7 +14,7 @@ import lombok.Setter;
 @Setter
 public class SendInAppRequest {
 
-  private Integer receiverUserId;
+  private String receiverUserId;
   private Payload payload;
 
   @NoArgsConstructor

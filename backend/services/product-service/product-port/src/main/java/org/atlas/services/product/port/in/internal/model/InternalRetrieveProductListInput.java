@@ -14,5 +14,5 @@ import lombok.Setter;
 @Setter
 public class InternalRetrieveProductListInput {
 
-  private List<Integer> ids;
+  private List<String> productIds;
 }

@@ -24,8 +24,8 @@ public interface JpaCartMapper {
   JpaCart toJpaCart(CartEntity cart);
 
   @Mapping(target = "cart", ignore = true)
-  @Mapping(target = "productId", source = "product.id")
-  JpaCartItem toJpaCartItem(CartItemEntity cartItem);
+  @Mapping(target = "productId", source = "product.productId")
+  JpaCartItem toJpaCartItem(CartEntity.CartItem cartItem);
 
   /**
    * After mapping for {@link CartEntity} to {@link JpaCart} - handles bidirectional relationships
@@ -43,6 +43,6 @@ public interface JpaCartMapper {
 
   CartEntity toCart(JpaCart jpaCart);
 
-  @Mapping(target = "product.id", source = "productId")
-  CartItemEntity toCartItem(JpaCartItem jpaCartItem);
+  @Mapping(target = "product.productId", source = "productId")
+  CartEntity.CartItem toCartItem(JpaCartItem jpaCartItem);
 }

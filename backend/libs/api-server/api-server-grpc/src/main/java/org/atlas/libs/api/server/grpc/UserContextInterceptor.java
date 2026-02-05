@@ -30,7 +30,7 @@ public class UserContextInterceptor implements ServerInterceptor {
     if (StringUtil.isNotBlank(userIdHeader) &&
         StringUtil.isNotBlank(userRoleHeader)) {
       ContextInfo contextInfo = new ContextInfo();
-      contextInfo.setUserId(Integer.parseInt(userIdHeader));
+      contextInfo.setUserId(userIdHeader);
       contextInfo.setUserRole(UserRole.valueOf(userRoleHeader));
       Contexts.set(contextInfo);
     }

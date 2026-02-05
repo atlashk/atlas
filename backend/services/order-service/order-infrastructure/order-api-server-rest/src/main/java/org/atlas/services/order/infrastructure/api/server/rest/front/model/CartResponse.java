@@ -50,7 +50,7 @@ public class CartResponse {
   public static class Product {
 
     @Schema(description = "Product ID", example = "1")
-    private Integer id;
+    private String productId;
 
     @Schema(description = "Product name", example = "iPhone 15")
     private String name;

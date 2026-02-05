@@ -133,7 +133,7 @@ public class StripePaymentGatewayService implements PaymentGatewayService {
           Map.of(BODY_FIELD_ERROR, "Invalid webhook event data: Missing metadata"));
       return response;
     }
-    String paymentId = JsonUtil.getInstance().getAsInt(metadata, "paymentId");
+    String paymentId = JsonUtil.getInstance().getAsString(metadata, "paymentId");
     result.setPaymentId(paymentId);
 
     // Extract payment method

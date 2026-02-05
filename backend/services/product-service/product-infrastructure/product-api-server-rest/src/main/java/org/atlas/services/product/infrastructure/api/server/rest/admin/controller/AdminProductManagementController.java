@@ -135,7 +135,7 @@ public class AdminProductManagementController {
       @Parameter(description = "Product image file")
       @RequestPart(value = "image", required = false) MultipartFile imageFile) throws Exception {
     ProductEntity product = AdminProductMapper.INSTANCE.toProduct(request);
-    product.setId(productId);
+    product.setProductId(productId);
     AdminUpdateProductInput input = AdminUpdateProductInput.builder()
         .product(product)
         .build();

@@ -12,11 +12,11 @@ service ProductService {
 }
 
 message ListProductRequestProto {
-  repeated int32 id = 1;
+  repeated string product_id = 1;
 }
 
 message ProductProto {
-  int32 id = 1;
+  string product_id = 1;
   string name = 2;
   double price = 3;
 }

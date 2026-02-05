@@ -18,7 +18,7 @@ import lombok.Setter;
 public class ProductResponse {
 
   @Schema(description = "Unique identifier of the product", example = "123")
-  private Integer id;
+  private String productId;
 
   @Schema(description = "Name of the product", example = "T-Shirt")
   private String name;

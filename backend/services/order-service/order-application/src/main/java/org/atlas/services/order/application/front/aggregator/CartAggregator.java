@@ -12,6 +12,7 @@ import org.atlas.libs.framework.internalapi.product.model.ListProductRequest;
 import org.atlas.libs.framework.internalapi.product.model.ProductResponse;
 import org.atlas.services.order.application.front.mapper.CartMapper;
 import org.atlas.services.order.domain.entity.CartEntity;
+import org.atlas.services.order.domain.entity.CartEntity.CartItem;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -32,7 +33,7 @@ public class CartAggregator {
    * @return false if at least one product is no longer available
    */
   private boolean loadProducts(CartEntity cart) {
-    List<Integer> productIds = cart.collectProductIds();
+    List<String> productIds = cart.collectProductIds();
     ListProductRequest request = new ListProductRequest(productIds);
     List<ProductResponse> productResponses = productApiClient.call(request);
 
@@ -43,14 +44,14 @@ public class CartAggregator {
     }
 
     // Update cart item's product
-    Map<Integer, ProductResponse> productResponseMap = productResponses.stream()
-        .collect(Collectors.toMap(ProductResponse::getId, Function.identity()));
+    Map<String, ProductResponse> productResponseMap = productResponses.stream()
+        .collect(Collectors.toMap(ProductResponse::getProductId, Function.identity()));
     boolean allProductsAreValid = true;
-    for (CartItemEntity cartItem : cart.getCartItems()) {
-      String productId = cartItem.getProduct().getId();
+    for (CartItem cartItem : cart.getCartItems()) {
+      String productId = cartItem.getProduct().getProductId();
       ProductResponse productResponse = productResponseMap.get(productId);
       if (productResponse != null) {
-        CartItemEntity.Product product = CartMapper.INSTANCE.toProduct(productResponse);
+        CartEntity.Product product = CartMapper.INSTANCE.toProduct(productResponse);
         cartItem.setProduct(product);
       } else {
         log.error("Product {} no longer exists, removing from cart {}", productId, cart.getId());

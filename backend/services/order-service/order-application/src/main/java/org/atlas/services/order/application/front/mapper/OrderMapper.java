@@ -2,6 +2,7 @@ package org.atlas.services.order.application.front.mapper;
 
 import org.atlas.libs.framework.internalapi.iam.model.UserResponse;
 import org.atlas.libs.framework.saga.checkout.CheckoutSagaData;
+import org.atlas.services.order.domain.entity.CartEntity;
 import org.atlas.services.order.domain.entity.OrderEntity;
 import org.atlas.services.order.domain.entity.OrderEntity.Address;
 import org.atlas.services.order.domain.entity.OrderEntity.OrderItem;
@@ -24,12 +25,10 @@ public interface OrderMapper {
 
   UserSnapshot toUserSnapshot(UserResponse response);
 
-  ProductSnapshot toProductSnapshot(CartItemEntity.Product product);
+  ProductSnapshot toProductSnapshot(CartEntity.Product product);
 
   Address toAddress(CheckoutInput.Address address);
 
-  @Mapping(target = "orderId", source = "id")
-  @Mapping(target = "orderCode", source = "code")
   @Mapping(target = "paymentGatewayId", source = "payment.paymentGatewayId")
   CheckoutSagaData toCheckoutSagaData(OrderEntity entity);
 

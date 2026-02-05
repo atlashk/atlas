@@ -22,7 +22,7 @@ public class SseEvent {
   public static SseEvent of(String userId, Payload payload) {
     return SseEvent.builder()
         .eventId(UUIDGenerator.generate())
-        .eventKey(userId.toString())
+        .eventKey(userId)
         .payload(payload)
         .build();
   }

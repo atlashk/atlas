@@ -23,12 +23,12 @@ public interface AdminProductMapper {
 
   @Mapping(target = "brand", source = "brandId")
   @Mapping(target = "categories", source = "categoryIds")
-  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "productId", ignore = true)
   ProductEntity toProduct(AdminCreateProductRequest request);
 
   @Mapping(target = "brand", source = "brandId")
   @Mapping(target = "categories", source = "categoryIds")
-  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "productId", ignore = true)
   ProductEntity toProduct(AdminUpdateProductRequest request);
 
   // Helper methods for mapping complex objects

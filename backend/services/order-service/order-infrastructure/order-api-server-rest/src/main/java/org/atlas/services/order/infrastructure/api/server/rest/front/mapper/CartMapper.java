@@ -14,8 +14,8 @@ public interface CartMapper {
   CartResponse toCartResponse(CartEntity cart);
 
   // Don't remove it
-  CartResponse.CartItem toCartItem(CartItemEntity cartItem);
+  CartResponse.CartItem toCartItem(CartEntity.CartItem cartItem);
 
   // Don't remove it
-  CartResponse.Product toProduct(CartItemEntity.Product product);
+  CartResponse.Product toProduct(CartEntity.Product product);
 }

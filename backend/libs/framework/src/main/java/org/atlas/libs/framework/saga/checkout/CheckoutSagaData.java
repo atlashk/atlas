@@ -21,7 +21,6 @@ import lombok.Setter;
 public class CheckoutSagaData {
 
   private String orderId;
-  private String orderCode;
   private User user;
   private Address address;
   private List<OrderItem> orderItems;
@@ -36,7 +35,7 @@ public class CheckoutSagaData {
   @Setter
   public static class User {
 
-    private Integer id;
+    private String userId;
     private String firstName;
     private String lastName;
     private String email;
@@ -75,7 +74,7 @@ public class CheckoutSagaData {
   @Setter
   public static class Product {
 
-    private Integer id;
+    private String productId;
     private String name;
     private BigDecimal price;
     private String image;

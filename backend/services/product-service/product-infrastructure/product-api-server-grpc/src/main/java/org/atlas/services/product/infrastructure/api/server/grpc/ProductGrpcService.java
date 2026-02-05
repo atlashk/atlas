@@ -34,7 +34,7 @@ public class ProductGrpcService extends ProductServiceGrpc.ProductServiceImplBas
   }
 
   private InternalRetrieveProductListInput map(ListProductRequestProto requestProto) {
-    return new InternalRetrieveProductListInput(requestProto.getIdList());
+    return new InternalRetrieveProductListInput(requestProto.getProductIdList());
   }
 
   private ListProductResponseProto map(List<ProductEntity> products) {
@@ -48,7 +48,7 @@ public class ProductGrpcService extends ProductServiceGrpc.ProductServiceImplBas
 
   private ProductProto map(ProductEntity product) {
     return ProductProto.newBuilder()
-        .setId(product.getId())
+        .setProductId(product.getProductId())
         .setName(product.getName())
         .setPrice(product.getPrice().doubleValue())
         .build();

@@ -60,10 +60,10 @@ public class OrderServiceImpl implements OrderService {
   @Override
   @Transactional(readOnly = true)
   public RetrieveOrderStatusOutput retrieveOrderStatus(String orderId, String userId) {
-    OrderEntity order = orderRepository.findById(orderId)
+    OrderEntity order = orderRepository.findByOrderId(orderId)
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
 
-    if (!Objects.equals(order.getUser().getId(), userId)) {
+    if (!Objects.equals(order.getUser().getUserId(), userId)) {
       throw new DomainException(DomainError.FORBIDDEN);
     }
 
@@ -72,7 +72,7 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   @Transactional
-  public Integer checkout(CheckoutInput input) {
+  public String checkout(CheckoutInput input) {
     // Retrieve user
     String userId = Contexts.getUserId();
     UserResponse userResponse = retrieveUser(userId);
@@ -127,11 +127,11 @@ public class OrderServiceImpl implements OrderService {
     // Create a deterministic signature based on order items
     StringBuilder signature = new StringBuilder();
     cart.getCartItems().stream().sorted(
-            Comparator.comparingInt(cartItem -> cartItem.getProduct().getId())) // Sort for consistency
-        .forEach(cartItem -> signature.append(cartItem.getProduct().getId()).append(":")
+            Comparator.comparing(cartItem -> cartItem.getProduct().getProductId())) // Sort for consistency
+        .forEach(cartItem -> signature.append(cartItem.getProduct().getProductId()).append(":")
             .append(cartItem.getQuantity()).append(";"));
     String hash = HashingUtil.sha256ToHex(signature.toString());
-    return String.format("checkout:%d:%s", cart.getUserId(), hash);
+    return String.format("checkout:%s:%s", cart.getUserId(), hash);
   }
 
   private OrderEntity newOrder(CheckoutInput input, UserResponse userResponse, CartEntity cart) {
@@ -147,7 +147,7 @@ public class OrderServiceImpl implements OrderService {
     order.setAddress(OrderMapper.INSTANCE.toAddress(input.getAddress()));
 
     // Order items
-    for (CartItemEntity cartItem : cart.getCartItems()) {
+    for (CartEntity.CartItem cartItem : cart.getCartItems()) {
       // Product
       ProductSnapshot product = OrderMapper.INSTANCE.toProductSnapshot(cartItem.getProduct());
 

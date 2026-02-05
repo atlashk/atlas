@@ -21,7 +21,7 @@ public interface JpaOrderMapper {
 
   JpaOrderMapper INSTANCE = Mappers.getMapper(JpaOrderMapper.class);
 
-  @Mapping(target = "userId", source = "user.id")
+  @Mapping(target = "userId", source = "user.userId")
   @Mapping(target = "userFirstName", source = "user.firstName")
   @Mapping(target = "userLastName", source = "user.lastName")
   @Mapping(target = "userEmail", source = "user.email")
@@ -38,7 +38,7 @@ public interface JpaOrderMapper {
   @Mapping(target = "orderItems", ignore = true)
   JpaOrder toJpaOrder(OrderEntity order);
 
-  @Mapping(target = "productId", source = "product.id")
+  @Mapping(target = "productId", source = "product.productId")
   @Mapping(target = "productName", source = "product.name")
   @Mapping(target = "productPrice", source = "product.price")
   @Mapping(target = "order", ignore = true)
@@ -57,7 +57,7 @@ public interface JpaOrderMapper {
     }
   }
 
-  @Mapping(target = "user.id", source = "userId")
+  @Mapping(target = "user.userId", source = "userId")
   @Mapping(target = "user.firstName", source = "userFirstName")
   @Mapping(target = "user.lastName", source = "userLastName")
   @Mapping(target = "user.email", source = "userEmail")
@@ -73,7 +73,7 @@ public interface JpaOrderMapper {
   @Mapping(target = "payment.transactionId", source = "paymentTransactionId")
   OrderEntity toOrder(JpaOrder jpaOrder);
 
-  @Mapping(target = "product.id", source = "productId")
+  @Mapping(target = "product.productId", source = "productId")
   @Mapping(target = "product.name", source = "productName")
   @Mapping(target = "product.price", source = "productPrice")
   OrderItem toOrderItem(JpaOrderItem jpaOrderItem);
