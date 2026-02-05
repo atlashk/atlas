@@ -6,7 +6,7 @@ import jakarta.persistence.TypedQuery;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.atlas.libs.framework.collection.CollectionUtil;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.product.port.out.repository.criteria.FindProductCriteria;
@@ -64,7 +64,7 @@ public class CustomJpaProductRepositoryUsingJpql implements CustomJpaProductRepo
     Map<String, Object> params = new HashMap<>();
     String whereClause = buildWhereClause(criteria, params);
     String countSql = """
-        select count(distinct p.id)
+        select count(distinct p.productId)
         from JpaProduct p
         left join p.details d
         left join p.attributes a
@@ -78,9 +78,9 @@ public class CustomJpaProductRepositoryUsingJpql implements CustomJpaProductRepo
 
   private String buildWhereClause(FindProductCriteria criteria, Map<String, Object> params) {
     StringBuilder whereClauseBuilder = new StringBuilder("where 1=1 ");
-    if (criteria.getId() != null) {
-      whereClauseBuilder.append(" and p.id = :id ");
-      params.put("id", criteria.getId());
+    if (criteria.getProductId() != null) {
+      whereClauseBuilder.append(" and p.productId = :productId ");
+      params.put("productId", criteria.getProductId());
     }
     if (StringUtil.isNotBlank(criteria.getKeyword())) {
       whereClauseBuilder.append("""
@@ -100,9 +100,9 @@ public class CustomJpaProductRepositoryUsingJpql implements CustomJpaProductRepo
       whereClauseBuilder.append(" and p.price <= :maxPrice ");
       params.put("maxPrice", criteria.getMaxPrice());
     }
-    if (criteria.getStatus() != null) {
-      whereClauseBuilder.append(" and p.status = :status ");
-      params.put("status", criteria.getStatus());
+    if (criteria.getStockStatus() != null) {
+      whereClauseBuilder.append(" and p.stockStatus = :stockStatus ");
+      params.put("stockStatus", criteria.getStockStatus());
     }
     if (criteria.getAvailableFrom() != null) {
       whereClauseBuilder.append(" and p.availableFrom >= :availableFrom ");

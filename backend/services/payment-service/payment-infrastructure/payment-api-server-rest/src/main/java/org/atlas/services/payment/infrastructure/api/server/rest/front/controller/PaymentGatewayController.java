@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
-import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.payment.domain.entity.PaymentGatewayEntity;
 import org.atlas.services.payment.infrastructure.api.server.rest.front.mapper.PaymentGatewayMapper;
 import org.atlas.services.payment.infrastructure.api.server.rest.front.model.PaymentGatewayResponse;
@@ -27,7 +27,7 @@ public class PaymentGatewayController {
   @Operation(summary = "Retrieve a list of available payment gateways")
   public ApiResponseWrapper<List<PaymentGatewayResponse>> listPaymentMethod() throws Exception {
     List<PaymentGatewayEntity> paymentGateways = paymentGatewayService.retrievePaymentGatewayList();
-    List<PaymentGatewayResponse> responseData = ObjectMapperUtil.mapList(paymentGateways,
+    List<PaymentGatewayResponse> responseData = MapperUtil.mapList(paymentGateways,
         PaymentGatewayMapper.INSTANCE::toPaymentGatewayResponse);
     return ApiResponseWrapper.success(responseData);
   }

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.collection.CollectionUtil;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.domain.order.OrderStatus;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.services.order.application.admin.mapper.AdminOrderMapper;

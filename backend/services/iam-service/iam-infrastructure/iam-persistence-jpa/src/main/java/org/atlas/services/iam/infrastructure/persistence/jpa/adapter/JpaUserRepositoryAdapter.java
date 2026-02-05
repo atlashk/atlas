@@ -11,13 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.collection.CollectionUtil;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
-import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.iam.domain.entity.UserEntity;
-import org.atlas.services.iam.infrastructure.persistence.jpa.entity.JpaUser;
+import org.atlas.services.iam.infrastructure.persistence.jpa.entity.JpaUserEntity;
 import org.atlas.services.iam.infrastructure.persistence.jpa.mapper.JpaUserMapper;
 import org.atlas.services.iam.infrastructure.persistence.jpa.repository.JpaUserRepository;
 import org.atlas.services.iam.port.out.repository.UserRepository;
@@ -40,23 +40,23 @@ public class JpaUserRepositoryAdapter implements UserRepository {
       return PagingResult.empty();
     }
 
-    List<JpaUser> jpaUsers = findJpaUsersByCriteria(criteria, pagingRequest);
-    List<UserEntity> users = ObjectMapperUtil.mapList(jpaUsers, JpaUserMapper.INSTANCE::toUser);
+    List<JpaUserEntity> jpaUsers = findJpaUsersByCriteria(criteria, pagingRequest);
+    List<UserEntity> users = MapperUtil.mapList(jpaUsers, JpaUserMapper.INSTANCE::toUser);
     return PagingResult.of(users, totalCount, pagingRequest);
   }
 
   @Override
-  public List<UserEntity> findByIdIn(List<String> ids) {
-    if (CollectionUtil.isEmpty(ids)) {
+  public List<UserEntity> findByUserIdIn(List<String> userIds) {
+    if (CollectionUtil.isEmpty(userIds)) {
       return List.of();
     }
-    List<JpaUser> jpaUsers = jpaUserRepository.findAllById(ids);
-    return ObjectMapperUtil.mapList(jpaUsers, JpaUserMapper.INSTANCE::toUser);
+    List<JpaUserEntity> jpaUsers = jpaUserRepository.findAllById(userIds);
+    return MapperUtil.mapList(jpaUsers, JpaUserMapper.INSTANCE::toUser);
   }
 
   @Override
-  public Optional<UserEntity> findById(String id) {
-    return jpaUserRepository.findById(id)
+  public Optional<UserEntity> findByUserId(String userId) {
+    return jpaUserRepository.findById(userId)
         .map(JpaUserMapper.INSTANCE::toUser);
   }
 
@@ -85,35 +85,35 @@ public class JpaUserRepositoryAdapter implements UserRepository {
 
   @Override
   public void insert(UserEntity user) {
-    JpaUser jpaUser = JpaUserMapper.INSTANCE.toJpaUser(user);
+    JpaUserEntity jpaUser = JpaUserMapper.INSTANCE.toJpaUser(user);
     jpaUserRepository.save(jpaUser);
     user.setUserId(jpaUser.getUserId());
   }
 
   @Override
   public void update(UserEntity user) {
-    JpaUser jpaUser = JpaUserMapper.INSTANCE.toJpaUser(user);
+    JpaUserEntity jpaUser = JpaUserMapper.INSTANCE.toJpaUser(user);
     jpaUserRepository.save(jpaUser);
   }
 
   @Override
-  public void deleteById(String id) {
-    jpaUserRepository.deleteById(id);
+  public void deleteByUserId(String userId) {
+    jpaUserRepository.deleteById(userId);
   }
 
-  private List<JpaUser> findJpaUsersByCriteria(FindUserCriteria criteria, PagingRequest pagingRequest) {
+  private List<JpaUserEntity> findJpaUsersByCriteria(FindUserCriteria criteria, PagingRequest pagingRequest) {
     PagingRequest effectivePaging = pagingRequest == null ? PagingRequest.unpaged() : pagingRequest;
 
     CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-    CriteriaQuery<JpaUser> criteriaQuery = criteriaBuilder.createQuery(JpaUser.class);
-    Root<JpaUser> root = criteriaQuery.from(JpaUser.class);
+    CriteriaQuery<JpaUserEntity> criteriaQuery = criteriaBuilder.createQuery(JpaUserEntity.class);
+    Root<JpaUserEntity> root = criteriaQuery.from(JpaUserEntity.class);
 
     Predicate predicate = buildPredicate(criteria, criteriaBuilder, root);
     criteriaQuery.select(root).where(predicate);
 
     applySort(criteriaQuery, criteriaBuilder, root, effectivePaging);
 
-    TypedQuery<JpaUser> query = entityManager.createQuery(criteriaQuery);
+    TypedQuery<JpaUserEntity> query = entityManager.createQuery(criteriaQuery);
     applyPaging(query, effectivePaging);
     return query.getResultList();
   }
@@ -121,7 +121,7 @@ public class JpaUserRepositoryAdapter implements UserRepository {
   private long countByCriteria(FindUserCriteria criteria) {
     CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
-    Root<JpaUser> root = criteriaQuery.from(JpaUser.class);
+    Root<JpaUserEntity> root = criteriaQuery.from(JpaUserEntity.class);
 
     Predicate predicate = buildPredicate(criteria, criteriaBuilder, root);
     criteriaQuery.select(criteriaBuilder.count(root)).where(predicate);
@@ -131,43 +131,44 @@ public class JpaUserRepositoryAdapter implements UserRepository {
   }
 
   private Predicate buildPredicate(FindUserCriteria criteria, CriteriaBuilder criteriaBuilder,
-      Root<JpaUser> root) {
+      Root<JpaUserEntity> root) {
     if (criteria == null) {
       return criteriaBuilder.conjunction();
     }
 
     List<Predicate> predicates = new ArrayList<>();
 
-    if (criteria.getId() != null) {
-      predicates.add(criteriaBuilder.equal(root.get("userId"), criteria.getId()));
+    if (StringUtil.isNotBlank(criteria.getUserId())) {
+      predicates.add(criteriaBuilder.equal(root.get("userId"), criteria.getUserId()));
     }
 
     if (criteria.getRole() != null) {
       predicates.add(criteriaBuilder.equal(root.get("role"), criteria.getRole()));
     }
 
-    if (StringUtil.isNotBlank(criteria.getKeyword())) {
-      String keyword = criteria.getKeyword().trim();
-      String lowercaseKeyword = "%" + keyword.toLowerCase() + "%";
+    if (StringUtil.isNotBlank(criteria.getUsername())) {
+      predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("username")),
+          "%" + criteria.getUsername().trim().toLowerCase() + "%"));
+    }
 
-      List<Predicate> keywordPredicates = new ArrayList<>();
-      keywordPredicates.add(
-          criteriaBuilder.like(criteriaBuilder.lower(root.get("username")),
-              lowercaseKeyword));
-      keywordPredicates.add(
-          criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")),
-              lowercaseKeyword));
-      keywordPredicates.add(
-          criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")),
-              lowercaseKeyword));
-      keywordPredicates.add(
-          criteriaBuilder.like(criteriaBuilder.lower(root.get("email")),
-              lowercaseKeyword));
-      keywordPredicates.add(
-          criteriaBuilder.like(criteriaBuilder.lower(root.get("phoneNumber")),
-              lowercaseKeyword));
+    if (StringUtil.isNotBlank(criteria.getFirstName())) {
+      predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")),
+          "%" + criteria.getFirstName().trim().toLowerCase() + "%"));
+    }
 
-      predicates.add(criteriaBuilder.or(keywordPredicates.toArray(new Predicate[0])));
+    if (StringUtil.isNotBlank(criteria.getLastName())) {
+      predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")),
+          "%" + criteria.getLastName().trim().toLowerCase() + "%"));
+    }
+
+    if (StringUtil.isNotBlank(criteria.getEmail())) {
+      predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("email")),
+          "%" + criteria.getEmail().trim().toLowerCase() + "%"));
+    }
+
+    if (StringUtil.isNotBlank(criteria.getPhoneNumber())) {
+      predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("phoneNumber")),
+          "%" + criteria.getPhoneNumber().trim().toLowerCase() + "%"));
     }
 
     if (predicates.isEmpty()) {
@@ -176,8 +177,8 @@ public class JpaUserRepositoryAdapter implements UserRepository {
     return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
   }
 
-  private void applySort(CriteriaQuery<JpaUser> criteriaQuery, CriteriaBuilder criteriaBuilder,
-      Root<JpaUser> root, PagingRequest pagingRequest) {
+  private void applySort(CriteriaQuery<JpaUserEntity> criteriaQuery, CriteriaBuilder criteriaBuilder,
+      Root<JpaUserEntity> root, PagingRequest pagingRequest) {
     if (!pagingRequest.hasSort()) {
       return;
     }

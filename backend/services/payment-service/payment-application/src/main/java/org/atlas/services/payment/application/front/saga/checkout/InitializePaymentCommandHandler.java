@@ -6,7 +6,7 @@ import org.atlas.libs.framework.constant.CommonConstant;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
 import org.atlas.libs.framework.domain.payment.PaymentStatus;
-import org.atlas.libs.framework.error.ErrorUtil;
+import org.atlas.libs.framework.util.ExceptionUtil;
 import org.atlas.libs.framework.json.jackson.JacksonService;
 import org.atlas.libs.framework.payment.PaymentGatewayService;
 import org.atlas.libs.framework.payment.model.CreatePaymentRequest;
@@ -65,7 +65,7 @@ public class InitializePaymentCommandHandler {
 
     // Insert new payment entity
     PaymentEntity payment = new PaymentEntity();
-    payment.setUserId(checkoutSagaData.getUser().getId());
+    payment.setUserId(checkoutSagaData.getUser().getUserId());
     payment.setOrderId(checkoutSagaData.getOrderId());
     payment.setSagaId(sagaCommand.getSagaId());
     payment.setAmount(checkoutSagaData.getAmount());
@@ -76,7 +76,7 @@ public class InitializePaymentCommandHandler {
 
     // Create external payment
     CreatePaymentRequest createPaymentRequest = CreatePaymentRequest.builder()
-        .paymentId(payment.getId())
+        .paymentId(payment.getPaymentId())
         .amount(payment.getAmount())
         .currency(payment.getCurrency())
         .build();
@@ -85,7 +85,7 @@ public class InitializePaymentCommandHandler {
     if (response.isSuccess()) {
       log.info(
           "Created payment via payment gateway successfully: orderId={}, userId={}, paymentId={}, transactionId={}",
-          payment.getOrderId(), payment.getUserId(), payment.getId(),
+          payment.getOrderId(), payment.getUserId(), payment.getPaymentId(),
           response.getTransactionId());
 
       // Update payment entity
@@ -103,13 +103,13 @@ public class InitializePaymentCommandHandler {
     } else {
       log.error(
           "Failed to create payment via payment gateway: orderId={}, userId={}, paymentId={}, errorCode={}, errorMessage={}",
-          payment.getId(), payment.getUserId(), payment.getOrderId(),
+          payment.getOrderId(), payment.getUserId(), payment.getPaymentId(),
           response.getErrorCode(), response.getErrorMessage());
 
       // Update payment entity
       payment.setStatus(PaymentStatus.FAILED);
       payment.setError(
-          ErrorUtil.buildErrorMessage(response.getErrorCode(), response.getErrorMessage()));
+          ExceptionUtil.buildErrorMessage(response.getErrorCode(), response.getErrorMessage()));
       paymentRepository.update(payment);
 
       return SagaCommandResult.failure(payment.getError());

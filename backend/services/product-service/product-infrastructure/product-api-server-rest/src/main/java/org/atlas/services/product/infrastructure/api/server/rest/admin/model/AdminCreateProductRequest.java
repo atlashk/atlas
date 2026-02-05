@@ -35,8 +35,8 @@ public class AdminCreateProductRequest {
   private Integer quantity;
 
   @NotNull
-  @Schema(description = "Status of the product", example = "IN_STOCK", requiredMode = RequiredMode.REQUIRED)
-  private ProductStockStatus status;
+  @Schema(description = "Stock status", example = "IN_STOCK", requiredMode = RequiredMode.REQUIRED)
+  private ProductStockStatus stockStatus;
 
   @NotNull
   @Schema(description = "Date and time the product becomes available in ISO 8601 format", example = "2023-10-01T10:00:00Z", requiredMode = RequiredMode.REQUIRED)

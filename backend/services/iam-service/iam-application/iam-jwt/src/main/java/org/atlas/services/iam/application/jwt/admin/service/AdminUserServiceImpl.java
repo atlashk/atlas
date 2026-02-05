@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
 import org.atlas.libs.framework.paging.PagingResult;
-import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.iam.application.jwt.admin.mapper.AdminUserMapper;
 import org.atlas.services.iam.application.jwt.event.service.UserEventService;
 import org.atlas.services.iam.domain.entity.UserEntity;
@@ -15,7 +15,7 @@ import org.atlas.services.iam.port.in.admin.model.AdminUpdateUserInput;
 import org.atlas.services.iam.port.in.admin.model.AdminUserOutput;
 import org.atlas.services.iam.port.in.admin.service.AdminUserService;
 import org.atlas.services.iam.port.out.repository.UserRepository;
-import org.atlas.services.iam.port.out.repository.criteria.FindUserCriteria;
+import org.atlas.services.iam.port.out.repository.UserRepository.FindUserCriteria;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,8 +32,9 @@ public class AdminUserServiceImpl implements AdminUserService {
   @Transactional(readOnly = true)
   public PagingResult<AdminUserOutput> retrieveUserList(AdminRetrieveUserListInput input) {
     FindUserCriteria criteria = AdminUserMapper.INSTANCE.toFindUserCriteria(input);
-    PagingResult<UserEntity> userPage = userRepository.findByCriteria(criteria, input.getPagingRequest());
-    return ObjectMapperUtil.mapPage(userPage, AdminUserMapper.INSTANCE::toAdminUserOutput);
+    PagingResult<UserEntity> userPage = userRepository.findByCriteria(criteria,
+        input.getPagingRequest());
+    return MapperUtil.mapPage(userPage, AdminUserMapper.INSTANCE::toAdminUserOutput);
   }
 
   @Override
@@ -45,7 +46,7 @@ public class AdminUserServiceImpl implements AdminUserService {
   @Override
   @Transactional(readOnly = true)
   public AdminUserOutput retrieveUser(String userId) {
-    return userRepository.findById(userId)
+    return userRepository.findByUserId(userId)
         .map(AdminUserMapper.INSTANCE::toAdminUserOutput)
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
   }
@@ -78,7 +79,7 @@ public class AdminUserServiceImpl implements AdminUserService {
   @Override
   @Transactional
   public void deleteUser(String userId) {
-    userRepository.deleteById(userId);
+    userRepository.deleteByUserId(userId);
 
     userEventService.publishUserDeletedEvent(userId);
   }

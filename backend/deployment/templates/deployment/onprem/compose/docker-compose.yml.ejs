@@ -417,6 +417,17 @@ services:
       - DB_USERNAME=${POSTGRES_USER:-atlas}
       - DB_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
       <%_ } -%>
+      <%_ if (hasKeycloak) { -%>
+      <%_ if (hasMysql) { -%>
+      - KEYCLOAK_DB_URL=jdbc:mysql://mysql:3306/db_keycloak?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
+      - KEYCLOAK_DB_USERNAME=${MYSQL_USER:-atlas}
+      - KEYCLOAK_DB_PASSWORD=${MYSQL_PASSWORD:-secret123456}
+      <%_ } else if (hasPostgres) { -%>
+      - KEYCLOAK_DB_URL=jdbc:postgresql://postgres:5432/db_keycloak
+      - KEYCLOAK_DB_USERNAME=${POSTGRES_USER:-atlas}
+      - KEYCLOAK_DB_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
+      <%_ } -%>
+      <%_ } -%>
       <%_ if (hasRedis) { -%>
       - REDIS_HOST=redis
       - REDIS_PORT=6379

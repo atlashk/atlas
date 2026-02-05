@@ -29,7 +29,7 @@ dependencies {
         case 'jwt':
             implementation project(':services.iam.jwt')
             break
-        case 'postgres':
+        case 'keycloak':
             implementation project(':services.iam.keycloak')
             break
         default:

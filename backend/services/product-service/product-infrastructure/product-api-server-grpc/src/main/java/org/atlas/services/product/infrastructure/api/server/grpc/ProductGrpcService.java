@@ -8,7 +8,7 @@ import org.atlas.libs.protobuf.product.ListProductRequestProto;
 import org.atlas.libs.protobuf.product.ListProductResponseProto;
 import org.atlas.libs.protobuf.product.ProductProto;
 import org.atlas.libs.protobuf.product.ProductServiceGrpc;
-import org.atlas.libs.framework.collection.CollectionUtil;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.services.product.domain.entity.ProductEntity;
 import org.atlas.services.product.port.in.internal.model.InternalRetrieveProductListInput;
 import org.atlas.services.product.port.in.internal.service.InternalProductService;

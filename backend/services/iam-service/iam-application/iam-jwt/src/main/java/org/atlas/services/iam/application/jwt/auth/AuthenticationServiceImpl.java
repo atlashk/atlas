@@ -64,7 +64,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     // Reissue tokens
-    UserEntity user = userRepository.findById(refreshTokenJwt.getUserId())
+    UserEntity user = userRepository.findByUserId(refreshTokenJwt.getUserId())
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
     UserDetailsImpl userDetails = new UserDetailsImpl(user);
 

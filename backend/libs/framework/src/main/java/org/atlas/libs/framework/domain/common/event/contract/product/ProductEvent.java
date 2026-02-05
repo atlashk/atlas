@@ -21,7 +21,7 @@ public class ProductEvent extends DomainEvent {
   private String productId;
   private String name;
   private BigDecimal price;
-  private ProductStockStatus status;
+  private ProductStockStatus stockStatus;
   private ProductDetails details;
   private List<ProductAttribute> attributes;
   private Brand brand;

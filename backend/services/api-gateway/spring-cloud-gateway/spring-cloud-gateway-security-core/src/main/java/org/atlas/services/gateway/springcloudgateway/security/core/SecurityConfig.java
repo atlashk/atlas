@@ -3,7 +3,7 @@ package org.atlas.services.gateway.springcloudgateway.security.core;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.collection.CollectionUtil;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.config.ApplicationConfigService;
 import org.atlas.libs.framework.domain.user.UserRole;
 import org.springframework.context.annotation.Bean;

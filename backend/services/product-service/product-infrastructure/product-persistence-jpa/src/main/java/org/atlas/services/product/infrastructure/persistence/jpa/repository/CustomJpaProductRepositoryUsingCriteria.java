@@ -9,7 +9,7 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.List;
-import org.atlas.libs.framework.collection.CollectionUtil;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.libs.persistence.jpa.specification.QueryFilter;
@@ -74,7 +74,7 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
     root.join("brand", JoinType.LEFT);
     root.join("categories", JoinType.LEFT);
 
-    query.select(criteriaBuilder.countDistinct(root.get("id")));
+    query.select(criteriaBuilder.countDistinct(root.get("productId")));
 
     Specification<JpaProduct> spec = buildSpec(params);
     Predicate predicate = spec.toPredicate(root, query, criteriaBuilder);
@@ -85,8 +85,8 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
 
   private Specification<JpaProduct> buildSpec(FindProductCriteria criteria) {
     QuerySpecification<JpaProduct> spec = new QuerySpecification<>();
-    if (criteria.getId() != null) {
-      spec.addFilter(QueryFilter.of("id", criteria.getId(), QueryOperator.EQUAL));
+    if (criteria.getProductId() != null) {
+      spec.addFilter(QueryFilter.of("productId", criteria.getProductId(), QueryOperator.EQUAL));
     }
     if (StringUtil.isNotBlank(criteria.getKeyword())) {
       String lowercaseKeyword = "%" + criteria.getKeyword().toLowerCase() + "%";
@@ -105,8 +105,8 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
       spec.addFilter(
           QueryFilter.of("price", criteria.getMaxPrice(), QueryOperator.LESS_THAN_EQUAL));
     }
-    if (criteria.getStatus() != null) {
-      spec.addFilter(QueryFilter.of("status", criteria.getStatus(), QueryOperator.EQUAL));
+    if (criteria.getStockStatus() != null) {
+      spec.addFilter(QueryFilter.of("stockStatus", criteria.getStockStatus(), QueryOperator.EQUAL));
     }
     if (criteria.getAvailableFrom() != null) {
       spec.addFilter(QueryFilter.of("availableFrom", criteria.getAvailableFrom(),

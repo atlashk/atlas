@@ -48,14 +48,14 @@ public class ReserveProductCommandHandler {
     // Try to reserve products
     for (CheckoutSagaData.OrderItem orderItem : checkoutSagaData.getOrderItems()) {
       try {
-        decreaseQuantity(orderItem.getProduct().getId(), orderItem.getQuantity());
+        decreaseQuantity(orderItem.getProduct().getProductId(), orderItem.getQuantity());
       } catch (OutOfStockException e) {
         log.error("Out of stock occurred for product {}: {}",
-            orderItem.getProduct().getId(), e.getMessage(), e);
+            orderItem.getProduct().getProductId(), e.getMessage(), e);
         return SagaCommandResult.failure(
             String.format("Product %s is out of stock", orderItem.getProduct().getName()));
       } catch (Exception e) {
-        log.error("Failed to reserve product {}: {}", orderItem.getProduct().getId(),
+        log.error("Failed to reserve product {}: {}", orderItem.getProduct().getProductId(),
             e.getMessage(), e);
         return SagaCommandResult.failure("Something went wrong with product %s",
             orderItem.getProduct().getName());
@@ -64,7 +64,7 @@ public class ReserveProductCommandHandler {
       // Insert new reservation
       ReservationEntity reservation = ReservationEntity.builder()
           .orderId(checkoutSagaData.getOrderId())
-          .productId(orderItem.getProduct().getId())
+          .productId(orderItem.getProduct().getProductId())
           .quantity(orderItem.getQuantity())
           .build();
       reservationRepository.insert(reservation);
@@ -107,7 +107,7 @@ public class ReserveProductCommandHandler {
 
   private void decreaseQuantityWithDistributedLock(String productId, Integer quantity)
       throws OutOfStockException {
-    final String lockKey = String.format("product:%d:decrease-quantity", productId);
+    final String lockKey = String.format("product:%s:decrease-quantity", productId);
     final Duration waitTime = Duration.ofSeconds(5);
     final Duration leaseTime = Duration.ofSeconds(15);
     try {
@@ -115,7 +115,7 @@ public class ReserveProductCommandHandler {
       if (!acquiredLock) {
         throw new LockAcquisitionException("Failed to acquire lock: " + lockKey);
       }
-      ProductEntity product = productRepository.findById(productId)
+      ProductEntity product = productRepository.findByProductId(productId)
           .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
       if (product.getQuantity() < quantity) {
         throw new OutOfStockException();
@@ -140,11 +140,11 @@ public class ReserveProductCommandHandler {
         .forEach(orderItem -> {
           // Check reservation exists or not
           ReservationEntity reservation = reservationRepository.findByOrderIdAndProductId(
-                  checkoutSagaData.getOrderId(), orderItem.getProduct().getId())
+                  checkoutSagaData.getOrderId(), orderItem.getProduct().getProductId())
               .orElseThrow(() -> new DomainException(DomainError.RESERVATION_NOT_FOUND));
 
           // Increase quantity to compensate
-          productRepository.increaseQuantity(orderItem.getProduct().getId(),
+          productRepository.increaseQuantity(orderItem.getProduct().getProductId(),
               orderItem.getQuantity());
 
           // Delete reservation

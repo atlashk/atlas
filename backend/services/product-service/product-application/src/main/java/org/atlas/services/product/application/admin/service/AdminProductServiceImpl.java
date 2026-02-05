@@ -3,7 +3,7 @@ package org.atlas.services.product.application.admin.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.collection.CollectionUtil;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.event.DomainEventType;
 import org.atlas.libs.framework.domain.common.event.contract.product.ProductEvent;
@@ -11,7 +11,7 @@ import org.atlas.libs.framework.domain.common.exception.DomainException;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.ArrayUtil;
-import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.product.application.admin.mapper.AdminProductMapper;
 import org.atlas.services.product.domain.entity.ProductEntity;
 import org.atlas.services.product.port.in.admin.model.AdminCreateProductInput;
@@ -58,7 +58,7 @@ public class AdminProductServiceImpl implements AdminProductService {
 
     // Set image
     productPage.getData()
-        .forEach(product -> product.setImage(productImageService.getImage(product.getId())));
+        .forEach(product -> product.setImage(productImageService.getImage(product.getProductId())));
 
     return productPage;
   }
@@ -66,7 +66,7 @@ public class AdminProductServiceImpl implements AdminProductService {
   @Override
   @Transactional(readOnly = true)
   public ProductEntity retrieveProduct(String productId) {
-    return productRepository.findById(productId)
+    return productRepository.findByProductId(productId)
         .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
   }
 
@@ -78,30 +78,30 @@ public class AdminProductServiceImpl implements AdminProductService {
 
   @Override
   @Transactional
-  public Integer createProduct(AdminCreateProductInput input) throws Exception {
+  public String createProduct(AdminCreateProductInput input) throws Exception {
     ProductEntity product = input.getProduct();
     productRepository.insert(product);
 
-    productImageService.uploadImage(product.getId(), input.getImageBytes(),
+    productImageService.uploadImage(product.getProductId(), input.getImageBytes(),
         input.getImageContentType());
 
     publishProductCreatedEvent(product);
 
-    return product.getId();
+    return product.getProductId();
   }
 
   @Override
   @Transactional
   public void updateProduct(AdminUpdateProductInput input) throws Exception {
     ProductEntity product = input.getProduct();
-    ProductEntity existingProduct = productRepository.findById(product.getId())
+    ProductEntity existingProduct = productRepository.findByProductId(product.getProductId())
         .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
 
     AdminProductMapper.INSTANCE.merge(product, existingProduct);
     productRepository.update(product);
 
     if (ArrayUtil.isNotEmpty(input.getImageBytes())) {
-      productImageService.uploadImage(product.getId(), input.getImageBytes(),
+      productImageService.uploadImage(product.getProductId(), input.getImageBytes(),
           input.getImageContentType());
     }
 
@@ -112,9 +112,9 @@ public class AdminProductServiceImpl implements AdminProductService {
   @Transactional
   public void deleteProduct(String productId) {
     // Delete product from DB
-    ProductEntity product = productRepository.findById(productId)
+    ProductEntity product = productRepository.findByProductId(productId)
         .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
-    productRepository.delete(product.getId());
+    productRepository.deleteByProductId(product.getProductId());
 
     // Publish event
     publishProductDeletedEvent(product);
@@ -154,7 +154,7 @@ public class AdminProductServiceImpl implements AdminProductService {
         PagingRequest.unpaged());
 
     // Use custom mapping method for complex attribute mapping
-    List<ProductWriteRow> productRows = ObjectMapperUtil.mapList(products.getData(),
+    List<ProductWriteRow> productRows = MapperUtil.mapList(products.getData(),
         ProductWriteRowMapper.INSTANCE::toProductWriteRow);
 
     byte[] fileContent;

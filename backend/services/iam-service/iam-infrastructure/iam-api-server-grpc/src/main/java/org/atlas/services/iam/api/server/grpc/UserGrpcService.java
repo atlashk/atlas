@@ -4,7 +4,7 @@ import io.grpc.stub.StreamObserver;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.server.service.GrpcService;
-import org.atlas.libs.framework.collection.CollectionUtil;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.protobuf.iam.ListUserRequestProto;
 import org.atlas.libs.protobuf.iam.ListUserResponseProto;
 import org.atlas.libs.protobuf.iam.UserProto;

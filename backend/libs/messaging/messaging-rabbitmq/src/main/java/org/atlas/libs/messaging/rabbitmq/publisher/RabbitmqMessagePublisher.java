@@ -3,7 +3,7 @@ package org.atlas.libs.messaging.rabbitmq.publisher;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.collection.MapUtil;
+import org.atlas.libs.framework.util.MapUtil;
 import org.atlas.libs.framework.messaging.publisher.Message;
 import org.atlas.libs.framework.messaging.publisher.MessagePublisher;
 import org.atlas.libs.framework.util.StringUtil;

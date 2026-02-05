@@ -2,9 +2,9 @@ package org.atlas.services.product.infrastructure.persistence.jpa.adapter;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaReservationEntity;
 import org.atlas.services.product.port.out.repository.ReservationRepository;
 import org.atlas.services.product.domain.entity.ReservationEntity;
-import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaReservation;
 import org.atlas.services.product.infrastructure.persistence.jpa.mapper.JpaReservationMapper;
 import org.atlas.services.product.infrastructure.persistence.jpa.repository.JpaReservationRepository;
 import org.springframework.stereotype.Component;
@@ -23,7 +23,7 @@ public class JpaReservationRepositoryAdapter implements ReservationRepository {
 
   @Override
   public void insert(ReservationEntity reservation) {
-    JpaReservation jpaReservation = JpaReservationMapper.INSTANCE.toJpaReservation(reservation);
+    JpaReservationEntity jpaReservation = JpaReservationMapper.INSTANCE.toJpaReservation(reservation);
     jpaReservationRepository.insert(jpaReservation);
     reservation.setId(jpaReservation.getId());
   }

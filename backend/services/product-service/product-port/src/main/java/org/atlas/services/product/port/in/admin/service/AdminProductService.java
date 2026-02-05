@@ -16,7 +16,7 @@ public interface AdminProductService {
 
   Long retrieveProductCount();
 
-  Integer createProduct(AdminCreateProductInput input) throws Exception;
+  String createProduct(AdminCreateProductInput input) throws Exception;
 
   void updateProduct(AdminUpdateProductInput input) throws Exception;
 

@@ -1,10 +1,11 @@
 package org.atlas.libs.internalapi.iam.grpc;
 
 import java.util.List;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.domain.user.UserRole;
 import org.atlas.libs.framework.internalapi.iam.model.ListUserRequest;
 import org.atlas.libs.framework.internalapi.iam.model.UserResponse;
-import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.libs.protobuf.iam.ListUserRequestProto;
 import org.atlas.libs.protobuf.iam.ListUserResponseProto;
 import org.atlas.libs.protobuf.iam.UserProto;
@@ -22,14 +23,23 @@ public interface GrpcUserMapper {
   /**
    * Maps ListUserRequest to ListUserRequestProto
    */
-  @Mapping(source = "userIds", target = "userIdList")
-  ListUserRequestProto map(ListUserRequest request);
+  default ListUserRequestProto map(ListUserRequest request) {
+    if (request == null) {
+      return null;
+    }
+
+    ListUserRequestProto.Builder builder = ListUserRequestProto.newBuilder();
+    if (CollectionUtil.isNotEmpty(request.getUserIds())) {
+      builder.addAllUserId(request.getUserIds());
+    }
+    return builder.build();
+  }
 
   /**
    * Maps ListUserResponseProto to List of UserResponse
    */
   default List<UserResponse> map(ListUserResponseProto responseProto) {
-    return ObjectMapperUtil.mapList(responseProto.getUserList(), this::map);
+    return MapperUtil.mapList(responseProto.getUserList(), this::map);
   }
 
   /**

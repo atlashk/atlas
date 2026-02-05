@@ -25,7 +25,7 @@ public class PdfboxProductPdfWriter implements ProductPdfWriter {
   private static final float BOTTOM_MARGIN = 25;
 
   private static final String[] HEADERS = {
-      "ID", "Name", "Price", "Quantity", "Status",
+      "ID", "Name", "Price", "Quantity", "Stock Status",
       "Available From", "Active", "Brand ID", "Category IDs"
   };
 
@@ -167,12 +167,12 @@ public class PdfboxProductPdfWriter implements ProductPdfWriter {
   }
 
   private String[] mapRowToData(ProductWriteRow row) {
-    return new String[]{
+    return new String[] {
         safeString(row.getId()),
         safeString(row.getName()),
         row.getPrice() != null ? String.format("%.2f", row.getPrice()) : "",
+        row.getStockStatus() != null ? row.getStockStatus().name() : "",
         safeString(row.getQuantity()),
-        row.getStatus() != null ? row.getStatus().name() : "",
         row.getAvailableFrom() != null ? DateUtil.format(row.getAvailableFrom(),
             CommonConstant.DATE_TIME_FORMAT) : "",
         String.valueOf(row.getIsActive()),

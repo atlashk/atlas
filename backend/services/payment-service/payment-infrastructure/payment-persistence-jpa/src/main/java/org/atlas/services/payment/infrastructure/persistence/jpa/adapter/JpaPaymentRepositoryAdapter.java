@@ -4,7 +4,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.services.payment.domain.entity.PaymentEntity;
-import org.atlas.services.payment.infrastructure.persistence.jpa.entity.JpaPayment;
+import org.atlas.services.payment.infrastructure.persistence.jpa.entity.JpaPaymentEntity;
 import org.atlas.services.payment.infrastructure.persistence.jpa.mapper.JpaPaymentMapper;
 import org.atlas.services.payment.infrastructure.persistence.jpa.repository.JpaPaymentRepository;
 import org.atlas.services.payment.port.out.repository.PaymentRepository;
@@ -18,8 +18,8 @@ public class JpaPaymentRepositoryAdapter implements PaymentRepository {
   private final JpaPaymentRepository jpaPaymentRepository;
 
   @Override
-  public Optional<PaymentEntity> findById(Integer id) {
-    return jpaPaymentRepository.findById(id)
+  public Optional<PaymentEntity> findByPaymentId(String paymentId) {
+    return jpaPaymentRepository.findById(paymentId)
         .map(JpaPaymentMapper.INSTANCE::toPayment);
   }
 
@@ -31,14 +31,14 @@ public class JpaPaymentRepositoryAdapter implements PaymentRepository {
 
   @Override
   public void insert(PaymentEntity payment) {
-    JpaPayment jpaPayment = JpaPaymentMapper.INSTANCE.toJpaPayment(payment);
+    JpaPaymentEntity jpaPayment = JpaPaymentMapper.INSTANCE.toJpaPayment(payment);
     jpaPaymentRepository.insert(jpaPayment);
-    payment.setId(jpaPayment.getId());
+    payment.setPaymentId(jpaPayment.getPaymentId());
   }
 
   @Override
   public void update(PaymentEntity payment) {
-    JpaPayment jpaPayment = JpaPaymentMapper.INSTANCE.toJpaPayment(payment);
+    JpaPaymentEntity jpaPayment = JpaPaymentMapper.INSTANCE.toJpaPayment(payment);
     jpaPaymentRepository.save(jpaPayment);
   }
 }

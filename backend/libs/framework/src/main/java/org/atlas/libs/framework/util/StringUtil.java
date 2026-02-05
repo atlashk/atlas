@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import lombok.experimental.UtilityClass;
-import org.atlas.libs.framework.collection.CollectionUtil;
+import org.apache.commons.lang3.StringUtils;
 
 @UtilityClass
 public class StringUtil {
@@ -73,6 +73,10 @@ public class StringUtil {
 
   public static String nvl(Object str) {
     return str == null ? StringUtil.EMPTY : str.toString();
+  }
+
+  public static String trimToEmpty(String str) {
+    return StringUtils.trimToEmpty(str);
   }
 
   /**

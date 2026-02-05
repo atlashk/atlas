@@ -1,9 +1,9 @@
 package org.atlas.services.order.infrastructure.persistence.jpa.mapper;
 
-import org.atlas.libs.framework.collection.CollectionUtil;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.services.order.domain.entity.CartEntity;
-import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaCart;
-import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaCartItem;
+import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaCartEntity;
+import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaCartItemEntity;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
@@ -21,28 +21,28 @@ public interface JpaCartMapper {
   JpaCartMapper INSTANCE = Mappers.getMapper(JpaCartMapper.class);
 
   @Mapping(target = "cartItems", ignore = true)
-  JpaCart toJpaCart(CartEntity cart);
+  JpaCartEntity toJpaCart(CartEntity cart);
 
   @Mapping(target = "cart", ignore = true)
   @Mapping(target = "productId", source = "product.productId")
-  JpaCartItem toJpaCartItem(CartEntity.CartItem cartItem);
+  JpaCartItemEntity toJpaCartItem(CartEntity.CartItem cartItem);
 
   /**
-   * After mapping for {@link CartEntity} to {@link JpaCart} - handles bidirectional relationships
+   * After mapping for {@link CartEntity} to {@link JpaCartEntity} - handles bidirectional relationships
    */
   @AfterMapping
-  default void afterToJpaCart(@MappingTarget JpaCart jpaCart, CartEntity cart) {
+  default void afterToJpaCart(@MappingTarget JpaCartEntity jpaCart, CartEntity cart) {
     if (CollectionUtil.isNotEmpty(cart.getCartItems())) {
       cart.getCartItems().forEach(cartItem -> {
-        JpaCartItem jpaCartItem = toJpaCartItem(cartItem);
+        JpaCartItemEntity jpaCartItem = toJpaCartItem(cartItem);
         // Bidirectional handling
         jpaCart.addCartItem(jpaCartItem);
       });
     }
   }
 
-  CartEntity toCart(JpaCart jpaCart);
+  CartEntity toCart(JpaCartEntity jpaCart);
 
   @Mapping(target = "product.productId", source = "productId")
-  CartEntity.CartItem toCartItem(JpaCartItem jpaCartItem);
+  CartEntity.CartItem toCartItem(JpaCartItemEntity jpaCartItem);
 }

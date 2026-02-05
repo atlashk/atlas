@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.error.ErrorUtil;
+import org.atlas.libs.framework.util.ExceptionUtil;
 import org.atlas.libs.framework.saga.core.annotation.SagaCommandHandler;
 import org.atlas.libs.framework.saga.core.exception.SagaConfigException;
 import org.atlas.libs.framework.saga.core.messaging.SagaMessagePublisher;
@@ -125,9 +125,9 @@ public class SagaCommandDispatcher {
             cachedHandlerMethod.methodSignature, sagaCommandResult.getError());
       }
     } catch (Exception e) {
-      Throwable cause = ErrorUtil.getRootCause(e);
+      Throwable cause = ExceptionUtil.getRootCause(e);
       sagaCommandResult = SagaCommandResult.failure(
-          ErrorUtil.sanitizeErrorMessage(cause.getMessage()));
+          ExceptionUtil.sanitizeErrorMessage(cause.getMessage()));
       log.error("Failed to execute saga command handler {}: {}",
           cachedHandlerMethod.methodSignature, sagaCommandResult.getError(), cause);
     }

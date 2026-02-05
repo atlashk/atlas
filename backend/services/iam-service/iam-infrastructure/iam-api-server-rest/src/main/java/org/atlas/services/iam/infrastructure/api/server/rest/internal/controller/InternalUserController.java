@@ -7,7 +7,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.internalapi.iam.model.UserResponse;
-import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.iam.infrastructure.api.server.rest.internal.mapper.InternalUserMapper;
 import org.atlas.services.iam.infrastructure.api.server.rest.internal.model.InternalRetrieveUserListRequest;
 import org.atlas.services.iam.port.in.internal.model.InternalRetrieveUserListInput;
@@ -36,7 +36,7 @@ public class InternalUserController {
     InternalRetrieveUserListInput input = InternalUserMapper.INSTANCE
         .toInternalRetrieveUserListInput(request);
     List<InternalUserOutput> output = internalUserService.retrieveUserList(input);
-    List<UserResponse> responses = ObjectMapperUtil.mapList(output,
+    List<UserResponse> responses = MapperUtil.mapList(output,
         InternalUserMapper.INSTANCE::toUserResponse);
     return ApiResponseWrapper.success(responses);
   }

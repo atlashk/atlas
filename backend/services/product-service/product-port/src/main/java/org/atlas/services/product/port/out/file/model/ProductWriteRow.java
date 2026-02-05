@@ -20,7 +20,7 @@ public class ProductWriteRow {
   private String name;
   private BigDecimal price;
   private Integer quantity;
-  private ProductStockStatus status;
+  private ProductStockStatus stockStatus;
   private Date availableFrom;
   private Boolean isActive;
   private Integer brandId;

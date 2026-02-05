@@ -19,7 +19,7 @@ import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
-import org.atlas.libs.framework.collection.MapUtil;
+import org.atlas.libs.framework.util.MapUtil;
 import org.atlas.libs.framework.json.JsonUtil;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Service;

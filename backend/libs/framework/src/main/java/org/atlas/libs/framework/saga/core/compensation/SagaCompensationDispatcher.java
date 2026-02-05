@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.error.ErrorUtil;
+import org.atlas.libs.framework.util.ExceptionUtil;
 import org.atlas.libs.framework.saga.core.annotation.SagaCompensationHandler;
 import org.atlas.libs.framework.saga.core.exception.SagaConfigException;
 import org.atlas.libs.framework.saga.core.messaging.SagaMessagePublisher;
@@ -113,7 +113,7 @@ public class SagaCompensationDispatcher {
             cachedHandlerMethod.methodSignature, sagaCompensationResult.getError());
       }
     } catch (Exception e) {
-      Throwable cause = ErrorUtil.getRootCause(e);
+      Throwable cause = ExceptionUtil.getRootCause(e);
       sagaCompensationResult = SagaCompensationResult.failure(cause);
       log.error("Failed to execute saga compensation handler {}: {}",
           cachedHandlerMethod.methodSignature, sagaCompensationResult.getError(), cause);

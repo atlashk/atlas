@@ -22,7 +22,7 @@ public class AdminRetrieveProductListInput {
   private String keyword;
   private BigDecimal minPrice;
   private BigDecimal maxPrice;
-  private ProductStockStatus status;
+  private ProductStockStatus stockStatus;
   private Date availableFrom;
   private Boolean isActive;
   private Integer brandId;

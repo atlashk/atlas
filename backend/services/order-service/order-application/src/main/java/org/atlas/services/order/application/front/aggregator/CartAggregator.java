@@ -6,7 +6,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.collection.CollectionUtil;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.internalapi.product.client.ProductApiClient;
 import org.atlas.libs.framework.internalapi.product.model.ListProductRequest;
 import org.atlas.libs.framework.internalapi.product.model.ProductResponse;

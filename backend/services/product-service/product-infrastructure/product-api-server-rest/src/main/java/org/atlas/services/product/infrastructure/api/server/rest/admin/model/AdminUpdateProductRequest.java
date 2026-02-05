@@ -32,13 +32,13 @@ public class AdminUpdateProductRequest {
   private String image;
 
   @NotNull
+  @Schema(description = "Stock status", example = "IN_STOCK")
+  private ProductStockStatus stockStatus;
+
+  @NotNull
   @PositiveOrZero
   @Schema(description = "Quantity of the product available", example = "100")
   private Integer quantity;
-
-  @NotNull
-  @Schema(description = "Status of the product", example = "IN_STOCK")
-  private ProductStockStatus status;
 
   @NotNull
   @Schema(description = "Date and time the product becomes available in ISO 8601 format.", example = "2023-10-01T10:00:00Z")

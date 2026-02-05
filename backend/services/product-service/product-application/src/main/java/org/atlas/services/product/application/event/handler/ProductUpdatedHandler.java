@@ -28,7 +28,7 @@ public class ProductUpdatedHandler {
         evictProductCache(product)
     ).whenComplete((result, error) -> {
       if (error == null) {
-        log.info("Completed handling product updated event: productId={}", product.getId());
+        log.info("Completed handling product updated event: productId={}", product.getProductId());
       }
     });
   }
@@ -42,13 +42,13 @@ public class ProductUpdatedHandler {
 
       @Override
       public void onSuccess() {
-        log.info("Updated full-text search document: productId={}", product.getId());
+        log.info("Updated full-text search document: productId={}", product.getProductId());
       }
 
       @Override
       public void onError(Throwable e) {
         log.error("Failed to update full-text search document: productId={}, error={}",
-            product.getId(), e.getMessage(), e);
+            product.getProductId(), e.getMessage(), e);
       }
     };
   }
@@ -57,18 +57,18 @@ public class ProductUpdatedHandler {
     return new AsyncUtil.AsyncTask() {
       @Override
       public void run() {
-        cacheService.evict(ApplicationCache.PRODUCT, String.valueOf(product.getId()));
+        cacheService.evict(ApplicationCache.PRODUCT, product.getProductId());
       }
 
       @Override
       public void onSuccess() {
-        log.info("Evicted product cache: productId={}", product.getId());
+        log.info("Evicted product cache: productId={}", product.getProductId());
       }
 
       @Override
       public void onError(Throwable e) {
         log.error("Failed to evict product cache: productId={}, error={}",
-            product.getId(), e.getMessage(), e);
+            product.getProductId(), e.getMessage(), e);
       }
     };
   }

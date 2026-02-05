@@ -14,6 +14,6 @@ public interface ProductEventMapper {
 
   ProductEntity toProduct(ProductEvent event);
 
-  @Mapping(source = "id", target = "productId")
+  @Mapping(source = "productId", target = "productId")
   void merge(ProductEntity product, @MappingTarget ProductEvent event);
 }

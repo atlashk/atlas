@@ -5,12 +5,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.util.DateUtil;
-import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.libs.persistence.jpa.paging.PagingConverter;
 import org.atlas.services.notification.port.out.repository.NotificationRepository;
 import org.atlas.services.notification.domain.entity.Notification;
 import org.atlas.services.notification.domain.entity.NotificationChannel;
-import org.atlas.services.notification.infrastructure.persistence.jpa.entity.JpaNotification;
+import org.atlas.services.notification.infrastructure.persistence.jpa.entity.JpaNotificationEntity;
 import org.atlas.services.notification.infrastructure.persistence.jpa.mapper.JpaNotificationMapper;
 import org.atlas.services.notification.infrastructure.persistence.jpa.repository.JpaNotificationRepository;
 import org.springframework.data.domain.Pageable;
@@ -27,15 +27,15 @@ public class JpaNotificationRepositoryAdapter implements NotificationRepository 
   public List<Notification> findByUserIdAndChannel(
       String userId, NotificationChannel channel, PagingRequest pagingRequest) {
     Pageable pageable = PagingConverter.convert(pagingRequest);
-    List<JpaNotification> jpaNotifications = jpaNotificationRepository.findByUserIdAndChannel(
+    List<JpaNotificationEntity> jpaNotifications = jpaNotificationRepository.findByUserIdAndChannel(
         userId, channel, pageable);
-    return ObjectMapperUtil.mapList(jpaNotifications,
+    return MapperUtil.mapList(jpaNotifications,
         JpaNotificationMapper.INSTANCE::toNotification);
   }
 
   @Override
   public void insert(Notification notification) {
-    JpaNotification jpaNotification = JpaNotificationMapper.INSTANCE
+    JpaNotificationEntity jpaNotification = JpaNotificationMapper.INSTANCE
         .toJpaNotification(notification);
     jpaNotificationRepository.insert(jpaNotification);
     notification.setId(jpaNotification.getId());
@@ -44,7 +44,7 @@ public class JpaNotificationRepositoryAdapter implements NotificationRepository 
 
   @Override
   public void update(Notification notification) {
-    JpaNotification jpaNotification = JpaNotificationMapper.INSTANCE
+    JpaNotificationEntity jpaNotification = JpaNotificationMapper.INSTANCE
         .toJpaNotification(notification);
     jpaNotificationRepository.save(jpaNotification);
   }

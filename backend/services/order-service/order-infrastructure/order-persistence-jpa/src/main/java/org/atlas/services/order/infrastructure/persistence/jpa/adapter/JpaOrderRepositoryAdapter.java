@@ -7,12 +7,12 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.domain.order.OrderStatus;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
-import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.order.domain.entity.OrderEntity;
 import org.atlas.services.order.port.in.admin.model.AdminMonthlyOrderAggregation;
 import org.atlas.services.order.port.out.repository.OrderRepository;
 import org.atlas.services.order.port.out.repository.criteria.FindOrderCriteria;
-import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaOrder;
+import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaOrderEntity;
 import org.atlas.services.order.infrastructure.persistence.jpa.mapper.JpaOrderMapper;
 import org.atlas.services.order.infrastructure.persistence.jpa.repository.CustomJpaOrderRepository;
 import org.atlas.services.order.infrastructure.persistence.jpa.repository.JpaOrderRepository;
@@ -32,9 +32,9 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
     if (totalCount == 0L) {
       return PagingResult.empty();
     }
-    List<JpaOrder> jpaOrders = customJpaOrderRepository.findByCriteria(criteria,
+    List<JpaOrderEntity> jpaOrders = customJpaOrderRepository.findByCriteria(criteria,
         pagingRequest);
-    List<OrderEntity> orders = ObjectMapperUtil.mapList(jpaOrders, JpaOrderMapper.INSTANCE::toOrder);
+    List<OrderEntity> orders = MapperUtil.mapList(jpaOrders, JpaOrderMapper.INSTANCE::toOrder);
     return PagingResult.of(orders, totalCount, pagingRequest);
   }
 
@@ -67,7 +67,7 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
 
   @Override
   public void insert(OrderEntity order) {
-    JpaOrder jpaOrder = JpaOrderMapper.INSTANCE.toJpaOrder(order);
+    JpaOrderEntity jpaOrder = JpaOrderMapper.INSTANCE.toJpaOrder(order);
     jpaOrderRepository.insert(jpaOrder);
     order.setOrderId(jpaOrder.getOrderId());
     order.setCreatedAt(jpaOrder.getCreatedAt());
@@ -75,7 +75,7 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
 
   @Override
   public void update(OrderEntity order) {
-    JpaOrder jpaOrder = JpaOrderMapper.INSTANCE.toJpaOrder(order);
+    JpaOrderEntity jpaOrder = JpaOrderMapper.INSTANCE.toJpaOrder(order);
     jpaOrderRepository.save(jpaOrder);
   }
 }

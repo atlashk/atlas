@@ -12,6 +12,6 @@ import lombok.Setter;
 public class InternalRetrieveProductListRequest {
 
   @NotEmpty
-  @Schema(description = "List of unique identifiers for the products to be retrieved", example = "[1, 2, 3]", requiredMode = RequiredMode.REQUIRED)
-  private List<Integer> ids;
+  @Schema(description = "List of unique identifiers for the products to be retrieved", example = "[\"PRD0000001\", \"PRD0000002\"]", requiredMode = RequiredMode.REQUIRED)
+  private List<String> productIds;
 }

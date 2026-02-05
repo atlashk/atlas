@@ -3,7 +3,6 @@ package org.atlas.services.notification.application.saga.checkout;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.concurrent.AsyncUtil;
 import org.atlas.libs.framework.concurrent.AsyncUtil.AsyncTask;
 import org.atlas.libs.framework.config.ApplicationConfigService;
-import org.atlas.libs.framework.error.ErrorUtil;
+import org.atlas.libs.framework.util.ExceptionUtil;
 import org.atlas.libs.framework.file.FileUtil;
 import org.atlas.libs.framework.json.JsonUtil;
 import org.atlas.libs.framework.json.jackson.JacksonService;
@@ -79,7 +78,7 @@ public class NotifyOrderFulfilledCommandHandler {
             .orderId(sagaData.getOrderId())
             .build();
         notification = Notification.builder()
-            .userId(sagaData.getUser().getId())
+            .userId(sagaData.getUser().getUserId())
             .type(NotificationType.ORDER_FULFILLED)
             .channel(NotificationChannel.EMAIL)
             .metadata(JsonUtil.getInstance().toJson(metadata))
@@ -173,7 +172,7 @@ public class NotifyOrderFulfilledCommandHandler {
             .orderId(sagaData.getOrderId())
             .build();
         notification = Notification.builder()
-            .userId(sagaData.getUser().getId())
+            .userId(sagaData.getUser().getUserId())
             .type(NotificationType.ORDER_FULFILLED)
             .channel(NotificationChannel.IN_APP)
             .message(message)
@@ -183,7 +182,7 @@ public class NotifyOrderFulfilledCommandHandler {
         notificationService.create(notification);
 
         SendInAppRequest request = SendInAppRequest.builder()
-            .receiverUserId(sagaData.getUser().getId())
+            .receiverUserId(sagaData.getUser().getUserId())
             .payload(Payload.builder()
                 .message(message)
                 .deliveredAt(notification.getCreatedAt())
@@ -204,7 +203,7 @@ public class NotifyOrderFulfilledCommandHandler {
       @Override
       public void onError(Throwable e) {
         if (notification != null) {
-          inAppNotificationService.markAsFailed(notification, ErrorUtil.sanitizeErrorMessage(e));
+          inAppNotificationService.markAsFailed(notification, ExceptionUtil.sanitizeErrorMessage(e));
         }
         log.error("Failed to deliver in-app notification for order fulfilled: orderId={}, error={}",
             sagaData.getOrderId(), e.getMessage(), e);

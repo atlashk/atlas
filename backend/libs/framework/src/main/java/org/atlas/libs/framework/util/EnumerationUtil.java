@@ -6,7 +6,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.experimental.UtilityClass;
-import org.atlas.libs.framework.collection.CollectionUtil;
 
 @UtilityClass
 public class EnumerationUtil {

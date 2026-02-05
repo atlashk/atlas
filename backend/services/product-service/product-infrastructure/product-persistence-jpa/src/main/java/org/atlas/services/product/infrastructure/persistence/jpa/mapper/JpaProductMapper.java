@@ -1,10 +1,10 @@
 package org.atlas.services.product.infrastructure.persistence.jpa.mapper;
 
-import org.atlas.libs.framework.collection.CollectionUtil;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.services.product.domain.entity.ProductEntity;
 import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaProduct;
-import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaProductAttribute;
-import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaProductDetails;
+import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaProductAttributeEntity;
+import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaProductDetailsEntity;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
@@ -42,7 +42,7 @@ public interface JpaProductMapper {
 
     if (CollectionUtil.isNotEmpty(product.getAttributes())) {
       product.getAttributes().forEach(attribute -> {
-        JpaProductAttribute jpaAttribute =
+        JpaProductAttributeEntity jpaAttribute =
             JpaProductAttributeMapper.INSTANCE.toJpaProductAttribute(attribute);
         jpaProduct.addAttribute(jpaAttribute);
       });
@@ -66,7 +66,7 @@ public interface JpaProductMapper {
         JpaProductDetailsMapper.INSTANCE.merge(product.getDetails(), jpaProduct.getDetails());
       } else {
         // Create new details if none exist
-        JpaProductDetails jpaDetails =
+        JpaProductDetailsEntity jpaDetails =
             JpaProductDetailsMapper.INSTANCE.toJpaProductDetails(product.getDetails());
         jpaDetails.setProduct(jpaProduct);
         jpaProduct.setDetails(jpaDetails);
@@ -77,7 +77,7 @@ public interface JpaProductMapper {
       // Clear existing attributes and add new ones using entity helper method
       jpaProduct.getAttributes().clear();
       product.getAttributes().forEach(attribute -> {
-        JpaProductAttribute jpaAttribute =
+        JpaProductAttributeEntity jpaAttribute =
             JpaProductAttributeMapper.INSTANCE.toJpaProductAttribute(attribute);
         jpaProduct.addAttribute(jpaAttribute);
       });

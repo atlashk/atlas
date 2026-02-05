@@ -7,7 +7,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.internalapi.product.model.ProductResponse;
-import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.product.infrastructure.api.server.rest.internal.mapper.InternalProductMapper;
 import org.atlas.services.product.infrastructure.api.server.rest.internal.model.InternalRetrieveProductListRequest;
 import org.atlas.services.product.port.in.internal.model.InternalRetrieveProductListInput;
@@ -36,7 +36,7 @@ public class InternalProductController {
     InternalRetrieveProductListInput input = InternalProductMapper.INSTANCE
         .toInternalRetrieveProductListInput(request);
     List<ProductEntity> products = internalProductService.retrieveProductList(input);
-    List<ProductResponse> responseData = ObjectMapperUtil.mapList(products,
+    List<ProductResponse> responseData = MapperUtil.mapList(products,
         InternalProductMapper.INSTANCE::toProductResponse);
     return ApiResponseWrapper.success(responseData);
   }

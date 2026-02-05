@@ -11,7 +11,7 @@ import org.atlas.libs.framework.domain.order.OrderStatus;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingRequest.SortOrder;
 import org.atlas.libs.framework.paging.PagingResult;
-import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.order.infrastructure.api.server.rest.admin.mapper.OrderMapper;
 import org.atlas.services.order.infrastructure.api.server.rest.admin.model.OrderResponse;
 import org.atlas.services.order.port.in.admin.model.AdminRetrieveOrderListInput;
@@ -65,7 +65,7 @@ public class AdminOrderManagementController {
         .pagingRequest(PagingRequest.of(page - 1, size, "createdAt", SortOrder.DESC))
         .build();
     PagingResult<OrderEntity> orderPage = adminOrderService.retrieveOrderList(input);
-    PagingResult<OrderResponse> responseData = ObjectMapperUtil.mapPage(orderPage,
+    PagingResult<OrderResponse> responseData = MapperUtil.mapPage(orderPage,
         OrderMapper.INSTANCE::toOrderResponse);
     return ApiResponseWrapper.successPage(responseData);
   }

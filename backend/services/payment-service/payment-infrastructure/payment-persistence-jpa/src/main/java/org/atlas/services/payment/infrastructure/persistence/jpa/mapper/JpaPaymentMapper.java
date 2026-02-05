@@ -9,7 +9,7 @@ import org.atlas.libs.framework.payment.model.nextaction.RedirectUrl;
 import org.atlas.libs.framework.payment.model.nextaction.UsePaymentElement;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.payment.domain.entity.PaymentEntity;
-import org.atlas.services.payment.infrastructure.persistence.jpa.entity.JpaPayment;
+import org.atlas.services.payment.infrastructure.persistence.jpa.entity.JpaPaymentEntity;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
@@ -27,26 +27,26 @@ public interface JpaPaymentMapper {
   JpaPaymentMapper INSTANCE = Mappers.getMapper(JpaPaymentMapper.class);
 
   @Mapping(target = "nextAction", ignore = true)
-  JpaPayment toJpaPayment(PaymentEntity payment);
+  JpaPaymentEntity toJpaPayment(PaymentEntity payment);
 
   /**
    * After mapping for Payment to JpaPayment - handle NextAction serialization
    */
   @AfterMapping
-  default void afterToJpaPayment(@MappingTarget JpaPayment jpaPayment, PaymentEntity payment) {
+  default void afterToJpaPayment(@MappingTarget JpaPaymentEntity jpaPayment, PaymentEntity payment) {
     if (payment.getNextAction() != null) {
       jpaPayment.setNextAction(JsonUtil.getInstance().toJson(payment.getNextAction()));
     }
   }
 
   @Mapping(target = "nextAction", ignore = true)
-  PaymentEntity toPayment(JpaPayment jpaPayment);
+  PaymentEntity toPayment(JpaPaymentEntity jpaPayment);
 
   /**
    * After mapping for JpaPayment to Payment - handle NextAction deserialization
    */
   @AfterMapping
-  default void afterToPayment(@MappingTarget PaymentEntity payment, JpaPayment jpaPayment) {
+  default void afterToPayment(@MappingTarget PaymentEntity payment, JpaPaymentEntity jpaPayment) {
     String nextActionJson = jpaPayment.getNextAction();
     if (StringUtil.isNotBlank(nextActionJson)) {
       NextActionType nextActionType = NextActionType.valueOf(

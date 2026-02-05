@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
-import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.product.infrastructure.api.server.rest.front.mapper.CategoryMapper;
 import org.atlas.services.product.infrastructure.api.server.rest.front.model.CategoryResponse;
 import org.atlas.services.product.port.in.front.service.CategoryService;
@@ -27,7 +27,7 @@ public class CategoryController {
   @Operation(summary = "Retrieve a list of all categories")
   public ApiResponseWrapper<List<CategoryResponse>> retrieveAllCategory() {
     List<CategoryEntity> categories = categoryService.retrieveAllCategory();
-    List<CategoryResponse> responseData = ObjectMapperUtil.mapList(categories,
+    List<CategoryResponse> responseData = MapperUtil.mapList(categories,
         CategoryMapper.INSTANCE::toCategoryResponse);
     return ApiResponseWrapper.success(responseData);
   }

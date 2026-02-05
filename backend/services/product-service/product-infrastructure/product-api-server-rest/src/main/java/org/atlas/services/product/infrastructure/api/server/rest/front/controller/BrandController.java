@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
-import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.product.infrastructure.api.server.rest.front.mapper.BrandMapper;
 import org.atlas.services.product.infrastructure.api.server.rest.front.model.BrandResponse;
 import org.atlas.services.product.port.in.front.service.BrandService;
@@ -27,7 +27,7 @@ public class BrandController {
   @Operation(summary = "Retrieve a list of all brands")
   public ApiResponseWrapper<List<BrandResponse>> retrieveAllBrand() {
     List<BrandEntity> brands = brandService.retrieveAllBrand();
-    List<BrandResponse> responseData = ObjectMapperUtil.mapList(brands,
+    List<BrandResponse> responseData = MapperUtil.mapList(brands,
         BrandMapper.INSTANCE::toBrandResponse);
     return ApiResponseWrapper.success(responseData);
   }

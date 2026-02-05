@@ -9,7 +9,7 @@ import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.constant.CommonConstant;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
-import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.product.infrastructure.api.server.rest.front.mapper.ProductMapper;
 import org.atlas.services.product.infrastructure.api.server.rest.front.model.ProductResponse;
 import org.atlas.services.product.port.in.front.model.RetrieveProductListInput;
@@ -58,7 +58,7 @@ public class ProductController {
         .pagingRequest(PagingRequest.of(page - 1, size))
         .build();
     PagingResult<ProductEntity> productPage = productService.retrieveProductList(input);
-    PagingResult<ProductResponse> responseData = ObjectMapperUtil.mapPage(productPage,
+    PagingResult<ProductResponse> responseData = MapperUtil.mapPage(productPage,
         ProductMapper.INSTANCE::toProductResponse);
     return ApiResponseWrapper.successPage(responseData);
   }

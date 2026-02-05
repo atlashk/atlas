@@ -54,11 +54,11 @@ public class PoiProductExcelWriter implements ProductExcelWriter {
     headerCell.setCellStyle(headerStyle);
 
     headerCell = header.createCell(3);
-    headerCell.setCellValue("Quantity");
+    headerCell.setCellValue("Stock Status");
     headerCell.setCellStyle(headerStyle);
 
     headerCell = header.createCell(4);
-    headerCell.setCellValue("Status");
+    headerCell.setCellValue("Quantity");
     headerCell.setCellStyle(headerStyle);
 
     headerCell = header.createCell(5);

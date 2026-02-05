@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.file.csv.opencsv.OpenCsvReader;
 import org.atlas.libs.framework.domain.product.ProductStockStatus;
-import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.product.port.out.file.csv.ProductCsvReader;
 import org.atlas.services.product.port.out.file.model.ProductReadRow;
 import org.mapstruct.Mapper;
@@ -28,7 +28,7 @@ public class OpencsvProductCsvReader implements ProductCsvReader {
   @Override
   public List<ProductReadRow> read(byte[] fileContent) throws IOException {
     List<ProductCsvRow> csvRows = OpenCsvReader.read(fileContent, ProductCsvRow.class);
-    return ObjectMapperUtil.mapList(csvRows, ProductCsvRowMapper.INSTANCE::toProductRow);
+    return MapperUtil.mapList(csvRows, ProductCsvRowMapper.INSTANCE::toProductRow);
   }
 
   @NoArgsConstructor
@@ -46,13 +46,13 @@ public class OpencsvProductCsvReader implements ProductCsvReader {
     @CsvBindByPosition(position = 1)
     private BigDecimal price;
 
-    @CsvBindByName(column = "Quantity")
+    @CsvBindByName(column = "Stock Status")
     @CsvBindByPosition(position = 2)
-    private Integer quantity;
+    private ProductStockStatus stockStatus;
 
-    @CsvBindByName(column = "Status")
+    @CsvBindByName(column = "Quantity")
     @CsvBindByPosition(position = 3)
-    private ProductStockStatus status;
+    private Integer quantity;
 
     @CsvBindByName(column = "Available From")
     @CsvBindByPosition(position = 4)

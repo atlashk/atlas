@@ -24,7 +24,7 @@ public class ElasticsearchProduct {
   @Id
   private String id;
 
-  @Field(type = FieldType.Integer)
+  @Field(type = FieldType.Keyword)
   private String productId;
 
   @Field(type = FieldType.Text, analyzer = "standard")
@@ -34,7 +34,7 @@ public class ElasticsearchProduct {
   private BigDecimal price;
 
   @Field(type = FieldType.Keyword)
-  private ProductStockStatus status;
+  private ProductStockStatus stockStatus;
 
   // Product Details
   @Field(type = FieldType.Nested)

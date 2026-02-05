@@ -1,7 +1,7 @@
 package org.atlas.services.product.port.out.file.mapper;
 
 import java.util.stream.Collectors;
-import org.atlas.libs.framework.collection.CollectionUtil;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.services.product.domain.entity.ProductEntity;
 import org.atlas.services.product.port.out.file.model.ProductWriteRow;
 import org.atlas.services.product.domain.entity.CategoryEntity;

@@ -9,11 +9,11 @@ import org.atlas.libs.framework.domain.common.exception.DomainException;
 import org.atlas.libs.framework.domain.common.exception.OutOfStockException;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
-import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.product.domain.entity.ProductEntity;
 import org.atlas.services.product.port.out.repository.ProductRepository;
 import org.atlas.services.product.port.out.repository.criteria.FindProductCriteria;
-import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaOptimisticProduct;
+import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaOptimisticProductEntity;
 import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaProduct;
 import org.atlas.services.product.infrastructure.persistence.jpa.mapper.JpaProductMapper;
 import org.atlas.services.product.infrastructure.persistence.jpa.repository.CustomJpaProductRepository;
@@ -41,7 +41,7 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
     }
     List<JpaProduct> jpaProducts = customJpaProductRepository.findByCriteria(criteria,
         pagingRequest);
-    List<ProductEntity> products = ObjectMapperUtil.mapList(jpaProducts,
+    List<ProductEntity> products = MapperUtil.mapList(jpaProducts,
         JpaProductMapper.INSTANCE::toProduct);
     return PagingResult.of(products, totalCount, pagingRequest);
   }
@@ -49,7 +49,7 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
   @Override
   public List<ProductEntity> findByProductIdIn(List<String> productIds) {
     List<JpaProduct> jpaProducts = jpaProductRepository.findAllByProductIdInWithAssociations(productIds);
-    return ObjectMapperUtil.mapList(jpaProducts, JpaProductMapper.INSTANCE::toProduct);
+    return MapperUtil.mapList(jpaProducts, JpaProductMapper.INSTANCE::toProduct);
   }
 
   @Override
@@ -73,7 +73,7 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
   @Override
   public void insertBatch(List<ProductEntity> products) {
     List<JpaProduct> jpaProducts =
-        ObjectMapperUtil.mapList(products, JpaProductMapper.INSTANCE::toJpaProduct);
+        MapperUtil.mapList(products, JpaProductMapper.INSTANCE::toJpaProduct);
     jpaProductRepository.saveAll(jpaProducts);
   }
 
@@ -116,7 +116,7 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
   @Override
   public void decreaseQuantityWithOptimisticLock(String productId, Integer decrement)
       throws OutOfStockException {
-    JpaOptimisticProduct jpaOptimisticProduct =
+    JpaOptimisticProductEntity jpaOptimisticProduct =
         jpaOptimisticProductRepository.findById(productId)
             .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
     if (jpaOptimisticProduct.getQuantity() < decrement) {

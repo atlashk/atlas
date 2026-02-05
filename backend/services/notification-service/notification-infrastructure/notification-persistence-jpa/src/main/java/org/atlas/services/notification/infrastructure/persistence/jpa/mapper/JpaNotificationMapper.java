@@ -1,7 +1,7 @@
 package org.atlas.services.notification.infrastructure.persistence.jpa.mapper;
 
 import org.atlas.services.notification.domain.entity.Notification;
-import org.atlas.services.notification.infrastructure.persistence.jpa.entity.JpaNotification;
+import org.atlas.services.notification.infrastructure.persistence.jpa.entity.JpaNotificationEntity;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
@@ -15,7 +15,7 @@ public interface JpaNotificationMapper {
 
   JpaNotificationMapper INSTANCE = Mappers.getMapper(JpaNotificationMapper.class);
 
-  Notification toNotification(JpaNotification jpaNotification);
+  Notification toNotification(JpaNotificationEntity jpaNotification);
 
-  JpaNotification toJpaNotification(Notification notification);
+  JpaNotificationEntity toJpaNotification(Notification notification);
 }

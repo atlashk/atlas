@@ -25,7 +25,7 @@ public class ProductCreatedHandler {
         createFullTextSearchDocument(product)
     ).whenComplete((result, error) -> {
       if (error == null) {
-        log.info("Completed handling product created event: productId={}", product.getId());
+        log.info("Completed handling product created event: productId={}", product.getProductId());
       }
     });
   }
@@ -42,13 +42,13 @@ public class ProductCreatedHandler {
 
       @Override
       public void onSuccess() {
-        log.info("Created full-text search document: productId={}", product.getId());
+        log.info("Created full-text search document: productId={}", product.getProductId());
       }
 
       @Override
       public void onError(Throwable e) {
         log.error("Failed to create full-text search document: productId={}, error={}",
-            product.getId(), e.getMessage(), e);
+            product.getProductId(), e.getMessage(), e);
       }
     };
   }

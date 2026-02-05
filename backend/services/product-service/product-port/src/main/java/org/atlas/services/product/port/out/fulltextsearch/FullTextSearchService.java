@@ -14,7 +14,7 @@ public interface FullTextSearchService {
   /**
    * @return the IDs of products that match the search criteria
    */
-  PagingResult<Integer> search(SearchProductCriteria criteria, PagingRequest pagingRequest);
+  PagingResult<String> search(SearchProductCriteria criteria, PagingRequest pagingRequest);
 
   void save(ProductEntity product);
 

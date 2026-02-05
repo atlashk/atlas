@@ -2,11 +2,11 @@ package org.atlas.services.product.infrastructure.persistence.jpa.repository;
 
 import java.util.Optional;
 import org.atlas.libs.persistence.jpa.repository.JpaBaseRepository;
-import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaReservation;
+import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaReservationEntity;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface JpaReservationRepository extends JpaBaseRepository<JpaReservation, Integer> {
+public interface JpaReservationRepository extends JpaBaseRepository<JpaReservationEntity, Integer> {
 
-  Optional<JpaReservation> findByOrderIdAndProductId(String orderId, String productId);
+  Optional<JpaReservationEntity> findByOrderIdAndProductId(String orderId, String productId);
 }

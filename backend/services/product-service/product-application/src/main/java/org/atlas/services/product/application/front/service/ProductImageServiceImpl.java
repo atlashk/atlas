@@ -73,6 +73,6 @@ public class ProductImageServiceImpl implements ProductImageService {
   }
 
   private String getObjectKey(String productId) {
-    return String.format("%d.jpg", productId);
+    return String.format("%s.jpg", productId);
   }
 }

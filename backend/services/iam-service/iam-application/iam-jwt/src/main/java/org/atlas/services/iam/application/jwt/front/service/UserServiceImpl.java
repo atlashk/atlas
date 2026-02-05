@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService {
   @Transactional(readOnly = true)
   public ProfileOutput retrieveProfile() {
     String userId = Contexts.getUserId();
-    return userRepository.findById(userId)
+    return userRepository.findByUserId(userId)
         .map(UserMapper.INSTANCE::toProfileOutput)
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
   }
@@ -53,11 +53,11 @@ public class UserServiceImpl implements UserService {
   @Transactional
   public void changePassword(ChangePasswordInput input) {
     String userId = Contexts.getUserId();
-    UserEntity user = userRepository.findById(userId)
+    UserEntity user = userRepository.findByUserId(userId)
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
 
     if (passwordEncoder.matches(input.getOldPassword(), user.getPassword())) {
-      throw new DomainException(DomainError.PASSWORD_NOT_MATCH);
+      throw new DomainException(DomainError.WRONG_PASSWORD);
     }
 
     user.setPassword(passwordEncoder.encode(input.getNewPassword()));

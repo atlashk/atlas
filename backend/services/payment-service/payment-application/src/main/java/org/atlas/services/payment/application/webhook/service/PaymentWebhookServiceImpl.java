@@ -106,7 +106,7 @@ public class PaymentWebhookServiceImpl implements PaymentWebhookService {
       HandleWebhookResponse.Result handleResult = handleResponse.getResult();
       AsyncUtil.executeTask(() -> {
         // Update payment entity
-        PaymentEntity payment = paymentRepository.findById(handleResult.getPaymentId())
+        PaymentEntity payment = paymentRepository.findByPaymentId(handleResult.getPaymentId())
             .orElseThrow(() -> new DomainException(DomainError.PAYMENT_NOT_FOUND));
         switch (handleResult.getStatus()) {
           case SUCCEEDED -> {

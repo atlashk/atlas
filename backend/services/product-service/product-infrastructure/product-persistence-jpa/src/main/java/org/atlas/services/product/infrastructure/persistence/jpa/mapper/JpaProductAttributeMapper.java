@@ -1,7 +1,7 @@
 package org.atlas.services.product.infrastructure.persistence.jpa.mapper;
 
 import org.atlas.services.product.domain.entity.ProductAttributeEntity;
-import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaProductAttribute;
+import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaProductAttributeEntity;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -18,12 +18,12 @@ public interface JpaProductAttributeMapper {
   JpaProductAttributeMapper INSTANCE = Mappers.getMapper(JpaProductAttributeMapper.class);
 
   @Mapping(target = "product", ignore = true)
-  JpaProductAttribute toJpaProductAttribute(ProductAttributeEntity productAttribute);
+  JpaProductAttributeEntity toJpaProductAttribute(ProductAttributeEntity productAttribute);
 
-  @Mapping(target = "productId", source = "product.id")
-  ProductAttributeEntity toProductAttribute(JpaProductAttribute jpaProductAttribute);
+  @Mapping(target = "productId", source = "product.productId")
+  ProductAttributeEntity toProductAttribute(JpaProductAttributeEntity jpaProductAttribute);
 
   @Mapping(target = "product", ignore = true)
   void merge(ProductAttributeEntity productAttribute,
-      @MappingTarget JpaProductAttribute jpaProductAttribute);
+      @MappingTarget JpaProductAttributeEntity jpaProductAttribute);
 }

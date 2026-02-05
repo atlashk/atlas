@@ -4,6 +4,7 @@ import org.atlas.services.iam.domain.entity.UserEntity;
 import org.atlas.services.iam.port.in.front.model.ProfileOutput;
 import org.atlas.services.iam.port.in.front.model.RegisterInput;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
@@ -14,5 +15,6 @@ public interface UserMapper {
 
   ProfileOutput toProfileOutput(UserEntity user);
 
+  @Mapping(target = "password", ignore = true)
   UserEntity toUser(RegisterInput input);
 }

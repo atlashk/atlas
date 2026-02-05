@@ -14,7 +14,7 @@ import lombok.Setter;
 import org.atlas.libs.file.excel.easyexcel.EasyExcelReader;
 import org.atlas.libs.framework.constant.CommonConstant;
 import org.atlas.libs.framework.domain.product.ProductStockStatus;
-import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.product.port.out.file.excel.ProductExcelReader;
 import org.atlas.services.product.port.out.file.model.ProductReadRow;
 import org.mapstruct.Mapper;
@@ -29,7 +29,7 @@ public class EasyExcelProductExcelReader implements ProductExcelReader {
   public List<ProductReadRow> read(byte[] fileContent) throws IOException {
     List<ProductExcelRow> excelRows =
         EasyExcelReader.read(fileContent, SHEET_NAME, ProductExcelRow.class);
-    return ObjectMapperUtil.mapList(excelRows, ProductExcelRowMapper.INSTANCE::toProductRow);
+    return MapperUtil.mapList(excelRows, ProductExcelRowMapper.INSTANCE::toProductRow);
   }
 
   @NoArgsConstructor
@@ -45,11 +45,11 @@ public class EasyExcelProductExcelReader implements ProductExcelReader {
     @ExcelProperty(value = "Price")
     private BigDecimal price;
 
+    @ExcelProperty(value = "Stock Status")
+    private ProductStockStatus stockStatus;
+
     @ExcelProperty(value = "Quantity")
     private Integer quantity;
-
-    @ExcelProperty(value = "Status")
-    private ProductStockStatus status;
 
     @ExcelProperty(value = "Available From")
     @DateTimeFormat(value = CommonConstant.DATE_TIME_FORMAT)

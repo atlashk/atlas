@@ -2,7 +2,7 @@ package org.atlas.services.product.infrastructure.fulltextsearch.elasticsearch.a
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.collection.CollectionUtil;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.services.product.domain.entity.ProductEntity;
@@ -53,14 +53,14 @@ public class ElasticsearchFullTextSearchService implements FullTextSearchService
   }
 
   @Override
-  public PagingResult<Integer> search(SearchProductCriteria criteria,
+  public PagingResult<String> search(SearchProductCriteria criteria,
       PagingRequest pagingRequest) {
     Pageable pageable = PageRequest.of(pagingRequest.getPage(), pagingRequest.getSize());
 
     SearchHits<ElasticsearchProduct> searchHits = elasticsearchProductRepository.search(criteria,
         pageable);
 
-    List<Integer> matchedProductIds = searchHits.stream()
+    List<String> matchedProductIds = searchHits.stream()
         .map(hit -> hit.getContent().getProductId())
         .distinct()
         .toList();
@@ -93,7 +93,7 @@ public class ElasticsearchFullTextSearchService implements FullTextSearchService
     ElasticsearchProduct elasticsearchProduct = elasticsearchProductRepository.findByProductId(
             productId)
         .orElseThrow(() -> new IllegalArgumentException(
-            String.format("Product %d does not exist in search index", productId)));
+            String.format("Product %s does not exist in search index", productId)));
 
     elasticsearchProductRepository.deleteById(elasticsearchProduct.getId());
   }

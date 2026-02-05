@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.collection.CollectionUtil;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.services.product.domain.entity.ProductEntity;
 import org.atlas.services.product.port.in.internal.model.InternalRetrieveProductListInput;
 import org.atlas.services.product.port.in.internal.service.InternalProductService;
@@ -22,13 +22,14 @@ public class InternalProductServiceImpl implements InternalProductService {
 
   @Override
   public List<ProductEntity> retrieveProductList(InternalRetrieveProductListInput input) {
-    List<ProductEntity> products = productRepository.findByIdIn(input.getIds());
+    List<ProductEntity> products = productRepository.findByProductIdIn(input.getProductIds());
     if (CollectionUtil.isEmpty(products)) {
       return Collections.emptyList();
     }
 
     // Update image
-    products.forEach(product -> product.setImage(productImageService.getImage(product.getId())));
+    products.forEach(
+        product -> product.setImage(productImageService.getImage(product.getProductId())));
 
     return products;
   }

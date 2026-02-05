@@ -25,9 +25,8 @@ public class Jwt {
   private Date expiresAt;
   // Custom claims
   private UserRole userRole;
-  private String sessionId;
 
-  public Integer getUserId() {
-    return Integer.valueOf(subject);
+  public String getUserId() {
+    return subject;
   }
 }

@@ -3,7 +3,7 @@ package org.atlas.libs.scheduler.quartz.listener;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.collection.CollectionUtil;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.quartz.JobListener;
 import org.quartz.ListenerManager;
 import org.quartz.TriggerListener;

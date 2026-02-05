@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.currency.CurrencyUtil;
 import org.atlas.libs.framework.domain.payment.PaymentStatus;
-import org.atlas.libs.framework.error.ErrorUtil;
+import org.atlas.libs.framework.util.ExceptionUtil;
 import org.atlas.libs.framework.http.HttpStatusCode;
 import org.atlas.libs.framework.json.JsonUtil;
 import org.atlas.libs.framework.payment.PaymentGatewayService;
@@ -169,7 +169,7 @@ public class StripePaymentGatewayService implements PaymentGatewayService {
         if (StringUtil.isNotBlank(lastPaymentError)) {
           String errorCode = JsonUtil.getInstance().getAsString(lastPaymentError, "error_code");
           String errorMessage = JsonUtil.getInstance().getAsString(lastPaymentError, "message");
-          result.setError(ErrorUtil.buildErrorMessage(errorCode, errorMessage));
+          result.setError(ExceptionUtil.buildErrorMessage(errorCode, errorMessage));
         }
       }
       case StripeEventType.PAYMENT_INTENT_CANCELED -> {

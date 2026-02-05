@@ -13,8 +13,8 @@ import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.persistence.jpa.specification.QueryFilter;
 import org.atlas.libs.persistence.jpa.specification.QueryOperator;
 import org.atlas.libs.persistence.jpa.specification.QuerySpecification;
+import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaOrderEntity;
 import org.atlas.services.order.port.out.repository.criteria.FindOrderCriteria;
-import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaOrder;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
@@ -25,16 +25,16 @@ public class CustomJpaOrderRepositoryUsingCriteria implements CustomJpaOrderRepo
   private EntityManager entityManager;
 
   @Override
-  public List<JpaOrder> findByCriteria(FindOrderCriteria criteria,
+  public List<JpaOrderEntity> findByCriteria(FindOrderCriteria criteria,
       PagingRequest pagingRequest) {
     CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-    CriteriaQuery<JpaOrder> criteriaQuery = criteriaBuilder.createQuery(JpaOrder.class);
-    Root<JpaOrder> root = criteriaQuery.from(JpaOrder.class);
+    CriteriaQuery<JpaOrderEntity> criteriaQuery = criteriaBuilder.createQuery(JpaOrderEntity.class);
+    Root<JpaOrderEntity> root = criteriaQuery.from(JpaOrderEntity.class);
 
     // Fetch join for orderItems to avoid N+1 problem
     root.fetch("orderItems", JoinType.LEFT);
 
-    Specification<JpaOrder> spec = buildSpec(criteria);
+    Specification<JpaOrderEntity> spec = buildSpec(criteria);
     Predicate predicate = spec.toPredicate(root, criteriaQuery, criteriaBuilder);
 
     criteriaQuery.select(root)
@@ -50,7 +50,7 @@ public class CustomJpaOrderRepositoryUsingCriteria implements CustomJpaOrderRepo
       }
     }
 
-    TypedQuery<JpaOrder> query = entityManager.createQuery(criteriaQuery);
+    TypedQuery<JpaOrderEntity> query = entityManager.createQuery(criteriaQuery);
 
     // Paging
     if (pagingRequest.hasPaging()) {
@@ -65,19 +65,19 @@ public class CustomJpaOrderRepositoryUsingCriteria implements CustomJpaOrderRepo
   public long countByCriteria(FindOrderCriteria criteria) {
     CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Long> query = criteriaBuilder.createQuery(Long.class);
-    Root<JpaOrder> root = query.from(JpaOrder.class);
+    Root<JpaOrderEntity> root = query.from(JpaOrderEntity.class);
 
     query.select(criteriaBuilder.countDistinct(root.get("id")));
 
-    Specification<JpaOrder> spec = buildSpec(criteria);
+    Specification<JpaOrderEntity> spec = buildSpec(criteria);
     Predicate predicate = spec.toPredicate(root, query, criteriaBuilder);
     query.where(predicate);
 
     return entityManager.createQuery(query).getSingleResult();
   }
 
-  private Specification<JpaOrder> buildSpec(FindOrderCriteria criteria) {
-    QuerySpecification<JpaOrder> spec = new QuerySpecification<>();
+  private Specification<JpaOrderEntity> buildSpec(FindOrderCriteria criteria) {
+    QuerySpecification<JpaOrderEntity> spec = new QuerySpecification<>();
 
     if (criteria.getOrderId() != null) {
       spec.addFilter(QueryFilter.of("id", criteria.getOrderId(), QueryOperator.EQUAL));

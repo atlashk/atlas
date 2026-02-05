@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.file.excel.easyexcel.EasyExcelWriter;
 import org.atlas.libs.framework.domain.product.ProductStockStatus;
-import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.product.port.out.file.excel.ProductExcelWriter;
 import org.atlas.services.product.port.out.file.model.ProductWriteRow;
 import org.mapstruct.Mapper;
@@ -24,7 +24,7 @@ public class EasyExcelProductExcelWriter implements ProductExcelWriter {
 
   @Override
   public byte[] write(List<ProductWriteRow> productRows) throws Exception {
-    List<ProductExcelRow> csvRows = ObjectMapperUtil.mapList(productRows,
+    List<ProductExcelRow> csvRows = MapperUtil.mapList(productRows,
         ProductExcelRowMapper.INSTANCE::toProductExcelRow);
     return EasyExcelWriter.write(csvRows, SHEET_NAME, ProductExcelRow.class);
   }
@@ -45,11 +45,11 @@ public class EasyExcelProductExcelWriter implements ProductExcelWriter {
     @ExcelProperty(value = "Price")
     private BigDecimal price;
 
+    @ExcelProperty(value = "Stock Status", converter = ProductStockStatusConverter.class)
+    private ProductStockStatus stockStatus;
+
     @ExcelProperty(value = "Quantity")
     private Integer quantity;
-
-    @ExcelProperty(value = "Status", converter = ProductStatusConverter.class)
-    private ProductStockStatus status;
 
     @ExcelProperty(value = "Available From")
     private Date availableFrom;

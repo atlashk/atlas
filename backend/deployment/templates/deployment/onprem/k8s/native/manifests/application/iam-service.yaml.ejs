@@ -1,11 +1,13 @@
 <%
   const internalApi = (stack['internal-api']).toLowerCase();
+  const iam = (stack.iam || '').toLowerCase();
   const datasource = (stack.datasource || '').toLowerCase();
   const kvStore = (stack['kv-store'] || '').toLowerCase();
   const observabilityLoggingStack = (stack.observability.logging.stack || '').toLowerCase();
   const observabilityTracing = (stack.observability.tracing || '').toLowerCase();
 
   const hasGrpc = internalApi === 'grpc'
+  const hasKeycloak = iam === 'keycloak';
   const hasMysql = datasource === 'mysql';
   const hasPostgres = datasource === 'postgres' || datasource === 'postgresql';
   const hasRedis = kvStore === 'redis';
@@ -54,6 +56,17 @@ spec:
                 secretKeyRef:
                   name: mysql-secret
                   key: mysql-password
+            <% if (hasKeycloak) { %>
+            - name: KEYCLOAK_DB_URL
+              value: "jdbc:mysql://mysql:3306/db_keycloak?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
+            - name: KEYCLOAK_DB_USERNAME
+              value: "atlas"
+            - name: KEYCLOAK_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: mysql-password
+            <% } %>
             <% } else if (hasPostgres) { %>
             - name: DB_URL
               value: "jdbc:postgresql://postgres:5432/db_iam"
@@ -64,6 +77,17 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: postgres-password
+            <% if (hasKeycloak) { %>
+            - name: KEYCLOAK_DB_URL
+              value: "jdbc:postgresql://postgres:5432/db_keycloak"
+            - name: KEYCLOAK_DB_USERNAME
+              value: "atlas"
+            - name: KEYCLOAK_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: postgres-password
+            <% } %>
             <% } %>
             <% if (hasRedis) { %>
             - name: REDIS_HOST

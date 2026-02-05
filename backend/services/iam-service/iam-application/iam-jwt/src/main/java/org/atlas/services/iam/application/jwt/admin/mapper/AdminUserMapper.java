@@ -5,7 +5,7 @@ import org.atlas.services.iam.port.in.admin.model.AdminCreateUserInput;
 import org.atlas.services.iam.port.in.admin.model.AdminRetrieveUserListInput;
 import org.atlas.services.iam.port.in.admin.model.AdminUpdateUserInput;
 import org.atlas.services.iam.port.in.admin.model.AdminUserOutput;
-import org.atlas.services.iam.port.out.repository.criteria.FindUserCriteria;
+import org.atlas.services.iam.port.out.repository.UserRepository.FindUserCriteria;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;

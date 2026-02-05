@@ -1,7 +1,7 @@
 package org.atlas.services.payment.infrastructure.persistence.jpa.mapper;
 
 import org.atlas.services.payment.domain.entity.PaymentGatewayEntity;
-import org.atlas.services.payment.infrastructure.persistence.jpa.entity.JpaPaymentGateway;
+import org.atlas.services.payment.infrastructure.persistence.jpa.entity.JpaPaymentGatewayEntity;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
@@ -15,5 +15,5 @@ public interface JpaPaymentGatewayMapper {
 
   JpaPaymentGatewayMapper INSTANCE = Mappers.getMapper(JpaPaymentGatewayMapper.class);
 
-  PaymentGatewayEntity toPaymentGateway(JpaPaymentGateway jpaPaymentGateway);
+  PaymentGatewayEntity toPaymentGateway(JpaPaymentGatewayEntity jpaPaymentGateway);
 }

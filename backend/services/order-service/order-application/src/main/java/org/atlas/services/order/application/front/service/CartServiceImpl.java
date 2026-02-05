@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.cache.ApplicationCache;
 import org.atlas.libs.framework.cache.Cache;
 import org.atlas.libs.framework.cache.CacheService;
-import org.atlas.libs.framework.collection.CollectionUtil;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
 import org.atlas.services.order.application.front.aggregator.CartAggregator;

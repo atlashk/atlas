@@ -14,7 +14,7 @@ import org.atlas.libs.framework.file.FileType;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.DateUtil;
-import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.product.domain.entity.ProductEntity;
 import org.atlas.services.product.infrastructure.api.server.rest.admin.mapper.AdminProductMapper;
 import org.atlas.services.product.infrastructure.api.server.rest.admin.model.AdminCreateProductRequest;
@@ -63,8 +63,8 @@ public class AdminProductManagementController {
       @RequestParam(name = "minPrice", required = false) BigDecimal minPrice,
       @Parameter(name = "maxPrice", description = "Maximum price for filtering products", example = "100.00")
       @RequestParam(name = "maxPrice", required = false) BigDecimal maxPrice,
-      @Parameter(name = "status", description = "Status of the product", example = "IN_STOCK")
-      @RequestParam(name = "status", required = false) ProductStockStatus status,
+      @Parameter(name = "stockStatus", description = "Stock status", example = "IN_STOCK")
+      @RequestParam(name = "stockStatus", required = false) ProductStockStatus stockStatus,
       @Parameter(name = "availableFrom", description = "Date from which the product is available (ISO 8601 format)", example = "2023-01-01T00:00:00Z")
       @RequestParam(name = "availableFrom", required = false)
       @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date availableFrom,
@@ -84,7 +84,7 @@ public class AdminProductManagementController {
         .keyword(keyword)
         .minPrice(minPrice)
         .maxPrice(maxPrice)
-        .status(status)
+        .stockStatus(stockStatus)
         .availableFrom(availableFrom)
         .isActive(isActive)
         .brandId(brandId)
@@ -92,7 +92,7 @@ public class AdminProductManagementController {
         .pagingRequest(PagingRequest.of(page - 1, size))
         .build();
     PagingResult<ProductEntity> productPage = adminProductService.retrieveProductList(input);
-    PagingResult<AdminProductResponse> responseData = ObjectMapperUtil.mapPage(productPage,
+    PagingResult<AdminProductResponse> responseData = MapperUtil.mapPage(productPage,
         AdminProductMapper.INSTANCE::toProductResponse);
     return ApiResponseWrapper.successPage(responseData);
   }
@@ -110,7 +110,7 @@ public class AdminProductManagementController {
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(summary = "Create a new product")
-  public ApiResponseWrapper<Integer> createProduct(
+  public ApiResponseWrapper<String> createProduct(
       @Parameter(description = "Request object containing product details", required = true)
       @Valid @RequestPart("request") AdminCreateProductRequest request,
       @Parameter(description = "Product image file")
@@ -121,7 +121,7 @@ public class AdminProductManagementController {
         .imageBytes(imageFile.getBytes())
         .imageContentType(imageFile.getContentType())
         .build();
-    Integer responseData = adminProductService.createProduct(input);
+    String responseData = adminProductService.createProduct(input);
     return ApiResponseWrapper.success(responseData);
   }
 
@@ -180,8 +180,8 @@ public class AdminProductManagementController {
       @RequestParam(name = "minPrice", required = false) BigDecimal minPrice,
       @Parameter(name = "maxPrice", description = "Maximum price for filtering products", example = "100.00")
       @RequestParam(name = "maxPrice", required = false) BigDecimal maxPrice,
-      @Parameter(name = "status", description = "Status of the product", example = "IN_STOCK")
-      @RequestParam(name = "status", required = false) ProductStockStatus status,
+      @Parameter(name = "stockStatus", description = "Stock status", example = "IN_STOCK")
+      @RequestParam(name = "stockStatus", required = false) ProductStockStatus stockStatus,
       @Parameter(name = "availableFrom", description = "Date from which the product is available (ISO 8601 format)", example = "2023-01-01T00:00:00Z")
       @RequestParam(name = "availableFrom", required = false) Date availableFrom,
       @Parameter(name = "isActive", description = "Indicates if the product is active", example = "true")
@@ -198,7 +198,7 @@ public class AdminProductManagementController {
         .keyword(keyword)
         .minPrice(minPrice)
         .maxPrice(maxPrice)
-        .status(status)
+        .stockStatus(stockStatus)
         .availableFrom(availableFrom)
         .isActive(isActive)
         .brandId(brandId)

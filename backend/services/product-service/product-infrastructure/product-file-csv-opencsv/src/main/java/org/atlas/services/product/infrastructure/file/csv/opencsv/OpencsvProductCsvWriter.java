@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.file.csv.opencsv.OpenCsvWriter;
 import org.atlas.libs.framework.domain.product.ProductStockStatus;
-import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.product.port.out.file.csv.ProductCsvWriter;
 import org.atlas.services.product.port.out.file.model.ProductWriteRow;
 import org.mapstruct.Mapper;
@@ -25,7 +25,7 @@ public class OpencsvProductCsvWriter implements ProductCsvWriter {
 
   @Override
   public byte[] write(List<ProductWriteRow> productRows) throws Exception {
-    List<ProductCsvRow> csvRows = ObjectMapperUtil.mapList(productRows,
+    List<ProductCsvRow> csvRows = MapperUtil.mapList(productRows,
         ProductCsvRowMapper.INSTANCE::toProductCsvRow);
     return OpenCsvWriter.write(csvRows, ProductCsvRow.class);
   }
@@ -53,9 +53,9 @@ public class OpencsvProductCsvWriter implements ProductCsvWriter {
     @CsvBindByPosition(position = 3)
     private Integer quantity;
 
-    @CsvBindByName(column = "Status")
+    @CsvBindByName(column = "Stock Status")
     @CsvBindByPosition(position = 4)
-    private ProductStockStatus status;
+    private ProductStockStatus stockStatus;
 
     @CsvBindByName(column = "Available From")
     @CsvBindByPosition(position = 5)

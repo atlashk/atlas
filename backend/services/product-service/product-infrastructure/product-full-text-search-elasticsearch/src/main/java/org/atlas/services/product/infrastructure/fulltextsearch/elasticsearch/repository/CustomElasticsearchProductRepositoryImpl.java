@@ -35,7 +35,7 @@ public class CustomElasticsearchProductRepositoryImpl implements
 
     // Add strong preference for IN_STOCK products (boost their relevance score significantly)
     boolQueryBuilder.should(QueryBuilders.term(t -> t
-        .field("status")
+        .field("stockStatus")
         .value(FieldValue.of(ProductStockStatus.IN_STOCK))
         .boost(5.0f)  // High boost to strongly prefer in-stock products
     ));

@@ -5,7 +5,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.saga.core.entity.SagaCommandEntity;
 import org.atlas.libs.framework.saga.core.repository.SagaCommandRepository;
-import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.libs.saga.persistence.jpa.entity.JpaSagaCommand;
 import org.atlas.libs.saga.persistence.jpa.mapper.JpaSagaCommandMapper;
 import org.atlas.libs.saga.persistence.jpa.repository.JpaSagaCommandRepository;
@@ -20,7 +20,7 @@ public class JpaSagaCommandRepositoryAdapter implements SagaCommandRepository {
   @Override
   public List<SagaCommandEntity> findBySagaId(Integer sagaId) {
     List<JpaSagaCommand> jpaSagaCommands = jpaSagaCommandRepository.findBySagaId(sagaId);
-    return ObjectMapperUtil.mapList(jpaSagaCommands,
+    return MapperUtil.mapList(jpaSagaCommands,
         JpaSagaCommandMapper.INSTANCE::toSagaCommandEntity);
   }
 

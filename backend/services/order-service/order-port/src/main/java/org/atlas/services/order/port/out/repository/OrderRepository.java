@@ -1,8 +1,14 @@
 package org.atlas.services.order.port.out.repository;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.atlas.libs.framework.domain.order.OrderStatus;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
@@ -27,4 +33,24 @@ public interface OrderRepository {
   void insert(OrderEntity order);
 
   void update(OrderEntity order);
+
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
+  @Getter
+  @Setter
+  class FindOrderCriteria {
+
+    private String orderId;
+
+    private String userId;
+
+    private String productId;
+
+    private OrderStatus status;
+
+    private Date startDate;
+
+    private Date endDate;
+  }
 }

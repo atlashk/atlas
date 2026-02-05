@@ -6,7 +6,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.context.Contexts;
-import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.notification.infrastructure.api.server.rest.mapper.NotificationMapper;
 import org.atlas.services.notification.infrastructure.api.server.rest.model.InAppNotificationResponse;
 import org.atlas.services.notification.infrastructure.api.server.rest.model.InAppServiceInfoResponse;
@@ -51,7 +51,7 @@ public class InAppNotificationController {
         .limit(limit)
         .build();
     List<Notification> notifications = inAppNotificationService.retrieveInAppNotification(input);
-    List<InAppNotificationResponse> responseData = ObjectMapperUtil.mapList(notifications,
+    List<InAppNotificationResponse> responseData = MapperUtil.mapList(notifications,
         NotificationMapper.INSTANCE::toInAppNotificationResponse);
     return ApiResponseWrapper.success(responseData);
   }

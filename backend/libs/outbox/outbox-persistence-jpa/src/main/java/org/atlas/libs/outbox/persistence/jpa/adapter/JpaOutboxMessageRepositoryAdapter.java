@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.messaging.outbox.OutboxMessage;
 import org.atlas.libs.framework.messaging.outbox.OutboxMessageRepository;
 import org.atlas.libs.framework.messaging.outbox.OutboxMessageStatus;
-import org.atlas.libs.framework.util.ObjectMapperUtil;
+import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.libs.outbox.persistence.jpa.entity.JpaOutboxMessage;
 import org.atlas.libs.outbox.persistence.jpa.mapper.JpaOutboxMessageMapper;
 import org.atlas.libs.outbox.persistence.jpa.repository.JpaOutboxMessageRepository;
@@ -21,7 +21,7 @@ public class JpaOutboxMessageRepositoryAdapter implements OutboxMessageRepositor
   public List<OutboxMessage> findByStatusOrderByCreatedAt(OutboxMessageStatus status) {
     List<JpaOutboxMessage> jpaOutboxMessages =
         jpaOutboxMessageRepository.findByStatusOrderByCreatedAt(status);
-    return ObjectMapperUtil.mapList(jpaOutboxMessages,
+    return MapperUtil.mapList(jpaOutboxMessages,
         JpaOutboxMessageMapper.INSTANCE::toOutboxMessage);
   }
 

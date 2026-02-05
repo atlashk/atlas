@@ -47,9 +47,9 @@ public class JpaProduct extends JpaBaseEntity {
   @Column(name = "price")
   private BigDecimal price;
 
-  @Column(name = "product_status")
+  @Column(name = "stock_status")
   @Enumerated(EnumType.STRING)
-  private ProductStockStatus productStatus;
+  private ProductStockStatus stockStatus;
 
   @Column(name = "quantity")
   private Integer quantity;
@@ -62,10 +62,10 @@ public class JpaProduct extends JpaBaseEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "brand_id")
-  private JpaBrand brand;
+  private JpaBrandEntity brand;
 
   @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-  private JpaProductDetails details;
+  private JpaProductDetailsEntity details;
 
   @OneToMany(
       cascade = {
@@ -76,7 +76,7 @@ public class JpaProduct extends JpaBaseEntity {
       mappedBy = "product",
       orphanRemoval = true
   )
-  private Set<JpaProductAttribute> attributes = new HashSet<>();
+  private Set<JpaProductAttributeEntity> attributes = new HashSet<>();
 
   @ManyToMany
   @JoinTable(
@@ -84,9 +84,9 @@ public class JpaProduct extends JpaBaseEntity {
       joinColumns = {@JoinColumn(name = "product_id")},
       inverseJoinColumns = {@JoinColumn(name = "category_id")}
   )
-  private Set<JpaCategory> categories = new HashSet<>();
+  private Set<JpaCategoryEntity> categories = new HashSet<>();
 
-  public void addAttribute(JpaProductAttribute attribute) {
+  public void addAttribute(JpaProductAttributeEntity attribute) {
     if (attributes == null) {
       attributes = new HashSet<>();
     }

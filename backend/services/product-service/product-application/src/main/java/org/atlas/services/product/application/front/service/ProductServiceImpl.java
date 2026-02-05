@@ -4,7 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.cache.Cache;
-import org.atlas.libs.framework.collection.CollectionUtil;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
 import org.atlas.libs.framework.domain.product.ProductStockStatus;
@@ -38,7 +38,7 @@ public class ProductServiceImpl implements ProductService {
     if (fullTextSearchService != null) {
       // Using full-text search engine
       SearchProductCriteria criteria = ProductMapper.INSTANCE.toSearchProductCriteria(input);
-      PagingResult<Integer> matchedProductIdsPage = fullTextSearchService.search(criteria,
+      PagingResult<String> matchedProductIdsPage = fullTextSearchService.search(criteria,
           input.getPagingRequest());
 
       if (matchedProductIdsPage.checkEmpty()) {
@@ -46,7 +46,8 @@ public class ProductServiceImpl implements ProductService {
       }
 
       // Find products from DB again
-      List<ProductEntity> products = productRepository.findByIdIn(matchedProductIdsPage.getData());
+      List<ProductEntity> products = productRepository.findByProductIdIn(
+          matchedProductIdsPage.getData());
       if (CollectionUtil.isEmpty(products)) {
         return PagingResult.empty();
       }
@@ -62,7 +63,7 @@ public class ProductServiceImpl implements ProductService {
 
     // Set image
     productPage.getData()
-        .forEach(product -> product.setImage(productImageService.getImage(product.getId())));
+        .forEach(product -> product.setImage(productImageService.getImage(product.getProductId())));
 
     return productPage;
   }
@@ -71,11 +72,11 @@ public class ProductServiceImpl implements ProductService {
   @Cache(cacheName = "product", key = "#productId", ttl = 3600)
   public ProductEntity retrieveProduct(String productId) throws Exception {
     // Get from DB
-    ProductEntity product = productRepository.findById(productId)
+    ProductEntity product = productRepository.findByProductId(productId)
         .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
 
     // Set image
-    product.setImage(productImageService.getImage(product.getId()));
+    product.setImage(productImageService.getImage(product.getProductId()));
 
     return product;
   }
