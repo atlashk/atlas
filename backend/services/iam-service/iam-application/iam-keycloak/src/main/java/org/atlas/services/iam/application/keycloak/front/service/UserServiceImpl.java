@@ -16,7 +16,6 @@ import org.atlas.services.iam.port.in.front.model.ProfileOutput;
 import org.atlas.services.iam.port.in.front.model.RegisterInput;
 import org.atlas.services.iam.port.in.front.service.UserService;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +26,6 @@ public class UserServiceImpl implements UserService {
   private final UserEventService userEventService;
 
   @Override
-  @Transactional
   public void register(RegisterInput input) {
     checkValidity(input);
 
@@ -39,7 +37,6 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public ProfileOutput retrieveProfile() {
     String userId = Contexts.getUserId();
     return keycloakUserClient.retrieveUser(userId)
@@ -48,7 +45,6 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  @Transactional
   public void changePassword(ChangePasswordInput input) {
     String userId = Contexts.getUserId();
     UserEntity user = keycloakUserClient.retrieveUser(userId)

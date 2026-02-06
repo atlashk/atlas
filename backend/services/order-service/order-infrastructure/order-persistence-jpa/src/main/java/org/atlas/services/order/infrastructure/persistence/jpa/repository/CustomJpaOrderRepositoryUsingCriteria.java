@@ -14,7 +14,7 @@ import org.atlas.libs.persistence.jpa.specification.QueryFilter;
 import org.atlas.libs.persistence.jpa.specification.QueryOperator;
 import org.atlas.libs.persistence.jpa.specification.QuerySpecification;
 import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaOrderEntity;
-import org.atlas.services.order.port.out.repository.criteria.FindOrderCriteria;
+import org.atlas.services.order.port.out.repository.OrderRepository;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
@@ -25,7 +25,7 @@ public class CustomJpaOrderRepositoryUsingCriteria implements CustomJpaOrderRepo
   private EntityManager entityManager;
 
   @Override
-  public List<JpaOrderEntity> findByCriteria(FindOrderCriteria criteria,
+  public List<JpaOrderEntity> findByCriteria(OrderRepository.FindOrderCriteria criteria,
       PagingRequest pagingRequest) {
     CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
     CriteriaQuery<JpaOrderEntity> criteriaQuery = criteriaBuilder.createQuery(JpaOrderEntity.class);
@@ -62,7 +62,7 @@ public class CustomJpaOrderRepositoryUsingCriteria implements CustomJpaOrderRepo
   }
 
   @Override
-  public long countByCriteria(FindOrderCriteria criteria) {
+  public long countByCriteria(OrderRepository.FindOrderCriteria criteria) {
     CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Long> query = criteriaBuilder.createQuery(Long.class);
     Root<JpaOrderEntity> root = query.from(JpaOrderEntity.class);
@@ -76,7 +76,7 @@ public class CustomJpaOrderRepositoryUsingCriteria implements CustomJpaOrderRepo
     return entityManager.createQuery(query).getSingleResult();
   }
 
-  private Specification<JpaOrderEntity> buildSpec(FindOrderCriteria criteria) {
+  private Specification<JpaOrderEntity> buildSpec(OrderRepository.FindOrderCriteria criteria) {
     QuerySpecification<JpaOrderEntity> spec = new QuerySpecification<>();
 
     if (criteria.getOrderId() != null) {

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaOrderEntity;
-import org.atlas.services.order.port.out.repository.criteria.FindOrderCriteria;
+import org.atlas.services.order.port.out.repository.OrderRepository;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
@@ -20,7 +20,7 @@ public class CustomJpaOrderRepositoryUsingJpql implements CustomJpaOrderReposito
   private EntityManager entityManager;
 
   @Override
-  public List<JpaOrderEntity> findByCriteria(FindOrderCriteria criteria,
+  public List<JpaOrderEntity> findByCriteria(OrderRepository.FindOrderCriteria criteria,
       PagingRequest pagingRequest) {
     StringBuilder sqlBuilder = new StringBuilder("""
         select distinct o
@@ -55,7 +55,7 @@ public class CustomJpaOrderRepositoryUsingJpql implements CustomJpaOrderReposito
   }
 
   @Override
-  public long countByCriteria(FindOrderCriteria criteria) {
+  public long countByCriteria(OrderRepository.FindOrderCriteria criteria) {
     Map<String, Object> params = new HashMap<>();
     String whereClause = buildWhereClause(criteria, params);
     String countSql = """
@@ -68,7 +68,7 @@ public class CustomJpaOrderRepositoryUsingJpql implements CustomJpaOrderReposito
     return countQuery.getSingleResult();
   }
 
-  private String buildWhereClause(FindOrderCriteria criteria, Map<String, Object> params) {
+  private String buildWhereClause(OrderRepository.FindOrderCriteria criteria, Map<String, Object> params) {
     StringBuilder whereClauseBuilder = new StringBuilder("where 1=1 ");
 
     if (criteria.getOrderId() != null) {

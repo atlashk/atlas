@@ -9,14 +9,14 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.List;
-import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.paging.PagingRequest;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.libs.persistence.jpa.specification.QueryFilter;
 import org.atlas.libs.persistence.jpa.specification.QueryOperator;
 import org.atlas.libs.persistence.jpa.specification.QuerySpecification;
-import org.atlas.services.product.port.out.repository.criteria.FindProductCriteria;
 import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaProduct;
+import org.atlas.services.product.port.out.repository.ProductRepository;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
@@ -27,7 +27,7 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
   private EntityManager entityManager;
 
   @Override
-  public List<JpaProduct> findByCriteria(FindProductCriteria criteria,
+  public List<JpaProduct> findByCriteria(ProductRepository.FindProductCriteria criteria,
       PagingRequest pagingRequest) {
     CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
     CriteriaQuery<JpaProduct> criteriaQuery = criteriaBuilder.createQuery(
@@ -64,7 +64,7 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
   }
 
   @Override
-  public long countByCriteria(FindProductCriteria params) {
+  public long countByCriteria(ProductRepository.FindProductCriteria params) {
     CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Long> query = criteriaBuilder.createQuery(Long.class);
     Root<JpaProduct> root = query.from(JpaProduct.class);
@@ -83,7 +83,7 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
     return entityManager.createQuery(query).getSingleResult();
   }
 
-  private Specification<JpaProduct> buildSpec(FindProductCriteria criteria) {
+  private Specification<JpaProduct> buildSpec(ProductRepository.FindProductCriteria criteria) {
     QuerySpecification<JpaProduct> spec = new QuerySpecification<>();
     if (criteria.getProductId() != null) {
       spec.addFilter(QueryFilter.of("productId", criteria.getProductId(), QueryOperator.EQUAL));

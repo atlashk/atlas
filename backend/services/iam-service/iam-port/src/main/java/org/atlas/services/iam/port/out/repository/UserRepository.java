@@ -11,7 +11,6 @@ import org.atlas.libs.framework.domain.user.UserRole;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.services.iam.domain.entity.UserEntity;
-import org.atlas.services.iam.port.out.repository.criteria.FindUserCriteria;
 
 public interface UserRepository {
 

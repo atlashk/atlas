@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
 import org.atlas.libs.framework.paging.PagingResult;
+import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
+import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.iam.application.jwt.admin.mapper.AdminUserMapper;
 import org.atlas.services.iam.application.jwt.event.service.UserEventService;
@@ -25,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminUserServiceImpl implements AdminUserService {
 
   private final UserRepository userRepository;
+  private final SequenceGenerator sequenceGenerator;
   private final PasswordEncoder passwordEncoder;
   private final UserEventService userEventService;
 
@@ -57,6 +60,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     checkValidity(input);
 
     UserEntity user = AdminUserMapper.INSTANCE.toUser(input);
+    user.setUserId(sequenceGenerator.generate(SequenceType.USER));
     user.setPassword(passwordEncoder.encode(input.getPassword()));
     userRepository.insert(user);
 
@@ -66,12 +70,17 @@ public class AdminUserServiceImpl implements AdminUserService {
   @Override
   @Transactional
   public void updateUser(AdminUpdateUserInput input) {
-    UserEntity user = AdminUserMapper.INSTANCE.toUser(input);
+    UserEntity user = userRepository.findByUserId(input.getUserId())
+        .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
+
+    boolean shouldPublishEvent = !Objects.equals(input.getFirstName(), user.getFirstName()) ||
+        !Objects.equals(input.getLastName(), user.getLastName());
+    
+    AdminUserMapper.INSTANCE.merge(input, user);
     user.setPassword(passwordEncoder.encode(input.getPassword()));
     userRepository.update(user);
 
-    if (!Objects.equals(input.getFirstName(), user.getFirstName()) ||
-        !Objects.equals(input.getLastName(), user.getLastName())) {
+    if (shouldPublishEvent) {
       userEventService.publishUserUpdatedEvent(user);
     }
   }

@@ -34,7 +34,6 @@ import org.atlas.services.order.port.in.front.model.RetrieveOrderStatusOutput;
 import org.atlas.services.order.port.in.front.service.CartService;
 import org.atlas.services.order.port.in.front.service.OrderService;
 import org.atlas.services.order.port.out.repository.OrderRepository;
-import org.atlas.services.order.port.out.repository.criteria.FindOrderCriteria;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,7 +52,7 @@ public class OrderServiceImpl implements OrderService {
   @Override
   @Transactional(readOnly = true)
   public PagingResult<OrderEntity> retrieveOrderList(RetrieveOrderListInput input) {
-    FindOrderCriteria criteria = OrderMapper.INSTANCE.toFindOrderCriteria(input);
+    OrderRepository.FindOrderCriteria criteria = OrderMapper.INSTANCE.toFindOrderCriteria(input);
     return orderRepository.findByCriteria(criteria, input.getPagingRequest());
   }
 

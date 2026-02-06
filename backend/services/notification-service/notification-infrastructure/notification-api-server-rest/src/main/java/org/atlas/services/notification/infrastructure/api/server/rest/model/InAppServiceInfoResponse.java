@@ -13,5 +13,5 @@ import lombok.Setter;
 @Setter
 public class InAppServiceInfoResponse {
 
-  private String serviceType;
+  private String serviceName;
 }

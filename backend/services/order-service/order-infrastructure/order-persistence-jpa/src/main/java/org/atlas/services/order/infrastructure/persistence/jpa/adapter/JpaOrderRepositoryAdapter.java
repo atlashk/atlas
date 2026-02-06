@@ -9,13 +9,12 @@ import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.order.domain.entity.OrderEntity;
-import org.atlas.services.order.port.in.admin.model.AdminMonthlyOrderAggregation;
-import org.atlas.services.order.port.out.repository.OrderRepository;
-import org.atlas.services.order.port.out.repository.criteria.FindOrderCriteria;
 import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaOrderEntity;
 import org.atlas.services.order.infrastructure.persistence.jpa.mapper.JpaOrderMapper;
 import org.atlas.services.order.infrastructure.persistence.jpa.repository.CustomJpaOrderRepository;
 import org.atlas.services.order.infrastructure.persistence.jpa.repository.JpaOrderRepository;
+import org.atlas.services.order.port.in.admin.model.AdminMonthlyOrderAggregation;
+import org.atlas.services.order.port.out.repository.OrderRepository;
 import org.springframework.stereotype.Component;
 
 @Component

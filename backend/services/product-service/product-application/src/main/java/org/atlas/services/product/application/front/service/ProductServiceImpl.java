@@ -17,7 +17,6 @@ import org.atlas.services.product.port.in.front.service.ProductService;
 import org.atlas.services.product.port.out.fulltextsearch.FullTextSearchService;
 import org.atlas.services.product.port.out.fulltextsearch.SearchProductCriteria;
 import org.atlas.services.product.port.out.repository.ProductRepository;
-import org.atlas.services.product.port.out.repository.criteria.FindProductCriteria;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
@@ -55,8 +54,8 @@ public class ProductServiceImpl implements ProductService {
       productPage = PagingResult.of(products, matchedProductIdsPage.getPagination());
     } else {
       // Using DB dynamic query natively
-      FindProductCriteria criteria = ProductMapper.INSTANCE.toFindProductCriteria(input);
-      criteria.setStatus(ProductStockStatus.IN_STOCK);
+      ProductRepository.FindProductCriteria criteria = ProductMapper.INSTANCE.toFindProductCriteria(input);
+      criteria.setStockStatus(ProductStockStatus.IN_STOCK);
       criteria.setIsActive(true);
       productPage = productRepository.findByCriteria(criteria, input.getPagingRequest());
     }

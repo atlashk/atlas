@@ -100,11 +100,11 @@ public class PoiProductExcelWriter implements ProductExcelWriter {
       cell.setCellStyle(style);
 
       cell = row.createCell(3);
-      cell.setCellValue(productRow.getQuantity());
+      cell.setCellValue(productRow.getStockStatus().name());
       cell.setCellStyle(style);
-
+      
       cell = row.createCell(4);
-      cell.setCellValue(productRow.getStatus().name());
+      cell.setCellValue(productRow.getQuantity());
       cell.setCellStyle(style);
 
       cell = row.createCell(5);

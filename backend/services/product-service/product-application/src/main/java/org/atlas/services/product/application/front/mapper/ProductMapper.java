@@ -2,7 +2,7 @@ package org.atlas.services.product.application.front.mapper;
 
 import org.atlas.services.product.port.in.front.model.RetrieveProductListInput;
 import org.atlas.services.product.port.out.fulltextsearch.SearchProductCriteria;
-import org.atlas.services.product.port.out.repository.criteria.FindProductCriteria;
+import org.atlas.services.product.port.out.repository.ProductRepository;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
@@ -14,5 +14,5 @@ public interface ProductMapper {
 
   SearchProductCriteria toSearchProductCriteria(RetrieveProductListInput input);
 
-  FindProductCriteria toFindProductCriteria(RetrieveProductListInput input);
+  ProductRepository.FindProductCriteria toFindProductCriteria(RetrieveProductListInput input);
 }

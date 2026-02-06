@@ -17,9 +17,13 @@ public class KeycloakRealmRoleClient {
   private final KeycloakProps keycloakProps;
 
   public RoleRepresentation getRealmRole(UserRole role) {
-    RealmResource realm = keycloak.realm(keycloakProps.getRealm());
-    RolesResource realmRoles = realm.roles();
+    RolesResource realmRoles = getRolesResource();
     return realmRoles.get(getRealmRoleName(role)).toRepresentation();
+  }
+
+  private RolesResource getRolesResource() {
+    RealmResource realm = keycloak.realm(keycloakProps.getRealm());
+    return realm.roles();
   }
 
   private String getRealmRoleName(UserRole role) {

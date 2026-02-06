@@ -1,11 +1,11 @@
-package org.atlas.services.iam.application.jwt.admin.mapper;
+package org.atlas.services.iam.application.keycloak.admin.mapper;
 
+import org.atlas.services.iam.application.keycloak.core.model.RetrieveUserListRequest;
 import org.atlas.services.iam.domain.entity.UserEntity;
 import org.atlas.services.iam.port.in.admin.model.AdminCreateUserInput;
 import org.atlas.services.iam.port.in.admin.model.AdminRetrieveUserListInput;
 import org.atlas.services.iam.port.in.admin.model.AdminUpdateUserInput;
 import org.atlas.services.iam.port.in.admin.model.AdminUserOutput;
-import org.atlas.services.iam.port.out.repository.UserRepository.FindUserCriteria;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
@@ -18,7 +18,7 @@ public interface AdminUserMapper {
 
   AdminUserOutput toAdminUserOutput(UserEntity user);
 
-  FindUserCriteria toFindUserCriteria(AdminRetrieveUserListInput input);
+  RetrieveUserListRequest toKeycloakRetrieveUserListRequest(AdminRetrieveUserListInput input);
 
   UserEntity toUser(AdminCreateUserInput input);
 

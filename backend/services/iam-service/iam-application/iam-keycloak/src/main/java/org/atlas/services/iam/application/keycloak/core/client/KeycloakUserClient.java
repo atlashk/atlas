@@ -7,18 +7,21 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.atlas.libs.framework.domain.user.UserRole;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.util.ExceptionUtil;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.iam.application.keycloak.core.config.KeycloakProps;
 import org.atlas.services.iam.application.keycloak.core.enums.KeycloakUserAttribute;
+import org.atlas.services.iam.application.keycloak.core.exception.KeycloakClientException;
 import org.atlas.services.iam.application.keycloak.core.model.RetrieveUserListRequest;
 import org.atlas.services.iam.application.keycloak.core.util.KeycloakUtil;
 import org.atlas.services.iam.domain.entity.UserEntity;
 import org.keycloak.admin.client.CreatedResponseUtil;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
@@ -35,9 +38,7 @@ public class KeycloakUserClient {
   private final KeycloakRealmRoleClient keycloakRealmRoleClient;
 
   public List<UserEntity> retrieveUserList(RetrieveUserListRequest request) {
-
-    RealmResource realm = keycloak.realm(keycloakProps.getRealm());
-    UsersResource users = realm.users();
+    UsersResource usersResource = getUsersResource();
 
     if (StringUtil.isNotBlank(request.getUserId())) {
       // Search by exact user ID
@@ -48,14 +49,12 @@ public class KeycloakUserClient {
 
       // Verify other criteria match
       UserEntity user = userOpt.get();
-      if ((StringUtil.isNotBlank(request.getUsername())
-          && !request.getUsername().equals(user.getUsername())) ||
-          (StringUtil.isNotBlank(request.getFirstName())
-              && !request.getFirstName().equals(user.getFirstName())) ||
-          (StringUtil.isNotBlank(request.getLastName())
-              && !request.getLastName().equals(user.getLastName())) ||
-          (StringUtil.isNotBlank(request.getEmail())
-              && !request.getEmail().equals(user.getEmail()))) {
+      if ((StringUtil.isNotBlank(request.getUsername()) && !request.getUsername()
+          .equals(user.getUsername())) || (StringUtil.isNotBlank(request.getFirstName())
+          && !request.getFirstName().equals(user.getFirstName())) || (
+          StringUtil.isNotBlank(request.getLastName()) && !request.getLastName()
+              .equals(user.getLastName())) || (StringUtil.isNotBlank(request.getEmail())
+          && !request.getEmail().equals(user.getEmail()))) {
         return CollectionUtil.emptyList();
       }
 
@@ -67,19 +66,15 @@ public class KeycloakUserClient {
         int first = request.getPagingRequest() == null ? 0 : request.getPagingRequest().getOffset();
         int max = request.getPagingRequest() == null ? 1 : request.getPagingRequest().getLimit();
 
-        List<UserRepresentation> kcUsers = users.search(
+        List<UserRepresentation> kcUsers = usersResource.search(
             StringUtil.trimToEmpty(request.getUsername()),
             StringUtil.trimToEmpty(request.getFirstName()),
             StringUtil.trimToEmpty(request.getLastName()),
-            StringUtil.trimToEmpty(request.getEmail()),
-            first,
-            max
-        );
+            StringUtil.trimToEmpty(request.getEmail()), first, max);
         return MapperUtil.mapList(kcUsers, KeycloakUtil::toUserEntity);
       } catch (Exception e) {
-        log.error("Failed to search Keycloak users: request={}, error={}",
-            request, e.getMessage(), e);
-        throw e;
+        throw new KeycloakClientException(
+            String.format("Failed to retrieve Keycloak user list: reason=%s", e.getMessage()), e);
       }
     }
   }
@@ -89,12 +84,11 @@ public class KeycloakUserClient {
       return CollectionUtil.emptyList();
     }
 
-    RealmResource realm = keycloak.realm(keycloakProps.getRealm());
-    UsersResource users = realm.users();
+    UsersResource usersResource = getUsersResource();
     List<UserEntity> userList = new ArrayList<>();
     for (String userId : userIds) {
       try {
-        UserRepresentation kcUser = users.get(userId).toRepresentation();
+        UserRepresentation kcUser = usersResource.get(userId).toRepresentation();
         UserEntity user = KeycloakUtil.toUserEntity(kcUser);
         userList.add(user);
       } catch (Exception e) {
@@ -105,10 +99,9 @@ public class KeycloakUserClient {
   }
 
   public Optional<UserEntity> retrieveUser(String userId) {
-    RealmResource realm = keycloak.realm(keycloakProps.getRealm());
-    UsersResource users = realm.users();
+    UsersResource usersResource = getUsersResource();
     try {
-      UserRepresentation kcUser = users.get(userId).toRepresentation();
+      UserRepresentation kcUser = usersResource.get(userId).toRepresentation();
       return Optional.of(KeycloakUtil.toUserEntity(kcUser));
     } catch (Exception e) {
       log.debug("Keycloak user {} not found: {}", userId, ExceptionUtil.getStacktrace(e));
@@ -116,16 +109,19 @@ public class KeycloakUserClient {
     }
   }
 
+  public Long retrieveUserCount() {
+    UsersResource usersResource = getUsersResource();
+    return (long) usersResource.count();
+  }
+
   public boolean existsByUsername(String username) {
     RetrieveUserListRequest retrieveUserListRequest = RetrieveUserListRequest.builder()
-        .username(username)
-        .build();
+        .username(username).build();
     return CollectionUtil.isNotEmpty(retrieveUserList(retrieveUserListRequest));
   }
 
   public boolean existsByEmail(String email) {
-    RetrieveUserListRequest retrieveUserListRequest = RetrieveUserListRequest.builder()
-        .email(email)
+    RetrieveUserListRequest retrieveUserListRequest = RetrieveUserListRequest.builder().email(email)
         .build();
     return CollectionUtil.isNotEmpty(retrieveUserList(retrieveUserListRequest));
   }
@@ -137,57 +133,90 @@ public class KeycloakUserClient {
       String query = String.format("attribute:%s", value);
       return CollectionUtil.isNotEmpty(users.searchByAttributes(query));
     } catch (Exception e) {
-      log.error("Failed to check exists by attribute: attribute={}, value={}, error={}",
-          attribute, value, e.getMessage(), e);
-      throw e;
+      throw new KeycloakClientException(
+          String.format("Failed to check exists by attribute: attribute=%s, reason=%s", 
+              attribute, e.getMessage()), e);
     }
   }
 
   public String createUser(UserEntity user, String password) {
-    Response response = null;
-    try {
-      RealmResource realm = keycloak.realm(keycloakProps.getRealm());
-      UsersResource users = realm.users();
-      UserRepresentation kcUser = toUserRepresentation(user, password);
-      response = users.create(kcUser);
+    RealmResource realm = keycloak.realm(keycloakProps.getRealm());
+    UsersResource usersResource = realm.users();
+    UserRepresentation kcUser = toUserRepresentation(user, password);
+    try (Response response = usersResource.create(kcUser)) {
       if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
-        throw new RuntimeException(String.format(
-            "Failed to create Keycloak user: username=%s, status=%d, reason=%s",
-            user.getUsername(),
-            response.getStatus(),
-            response.getStatusInfo().getReasonPhrase()
-        ));
+        throw new KeycloakClientException(
+            String.format("Failed to create Keycloak user: username=%s, status=%d, reason=%s",
+                user.getUsername(), response.getStatus(),
+                response.getStatusInfo().getReasonPhrase()));
       }
-      String kcUserId = CreatedResponseUtil.getCreatedId(response);
 
-      // Add role
-      RoleRepresentation realmRole = keycloakRealmRoleClient.getRealmRole(user.getRole());
-      users.get(kcUserId)
-          .roles()
-          .realmLevel()
-          .add(List.of(realmRole));
+      // Assign role
+      String kcUserId = CreatedResponseUtil.getCreatedId(response);
+      UserResource userResource = usersResource.get(kcUserId);
+      assignUserRole(userResource, user.getRole());
 
       log.info("Created Keycloak user successfully: username={}, keycloakUserId={}",
           user.getUsername(), kcUserId);
       return kcUserId;
     } catch (Exception e) {
-      log.error("Failed to create Keycloak user: username={}, error={}",
-          user.getUsername(), e.getMessage(), e);
-      throw e;
-    } finally {
-      if (response != null) {
-        response.close();
+      throw new KeycloakClientException(
+          String.format("Failed to create Keycloak user: username=%s, reason=%s",
+              user.getUsername(), e.getMessage()));
+    }
+  }
+
+  public void updateUser(UserEntity user, String password) {
+    UsersResource usersResource = getUsersResource();
+    try {
+      // Update user info
+      UserResource userResource = usersResource.get(user.getUserId());
+      UserRepresentation kcUser = toUserRepresentation(user, password);
+      userResource.update(kcUser);
+
+      // Assign role
+      assignUserRole(userResource, user.getRole());
+
+      log.info("Updated Keycloak user successfully: userId={}", user.getUserId());
+    } catch (Exception e) {
+      throw new KeycloakClientException(
+          String.format("Failed to update Keycloak user: username=%s, reason=%s",
+              user.getUsername(), e.getMessage()));
+    }
+  }
+
+  public void deleteUser(String userId) {
+    UsersResource usersResource = getUsersResource();
+    try (Response response = usersResource.delete(userId)) {
+      if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
+        throw new KeycloakClientException(
+            String.format("Failed to delete Keycloak user: userId=%s, status=%d, reason=%s", 
+                userId, response.getStatus(), response.getStatusInfo().getReasonPhrase()));
       }
+    } catch (Exception e) {
+      throw new KeycloakClientException(
+          String.format("Failed to delete Keycloak user: userId=%s, reason=%s", 
+              userId, e.getMessage()));
     }
   }
 
   public void changePassword(String userId, String newPassword) {
-    CredentialRepresentation credential = new CredentialRepresentation();
-    credential.setType(CredentialRepresentation.PASSWORD);
-    credential.setValue(newPassword);
-    credential.setTemporary(Boolean.FALSE);
+    UsersResource usersResource = getUsersResource();
+    try {
+      UserResource userResource = usersResource.get(userId);
+      CredentialRepresentation kcCredential = toCredentialRepresentation(newPassword);
+      userResource.resetPassword(kcCredential);
+      log.info("Changed Keycloak user password successfully: userId={}", userId);
+    } catch (Exception e) {
+      throw new KeycloakClientException(
+          String.format("Failed to change Keycloak user password: userId=%s, reason=%s", 
+              userId, e.getMessage()));
+    }
+  }
+
+  private UsersResource getUsersResource() {
     RealmResource realm = keycloak.realm(keycloakProps.getRealm());
-    realm.users().get(userId).resetPassword(credential);
+    return realm.users();
   }
 
   private UserRepresentation toUserRepresentation(UserEntity user, String password) {
@@ -215,5 +244,25 @@ public class KeycloakUserClient {
     kcCredential.setValue(password);
     kcCredential.setTemporary(Boolean.FALSE);
     return kcCredential;
+  }
+
+  private void assignUserRole(UserResource userResource, UserRole userRole) {
+    List<RoleRepresentation> assignedKcRoles = userResource.roles().realmLevel().listAll();
+
+    RoleRepresentation targetKcRole = keycloakRealmRoleClient.getRealmRole(userRole);
+
+    // Remove other roles
+    List<RoleRepresentation> kcRolesToRemove = assignedKcRoles.stream()
+        .filter(kcRole -> !kcRole.getName().equals(targetKcRole.getName())).toList();
+    if (!kcRolesToRemove.isEmpty()) {
+      userResource.roles().realmLevel().remove(kcRolesToRemove);
+    }
+
+    // Assign target role if not already assigned
+    boolean alreadyHasRole = assignedKcRoles.stream()
+        .anyMatch(r -> r.getName().equals(targetKcRole.getName()));
+    if (!alreadyHasRole) {
+      userResource.roles().realmLevel().add(List.of(targetKcRole));
+    }
   }
 }

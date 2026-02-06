@@ -1,13 +1,11 @@
 package org.atlas.services.notification.port.in.service;
 
 import java.util.List;
+import org.atlas.services.notification.domain.entity.Notification;
 import org.atlas.services.notification.port.in.model.MarkAsReadAllInput;
 import org.atlas.services.notification.port.in.model.RetrieveInAppNotificationListInput;
-import org.atlas.services.notification.domain.entity.Notification;
 
 public interface InAppNotificationService {
-
-  String retrieveCurrentInAppServiceType();
 
   List<Notification> retrieveInAppNotification(RetrieveInAppNotificationListInput input);
 

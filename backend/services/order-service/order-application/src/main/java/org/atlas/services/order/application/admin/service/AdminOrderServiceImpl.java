@@ -17,7 +17,6 @@ import org.atlas.services.order.domain.entity.OrderEntity;
 import org.atlas.services.order.port.in.admin.model.AdminMonthlyOrderAggregation;
 import org.atlas.services.order.port.in.admin.model.AdminRetrieveOrderListInput;
 import org.atlas.services.order.port.out.repository.OrderRepository;
-import org.atlas.services.order.port.out.repository.criteria.FindOrderCriteria;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +31,7 @@ public class AdminOrderServiceImpl implements
   @Override
   @Transactional(readOnly = true)
   public PagingResult<OrderEntity> retrieveOrderList(AdminRetrieveOrderListInput input) {
-    FindOrderCriteria criteria = AdminOrderMapper.INSTANCE.toFindOrderCriteria(input);
+    OrderRepository.FindOrderCriteria criteria = AdminOrderMapper.INSTANCE.toFindOrderCriteria(input);
     return orderRepository.findByCriteria(criteria, input.getPagingRequest());
   }
 

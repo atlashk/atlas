@@ -11,6 +11,7 @@ import org.atlas.services.iam.port.in.internal.model.InternalUserOutput;
 import org.atlas.services.iam.port.in.internal.service.InternalUserService;
 import org.atlas.services.iam.port.out.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +21,7 @@ public class InternalUserServiceImpl implements InternalUserService {
   private final UserRepository userRepository;
 
   @Override
+  @Transactional(readOnly = true)
   public List<InternalUserOutput> retrieveUserList(InternalRetrieveUserListInput input) {
     List<UserEntity> userList = userRepository.findByUserIdIn(input.getUserIds());
     return MapperUtil.mapList(userList, InternalUserMapper.INSTANCE::toInternalUserOutput);

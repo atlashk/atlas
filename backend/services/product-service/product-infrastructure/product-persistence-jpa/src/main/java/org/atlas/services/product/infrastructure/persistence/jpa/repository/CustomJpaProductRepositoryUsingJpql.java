@@ -6,11 +6,11 @@ import jakarta.persistence.TypedQuery;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.paging.PagingRequest;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.util.StringUtil;
-import org.atlas.services.product.port.out.repository.criteria.FindProductCriteria;
 import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaProduct;
+import org.atlas.services.product.port.out.repository.ProductRepository;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
@@ -22,7 +22,7 @@ public class CustomJpaProductRepositoryUsingJpql implements CustomJpaProductRepo
   private EntityManager entityManager;
 
   @Override
-  public List<JpaProduct> findByCriteria(FindProductCriteria criteria,
+  public List<JpaProduct> findByCriteria(ProductRepository.FindProductCriteria criteria,
       PagingRequest pagingRequest) {
     StringBuilder sqlBuilder = new StringBuilder("""
         select p
@@ -60,7 +60,7 @@ public class CustomJpaProductRepositoryUsingJpql implements CustomJpaProductRepo
   }
 
   @Override
-  public long countByCriteria(FindProductCriteria criteria) {
+  public long countByCriteria(ProductRepository.FindProductCriteria criteria) {
     Map<String, Object> params = new HashMap<>();
     String whereClause = buildWhereClause(criteria, params);
     String countSql = """
@@ -76,7 +76,7 @@ public class CustomJpaProductRepositoryUsingJpql implements CustomJpaProductRepo
     return countQuery.getSingleResult();
   }
 
-  private String buildWhereClause(FindProductCriteria criteria, Map<String, Object> params) {
+  private String buildWhereClause(ProductRepository.FindProductCriteria criteria, Map<String, Object> params) {
     StringBuilder whereClauseBuilder = new StringBuilder("where 1=1 ");
     if (criteria.getProductId() != null) {
       whereClauseBuilder.append(" and p.productId = :productId ");

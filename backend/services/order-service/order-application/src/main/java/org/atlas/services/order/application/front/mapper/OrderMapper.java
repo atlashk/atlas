@@ -10,7 +10,7 @@ import org.atlas.services.order.domain.entity.OrderEntity.ProductSnapshot;
 import org.atlas.services.order.domain.entity.OrderEntity.UserSnapshot;
 import org.atlas.services.order.port.in.front.model.CheckoutInput;
 import org.atlas.services.order.port.in.front.model.RetrieveOrderListInput;
-import org.atlas.services.order.port.out.repository.criteria.FindOrderCriteria;
+import org.atlas.services.order.port.out.repository.OrderRepository;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
@@ -21,7 +21,7 @@ public interface OrderMapper {
 
   OrderMapper INSTANCE = Mappers.getMapper(OrderMapper.class);
 
-  FindOrderCriteria toFindOrderCriteria(RetrieveOrderListInput input);
+  OrderRepository.FindOrderCriteria toFindOrderCriteria(RetrieveOrderListInput input);
 
   UserSnapshot toUserSnapshot(UserResponse response);
 

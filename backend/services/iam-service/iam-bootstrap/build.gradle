@@ -42,6 +42,12 @@ dependencyManagement {
     }
 }
 
+tasks.withType(JavaExec).configureEach {
+    appStack.each { k, v ->
+        systemProperty "appStack.${k}", v.toString()
+    }
+}
+
 idea {
     module {
         downloadJavadoc = true

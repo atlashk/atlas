@@ -10,7 +10,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.framework.util.CollectionUtil;
-import org.atlas.libs.framework.util.PagingUtil;
 
 @Getter
 @Setter
@@ -18,9 +17,14 @@ import org.atlas.libs.framework.util.PagingUtil;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class PagingResult<T> {
 
-  protected List<T> data;
-  protected Pagination pagination;
+  private List<T> data;
+  private Pagination pagination;
 
+  /* ---------- Factory methods ---------- */
+
+  /**
+   * Empty result
+   */
   public static <T> PagingResult<T> empty() {
     return new PagingResult<>(Collections.emptyList(), Pagination.empty());
   }
@@ -28,10 +32,19 @@ public class PagingResult<T> {
   public static <T> PagingResult<T> of(List<T> data, Pagination pagination) {
     return new PagingResult<>(data, pagination);
   }
+  
+  /**
+   * Case A: Offset pagination WITH count
+   */
+  public static <T> PagingResult<T> of(List<T> data, long totalRecords, PagingRequest request) {
+    return new PagingResult<>(data, Pagination.countable(totalRecords, request));
+  }
 
-  public static <T> PagingResult<T> of(List<T> data, long totalRecords,
-      PagingRequest pagingRequest) {
-    return new PagingResult<>(data, Pagination.of(totalRecords, pagingRequest));
+  /**
+   * Case B: Offset pagination WITHOUT count (Keycloak)
+   */
+  public static <T> PagingResult<T> of(List<T> data, PagingRequest request, boolean hasNext) {
+    return new PagingResult<>(data, Pagination.blindOffset(request, hasNext));
   }
 
   public boolean checkEmpty() {
@@ -39,32 +52,9 @@ public class PagingResult<T> {
   }
 
   public <U> PagingResult<U> map(Function<? super T, ? extends U> mapper) {
-    List<U> mappedData = data.stream()
+    List<U> mapped = data.stream()
         .map(mapper)
         .collect(Collectors.toList());
-    return new PagingResult<>(mappedData, pagination);
-  }
-
-  @Getter
-  @Setter
-  public static class Pagination {
-
-    private int currentPage;
-    private int pageSize;
-    private int totalPages;
-    private long totalRecords;
-
-    public static Pagination empty() {
-      return new Pagination();
-    }
-
-    public static Pagination of(long totalRecords, PagingRequest pagingRequest) {
-      Pagination pagination = new Pagination();
-      pagination.setCurrentPage(pagingRequest.getPage());
-      pagination.setPageSize(pagingRequest.getSize());
-      pagination.setTotalPages(PagingUtil.calcTotalPages(totalRecords, pagination.getPageSize()));
-      pagination.setTotalRecords(totalRecords);
-      return pagination;
-    }
+    return new PagingResult<>(mapped, pagination);
   }
 }

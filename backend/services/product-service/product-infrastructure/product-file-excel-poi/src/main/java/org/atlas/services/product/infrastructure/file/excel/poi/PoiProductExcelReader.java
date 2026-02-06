@@ -49,8 +49,8 @@ public class PoiProductExcelReader implements ProductExcelReader {
     ProductReadRow productRow = new ProductReadRow();
     productRow.setName(row.getCell(0).getStringCellValue());
     productRow.setPrice(BigDecimal.valueOf(row.getCell(1).getNumericCellValue()));
+    productRow.setStockStatus(ProductStockStatus.valueOf(row.getCell(3).getStringCellValue()));
     productRow.setQuantity((int) row.getCell(2).getNumericCellValue());
-    productRow.setStatus(ProductStockStatus.valueOf(row.getCell(3).getStringCellValue()));
     productRow.setAvailableFrom(DateUtil.parse(row.getCell(4).getStringCellValue(),
         CommonConstant.DATE_TIME_FORMAT));
     productRow.setIsActive(row.getCell(5).getBooleanCellValue());

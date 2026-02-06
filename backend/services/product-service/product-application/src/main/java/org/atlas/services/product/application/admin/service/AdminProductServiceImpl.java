@@ -3,24 +3,27 @@ package org.atlas.services.product.application.admin.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.event.DomainEventType;
 import org.atlas.libs.framework.domain.common.event.contract.product.ProductEvent;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
+import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
+import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.libs.framework.util.ArrayUtil;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.product.application.admin.mapper.AdminProductMapper;
+import org.atlas.services.product.application.event.mapper.ProductEventMapper;
 import org.atlas.services.product.domain.entity.ProductEntity;
 import org.atlas.services.product.port.in.admin.model.AdminCreateProductInput;
 import org.atlas.services.product.port.in.admin.model.AdminExportProductInput;
 import org.atlas.services.product.port.in.admin.model.AdminImportProductInput;
 import org.atlas.services.product.port.in.admin.model.AdminRetrieveProductListInput;
 import org.atlas.services.product.port.in.admin.model.AdminUpdateProductInput;
-import org.atlas.services.product.application.event.mapper.ProductEventMapper;
 import org.atlas.services.product.port.in.admin.service.AdminProductService;
+import org.atlas.services.product.port.in.front.service.ProductImageService;
 import org.atlas.services.product.port.out.file.csv.ProductCsvReader;
 import org.atlas.services.product.port.out.file.csv.ProductCsvWriter;
 import org.atlas.services.product.port.out.file.excel.ProductExcelReader;
@@ -31,8 +34,6 @@ import org.atlas.services.product.port.out.file.model.ProductWriteRow;
 import org.atlas.services.product.port.out.file.pdf.ProductPdfWriter;
 import org.atlas.services.product.port.out.messaging.ProductEventMessagePublisher;
 import org.atlas.services.product.port.out.repository.ProductRepository;
-import org.atlas.services.product.port.out.repository.criteria.FindProductCriteria;
-import org.atlas.services.product.port.in.front.service.ProductImageService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +44,7 @@ public class AdminProductServiceImpl implements AdminProductService {
 
   private final ProductRepository productRepository;
   private final ProductImageService productImageService;
+  private final SequenceGenerator sequenceGenerator;
   private final ProductEventMessagePublisher productEventMessagePublisher;
   private final ProductCsvReader productCsvReader;
   private final ProductExcelReader productExcelReader;
@@ -52,7 +54,8 @@ public class AdminProductServiceImpl implements AdminProductService {
 
   @Override
   public PagingResult<ProductEntity> retrieveProductList(AdminRetrieveProductListInput input) {
-    FindProductCriteria criteria = AdminProductMapper.INSTANCE.toFindProductCriteria(input);
+    ProductRepository.FindProductCriteria criteria = AdminProductMapper.INSTANCE.toFindProductCriteria(
+        input);
     PagingResult<ProductEntity> productPage = productRepository.findByCriteria(criteria,
         input.getPagingRequest());
 
@@ -80,6 +83,7 @@ public class AdminProductServiceImpl implements AdminProductService {
   @Transactional
   public String createProduct(AdminCreateProductInput input) throws Exception {
     ProductEntity product = input.getProduct();
+    product.setProductId(sequenceGenerator.generate(SequenceType.PRODUCT));
     productRepository.insert(product);
 
     productImageService.uploadImage(product.getProductId(), input.getImageBytes(),
@@ -137,7 +141,11 @@ public class AdminProductServiceImpl implements AdminProductService {
     // Sync into DB and publish events
     try {
       List<ProductEntity> products = rows.stream()
-          .map(ProductReadRowMapper.INSTANCE::toProduct)
+          .map(row -> {
+            ProductEntity product = ProductReadRowMapper.INSTANCE.toProduct(row);
+            product.setProductId(sequenceGenerator.generate(SequenceType.PRODUCT));
+            return product;
+          })
           .toList();
       productRepository.insertBatch(products);
       products.forEach(this::publishProductCreatedEvent);
@@ -149,7 +157,8 @@ public class AdminProductServiceImpl implements AdminProductService {
 
   @Override
   public byte[] exportProduct(AdminExportProductInput input) throws Exception {
-    FindProductCriteria criteria = AdminProductMapper.INSTANCE.toFindProductCriteria(input);
+    ProductRepository.FindProductCriteria criteria = AdminProductMapper.INSTANCE
+        .toFindProductCriteria(input);
     PagingResult<ProductEntity> products = productRepository.findByCriteria(criteria,
         PagingRequest.unpaged());
 

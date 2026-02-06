@@ -12,7 +12,6 @@ import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.product.domain.entity.ProductEntity;
 import org.atlas.services.product.port.out.repository.ProductRepository;
-import org.atlas.services.product.port.out.repository.criteria.FindProductCriteria;
 import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaOptimisticProductEntity;
 import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaProduct;
 import org.atlas.services.product.infrastructure.persistence.jpa.mapper.JpaProductMapper;

@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
+import org.atlas.libs.framework.config.AppStackConfigService;
 import org.atlas.libs.framework.context.Contexts;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.notification.infrastructure.api.server.rest.mapper.NotificationMapper;
@@ -29,13 +30,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class InAppNotificationController {
 
   private final InAppNotificationService inAppNotificationService;
+  private final AppStackConfigService appStackConfigService;
 
   @GetMapping(value = "/service-info", produces = MediaType.APPLICATION_JSON_VALUE)
-  @Operation(summary = "Get current in-app service type information")
+  @Operation(summary = "Get current in-app service name")
   public ApiResponseWrapper<InAppServiceInfoResponse> retrieveCurrentInAppServiceType() {
-    String serviceType = inAppNotificationService.retrieveCurrentInAppServiceType();
+    String serviceName = appStackConfigService.getServiceName("notification.in-app");
     InAppServiceInfoResponse responseData = InAppServiceInfoResponse.builder()
-        .serviceType(serviceType.toLowerCase())
+        .serviceName(serviceName.toLowerCase())
         .build();
     return ApiResponseWrapper.success(responseData);
   }

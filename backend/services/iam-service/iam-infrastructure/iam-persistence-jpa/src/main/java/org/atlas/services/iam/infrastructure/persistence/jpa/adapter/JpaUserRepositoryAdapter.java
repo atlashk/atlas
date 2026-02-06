@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.iam.domain.entity.UserEntity;
@@ -21,7 +21,6 @@ import org.atlas.services.iam.infrastructure.persistence.jpa.entity.JpaUserEntit
 import org.atlas.services.iam.infrastructure.persistence.jpa.mapper.JpaUserMapper;
 import org.atlas.services.iam.infrastructure.persistence.jpa.repository.JpaUserRepository;
 import org.atlas.services.iam.port.out.repository.UserRepository;
-import org.atlas.services.iam.port.out.repository.criteria.FindUserCriteria;
 import org.springframework.stereotype.Component;
 
 @Component

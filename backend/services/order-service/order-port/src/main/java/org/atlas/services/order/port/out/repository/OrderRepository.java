@@ -14,7 +14,6 @@ import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.services.order.domain.entity.OrderEntity;
 import org.atlas.services.order.port.in.admin.model.AdminMonthlyOrderAggregation;
-import org.atlas.services.order.port.out.repository.criteria.FindOrderCriteria;
 
 public interface OrderRepository {
 

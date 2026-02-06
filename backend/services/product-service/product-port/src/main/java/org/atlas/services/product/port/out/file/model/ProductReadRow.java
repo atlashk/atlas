@@ -19,7 +19,7 @@ public class ProductReadRow {
   private String name;
   private BigDecimal price;
   private Integer quantity;
-  private ProductStatus stockStatus;
+  private ProductStockStatus stockStatus;
   private Date availableFrom;
   private Boolean isActive;
   private Integer brandId;
