@@ -25,6 +25,4 @@ SELECT format('CREATE DATABASE %I OWNER %I;', 'db_payment', :'db_owner')
 WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'db_payment')\gexec
 SELECT format('CREATE DATABASE %I OWNER %I;', 'db_product', :'db_owner')
 WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'db_product')\gexec
-SELECT format('CREATE DATABASE %I OWNER %I;', 'db_user', :'db_owner')
-WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'db_user')\gexec
 EOSQL

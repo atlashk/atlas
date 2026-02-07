@@ -14,7 +14,7 @@ public class KeycloakUtil {
 
   public static UserEntity toUserEntity(UserRepresentation kcUser) {
     return UserEntity.builder()
-        .userId(kcUser.getId())
+        .id(kcUser.getId())
         .username(kcUser.getUsername())
         .firstName(kcUser.getFirstName())
         .lastName(kcUser.getLastName())

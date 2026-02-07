@@ -33,20 +33,20 @@ data:
     <%_ if (hasJwt) { -%>
     CREATE DATABASE db_iam;
     <%_ } -%>
+    CREATE DATABASE db_iam;
     CREATE DATABASE db_notification;
     CREATE DATABASE db_order;
     CREATE DATABASE db_payment;
     CREATE DATABASE db_product;
-    CREATE DATABASE db_user;
 
     <%_ if (hasJwt) { -%>
     GRANT ALL PRIVILEGES ON db_iam.* TO '${MYSQL_USER}'@'%';
     <%_ } -%>
+    GRANT ALL PRIVILEGES ON db_iam.* TO '${MYSQL_USER}'@'%';
     GRANT ALL PRIVILEGES ON db_notification.* TO '${MYSQL_USER}'@'%';
     GRANT ALL PRIVILEGES ON db_order.* TO '${MYSQL_USER}'@'%';
     GRANT ALL PRIVILEGES ON db_payment.* TO '${MYSQL_USER}'@'%';
     GRANT ALL PRIVILEGES ON db_product.* TO '${MYSQL_USER}'@'%';
-    GRANT ALL PRIVILEGES ON db_user.* TO '${MYSQL_USER}'@'%';
     FLUSH PRIVILEGES;
     EOF
 ---

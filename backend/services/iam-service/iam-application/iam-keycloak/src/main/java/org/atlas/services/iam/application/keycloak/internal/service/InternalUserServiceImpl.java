@@ -19,7 +19,7 @@ public class InternalUserServiceImpl implements InternalUserService {
 
   @Override
   public List<InternalUserOutput> retrieveUserList(InternalRetrieveUserListInput input) {
-    List<UserEntity> userList = keycloakUserClient.retrieveUserList(input.getUserIds());
+    List<UserEntity> userList = keycloakUserClient.retrieveUserList(input.getIds());
     return MapperUtil.mapList(userList, InternalUserMapper.INSTANCE::toInternalUserOutput);
   }
 }

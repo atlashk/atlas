@@ -56,7 +56,7 @@ public class AdminOrderManagementController {
       @RequestParam(name = "size", required = false, defaultValue = CommonConstant.DEFAULT_PAGE_SIZE_STR) Integer size
   ) throws Exception {
     AdminRetrieveOrderListInput input = AdminRetrieveOrderListInput.builder()
-        .orderId(orderId)
+        .id(orderId)
         .userId(userId)
         .productId(productId)
         .status(status)

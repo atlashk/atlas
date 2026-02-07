@@ -115,7 +115,7 @@ public class ReserveProductCommandHandler {
       if (!acquiredLock) {
         throw new LockAcquisitionException("Failed to acquire lock: " + lockKey);
       }
-      ProductEntity product = productRepository.findByProductId(productId)
+      ProductEntity product = productRepository.findById(productId)
           .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
       if (product.getQuantity() < quantity) {
         throw new OutOfStockException();

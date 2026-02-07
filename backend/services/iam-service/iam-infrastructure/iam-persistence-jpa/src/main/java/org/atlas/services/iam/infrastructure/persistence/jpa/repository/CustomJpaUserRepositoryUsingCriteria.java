@@ -59,7 +59,7 @@ public class CustomJpaUserRepositoryUsingCriteria implements CustomJpaUserReposi
     CriteriaQuery<Long> query = criteriaBuilder.createQuery(Long.class);
     Root<JpaUserEntity> root = query.from(JpaUserEntity.class);
 
-    query.select(criteriaBuilder.countDistinct(root.get("userId")));
+    query.select(criteriaBuilder.countDistinct(root.get("id")));
 
     Specification<JpaUserEntity> spec = buildSpec(criteria);
     Predicate predicate = spec.toPredicate(root, query, criteriaBuilder);
@@ -74,8 +74,8 @@ public class CustomJpaUserRepositoryUsingCriteria implements CustomJpaUserReposi
       return spec;
     }
 
-    if (StringUtil.isNotBlank(criteria.getUserId())) {
-      spec.addFilter(QueryFilter.of("userId", criteria.getUserId().trim(), QueryOperator.EQUAL));
+    if (StringUtil.isNotBlank(criteria.getId())) {
+      spec.addFilter(QueryFilter.of("id", criteria.getId().trim(), QueryOperator.EQUAL));
     }
 
     if (StringUtil.isNotBlank(criteria.getUsername())) {

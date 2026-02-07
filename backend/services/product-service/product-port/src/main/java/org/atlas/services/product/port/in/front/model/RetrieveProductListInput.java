@@ -18,9 +18,23 @@ public class RetrieveProductListInput {
 
   // Product name, description, brand name, category name, attribute name/value
   private String keyword;
+
   private BigDecimal minPrice;
+
   private BigDecimal maxPrice;
+
   private Integer brandId;
+
   private List<Integer> categoryIds;
+
   private PagingRequest pagingRequest;
+
+  @Builder.Default
+  private Mode mode = Mode.DATABASE;
+
+  public enum Mode {
+
+    DATABASE, // Dynamic search
+    FULL_TEXT_SEARCH,
+  }
 }

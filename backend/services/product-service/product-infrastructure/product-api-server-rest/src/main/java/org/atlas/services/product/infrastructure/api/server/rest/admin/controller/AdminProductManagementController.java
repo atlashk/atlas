@@ -3,13 +3,9 @@ package org.atlas.services.product.infrastructure.api.server.rest.admin.controll
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
-import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
-import org.atlas.libs.framework.constant.CommonConstant;
-import org.atlas.libs.framework.domain.product.ProductStockStatus;
 import org.atlas.libs.framework.file.FileType;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
@@ -18,7 +14,9 @@ import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.product.domain.entity.ProductEntity;
 import org.atlas.services.product.infrastructure.api.server.rest.admin.mapper.AdminProductMapper;
 import org.atlas.services.product.infrastructure.api.server.rest.admin.model.AdminCreateProductRequest;
+import org.atlas.services.product.infrastructure.api.server.rest.admin.model.AdminExportProductRequest;
 import org.atlas.services.product.infrastructure.api.server.rest.admin.model.AdminProductResponse;
+import org.atlas.services.product.infrastructure.api.server.rest.admin.model.AdminRetrieveProductListRequest;
 import org.atlas.services.product.infrastructure.api.server.rest.admin.model.AdminUpdateProductRequest;
 import org.atlas.services.product.port.in.admin.model.AdminCreateProductInput;
 import org.atlas.services.product.port.in.admin.model.AdminExportProductInput;
@@ -26,7 +24,6 @@ import org.atlas.services.product.port.in.admin.model.AdminImportProductInput;
 import org.atlas.services.product.port.in.admin.model.AdminRetrieveProductListInput;
 import org.atlas.services.product.port.in.admin.model.AdminUpdateProductInput;
 import org.atlas.services.product.port.in.admin.service.AdminProductService;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -37,8 +34,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -52,46 +49,17 @@ public class AdminProductManagementController {
 
   private final AdminProductService adminProductService;
 
-  @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve a list of products with optional filtering and pagination")
   public ApiResponseWrapper<List<AdminProductResponse>> retrieveProductList(
-      @Parameter(name = "id", description = "The unique identifier of the product", example = "1")
-      @RequestParam(name = "id", required = false) Integer id,
-      @Parameter(name = "keyword", description = "Keyword for searching products", example = "T-Shirt")
-      @RequestParam(name = "keyword", required = false) String keyword,
-      @Parameter(name = "minPrice", description = "Minimum price for filtering products", example = "10.00")
-      @RequestParam(name = "minPrice", required = false) BigDecimal minPrice,
-      @Parameter(name = "maxPrice", description = "Maximum price for filtering products", example = "100.00")
-      @RequestParam(name = "maxPrice", required = false) BigDecimal maxPrice,
-      @Parameter(name = "stockStatus", description = "Stock status", example = "IN_STOCK")
-      @RequestParam(name = "stockStatus", required = false) ProductStockStatus stockStatus,
-      @Parameter(name = "availableFrom", description = "Date from which the product is available (ISO 8601 format)", example = "2023-01-01T00:00:00Z")
-      @RequestParam(name = "availableFrom", required = false)
-      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date availableFrom,
-      @Parameter(name = "isActive", description = "Indicates if the product is active", example = "true")
-      @RequestParam(name = "isActive", required = false) Boolean isActive,
-      @Parameter(name = "brandId", description = "Brand ID for filtering products", example = "1")
-      @RequestParam(name = "brandId", required = false) Integer brandId,
-      @Parameter(name = "categoryIds", description = "List of category IDs for filtering products", example = "[1, 2, 3]")
-      @RequestParam(name = "categoryIds", required = false) List<Integer> categoryIds,
-      @Parameter(name = "page", description = "Page number for pagination", example = "1")
-      @RequestParam(name = "page", required = false, defaultValue = "1") Integer page,
-      @Parameter(name = "size", description = "Number of items per page", example = "20")
-      @RequestParam(name = "size", required = false, defaultValue = CommonConstant.DEFAULT_PAGE_SIZE_STR) Integer size
+      @Parameter(description = "Request object containing filters and pagination", required = true)
+      @Valid @RequestBody AdminRetrieveProductListRequest request
   ) {
-    AdminRetrieveProductListInput input = AdminRetrieveProductListInput.builder()
-        .id(id)
-        .keyword(keyword)
-        .minPrice(minPrice)
-        .maxPrice(maxPrice)
-        .stockStatus(stockStatus)
-        .availableFrom(availableFrom)
-        .isActive(isActive)
-        .brandId(brandId)
-        .categoryIds(categoryIds)
-        .pagingRequest(PagingRequest.of(page - 1, size))
-        .build();
+    AdminRetrieveProductListInput input = AdminProductMapper.INSTANCE.toRetrieveProductListInput(request);
+    input.setPagingRequest(PagingRequest.of(request.getPage() - 1, request.getSize()));
+
     PagingResult<ProductEntity> productPage = adminProductService.retrieveProductList(input);
+
     PagingResult<AdminProductResponse> responseData = MapperUtil.mapPage(productPage,
         AdminProductMapper.INSTANCE::toProductResponse);
     return ApiResponseWrapper.successPage(responseData);
@@ -103,6 +71,7 @@ public class AdminProductManagementController {
       @Parameter(name = "productId", description = "The unique identifier of the product", example = "1")
       @PathVariable String productId) {
     ProductEntity product = adminProductService.retrieveProduct(productId);
+
     AdminProductResponse response = AdminProductMapper.INSTANCE.toProductResponse(product);
     return ApiResponseWrapper.success(response);
   }
@@ -121,6 +90,7 @@ public class AdminProductManagementController {
         .imageBytes(imageFile.getBytes())
         .imageContentType(imageFile.getContentType())
         .build();
+
     String responseData = adminProductService.createProduct(input);
     return ApiResponseWrapper.success(responseData);
   }
@@ -135,7 +105,7 @@ public class AdminProductManagementController {
       @Parameter(description = "Product image file")
       @RequestPart(value = "image", required = false) MultipartFile imageFile) throws Exception {
     ProductEntity product = AdminProductMapper.INSTANCE.toProduct(request);
-    product.setProductId(productId);
+    product.setId(productId);
     AdminUpdateProductInput input = AdminUpdateProductInput.builder()
         .product(product)
         .build();
@@ -143,6 +113,7 @@ public class AdminProductManagementController {
       input.setImageBytes(imageFile.getBytes());
       input.setImageContentType(imageFile.getContentType());
     }
+
     adminProductService.updateProduct(input);
     return ApiResponseWrapper.success();
   }
@@ -165,53 +136,24 @@ public class AdminProductManagementController {
       @RequestPart("file_type") FileType fileType) throws Exception {
     byte[] fileContent = file.getBytes();
     AdminImportProductInput input = new AdminImportProductInput(fileType, fileContent);
+
     adminProductService.importProduct(input);
     return ApiResponseWrapper.success();
   }
 
-  @GetMapping(value = "/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  @PostMapping(value = "/export", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @Operation(summary = "Export products based on optional filters")
   public ResponseEntity<byte[]> export(
-      @Parameter(name = "id", description = "The unique identifier of the product to export", example = "1")
-      @RequestParam(name = "id", required = false) Integer id,
-      @Parameter(name = "keyword", description = "Keyword for searching products", example = "T-Shirt")
-      @RequestParam(name = "keyword", required = false) String keyword,
-      @Parameter(name = "minPrice", description = "Minimum price for filtering products", example = "10.00")
-      @RequestParam(name = "minPrice", required = false) BigDecimal minPrice,
-      @Parameter(name = "maxPrice", description = "Maximum price for filtering products", example = "100.00")
-      @RequestParam(name = "maxPrice", required = false) BigDecimal maxPrice,
-      @Parameter(name = "stockStatus", description = "Stock status", example = "IN_STOCK")
-      @RequestParam(name = "stockStatus", required = false) ProductStockStatus stockStatus,
-      @Parameter(name = "availableFrom", description = "Date from which the product is available (ISO 8601 format)", example = "2023-01-01T00:00:00Z")
-      @RequestParam(name = "availableFrom", required = false) Date availableFrom,
-      @Parameter(name = "isActive", description = "Indicates if the product is active", example = "true")
-      @RequestParam(name = "isActive", required = false) Boolean isActive,
-      @Parameter(name = "brandId", description = "Brand ID for filtering products", example = "1")
-      @RequestParam(name = "brandId", required = false) Integer brandId,
-      @Parameter(name = "categoryIds", description = "List of category IDs for filtering products", example = "[1, 2, 3]")
-      @RequestParam(name = "categoryIds", required = false) List<Integer> categoryIds,
-      @Parameter(name = "file_type", description = "The type of the file to export to (e.g., csv, xlsx)", example = "csv")
-      @RequestParam(name = "file_type") FileType fileType
+      @Parameter(description = "Request object containing filters and export settings", required = true)
+      @Valid @RequestBody AdminExportProductRequest request
   ) throws Exception {
-    AdminExportProductInput input = AdminExportProductInput.builder()
-        .id(id)
-        .keyword(keyword)
-        .minPrice(minPrice)
-        .maxPrice(maxPrice)
-        .stockStatus(stockStatus)
-        .availableFrom(availableFrom)
-        .isActive(isActive)
-        .brandId(brandId)
-        .categoryIds(categoryIds)
-        .fileType(fileType)
-        .build();
+    AdminExportProductInput input = AdminProductMapper.INSTANCE.toExportProductInput(request);
     byte[] fileContent = adminProductService.exportProduct(input);
 
     // Exported file info
     String fileName = String.format("export-product-%s.%s",
         DateUtil.now("yyyyMMddHHmmss"),
-        fileType.getExtension());
-
+        request.getFileType().getExtension());
     return ResponseEntity.ok()
         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
         .contentType(MediaType.APPLICATION_OCTET_STREAM)

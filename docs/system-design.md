@@ -1,5 +1,89 @@
 # System Design
 
+## Atlas system design (repository-specific)
+
+Atlas is organized as a poly-repo style mono-workspace:
+
+- `backend/`: Java/Spring multi-module Gradle workspace (libs + services + platform)
+- `frontend/`: Next.js app (React 19)
+- `wiki/`: design notes and architecture docs
+
+### Service landscape
+
+```mermaid
+flowchart LR
+  FE[Frontend (Next.js :8000)] -->|HTTP| GW[API Gateway :8080]
+  GW --> EUREKA[Eureka :8761]
+  GW --> IAM[IAM :8081]
+  GW --> PRD[Product :8082]
+  GW --> ORD[Order :8083]
+  GW --> PAY[Payment :8084]
+  GW --> NOTIF[Notification :8085]
+
+  subgraph Infra
+    DB[(MySQL/Postgres)]
+    REDIS[(Redis)]
+    MQ[(Kafka/RabbitMQ)]
+  end
+
+  IAM --> DB
+  PRD --> DB
+  ORD --> DB
+  PAY --> DB
+  NOTIF --> DB
+
+  IAM --> REDIS
+  PRD --> REDIS
+  ORD --> REDIS
+  PAY --> REDIS
+  NOTIF --> REDIS
+
+  IAM --> MQ
+  PRD --> MQ
+  ORD --> MQ
+  PAY --> MQ
+  NOTIF --> MQ
+```
+
+### Deployment configuration (app-stack)
+
+Local deployment is generated from an app-stack YAML file under `backend/config/` (example:
+`app-stack.dev.yml`). This file selects concrete implementations for infra and cross-cutting concerns
+(datasource, messaging, auth, storage, observability, etc.).
+
+### Generated deployment (Compose/K8s)
+
+`backend/deploy.sh` performs:
+
+1. Read `backend/config/app-stack.<name>.yml`
+2. Convert YAML -> `.cfg` format for the generator
+3. Render templates (EJS) into `backend/dist/`
+4. Execute the generated `install.sh`
+
+### Checkout flow (Saga)
+
+Checkout is implemented as an orchestrated saga (orchestrator in Order Service). Commands and replies are
+exchanged via the configured messaging backend.
+
+```mermaid
+sequenceDiagram
+  participant ORD as Order Service (Saga orchestrator)
+  participant MQ as Messaging
+  participant PRD as Product Service
+  participant PAY as Payment Service
+  participant NOT as Notification Service
+
+  ORD->>MQ: RESERVE_PRODUCT
+  MQ->>PRD: RESERVE_PRODUCT
+  PRD->>MQ: reply
+  ORD->>MQ: INITIALIZE_PAYMENT
+  MQ->>PAY: INITIALIZE_PAYMENT
+  PAY->>MQ: reply
+  ORD->>MQ: NOTIFY_ORDER_FULFILLED
+  MQ->>NOT: NOTIFY_ORDER_FULFILLED
+  NOT->>MQ: reply
+```
+
 https://scalabrix.medium.com/list/system-design-concepts-for-interviews-7b12980141be
 
 ## Twelve-factor applications

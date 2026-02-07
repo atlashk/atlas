@@ -56,7 +56,7 @@ public class CustomJpaUserRepositoryUsingJpql implements CustomJpaUserRepository
     Map<String, Object> params = new HashMap<>();
     String whereClause = buildWhereClause(criteria, params);
     String countSql = """
-        select count(distinct u.userId)
+        select count(distinct u.id)
         from JpaUserEntity u
         """ + whereClause;
     TypedQuery<Long> countQuery = entityManager.createQuery(countSql, Long.class);
@@ -68,9 +68,9 @@ public class CustomJpaUserRepositoryUsingJpql implements CustomJpaUserRepository
       Map<String, Object> params) {
     StringBuilder whereClauseBuilder = new StringBuilder("where 1=1 ");
 
-    if (StringUtil.isNotBlank(criteria.getUserId())) {
-      whereClauseBuilder.append(" and u.userId = :userId ");
-      params.put("userId", criteria.getUserId());
+    if (StringUtil.isNotBlank(criteria.getId())) {
+      whereClauseBuilder.append(" and u.id = :id ");
+      params.put("id", criteria.getId());
     }
 
     if (StringUtil.isNotBlank(criteria.getUsername())) {

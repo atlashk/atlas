@@ -17,26 +17,7 @@ export class ProductAdminApi extends BaseApi {
   async listProduct(
     filters: ListProductFilters
   ): Promise<ApiResponse<Product[]>> {
-    const queryParams = new URLSearchParams();
-    if (filters.id) queryParams.append("id", filters.id.toString());
-    if (filters.keyword) queryParams.append("keyword", filters.keyword);
-    if (filters.minPrice)
-      queryParams.append("minPrice", filters.minPrice.toString());
-    if (filters.maxPrice)
-      queryParams.append("maxPrice", filters.maxPrice.toString());
-    if (filters.status) queryParams.append("status", filters.status);
-    if (filters.availableFrom)
-      queryParams.append("availableFrom", filters.availableFrom);
-    if (filters.isActive != null)
-      queryParams.append("isActive", filters.isActive.toString());
-    if (filters.brandId)
-      queryParams.append("brandId", filters.brandId.toString());
-    if (filters.categoryIds?.length)
-      queryParams.append("categoryIds", filters.categoryIds.join(","));
-    queryParams.append("page", filters.page.toString());
-    queryParams.append("size", filters.size.toString());
-
-    return this.get<Product[]>(`/products?${queryParams.toString()}`);
+    return this.post<Product[], ListProductFilters>("/products", filters);
   }
 
   async getProduct(productId: number): Promise<ApiResponse<Product>> {
@@ -87,28 +68,7 @@ export class ProductAdminApi extends BaseApi {
   }
 
   async exportProduct(filters: ExportProductFilters): Promise<void> {
-    const queryParams = new URLSearchParams();
-    if (filters.id) queryParams.append("id", filters.id.toString());
-    if (filters.keyword) queryParams.append("keyword", filters.keyword);
-    if (filters.minPrice)
-      queryParams.append("minPrice", filters.minPrice.toString());
-    if (filters.maxPrice)
-      queryParams.append("maxPrice", filters.maxPrice.toString());
-    if (filters.status) queryParams.append("status", filters.status);
-    if (filters.availableFrom)
-      queryParams.append("availableFrom", filters.availableFrom);
-    if (filters.isActive != null)
-      queryParams.append("isActive", filters.isActive.toString());
-    if (filters.brandId)
-      queryParams.append("brandId", filters.brandId.toString());
-    if (filters.categoryIds?.length) {
-      queryParams.append("categoryIds", filters.categoryIds.join(","));
-    }
-    queryParams.append("file_type", filters.fileType);
-
-    const response = await this.getBlob(
-      `/products/export?${queryParams.toString()}`
-    );
+    const response = await this.postBlob("/products/export", filters);
 
     // Create blob and download
     const blob = new Blob([response.data], {

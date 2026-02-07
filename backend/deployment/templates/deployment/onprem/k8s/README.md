@@ -31,12 +31,12 @@ All deployment scripts are located in this directory.
 cd backend/scripts/deploy/onprem/k8s
 
 # Start services
-./deploy.sh                          # Local environment (default)
-./deploy.sh --env local              # Specified environment
+./install.sh                          # Local environment (default)
+./install.sh --env local              # Specified environment
 
 # Start services (skip builds)
-./deploy.sh --skip-build             # Local environment (default)
-./deploy.sh --env local --skip-build # Specified environment
+./install.sh --skip-build             # Local environment (default)
+./install.sh --env local --skip-build # Specified environment
 
 # Stop services: scales to 0 replicas, preserves all data
 ./stop.sh                           # Local environment (default)

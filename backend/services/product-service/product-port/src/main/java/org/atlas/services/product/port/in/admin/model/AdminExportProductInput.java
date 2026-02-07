@@ -18,7 +18,7 @@ import org.atlas.libs.framework.file.FileType;
 @Setter
 public class AdminExportProductInput {
 
-  private Integer id;
+  private String id;
   private String keyword;
   private BigDecimal minPrice;
   private BigDecimal maxPrice;

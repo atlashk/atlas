@@ -20,7 +20,7 @@ public interface JpaProductAttributeMapper {
   @Mapping(target = "product", ignore = true)
   JpaProductAttributeEntity toJpaProductAttribute(ProductAttributeEntity productAttribute);
 
-  @Mapping(target = "productId", source = "product.productId")
+  @Mapping(target = "productId", source = "product.id")
   ProductAttributeEntity toProductAttribute(JpaProductAttributeEntity jpaProductAttribute);
 
   @Mapping(target = "product", ignore = true)

@@ -1,5 +1,37 @@
 # Event-driven architecture
 
+## Atlas notes
+
+Atlas uses event-driven messaging primarily for cross-service coordination (Saga commands/replies) and
+optionally for reliable publishing via the Outbox pattern.
+
+### Messaging backends
+
+- Kafka or RabbitMQ (selected by app-stack; see `backend/config/app-stack.*.yml`)
+- Saga topics/exchanges follow a convention:
+  - `saga.<sagaName>.command.<targetService>`
+  - `saga.<sagaName>.commandreply`
+  - `saga.<sagaName>.compensation.<targetService>`
+  - `saga.<sagaName>.compensationreply`
+
+```mermaid
+flowchart LR
+  ORCH[Order Service<br/>Saga orchestrator] -->|SagaCommand| MQ[Kafka/RabbitMQ]
+  MQ -->|SagaCommand| SVC[Target service handler]
+  SVC -->|SagaCommandReply| MQ
+  MQ -->|SagaCommandReply| ORCH
+```
+
+### Outbox gateway (optional)
+
+Publishing can be configured as:
+
+- `app.messaging.gateway=instant` (default): publish directly
+- `app.messaging.gateway=outbox`: persist message to `outbox_message` table, then relay via a scheduler
+
+Relay runs periodically (implementation depends on included scheduler module) and processes
+`OutboxMessageStatus.PENDING` entries until `PROCESSED` or `FAILED`.
+
 https://blog.bytebytego.com/p/event-driven-architectural-patterns
 
 ---

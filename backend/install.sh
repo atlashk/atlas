@@ -11,10 +11,13 @@ set -euo pipefail
 # - Execute install.sh script
 #
 # Usage:
-#   ./deploy.sh <app-stack>
+#   ./install.sh [--app-stack <name>] [--skip-build] [--infra-only]
 #
 # Parameters:
-#   app-stack: Configuration name (e.g., dev, onprem.compose, onprem.k8s.native)
+#   app-stack: Configuration name (e.g., onprem.compose, dev, onprem.k8s.native); via --app-stack
+#   skip-build: Optional; default false
+#   infra-only: Optional; default false
+#              If app-stack is 'dev' and infra-only not specified, default true
 #
 # Notes:
 # - Requires Node.js; will install 'ejs' if missing (via npm).
@@ -28,31 +31,38 @@ GENERATOR_DIR="$BACKEND_DIR/deployment/generator"
 TEMPLATES_DIR="$BACKEND_DIR/deployment/templates"
 BUILDSRC_TEMPLATES_DIR="$TEMPLATES_DIR/buildSrc"
 DEPLOYMENT_TEMPLATES_DIR="$TEMPLATES_DIR/deployment"
-DIST_DIR="$BACKEND_DIR/dist"
+DIST_DIR="$BACKEND_DIR/deployment/dist"
 
 info() { printf "[INFO] %s\n" "$*"; }
 warn() { printf "[WARN] %s\n" "$*"; }
 err()  { printf "[ERROR] %s\n" "$*"; }
 
 usage() {
-  echo "Usage: $0 [app-stack] [options] [-- <install.sh options>]"
-  echo ""
-  echo "Arguments:"
-  echo "  app-stack                Configuration name (default: dev)"
-  echo "                           Available: dev, onprem.compose, onprem.k8s.native"
+  local code="${1:-1}"
+  echo "Usage: $0 [--app-stack <name>] [--skip-build] [--infra-only] [--debug-template]"
   echo ""
   echo "Options:"
-  echo "  --infra-only              Deploy only infrastructure services"
-  echo "  -h, --help                Show this help and exit"
+  echo "  --app-stack <name>        Pick config/app-stack.<name>.yml"
+  echo "  --skip-build              Pass '--skip-build' to install.sh"
+  echo "  --infra-only              Pass '--infra-only' to install.sh"
+  echo "  --debug-template          Skip install.sh execution"
+  echo "  -h, --help                Show help and exit"
+  echo ""
+  echo "Defaults:"
+  echo "  - app-stack=onprem.compose"
+  echo "  - skip-build=false"
+  echo "  - infra-only=false"
+  echo "  - If app-stack=dev and infra-only not specified, infra-only=true"
   echo ""
   echo "Examples:"
-  echo "  $0                               # Uses default 'dev'"
-  echo "  $0 dev"
-  echo "  $0 onprem.compose"
-  echo "  $0 onprem.k8s.native"
-  echo "  $0 onprem.compose --infra-only"
-  echo "  $0 dev -- --skip-build           # Pass-through option to generated install.sh"
-  exit 1
+  echo "  $0"
+  echo "  $0 --app-stack onprem.compose"
+  echo "  $0 --app-stack onprem.k8s.native"
+  echo "  $0 --app-stack onprem.compose --skip-build"
+  echo "  $0 --app-stack onprem.compose --infra-only"
+  echo "  $0 --app-stack dev                  # Defaults infra-only=true"
+  echo "  $0 --app-stack dev --skip-build     # dev + infra-only=true + skip-build=true"
+  exit "$code"
 }
 
 ensure_generator_deps() {
@@ -63,12 +73,9 @@ ensure_generator_deps() {
   fi
 
   # Check if we're in the generator directory and ejs is available
-  (
-    cd "$GENERATOR_DIR" || exit 1
-    if node -e "try{require('ejs');}catch(e){process.exit(1)}" >/dev/null 2>&1; then
-      return 0
-    fi
-  )
+  if (cd "$GENERATOR_DIR" && node -e "try{require('ejs');}catch(e){process.exit(1)}" >/dev/null 2>&1); then
+    return 0
+  fi
 
   warn "Missing Node package 'ejs' required by generator.mjs."
   if ! command -v npm >/dev/null 2>&1; then
@@ -282,53 +289,68 @@ execute_install_script() {
 }
 
 main() {
-  local app_stack="dev"
+  local app_stack="onprem.compose"
+  local skip_build=false
   local infra_only=false
-  local pass_through=()
+  local infra_only_specified=false
+  local debug_template=false
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
       -h|--help)
-        usage
+        usage 0
+        ;;
+      --app-stack)
+        shift
+        if [[ $# -eq 0 || "$1" == -* ]]; then
+          err "Missing value for --app-stack"
+          usage 1
+        fi
+        app_stack="$1"
+        shift
+        ;;
+      --app-stack=*)
+        app_stack="${1#--app-stack=}"
+        if [[ -z "$app_stack" ]]; then
+          err "Missing value for --app-stack"
+          usage 1
+        fi
+        shift
         ;;
       --infra-only)
         infra_only=true
+        infra_only_specified=true
         shift
         ;;
-      --)
+      --skip-build)
+        skip_build=true
         shift
-        pass_through+=("$@")
-        break
+        ;;
+      --debug-template)
+        debug_template=true
+        shift
         ;;
       -*)
-        pass_through+=("$1")
-        shift
+        err "Unsupported option: $1"
+        usage 1
         ;;
       *)
-        if [[ "$app_stack" == "dev" ]]; then
-          app_stack="$1"
-          shift
-        else
-          pass_through+=("$1")
-          shift
-        fi
+        err "Unsupported argument: $1"
+        usage 1
         ;;
     esac
   done
 
-  local install_args=("${pass_through[@]}")
+  if [[ "$app_stack" == "dev" && "$infra_only_specified" == "false" ]]; then
+    infra_only=true
+  fi
+
+  local install_args=()
+  if [[ "$skip_build" == "true" ]]; then
+    install_args+=("--skip-build")
+  fi
   if [[ "$infra_only" == "true" ]]; then
     install_args+=("--infra-only")
-    local has_skip_build=false
-    for a in "${install_args[@]}"; do
-      if [[ "$a" == "--skip-build" || "$a" == "skip-build" ]]; then
-        has_skip_build=true
-        break
-      fi
-    done
-    if [[ "$has_skip_build" == "false" ]]; then
-      install_args+=("--skip-build")
-    fi
   fi
   
   local config_file="$CONFIG_DIR/app-stack.${app_stack}.yml"
@@ -361,15 +383,18 @@ main() {
 
   # Step 5: Generate templates
   generate_templates "$temp_cfg_file" "$deployment"
+  info "Generated files are available in: $DIST_DIR"
 
   # Step 6: Normalize line endings
   normalize_line_endings_to_lf "$DIST_DIR"
 
   # Step 7: Execute install.sh
-  execute_install_script "${install_args[@]}"
-  
-  info "Atlas deployment completed successfully."
-  info "Generated files are available in: $DIST_DIR"
+  if [[ "$debug_template" == "true" ]]; then
+    info "Debug template mode enabled. Skipping install script execution."
+  else
+    execute_install_script "${install_args[@]}"
+    info "Atlas deployment completed successfully"
+  fi  
 }
 
 main "$@"

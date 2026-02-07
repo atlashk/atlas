@@ -16,8 +16,8 @@ public interface ElasticsearchProductMapper {
 
   ElasticsearchProductMapper INSTANCE = Mappers.getMapper(ElasticsearchProductMapper.class);
 
-  @Mapping(target = "id", source = "productId")
-  @Mapping(target = "productId", source = "productId")
+  @Mapping(target = "id", source = "id")
+  @Mapping(target = "productId", source = "id")
   ElasticsearchProduct toProductDocument(ProductEntity product);
 
   ElasticsearchProduct.ProductDetails toProductDetailsDocument(ProductDetailsEntity details);
@@ -28,7 +28,7 @@ public interface ElasticsearchProductMapper {
 
   ElasticsearchProduct.Category toCategoryDocument(CategoryEntity category);
 
-  @Mapping(target = "productId", source = "productId")
+  @Mapping(target = "id", source = "productId")
   ProductEntity toProduct(ElasticsearchProduct document);
 
   ProductDetailsEntity toProductDetails(ElasticsearchProduct.ProductDetails details);

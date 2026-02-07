@@ -76,7 +76,7 @@ public class InitializePaymentCommandHandler {
 
     // Create external payment
     CreatePaymentRequest createPaymentRequest = CreatePaymentRequest.builder()
-        .paymentId(payment.getPaymentId())
+        .paymentId(payment.getId())
         .amount(payment.getAmount())
         .currency(payment.getCurrency())
         .build();
@@ -85,7 +85,7 @@ public class InitializePaymentCommandHandler {
     if (response.isSuccess()) {
       log.info(
           "Created payment via payment gateway successfully: orderId={}, userId={}, paymentId={}, transactionId={}",
-          payment.getOrderId(), payment.getUserId(), payment.getPaymentId(),
+          payment.getOrderId(), payment.getUserId(), payment.getId(),
           response.getTransactionId());
 
       // Update payment entity
@@ -103,7 +103,7 @@ public class InitializePaymentCommandHandler {
     } else {
       log.error(
           "Failed to create payment via payment gateway: orderId={}, userId={}, paymentId={}, errorCode={}, errorMessage={}",
-          payment.getOrderId(), payment.getUserId(), payment.getPaymentId(),
+          payment.getOrderId(), payment.getUserId(), payment.getId(),
           response.getErrorCode(), response.getErrorMessage());
 
       // Update payment entity

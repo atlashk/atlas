@@ -64,17 +64,6 @@ public class StringUtil {
     return str.chars().allMatch(Character::isLetterOrDigit);
   }
 
-  /**
-   * Returns the input string if it is not null; otherwise, returns an empty value by default.
-   */
-  public static String nvl(String str) {
-    return str == null ? StringUtil.EMPTY : str;
-  }
-
-  public static String nvl(Object str) {
-    return str == null ? StringUtil.EMPTY : str.toString();
-  }
-
   public static String trimToEmpty(String str) {
     return StringUtils.trimToEmpty(str);
   }

@@ -108,7 +108,7 @@ public class AdminUserManagementController {
       @Parameter(description = "Request object containing updated user details", required = true)
       @Valid @RequestBody AdminUpdateUserRequest request) {
     AdminUpdateUserInput input = AdminUpdateUserInput.builder()
-        .userId(userId)
+        .id(userId)
         .password(request.getPassword())
         .firstName(request.getFirstName())
         .lastName(request.getLastName())

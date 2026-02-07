@@ -1,5 +1,13 @@
 # Messaging
 
+## Atlas notes
+
+- Messaging backend is configurable (Kafka / RabbitMQ) via app-stack (`backend/config/app-stack.*.yml`).
+- Saga messaging is built on a generic `MessagePublisher` abstraction with Kafka/RabbitMQ adapters:
+  - Kafka publisher: `backend/libs/messaging/messaging-kafka`
+  - RabbitMQ publisher: `backend/libs/messaging/messaging-rabbitmq`
+- Saga topic/exchange naming follows `saga.<sagaName>.*` (see `KafkaSagaMessagePublisher` / `RabbitmqSagaMessagePublisher`).
+
 ## Apache Kafka
 
 ### Offset management

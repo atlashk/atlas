@@ -1,5 +1,30 @@
 # Service discovery
 
+## Atlas notes
+
+Atlas uses Netflix Eureka as the discovery server and Spring Cloud’s service discovery integration.
+
+```mermaid
+flowchart LR
+  GW[API Gateway] --> E[Eureka Server]
+  IAM[IAM Service] --> E
+  PRD[Product Service] --> E
+  ORD[Order Service] --> E
+  PAY[Payment Service] --> E
+  NOT[Notification Service] --> E
+
+  GW -->|lb://iam-service| IAM
+  GW -->|lb://product-service| PRD
+  GW -->|lb://order-service| ORD
+  GW -->|lb://payment-service| PAY
+  GW -->|lb://notification-service| NOT
+```
+
+Operationally:
+
+- Eureka UI: `http://localhost:8761`
+- Gateway can route using `lb://<service-id>` when discovery is enabled.
+
 ## Client-side discovery
 
 In the client-side discovery pattern, each microservice will communicate with the discovery service directly. In this pattern, the service gets the network location of all other services and their instance location from the discovery service before making the request to the required service. After getting the locations, the calling service is supposed to have smartness in choosing the proper instance of the required service by implementing some load balancing algorithms. Netflix Eureka is a good example of using this pattern. Ribbon is another tool that works with Eureka and helps the service to efficiently choose an instance for load balancing the request.

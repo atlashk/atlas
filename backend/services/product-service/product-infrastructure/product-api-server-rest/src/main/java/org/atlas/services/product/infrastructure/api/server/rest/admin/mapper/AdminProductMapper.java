@@ -1,14 +1,18 @@
 package org.atlas.services.product.infrastructure.api.server.rest.admin.mapper;
 
 import java.util.List;
+import org.atlas.services.product.domain.entity.BrandEntity;
 import org.atlas.services.product.domain.entity.CategoryEntity;
 import org.atlas.services.product.domain.entity.ProductAttributeEntity;
+import org.atlas.services.product.domain.entity.ProductDetailsEntity;
 import org.atlas.services.product.domain.entity.ProductEntity;
 import org.atlas.services.product.infrastructure.api.server.rest.admin.model.AdminCreateProductRequest;
+import org.atlas.services.product.infrastructure.api.server.rest.admin.model.AdminExportProductRequest;
 import org.atlas.services.product.infrastructure.api.server.rest.admin.model.AdminProductResponse;
+import org.atlas.services.product.infrastructure.api.server.rest.admin.model.AdminRetrieveProductListRequest;
 import org.atlas.services.product.infrastructure.api.server.rest.admin.model.AdminUpdateProductRequest;
-import org.atlas.services.product.domain.entity.BrandEntity;
-import org.atlas.services.product.domain.entity.ProductDetailsEntity;
+import org.atlas.services.product.port.in.admin.model.AdminExportProductInput;
+import org.atlas.services.product.port.in.admin.model.AdminRetrieveProductListInput;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
@@ -19,17 +23,21 @@ public interface AdminProductMapper {
 
   AdminProductMapper INSTANCE = Mappers.getMapper(AdminProductMapper.class);
 
+  AdminRetrieveProductListInput toRetrieveProductListInput(AdminRetrieveProductListRequest request);
+
   AdminProductResponse toProductResponse(ProductEntity product);
 
   @Mapping(target = "brand", source = "brandId")
   @Mapping(target = "categories", source = "categoryIds")
-  @Mapping(target = "productId", ignore = true)
+  @Mapping(target = "id", ignore = true)
   ProductEntity toProduct(AdminCreateProductRequest request);
 
   @Mapping(target = "brand", source = "brandId")
   @Mapping(target = "categories", source = "categoryIds")
-  @Mapping(target = "productId", ignore = true)
+  @Mapping(target = "id", ignore = true)
   ProductEntity toProduct(AdminUpdateProductRequest request);
+
+  AdminExportProductInput toExportProductInput(AdminExportProductRequest request);
 
   // Helper methods for mapping complex objects
   default BrandEntity mapBrandId(Integer brandId) {

@@ -13,7 +13,7 @@ PROJECT_NAME="atlas"
 
 # Service definitions with name and build context
 SERVICES=(
-    "user-service:$PROJECT_ROOT/backend/application/user-application"
+    "iam-service:$PROJECT_ROOT/backend/application/iam-application"
     "product-service:$PROJECT_ROOT/backend/application/product-application"
     "order-service:$PROJECT_ROOT/backend/application/order-application"
     "payment-service:$PROJECT_ROOT/backend/application/payment-application"
@@ -80,7 +80,7 @@ usage() {
     echo ""
     echo "Examples:"
     echo "  $0                              # Build all Docker images"
-    echo "  $0 --service=user-service       # Build only user-service Docker image"
+    echo "  $0 --service=iam-service        # Build only iam-service Docker image"
 }
 
 # Parse named parameters

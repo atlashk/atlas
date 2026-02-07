@@ -19,15 +19,22 @@ import org.atlas.libs.framework.paging.PagingRequest;
 public class AdminRetrieveProductListInput {
 
   private String id;
+
   private String keyword;
+
   private BigDecimal minPrice;
+
   private BigDecimal maxPrice;
+
   private ProductStockStatus stockStatus;
+
   private Date availableFrom;
+
   private Boolean isActive;
+
   private Integer brandId;
+
   private List<Integer> categoryIds;
+
   private PagingRequest pagingRequest;
 }
-
-

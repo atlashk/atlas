@@ -1,5 +1,5 @@
 <%
-  const authServer = (stack['iam'] || '').toLowerCase();
+  const iam = (stack['iam'] || '').toLowerCase();
   const datasource = (stack.datasource || '').toLowerCase();
   const fullTextSearch = (stack['full-text-search'] || '').toLowerCase();
   const kvStore = (stack['kv-store'] || '').toLowerCase();
@@ -16,7 +16,7 @@
   const hasRedis = kvStore === 'redis';
   const hasKafka = messaging === 'kafka';
   const hasRabbitmq = messaging === 'rabbitmq';
-  const hasKeycloak = authServer === 'keycloak'
+  const hasKeycloak = iam === 'keycloak';
   const hasElasticsearch = fullTextSearch === 'elasticsearch';
   const hasMinio = storage === 'minio';
   const hasLoki = observabilityLoggingStack === 'loki';
@@ -42,20 +42,6 @@
   if (hasZipkin) infraServices.push('zipkin');
   if (hasNginx) infraServices.push('nginx');
 
-  const servicesForDevMode = [];
-
-  if (hasMysql) servicesForDevMode.push('mysql');
-  if (hasPostgres) servicesForDevMode.push('postgres');
-  if (hasRedis) servicesForDevMode.push('redis');
-  if (hasKafka) servicesForDevMode.push('kafka');
-  if (hasRabbitmq) servicesForDevMode.push('rabbitmq');
-  if (hasKeycloak) servicesForDevMode.push('keycloak');
-  if (hasElasticsearch) servicesForDevMode.push('elasticsearch');
-  if (hasMinio) servicesForDevMode.push('minio');
-  if (hasSmtp4dev) servicesForDevMode.push('smtp4dev');
-  if (hasZipkin) servicesForDevMode.push('zipkin');
-
-  const servicesToRun = servicesForDevMode.join(' ');
   const infraServicesToRun = infraServices.join(' ');
 %>
 
@@ -85,7 +71,6 @@ DOCKER_COMPOSE_CMD="docker-compose"
  
 # Default flags
 SKIP_BUILD=false
-DEV_MODE=false
 INFRA_ONLY=false
 
 # =============================================================================
@@ -151,7 +136,7 @@ check_docker_compose() {
 
 check_prerequisites() {
     echo "Checking prerequisites..."
-    if [[ "$SKIP_BUILD" == "false" && "$DEV_MODE" == "false" && "$INFRA_ONLY" == "false" ]]; then
+    if [[ "$SKIP_BUILD" == "false" && "$INFRA_ONLY" == "false" ]]; then
         check_java_version || exit 1
     fi
     check_docker || exit 1
@@ -168,7 +153,6 @@ show_usage() {
     echo
     echo "Options:"
     echo "  --skip-build      Skip service build step"
-    echo "  --dev-mode        Start only services need for development"
     echo "  --infra-only      Start only infrastructure services"
     echo "  -h, --help        Show this help and exit"
 }
@@ -178,9 +162,6 @@ parse_args() {
         case "$arg" in
             --skip-build|skip-build)
                 SKIP_BUILD=true
-                ;;
-            --dev-mode|dev-mode)
-                DEV_MODE=true
                 ;;
             --infra-only|infra-only)
                 INFRA_ONLY=true
@@ -228,21 +209,7 @@ build_services() {
 
 deploy_services() {
     echo "Deploying services using compose file: $COMPOSE_FILE"
-    if [[ "$DEV_MODE" == "true" ]]; then
-        local SERVICES_TO_RUN="<%= servicesToRun %>"
-        if [[ -z "$SERVICES_TO_RUN" ]]; then
-            echo "No services configured for the dev mode" >&2
-            exit 1
-        fi
-        echo "Starting dev mode services: $SERVICES_TO_RUN"
-        if $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" -p "$PROJECT_NAME" up -d $SERVICES_TO_RUN; then
-            echo "Compose stack for the dev mode started"
-        else
-            echo "Failed to start compose stack for the dev mode" >&2
-            echo "You can check logs with: $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME logs"
-            exit 1
-        fi
-    elif [[ "$INFRA_ONLY" == "true" ]]; then
+    if [[ "$INFRA_ONLY" == "true" ]]; then
         local INFRA_SERVICES="<%= infraServicesToRun %>"
         local SERVICES_TO_RUN="$INFRA_SERVICES"
         SERVICES_TO_RUN="$(echo "$SERVICES_TO_RUN" | awk '{$1=$1};1')"
@@ -250,11 +217,10 @@ deploy_services() {
             echo "No services configured for infra-only mode" >&2
             exit 1
         fi
-        echo "Starting infra-only services: $SERVICES_TO_RUN"
         if $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" -p "$PROJECT_NAME" up -d $SERVICES_TO_RUN; then
-            echo "Compose stack for infra-only mode started"
+            echo "Compose stack started"
         else
-            echo "Failed to start compose stack for infra-only mode" >&2
+            echo "Failed to start compose stack" >&2
             echo "You can check logs with: $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME logs"
             exit 1
         fi
@@ -267,66 +233,6 @@ deploy_services() {
             exit 1
         fi
     fi
-    echo
-}
-
-# =============================================================================
-# SUMMARY AND REPORTING
-# =============================================================================
-
-show_deployment_summary() {
-    echo "=== Deployment Summary ==="
-    echo "Atlas platform deployment completed successfully!"
-    echo
-    show_access_information
-}
-
-show_access_information() {
-    echo "Service Access URLs:"
-    if [[ "$DEV_MODE" != "true" && "$INFRA_ONLY" != "true" ]]; then
-    <% if (hasNginx) { %>
-    echo "  API Gateway: http://api.atlas.local"
-    <% } else { %>
-    echo "  API Gateway: http://localhost:8080"
-    <% } %>
-    fi
-    <% if (hasKeycloak) { %>
-    <% if (hasNginx) { %>
-    echo "  Keycloak Admin Console: http://keycloak.atlas.local (atlas/secret123456)"
-    <% } else { %>
-    echo "  Keycloak Admin Console: http://localhost:8443 (atlas/secret123456)"
-    <% } %>
-    <% } %>
-    <% if (hasSmtp4dev) { %>
-    <% if (hasNginx) { %>
-    echo "  SMTP4Dev: http://smtp4dev.atlas.local"
-    <% } else { %>
-    echo "  SMTP4Dev: http://localhost:5000"
-    <% } %>
-    <% } %>
-    <% if (hasMinio) { %>
-    <% if (hasNginx) { %>
-    echo "  MinIO Console: http://minio.atlas.local (atlas/secret123456)"
-    <% } else { %>
-    echo "  MinIO Console: http://localhost:9001 (atlas/secret123456)"
-    <% } %>
-    <% } %>
-    <% if (hasZipkin) { %>
-    <% if (hasNginx) { %>
-    echo "  Zipkin: http://zipkin.atlas.local"
-    <% } else { %>
-    echo "  Zipkin: http://localhost:9411"
-    <% } %>
-    <% } %>
-    <% if (hasGrafana) { %>
-    if [[ "$DEV_MODE" != "true" ]]; then
-    <% if (hasNginx) { %>
-    echo "  Grafana: http://grafana.atlas.local (atlas/secret123456)"
-    <% } else { %>
-    echo "  Grafana: http://localhost:3000 (atlas/secret123456)"
-    <% } %>
-    fi
-    <% } %>
     echo
 }
 
@@ -347,12 +253,8 @@ main() {
     parse_args "$@"
     check_prerequisites
 
-    echo "Atlas Docker Compose Platform - Starting..."
-
-    if [[ "$SKIP_BUILD" == "true" || "$DEV_MODE" == "true" || "$INFRA_ONLY" == "true" ]]; then
-        if [[ "$DEV_MODE" == "true" ]]; then
-            echo "Dev mode enabled; skipping build step"
-        elif [[ "$INFRA_ONLY" == "true" ]]; then
+    if [[ "$SKIP_BUILD" == "true" || "$INFRA_ONLY" == "true" ]]; then
+        if [[ "$INFRA_ONLY" == "true" ]]; then
             echo "Infra-only mode enabled; skipping build step"
         else
             echo "Skip build enabled; skipping build step"
@@ -363,7 +265,6 @@ main() {
 
     deploy_services
 
-    show_deployment_summary
 }
 
 # Execute main function

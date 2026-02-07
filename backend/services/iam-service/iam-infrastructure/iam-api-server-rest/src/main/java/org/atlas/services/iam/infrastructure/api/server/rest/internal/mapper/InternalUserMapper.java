@@ -14,7 +14,7 @@ public interface InternalUserMapper {
 
   InternalUserMapper INSTANCE = Mappers.getMapper(InternalUserMapper.class);
 
-  @Mapping(source = "ids", target = "userIds")
+  @Mapping(source = "ids", target = "ids")
   InternalRetrieveUserListInput toInternalRetrieveUserListInput(
       InternalRetrieveUserListRequest request);
 

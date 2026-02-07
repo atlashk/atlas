@@ -71,7 +71,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
   @Override
   public void updateUser(AdminUpdateUserInput input) {
-    UserEntity user = keycloakUserClient.retrieveUser(input.getUserId())
+    UserEntity user = keycloakUserClient.retrieveUser(input.getId())
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
 
     boolean shouldPublishEvent = !Objects.equals(input.getFirstName(), user.getFirstName()) ||

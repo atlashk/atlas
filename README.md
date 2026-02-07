@@ -1,89 +1,192 @@
 # Atlas
 
+[![Java 17](https://img.shields.io/badge/Java-17-ED8B00?logo=openjdk&logoColor=white)](https://openjdk.org/)
+[![Spring Boot 3.5.4](https://img.shields.io/badge/Spring%20Boot-3.5.4-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Spring Cloud 2025.0.0](https://img.shields.io/badge/Spring%20Cloud-2025.0.0-6DB33F?logo=spring&logoColor=white)](https://spring.io/projects/spring-cloud)
+[![Next.js 16](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/compose/)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-Templates-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io/)
+
+## 📋 Table of Contents
+
+- Project Overview
+- Architecture Diagram
+- Technology Stack
+- Project Structure
+- Getting Started
+- Documentation
+- Contributing
+- License
+
 ## Project Overview
 
-**Atlas** is a comprehensive microservices-based e-commerce platform built with modern technologies
-and best practices. It demonstrates Domain-Driven Design (DDD), Event-Driven Architecture, and Clean
-Architecture principles across multiple bounded contexts including User Management, Product Catalog,
-Order Processing, and Notifications.
+Atlas is a microservices-based e-commerce platform showcasing DDD and Hexagonal architecture. 
 
----
+### Hexagonal Architecture
 
-## Technical Stack
+### App Stack
+
+The *app-stack* configuration allows you to swap infrastructure components (DB, cache, messaging, auth, storage, observability, etc.) with minimal code changes.
+
+### 🧭 Architecture Diagram
+
+```mermaid
+flowchart LR
+  U[Browser] --> FE[Frontend (Next.js)]
+  FE -->|HTTP| GW[API Gateway (Spring Cloud Gateway :8080)]
+
+  GW --> DS[Eureka Server :8761]
+  GW --> IAM[IAM Service :8081]
+  GW --> PRD[Product Service :8082]
+  GW --> ORD[Order Service :8083]
+  GW --> PAY[Payment Service :8084]
+  GW --> NOTIF[Notification Service :8085]
+
+  subgraph Data
+    DB[(MySQL 8 / Postgres 14)]
+    CACHE[(Redis 7)]
+    MQ[(Kafka 7.9.0 / RabbitMQ)]
+  end
+
+  IAM --> DB
+  PRD --> DB
+  ORD --> DB
+  PAY --> DB
+  NOTIF --> DB
+
+  IAM --> CACHE
+  PRD --> CACHE
+  ORD --> CACHE
+  PAY --> CACHE
+  NOTIF --> CACHE
+
+  PRD --> MQ
+  ORD --> MQ
+  PAY --> MQ
+  NOTIF --> MQ
+```
+
+```mermaid
+sequenceDiagram
+  participant FE as Frontend
+  participant GW as API Gateway
+  participant ORD as Order Service (Saga orchestrator)
+  participant MQ as Messaging (Kafka/RabbitMQ)
+  participant PRD as Product Service
+  participant PAY as Payment Service
+  participant NOT as Notification Service
+
+  FE->>GW: POST /services/order/api/front/checkout
+  GW->>ORD: POST /api/front/checkout
+  ORD->>MQ: RESERVE_PRODUCT command
+  MQ->>PRD: RESERVE_PRODUCT command
+  PRD->>MQ: RESERVE_PRODUCT reply
+  ORD->>MQ: INITIALIZE_PAYMENT command
+  MQ->>PAY: INITIALIZE_PAYMENT command
+  PAY->>MQ: INITIALIZE_PAYMENT reply
+  ORD->>MQ: NOTIFY_ORDER_FULFILLED command
+  MQ->>NOT: NOTIFY_ORDER_FULFILLED command
+  NOT->>MQ: NOTIFY_ORDER_FULFILLED reply
+  ORD-->>FE: 201 Created (orderId)
+```
+
+### 🧩 Microservices Overview
+
+| Service | Responsibility | Default Port |
+| --- | --- | --- |
+| API Gateway | Routing, security, aggregated API docs | 8080 |
+| IAM Service | Authentication and user management | 8081 |
+| Product Service | Product catalog and admin | 8082 |
+| Order Service | Checkout and saga orchestration | 8083 |
+| Payment Service | Payment processing and simulation | 8084 |
+| Notification Service | Notifications and email | 8085 |
+| Eureka Server | Service discovery | 8761 |
+
+## 🧰 Technology Stack
 
 ### Backend
 
-- **Java 17** - Core programming language
-- **Spring Boot 3.4.0** - Main application framework
-- **Spring Framework 6.2.0** - Core Spring framework
-- **Spring Cloud 2024.0.0** - Microservices infrastructure
-- **MySQL 8.0** - Primary database
-- **Redis 7** - Caching and session storage
-- **Apache Kafka 7.9.0** - Event streaming and messaging
-- **Gradle** - Build automation tool
+- Java 17
+- Spring Boot 3.5.4
+- Spring Framework 6.2.9
+- Spring Cloud 2025.0.0
+- Gradle (multi-module)
+- MySQL 8 / Postgres 14 (configurable)
+- Redis 7 (configurable)
+- Kafka 7.9.0 or RabbitMQ (configurable)
 
 ### Frontend
 
-- **Vue.js 3.5.14** - Progressive web framework
-- **TypeScript 5.8.0** - Type-safe JavaScript
-- **Vite 6.3.5** - Build tool and dev server
-- **Pinia 3.0.1** - State management
-- **Vue Router 4.5.1** - Client-side routing
-- **Axios 1.9.0** - HTTP client
+- Next.js 16.0.1 (React 19.2.0)
+- TypeScript
+- Tailwind CSS
+- Axios
 
-### Deployment
+### Deployment & Observability
 
-- **Docker & Docker Compose** - Containerization
-- **Kubernetes** - Container orchestration (optional)
+- Docker & Docker Compose (primary local stack)
+- Kubernetes templates (optional)
+- Loki / Promtail, Prometheus, Zipkin, Grafana (optional, configurable)
 
-### Observabilities
+## 🗂️ Project Structure
 
-- **Promptail** & **Loki** - Log aggregation
-- **Prometheus** - Metrics
-- **Zipkin** - Distributed tracing
-- **Grafana** - Visualization and monitoring dashboards
+```
+.
+├── backend/
+│   ├── config/
+│   ├── deployment/
+│   ├── libs/
+│   │   ├── framework/
+│   │   ├── cross-cutting concerns/
+│   ├── platform/
+│   │   ├── config-server/
+│   │   └── discovery-server/
+│   ├── services/
+│   │   ├── iam-service/
+│   │   ├── product-service/
+│   │   ├── order-service/
+│   │   ├── payment-service/
+│   │   └── notification-service/
+│   ├── build.gradle
+│   └── deploy.sh
+├── frontend/
+└── docs/
+```
 
-### Architecture Patterns
-
-- **Microservices Architecture** - Service decomposition
-- **Domain-Driven Design (DDD)** - Business logic organization
-- **Event-Driven Architecture** - Asynchronous communication
-- **CQRS** - Command Query Responsibility Segregation
-- **Outbox Pattern** - Reliable event publishing
-
----
-
-## 🚀 Quick Start
+## ⚡ Getting Started
 
 ### Prerequisites
 
-- **Mininum memory** - 8Gb
-- **Java 17+** - For building the project
-- **Node.js 22+** - For frontend development
-- **Docker & Docker Compose** - For running services
+- Java 17+
+- Node.js (for frontend and deployment generator)
+- Docker Desktop with Docker Compose
 
-### Backend Startup
-
-For this style, we can easily use our simple wrapper scripts from the project root. They will invoke
-the relevant on-prem Docker compose scripts.
+### Backend
 
 ```bash
-# Start services
-./startup.sh
-
-# Start services (skip builds)
-./startup.sh --skip-build
+cd backend
+./deploy.sh
 ```
 
-### Frontend Startup
+Supported app-stacks:
+- dev
+- onprem.compose (default)
+- onprem.k8s.native
 
-To start frontend, we need to make a `.env` file in `frontend` directory:
+Flags:
+- `--app-stack <name>` select the app-stack config (default: `onprem.compose`).
+- `--skip-build` skip building application services and use existing artifacts.
+- `--infra-only` deploy only infrastructure components and skip application services.
+- Special case: `--app-stack dev` defaults `infra-only` to `true` unless explicitly set.
 
-```
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
-```
+Notes:
+- Requires Node.js to render EJS templates
+- If `ejs` is missing, install in `backend/deployment/generator/` via `npm install ejs --save`
+- On Windows, use Git Bash or WSL to run `deploy.sh`
+- Re-running `deploy.sh` regenerates `backend/dist/`
 
-Then start Frontend in development mode:
+### Frontend
 
 ```bash
 cd frontend
@@ -91,9 +194,29 @@ npm install
 npm run dev
 ```
 
-The web application will be accessible at **http://localhost:8000**.
+Open: http://localhost:8000
 
-Login Credentials:
+### 🔗 Access URLs
 
-- **Customer Portal**: `user` / `Aa@123456`
-- **Admin Dashboard**: `admin` / `Aa@123456`
+- Frontend: http://localhost:8000
+- API Gateway: http://localhost:8080
+- Swagger UI (Gateway): http://localhost:8080/swagger-ui.html
+- Eureka: http://localhost:8761
+- Grafana: http://localhost:3000
+- Prometheus: http://localhost:9090
+- Zipkin: http://localhost:9411
+
+### Default Credentials (dev)
+
+- Admin: `admin` / `Aa@123456`
+
+## 🤝 Contributing
+
+- Issues and PRs are welcome
+- Keep modules aligned with DDD/Clean Architecture
+- Prefer adding adapters over changing domain logic
+
+## 🪪 License
+
+- No LICENSE file is included in this repository
+- Add a `LICENSE` file if you plan to distribute

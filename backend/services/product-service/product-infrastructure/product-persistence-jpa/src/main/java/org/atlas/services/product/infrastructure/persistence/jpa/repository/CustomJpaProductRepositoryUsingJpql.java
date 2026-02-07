@@ -64,7 +64,7 @@ public class CustomJpaProductRepositoryUsingJpql implements CustomJpaProductRepo
     Map<String, Object> params = new HashMap<>();
     String whereClause = buildWhereClause(criteria, params);
     String countSql = """
-        select count(distinct p.productId)
+        select count(distinct p.id)
         from JpaProductEntity p
         left join p.details d
         left join p.attributes a
@@ -78,9 +78,9 @@ public class CustomJpaProductRepositoryUsingJpql implements CustomJpaProductRepo
 
   private String buildWhereClause(ProductRepository.FindProductCriteria criteria, Map<String, Object> params) {
     StringBuilder whereClauseBuilder = new StringBuilder("where 1=1 ");
-    if (criteria.getProductId() != null) {
-      whereClauseBuilder.append(" and p.productId = :productId ");
-      params.put("productId", criteria.getProductId());
+    if (criteria.getId() != null) {
+      whereClauseBuilder.append(" and p.id = :id ");
+      params.put("id", criteria.getId());
     }
     if (StringUtil.isNotBlank(criteria.getKeyword())) {
       whereClauseBuilder.append("""
