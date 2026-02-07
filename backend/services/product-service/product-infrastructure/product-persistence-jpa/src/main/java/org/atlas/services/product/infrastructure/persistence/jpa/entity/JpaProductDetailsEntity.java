@@ -31,7 +31,7 @@ public class JpaProductDetailsEntity extends JpaBaseEntity {
   @OneToOne
   @MapsId
   @JoinColumn(name = "product_id", referencedColumnName = "id")
-  private JpaProduct product;
+  private JpaProductEntity product;
 
   @Column(name = "description")
   private String description;

@@ -79,8 +79,8 @@ public class CustomJpaOrderRepositoryUsingCriteria implements CustomJpaOrderRepo
   private Specification<JpaOrderEntity> buildSpec(OrderRepository.FindOrderCriteria criteria) {
     QuerySpecification<JpaOrderEntity> spec = new QuerySpecification<>();
 
-    if (criteria.getOrderId() != null) {
-      spec.addFilter(QueryFilter.of("id", criteria.getOrderId(), QueryOperator.EQUAL));
+    if (criteria.getId() != null) {
+      spec.addFilter(QueryFilter.of("id", criteria.getId(), QueryOperator.EQUAL));
     }
 
     if (criteria.getUserId() != null) {

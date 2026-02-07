@@ -27,8 +27,8 @@ import org.atlas.libs.persistence.jpa.entity.JpaBaseEntity;
 public class JpaPaymentEntity extends JpaBaseEntity {
 
   @Id
-  @Column(name = "payment_id")
-  private String paymentId;
+  @Column(name = "id")
+  private String id;
 
   @Column(name = "user_id")
   private String userId;

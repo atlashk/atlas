@@ -58,8 +58,10 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   @Transactional(readOnly = true)
-  public RetrieveOrderStatusOutput retrieveOrderStatus(String orderId, String userId) {
-    OrderEntity order = orderRepository.findByOrderId(orderId)
+  public RetrieveOrderStatusOutput retrieveOrderStatus(String id) {
+    String userId = Contexts.getUserId();
+
+    OrderEntity order = orderRepository.findById(id)
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
 
     if (!Objects.equals(order.getUser().getUserId(), userId)) {
@@ -107,7 +109,7 @@ public class OrderServiceImpl implements OrderService {
       order.setSagaId(sagaId);
       orderRepository.update(order);
 
-      return order.getOrderId();
+      return order.getId();
     } finally {
       lockService.releaseLock(lockKey);
     }
@@ -136,7 +138,7 @@ public class OrderServiceImpl implements OrderService {
   private OrderEntity newOrder(CheckoutInput input, UserResponse userResponse, CartEntity cart) {
     // Order
     OrderEntity order = new OrderEntity();
-    order.setOrderId(sequenceGenerator.generate(SequenceType.ORDER));
+    order.setId(sequenceGenerator.generate(SequenceType.ORDER));
     order.setStatus(OrderStatus.AWAITING_PRODUCT_RESERVATION);
 
     // User

@@ -9,9 +9,9 @@ CREATE TABLE IF NOT EXISTS payment_gateway
 
 CREATE TABLE IF NOT EXISTS payment
 (
-    id                     SERIAL         NOT NULL PRIMARY KEY,
-    user_id                INTEGER        NOT NULL,
-    order_id               INTEGER        NOT NULL UNIQUE,
+    id                     VARCHAR(64)    NOT NULL PRIMARY KEY,
+    user_id                VARCHAR(64)    NOT NULL,
+    order_id               VARCHAR(64)    NOT NULL UNIQUE,
     saga_id                INTEGER        NOT NULL UNIQUE,
     amount                 DECIMAL(19, 2) NOT NULL,
     currency               VARCHAR(3)     NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS payment_event
 (
     id                 SERIAL      NOT NULL PRIMARY KEY,
     payment_gateway_id INTEGER     NOT NULL,
-    payment_id         INTEGER,
+    payment_id         VARCHAR(64) NOT NULL,
     payload            TEXT        NOT NULL,
     headers            TEXT,
     status             VARCHAR(50) NOT NULL,

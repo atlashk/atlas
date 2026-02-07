@@ -1,9 +1,8 @@
 package org.atlas.services.order.infrastructure.api.server.rest.admin.mapper;
 
-import org.atlas.services.order.domain.entity.OrderEntity;
-import org.atlas.services.order.infrastructure.api.server.rest.admin.model.OrderResponse;
+import org.atlas.services.order.infrastructure.api.server.rest.admin.model.AdminOrderResponse;
+import org.atlas.services.order.port.in.admin.model.AdminOrderOutput;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
@@ -12,16 +11,15 @@ public interface OrderMapper {
 
   OrderMapper INSTANCE = Mappers.getMapper(OrderMapper.class);
 
-  OrderResponse toOrderResponse(OrderEntity order);
+  AdminOrderResponse toAdminOrderResponse(AdminOrderOutput order);
 
-  OrderResponse.User toUserResponse(OrderEntity.UserSnapshot userSnapshot);
+  AdminOrderResponse.User toAdminOrderResponseUser(AdminOrderOutput.User user);
 
-  OrderResponse.Address toAddressResponse(OrderEntity.Address address);
+  AdminOrderResponse.Address toAdminOrderResponseAddress(AdminOrderOutput.Address address);
 
-  OrderResponse.OrderItem toOrderItemResponse(OrderEntity.OrderItem orderItem);
+  AdminOrderResponse.OrderItem toAdminOrderResponseOrderItem(AdminOrderOutput.OrderItem orderItem);
 
-  OrderResponse.Product toProductResponse(OrderEntity.ProductSnapshot productSnapshot);
+  AdminOrderResponse.Product toAdminOrderResponseProduct(AdminOrderOutput.Product product);
 
-  @Mapping(target = "paymentGateway", source = "paymentGatewayName")
-  OrderResponse.Payment toPaymentResponse(OrderEntity.PaymentSnapshot paymentSnapshot);
+  AdminOrderResponse.Payment toAdminOrderResponsePayment(AdminOrderOutput.Payment payment);
 }

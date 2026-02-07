@@ -26,6 +26,22 @@
   const hasSmtp4dev = notificationEmail === 'spring';
   const hasNginx = reverseProxy === 'nginx';
 
+  const infraServices = [];
+  if (hasMysql) infraServices.push('mysql');
+  if (hasPostgres) infraServices.push('postgres');
+  if (hasRedis) infraServices.push('redis');
+  if (hasKafka) infraServices.push('kafka');
+  if (hasRabbitmq) infraServices.push('rabbitmq');
+  if (hasKeycloak) infraServices.push('keycloak');
+  if (hasElasticsearch) infraServices.push('elasticsearch');
+  if (hasMinio) infraServices.push('minio');
+  if (hasSmtp4dev) infraServices.push('smtp4dev');
+  if (hasPrometheus) infraServices.push('prometheus');
+  if (hasLoki) infraServices.push('loki', 'promtail');
+  if (hasGrafana) infraServices.push('grafana');
+  if (hasZipkin) infraServices.push('zipkin');
+  if (hasNginx) infraServices.push('nginx');
+
   const servicesForDevMode = [];
 
   if (hasMysql) servicesForDevMode.push('mysql');
@@ -40,6 +56,7 @@
   if (hasZipkin) servicesForDevMode.push('zipkin');
 
   const servicesToRun = servicesForDevMode.join(' ');
+  const infraServicesToRun = infraServices.join(' ');
 %>
 
 #!/usr/bin/env bash
@@ -69,6 +86,7 @@ DOCKER_COMPOSE_CMD="docker-compose"
 # Default flags
 SKIP_BUILD=false
 DEV_MODE=false
+INFRA_ONLY=false
 
 # =============================================================================
 # PREREQUISITE CHECKS
@@ -133,7 +151,9 @@ check_docker_compose() {
 
 check_prerequisites() {
     echo "Checking prerequisites..."
-    check_java_version || exit 1
+    if [[ "$SKIP_BUILD" == "false" && "$DEV_MODE" == "false" && "$INFRA_ONLY" == "false" ]]; then
+        check_java_version || exit 1
+    fi
     check_docker || exit 1
     check_docker_compose || exit 1
     echo "Prerequisites check passed"
@@ -149,6 +169,7 @@ show_usage() {
     echo "Options:"
     echo "  --skip-build      Skip service build step"
     echo "  --dev-mode        Start only services need for development"
+    echo "  --infra-only      Start only infrastructure services"
     echo "  -h, --help        Show this help and exit"
 }
 
@@ -160,6 +181,10 @@ parse_args() {
                 ;;
             --dev-mode|dev-mode)
                 DEV_MODE=true
+                ;;
+            --infra-only|infra-only)
+                INFRA_ONLY=true
+                SKIP_BUILD=true
                 ;;
             -h|--help)
                 show_usage
@@ -217,6 +242,22 @@ deploy_services() {
             echo "You can check logs with: $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME logs"
             exit 1
         fi
+    elif [[ "$INFRA_ONLY" == "true" ]]; then
+        local INFRA_SERVICES="<%= infraServicesToRun %>"
+        local SERVICES_TO_RUN="$INFRA_SERVICES"
+        SERVICES_TO_RUN="$(echo "$SERVICES_TO_RUN" | awk '{$1=$1};1')"
+        if [[ -z "$SERVICES_TO_RUN" ]]; then
+            echo "No services configured for infra-only mode" >&2
+            exit 1
+        fi
+        echo "Starting infra-only services: $SERVICES_TO_RUN"
+        if $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" -p "$PROJECT_NAME" up -d $SERVICES_TO_RUN; then
+            echo "Compose stack for infra-only mode started"
+        else
+            echo "Failed to start compose stack for infra-only mode" >&2
+            echo "You can check logs with: $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME logs"
+            exit 1
+        fi
     else
         if $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" -p "$PROJECT_NAME" up -d; then
             echo "Compose stack started"
@@ -242,11 +283,13 @@ show_deployment_summary() {
 
 show_access_information() {
     echo "Service Access URLs:"
+    if [[ "$DEV_MODE" != "true" && "$INFRA_ONLY" != "true" ]]; then
     <% if (hasNginx) { %>
     echo "  API Gateway: http://api.atlas.local"
     <% } else { %>
     echo "  API Gateway: http://localhost:8080"
     <% } %>
+    fi
     <% if (hasKeycloak) { %>
     <% if (hasNginx) { %>
     echo "  Keycloak Admin Console: http://keycloak.atlas.local (atlas/secret123456)"
@@ -306,9 +349,11 @@ main() {
 
     echo "Atlas Docker Compose Platform - Starting..."
 
-    if [[ "$SKIP_BUILD" == "true" || "$DEV_MODE" == "true" ]]; then
+    if [[ "$SKIP_BUILD" == "true" || "$DEV_MODE" == "true" || "$INFRA_ONLY" == "true" ]]; then
         if [[ "$DEV_MODE" == "true" ]]; then
             echo "Dev mode enabled; skipping build step"
+        elif [[ "$INFRA_ONLY" == "true" ]]; then
+            echo "Infra-only mode enabled; skipping build step"
         else
             echo "Skip build enabled; skipping build step"
         fi

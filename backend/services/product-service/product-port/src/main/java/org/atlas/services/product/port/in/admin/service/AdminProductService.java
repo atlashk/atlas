@@ -12,7 +12,7 @@ public interface AdminProductService {
 
   PagingResult<ProductEntity> retrieveProductList(AdminRetrieveProductListInput input);
 
-  ProductEntity retrieveProduct(String productId);
+  ProductEntity retrieveProduct(String id);
 
   Long retrieveProductCount();
 
@@ -20,7 +20,7 @@ public interface AdminProductService {
 
   void updateProduct(AdminUpdateProductInput input) throws Exception;
 
-  void deleteProduct(String productId);
+  void deleteProduct(String id);
 
   void importProduct(AdminImportProductInput input) throws Exception;
 

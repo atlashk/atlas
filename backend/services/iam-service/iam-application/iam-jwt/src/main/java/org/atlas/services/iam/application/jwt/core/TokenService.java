@@ -21,7 +21,7 @@ public class TokenService {
     Jwt jwt = Jwt.builder()
         .issuer(SecurityConstant.TOKEN_ISSUER)
         .issuedAt(issuedAt)
-        .subject(String.valueOf(userDetails.getUserId()))
+        .subject(String.valueOf(userDetails.getId()))
         .audience(SecurityConstant.TOKEN_AUDIENCE)
         .expiresAt(expiresAt)
         .userRole(userDetails.getRole())
@@ -39,7 +39,7 @@ public class TokenService {
     Jwt jwt = Jwt.builder()
         .issuer(SecurityConstant.TOKEN_ISSUER)
         .issuedAt(issuedAt)
-        .subject(String.valueOf(userDetails.getUserId()))
+        .subject(String.valueOf(userDetails.getId()))
         .audience(SecurityConstant.TOKEN_AUDIENCE)
         .expiresAt(expiresAt)
         .build();

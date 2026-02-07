@@ -26,8 +26,8 @@ public interface GrpcProductMapper {
     }
 
     ListProductRequestProto.Builder builder = ListProductRequestProto.newBuilder();
-    if (CollectionUtil.isNotEmpty(request.getProductIds())) {
-      builder.addAllProductId(request.getProductIds());
+    if (CollectionUtil.isNotEmpty(request.getIds())) {
+      builder.addAllId(request.getIds());
     }
     return builder.build();
   }

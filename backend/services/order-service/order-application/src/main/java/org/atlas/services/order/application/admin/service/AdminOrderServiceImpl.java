@@ -9,13 +9,16 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.domain.order.OrderStatus;
 import org.atlas.libs.framework.paging.PagingResult;
+import org.atlas.libs.framework.util.CollectionUtil;
+import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.order.application.admin.mapper.AdminOrderMapper;
 import org.atlas.services.order.domain.entity.OrderEntity;
 import org.atlas.services.order.port.in.admin.model.AdminMonthlyOrderAggregation;
+import org.atlas.services.order.port.in.admin.model.AdminOrderOutput;
 import org.atlas.services.order.port.in.admin.model.AdminRetrieveOrderListInput;
+import org.atlas.services.order.port.in.admin.service.AdminOrderService;
 import org.atlas.services.order.port.out.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,16 +26,18 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AdminOrderServiceImpl implements
-    org.atlas.services.order.port.in.admin.service.AdminOrderService {
+public class AdminOrderServiceImpl implements AdminOrderService {
 
   private final OrderRepository orderRepository;
 
   @Override
   @Transactional(readOnly = true)
-  public PagingResult<OrderEntity> retrieveOrderList(AdminRetrieveOrderListInput input) {
-    OrderRepository.FindOrderCriteria criteria = AdminOrderMapper.INSTANCE.toFindOrderCriteria(input);
-    return orderRepository.findByCriteria(criteria, input.getPagingRequest());
+  public PagingResult<AdminOrderOutput> retrieveOrderList(AdminRetrieveOrderListInput input) {
+    OrderRepository.FindOrderCriteria criteria = AdminOrderMapper.INSTANCE
+        .toFindOrderCriteria(input);
+    PagingResult<OrderEntity> orderPage = orderRepository.findByCriteria(criteria,
+        input.getPagingRequest());
+    return MapperUtil.mapPage(orderPage, AdminOrderMapper.INSTANCE::toAdminOrderOutput);
   }
 
   @Override

@@ -14,5 +14,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ListUserRequest {
 
-  private List<String> userIds;
+  private List<String> ids;
 }

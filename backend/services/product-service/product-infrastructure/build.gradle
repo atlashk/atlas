@@ -76,7 +76,6 @@ dependencies {
     // Full-text search
     switch (rootProject.ext.appStack['full-text-search']) {
         case 'none':
-        case 'database':
             break
         case 'elasticsearch':
             api project(':services.product.full-text-search.elasticsearch')
@@ -165,7 +164,10 @@ dependencies {
 
     // Saga
     api project(':libs.saga')
-    
+
+    // Sequence generator
+    api project(':libs.sequence-generator')
+
     // Service discovery
     switch (rootProject.ext.appStack['service-discovery']) {
         case 'none':

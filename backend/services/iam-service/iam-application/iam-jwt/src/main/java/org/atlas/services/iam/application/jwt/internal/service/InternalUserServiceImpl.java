@@ -23,7 +23,7 @@ public class InternalUserServiceImpl implements InternalUserService {
   @Override
   @Transactional(readOnly = true)
   public List<InternalUserOutput> retrieveUserList(InternalRetrieveUserListInput input) {
-    List<UserEntity> userList = userRepository.findByUserIdIn(input.getUserIds());
+    List<UserEntity> userList = userRepository.findByIdIn(input.getIds());
     return MapperUtil.mapList(userList, InternalUserMapper.INSTANCE::toInternalUserOutput);
   }
 }

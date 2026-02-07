@@ -25,15 +25,26 @@ repositories {
 }
 
 dependencies {
-    // Framework
-    api project(':libs.framework')
+    // Schema
+    switch (rootProject.ext.appStack['migration']) {
+        case 'flyway':
+            switch (rootProject.ext.appStack['datasource']) {
+                case 'mysql':
+                    api project(':libs.sequence-generator.migration.flyway.mysql')
+                    break
+                case 'postgres':
+                    api project(':libs.sequence-generator.migration.flyway.postgres')
+                    break
+                default:
+                    throw new IllegalArgumentException("Unsupported datasource: ${rootProject.ext.appStack['datasource']}")
+            }
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported migration: ${rootProject.ext.appStack['migration']}")
+    }
 
-    // JDBC
-    api 'org.springframework.boot:spring-boot-starter-jdbc'
-
-    // Lombok
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
+    // Core
+    api project(':libs.sequence-generator.core')
 }
 
 bootJar {

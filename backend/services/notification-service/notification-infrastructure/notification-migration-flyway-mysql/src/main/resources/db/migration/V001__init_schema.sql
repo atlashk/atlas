@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS notification
 (
     id              INT         NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    user_id         INT         NOT NULL,
+    user_id         VARCHAR(64) NOT NULL,
     type            VARCHAR(50) NOT NULL,
     channel         VARCHAR(50) NOT NULL,
     message         TEXT,

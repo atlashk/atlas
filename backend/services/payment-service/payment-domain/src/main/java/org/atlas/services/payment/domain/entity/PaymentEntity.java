@@ -20,7 +20,7 @@ import org.atlas.libs.framework.payment.model.nextaction.NextAction;
 public class PaymentEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
-  private String paymentId;
+  private String id;
   private String userId;
   private String orderId;
   private Integer sagaId; // Support for webhook case

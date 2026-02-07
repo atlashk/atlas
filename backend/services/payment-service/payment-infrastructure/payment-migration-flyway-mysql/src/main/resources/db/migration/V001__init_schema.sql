@@ -10,9 +10,9 @@ CREATE TABLE IF NOT EXISTS payment_gateway
 
 CREATE TABLE IF NOT EXISTS payment
 (
-    id                     INT            NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    user_id                INT            NOT NULL,
-    order_id               INT            NOT NULL,
+    id                     VARCHAR(64)    NOT NULL PRIMARY KEY,
+    user_id                VARCHAR(64)    NOT NULL,
+    order_id               VARCHAR(64)    NOT NULL,
     saga_id                INT            NOT NULL,
     amount                 DECIMAL(19, 2) NOT NULL,
     currency               VARCHAR(3)     NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS payment_event
 (
     id                 INT         NOT NULL AUTO_INCREMENT PRIMARY KEY,
     payment_gateway_id INT         NOT NULL,
-    payment_id         INT,
+    payment_id         VARCHAR(64) NOT NULL,
     payload            TEXT        NOT NULL,
     headers            TEXT,
     status             VARCHAR(50) NOT NULL,

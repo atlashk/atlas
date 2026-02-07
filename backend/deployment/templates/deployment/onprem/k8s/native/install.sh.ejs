@@ -30,12 +30,14 @@ NAMESPACE="atlas"
 MANIFESTS_DIR="$SCRIPT_DIR/manifests"
 
 SKIP_BUILD=false
+INFRA_ONLY=false
 
 show_help() {
-  echo "Usage: $0 [--skip-build]"
+  echo "Usage: $0 [--skip-build] [--infra-only]"
   echo ""
   echo "Simplified Atlas Kubernetes deploy script"
   echo "  --skip-build        Skip backend and Docker image builds"
+  echo "  --infra-only        Apply only infrastructure manifests"
 }
 
 parse_arguments() {
@@ -45,6 +47,8 @@ parse_arguments() {
         show_help; exit 0;;
       --skip-build)
         SKIP_BUILD=true; shift;;
+      --infra-only)
+        INFRA_ONLY=true; SKIP_BUILD=true; shift;;
       *)
         echo "Unknown option: $1" >&2
         echo "Use --help for usage information" >&2
@@ -223,6 +227,11 @@ install_ingress_controller() {
 apply_manifests() {
   echo "Applying Kubernetes manifests in namespace '$NAMESPACE'..."
   apply_and_wait "$MANIFESTS_DIR/infrastructure" "infrastructure"
+  if [[ "$INFRA_ONLY" == "true" ]]; then
+    apply_and_wait "$MANIFESTS_DIR/observability" "observability"
+    return 0
+  fi
+
   apply_and_wait "$MANIFESTS_DIR/observability" "observability"
   apply_and_wait "$MANIFESTS_DIR/application" "application"
   install_ingress_controller
@@ -235,16 +244,20 @@ apply_manifests() {
 
 show_access_information() {
   echo "Service Access URLs:"
-  echo "  API Gateway:   http://api.atlas.local"
-  <% if (hasGrafana) { %>
-  echo "  Grafana:       http://grafana.atlas.local (admin/secret123456)"
-  <% } %>
-  <% if (hasZipkin) { %>
-  echo "  Zipkin:        http://zipkin.atlas.local"
-  <% } %>
-  <% if (hasSmtp4dev) { %>
-  echo "  SMTP4Dev:      http://smtp4dev.atlas.local"
-  <% } %>
+  if [[ "$INFRA_ONLY" != "true" ]]; then
+    echo "  API Gateway:   http://api.atlas.local"
+    <% if (hasGrafana) { %>
+    echo "  Grafana:       http://grafana.atlas.local (admin/secret123456)"
+    <% } %>
+    <% if (hasZipkin) { %>
+    echo "  Zipkin:        http://zipkin.atlas.local"
+    <% } %>
+    <% if (hasSmtp4dev) { %>
+    echo "  SMTP4Dev:      http://smtp4dev.atlas.local"
+    <% } %>
+  else
+    echo "  Namespace:     $NAMESPACE"
+  fi
 }
 
 print_total_time() {

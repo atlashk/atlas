@@ -22,9 +22,9 @@ public interface ProductRepository {
 
   Long countAll();
 
-  List<ProductEntity> findByProductIdIn(List<String> productIds);
+  List<ProductEntity> findByIdIn(List<String> ids);
 
-  Optional<ProductEntity> findByProductId(String productId);
+  Optional<ProductEntity> findById(String id);
 
   void insert(ProductEntity product);
 
@@ -32,18 +32,18 @@ public interface ProductRepository {
 
   void update(ProductEntity product);
 
-  void decreaseQuantityWithConstraint(String productId, Integer decrement)
+  void decreaseQuantityWithConstraint(String id, Integer decrement)
       throws OutOfStockException;
 
-  void decreaseQuantityWithPessimisticLock(String productId, Integer decrement)
+  void decreaseQuantityWithPessimisticLock(String id, Integer decrement)
       throws OutOfStockException;
 
-  void decreaseQuantityWithOptimisticLock(String productId, Integer decrement)
+  void decreaseQuantityWithOptimisticLock(String id, Integer decrement)
       throws OutOfStockException;
 
-  void increaseQuantity(String productId, Integer increment);
+  void increaseQuantity(String id, Integer increment);
 
-  void deleteByProductId(String productId);
+  void deleteById(String id);
 
   @NoArgsConstructor
   @AllArgsConstructor
@@ -52,7 +52,7 @@ public interface ProductRepository {
   @Setter
   class FindProductCriteria {
 
-    private String productId;
+    private String id;
 
     private String keyword;
 

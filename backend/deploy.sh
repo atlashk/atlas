@@ -35,17 +35,23 @@ warn() { printf "[WARN] %s\n" "$*"; }
 err()  { printf "[ERROR] %s\n" "$*"; }
 
 usage() {
-  echo "Usage: $0 [app-stack]"
+  echo "Usage: $0 [app-stack] [options] [-- <install.sh options>]"
   echo ""
-  echo "Parameters:"
-  echo "  app-stack    Configuration name (default: dev)"
-  echo "               Available: dev, onprem.compose, onprem.k8s.native"
+  echo "Arguments:"
+  echo "  app-stack                Configuration name (default: dev)"
+  echo "                           Available: dev, onprem.compose, onprem.k8s.native"
+  echo ""
+  echo "Options:"
+  echo "  --infra-only              Deploy only infrastructure services"
+  echo "  -h, --help                Show this help and exit"
   echo ""
   echo "Examples:"
-  echo "  $0           # Uses default 'dev'"
+  echo "  $0                               # Uses default 'dev'"
   echo "  $0 dev"
   echo "  $0 onprem.compose"
   echo "  $0 onprem.k8s.native"
+  echo "  $0 onprem.compose --infra-only"
+  echo "  $0 dev -- --skip-build           # Pass-through option to generated install.sh"
   exit 1
 }
 
@@ -262,23 +268,67 @@ generate_templates() {
 execute_install_script() {
   # Execute install.sh if it exists in the dist directory
   local install_script="$DIST_DIR/install.sh"
+  if [[ ! -f "$install_script" && -f "$DIST_DIR/native/install.sh" ]]; then
+    install_script="$DIST_DIR/native/install.sh"
+  fi
+  local install_args=("$@")
   if [[ -f "$install_script" ]]; then
     info "Executing install script: $install_script"
     chmod +x "$install_script"
-    "$install_script"
+    "$install_script" "${install_args[@]}"
   else
     warn "install.sh not found in $DIST_DIR, skipping installation step"
   fi
 }
 
 main() {
-  # Set default app-stack to 'dev' if no parameter provided
-  local app_stack="${1:-dev}"
-  
-  # Check if too many parameters are provided
-  if [[ $# -gt 1 ]]; then
-    err "Too many parameters provided"
-    usage
+  local app_stack="dev"
+  local infra_only=false
+  local pass_through=()
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -h|--help)
+        usage
+        ;;
+      --infra-only)
+        infra_only=true
+        shift
+        ;;
+      --)
+        shift
+        pass_through+=("$@")
+        break
+        ;;
+      -*)
+        pass_through+=("$1")
+        shift
+        ;;
+      *)
+        if [[ "$app_stack" == "dev" ]]; then
+          app_stack="$1"
+          shift
+        else
+          pass_through+=("$1")
+          shift
+        fi
+        ;;
+    esac
+  done
+
+  local install_args=("${pass_through[@]}")
+  if [[ "$infra_only" == "true" ]]; then
+    install_args+=("--infra-only")
+    local has_skip_build=false
+    for a in "${install_args[@]}"; do
+      if [[ "$a" == "--skip-build" || "$a" == "skip-build" ]]; then
+        has_skip_build=true
+        break
+      fi
+    done
+    if [[ "$has_skip_build" == "false" ]]; then
+      install_args+=("--skip-build")
+    fi
   fi
   
   local config_file="$CONFIG_DIR/app-stack.${app_stack}.yml"
@@ -316,7 +366,7 @@ main() {
   normalize_line_endings_to_lf "$DIST_DIR"
 
   # Step 7: Execute install.sh
-  execute_install_script
+  execute_install_script "${install_args[@]}"
   
   info "Atlas deployment completed successfully."
   info "Generated files are available in: $DIST_DIR"

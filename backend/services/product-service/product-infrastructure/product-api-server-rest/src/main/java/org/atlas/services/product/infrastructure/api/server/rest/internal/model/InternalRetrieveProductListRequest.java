@@ -13,5 +13,5 @@ public class InternalRetrieveProductListRequest {
 
   @NotEmpty
   @Schema(description = "List of unique identifiers for the products to be retrieved", example = "[\"PRD0000001\", \"PRD0000002\"]", requiredMode = RequiredMode.REQUIRED)
-  private List<String> productIds;
+  private List<String> ids;
 }

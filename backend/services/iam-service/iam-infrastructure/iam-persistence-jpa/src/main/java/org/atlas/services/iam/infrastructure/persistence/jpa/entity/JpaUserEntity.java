@@ -28,8 +28,8 @@ import org.atlas.libs.persistence.jpa.entity.JpaBaseEntity;
 public class JpaUserEntity extends JpaBaseEntity {
 
   @Id
-  @Column(name = "user_id")
-  private String userId;
+  @Column(name = "id")
+  private String id;
 
   @Column(name = "username")
   private String username;

@@ -16,9 +16,9 @@ public interface UserRepository {
 
   PagingResult<UserEntity> findByCriteria(FindUserCriteria criteria, PagingRequest pagingRequest);
 
-  List<UserEntity> findByUserIdIn(List<String> userIds);
+  List<UserEntity> findByIdIn(List<String> ids);
 
-  Optional<UserEntity> findByUserId(String userId);
+  Optional<UserEntity> findById(String id);
 
   Optional<UserEntity> findByUsername(String username);
 
@@ -32,7 +32,7 @@ public interface UserRepository {
 
   void update(UserEntity user);
 
-  void deleteByUserId(String userId);
+  void deleteById(String id);
 
   @Getter
   @Setter
@@ -41,7 +41,7 @@ public interface UserRepository {
   @AllArgsConstructor
   class FindUserCriteria {
 
-    private String userId;
+    private String id;
 
     private String username;
 

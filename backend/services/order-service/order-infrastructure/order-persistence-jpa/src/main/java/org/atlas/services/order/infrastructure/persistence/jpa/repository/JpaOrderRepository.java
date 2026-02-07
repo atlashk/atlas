@@ -18,9 +18,9 @@ public interface JpaOrderRepository extends JpaBaseRepository<JpaOrderEntity, In
       select o
       from JpaOrderEntity o
       left join fetch o.orderItems
-      where o.orderId = :orderId
+      where o.id = :id
       """)
-  Optional<JpaOrderEntity> findByOrderIdAndFetch(@Param("orderId") String orderId);
+  Optional<JpaOrderEntity> findByIdAndFetch(@Param("id") String id);
 
   @Query("""
       select o

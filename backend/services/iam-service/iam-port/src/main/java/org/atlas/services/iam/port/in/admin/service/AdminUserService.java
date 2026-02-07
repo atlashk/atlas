@@ -12,7 +12,7 @@ public interface AdminUserService {
 
   Long retrieveUserCount();
 
-  AdminUserOutput retrieveUser(String userId);
+  AdminUserOutput retrieveUser(String id);
 
   void createUser(AdminCreateUserInput input);
 

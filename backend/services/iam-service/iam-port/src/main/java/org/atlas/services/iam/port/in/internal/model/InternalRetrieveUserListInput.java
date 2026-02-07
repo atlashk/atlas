@@ -16,5 +16,5 @@ import lombok.Setter;
 public class InternalRetrieveUserListInput {
 
   @NotEmpty
-  private List<String> userIds;
+  private List<String> ids;
 }

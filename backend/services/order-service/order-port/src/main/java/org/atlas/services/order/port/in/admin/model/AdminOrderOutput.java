@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.framework.domain.order.OrderStatus;
 import org.atlas.libs.framework.domain.payment.PaymentStatus;
-import org.atlas.services.order.domain.entity.OrderEntity.OrderItem;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,11 +20,36 @@ public class AdminOrderOutput {
   private Integer id;
   private String code;
   private User user;
+  private Address address;
   private List<OrderItem> orderItems;
   private BigDecimal amount;
   private Payment payment;
   private OrderStatus status;
   private String cancellationReason;
+
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
+  @Getter
+  @Setter
+  public static class OrderItem {
+
+    private Product product;
+    private Integer quantity;
+  }
+
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
+  @Getter
+  @Setter
+  public static class Product {
+
+    private String productId;
+    private String name;
+    private BigDecimal price;
+    private String image;
+  }
 
   @NoArgsConstructor
   @AllArgsConstructor
@@ -39,6 +63,19 @@ public class AdminOrderOutput {
     private String lastName;
     private String email;
     private String phoneNumber;
+  }
+
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
+  @Getter
+  @Setter
+  public static class Address {
+
+    private String street;
+    private String city;
+    private String country; // Country code
+    private String postalCode;
   }
 
   @NoArgsConstructor

@@ -13,10 +13,10 @@ import org.atlas.libs.framework.paging.PagingRequest.SortOrder;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.order.infrastructure.api.server.rest.admin.mapper.OrderMapper;
-import org.atlas.services.order.infrastructure.api.server.rest.admin.model.OrderResponse;
+import org.atlas.services.order.infrastructure.api.server.rest.admin.model.AdminOrderResponse;
+import org.atlas.services.order.port.in.admin.model.AdminOrderOutput;
 import org.atlas.services.order.port.in.admin.model.AdminRetrieveOrderListInput;
 import org.atlas.services.order.port.in.admin.service.AdminOrderService;
-import org.atlas.services.order.domain.entity.OrderEntity;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -35,7 +35,7 @@ public class AdminOrderManagementController {
 
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve a list of orders with optional filtering and pagination")
-  public ApiResponseWrapper<List<OrderResponse>> retrieveOrderList(
+  public ApiResponseWrapper<List<AdminOrderResponse>> retrieveOrderList(
       @Parameter(name = "orderId", description = "Order ID", example = "1")
       @RequestParam(name = "orderId", required = false) String orderId,
       @Parameter(name = "userId", description = "User ID", example = "1")
@@ -64,9 +64,9 @@ public class AdminOrderManagementController {
         .endDate(endDate)
         .pagingRequest(PagingRequest.of(page - 1, size, "createdAt", SortOrder.DESC))
         .build();
-    PagingResult<OrderEntity> orderPage = adminOrderService.retrieveOrderList(input);
-    PagingResult<OrderResponse> responseData = MapperUtil.mapPage(orderPage,
-        OrderMapper.INSTANCE::toOrderResponse);
+    PagingResult<AdminOrderOutput> output = adminOrderService.retrieveOrderList(input);
+    PagingResult<AdminOrderResponse> responseData = MapperUtil.mapPage(output,
+        OrderMapper.INSTANCE::toAdminOrderResponse);
     return ApiResponseWrapper.successPage(responseData);
   }
 }

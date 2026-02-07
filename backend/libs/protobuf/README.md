@@ -5,5 +5,5 @@
 At the `backend` directory, run the following command:
 
 ```bash
-./gradlew :protobuf:generateProto
+./gradlew :libs.protobuf:generateProto
 ```

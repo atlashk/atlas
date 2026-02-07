@@ -61,15 +61,15 @@ public class AdminProductServiceImpl implements AdminProductService {
 
     // Set image
     productPage.getData()
-        .forEach(product -> product.setImage(productImageService.getImage(product.getProductId())));
+        .forEach(product -> product.setImage(productImageService.getImage(product.getId())));
 
     return productPage;
   }
 
   @Override
   @Transactional(readOnly = true)
-  public ProductEntity retrieveProduct(String productId) {
-    return productRepository.findByProductId(productId)
+  public ProductEntity retrieveProduct(String id) {
+    return productRepository.findById(id)
         .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
   }
 
@@ -83,29 +83,29 @@ public class AdminProductServiceImpl implements AdminProductService {
   @Transactional
   public String createProduct(AdminCreateProductInput input) throws Exception {
     ProductEntity product = input.getProduct();
-    product.setProductId(sequenceGenerator.generate(SequenceType.PRODUCT));
+    product.setId(sequenceGenerator.generate(SequenceType.PRODUCT));
     productRepository.insert(product);
 
-    productImageService.uploadImage(product.getProductId(), input.getImageBytes(),
+    productImageService.uploadImage(product.getId(), input.getImageBytes(),
         input.getImageContentType());
 
     publishProductCreatedEvent(product);
 
-    return product.getProductId();
+    return product.getId();
   }
 
   @Override
   @Transactional
   public void updateProduct(AdminUpdateProductInput input) throws Exception {
     ProductEntity product = input.getProduct();
-    ProductEntity existingProduct = productRepository.findByProductId(product.getProductId())
+    ProductEntity existingProduct = productRepository.findById(product.getId())
         .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
 
     AdminProductMapper.INSTANCE.merge(product, existingProduct);
     productRepository.update(product);
 
     if (ArrayUtil.isNotEmpty(input.getImageBytes())) {
-      productImageService.uploadImage(product.getProductId(), input.getImageBytes(),
+      productImageService.uploadImage(product.getId(), input.getImageBytes(),
           input.getImageContentType());
     }
 
@@ -114,11 +114,11 @@ public class AdminProductServiceImpl implements AdminProductService {
 
   @Override
   @Transactional
-  public void deleteProduct(String productId) {
+  public void deleteProduct(String id) {
     // Delete product from DB
-    ProductEntity product = productRepository.findByProductId(productId)
+    ProductEntity product = productRepository.findById(id)
         .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
-    productRepository.deleteByProductId(product.getProductId());
+    productRepository.deleteById(product.getId());
 
     // Publish event
     publishProductDeletedEvent(product);
@@ -143,7 +143,7 @@ public class AdminProductServiceImpl implements AdminProductService {
       List<ProductEntity> products = rows.stream()
           .map(row -> {
             ProductEntity product = ProductReadRowMapper.INSTANCE.toProduct(row);
-            product.setProductId(sequenceGenerator.generate(SequenceType.PRODUCT));
+            product.setId(sequenceGenerator.generate(SequenceType.PRODUCT));
             return product;
           })
           .toList();

@@ -15,7 +15,7 @@ import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.libs.persistence.jpa.specification.QueryFilter;
 import org.atlas.libs.persistence.jpa.specification.QueryOperator;
 import org.atlas.libs.persistence.jpa.specification.QuerySpecification;
-import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaProduct;
+import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaProductEntity;
 import org.atlas.services.product.port.out.repository.ProductRepository;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
@@ -27,19 +27,19 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
   private EntityManager entityManager;
 
   @Override
-  public List<JpaProduct> findByCriteria(ProductRepository.FindProductCriteria criteria,
+  public List<JpaProductEntity> findByCriteria(ProductRepository.FindProductCriteria criteria,
       PagingRequest pagingRequest) {
     CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-    CriteriaQuery<JpaProduct> criteriaQuery = criteriaBuilder.createQuery(
-        JpaProduct.class);
-    Root<JpaProduct> root = criteriaQuery.from(JpaProduct.class);
+    CriteriaQuery<JpaProductEntity> criteriaQuery = criteriaBuilder.createQuery(
+        JpaProductEntity.class);
+    Root<JpaProductEntity> root = criteriaQuery.from(JpaProductEntity.class);
 
     root.join("details", JoinType.LEFT);
     root.join("attributes", JoinType.LEFT);
     root.join("brand", JoinType.LEFT);
     root.join("categories", JoinType.LEFT);
 
-    Specification<JpaProduct> spec = buildSpec(criteria);
+    Specification<JpaProductEntity> spec = buildSpec(criteria);
     Predicate predicate = spec.toPredicate(root, criteriaQuery, criteriaBuilder);
     criteriaQuery.where(predicate);
 
@@ -52,7 +52,7 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
       }
     }
 
-    TypedQuery<JpaProduct> query = entityManager.createQuery(criteriaQuery);
+    TypedQuery<JpaProductEntity> query = entityManager.createQuery(criteriaQuery);
 
     // Paging
     if (pagingRequest.hasPaging()) {
@@ -67,7 +67,7 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
   public long countByCriteria(ProductRepository.FindProductCriteria params) {
     CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Long> query = criteriaBuilder.createQuery(Long.class);
-    Root<JpaProduct> root = query.from(JpaProduct.class);
+    Root<JpaProductEntity> root = query.from(JpaProductEntity.class);
 
     root.join("details", JoinType.LEFT);
     root.join("attributes", JoinType.LEFT);
@@ -76,17 +76,17 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
 
     query.select(criteriaBuilder.countDistinct(root.get("productId")));
 
-    Specification<JpaProduct> spec = buildSpec(params);
+    Specification<JpaProductEntity> spec = buildSpec(params);
     Predicate predicate = spec.toPredicate(root, query, criteriaBuilder);
     query.where(predicate);
 
     return entityManager.createQuery(query).getSingleResult();
   }
 
-  private Specification<JpaProduct> buildSpec(ProductRepository.FindProductCriteria criteria) {
-    QuerySpecification<JpaProduct> spec = new QuerySpecification<>();
-    if (criteria.getProductId() != null) {
-      spec.addFilter(QueryFilter.of("productId", criteria.getProductId(), QueryOperator.EQUAL));
+  private Specification<JpaProductEntity> buildSpec(ProductRepository.FindProductCriteria criteria) {
+    QuerySpecification<JpaProductEntity> spec = new QuerySpecification<>();
+    if (criteria.getId() != null) {
+      spec.addFilter(QueryFilter.of("productId", criteria.getId(), QueryOperator.EQUAL));
     }
     if (StringUtil.isNotBlank(criteria.getKeyword())) {
       String lowercaseKeyword = "%" + criteria.getKeyword().toLowerCase() + "%";

@@ -29,8 +29,8 @@ public interface GrpcUserMapper {
     }
 
     ListUserRequestProto.Builder builder = ListUserRequestProto.newBuilder();
-    if (CollectionUtil.isNotEmpty(request.getUserIds())) {
-      builder.addAllUserId(request.getUserIds());
+    if (CollectionUtil.isNotEmpty(request.getIds())) {
+      builder.addAllId(request.getIds());
     }
     return builder.build();
   }

@@ -1,10 +1,10 @@
 CREATE TABLE IF NOT EXISTS orders
 (
-    id                     INT            NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    id                     VARCHAR(64)    NOT NULL PRIMARY KEY,
     saga_id                INT,
     code                   CHAR(7)        NOT NULL,
     status                 VARCHAR(50)    NOT NULL,
-    user_id                INT            NOT NULL,
+    user_id                VARCHAR(64)    NOT NULL,
     user_first_name        VARCHAR(255)   NOT NULL,
     user_last_name         VARCHAR(255)   NOT NULL,
     user_email             VARCHAR(255)   NOT NULL,
@@ -30,21 +30,13 @@ CREATE TABLE IF NOT EXISTS orders
 CREATE TABLE IF NOT EXISTS order_item
 (
     id            INT           NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    order_id      INT           NOT NULL,
-    product_id    INT           NOT NULL,
+    order_id      VARCHAR(64)   NOT NULL,
+    product_id    VARCHAR(64)   NOT NULL,
     product_name  VARCHAR(255)  NOT NULL,
     product_price DECIMAL(9, 2) NOT NULL,
     quantity      INT           NOT NULL,
-    created_at    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at    DATETIME               DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at    DATETIME      NOT NULL,
+    updated_at    DATETIME,
     INDEX idx_order_id (order_id),
     INDEX idx_product_id (product_id)
-) ENGINE = InnoDB;
-
-CREATE TABLE IF NOT EXISTS sequence_generator
-(
-    seq_name   VARCHAR(50) PRIMARY KEY,
-    seq_value  INT      NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME          DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB;

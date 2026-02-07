@@ -40,5 +40,5 @@ public class JpaProductAttributeEntity extends JpaBaseEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "product_id")
-  private JpaProduct product;
+  private JpaProductEntity product;
 }

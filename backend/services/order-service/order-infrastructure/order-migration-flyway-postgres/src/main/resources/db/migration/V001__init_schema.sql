@@ -1,10 +1,10 @@
 CREATE TABLE IF NOT EXISTS orders
 (
-    id                     SERIAL PRIMARY KEY,
+    id                     VARCHAR(64) PRIMARY KEY,
     saga_id                INT,
     code                   CHAR(7)        NOT NULL UNIQUE,
     status                 VARCHAR(50)    NOT NULL,
-    user_id                INT            NOT NULL,
+    user_id                VARCHAR(64)    NOT NULL,
     user_first_name        VARCHAR(255)   NOT NULL,
     user_last_name         VARCHAR(255)   NOT NULL,
     user_email             VARCHAR(255)   NOT NULL,
@@ -29,8 +29,8 @@ CREATE INDEX idx_user_id ON orders (user_id);
 CREATE TABLE IF NOT EXISTS order_item
 (
     id            SERIAL PRIMARY KEY,
-    order_id      INT           NOT NULL,
-    product_id    INT           NOT NULL,
+    order_id      VARCHAR(64)   NOT NULL,
+    product_id    VARCHAR(64)   NOT NULL,
     product_name  VARCHAR(255)  NOT NULL,
     product_price NUMERIC(9, 2) NOT NULL,
     quantity      INT           NOT NULL,
@@ -39,11 +39,3 @@ CREATE TABLE IF NOT EXISTS order_item
 );
 CREATE INDEX idx_order_id ON order_item (order_id);
 CREATE INDEX idx_product_id ON order_item (product_id);
-
-CREATE TABLE IF NOT EXISTS sequence_generator
-(
-    seq_name   VARCHAR(50) PRIMARY KEY,
-    seq_value  INT       NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP
-);

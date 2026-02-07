@@ -18,7 +18,7 @@ import org.atlas.libs.framework.domain.user.UserRole;
 public class UserEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
-  private String userId;
+  private String id;
 
   private String username;
 

@@ -10,7 +10,7 @@ public interface OrderService {
 
   PagingResult<OrderEntity> retrieveOrderList(RetrieveOrderListInput input);
 
-  RetrieveOrderStatusOutput retrieveOrderStatus(String orderId, String userId);
+  RetrieveOrderStatusOutput retrieveOrderStatus(String id);
 
   String checkout(CheckoutInput input);
 }

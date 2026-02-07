@@ -45,7 +45,7 @@ public class CartAggregator {
 
     // Update cart item's product
     Map<String, ProductResponse> productResponseMap = productResponses.stream()
-        .collect(Collectors.toMap(ProductResponse::getProductId, Function.identity()));
+        .collect(Collectors.toMap(ProductResponse::getId, Function.identity()));
     boolean allProductsAreValid = true;
     for (CartItem cartItem : cart.getCartItems()) {
       String productId = cartItem.getProduct().getProductId();

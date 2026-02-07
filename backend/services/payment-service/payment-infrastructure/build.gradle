@@ -124,6 +124,9 @@ dependencies {
     // Saga
     api project(':libs.saga')
 
+    // Sequence generator
+    api project(':libs.sequence-generator')
+
     // Service discovery
     switch (rootProject.ext.appStack['service-discovery']) {
         case 'none':

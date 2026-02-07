@@ -71,9 +71,9 @@ public class CustomJpaOrderRepositoryUsingJpql implements CustomJpaOrderReposito
   private String buildWhereClause(OrderRepository.FindOrderCriteria criteria, Map<String, Object> params) {
     StringBuilder whereClauseBuilder = new StringBuilder("where 1=1 ");
 
-    if (criteria.getOrderId() != null) {
+    if (criteria.getId() != null) {
       whereClauseBuilder.append(" and o.id = :orderId ");
-      params.put("orderId", criteria.getOrderId());
+      params.put("orderId", criteria.getId());
     }
 
     if (criteria.getUserId() != null) {

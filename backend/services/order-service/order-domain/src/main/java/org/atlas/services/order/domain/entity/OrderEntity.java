@@ -23,7 +23,7 @@ import org.atlas.libs.framework.domain.order.OrderStatus;
 public class OrderEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
-  private String orderId;
+  private String id;
   private Integer sagaId;
   private OrderStatus status;
   private UserSnapshot user;

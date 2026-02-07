@@ -24,7 +24,7 @@ import org.atlas.services.product.infrastructure.api.server.rest.front.model.Pro
 public class AdminProductResponse {
 
   @Schema(description = "Unique identifier of the product", example = "123")
-  private String productId;
+  private String id;
 
   @Schema(description = "Name of the product", example = "T-Shirt")
   private String name;

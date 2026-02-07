@@ -16,7 +16,7 @@ import org.atlas.libs.framework.domain.product.ProductStockStatus;
 @Setter
 public class ProductWriteRow {
 
-  private Integer id;
+  private String id;
   private String name;
   private BigDecimal price;
   private Integer quantity;

@@ -9,7 +9,7 @@ import java.util.Map;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.util.StringUtil;
-import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaProduct;
+import org.atlas.services.product.infrastructure.persistence.jpa.entity.JpaProductEntity;
 import org.atlas.services.product.port.out.repository.ProductRepository;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
@@ -22,7 +22,7 @@ public class CustomJpaProductRepositoryUsingJpql implements CustomJpaProductRepo
   private EntityManager entityManager;
 
   @Override
-  public List<JpaProduct> findByCriteria(ProductRepository.FindProductCriteria criteria,
+  public List<JpaProductEntity> findByCriteria(ProductRepository.FindProductCriteria criteria,
       PagingRequest pagingRequest) {
     StringBuilder sqlBuilder = new StringBuilder("""
         select p
@@ -45,7 +45,7 @@ public class CustomJpaProductRepositoryUsingJpql implements CustomJpaProductRepo
     }
 
     String sql = sqlBuilder.toString();
-    TypedQuery<JpaProduct> query = entityManager.createQuery(sql, JpaProduct.class);
+    TypedQuery<JpaProductEntity> query = entityManager.createQuery(sql, JpaProductEntity.class);
 
     // Set parameters
     params.forEach(query::setParameter);
@@ -65,7 +65,7 @@ public class CustomJpaProductRepositoryUsingJpql implements CustomJpaProductRepo
     String whereClause = buildWhereClause(criteria, params);
     String countSql = """
         select count(distinct p.productId)
-        from JpaProduct p
+        from JpaProductEntity p
         left join p.details d
         left join p.attributes a
         left join p.brand b

@@ -18,7 +18,7 @@ import org.atlas.libs.framework.paging.PagingRequest;
 @Setter
 public class AdminRetrieveProductListInput {
 
-  private Integer id;
+  private String id;
   private String keyword;
   private BigDecimal minPrice;
   private BigDecimal maxPrice;

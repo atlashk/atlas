@@ -48,8 +48,8 @@ public class AdminUserServiceImpl implements AdminUserService {
 
   @Override
   @Transactional(readOnly = true)
-  public AdminUserOutput retrieveUser(String userId) {
-    return userRepository.findByUserId(userId)
+  public AdminUserOutput retrieveUser(String id) {
+    return userRepository.findById(id)
         .map(AdminUserMapper.INSTANCE::toAdminUserOutput)
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
   }
@@ -60,7 +60,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     checkValidity(input);
 
     UserEntity user = AdminUserMapper.INSTANCE.toUser(input);
-    user.setUserId(sequenceGenerator.generate(SequenceType.USER));
+    user.setId(sequenceGenerator.generate(SequenceType.USER));
     user.setPassword(passwordEncoder.encode(input.getPassword()));
     userRepository.insert(user);
 
@@ -70,7 +70,7 @@ public class AdminUserServiceImpl implements AdminUserService {
   @Override
   @Transactional
   public void updateUser(AdminUpdateUserInput input) {
-    UserEntity user = userRepository.findByUserId(input.getUserId())
+    UserEntity user = userRepository.findById(input.getId())
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
 
     boolean shouldPublishEvent = !Objects.equals(input.getFirstName(), user.getFirstName()) ||
@@ -87,10 +87,10 @@ public class AdminUserServiceImpl implements AdminUserService {
 
   @Override
   @Transactional
-  public void deleteUser(String userId) {
-    userRepository.deleteByUserId(userId);
+  public void deleteUser(String id) {
+    userRepository.deleteById(id);
 
-    userEventService.publishUserDeletedEvent(userId);
+    userEventService.publishUserDeletedEvent(id);
   }
 
   private void checkValidity(AdminCreateUserInput input) {

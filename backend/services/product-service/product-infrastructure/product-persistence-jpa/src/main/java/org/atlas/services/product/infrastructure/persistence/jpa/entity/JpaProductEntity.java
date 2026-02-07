@@ -35,11 +35,11 @@ import org.atlas.libs.persistence.jpa.entity.JpaBaseEntity;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
-public class JpaProduct extends JpaBaseEntity {
+public class JpaProductEntity extends JpaBaseEntity {
 
   @Id
-  @Column(name = "product_id")
-  private String productId;
+  @Column(name = "id")
+  private String id;
 
   @Column(name = "name")
   private String name;

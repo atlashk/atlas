@@ -33,8 +33,8 @@ import org.atlas.libs.persistence.jpa.entity.JpaBaseEntity;
 public class JpaOrderEntity extends JpaBaseEntity {
 
   @Id
-  @Column(name = "order_id")
-  private String orderId;
+  @Column(name = "id")
+  private String id;
 
   @Column(name = "saga_id")
   private Integer sagaId;

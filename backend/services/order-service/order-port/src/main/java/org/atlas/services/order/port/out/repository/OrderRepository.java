@@ -25,7 +25,7 @@ public interface OrderRepository {
 
   List<AdminMonthlyOrderAggregation> aggregateMonthlyByStatus(OrderStatus status);
 
-  Optional<OrderEntity> findByOrderId(String orderId);
+  Optional<OrderEntity> findById(String id);
 
   Optional<OrderEntity> findBySagaId(Integer sagaId);
 
@@ -40,7 +40,7 @@ public interface OrderRepository {
   @Setter
   class FindOrderCriteria {
 
-    private String orderId;
+    private String id;
 
     private String userId;
 

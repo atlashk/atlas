@@ -17,7 +17,7 @@ import org.atlas.libs.framework.domain.order.OrderStatus;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderResponse {
+public class AdminOrderResponse {
 
   @Schema(description = "Unique identifier of the order", example = "1")
   private Integer id;

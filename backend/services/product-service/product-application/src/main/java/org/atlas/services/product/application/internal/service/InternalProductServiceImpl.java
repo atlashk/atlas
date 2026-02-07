@@ -22,14 +22,14 @@ public class InternalProductServiceImpl implements InternalProductService {
 
   @Override
   public List<ProductEntity> retrieveProductList(InternalRetrieveProductListInput input) {
-    List<ProductEntity> products = productRepository.findByProductIdIn(input.getProductIds());
+    List<ProductEntity> products = productRepository.findByIdIn(input.getIds());
     if (CollectionUtil.isEmpty(products)) {
       return Collections.emptyList();
     }
 
     // Update image
     products.forEach(
-        product -> product.setImage(productImageService.getImage(product.getProductId())));
+        product -> product.setImage(productImageService.getImage(product.getId())));
 
     return products;
   }

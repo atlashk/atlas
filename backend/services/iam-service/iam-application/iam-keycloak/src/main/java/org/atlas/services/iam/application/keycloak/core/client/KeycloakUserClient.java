@@ -40,9 +40,9 @@ public class KeycloakUserClient {
   public List<UserEntity> retrieveUserList(RetrieveUserListRequest request) {
     UsersResource usersResource = getUsersResource();
 
-    if (StringUtil.isNotBlank(request.getUserId())) {
+    if (StringUtil.isNotBlank(request.getId())) {
       // Search by exact user ID
-      Optional<UserEntity> userOpt = retrieveUser(request.getUserId());
+      Optional<UserEntity> userOpt = retrieveUser(request.getId());
       if (userOpt.isEmpty()) {
         return CollectionUtil.emptyList();
       }
@@ -79,32 +79,32 @@ public class KeycloakUserClient {
     }
   }
 
-  public List<UserEntity> retrieveUserList(List<String> userIds) {
-    if (CollectionUtil.isEmpty(userIds)) {
+  public List<UserEntity> retrieveUserList(List<String> ids) {
+    if (CollectionUtil.isEmpty(ids)) {
       return CollectionUtil.emptyList();
     }
 
     UsersResource usersResource = getUsersResource();
     List<UserEntity> userList = new ArrayList<>();
-    for (String userId : userIds) {
+    for (String id : ids) {
       try {
-        UserRepresentation kcUser = usersResource.get(userId).toRepresentation();
+        UserRepresentation kcUser = usersResource.get(id).toRepresentation();
         UserEntity user = KeycloakUtil.toUserEntity(kcUser);
         userList.add(user);
       } catch (Exception e) {
-        log.debug("Keycloak user {} not found: {}", userId, ExceptionUtil.getStacktrace(e));
+        log.debug("Keycloak user {} not found: {}", id, ExceptionUtil.getStacktrace(e));
       }
     }
     return userList;
   }
 
-  public Optional<UserEntity> retrieveUser(String userId) {
+  public Optional<UserEntity> retrieveUser(String id) {
     UsersResource usersResource = getUsersResource();
     try {
-      UserRepresentation kcUser = usersResource.get(userId).toRepresentation();
+      UserRepresentation kcUser = usersResource.get(id).toRepresentation();
       return Optional.of(KeycloakUtil.toUserEntity(kcUser));
     } catch (Exception e) {
-      log.debug("Keycloak user {} not found: {}", userId, ExceptionUtil.getStacktrace(e));
+      log.debug("Keycloak user {} not found: {}", id, ExceptionUtil.getStacktrace(e));
       return Optional.empty();
     }
   }
@@ -139,7 +139,7 @@ public class KeycloakUserClient {
     }
   }
 
-  public String createUser(UserEntity user, String password) {
+  public void createUser(UserEntity user, String password) {
     RealmResource realm = keycloak.realm(keycloakProps.getRealm());
     UsersResource usersResource = realm.users();
     UserRepresentation kcUser = toUserRepresentation(user, password);
@@ -152,13 +152,12 @@ public class KeycloakUserClient {
       }
 
       // Assign role
-      String kcUserId = CreatedResponseUtil.getCreatedId(response);
-      UserResource userResource = usersResource.get(kcUserId);
+      String kcCreatedId = CreatedResponseUtil.getCreatedId(response);
+      UserResource userResource = usersResource.get(kcCreatedId);
       assignUserRole(userResource, user.getRole());
 
       log.info("Created Keycloak user successfully: username={}, keycloakUserId={}",
-          user.getUsername(), kcUserId);
-      return kcUserId;
+          user.getUsername(), kcCreatedId);
     } catch (Exception e) {
       throw new KeycloakClientException(
           String.format("Failed to create Keycloak user: username=%s, reason=%s",
@@ -170,14 +169,14 @@ public class KeycloakUserClient {
     UsersResource usersResource = getUsersResource();
     try {
       // Update user info
-      UserResource userResource = usersResource.get(user.getUserId());
+      UserResource userResource = usersResource.get(user.getId());
       UserRepresentation kcUser = toUserRepresentation(user, password);
       userResource.update(kcUser);
 
       // Assign role
       assignUserRole(userResource, user.getRole());
 
-      log.info("Updated Keycloak user successfully: userId={}", user.getUserId());
+      log.info("Updated Keycloak user successfully: id={}", user.getId());
     } catch (Exception e) {
       throw new KeycloakClientException(
           String.format("Failed to update Keycloak user: username=%s, reason=%s",
@@ -185,32 +184,32 @@ public class KeycloakUserClient {
     }
   }
 
-  public void deleteUser(String userId) {
+  public void deleteUser(String id) {
     UsersResource usersResource = getUsersResource();
-    try (Response response = usersResource.delete(userId)) {
+    try (Response response = usersResource.delete(id)) {
       if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
         throw new KeycloakClientException(
-            String.format("Failed to delete Keycloak user: userId=%s, status=%d, reason=%s", 
-                userId, response.getStatus(), response.getStatusInfo().getReasonPhrase()));
+            String.format("Failed to delete Keycloak user: id=%s, status=%d, reason=%s",
+                id, response.getStatus(), response.getStatusInfo().getReasonPhrase()));
       }
     } catch (Exception e) {
       throw new KeycloakClientException(
-          String.format("Failed to delete Keycloak user: userId=%s, reason=%s", 
-              userId, e.getMessage()));
+          String.format("Failed to delete Keycloak user: id=%s, reason=%s",
+              id, e.getMessage()));
     }
   }
 
-  public void changePassword(String userId, String newPassword) {
+  public void changePassword(String id, String newPassword) {
     UsersResource usersResource = getUsersResource();
     try {
-      UserResource userResource = usersResource.get(userId);
+      UserResource userResource = usersResource.get(id);
       CredentialRepresentation kcCredential = toCredentialRepresentation(newPassword);
       userResource.resetPassword(kcCredential);
-      log.info("Changed Keycloak user password successfully: userId={}", userId);
+      log.info("Changed Keycloak user password successfully: id={}", id);
     } catch (Exception e) {
       throw new KeycloakClientException(
-          String.format("Failed to change Keycloak user password: userId=%s, reason=%s", 
-              userId, e.getMessage()));
+          String.format("Failed to change Keycloak user password: id=%s, reason=%s",
+              id, e.getMessage()));
     }
   }
 

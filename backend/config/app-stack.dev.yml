@@ -4,7 +4,7 @@ file:
   csv: opencsv
   excel: poi
   pdf: pdfbox
-full-text-search: database
+full-text-search: none
 iam: jwt
 internal-api: rest
 kv-store: redis

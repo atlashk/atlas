@@ -1,8 +1,10 @@
 package org.atlas.libs.sequencegenerator;
 
+import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.libs.framework.sequencegenerator.SequenceType;
+import org.atlas.libs.framework.util.DateUtil;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,16 +18,20 @@ public class DefaultSequenceGenerator implements SequenceGenerator {
   @Override
   @Transactional
   public String generate(SequenceType sequenceType) {
+    Date now = DateUtil.now();
+
     // Step 1: Check if the sequence exists; if not, insert a new one with initial value = 1
     int affectedRows = jdbcTemplate.update(
         """
-            INSERT INTO sequence_generator (seq_name, seq_value)
-            SELECT ?, 1
+            INSERT INTO sequence_generator (seq_name, seq_value, created_at)
+            SELECT ?, 1, ?
             WHERE NOT EXISTS (
               SELECT 1 FROM sequence_generator WHERE seq_name = ?
             )
             """,
-        sequenceType.getName(), sequenceType.getName()
+        sequenceType.getName(),
+        now,
+        sequenceType.getName()
     );
 
     Long sequence;
@@ -34,7 +40,12 @@ public class DefaultSequenceGenerator implements SequenceGenerator {
     if (affectedRows == 0) {
       // Sequence already exists, increment the sequence and fetch the updated value
       jdbcTemplate.update(
-          "UPDATE sequence_generator SET seq_value = seq_value + 1 WHERE seq_name = ?",
+          """
+              UPDATE sequence_generator
+                 SET seq_value = seq_value + 1, updated_at = ?
+               WHERE seq_name = ?
+              """,
+          now,
           sequenceType.getName()
       );
     }
@@ -50,6 +61,11 @@ public class DefaultSequenceGenerator implements SequenceGenerator {
     return generateFormattedString(sequenceType.getPrefix(), sequence, sequenceType.getPadding());
   }
 
+  /**
+   * Example outputs:
+   * - prefix = "ORD", sequence = 12, padding = 5  => "ORD00012"
+   * - prefix = "ORD", sequence = 12345, padding = 3 => "ORD12345"
+   */
   private String generateFormattedString(String prefix, Long sequence, int padding) {
     // Create a StringBuilder for efficient string concatenation
     StringBuilder builder = new StringBuilder(prefix);

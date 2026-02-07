@@ -23,7 +23,7 @@ import org.atlas.libs.framework.domain.product.ProductStockStatus;
 public class ProductEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
-  private String productId;
+  private String id;
 
   private String name;
 

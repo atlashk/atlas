@@ -38,8 +38,8 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
   }
 
   @Override
-  public Optional<OrderEntity> findByOrderId(String orderId) {
-    return jpaOrderRepository.findByOrderIdAndFetch(orderId)
+  public Optional<OrderEntity> findById(String id) {
+    return jpaOrderRepository.findByIdAndFetch(id)
         .map(JpaOrderMapper.INSTANCE::toOrder);
   }
 
@@ -68,7 +68,7 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
   public void insert(OrderEntity order) {
     JpaOrderEntity jpaOrder = JpaOrderMapper.INSTANCE.toJpaOrder(order);
     jpaOrderRepository.insert(jpaOrder);
-    order.setOrderId(jpaOrder.getOrderId());
+    order.setId(jpaOrder.getId());
     order.setCreatedAt(jpaOrder.getCreatedAt());
   }
 

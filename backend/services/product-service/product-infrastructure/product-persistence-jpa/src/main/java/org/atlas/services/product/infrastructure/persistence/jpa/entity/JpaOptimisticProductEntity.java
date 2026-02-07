@@ -39,8 +39,8 @@ import org.atlas.libs.persistence.jpa.entity.JpaBaseEntity;
 public class JpaOptimisticProductEntity extends JpaBaseEntity {
 
   @Id
-  @Column(name = "product_id")
-  private String productId;
+  @Column(name = "id")
+  private String id;
 
   @Column(name = "name")
   private String name;

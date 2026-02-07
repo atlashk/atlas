@@ -86,13 +86,12 @@ public class OrderController {
     return ApiResponseWrapper.success(responseData);
   }
 
-  @GetMapping(value = "/{orderId}/status", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/{id}/status", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Get order status")
   public ApiResponseWrapper<RetrieveOrderStatusResponse> getOrderStatus(
-      @Parameter(name = "orderId", description = "ID of the order to retrieve the status for", example = "123")
-      @PathVariable String orderId) {
-    RetrieveOrderStatusOutput output = orderService.retrieveOrderStatus(
-        orderId, Contexts.getUserId());
+      @Parameter(name = "id", description = "ID of the order to retrieve the status for", example = "123")
+      @PathVariable String id) {
+    RetrieveOrderStatusOutput output = orderService.retrieveOrderStatus(id);
     RetrieveOrderStatusResponse responseData = OrderMapper.INSTANCE.toGetOrderStatusResponse(
         output);
     return ApiResponseWrapper.success(responseData);

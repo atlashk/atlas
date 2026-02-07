@@ -21,14 +21,12 @@ include(':libs.api.client.rest.resttemplate')
 project(':libs.api.client.rest.resttemplate').projectDir = file('libs/api-client/api-client-rest-resttemplate')
 
 // API Server
-
 include(':libs.api.server.rest')
 project(':libs.api.server.rest').projectDir = file('libs/api-server/api-server-rest')
 include(':libs.api.server.grpc')
 project(':libs.api.server.grpc').projectDir = file('libs/api-server/api-server-grpc')
 
 // Datasource
-
 include(':libs.datasource.mysql')
 project(':libs.datasource.mysql').projectDir = file('libs/datasource/datasource-mysql')
 include(':libs.datasource.postgres')
@@ -197,6 +195,12 @@ project(':libs.scheduler.quartz.migration.flyway.postgres').projectDir = file('l
 // Sequence generator
 include(':libs.sequence-generator')
 project(':libs.sequence-generator').projectDir = file('libs/sequence-generator')
+include(':libs.sequence-generator.core')
+project(':libs.sequence-generator.core').projectDir = file('libs/sequence-generator/sequence-generator-core')
+include(':libs.sequence-generator.migration.flyway.mysql')
+project(':libs.sequence-generator.migration.flyway.mysql').projectDir = file('libs/sequence-generator/sequence-generator-migration-flyway-mysql')
+include(':libs.sequence-generator.migration.flyway.postgres')
+project(':libs.sequence-generator.migration.flyway.postgres').projectDir = file('libs/sequence-generator/sequence-generator-migration-flyway-postgres')
 
 // Storage
 include(':libs.storage.filesystem')
@@ -241,6 +245,10 @@ include(':services.iam.datasource.mysql')
 project(':services.iam.datasource.mysql').projectDir = file('services/iam-service/iam-infrastructure/iam-datasource-mysql')
 include(':services.iam.datasource.postgres')
 project(':services.iam.datasource.postgres').projectDir = file('services/iam-service/iam-infrastructure/iam-datasource-postgres')
+include(':services.iam.messaging.kafka')
+project(':services.iam.messaging.kafka').projectDir = file('services/iam-service/iam-infrastructure/iam-messaging-kafka')
+include(':services.iam.messaging.rabbitmq')
+project(':services.iam.messaging.rabbitmq').projectDir = file('services/iam-service/iam-infrastructure/iam-messaging-rabbitmq')
 include(':services.iam.migration.flyway.mysql')
 project(':services.iam.migration.flyway.mysql').projectDir = file('services/iam-service/iam-infrastructure/iam-migration-flyway-mysql')
 include(':services.iam.migration.flyway.postgres')

@@ -8,5 +8,5 @@ public interface ProductService {
 
   PagingResult<ProductEntity> retrieveProductList(RetrieveProductListInput input);
 
-  ProductEntity retrieveProduct(String productId) throws Exception;
+  ProductEntity retrieveProduct(String id) throws Exception;
 }

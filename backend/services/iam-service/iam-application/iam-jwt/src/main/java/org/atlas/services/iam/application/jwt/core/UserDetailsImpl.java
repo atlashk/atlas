@@ -14,13 +14,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Setter
 public class UserDetailsImpl implements UserDetails {
 
-  private String userId;
+  private String id;
   private String username;
   private String password;
   private Collection<? extends GrantedAuthority> authorities;
 
   public UserDetailsImpl(UserEntity user) {
-    this.userId = user.getUserId();
+    this.id = user.getId();
     this.username = user.getUsername();
     this.password = user.getPassword();
     this.authorities = Collections.singletonList(
