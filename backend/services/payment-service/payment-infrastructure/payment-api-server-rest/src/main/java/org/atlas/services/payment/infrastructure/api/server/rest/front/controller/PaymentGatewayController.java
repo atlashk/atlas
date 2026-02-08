@@ -25,7 +25,7 @@ public class PaymentGatewayController {
 
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve a list of available payment gateways")
-  public ApiResponseWrapper<List<PaymentGatewayResponse>> listPaymentMethod() throws Exception {
+  public ApiResponseWrapper<List<PaymentGatewayResponse>> retrievePaymentGatewayList() throws Exception {
     List<PaymentGatewayEntity> paymentGateways = paymentGatewayService.retrievePaymentGatewayList();
     List<PaymentGatewayResponse> responseData = MapperUtil.mapList(paymentGateways,
         PaymentGatewayMapper.INSTANCE::toPaymentGatewayResponse);

@@ -1,8 +1,6 @@
 package org.atlas.services.iam.application.jwt.core;
 
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.atlas.services.iam.domain.entity.UserEntity;
 import org.atlas.services.iam.port.out.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,16 +15,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    Optional<UserEntity> userOpt = userRepository.findByUsername(username);
-    if (userOpt.isEmpty()) {
-      userOpt = userRepository.findByEmail(username);
-      if (userOpt.isEmpty()) {
-        userOpt = userRepository.findByPhoneNumber(username);
-        if (userOpt.isEmpty()) {
-          throw new UsernameNotFoundException(username);
-        }
-      }
-    }
-    return userOpt.map(UserDetailsImpl::new).get();
+    return userRepository.findByUsername(username)
+        .map(UserDetailsImpl::new)
+        .orElseThrow(() -> new UsernameNotFoundException(String.format("User %s not found", username)));
   }
 }

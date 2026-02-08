@@ -39,7 +39,7 @@ class ServiceInfoCache {
   }
 
   private async fetchServiceInfo(): Promise<InAppServiceInfo> {
-    const response = await notificationApi.getInAppServiceInfo();
+    const response = await notificationApi.retrieveInAppServiceInfo();
     if (!response.success || !response.data) {
       throw new Error(response.errorMessage || 'Failed to fetch service info');
     }

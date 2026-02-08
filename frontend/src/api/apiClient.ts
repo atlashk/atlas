@@ -178,7 +178,7 @@ function redirectToLogin(): void {
 async function performTokenRefresh(refreshToken: string): Promise<string> {
   try {
     const response = await axios.post(
-      `${API_BASE_URL}/api/auth/refresh-token`,
+      `${API_BASE_URL}/services/iam/api/authentication/refresh-token`,
       { refreshToken },
       {
         timeout: 10000, // 10 second timeout for refresh requests

@@ -18,5 +18,7 @@ public interface AdminUserService {
 
   void updateUser(AdminUpdateUserInput input);
 
-  void deleteUser(String userId);
+  void deleteUser(String id);
+
+  boolean existsUser(String username);
 }

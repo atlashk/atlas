@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.domain.common.error.DomainError;
@@ -27,6 +28,7 @@ import org.atlas.services.iam.port.in.auth.service.AuthenticationService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,7 +42,7 @@ public class AuthenticationController {
 
   private final AuthenticationService authenticationService;
 
-  @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "User login")
   public ApiResponseWrapper<LoginResponse> login(
       @Parameter(description = "Request object containing user credentials for login", required = true)
@@ -51,7 +53,7 @@ public class AuthenticationController {
     return ApiResponseWrapper.success(response);
   }
 
-  @PostMapping(value = "/refresh-token", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/refresh-token", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Refresh token")
   public ApiResponseWrapper<RefreshTokenResponse> refreshToken(
       @Parameter(description = "Refresh token sent in the request body", required = true)
@@ -78,7 +80,7 @@ public class AuthenticationController {
     return ApiResponseWrapper.success();
   }
 
-  @PostMapping("/ott/login")
+  @PostMapping(value = "/ott/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "One-time token login")
   public ApiResponseWrapper<LoginResponse> oneTimeTokenLogin(
       @Valid @RequestBody OneTimeTokenLoginRequest request) throws Exception {
@@ -88,7 +90,7 @@ public class AuthenticationController {
     return ApiResponseWrapper.success(response);
   }
 
-  @PostMapping("/ott/generate")
+  @PostMapping(value = "/ott/generate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Generate one-time token")
   public ApiResponseWrapper<GenerateOneTimeTokenResponse> generateOneTimeToken(
       @Valid @RequestBody GenerateOneTimeTokenRequest request) {
@@ -98,5 +100,11 @@ public class AuthenticationController {
     GenerateOneTimeTokenResponse response = AuthenticationMapper.INSTANCE
         .toGenerateOneTimeTokenResponse(output);
     return ApiResponseWrapper.success(response);
+  }
+
+  @GetMapping(value = "/.well-known/jwks.json")
+  @Operation(summary = "JwkSet")
+  public Map<String, Object> jwkSet() {
+    return authenticationService.jwkSet();
   }
 }

@@ -22,9 +22,11 @@ public interface UserRepository {
 
   Optional<UserEntity> findByUsername(String username);
 
-  Optional<UserEntity> findByEmail(String email);
+  boolean existsByUsername(String username);
 
-  Optional<UserEntity> findByPhoneNumber(String phoneNumber);
+  boolean existsByEmail(String email);
+
+  boolean existsByPhoneNumber(String phoneNumber);
 
   Long countAll();
 

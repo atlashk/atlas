@@ -10,7 +10,9 @@ public interface JpaUserRepository extends JpaBaseRepository<JpaUserEntity, Stri
 
   Optional<JpaUserEntity> findByUsername(String username);
 
-  Optional<JpaUserEntity> findByEmail(String email);
+  boolean existsByUsername(String username);
 
-  Optional<JpaUserEntity> findByPhoneNumber(String phoneNumber);
+  boolean existsByEmail(String email);
+
+  boolean existsByPhoneNumber(String phoneNumber);
 }

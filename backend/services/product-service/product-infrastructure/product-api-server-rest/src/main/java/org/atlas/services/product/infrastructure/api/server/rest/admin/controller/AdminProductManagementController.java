@@ -49,7 +49,7 @@ public class AdminProductManagementController {
 
   private final AdminProductService adminProductService;
 
-  @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/list", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve a list of products with optional filtering and pagination")
   public ApiResponseWrapper<List<AdminProductResponse>> retrieveProductList(
       @Parameter(description = "Request object containing filters and pagination", required = true)
@@ -76,7 +76,7 @@ public class AdminProductManagementController {
     return ApiResponseWrapper.success(response);
   }
 
-  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(summary = "Create a new product")
   public ApiResponseWrapper<String> createProduct(
@@ -95,7 +95,7 @@ public class AdminProductManagementController {
     return ApiResponseWrapper.success(responseData);
   }
 
-  @PutMapping(value = "/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping(value = "/{productId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Update an existing product by ID")
   public ApiResponseWrapper<Void> updateProduct(
       @Parameter(name = "productId", description = "The unique identifier of the product to update", example = "1")
@@ -127,7 +127,7 @@ public class AdminProductManagementController {
     return ApiResponseWrapper.success();
   }
 
-  @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/import", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Import products from a file")
   public ApiResponseWrapper<Void> importProduct(
       @Parameter(name = "file", description = "The file containing products to import")

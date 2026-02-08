@@ -8,7 +8,7 @@ import { useUserStore } from "@/stores/user.store";
 import { Clock, ShoppingCart } from "lucide-react";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 
 export default function NavBar() {
   const router = useRouter();
@@ -24,15 +24,11 @@ export default function NavBar() {
     resetIntentionallyCleared,
   } = useCartStore();
   const cartItemCount = getCartItemCount();
-  const [isHydrated, setIsHydrated] = useState(false);
-  const [cartLoadAttempted, setCartLoadAttempted] = useState(false);
+  const isHydrated = true;
+  const cartLoadAttemptedRef = useRef(false);
 
   const isAuth = isAuthenticated();
   const admin = isAdmin();
-
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
 
   // Load cart data when user is authenticated
   useEffect(() => {
@@ -50,10 +46,10 @@ export default function NavBar() {
         !admin &&
         !cart &&
         !isLoading &&
-        (!cartLoadAttempted || !error)
+        (!cartLoadAttemptedRef.current || !error)
       ) {
         try {
-          setCartLoadAttempted(true);
+          cartLoadAttemptedRef.current = true;
           await loadCart();
         } catch (error) {
           console.error("Failed to load cart:", error);
@@ -63,12 +59,12 @@ export default function NavBar() {
     };
 
     loadCartData();
-  }, [isHydrated, isAuth, admin, cart, isLoading, error, cartLoadAttempted, loadCart]);
+  }, [isHydrated, isAuth, admin, cart, isLoading, error, loadCart]);
 
   // Reset cart load attempt when user authentication changes
   useEffect(() => {
     if (!isAuth) {
-      setCartLoadAttempted(false);
+      cartLoadAttemptedRef.current = false;
     }
   }, [isAuth]);
 

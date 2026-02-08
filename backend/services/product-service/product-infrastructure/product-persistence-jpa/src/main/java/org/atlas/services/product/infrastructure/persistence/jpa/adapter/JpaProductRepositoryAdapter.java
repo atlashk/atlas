@@ -66,7 +66,6 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
   public void insert(ProductEntity product) {
     JpaProductEntity jpaProduct = JpaProductMapper.INSTANCE.toJpaProduct(product);
     jpaProductRepository.insert(jpaProduct);
-    product.setId(jpaProduct.getId());
   }
 
   @Override

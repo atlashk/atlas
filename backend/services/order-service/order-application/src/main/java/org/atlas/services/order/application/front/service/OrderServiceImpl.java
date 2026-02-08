@@ -64,7 +64,7 @@ public class OrderServiceImpl implements OrderService {
     OrderEntity order = orderRepository.findById(id)
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
 
-    if (!Objects.equals(order.getUser().getUserId(), userId)) {
+    if (!Objects.equals(order.getUser().getId(), userId)) {
       throw new DomainException(DomainError.FORBIDDEN);
     }
 
@@ -79,13 +79,13 @@ public class OrderServiceImpl implements OrderService {
     UserResponse userResponse = retrieveUser(userId);
 
     // Retrieve cart
-    CartEntity cart = cartService.retrieveCart(userId);
+    CartEntity cart = cartService.retrieveCart();
     if (cart.isEmpty()) {
       throw new DomainException(DomainError.CART_EMPTY);
     }
 
     // Checkout idempotence guarantee
-    String lockKey = obtainLockKey(input, cart);
+    String lockKey = obtainLockKey(cart);
     Duration waitTime = Duration.ofSeconds(30);
     Duration leaseTime = Duration.ofMinutes(15);
     boolean lockAcquired = lockService.acquireLock(lockKey, waitTime, leaseTime);
@@ -124,7 +124,7 @@ public class OrderServiceImpl implements OrderService {
     return userResponses.get(0);
   }
 
-  private String obtainLockKey(CheckoutInput input, CartEntity cart) {
+  private String obtainLockKey(CartEntity cart) {
     // Create a deterministic signature based on order items
     StringBuilder signature = new StringBuilder();
     cart.getCartItems().stream().sorted(

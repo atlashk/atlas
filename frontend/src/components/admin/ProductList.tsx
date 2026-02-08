@@ -1,7 +1,6 @@
 "use client";
 
-import { productApi } from "@/api/index.api";
-import { productAdminApi } from "@/api/product.admin.api";
+import { productFrontApi, productAdminApi } from "@/api/index.api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -99,7 +98,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
       setIsLoadingBrands(true);
       setBrandsError(null);
 
-      const brandsResponse = await productApi.listBrand();
+      const brandsResponse = await productFrontApi.retrieveAllBrand();
 
       if (!brandsResponse.success) {
         throw new Error(brandsResponse.errorMessage || "Failed to load brands");
@@ -122,7 +121,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
       setIsLoadingCategories(true);
       setCategoriesError(null);
 
-      const categoriesResponse = await productApi.listCategory();
+      const categoriesResponse = await productFrontApi.retrieveAllCategory();
 
       if (!categoriesResponse.success) {
         throw new Error(
@@ -250,7 +249,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
         // Load brands
         setIsLoadingBrands(true);
         setBrandsError(null);
-        const brandsResponse = await productApi.listBrand();
+        const brandsResponse = await productFrontApi.retrieveAllBrand();
         if (!brandsResponse.success) {
           throw new Error(
             brandsResponse.errorMessage || "Failed to load brands"
@@ -270,7 +269,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
         // Load categories
         setIsLoadingCategories(true);
         setCategoriesError(null);
-        const categoriesResponse = await productApi.listCategory();
+        const categoriesResponse = await productFrontApi.retrieveAllCategory();
         if (!categoriesResponse.success) {
           throw new Error(
             categoriesResponse.errorMessage || "Failed to load categories"
@@ -318,7 +317,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
           }
         });
 
-        const response = await productAdminApi.listProduct(apiFilters);
+        const response = await productAdminApi.retrieveProductList(apiFilters);
 
         if (!response.success) {
           throw new Error(response.errorMessage || "Failed to load products");

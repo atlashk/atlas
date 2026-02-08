@@ -1,6 +1,6 @@
 "use client";
 
-import { orderAdminApi, productAdminApi, userAdminApi } from "@/api/index.api";
+import { iamAdminApi, orderAdminApi, productAdminApi } from "@/api/index.api";
 import {
   Card,
   CardContent,
@@ -68,11 +68,11 @@ const Dashboard: React.FC = () => {
         revenueResponse,
         monthlyResponse,
       ] = await Promise.all([
-        userAdminApi.countUser(),
+        iamAdminApi.countUser(),
         productAdminApi.countProduct(),
-        orderAdminApi.countOrder(),
-        orderAdminApi.getTotalRevenue(),
-        orderAdminApi.getMonthlyStatistics(),
+        orderAdminApi.retrieveOrderCount(),
+        orderAdminApi.retrieveTotalRevenue(),
+        orderAdminApi.retrieveMonthlyOrderStatistics(),
       ]);
 
       setStats({

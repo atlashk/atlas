@@ -3,6 +3,7 @@ package org.atlas.services.payment.application.front.service;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.atlas.libs.framework.context.Contexts;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
 import org.atlas.libs.framework.domain.payment.PaymentStatus;
@@ -23,8 +24,9 @@ public class PaymentServiceImpl implements PaymentService {
 
   @Override
   @Transactional(readOnly = true)
-  public RetrievePaymentNextActionOutput retrievePaymentNextAction(String orderId,
-      String userId) {
+  public RetrievePaymentNextActionOutput retrievePaymentNextAction(String orderId) {
+    String userId = Contexts.getUserId();
+
     PaymentEntity payment = paymentRepository.findByOrderId(orderId)
         .orElseThrow(() -> new DomainException(DomainError.PAYMENT_NOT_FOUND));
 

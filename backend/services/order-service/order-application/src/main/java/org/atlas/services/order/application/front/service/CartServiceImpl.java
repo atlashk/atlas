@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.cache.ApplicationCache;
 import org.atlas.libs.framework.cache.Cache;
 import org.atlas.libs.framework.cache.CacheService;
+import org.atlas.libs.framework.context.Contexts;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
@@ -28,7 +29,9 @@ public class CartServiceImpl implements CartService {
   @Override
   @Cache(cacheName = "cart", key = "#userId")
   @Transactional(readOnly = true)
-  public CartEntity retrieveCart(String userId) {
+  public CartEntity retrieveCart() {
+    String userId = Contexts.getUserId();
+
     // Get or create cart for user
     Optional<CartEntity> cartOpt = cartRepository.findByUserId(userId);
     if (cartOpt.isEmpty()) {
@@ -53,7 +56,9 @@ public class CartServiceImpl implements CartService {
 
   @Override
   @Transactional
-  public CartEntity addCartItem(String userId, String productId, Integer quantity) {
+  public CartEntity addCartItem(String productId, Integer quantity) {
+    String userId = Contexts.getUserId();
+
     // Get or create cart for user
     CartEntity cart = cartRepository.findByUserId(userId)
         .orElseGet(() -> {
@@ -78,7 +83,9 @@ public class CartServiceImpl implements CartService {
 
   @Override
   @Transactional
-  public CartEntity updateQuantity(String userId, String productId, Integer quantity) {
+  public CartEntity updateQuantity(String productId, Integer quantity) {
+    String userId = Contexts.getUserId();
+
     // Find cart
     CartEntity cart = cartRepository.findByUserId(userId)
         .orElseThrow(() -> new DomainException(DomainError.CART_NOT_FOUND));
@@ -100,7 +107,9 @@ public class CartServiceImpl implements CartService {
 
   @Override
   @Transactional
-  public CartEntity removeCartItem(String userId, String productId) {
+  public CartEntity removeCartItem(String productId) {
+    String userId = Contexts.getUserId();
+
     // Find cart
     CartEntity cart = cartRepository.findByUserId(userId)
         .orElseThrow(() -> new DomainException(DomainError.CART_NOT_FOUND));
@@ -120,7 +129,9 @@ public class CartServiceImpl implements CartService {
 
   @Override
   @Transactional
-  public CartEntity clearCart(String userId) {
+  public CartEntity clearCart() {
+    String userId = Contexts.getUserId();
+
     // Find cart
     CartEntity cart = cartRepository.findByUserId(userId)
         .orElseThrow(() -> new DomainException(DomainError.CART_NOT_FOUND));

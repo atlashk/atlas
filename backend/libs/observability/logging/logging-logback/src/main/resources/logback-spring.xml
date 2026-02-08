@@ -3,6 +3,14 @@
   <springProperty name="SERVICE_NAME" scope="context" source="spring.application.name"/>
   <property name="LOG_DIR" value="/var/log/${SERVICE_NAME}"/>
 
+  <!-- MDC Filter to suppress logs -->
+  <turboFilter class="ch.qos.logback.classic.turbo.MDCFilter">
+    <MDCKey>suppressLog</MDCKey>
+    <Value>true</Value>
+    <OnMatch>DENY</OnMatch>
+    <OnMismatch>NEUTRAL</OnMismatch>
+  </turboFilter>
+
   <!-- use Spring default values -->
   <appender class="ch.qos.logback.core.ConsoleAppender" name="CONSOLE">
     <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">

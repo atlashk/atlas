@@ -23,7 +23,8 @@ public class JpaUserRepositoryAdapter implements UserRepository {
   private final CustomJpaUserRepository customJpaUserRepository;
 
   @Override
-  public PagingResult<UserEntity> findByCriteria(FindUserCriteria criteria, PagingRequest pagingRequest) {
+  public PagingResult<UserEntity> findByCriteria(FindUserCriteria criteria,
+      PagingRequest pagingRequest) {
     long totalCount = customJpaUserRepository.countByCriteria(criteria);
     if (totalCount == 0L) {
       return PagingResult.empty();
@@ -50,21 +51,24 @@ public class JpaUserRepositoryAdapter implements UserRepository {
   }
 
   @Override
-  public Optional<UserEntity> findByUsername(String username) {
-    return jpaUserRepository.findByUsername(username)
+  public Optional<UserEntity> findByUsername(String email) {
+    return jpaUserRepository.findByUsername(email)
         .map(JpaUserMapper.INSTANCE::toUser);
   }
 
   @Override
-  public Optional<UserEntity> findByEmail(String email) {
-    return jpaUserRepository.findByEmail(email)
-        .map(JpaUserMapper.INSTANCE::toUser);
+  public boolean existsByUsername(String username) {
+    return jpaUserRepository.existsByUsername(username);
   }
 
   @Override
-  public Optional<UserEntity> findByPhoneNumber(String phoneNumber) {
-    return jpaUserRepository.findByPhoneNumber(phoneNumber)
-        .map(JpaUserMapper.INSTANCE::toUser);
+  public boolean existsByEmail(String email) {
+    return jpaUserRepository.existsByEmail(email);
+  }
+
+  @Override
+  public boolean existsByPhoneNumber(String phoneNumber) {
+    return jpaUserRepository.existsByPhoneNumber(phoneNumber);
   }
 
   @Override
@@ -76,7 +80,6 @@ public class JpaUserRepositoryAdapter implements UserRepository {
   public void insert(UserEntity user) {
     JpaUserEntity jpaUser = JpaUserMapper.INSTANCE.toJpaUser(user);
     jpaUserRepository.save(jpaUser);
-    user.setId(jpaUser.getId());
   }
 
   @Override

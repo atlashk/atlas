@@ -7,11 +7,11 @@ class PaymentApi extends BaseApi {
     super('/services/payment/api');
   }
 
-  async getPaymentGateways(): Promise<ApiResponse<PaymentGatewayResponse[]>> {
+  async retrievePaymentGatewayList(): Promise<ApiResponse<PaymentGatewayResponse[]>> {
     return this.get<PaymentGatewayResponse[]>('/payment-gateways');
   }
 
-  async getPaymentNextAction(orderId: string): Promise<ApiResponse<PaymentNextActionResponse>> {
+  async retrievePaymentNextAction(orderId: string): Promise<ApiResponse<PaymentNextActionResponse>> {
     return this.get<PaymentNextActionResponse>(`/payments/${orderId}/next-action`);
   }
 }

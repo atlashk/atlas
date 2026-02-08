@@ -29,7 +29,7 @@ function AdminProductDetailsPage() {
   const loadProduct = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await productAdminApi.getProduct(productId);
+      const response = await productAdminApi.retrieveProduct(productId);
       if (response.success) {
         setProduct(response.data);
       } else {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { orderApi } from '@/api/order.api';
+import { orderFrontApi } from '@/api/order.api';
 import { OrderStatusResponse } from '@/interfaces/order.interface';
 
 export function useOrderStatusPolling(orderId: string | null) {
@@ -8,6 +8,11 @@ export function useOrderStatusPolling(orderId: string | null) {
   const [error, setError] = useState<string | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const isPollingRef = useRef<boolean>(false);
+  const orderIdRef = useRef<string | null>(orderId);
+
+  useEffect(() => {
+    orderIdRef.current = orderId;
+  }, [orderId]);
 
   const stopPolling = useCallback(() => {
     if (intervalRef.current) {
@@ -17,51 +22,50 @@ export function useOrderStatusPolling(orderId: string | null) {
     isPollingRef.current = false;
   }, []);
 
-  const startPolling = useCallback(() => {
-    if (!orderId) return;
-    
-    // Prevent multiple polling instances
+  const poll = useCallback(async () => {
+    const currentOrderId = orderIdRef.current;
+    if (!currentOrderId) return;
+
+    try {
+      const response = await orderFrontApi.getOrderStatus(currentOrderId);
+      
+      if (response.success && response.data) {
+        setOrderStatus(response.data);
+
+        if (['FULFILLED', 'CANCELED'].includes(response.data.status)) {
+          setIsLoading(false);
+          stopPolling();
+          return;
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+      setIsLoading(false);
+      stopPolling();
+    }
+  }, [stopPolling]);
+
+  const schedulePolling = useCallback(() => {
+    if (!orderIdRef.current) return;
+
     if (isPollingRef.current) {
       return;
     }
 
-    // Stop any existing polling first
     stopPolling();
-
     isPollingRef.current = true;
-    setIsLoading(true);
-    setError(null);
 
-    const poll = async () => {
-      try {
-        const response = await orderApi.getOrderStatus(orderId);
-        
-        if (response.success && response.data) {
-          setOrderStatus(response.data);
+    setTimeout(() => {
+      setIsLoading(true);
+      setError(null);
+      poll();
+      intervalRef.current = setInterval(poll, 2000);
+    }, 0);
+  }, [poll, stopPolling]);
 
-          // Stop polling if order is completed (fulfilled or canceled)
-          // Continue polling for AWAITING_PAYMENT_PROCESSED to allow payment processing
-          if (['FULFILLED', 'CANCELED'].includes(response.data.status)) {
-            // Use functional update to ensure we have the latest state
-            setIsLoading(() => false);
-            
-            stopPolling();
-            return; // Exit early to prevent further polling
-          }
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error');
-        setIsLoading(false);
-        stopPolling();
-      }
-    };
-
-    // Poll immediately
-    poll();
-
-    // Then poll every 2 seconds
-    intervalRef.current = setInterval(poll, 2000);
-  }, [orderId, stopPolling]);
+  const startPolling = useCallback(() => {
+    schedulePolling();
+  }, [schedulePolling]);
 
   const reset = useCallback(() => {
     stopPolling();
@@ -73,7 +77,7 @@ export function useOrderStatusPolling(orderId: string | null) {
 
   useEffect(() => {
     if (orderId) {
-      startPolling();
+      schedulePolling();
     } else {
       stopPolling();
     }
@@ -81,7 +85,7 @@ export function useOrderStatusPolling(orderId: string | null) {
     return () => {
       stopPolling();
     };
-  }, [orderId, startPolling, stopPolling]);
+  }, [orderId, schedulePolling, stopPolling]);
 
   // Helper function to check if payment processing is needed
   const needsPaymentProcessing = orderStatus?.status === 'AWAITING_PAYMENT_PROCESSED';

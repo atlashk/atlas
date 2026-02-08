@@ -3,12 +3,11 @@ package org.atlas.services.notification.application.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.atlas.libs.framework.context.Contexts;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.services.notification.domain.entity.DeliveryStatus;
 import org.atlas.services.notification.domain.entity.Notification;
 import org.atlas.services.notification.domain.entity.NotificationChannel;
-import org.atlas.services.notification.port.in.model.MarkAsReadAllInput;
-import org.atlas.services.notification.port.in.model.RetrieveInAppNotificationListInput;
 import org.atlas.services.notification.port.in.service.InAppNotificationService;
 import org.atlas.services.notification.port.out.repository.NotificationRepository;
 import org.springframework.stereotype.Service;
@@ -24,17 +23,19 @@ public class InAppNotificationServiceImpl implements InAppNotificationService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<Notification> retrieveInAppNotification(RetrieveInAppNotificationListInput input) {
-    PagingRequest pagingRequest = PagingRequest.of(0, input.getLimit(), "createdAt",
+  public List<Notification> retrieveInAppNotification(int limit) {
+    String userId = Contexts.getUserId();
+    PagingRequest pagingRequest = PagingRequest.of(0, limit, "createdAt",
         PagingRequest.SortOrder.DESC);
     return notificationRepository.findByUserIdAndChannel(
-        input.getUserId(), NotificationChannel.IN_APP, pagingRequest);
+        userId, NotificationChannel.IN_APP, pagingRequest);
   }
 
   @Override
   @Transactional
-  public void markAsReadAll(MarkAsReadAllInput input) {
-    notificationRepository.markAsReadAll(input.getUserId(), NotificationChannel.IN_APP);
+  public void markAsReadAll() {
+    String userId = Contexts.getUserId();
+    notificationRepository.markAsReadAll(userId, NotificationChannel.IN_APP);
   }
 
   @Override

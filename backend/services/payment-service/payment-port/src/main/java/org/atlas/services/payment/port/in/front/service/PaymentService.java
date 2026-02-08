@@ -4,5 +4,5 @@ import org.atlas.services.payment.port.in.front.model.RetrievePaymentNextActionO
 
 public interface PaymentService {
 
-  RetrievePaymentNextActionOutput retrievePaymentNextAction(String orderId, String userId);
+  RetrievePaymentNextActionOutput retrievePaymentNextAction(String orderId);
 }

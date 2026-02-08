@@ -32,33 +32,27 @@ public class ProductController {
 
   private final ProductService productService;
 
-  @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/list", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve a list of products based on various filters")
   public ApiResponseWrapper<List<ProductResponse>> retrieveProductList(
       @Parameter(description = "Request object containing filters and pagination", required = true)
       @Valid @RequestBody RetrieveProductListRequest request
   ) {
-    RetrieveProductListInput input = RetrieveProductListInput.builder()
-        .keyword(request.getKeyword())
-        .minPrice(request.getMinPrice())
-        .maxPrice(request.getMaxPrice())
-        .brandId(request.getBrandId())
-        .categoryIds(request.getCategoryIds())
-        .pagingRequest(PagingRequest.of(request.getPage() - 1, request.getSize()))
-        .mode(request.getMode())
-        .build();
+    RetrieveProductListInput input = ProductMapper.INSTANCE.toRetrieveProductListInput(request);
+    input.setPagingRequest(PagingRequest.of(request.getPage() - 1, request.getSize()));
+
     PagingResult<ProductEntity> productPage = productService.retrieveProductList(input);
     PagingResult<ProductResponse> responseData = MapperUtil.mapPage(productPage,
         ProductMapper.INSTANCE::toProductResponse);
     return ApiResponseWrapper.successPage(responseData);
   }
 
-  @GetMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve details of a specific product by ID")
   public ApiResponseWrapper<ProductResponse> retrieveProduct(
-      @Parameter(name = "productId", description = "The unique identifier of the product.", example = "1", required = true)
-      @PathVariable String productId) throws Exception {
-    ProductEntity product = productService.retrieveProduct(productId);
+      @Parameter(name = "id", description = "The unique identifier of the product.", example = "1", required = true)
+      @PathVariable String id) throws Exception {
+    ProductEntity product = productService.retrieveProduct(id);
     ProductResponse responseData = ProductMapper.INSTANCE.toProductResponse(product);
     return ApiResponseWrapper.success(responseData);
   }

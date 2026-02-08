@@ -31,13 +31,15 @@ MANIFESTS_DIR="$SCRIPT_DIR/manifests"
 
 SKIP_BUILD=false
 INFRA_ONLY=false
+ENABLE_OBSERVABILITY=true
 
 show_help() {
-  echo "Usage: $0 [--skip-build] [--infra-only]"
+  echo "Usage: $0 [--skip-build] [--infra-only] [--enable-observability <true|false>]"
   echo ""
   echo "Simplified Atlas Kubernetes deploy script"
   echo "  --skip-build        Skip backend and Docker image builds"
   echo "  --infra-only        Apply only infrastructure manifests"
+  echo "  --enable-observability <true|false>"
 }
 
 parse_arguments() {
@@ -49,12 +51,31 @@ parse_arguments() {
         SKIP_BUILD=true; shift;;
       --infra-only)
         INFRA_ONLY=true; SKIP_BUILD=true; shift;;
+      --enable-observability)
+        shift
+        if [[ $# -eq 0 || "$1" == -* ]]; then
+          echo "Missing value for --enable-observability" >&2
+          exit 1
+        fi
+        ENABLE_OBSERVABILITY="$1"; shift;;
+      --enable-observability=*)
+        ENABLE_OBSERVABILITY="${1#--enable-observability=}"
+        if [[ -z "$ENABLE_OBSERVABILITY" ]]; then
+          echo "Missing value for --enable-observability" >&2
+          exit 1
+        fi
+        shift;;
       *)
         echo "Unknown option: $1" >&2
         echo "Use --help for usage information" >&2
         exit 1;;
     esac
   done
+  ENABLE_OBSERVABILITY="$(echo "$ENABLE_OBSERVABILITY" | tr '[:upper:]' '[:lower:]')"
+  if [[ "$ENABLE_OBSERVABILITY" != "true" && "$ENABLE_OBSERVABILITY" != "false" ]]; then
+    echo "Invalid value for --enable-observability: $ENABLE_OBSERVABILITY" >&2
+    exit 1
+  fi
 }
 
 check_prerequisites() {
@@ -227,37 +248,16 @@ install_ingress_controller() {
 apply_manifests() {
   echo "Applying Kubernetes manifests in namespace '$NAMESPACE'..."
   apply_and_wait "$MANIFESTS_DIR/infrastructure" "infrastructure"
-  if [[ "$INFRA_ONLY" == "true" ]]; then
+  if [[ "$ENABLE_OBSERVABILITY" == "true" ]]; then
     apply_and_wait "$MANIFESTS_DIR/observability" "observability"
+  fi
+  if [[ "$INFRA_ONLY" == "true" ]]; then
     return 0
   fi
 
-  apply_and_wait "$MANIFESTS_DIR/observability" "observability"
   apply_and_wait "$MANIFESTS_DIR/application" "application"
   install_ingress_controller
   apply_and_wait "$MANIFESTS_DIR/ingress" "ingress"
-}
-
-# =============================================================================
-# SUMMARY AND REPORTING
-# =============================================================================
-
-show_access_information() {
-  echo "Service Access URLs:"
-  if [[ "$INFRA_ONLY" != "true" ]]; then
-    echo "  API Gateway:   http://api.atlas.local"
-    <% if (hasGrafana) { %>
-    echo "  Grafana:       http://grafana.atlas.local (admin/secret123456)"
-    <% } %>
-    <% if (hasZipkin) { %>
-    echo "  Zipkin:        http://zipkin.atlas.local"
-    <% } %>
-    <% if (hasSmtp4dev) { %>
-    echo "  SMTP4Dev:      http://smtp4dev.atlas.local"
-    <% } %>
-  else
-    echo "  Namespace:     $NAMESPACE"
-  fi
 }
 
 print_total_time() {
@@ -284,9 +284,8 @@ main() {
   fi
 
   create_namespace
+
   apply_manifests
-  show_access_information
-  echo "Deployment completed successfully. Namespace: $NAMESPACE"
 }
 
 main "$@"

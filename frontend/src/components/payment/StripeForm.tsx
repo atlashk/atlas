@@ -9,10 +9,10 @@ import {
   useElements,
   useStripe,
 } from "@stripe/react-stripe-js";
-import type { PaymentIntent, Stripe } from "@stripe/stripe-js";
+import type { PaymentIntent } from "@stripe/stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { CreditCard, Loader2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 interface StripeFormProps {
   clientSecret: string;
@@ -147,17 +147,10 @@ export function StripeForm({
   onError,
   onCancel,
 }: StripeFormProps) {
-  const [stripeLoaded, setStripeLoaded] = useState(false);
-  const [stripePromise, setStripePromise] =
-    useState<Promise<Stripe | null> | null>(null);
-
-  useEffect(() => {
-    if (publishableKey) {
-      const promise = loadStripe(publishableKey);
-      setStripePromise(promise);
-      promise.then(() => setStripeLoaded(true));
-    }
-  }, [publishableKey]);
+  const stripePromise = useMemo(
+    () => (publishableKey ? loadStripe(publishableKey) : null),
+    [publishableKey]
+  );
 
   // Use useMemo to optimize Elements options
   const options = useMemo(
@@ -179,7 +172,7 @@ export function StripeForm({
     [clientSecret]
   );
 
-  if (!stripePromise || !stripeLoaded) {
+  if (!stripePromise) {
     return (
       <Card>
         <CardContent className="p-6">

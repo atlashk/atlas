@@ -8,7 +8,7 @@
 [![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/compose/)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-Templates-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io/)
 
-## 📋 Table of Contents
+## Table of Contents
 
 - Project Overview
 - Architecture Diagram
@@ -29,12 +29,12 @@ Atlas is a microservices-based e-commerce platform showcasing DDD and Hexagonal 
 
 The *app-stack* configuration allows you to swap infrastructure components (DB, cache, messaging, auth, storage, observability, etc.) with minimal code changes.
 
-### 🧭 Architecture Diagram
+### Architecture Diagram
 
 ```mermaid
 flowchart LR
-  U[Browser] --> FE[Frontend (Next.js)]
-  FE -->|HTTP| GW[API Gateway (Spring Cloud Gateway :8080)]
+  U[Browser] --> FE["Frontend (Next.js)"]
+  FE -->|HTTP| GW["API Gateway (Spring Cloud Gateway :8080)"]
 
   GW --> DS[Eureka Server :8761]
   GW --> IAM[IAM Service :8081]
@@ -91,7 +91,7 @@ sequenceDiagram
   ORD-->>FE: 201 Created (orderId)
 ```
 
-### 🧩 Microservices Overview
+### Microservices Overview
 
 | Service | Responsibility | Default Port |
 | --- | --- | --- |
@@ -103,7 +103,7 @@ sequenceDiagram
 | Notification Service | Notifications and email | 8085 |
 | Eureka Server | Service discovery | 8761 |
 
-## 🧰 Technology Stack
+## Technology Stack
 
 ### Backend
 
@@ -129,7 +129,7 @@ sequenceDiagram
 - Kubernetes templates (optional)
 - Loki / Promtail, Prometheus, Zipkin, Grafana (optional, configurable)
 
-## 🗂️ Project Structure
+## Project Structure
 
 ```
 .
@@ -154,7 +154,7 @@ sequenceDiagram
 └── docs/
 ```
 
-## ⚡ Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -196,7 +196,7 @@ npm run dev
 
 Open: http://localhost:8000
 
-### 🔗 Access URLs
+### Access URLs
 
 - Frontend: http://localhost:8000
 - API Gateway: http://localhost:8080
@@ -210,13 +210,13 @@ Open: http://localhost:8000
 
 - Admin: `admin` / `Aa@123456`
 
-## 🤝 Contributing
+## Contributing
 
 - Issues and PRs are welcome
 - Keep modules aligned with DDD/Clean Architecture
 - Prefer adding adapters over changing domain logic
 
-## 🪪 License
+## License
 
 - No LICENSE file is included in this repository
 - Add a `LICENSE` file if you plan to distribute

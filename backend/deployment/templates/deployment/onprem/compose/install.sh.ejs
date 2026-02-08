@@ -26,6 +26,12 @@
   const hasSmtp4dev = notificationEmail === 'spring';
   const hasNginx = reverseProxy === 'nginx';
 
+  const observabilityServices = [];
+  if (hasPrometheus) observabilityServices.push('prometheus');
+  if (hasLoki) observabilityServices.push('loki', 'promtail');
+  if (hasGrafana) observabilityServices.push('grafana');
+  if (hasZipkin) observabilityServices.push('zipkin');
+
   const infraServices = [];
   if (hasMysql) infraServices.push('mysql');
   if (hasPostgres) infraServices.push('postgres');
@@ -43,6 +49,7 @@
   if (hasNginx) infraServices.push('nginx');
 
   const infraServicesToRun = infraServices.join(' ');
+  const observabilityServicesToRun = observabilityServices.join(' ');
 %>
 
 #!/usr/bin/env bash
@@ -72,6 +79,7 @@ DOCKER_COMPOSE_CMD="docker-compose"
 # Default flags
 SKIP_BUILD=false
 INFRA_ONLY=false
+ENABLE_OBSERVABILITY=true
 
 # =============================================================================
 # PREREQUISITE CHECKS
@@ -154,27 +162,53 @@ show_usage() {
     echo "Options:"
     echo "  --skip-build      Skip service build step"
     echo "  --infra-only      Start only infrastructure services"
+    echo "  --enable-observability <true|false>"
     echo "  -h, --help        Show this help and exit"
 }
 
 parse_args() {
-    for arg in "$@"; do
-        case "$arg" in
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
             --skip-build|skip-build)
                 SKIP_BUILD=true
+                shift
                 ;;
             --infra-only|infra-only)
                 INFRA_ONLY=true
                 SKIP_BUILD=true
+                shift
+                ;;
+            --enable-observability)
+                shift
+                if [[ $# -eq 0 || "$1" == -* ]]; then
+                    echo "Missing value for --enable-observability" >&2
+                    exit 1
+                fi
+                ENABLE_OBSERVABILITY="$1"
+                shift
+                ;;
+            --enable-observability=*)
+                ENABLE_OBSERVABILITY="${1#--enable-observability=}"
+                if [[ -z "$ENABLE_OBSERVABILITY" ]]; then
+                    echo "Missing value for --enable-observability" >&2
+                    exit 1
+                fi
+                shift
                 ;;
             -h|--help)
                 show_usage
                 exit 0
                 ;;
             *)
+                shift
                 ;;
         esac
     done
+    ENABLE_OBSERVABILITY="$(echo "$ENABLE_OBSERVABILITY" | tr '[:upper:]' '[:lower:]')"
+    if [[ "$ENABLE_OBSERVABILITY" != "true" && "$ENABLE_OBSERVABILITY" != "false" ]]; then
+        echo "Invalid value for --enable-observability: $ENABLE_OBSERVABILITY" >&2
+        exit 1
+    fi
 }
 
 # =============================================================================
@@ -212,6 +246,10 @@ deploy_services() {
     if [[ "$INFRA_ONLY" == "true" ]]; then
         local INFRA_SERVICES="<%= infraServicesToRun %>"
         local SERVICES_TO_RUN="$INFRA_SERVICES"
+        if [[ "$ENABLE_OBSERVABILITY" == "false" ]]; then
+            local OBS_SERVICES="<%= observabilityServicesToRun %>"
+            SERVICES_TO_RUN="$(filter_services "$SERVICES_TO_RUN" "$OBS_SERVICES")"
+        fi
         SERVICES_TO_RUN="$(echo "$SERVICES_TO_RUN" | awk '{$1=$1};1')"
         if [[ -z "$SERVICES_TO_RUN" ]]; then
             echo "No services configured for infra-only mode" >&2
@@ -225,15 +263,44 @@ deploy_services() {
             exit 1
         fi
     else
-        if $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" -p "$PROJECT_NAME" up -d; then
-            echo "Compose stack started"
+        if [[ "$ENABLE_OBSERVABILITY" == "false" ]]; then
+            local SERVICES_TO_RUN
+            SERVICES_TO_RUN="$($DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" -p "$PROJECT_NAME" config --services)"
+            SERVICES_TO_RUN="$(echo "$SERVICES_TO_RUN" | tr '\n' ' ')"
+            local OBS_SERVICES="<%= observabilityServicesToRun %>"
+            SERVICES_TO_RUN="$(filter_services "$SERVICES_TO_RUN" "$OBS_SERVICES")"
+            if [[ -z "$SERVICES_TO_RUN" ]]; then
+                echo "No services configured after disabling observability" >&2
+                exit 1
+            fi
+            if $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" -p "$PROJECT_NAME" up -d $SERVICES_TO_RUN; then
+                echo "Compose stack started"
+            else
+                echo "Failed to start compose stack" >&2    
+                echo "You can check logs with: $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME logs"
+                exit 1
+            fi
         else
-            echo "Failed to start compose stack" >&2    
-            echo "You can check logs with: $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME logs"
-            exit 1
+            if $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" -p "$PROJECT_NAME" up -d; then
+                echo "Compose stack started"
+            else
+                echo "Failed to start compose stack" >&2    
+                echo "You can check logs with: $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME logs"
+                exit 1
+            fi
         fi
     fi
     echo
+}
+
+filter_services() {
+    local services="$1"
+    local skip_list="$2"
+    local filtered="$services"
+    for svc in $skip_list; do
+        filtered="$(echo "$filtered" | tr ' ' '\n' | grep -v "^${svc}$" | tr '\n' ' ')"
+    done
+    echo "$filtered" | awk '{$1=$1};1'
 }
 
 print_total_time() {
@@ -264,7 +331,6 @@ main() {
     fi
 
     deploy_services
-
 }
 
 # Execute main function

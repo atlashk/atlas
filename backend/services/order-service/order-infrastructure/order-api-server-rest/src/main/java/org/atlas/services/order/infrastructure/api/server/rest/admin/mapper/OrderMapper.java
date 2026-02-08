@@ -1,7 +1,9 @@
 package org.atlas.services.order.infrastructure.api.server.rest.admin.mapper;
 
 import org.atlas.services.order.infrastructure.api.server.rest.admin.model.AdminOrderResponse;
+import org.atlas.services.order.infrastructure.api.server.rest.admin.model.AdminRetrieveOrderListRequest;
 import org.atlas.services.order.port.in.admin.model.AdminOrderOutput;
+import org.atlas.services.order.port.in.admin.model.AdminRetrieveOrderListInput;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
@@ -10,6 +12,8 @@ import org.mapstruct.factory.Mappers;
 public interface OrderMapper {
 
   OrderMapper INSTANCE = Mappers.getMapper(OrderMapper.class);
+
+  AdminRetrieveOrderListInput toAdminRetrieveOrderListInput(AdminRetrieveOrderListRequest request);
 
   AdminOrderResponse toAdminOrderResponse(AdminOrderOutput order);
 

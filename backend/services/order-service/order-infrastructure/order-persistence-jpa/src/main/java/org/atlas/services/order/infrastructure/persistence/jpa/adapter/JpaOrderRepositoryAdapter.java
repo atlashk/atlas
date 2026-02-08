@@ -68,7 +68,6 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
   public void insert(OrderEntity order) {
     JpaOrderEntity jpaOrder = JpaOrderMapper.INSTANCE.toJpaOrder(order);
     jpaOrderRepository.insert(jpaOrder);
-    order.setId(jpaOrder.getId());
     order.setCreatedAt(jpaOrder.getCreatedAt());
   }
 

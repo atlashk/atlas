@@ -2,11 +2,14 @@ package org.atlas.services.iam.application.jwt.auth;
 
 import java.time.Duration;
 import java.util.Date;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.cryptography.HashingUtil;
+import org.atlas.libs.framework.cryptography.RsaKeyLoader;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
+import org.atlas.libs.framework.jwks.JwkSetUtil;
 import org.atlas.libs.framework.jwt.Jwt;
 import org.atlas.libs.framework.kvstore.KvStoreService;
 import org.atlas.libs.framework.security.SecurityConstant;
@@ -24,6 +27,7 @@ import org.atlas.services.iam.port.in.auth.model.RefreshTokenInput;
 import org.atlas.services.iam.port.in.auth.model.RefreshTokenOutput;
 import org.atlas.services.iam.port.in.auth.service.AuthenticationService;
 import org.atlas.services.iam.port.out.repository.UserRepository;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.ott.GenerateOneTimeTokenRequest;
@@ -37,13 +41,27 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AuthenticationServiceImpl implements AuthenticationService {
+public class AuthenticationServiceImpl implements AuthenticationService, InitializingBean {
 
   private final AuthenticationManager authenticationManager;
   private final OneTimeTokenService oneTimeTokenService;
   private final UserRepository userRepository;
   private final TokenService tokenService;
   private final KvStoreService kvStoreService;
+
+  private Map<String, Object> jwkSet;
+
+  @Override
+  public void afterPropertiesSet() throws Exception {
+    jwkSet = JwkSetUtil.getInstance()
+        .generate(RsaKeyLoader.loadPublicKey(SecurityConstant.RSA_PUBLIC_KEY_PATH),
+            SecurityConstant.JWKS_KEY_ID);
+  }
+
+  @Override
+  public Map<String, Object> jwkSet() {
+    return jwkSet;
+  }
 
   @Override
   public LoginOutput login(LoginInput input) throws Exception {

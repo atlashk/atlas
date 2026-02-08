@@ -13,15 +13,15 @@ PROJECT_NAME="atlas"
 
 # Service definitions with name and build context
 SERVICES=(
-    "iam-service:$PROJECT_ROOT/backend/application/iam-application"
-    "product-service:$PROJECT_ROOT/backend/application/product-application"
-    "order-service:$PROJECT_ROOT/backend/application/order-application"
-    "payment-service:$PROJECT_ROOT/backend/application/payment-application"
-    "notification-service:$PROJECT_ROOT/backend/application/notification-application"
+    "iam-service:$PROJECT_ROOT/backend/services/iam-service/iam-bootstrap"
+    "product-service:$PROJECT_ROOT/backend/services/product-service/product-bootstrap"
+    "order-service:$PROJECT_ROOT/backend/services/order-service/order-bootstrap"
+    "payment-service:$PROJECT_ROOT/backend/services/payment-service/payment-bootstrap"
+    "notification-service:$PROJECT_ROOT/backend/services/notification-service/notification-bootstrap"
+    "api-gateway:$PROJECT_ROOT/backend/services/api-gateway/spring-cloud-gateway/spring-cloud-gateway-server"
 <%_ if (hasEureka) { -%>
-    "eureka-server:$PROJECT_ROOT/backend/edge/discovery-server/discovery-server-eureka"
+    "eureka-server:$PROJECT_ROOT/backend/platform/discovery-server/eureka-server"
 <%_ } -%>
-    "api-gateway:$PROJECT_ROOT/backend/edge/api-gateway/api-gateway-spring-cloud-gateway"
 )
 
 # Default values

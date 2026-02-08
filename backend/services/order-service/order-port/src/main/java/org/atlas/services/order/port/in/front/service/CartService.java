@@ -4,13 +4,13 @@ import org.atlas.services.order.domain.entity.CartEntity;
 
 public interface CartService {
 
-  CartEntity retrieveCart(String userId);
+  CartEntity retrieveCart();
 
-  CartEntity addCartItem(String userId, String productId, Integer quantity);
+  CartEntity addCartItem(String productId, Integer quantity);
 
-  CartEntity updateQuantity(String userId, String productId, Integer quantity);
+  CartEntity updateQuantity(String productId, Integer quantity);
 
-  CartEntity removeCartItem(String userId, String productId);
+  CartEntity removeCartItem(String productId);
 
-  CartEntity clearCart(String userId);
+  CartEntity clearCart();
 }

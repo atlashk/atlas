@@ -10,15 +10,55 @@ import {
 import { useRealtime } from "@/contexts/RealtimeContext";
 import { InAppNotification } from "@/interfaces/notification.interface";
 import { Bell } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import DOMPurify from "isomorphic-dompurify";
 
+type NotificationsState = {
+  notifications: InAppNotification[];
+  hasUnread: boolean;
+};
+
+const notificationsStore = (() => {
+  let state: NotificationsState = { notifications: [], hasUnread: false };
+  const listeners = new Set<() => void>();
+
+  return {
+    getSnapshot: () => state,
+    subscribe: (listener: () => void) => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    setState: (next: NotificationsState) => {
+      state = next;
+      listeners.forEach((listener) => listener());
+    },
+    update: (partial: Partial<NotificationsState>) => {
+      state = { ...state, ...partial };
+      listeners.forEach((listener) => listener());
+    },
+  };
+})();
+
 export default function NotificationBell() {
-  const [notifications, setNotifications] = useState<InAppNotification[]>([]);
-  const [hasUnread, setHasUnread] = useState(false);
+  const { notifications, hasUnread } = useSyncExternalStore(
+    notificationsStore.subscribe,
+    notificationsStore.getSnapshot
+  );
   const { lastMessage } = useRealtime();
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const response = await notificationApi.retrieveInAppNotification();
+      notificationsStore.setState({
+        notifications: response.data,
+        hasUnread: response.data.some((n: InAppNotification) => !n.read),
+      });
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error);
+    }
+  }, []);
 
   useEffect(() => {
     if (lastMessage) {
@@ -29,27 +69,14 @@ export default function NotificationBell() {
           }}
         />
       );
-      // Immediately show unread badge when a realtime message arrives
-      setHasUnread(true);
       fetchNotifications();
     }
   }, [lastMessage]);
 
-  const fetchNotifications = async () => {
-    try {
-      const response = await notificationApi.listInAppNotifications();
-      setNotifications(response.data);
-      setHasUnread(response.data.some((n: InAppNotification) => !n.read));
-    } catch (error) {
-      console.error("Failed to fetch notifications:", error);
-    }
-  };
-
   const handleMarkAllAsRead = async () => {
     try {
       await notificationApi.markAllAsRead();
-      // Optimistically clear unread badge
-      setHasUnread(false);
+      notificationsStore.update({ hasUnread: false });
       fetchNotifications();
     } catch (error) {
       console.error("Failed to mark all as read:", error);

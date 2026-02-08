@@ -578,10 +578,10 @@ services:
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-secret123456}
       <%_ } -%>
       <%_ if (internalApi === 'grpc') { -%>
-      - API_CLIENT_GRPC_USER_SERVICE_ADDRESS=static://iam-service:50051
+      - API_CLIENT_GRPC_IAM_SERVICE_ADDRESS=static://iam-service:50051
       - API_CLIENT_GRPC_PRODUCT_SERVICE_ADDRESS=static://product-service:50052
       <%_ } else { -%>
-      - API_CLIENT_REST_USER_SERVICE_BASE_URL=http://iam-service:8081
+      - API_CLIENT_REST_IAM_SERVICE_BASE_URL=http://iam-service:8081
       - API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL=http://product-service:8082
       <%_ } -%>
       <%_ if (hasZipkin) { -%>

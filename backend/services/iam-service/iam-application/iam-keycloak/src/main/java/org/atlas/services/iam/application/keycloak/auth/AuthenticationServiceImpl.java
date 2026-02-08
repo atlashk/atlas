@@ -3,6 +3,7 @@ package org.atlas.services.iam.application.keycloak.auth;
 import com.auth0.jwt.JWT;
 import java.time.Duration;
 import java.util.Date;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.cryptography.HashingUtil;
 import org.atlas.libs.framework.domain.common.error.DomainError;
@@ -29,6 +30,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   private final KeycloakAuthenticationClient keycloakAuthenticationClient;
   private final KvStoreService kvStoreService;
+
+  @Override
+  public Map<String, Object> jwkSet() {
+    throw new UnsupportedOperationException();
+  }
 
   @Override
   public LoginOutput login(LoginInput input) {

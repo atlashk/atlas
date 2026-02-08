@@ -4,19 +4,19 @@ import { InAppNotification, InAppServiceInfo } from "@/interfaces/notification.i
 
 export class NotificationApi extends BaseApi {
   constructor() {
-    super("/services/notification/api/notifications");
+    super("/services/notification/api");
   }
 
-  async getInAppServiceInfo(): Promise<ApiResponse<InAppServiceInfo>> {
-    return this.get<InAppServiceInfo>("/inapp/service-info");
+  async retrieveInAppServiceInfo(): Promise<ApiResponse<InAppServiceInfo>> {
+    return this.get<InAppServiceInfo>("/notifications/inapp/service-info");
   }
 
-  async listInAppNotifications(limit: number = 10): Promise<ApiResponse<InAppNotification[]>> {
-    return this.get<InAppNotification[]>(`/inapp?limit=${limit}`);
+  async retrieveInAppNotification(limit: number = 10): Promise<ApiResponse<InAppNotification[]>> {
+    return this.get<InAppNotification[]>(`/notifications/inapp?limit=${limit}`);
   }
 
   async markAllAsRead(): Promise<ApiResponse<void>> {
-    return this.post<void>("/inapp/mark-all-as-read");
+    return this.post<void>("/notifications/inapp/mark-all-as-read");
   }
 }
 

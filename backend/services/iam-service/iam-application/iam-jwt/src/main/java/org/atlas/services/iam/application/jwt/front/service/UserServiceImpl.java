@@ -65,13 +65,13 @@ public class UserServiceImpl implements UserService {
   }
 
   private void checkValidity(RegisterInput input) {
-    if (userRepository.findByUsername(input.getUsername()).isPresent()) {
+    if (userRepository.existsByUsername(input.getUsername())) {
       throw new DomainException(DomainError.USERNAME_ALREADY_EXISTS);
     }
-    if (userRepository.findByEmail(input.getEmail()).isPresent()) {
+    if (userRepository.existsByEmail(input.getEmail())) {
       throw new DomainException(DomainError.EMAIL_ALREADY_EXISTS);
     }
-    if (userRepository.findByPhoneNumber(input.getPhoneNumber()).isPresent()) {
+    if (userRepository.existsByPhoneNumber(input.getPhoneNumber())) {
       throw new DomainException(DomainError.PHONE_NUMBER_ALREADY_EXISTS);
     }
   }

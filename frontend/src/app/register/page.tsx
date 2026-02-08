@@ -1,6 +1,6 @@
 "use client";
 
-import { userApi } from "@/api/index.api";
+import { iamFrontApi } from "@/api/index.api";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -89,7 +89,7 @@ const Register: React.FC = () => {
 
     try {
       setIsRegistering(true);
-      await userApi.register(request);
+      await iamFrontApi.register(request);
       toast.success("Registration successful!");
       form.reset();
       setTimeout(goToLogin, 1000);

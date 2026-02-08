@@ -15,9 +15,13 @@ public class UserDataInitializer {
   private final AdminUserService adminUserService;
 
   public void handle() throws Exception {
-    log.info("Creating admin user...");
-    createAdminUser();
-    log.info("Created admin user successfully");
+    if (!adminUserService.existsUser("admin")) {
+      createAdminUser();
+    }
+
+    if (!adminUserService.existsUser("demo")) {
+      createDemoUser();
+    }
   }
 
   private void createAdminUser() throws Exception {
@@ -31,5 +35,20 @@ public class UserDataInitializer {
         .role(UserRole.ADMIN)
         .build();
     adminUserService.createUser(input);
+    log.info("Created admin user");
+  }
+
+  private void createDemoUser() throws Exception {
+    AdminCreateUserInput input = AdminCreateUserInput.builder()
+        .username("demo")
+        .password("Aa@123456")
+        .firstName("Demo")
+        .lastName("User")
+        .email("demo@atlas.org")
+        .phoneNumber("0123456789")
+        .role(UserRole.USER)
+        .build();
+    adminUserService.createUser(input);
+    log.info("Created demo user");
   }
 }

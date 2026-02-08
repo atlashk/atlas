@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.concurrent.AsyncUtil;
 import org.atlas.libs.framework.constant.Services;
+import org.atlas.libs.framework.context.ContextInfo;
+import org.atlas.libs.framework.context.Contexts;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
 import org.atlas.libs.framework.domain.order.OrderStatus;
@@ -18,6 +20,7 @@ import org.atlas.libs.framework.saga.core.command.SagaCommandResult;
 import org.atlas.libs.framework.saga.core.entity.SagaEntity;
 import org.atlas.libs.framework.saga.core.orchestrator.SagaOrchestrator;
 import org.atlas.services.order.domain.entity.OrderEntity;
+import org.atlas.services.order.port.in.front.service.CartService;
 import org.atlas.services.order.port.out.repository.OrderRepository;
 import org.atlas.services.order.domain.entity.OrderEntity.CancellationReason;
 
@@ -30,6 +33,7 @@ import org.atlas.services.order.domain.entity.OrderEntity.CancellationReason;
 public class CheckoutSaga {
 
   private final OrderRepository orderRepository;
+  private final CartService cartService;
   private final SagaOrchestrator sagaOrchestrator;
 
   @StartSaga
@@ -114,8 +118,16 @@ public class CheckoutSaga {
 
       // Send the remaining commands
       AsyncUtil.executeTasks(
-          () -> sagaOrchestrator.sendSagaCommand(
-              saga, CheckoutCommand.CLEAR_CART, Services.USER_SERVICE),
+          () -> {
+            // Set context info
+            String userId = order.getUser().getId();
+            ContextInfo contextInfo = ContextInfo.builder()
+                .userId(userId)
+                .build();
+            Contexts.set(contextInfo);
+
+            cartService.clearCart();
+          },
           () -> sagaOrchestrator.sendSagaCommand(
               saga, CheckoutCommand.NOTIFY_ORDER_FULFILLED, Services.NOTIFICATION_SERVICE)
       );

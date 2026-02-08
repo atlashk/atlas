@@ -86,10 +86,15 @@ public class AdminUserServiceImpl implements AdminUserService {
   }
 
   @Override
-  public void deleteUser(String userId) {
-    keycloakUserClient.deleteUser(userId);
+  public void deleteUser(String id) {
+    keycloakUserClient.deleteUser(id);
 
-    userEventService.publishUserDeletedEvent(userId);
+    userEventService.publishUserDeletedEvent(id);
+  }
+
+  @Override
+  public boolean existsUser(String username) {
+    return keycloakUserClient.existsByUsername(username);
   }
 
   private void checkValidity(AdminCreateUserInput input) {

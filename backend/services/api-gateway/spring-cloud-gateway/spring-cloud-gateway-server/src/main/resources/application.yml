@@ -32,6 +32,13 @@ spring:
               max-idle-time: 45m # Allow connections to stay idle longer for SSE/WebSocket
           routes:
             # IAM service
+            - id: iam-service-auth
+              uri: ${IAM_SERVICE_URI:lb://iam-service}
+              predicates:
+                - Path=/services/iam/api/authentication/**
+              filters:
+                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+                - RewritePath=/services/iam/api/authentication/(?<segment>.*), /api/authentication/${segment}
             - id: iam-service-front
               uri: ${IAM_SERVICE_URI:lb://iam-service}
               predicates:

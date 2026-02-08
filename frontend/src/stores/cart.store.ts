@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { cartApi } from "@/api/index.api";
+import { orderFrontApi } from "@/api/index.api";
 import type { CartResponse } from "@/interfaces/cart.interface";
 import { useUserStore } from "./user.store";
 
@@ -67,7 +67,7 @@ export const useCartStore = create<CartStore>()((set, get) => ({
 
     try {
       set({ isLoading: true, error: null });
-      const response = await cartApi.getCart();
+      const response = await orderFrontApi.retrieveCart();
       
       if (response.success && response.data) {
         set({ cart: response.data, error: null, isIntentionallyCleared: false });
@@ -94,7 +94,7 @@ export const useCartStore = create<CartStore>()((set, get) => ({
 
     try {
       set({ isLoading: true, error: null });
-      const response = await cartApi.addCartItem({ productId, quantity });
+      const response = await orderFrontApi.addCartItem({ productId, quantity });
       
       if (response.success && response.data) {
         set({ cart: response.data, isIntentionallyCleared: false });
@@ -120,7 +120,7 @@ export const useCartStore = create<CartStore>()((set, get) => ({
 
     try {
       set({ isLoading: true, error: null });
-      const response = await cartApi.removeCartItem(productId);
+      const response = await orderFrontApi.removeCartItem(productId);
       
       if (response.success && response.data) {
         set({ cart: response.data, isIntentionallyCleared: false });
@@ -152,7 +152,7 @@ export const useCartStore = create<CartStore>()((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       // Send final quantity to API
-      const response = await cartApi.updateCartItem(productId, { quantity: newQuantity });
+      const response = await orderFrontApi.updateCartItem(productId, { quantity: newQuantity });
       
       if (response.success && response.data) {
         set({ cart: response.data, isIntentionallyCleared: false });
@@ -178,7 +178,7 @@ export const useCartStore = create<CartStore>()((set, get) => ({
 
     try {
       set({ isLoading: true, error: null });
-      const response = await cartApi.clearCart();
+      const response = await orderFrontApi.clearCart();
       
       if (response.success && response.data) {
         set({ cart: response.data, isIntentionallyCleared: false });

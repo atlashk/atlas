@@ -13,6 +13,7 @@ public interface UserEventMapper {
 
   UserEventMapper INSTANCE = Mappers.getMapper(UserEventMapper.class);
 
+  @Mapping(target = "userId", source = "id")
   @Mapping(target = "version", ignore = true)
   void merge(UserEntity user, @MappingTarget UserEvent event);
 }

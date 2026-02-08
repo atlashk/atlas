@@ -1,7 +1,7 @@
 "use client";
 
 import { Metadata } from "@/api/apiClient";
-import { userAdminApi } from "@/api/user.admin.api";
+import { iamAdminApi } from "@/api/index.api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -75,7 +75,7 @@ const UserList: React.FC = () => {
           }
         });
 
-        const response = await userAdminApi.listUser(apiFilters);
+        const response = await iamAdminApi.retrieveUserList(apiFilters);
 
         if (response.success) {
           setUsers(response.data || []);

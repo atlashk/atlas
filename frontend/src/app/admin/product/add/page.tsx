@@ -1,6 +1,6 @@
 "use client";
 
-import { productApi, productAdminApi } from "@/api/index.api";
+import { productFrontApi, productAdminApi } from "@/api/index.api";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -80,7 +80,7 @@ function AdminProductAddPage() {
     try {
       setIsLoadingBrands(true);
 
-      const brandsResponse = await productApi.listBrand();
+      const brandsResponse = await productFrontApi.retrieveAllBrand();
 
       if (!brandsResponse.success) {
         throw new Error(brandsResponse.errorMessage || "Failed to load brands");
@@ -101,7 +101,7 @@ function AdminProductAddPage() {
     try {
       setIsLoadingCategories(true);
 
-      const categoriesResponse = await productApi.listCategory();
+      const categoriesResponse = await productFrontApi.retrieveAllCategory();
 
       if (!categoriesResponse.success) {
         throw new Error(

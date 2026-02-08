@@ -31,6 +31,18 @@ type WebSocketEventMsg = {
   payload: InAppPayload;
 };
 
+type RealtimeConnection = EventSource | StompClient;
+
+function closeRealtimeConnection(connection: RealtimeConnection) {
+  if ("deactivate" in connection && typeof connection.deactivate === "function") {
+    connection.deactivate();
+    return;
+  }
+  if ("close" in connection && typeof connection.close === "function") {
+    connection.close();
+  }
+}
+
 // Normalize various backend realtime payloads into NotificationMessage
 function normalizeToNotificationMessage(input: unknown, fallbackId?: string): NotificationMessage {
   const possibleEvent = input as Partial<WebSocketEventMsg> | undefined;
@@ -65,7 +77,7 @@ export const RealtimeProvider = ({
   const [lastMessage, setLastMessage] = useState<NotificationMessage | null>(
     null
   );
-  const connectionRef = useRef<EventSource | StompClient | null>(null);
+  const connectionRef = useRef<RealtimeConnection | null>(null);
   const isConnectingRef = useRef<boolean>(false);
 
   // Get user profile from the Zustand store
@@ -77,12 +89,7 @@ export const RealtimeProvider = ({
     if (!userId) {
       // Ensure any existing connections are closed if the user logs out or profile is not available
       if (connectionRef.current) {
-        const currentConn: any = connectionRef.current;
-        if (typeof currentConn.deactivate === "function") {
-          currentConn.deactivate();
-        } else if (typeof currentConn.close === "function") {
-          currentConn.close();
-        }
+        closeRealtimeConnection(connectionRef.current);
         connectionRef.current = null;
         setConnectionStatus("disconnected");
       }
@@ -102,12 +109,7 @@ export const RealtimeProvider = ({
 
         // Close existing connection before creating a new one
         if (connectionRef.current) {
-          const currentConn: any = connectionRef.current;
-          if (typeof currentConn.deactivate === "function") {
-            currentConn.deactivate();
-          } else if (typeof currentConn.close === "function") {
-            currentConn.close();
-          }
+          closeRealtimeConnection(connectionRef.current);
           connectionRef.current = null;
         }
 
@@ -124,11 +126,11 @@ export const RealtimeProvider = ({
           console.log("SSE connection initiated");
 
           // Handle default SSE messages (without named event)
-          eventSource.onmessage = (event) => {
+          eventSource.onmessage = (event: MessageEvent<string>) => {
             console.log("SSE onmessage raw:", event.data);
             try {
               const raw = JSON.parse(event.data);
-              const normalized = normalizeToNotificationMessage(raw, (event as any).lastEventId);
+              const normalized = normalizeToNotificationMessage(raw, event.lastEventId);
               console.log("SSE onmessage normalized:", normalized);
               setLastMessage(normalized);
             } catch (e) {
@@ -143,7 +145,7 @@ export const RealtimeProvider = ({
               console.log("SSE inapp-notification raw:", event.data);
               try {
                 const raw = JSON.parse(event.data as string);
-                const normalized = normalizeToNotificationMessage(raw, (event as any).lastEventId);
+                const normalized = normalizeToNotificationMessage(raw, event.lastEventId);
                 console.log("SSE inapp-notification normalized:", normalized);
                 setLastMessage(normalized);
               } catch (e) {
@@ -211,12 +213,7 @@ export const RealtimeProvider = ({
     // Cleanup function to close the connection when the component unmounts or userId changes
     return () => {
       if (connectionRef.current) {
-        const currentConn: any = connectionRef.current;
-        if (typeof currentConn.deactivate === "function") {
-          currentConn.deactivate();
-        } else if (typeof currentConn.close === "function") {
-          currentConn.close();
-        }
+        closeRealtimeConnection(connectionRef.current);
         connectionRef.current = null;
         setConnectionStatus("disconnected");
       }

@@ -18,7 +18,7 @@ export function usePaymentProcessing() {
       clearError();
 
       try {
-        const response = await paymentApi.getPaymentNextAction(orderId);
+        const response = await paymentApi.retrievePaymentNextAction(orderId);
         return response.data;
       } catch (err) {
         handleApiError(err as Error);

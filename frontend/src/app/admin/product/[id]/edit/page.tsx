@@ -1,6 +1,6 @@
 "use client";
 
-import { productApi, productAdminApi } from "@/api/index.api";
+import { productFrontApi, productAdminApi } from "@/api/index.api";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -90,7 +90,7 @@ function AdminProductEditPage() {
     try {
       setIsLoadingBrands(true);
 
-      const brandsResponse = await productApi.listBrand();
+      const brandsResponse = await productFrontApi.retrieveAllBrand();
 
       if (!brandsResponse.success) {
         throw new Error(brandsResponse.errorMessage || "Failed to load brands");
@@ -111,7 +111,7 @@ function AdminProductEditPage() {
     try {
       setIsLoadingCategories(true);
 
-      const categoriesResponse = await productApi.listCategory();
+      const categoriesResponse = await productFrontApi.retrieveAllCategory();
 
       if (!categoriesResponse.success) {
         throw new Error(
@@ -158,7 +158,7 @@ function AdminProductEditPage() {
 
     setIsLoadingProduct(true);
     try {
-      const productResponse = await productAdminApi.getProduct(productId);
+      const productResponse = await productAdminApi.retrieveProduct(productId);
       
       if (productResponse.success) {
         const productData = productResponse.data;

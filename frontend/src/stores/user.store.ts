@@ -1,4 +1,4 @@
-import { authApi, userApi } from "@/api/index.api";
+import { iamAuthenticationApi, iamFrontApi } from "@/api/index.api";
 import { Role } from "@/constants";
 import type { LoginRequest } from "@/interfaces/auth.interface";
 import type { RegisterRequest, User } from "@/interfaces/user.interface";
@@ -97,7 +97,7 @@ export const useUserStore = create<UserStore>()(
       login: async (request: LoginRequest) => {
         set({ loading: true, error: null });
         try {
-          const response = await authApi.login(request);
+          const response = await iamAuthenticationApi.login(request);
           if (response.success && response.data) {
             const { accessToken, refreshToken } = response.data;
 
@@ -160,7 +160,7 @@ export const useUserStore = create<UserStore>()(
       register: async (userData: RegisterRequest) => {
         set({ loading: true, error: null });
         try {
-          const response = await userApi.register(userData);
+          const response = await iamFrontApi.register(userData);
           if (response.success) {
             set({ loading: false });
           } else {
@@ -187,7 +187,7 @@ export const useUserStore = create<UserStore>()(
 
         set({ profileLoading: true, error: null });
         try {
-          const response = await userApi.getProfile();
+          const response = await iamFrontApi.getProfile();
           if (response.success && response.data) {
             set({
               profile: response.data,
@@ -214,7 +214,7 @@ export const useUserStore = create<UserStore>()(
 
       logout: async () => {
         console.log('Logout initiated');
-        authApi.logout();
+        iamAuthenticationApi.logout();
         clearAuthTokens();
         
         // Clear cart state

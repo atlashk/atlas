@@ -20,13 +20,13 @@ export function usePaymentGateways() {
       clearError();
       fetchedRef.current = true;
       
-      const response = await paymentApi.getPaymentGateways();
+      const response = await paymentApi.retrievePaymentGatewayList();
       
       if (response.success && response.data) {
         setAvailablePaymentGateways(response.data);
         
         // Set first available gateway as default if no selection or current selection is not available
-        if (response.data.length > 0 && (!selectedPaymentGateway || !response.data.find(g => g.id === selectedPaymentGateway.id))) {
+        if (response.data.length > 0 && (!selectedPaymentGateway || !response.data.find((gateway) => gateway.id === selectedPaymentGateway.id))) {
           setSelectedPaymentGateway(response.data[0]);
         }
       } else {

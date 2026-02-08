@@ -1,7 +1,7 @@
 "use client";
 
 import { PaymentNextAction } from "@/interfaces/payment.interface";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 interface UseNextActionHandlerProps {
   nextAction: PaymentNextAction | null;
@@ -18,12 +18,6 @@ export function useNextActionHandler({
 }: UseNextActionHandlerProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Reset error when nextAction changes
-  useEffect(() => {
-    setError(null);
-    setIsProcessing(false);
-  }, [nextAction]);
 
   const handlePaymentComplete = useCallback(() => {
     setIsProcessing(false);

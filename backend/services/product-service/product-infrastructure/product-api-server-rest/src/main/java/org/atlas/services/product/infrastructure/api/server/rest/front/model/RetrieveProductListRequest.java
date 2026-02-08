@@ -1,14 +1,22 @@
 package org.atlas.services.product.infrastructure.api.server.rest.front.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.framework.constant.CommonConstant;
 import org.atlas.services.product.port.in.front.model.RetrieveProductListInput.Mode;
 
 @Schema(description = "Request object for retrieving product list")
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Getter
 @Setter
 public class RetrieveProductListRequest {
@@ -31,9 +39,15 @@ public class RetrieveProductListRequest {
   @Schema(description = "Retrieve mode", example = "DATABASE")
   private Mode mode;
 
-  @Schema(description = "Page number for pagination.", example = "1")
+  @Positive
+  @Min(1)
+  @Schema(description = "The page number", example = "1", defaultValue = "1")
+  @Builder.Default
   private int page = 1;
 
-  @Schema(description = "Number of items per page.", example = "20")
+  @Positive
+  @Min(0)
+  @Schema(description = "The number of records per page", example = "20", defaultValue = "20")
+  @Builder.Default
   private int size = CommonConstant.DEFAULT_PAGE_SIZE;
 }

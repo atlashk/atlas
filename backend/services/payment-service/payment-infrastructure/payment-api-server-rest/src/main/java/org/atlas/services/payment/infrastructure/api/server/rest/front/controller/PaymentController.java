@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
-import org.atlas.libs.framework.context.Contexts;
 import org.atlas.services.payment.infrastructure.api.server.rest.front.mapper.PaymentMapper;
 import org.atlas.services.payment.infrastructure.api.server.rest.front.model.RetrievePaymentNextActionResponse;
 import org.atlas.services.payment.port.in.front.model.RetrievePaymentNextActionOutput;
@@ -25,12 +24,11 @@ public class PaymentController {
   private final PaymentService paymentService;
 
   @GetMapping(value = "/{orderId}/next-action", produces = MediaType.APPLICATION_JSON_VALUE)
-  @Operation(summary = "Get payment next action")
-  public ApiResponseWrapper<RetrievePaymentNextActionResponse> getPaymentNextAction(
+  @Operation(summary = "Retrieve payment next action")
+  public ApiResponseWrapper<RetrievePaymentNextActionResponse> retrievePaymentNextAction(
       @Parameter(name = "orderId", description = "Order ID associated with the payment", example = "1")
       @PathVariable String orderId) throws Exception {
-    RetrievePaymentNextActionOutput output = paymentService.retrievePaymentNextAction(orderId,
-        Contexts.getUserId());
+    RetrievePaymentNextActionOutput output = paymentService.retrievePaymentNextAction(orderId);
     RetrievePaymentNextActionResponse responseData =
         PaymentMapper.INSTANCE.toRetrievePaymentNextActionResponse(output);
     return ApiResponseWrapper.success(responseData);

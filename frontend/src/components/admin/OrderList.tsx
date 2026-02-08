@@ -1,7 +1,7 @@
 "use client";
 
 import { Metadata } from "@/api/apiClient";
-import { orderAdminApi } from "@/api/order.admin.api";
+import { orderAdminApi } from "@/api/order.api";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -105,7 +105,7 @@ const OrderList: React.FC = () => {
           }
         });
 
-        const response = await orderAdminApi.listOrder(apiFilters);
+        const response = await orderAdminApi.retrieveOrderList(apiFilters);
 
         if (response.success) {
           setOrders(response.data || []);

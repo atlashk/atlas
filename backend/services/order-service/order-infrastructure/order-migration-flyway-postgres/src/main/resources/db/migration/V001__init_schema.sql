@@ -1,8 +1,26 @@
+CREATE TABLE IF NOT EXISTS cart
+(
+    id         SERIAL PRIMARY KEY,
+    user_id    VARCHAR(64) NOT NULL UNIQUE,
+    created_at TIMESTAMP    NOT NULL,
+    updated_at TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS cart_item
+(
+    id         SERIAL PRIMARY KEY,
+    cart_id    INT         NOT NULL,
+    product_id VARCHAR(64) NOT NULL,
+    quantity   INT         NOT NULL,
+    created_at TIMESTAMP    NOT NULL,
+    updated_at TIMESTAMP
+);
+CREATE UNIQUE INDEX idx_cart_id_product_id ON cart_item (cart_id, product_id);
+
 CREATE TABLE IF NOT EXISTS orders
 (
     id                     VARCHAR(64) PRIMARY KEY,
     saga_id                INT,
-    code                   CHAR(7)        NOT NULL UNIQUE,
     status                 VARCHAR(50)    NOT NULL,
     user_id                VARCHAR(64)    NOT NULL,
     user_first_name        VARCHAR(255)   NOT NULL,

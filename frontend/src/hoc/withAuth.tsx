@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ComponentType, useEffect, useState } from 'react';
+import React, { ComponentType } from 'react';
 import { useAuthRedirect, useGuestRedirect } from '@/hooks/useAuthRedirect';
 import { Spinner } from '@/components/ui/spinner';
 
@@ -37,11 +37,7 @@ export function withAuth<P extends object>(
   } = options;
 
   const WithAuthComponent: React.FC<P> = (props) => {
-    // Hydration guard to ensure consistent SSR/CSR markup
-    const [isHydrated, setIsHydrated] = useState(false);
-    useEffect(() => {
-      setIsHydrated(true);
-    }, []);
+    const isHydrated = true;
 
     const { isLoading, canAccess } = useAuthRedirect({
       requireAuth,

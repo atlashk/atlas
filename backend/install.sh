@@ -39,12 +39,13 @@ err()  { printf "[ERROR] %s\n" "$*"; }
 
 usage() {
   local code="${1:-1}"
-  echo "Usage: $0 [--app-stack <name>] [--skip-build] [--infra-only] [--debug-template]"
+  echo "Usage: $0 [--app-stack <name>] [--skip-build] [--infra-only] [--enable-observability <true|false>] [--debug-template]"
   echo ""
   echo "Options:"
   echo "  --app-stack <name>        Pick config/app-stack.<name>.yml"
   echo "  --skip-build              Pass '--skip-build' to install.sh"
   echo "  --infra-only              Pass '--infra-only' to install.sh"
+  echo "  --enable-observability    Pass '--enable-observability <true|false>' to install.sh"
   echo "  --debug-template          Skip install.sh execution"
   echo "  -h, --help                Show help and exit"
   echo ""
@@ -52,7 +53,9 @@ usage() {
   echo "  - app-stack=onprem.compose"
   echo "  - skip-build=false"
   echo "  - infra-only=false"
+  echo "  - enable-observability=true"
   echo "  - If app-stack=dev and infra-only not specified, infra-only=true"
+  echo "  - If app-stack=dev and enable-observability not specified, enable-observability=false"
   echo ""
   echo "Examples:"
   echo "  $0"
@@ -60,6 +63,7 @@ usage() {
   echo "  $0 --app-stack onprem.k8s.native"
   echo "  $0 --app-stack onprem.compose --skip-build"
   echo "  $0 --app-stack onprem.compose --infra-only"
+  echo "  $0 --app-stack onprem.compose --enable-observability false"
   echo "  $0 --app-stack dev                  # Defaults infra-only=true"
   echo "  $0 --app-stack dev --skip-build     # dev + infra-only=true + skip-build=true"
   exit "$code"
@@ -293,6 +297,8 @@ main() {
   local skip_build=false
   local infra_only=false
   local infra_only_specified=false
+  local enable_observability=true
+  local enable_observability_specified=false
   local debug_template=false
 
   while [[ $# -gt 0 ]]; do
@@ -322,6 +328,25 @@ main() {
         infra_only_specified=true
         shift
         ;;
+      --enable-observability)
+        shift
+        if [[ $# -eq 0 || "$1" == -* ]]; then
+          err "Missing value for --enable-observability"
+          usage 1
+        fi
+        enable_observability="$1"
+        enable_observability_specified=true
+        shift
+        ;;
+      --enable-observability=*)
+        enable_observability="${1#--enable-observability=}"
+        if [[ -z "$enable_observability" ]]; then
+          err "Missing value for --enable-observability"
+          usage 1
+        fi
+        enable_observability_specified=true
+        shift
+        ;;
       --skip-build)
         skip_build=true
         shift
@@ -344,6 +369,14 @@ main() {
   if [[ "$app_stack" == "dev" && "$infra_only_specified" == "false" ]]; then
     infra_only=true
   fi
+  if [[ "$app_stack" == "dev" && "$enable_observability_specified" == "false" ]]; then
+    enable_observability=false
+  fi
+  enable_observability="$(echo "$enable_observability" | tr '[:upper:]' '[:lower:]')"
+  if [[ "$enable_observability" != "true" && "$enable_observability" != "false" ]]; then
+    err "Invalid value for --enable-observability: $enable_observability"
+    usage 1
+  fi
 
   local install_args=()
   if [[ "$skip_build" == "true" ]]; then
@@ -352,7 +385,10 @@ main() {
   if [[ "$infra_only" == "true" ]]; then
     install_args+=("--infra-only")
   fi
-  
+  if [[ "$enable_observability" == "false" ]]; then
+    install_args+=("--enable-observability=false")
+  fi
+
   local config_file="$CONFIG_DIR/app-stack.${app_stack}.yml"
   local temp_cfg_file="$DIST_DIR/app-stack.cfg"
   

@@ -34,14 +34,16 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
         JpaProductEntity.class);
     Root<JpaProductEntity> root = criteriaQuery.from(JpaProductEntity.class);
 
-    root.join("details", JoinType.LEFT);
-    root.join("attributes", JoinType.LEFT);
-    root.join("brand", JoinType.LEFT);
-    root.join("categories", JoinType.LEFT);
+    root.fetch("details", JoinType.LEFT);
+    root.fetch("attributes", JoinType.LEFT);
+    root.fetch("brand", JoinType.LEFT);
+    root.fetch("categories", JoinType.LEFT);
 
     Specification<JpaProductEntity> spec = buildSpec(criteria);
     Predicate predicate = spec.toPredicate(root, criteriaQuery, criteriaBuilder);
-    criteriaQuery.where(predicate);
+    criteriaQuery.select(root)
+        .where(predicate)
+        .distinct(true);
 
     // Sorting
     if (pagingRequest.hasSort()) {
@@ -74,7 +76,7 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
     root.join("brand", JoinType.LEFT);
     root.join("categories", JoinType.LEFT);
 
-    query.select(criteriaBuilder.countDistinct(root.get("productId")));
+    query.select(criteriaBuilder.countDistinct(root.get("id")));
 
     Specification<JpaProductEntity> spec = buildSpec(params);
     Predicate predicate = spec.toPredicate(root, query, criteriaBuilder);
@@ -86,7 +88,7 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
   private Specification<JpaProductEntity> buildSpec(ProductRepository.FindProductCriteria criteria) {
     QuerySpecification<JpaProductEntity> spec = new QuerySpecification<>();
     if (criteria.getId() != null) {
-      spec.addFilter(QueryFilter.of("productId", criteria.getId(), QueryOperator.EQUAL));
+      spec.addFilter(QueryFilter.of("id", criteria.getId(), QueryOperator.EQUAL));
     }
     if (StringUtil.isNotBlank(criteria.getKeyword())) {
       String lowercaseKeyword = "%" + criteria.getKeyword().toLowerCase() + "%";
