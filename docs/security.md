@@ -2,43 +2,38 @@
 
 ## Authentication
 
-https://levelup.gitconnected.com/system-design-concepts-authentication-in-distributed-systems-6c59bc76308a
-https://levelup.gitconnected.com/system-design-concepts-oauth-2-0-for-service-to-service-communication-0265c0c33344
-https://medium.com/swlh/all-you-need-to-know-about-authentication-is-here-25c8d8135cd6
+Atlas supports two IAM implementations selected by app-stack (`backend/config/app-stack.*.yml`):
 
-### JWT
+- `iam: keycloak` uses Keycloak for user management and token issuance
+- `iam: jwt` issues tokens directly using the internal JWT module
 
-#### Invalidate/Revoked the JWT
+Gateway resource server configuration depends on the selected IAM module:
 
-**Option 1. Blacklist JWT**
-
-To invalidate the JWT token upon logout, you can maintain a blacklist or a list of revoked tokens. When a user logs out, add their token to this blacklist. When a request is made with a blacklisted token, it should be rejected. You can store the blacklisted tokens in memory, in a database, or using a distributed cache like Redis.
-
-#### Token storage
-
-1. Cookies
-2. Local storage
-
----
+- JWT mode uses `jwk-set-uri` from IAM `/api/authentication/.well-known/jwks.json`
+- Keycloak mode uses `issuer-uri` from the configured Keycloak realm
 
 ## Authorization
 
-https://levelup.gitconnected.com/system-design-concepts-authorization-in-distributed-systems-1da48088ee83
+Role-based access control is enforced at the API Gateway:
 
----
+- Admin routes apply `Authorization=ADMIN` filter
+- User role is extracted from JWT claims
 
 ## API Gateway
 
-Acts as the central entry point for requests and enforces security.
+Security policies are centralized in the gateway:
 
----
+- Token validation for protected routes
+- Role checks for admin routes
+- Token relay to downstream services
 
 ## Secure Communication
 
----
-
-## Service Mesh
-
----
+- Prefer HTTPS between services in non-local environments
+- Use service discovery + load balancing to avoid hardcoded service URLs
 
 ## Secret Management
+
+- Do not commit secrets or client credentials
+- Use environment variables for Keycloak admin credentials and client secrets
+- Rotate secrets before enabling external access

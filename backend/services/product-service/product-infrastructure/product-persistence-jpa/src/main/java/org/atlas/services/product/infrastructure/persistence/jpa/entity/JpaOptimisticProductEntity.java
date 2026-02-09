@@ -72,8 +72,11 @@ public class JpaOptimisticProductEntity extends JpaBaseEntity {
   @JoinColumn(name = "id", referencedColumnName = "product_id")
   private JpaProductDetailsEntity details;
 
-  @OneToMany(cascade = {CascadeType.PERSIST,
-      CascadeType.REMOVE}, mappedBy = "product", orphanRemoval = true)
+  @OneToMany(
+      cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
+      mappedBy = "product",
+      orphanRemoval = true
+  )
   private Set<JpaProductAttributeEntity> attributes = new HashSet<>();
 
   @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})

@@ -49,7 +49,7 @@ public class CartEntity extends DomainEntity {
       cartItems = new ArrayList<>();
     }
     cartItems.stream()
-        .filter(it -> it.getProduct().getProductId().equals(productId))
+        .filter(it -> it.getProduct().getId().equals(productId))
         .findFirst()
         .ifPresentOrElse(
             it -> it.setQuantity(it.getQuantity() + quantity),
@@ -69,7 +69,7 @@ public class CartEntity extends DomainEntity {
       cartItems = new ArrayList<>();
     }
     cartItems.stream()
-        .filter(it -> it.getProduct().getProductId().equals(productId))
+        .filter(it -> it.getProduct().getId().equals(productId))
         .findFirst()
         .ifPresentOrElse(
             it -> it.setQuantity(quantity),
@@ -89,7 +89,7 @@ public class CartEntity extends DomainEntity {
       Iterator<CartItem> iterator = cartItems.iterator();
       while (iterator.hasNext()) {
         CartItem cartItem = iterator.next();
-        if (cartItem.getProduct().getProductId().equals(productId)) {
+        if (cartItem.getProduct().getId().equals(productId)) {
           iterator.remove();
           break;
         }
@@ -108,7 +108,7 @@ public class CartEntity extends DomainEntity {
       return java.util.Collections.emptyList();
     }
     return cartItems.stream()
-        .map(it -> it.getProduct().getProductId())
+        .map(it -> it.getProduct().getId())
         .toList();
   }
 
@@ -119,6 +119,7 @@ public class CartEntity extends DomainEntity {
   @Setter
   public static class CartItem {
 
+    private Integer id;
     private Product product;
     private Integer quantity;
 
@@ -132,13 +133,13 @@ public class CartEntity extends DomainEntity {
   @Setter
   public static class Product {
 
-    private String productId;
+    private String id;
     private String name;
     private BigDecimal price;
     private String image;
 
-    public Product(String productId) {
-      this.productId = productId;
+    public Product(String id) {
+      this.id = id;
     }
   }
 }

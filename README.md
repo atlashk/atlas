@@ -21,13 +21,23 @@
 
 ## Project Overview
 
-Atlas is a microservices-based e-commerce platform showcasing DDD and Hexagonal architecture. 
+Atlas is a microservices-based e-commerce platform showcasing DDD and Hexagonal architecture.
 
 ### Hexagonal Architecture
 
+Each service follows a consistent module layout:
+
+- `domain`: aggregates, entities, value objects
+- `port`: inbound and outbound contracts
+- `application`: use cases and orchestration
+- `infrastructure`: adapters (JPA, messaging, files, external APIs)
+- `bootstrap`: Spring Boot runtime wiring
+
 ### App Stack
 
-The *app-stack* configuration allows you to swap infrastructure components (DB, cache, messaging, auth, storage, observability, etc.) with minimal code changes.
+The app-stack configuration allows swapping infrastructure components (database, cache, messaging,
+auth, storage, observability) with minimal code changes. App-stack selection drives both Gradle
+module wiring and deployment generation. See `backend/config/app-stack.*.yml`.
 
 ### Architecture Diagram
 
@@ -102,6 +112,7 @@ sequenceDiagram
 | Payment Service | Payment processing and simulation | 8084 |
 | Notification Service | Notifications and email | 8085 |
 | Eureka Server | Service discovery | 8761 |
+| Config Server | Externalized configuration | 8888 |
 
 ## Technology Stack
 
@@ -134,22 +145,13 @@ sequenceDiagram
 ```
 .
 ├── backend/
-│   ├── config/
-│   ├── deployment/
-│   ├── libs/
-│   │   ├── framework/
-│   │   ├── cross-cutting concerns/
-│   ├── platform/
-│   │   ├── config-server/
-│   │   └── discovery-server/
-│   ├── services/
-│   │   ├── iam-service/
-│   │   ├── product-service/
-│   │   ├── order-service/
-│   │   ├── payment-service/
-│   │   └── notification-service/
+│   ├── config/            # app-stack definitions
+│   ├── deployment/        # generator + templates
+│   ├── libs/              # shared adapters (messaging, storage, observability, etc.)
+│   ├── platform/          # config-server, discovery-server
+│   ├── services/          # api-gateway, iam, product, order, payment, notification
 │   ├── build.gradle
-│   └── deploy.sh
+│   └── install.sh
 ├── frontend/
 └── docs/
 ```
@@ -166,7 +168,7 @@ sequenceDiagram
 
 ```bash
 cd backend
-./deploy.sh
+./install.sh
 ```
 
 Supported app-stacks:
@@ -178,13 +180,14 @@ Flags:
 - `--app-stack <name>` select the app-stack config (default: `onprem.compose`).
 - `--skip-build` skip building application services and use existing artifacts.
 - `--infra-only` deploy only infrastructure components and skip application services.
+- `--enable-observability <true|false>` toggle observability stacks in generated deployments.
 - Special case: `--app-stack dev` defaults `infra-only` to `true` unless explicitly set.
 
 Notes:
 - Requires Node.js to render EJS templates
 - If `ejs` is missing, install in `backend/deployment/generator/` via `npm install ejs --save`
-- On Windows, use Git Bash or WSL to run `deploy.sh`
-- Re-running `deploy.sh` regenerates `backend/dist/`
+- On Windows, use Git Bash or WSL to run `install.sh`
+- Re-running `install.sh` regenerates `backend/deployment/dist/`
 
 ### Frontend
 
@@ -209,6 +212,14 @@ Open: http://localhost:8000
 ### Default Credentials (dev)
 
 - Admin: `admin` / `Aa@123456`
+
+## Documentation
+
+- System design and service landscape: `docs/system-design.md`
+- API gateway routing: `docs/api-gateway.md`
+- Messaging and outbox: `docs/messaging.md` and `docs/event-driven-architecture.md`
+- Observability stack: `docs/observability.md`
+- Security and IAM: `docs/security.md`
 
 ## Contributing
 

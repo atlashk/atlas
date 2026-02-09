@@ -1,108 +1,134 @@
-# Backpressure
+# Backpressure Handling in Distributed Systems
 
-Backpressure handling in distributed systems is critical to ensure that systems can manage load appropriately, preventing service failures under high traffic conditions. Backpressure occurs when a system or service cannot process incoming requests as fast as they are arriving, which can result in overload, failures, or data loss.
+Backpressure is a form of feedback-based flow control. In a distributed system, it refers to the resistance or force opposing the desired flow of data from a source to a destination. It occurs when a downstream component cannot keep up with the rate of requests from an upstream component.
 
-Below are several techniques to handle backpressure in distributed systems, along with the relevant implementation considerations and a block diagram to visualize each approach.
+Without effective backpressure handling, a system under high load can suffer from:
+- **Service Overload:** Components become overwhelmed, leading to high latency and errors.
+- **Cascading Failures:** The failure of one service can ripple through the system, causing widespread outages.
+- **Data Loss:** If buffers overflow, incoming data or requests may be dropped.
 
-##  Rate Limiting (Token Bucket)
+This document outlines common techniques for managing backpressure.
 
-https://miro.medium.com/v2/resize:fit:1100/format:webp/1*aj_1wcA3O-En2pOanCcrFA.png
+---
 
-The Token Bucket Algorithm is one of the most common rate-limiting techniques. The idea is to control the rate at which requests are processed by maintaining a “bucket” of tokens. Each request consumes a token, and tokens are refilled at a constant rate. If the bucket is empty (i.e., no tokens are available), requests are either delayed or rejected, thereby protecting the system from being overloaded.
+## Comparison of Backpressure Techniques
 
-Use Cases:
-- API Gateways: Preventing abuse by limiting the number of requests a user can make within a certain time frame.
-- Rate Limiting for Distributed Systems: Ensures that downstream services are not overwhelmed by high traffic.
+| Technique | Core Idea | How it Works | Primary Use Case |
+| :--- | :--- | :--- | :--- |
+| **Rate Limiting** | Control the rate of incoming requests. | A "token bucket" or similar algorithm limits the number of requests allowed in a time window. | Protecting APIs from abuse and ensuring fair usage among clients. |
+| **Load Shedding** | Drop excess requests when overloaded. | When a load threshold is exceeded, the system intentionally rejects new requests to protect its stability. | Graceful degradation under extreme load, ensuring critical services remain available. |
+| **Circuit Breaking**| Stop sending requests to a failing service. | A "circuit breaker" monitors a downstream service for failures. If failures exceed a threshold, it "opens" the circuit and fails fast. | Preventing cascading failures and improving system resilience when a dependency is unavailable. |
+| **Buffering** | Temporarily store requests in a queue. | A buffer (e.g., a message queue) absorbs spikes in traffic, allowing the consumer to process requests at its own pace. | Decoupling services that operate at different speeds and smoothing out load spikes. |
 
-Key Characteristics:
-- Token Generation Rate: Tokens are added to the bucket at a fixed rate.
-- Capacity: The bucket has a fixed capacity. Once full, new tokens are discarded.
-- Request Handling: Requests consume tokens. If no tokens are available, the request is either delayed or rejected.
+---
+
+## 1. Rate Limiting (Token Bucket)
+
+The Token Bucket algorithm is a common rate-limiting technique. It controls the rate of requests by maintaining a "bucket" of tokens. Each request consumes a token, and tokens are refilled at a constant rate. If the bucket is empty, requests are either delayed or rejected.
+
+**Diagram:**
+```mermaid
+graph TD
+    subgraph Client
+        direction LR
+        R1(Request)
+        R2(Request)
+        R3(Request)
+    end
+    subgraph Rate Limiter
+        direction LR
+        Bucket[Token Bucket]
+    end
+    Client --> Bucket
+    Bucket -- Token Available --> Service[Downstream Service]
+    Bucket -- No Tokens --> Rejected[Request Rejected]
+```
+
+**Key Characteristics:**
+- **Token Refill Rate:** The rate at which tokens are added to the bucket. This defines the average request rate.
+- **Bucket Capacity:** The maximum number of tokens the bucket can hold. This allows for short bursts of traffic.
+- **Request Handling:** If a token is available, the request passes. If not, it is rejected or queued.
+
+**Example Use Case:** An API gateway limiting a specific client to 100 requests per minute to ensure fair usage.
 
 ```java
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class TokenBucketRateLimiter {
+    private final Semaphore tokens;
     private final int maxTokens;
-    private final AtomicInteger currentTokens;
-    private long lastRefillTimestamp;
-    private final long refillIntervalMillis;
-    private final int refillTokens;
+    private final int refillRate;
+    private final TimeUnit timeUnit;
 
-    public TokenBucketRateLimiter(int maxTokens, int refillTokens, long refillInterval, TimeUnit timeUnit) {
+    public TokenBucketRateLimiter(int maxTokens, int refillRate, TimeUnit timeUnit) {
         this.maxTokens = maxTokens;
-        this.currentTokens = new AtomicInteger(maxTokens);
-        this.refillTokens = refillTokens;
-        this.refillIntervalMillis = timeUnit.toMillis(refillInterval);
-        this.lastRefillTimestamp = System.currentTimeMillis();
+        this.refillRate = refillRate;
+        this.timeUnit = timeUnit;
+        this.tokens = new Semaphore(maxTokens);
+        startRefillThread();
     }
 
-    private void refill() {
-        long now = System.currentTimeMillis();
-        long timeElapsed = now - lastRefillTimestamp;
-        
-        if (timeElapsed > refillIntervalMillis) {
-            int tokensToAdd = (int) (timeElapsed / refillIntervalMillis) * refillTokens;
-            currentTokens.set(Math.min(maxTokens, currentTokens.get() + tokensToAdd));
-            lastRefillTimestamp = now;
-        }
+    private void startRefillThread() {
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        scheduler.scheduleAtFixedRate(() -> {
+            tokens.release(Math.min(maxTokens - tokens.availablePermits(), refillRate));
+        }, 0, 1, timeUnit);
     }
 
-    public synchronized boolean tryConsume() {
-        refill();
-        if (currentTokens.get() > 0) {
-            currentTokens.decrementAndGet();
-            return true;
-        }
-        return false; // Rate limit exceeded, request rejected
+    public boolean tryConsume() {
+        return tokens.tryAcquire();
     }
 }
 ```
 
 ---
 
-## Load Shedding
+## 2. Load Shedding
 
-https://miro.medium.com/v2/resize:fit:1100/format:webp/1*ilnc4bzwNY2i48hTKNrHzA.png
+Load shedding is a defensive mechanism where a system intentionally drops excess requests when it becomes overloaded. This protects the system's core functionality from degrading or failing completely.
 
-Load shedding is a backpressure technique where the system intentionally drops or rejects excess requests when it becomes overloaded. This helps protect the system’s core services from degradation. Load shedding is typically used when the system can’t keep up with incoming traffic, and some requests need to be discarded in favor of ensuring the system stays operational.
-
-In distributed systems, this technique is useful when the system is under extreme load. By shedding less important or non-critical requests, we preserve resources for the most critical ones.
-
-**Use Cases:**
-- Web Servers: When overwhelmed, shed non-critical requests to keep the system responsive.
-- Message Queues: When queues overflow, drop less important messages to ensure priority messages are processed.
-- Microservices: Handle overload situations by shedding load in microservices that are under heavy traffic.
+**Diagram:**
+```mermaid
+graph TD
+    Client --> LoadShedder{Load Shedder}
+    LoadShedder -- Under Threshold --> Service[Downstream Service]
+    LoadShedder -- Over Threshold --> Rejected[Request Rejected]
+```
 
 **Key Characteristics:**
-- Threshold-Based Shedding: The system drops requests once the request rate crosses a pre-defined threshold.
-- Priority Handling: Systems often assign priorities to requests and shed low-priority ones.
-- Graceful Degradation: The system avoids crashing by shedding excess load instead of failing entirely.
+- **Threshold-Based:** Shedding begins when a metric (e.g., CPU usage, memory, request queue length) crosses a predefined threshold.
+- **Priority-Based:** Often, requests are prioritized, and low-priority requests are shed first.
+- **Graceful Degradation:** The system remains operational for high-priority requests instead of crashing.
+
+**Example Use Case:** A video streaming service under extreme load might shed requests for lower-quality streams to ensure high-quality streams remain available.
 
 ```java
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class LoadShedding {
-    private final int requestThreshold;
-    private AtomicInteger currentRequests;
+public class LoadShedder {
+    private final int maxConcurrentRequests;
+    private final AtomicInteger currentRequests = new AtomicInteger(0);
 
-    public LoadShedding(int requestThreshold) {
-        this.requestThreshold = requestThreshold;
-        this.currentRequests = new AtomicInteger(0);
+    public LoadShedder(int maxConcurrentRequests) {
+        this.maxConcurrentRequests = maxConcurrentRequests;
     }
 
     public boolean tryProcessRequest() {
-        if (currentRequests.incrementAndGet() <= requestThreshold) {
-            // Process request
-            System.out.println("Request processed.");
-            currentRequests.decrementAndGet(); // After processing, decrement the count
-            return true;
-        } else {
-            // Load shedding - reject request
+        if (currentRequests.get() >= maxConcurrentRequests) {
             System.out.println("Request rejected (load shedding).");
+            return false; // Shedding load
+        }
+        
+        currentRequests.incrementAndGet();
+        try {
+            // Simulate processing
+            System.out.println("Request processed.");
+            return true;
+        } finally {
             currentRequests.decrementAndGet();
-            return false;
         }
     }
 }
@@ -110,25 +136,31 @@ public class LoadShedding {
 
 ---
 
-## Circuit Breaking
+## 3. Circuit Breaking
 
-https://miro.medium.com/v2/resize:fit:1100/format:webp/1*tp6qjyh5RIrGNoRAa7y3Rg.png
+The Circuit Breaker pattern prevents an application from repeatedly trying to execute an operation that is likely to fail. After a configured number of failures, the circuit breaker "trips" or "opens," and for a period of time, all subsequent calls to the circuit breaker return with an error, without the protected operation ever being attempted.
 
-Circuit breaking is a backpressure handling technique where the system temporarily “breaks” or blocks requests to a dependent service when it detects that the service is failing or underperforming. This protects the overall system from cascading failures or slowdowns caused by waiting on unresponsive services.
+**States:**
+1.  **Closed:** The service is functioning normally. Requests are passed through.
+2.  **Open:** The service is failing. Requests are blocked immediately for a timeout period.
+3.  **Half-Open:** After the timeout, the circuit allows a limited number of test requests through. If they succeed, the circuit closes. If they fail, it returns to the open state.
 
-The circuit breaker can have three states:
-1. Closed: The service is functioning normally, and all requests are allowed.
-2. Open: The service is failing, so requests are blocked or rejected without being forwarded.
-3. Half-Open: The circuit breaker allows a limited number of requests through to see if the service has recovered. If successful, the breaker returns to the closed state; if not, it returns to the open state.
+**Diagram:**
+```mermaid
+graph TD
+    Client --> CircuitBreaker{Circuit Breaker}
+    subgraph States
+        direction LR
+        Closed -- Failures Exceed Threshold --> Open
+        Open -- Timeout Expires --> HalfOpen[Half-Open]
+        HalfOpen -- Success --> Closed
+        HalfOpen -- Failure --> Open
+    end
+    CircuitBreaker -- Closed/Half-Open --> Service[Downstream Service]
+    CircuitBreaker -- Open --> Rejected[Request Failed Fast]
+```
 
-**Key Characteristics:**
-- Failure Threshold: When the number of failures exceeds a threshold, the circuit breaker opens.
-- Recovery: After a timeout period, the circuit breaker enters a half-open state to test if the service has recovered.
-- Health Check: The circuit periodically tests whether the underlying service is operational.
-
-**Use Cases:**
-- Microservices: If one microservice is slow or down, using a circuit breaker prevents other microservices from being affected.
-- API Gateways: Prevent overloading backend services by failing fast when an external service is unavailable.
+**Example Use Case:** A microservice that calls an external payment gateway. If the gateway becomes unresponsive, the circuit breaker opens, preventing the service from hanging while waiting for responses.
 
 ```java
 public class CircuitBreaker {
@@ -137,42 +169,38 @@ public class CircuitBreaker {
     private State state = State.CLOSED;
     private int failureCount = 0;
     private final int failureThreshold;
-    private final long timeout;
+    private final long timeoutMillis;
     private long lastFailureTime;
 
-    public CircuitBreaker(int failureThreshold, long timeout) {
+    public CircuitBreaker(int failureThreshold, long timeoutMillis) {
         this.failureThreshold = failureThreshold;
-        this.timeout = timeout;
+        this.timeoutMillis = timeoutMillis;
     }
 
     public boolean allowRequest() {
-        switch (state) {
-            case OPEN:
-                if (System.currentTimeMillis() - lastFailureTime > timeout) {
-                    state = State.HALF_OPEN; // Try to recover
-                    return true; // Allow a few requests to test
-                }
-                return false; // Still open, reject requests
-            case HALF_OPEN:
-                return true; // Let requests go through in half-open state
-            case CLOSED:
-            default:
-                return true; // Normal operation
+        long now = System.currentTimeMillis();
+        if (state == State.OPEN) {
+            if (now - lastFailureTime > timeoutMillis) {
+                state = State.HALF_OPEN;
+                return true; // Allow a test request
+            }
+            return false; // Circuit is open
         }
+        return true; // Circuit is closed or half-open
     }
 
     public void recordSuccess() {
         if (state == State.HALF_OPEN) {
-            state = State.CLOSED; // Service recovered
+            state = State.CLOSED;
         }
-        failureCount = 0; // Reset failure count
+        failureCount = 0;
     }
 
     public void recordFailure() {
         failureCount++;
-        lastFailureTime = System.currentTimeMillis();
-        if (failureCount >= failureThreshold) {
-            state = State.OPEN; // Open circuit
+        if (state == State.HALF_OPEN || failureCount >= failureThreshold) {
+            state = State.OPEN;
+            lastFailureTime = System.currentTimeMillis();
         }
     }
 }
@@ -180,23 +208,23 @@ public class CircuitBreaker {
 
 ---
 
-## Buffering
+## 4. Buffering
 
-https://miro.medium.com/v2/resize:fit:1100/format:webp/1*JXV_QT6INnjKs26aK_O60A.png
+Buffering involves using a queue to temporarily store incoming requests. This smooths out spikes in traffic and decouples the producer of requests from the consumer, allowing them to operate at different rates.
 
-Buffering is a technique used to temporarily store incoming data or requests in a queue (buffer) when the system is unable to immediately process them. This prevents overload situations by smoothing out spikes in traffic and allowing the system to process requests at its own pace. Once the system catches up, it drains the buffer by processing the queued data.
-
-Buffering is commonly used in distributed systems where different parts of the system operate at different speeds. It acts as a temporary storage mechanism between producers and consumers, preventing the system from becoming overwhelmed during periods of high load.
+**Diagram:**
+```mermaid
+graph TD
+    Producer --> Buffer[Buffer (Queue)]
+    Buffer --> Consumer
+```
 
 **Key Characteristics:**
-- Temporary Storage: Incoming requests or data are held in a buffer (queue) until they can be processed.
-- Smoothing Load Spikes: Buffers absorb sudden spikes in traffic, allowing the system to process them gradually.
-- Rate Matching: Helps match the rate of data production and consumption in systems with varying speeds.
+- **Temporary Storage:** Requests are held in a buffer until the consumer is ready.
+- **Load Smoothing:** Absorbs sudden spikes in traffic, allowing the system to process them gradually.
+- **Asynchronous Communication:** Enables producers and consumers to work independently without blocking each other.
 
-**Use Cases:**
-- Message Queues: Systems like Kafka or RabbitMQ use buffering to store messages before they are consumed by downstream services.
-- Web Servers: Buffer requests to prevent overloading backend services during traffic spikes.
-Streaming Systems: Buffer incoming data streams to process them smoothly.
+**Example Use Case:** A message queue like RabbitMQ or Kafka is used to buffer events between microservices. An `OrderService` produces an `OrderCreated` event, which is consumed by a `NotificationService` at its own pace.
 
 ```java
 import java.util.concurrent.BlockingQueue;
@@ -204,52 +232,32 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class BufferingSystem {
     private final BlockingQueue<String> buffer;
-    private final int bufferCapacity;
 
-    public BufferingSystem(int bufferCapacity) {
-        this.bufferCapacity = bufferCapacity;
-        this.buffer = new LinkedBlockingQueue<>(bufferCapacity);
+    public BufferingSystem(int capacity) {
+        this.buffer = new LinkedBlockingQueue<>(capacity);
     }
 
-    public void produce(String request) {
-        try {
-            buffer.put(request); // Block if buffer is full
-            System.out.println("Request added to buffer: " + request);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+    public boolean produce(String request) {
+        // Non-blocking: returns false if the buffer is full
+        return buffer.offer(request); 
     }
 
-    public void consume() {
-        try {
-            String request = buffer.take(); // Block if buffer is empty
-            System.out.println("Processing request: " + request);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        BufferingSystem system = new BufferingSystem(10);
-
-        // Producer Thread
-        new Thread(() -> {
-            for (int i = 1; i <= 20; i++) {
-                system.produce("Request-" + i);
-            }
-        }).start();
-
-        // Consumer Thread
-        new Thread(() -> {
-            for (int i = 1; i <= 20; i++) {
-                system.consume();
-                try {
-                    Thread.sleep(500); // Simulating processing delay
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }).start();
+    public String consume() throws InterruptedException {
+        // Blocking: waits if the buffer is empty
+        return buffer.take();
     }
 }
 ```
+
+---
+
+## Choosing the Right Technique
+
+The best backpressure strategy depends on the specific problem you are trying to solve:
+
+- Use **Rate Limiting** to enforce usage policies and prevent abuse from specific clients.
+- Use **Load Shedding** as a last resort to maintain system stability during extreme, unexpected traffic spikes.
+- Use a **Circuit Breaker** to protect your system from failures in its dependencies.
+- Use **Buffering** to decouple components and handle predictable variations in load between producers and consumers.
+
+These techniques are not mutually exclusive and are often used in combination to build a robust, resilient system.

@@ -68,11 +68,7 @@ public class JpaProductEntity extends JpaBaseEntity {
   private JpaProductDetailsEntity details;
 
   @OneToMany(
-      cascade = {
-          CascadeType.PERSIST,
-          CascadeType.MERGE,
-          CascadeType.REMOVE
-      },
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE},
       mappedBy = "product",
       orphanRemoval = true
   )

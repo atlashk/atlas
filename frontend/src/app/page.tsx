@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { ProductSearch } from '../components/front';
 import { Spinner } from '../components/ui/spinner';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
@@ -24,8 +24,18 @@ const StoreFront: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-4">
       <div className="w-full">
-        {/* Product Search */}
-        <ProductSearch />
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center min-h-screen">
+              <div className="text-center">
+                <Spinner className="text-blue-600 mx-auto mb-4" />
+                <p className="text-gray-600">Loading...</p>
+              </div>
+            </div>
+          }
+        >
+          <ProductSearch />
+        </Suspense>
       </div>
     </div>
   );

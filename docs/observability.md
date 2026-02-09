@@ -2,7 +2,15 @@
 
 ## Atlas notes
 
-Observability components are enabled via app-stack (`backend/config/app-stack.*.yml`).
+Observability components are enabled via app-stack (`backend/config/app-stack.*.yml`) and wired in
+Gradle through `libs/observability/*` modules.
+
+App-stack switches:
+
+- `observability.logging.stack`: `none` or `loki`
+- `observability.logging.framework`: `logback`
+- `observability.metrics`: `none` or `prometheus`
+- `observability.tracing`: `none` or `zipkin`
 
 Default Compose ports when enabled:
 
@@ -20,9 +28,14 @@ flowchart LR
   LOKI --> G
 ```
 
-https://levelup.gitconnected.com/system-design-concepts-prometheus-grafana-and-elk-eln-stack-c28274b26b15
-https://levelup.gitconnected.com/system-design-concepts-hot-spot-detection-techniques-%EF%B8%8F-3ee1fc89de7a
+### Service instrumentation
 
-## Tracing
+- Actuator base config is centralized in `libs/observability/actuator`
+- Exposed endpoints include `health`, `info`, and `prometheus`
+- Gateway additionally exposes `gateway`, `refresh`, and `routes`
 
-https://netflixtechblog.com/building-netflixs-distributed-tracing-infrastructure-bb856c319304
+### Operational tips
+
+- Keep Prometheus scraping internal ports only
+- Use Grafana dashboards from deployment templates as a baseline
+- Prefer trace sampling in non-prod environments to control storage

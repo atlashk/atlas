@@ -2,11 +2,11 @@
 
 ## Atlas system design (repository-specific)
 
-Atlas is organized as a poly-repo style mono-workspace:
+Atlas is organized as a mono-repo workspace:
 
 - `backend/`: Java/Spring multi-module Gradle workspace (libs + services + platform)
 - `frontend/`: Next.js app (React 19)
-- `wiki/`: design notes and architecture docs
+- `docs/`: design notes and architecture docs
 
 ### Service landscape
 
@@ -45,6 +45,19 @@ flowchart LR
   NOTIF --> MQ
 ```
 
+### Module boundaries (DDD + Hexagonal)
+
+Each service keeps the same layers to enforce boundaries and enable app-stack swapping:
+
+- `domain`: business entities, aggregates, domain services
+- `port`: inbound and outbound contracts
+- `application`: use cases, orchestration, DTO mapping
+- `infrastructure`: JPA, messaging, file storage, external APIs
+- `bootstrap`: Spring Boot startup and wiring
+
+Infrastructure modules are selected by app-stack settings at build time (Gradle reads `appStack.*`
+properties to include the correct adapters).
+
 ### Deployment configuration (app-stack)
 
 Local deployment is generated from an app-stack YAML file under `backend/config/` (example:
@@ -53,12 +66,28 @@ Local deployment is generated from an app-stack YAML file under `backend/config/
 
 ### Generated deployment (Compose/K8s)
 
-`backend/deploy.sh` performs:
+`backend/install.sh` performs:
 
 1. Read `backend/config/app-stack.<name>.yml`
 2. Convert YAML -> `.cfg` format for the generator
-3. Render templates (EJS) into `backend/dist/`
-4. Execute the generated `install.sh`
+3. Render templates (EJS) into `backend/deployment/dist/`
+4. Execute the generated `install.sh` (Compose or K8s-native)
+
+### App-stack matrix (current implementations)
+
+App-stack files live under `backend/config/`. Current switches map directly to concrete modules:
+
+- Datasource: `mysql`, `postgres`
+- Messaging: `kafka`, `rabbitmq`
+- Service discovery: `eureka`, `kubernetes`
+- Persistence: `jpa`
+- Migration: `flyway`
+- Storage: `filesystem`, `minio`
+- File adapters: `file.csv` = `opencsv`, `file.excel` = `poi`, `file.pdf` = `pdfbox`
+- Observability: logging stack `logback` + optional `loki`, metrics `prometheus`, tracing `zipkin`
+- Scheduler: `quartz`
+- Internal API: `rest`, `grpc`
+- IAM: `keycloak`, `jwt`
 
 ### Checkout flow (Saga)
 

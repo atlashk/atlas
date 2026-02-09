@@ -31,6 +31,5 @@ public class JpaCartRepositoryAdapter implements CartRepository {
   public void update(CartEntity cart) {
     JpaCartEntity jpaCart = JpaCartMapper.INSTANCE.toJpaCart(cart);
     JpaCartEntity saved = jpaCartRepository.save(jpaCart);
-    cart.setId(saved.getId());
   }
 }

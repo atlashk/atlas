@@ -48,7 +48,7 @@ public class CartAggregator {
         .collect(Collectors.toMap(ProductResponse::getId, Function.identity()));
     boolean allProductsAreValid = true;
     for (CartItem cartItem : cart.getCartItems()) {
-      String productId = cartItem.getProduct().getProductId();
+      String productId = cartItem.getProduct().getId();
       ProductResponse productResponse = productResponseMap.get(productId);
       if (productResponse != null) {
         CartEntity.Product product = CartMapper.INSTANCE.toProduct(productResponse);

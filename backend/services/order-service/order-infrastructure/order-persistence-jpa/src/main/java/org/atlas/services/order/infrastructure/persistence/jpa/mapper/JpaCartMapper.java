@@ -24,7 +24,7 @@ public interface JpaCartMapper {
   JpaCartEntity toJpaCart(CartEntity cart);
 
   @Mapping(target = "cart", ignore = true)
-  @Mapping(target = "productId", source = "product.productId")
+  @Mapping(target = "productId", source = "product.id")
   JpaCartItemEntity toJpaCartItem(CartEntity.CartItem cartItem);
 
   /**
@@ -43,6 +43,6 @@ public interface JpaCartMapper {
 
   CartEntity toCart(JpaCartEntity jpaCart);
 
-  @Mapping(target = "product.productId", source = "productId")
+  @Mapping(target = "product.id", source = "productId")
   CartEntity.CartItem toCartItem(JpaCartItemEntity jpaCartItem);
 }

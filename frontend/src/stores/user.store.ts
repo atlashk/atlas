@@ -33,7 +33,7 @@ interface UserActions {
     credentials: LoginRequest
   ) => Promise<{ success: boolean; errorMessage?: string; userRole?: Role }>;
   register: (userData: RegisterRequest) => Promise<void>;
-  fetchProfile: () => Promise<void>;
+  fetchProfile: (options?: { force?: boolean }) => Promise<void>;
   setTokens: (accessToken: string, refreshToken: string) => void;
   logout: () => void;
   clearError: () => void;
@@ -62,10 +62,7 @@ export const useUserStore = create<UserStore>()(
       // Getters
       isAuthenticated: () => {
         const { accessToken } = get();
-        // Check both store state and cookies for better reliability
-        const cookieToken = getCookie('accessToken');
-        const tokenToCheck = accessToken || cookieToken;
-        return isValidToken(tokenToCheck);
+        return isValidToken(accessToken);
       },
 
       isAdmin: () => {
@@ -178,16 +175,19 @@ export const useUserStore = create<UserStore>()(
         }
       },
 
-      fetchProfile: async () => {
-        const { accessToken, profile } = get();
-        if (!accessToken) return;
+      fetchProfile: async (options?: { force?: boolean }) => {
+        const { profile, profileLoading } = get();
         
-        // Don't fetch if we already have a profile
-        if (profile) return;
+        if (!options?.force && profile) return;
+        if (profileLoading) return;
+
+        if (options?.force && profile) {
+          set({ profile: null });
+        }
 
         set({ profileLoading: true, error: null });
         try {
-          const response = await iamFrontApi.getProfile();
+          const response = await iamFrontApi.retrieveProfile();
           if (response.success && response.data) {
             set({
               profile: response.data,
@@ -282,6 +282,7 @@ export const useUserStore = create<UserStore>()(
     }),
     {
       name: "user-store",
+      skipHydration: true,
       partialize: (state) => ({
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,

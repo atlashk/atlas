@@ -26,7 +26,7 @@ export class IamFrontApi extends BaseApi {
     super("/services/iam/api");
   }
 
-  async getProfile(): Promise<ApiResponse<User>> {
+  async retrieveProfile(): Promise<ApiResponse<User>> {
     return this.get<User>("/front/users/profile");
   }
 

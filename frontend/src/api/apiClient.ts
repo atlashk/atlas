@@ -59,6 +59,11 @@ const getRefreshTokenFromCookies = (): string | null => {
   return getCookie('refreshToken');
 };
 
+const shouldSkipAuthRedirect = (requestUrl?: string): boolean => {
+  if (!requestUrl) return false;
+  return requestUrl.includes('/services/iam/api/front/users/profile');
+};
+
 // Enhanced request interceptor
 apiClient.interceptors.request.use(
   (config) => {
@@ -116,7 +121,9 @@ apiClient.interceptors.response.use(
       // Prevent infinite retry loops
       if (originalRequest._retryCount > MAX_REFRESH_RETRIES) {
         clearAuthCookies();
-        redirectToLogin();
+        if (!shouldSkipAuthRedirect(originalRequest.url)) {
+          redirectToLogin();
+        }
         return Promise.reject(new Error('Maximum refresh retries exceeded'));
       }
 
@@ -124,7 +131,9 @@ apiClient.interceptors.response.use(
 
       if (!refreshToken || !isValidToken(refreshToken)) {
         clearAuthCookies();
-        redirectToLogin();
+        if (!shouldSkipAuthRedirect(originalRequest.url)) {
+          redirectToLogin();
+        }
         return Promise.reject(error);
       }
 
@@ -149,7 +158,9 @@ apiClient.interceptors.response.use(
         // If we've exceeded max retries, clear tokens and redirect
         if (refreshRetryCount >= MAX_REFRESH_RETRIES) {
           clearAuthCookies();
-          redirectToLogin();
+          if (!shouldSkipAuthRedirect(originalRequest.url)) {
+            redirectToLogin();
+          }
           refreshRetryCount = 0;
         }
         

@@ -41,7 +41,7 @@ public class UserController {
 
   @GetMapping(value = "/profile", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve user profile")
-  public ApiResponseWrapper<ProfileResponse> retrieveUserProfile() {
+  public ApiResponseWrapper<ProfileResponse> retrieveProfile() {
     ProfileOutput output = userService.retrieveProfile();
     ProfileResponse response = UserMapper.INSTANCE.toProfileResponse(output);
     return ApiResponseWrapper.success(response);

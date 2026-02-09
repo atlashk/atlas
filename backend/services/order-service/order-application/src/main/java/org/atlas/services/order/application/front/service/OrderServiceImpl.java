@@ -128,8 +128,8 @@ public class OrderServiceImpl implements OrderService {
     // Create a deterministic signature based on order items
     StringBuilder signature = new StringBuilder();
     cart.getCartItems().stream().sorted(
-            Comparator.comparing(cartItem -> cartItem.getProduct().getProductId())) // Sort for consistency
-        .forEach(cartItem -> signature.append(cartItem.getProduct().getProductId()).append(":")
+            Comparator.comparing(cartItem -> cartItem.getProduct().getId())) // Sort for consistency
+        .forEach(cartItem -> signature.append(cartItem.getProduct().getId()).append(":")
             .append(cartItem.getQuantity()).append(";"));
     String hash = HashingUtil.sha256ToHex(signature.toString());
     return String.format("checkout:%s:%s", cart.getUserId(), hash);

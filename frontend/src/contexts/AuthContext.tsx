@@ -3,7 +3,7 @@
 import type { LoginRequest } from '@/interfaces/auth.interface';
 import type { User } from '@/interfaces/user.interface';
 import { useUserStore } from '@/stores/user.store';
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 interface AuthContextType {
   // Auth state
@@ -32,7 +32,6 @@ interface AuthProviderProps {
 export const AuthProvider = React.memo(function AuthProvider({ children }: AuthProviderProps) {
   const {
     profile,
-    accessToken,
     loading,
     error,
     isAuthenticated: storeIsAuthenticated,
@@ -47,17 +46,21 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: AuthP
   
   const [isInitialized, setIsInitialized] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
+  const initStartedRef = useRef(false);
 
   const initializeAuth = useCallback(async () => {
     try {
       setInitError(null);
+      const { accessToken, profile } = useUserStore.getState();
       console.log('AuthContext initializing:', { accessToken: !!accessToken, profile: !!profile });
+
+      await useUserStore.persist.rehydrate();
       
       // Initialize store from cookies to sync state
       initializeFromCookies();
-      
-      // No need to fetch profile here - user store handles this during login
-      // Just mark as initialized
+
+      const { fetchProfile } = useUserStore.getState();
+      await fetchProfile({ force: true });
     } catch (error) {
       console.warn('AuthContext initialization error:', error);
       setInitError(error instanceof Error ? error.message : 'Initialization failed');
@@ -65,10 +68,12 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: AuthP
       console.log('AuthContext initialization complete');
       setIsInitialized(true);
     }
-  }, [accessToken, profile, initializeFromCookies]);
+  }, [initializeFromCookies]);
 
   useEffect(() => {
-    initializeAuth();
+    if (initStartedRef.current) return;
+    initStartedRef.current = true;
+    void initializeAuth();
   }, [initializeAuth]);
 
   // Memoize computed values to prevent unnecessary re-renders
@@ -103,7 +108,7 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: AuthP
 
   return (
     <AuthContext.Provider value={contextValue}>
-      {children}
+      {isInitialized ? children : null}
     </AuthContext.Provider>
   );
 });
