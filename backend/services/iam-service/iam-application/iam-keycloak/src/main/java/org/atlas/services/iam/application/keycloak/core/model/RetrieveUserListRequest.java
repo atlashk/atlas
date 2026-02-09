@@ -14,7 +14,7 @@ import org.atlas.libs.framework.paging.PagingRequest;
 @Setter
 public class RetrieveUserListRequest {
 
-  private String id;
+  private String userId;
 
   private String username;
 

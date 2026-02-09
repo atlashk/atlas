@@ -1,0 +1,108 @@
+package org.atlas.libs.jwt;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTCreator;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.Claim;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
+import java.io.IOException;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.util.Date;
+import java.util.Map;
+import java.util.Optional;
+import lombok.experimental.UtilityClass;
+import org.atlas.libs.framework.cryptography.RsaKeyLoader;
+import org.atlas.libs.framework.security.CustomClaim;
+import org.atlas.libs.framework.security.SecurityConstant;
+import org.atlas.libs.framework.util.DateUtil;
+import org.atlas.libs.framework.uuid.UUIDGenerator;
+
+@UtilityClass
+public class JwtUtil {
+
+  public static Map<String, Object> jwkSet() throws IOException, InvalidKeySpecException {
+    RSAPublicKey rsaPublicKey = RsaKeyLoader.loadPublicKey(SecurityConstant.RSA_PUBLIC_KEY_PATH);
+    RSAKey rsaKey = new RSAKey.Builder(rsaPublicKey)
+        .keyID(SecurityConstant.JWKS_KEY_ID)
+        .build();
+    return new JWKSet(rsaKey).toJSONObject();
+  }
+
+  public static String issueAccessToken(IssueTokenInput input)
+      throws Exception {
+    Date issuedAt = DateUtil.now();
+    Date expiresAt = new Date(
+        issuedAt.getTime() + SecurityConstant.ACCESS_TOKEN_EXPIRATION_TIME * 1000);
+
+    JWTCreator.Builder builder = JWT.create()
+        .withJWTId(UUIDGenerator.generate())
+        .withIssuer(SecurityConstant.TOKEN_ISSUER)
+        .withIssuedAt(issuedAt)
+        .withSubject(input.getUserId())
+        .withAudience(SecurityConstant.TOKEN_AUDIENCE)
+        .withExpiresAt(expiresAt);
+
+    // Custom claims
+    builder.withClaim(CustomClaim.USER_ROLE.getClaimName(), input.getRole().name());
+
+    // Signing
+    RSAPublicKey rsaPublicKey = RsaKeyLoader.loadPublicKey(SecurityConstant.RSA_PUBLIC_KEY_PATH);
+    RSAPrivateKey rsaPrivateKey = RsaKeyLoader.loadPrivateKey(
+        SecurityConstant.RSA_PRIVATE_KEY_PATH);
+    Algorithm algorithm = Algorithm.RSA256(rsaPublicKey, rsaPrivateKey);
+    return builder.sign(algorithm);
+  }
+
+  public static String issueRefreshToken(IssueTokenInput input) throws Exception {
+    Date issuedAt = DateUtil.now();
+    Date expiresAt = new Date(
+        issuedAt.getTime() + SecurityConstant.REFRESH_TOKEN_EXPIRATION_TIME * 1000);
+
+    JWTCreator.Builder builder = JWT.create()
+        .withJWTId(UUIDGenerator.generate())
+        .withIssuer(SecurityConstant.TOKEN_ISSUER)
+        .withIssuedAt(issuedAt)
+        .withSubject(input.getUserId())
+        .withAudience(SecurityConstant.TOKEN_AUDIENCE)
+        .withExpiresAt(expiresAt);
+
+    // Signing
+    RSAPublicKey rsaPublicKey = RsaKeyLoader.loadPublicKey(SecurityConstant.RSA_PUBLIC_KEY_PATH);
+    RSAPrivateKey rsaPrivateKey = RsaKeyLoader.loadPrivateKey(
+        SecurityConstant.RSA_PRIVATE_KEY_PATH);
+    Algorithm algorithm = Algorithm.RSA256(rsaPublicKey, rsaPrivateKey);
+    return builder.sign(algorithm);
+  }
+
+  public static String extractSubject(String token) throws IOException, InvalidKeySpecException {
+    DecodedJWT decodedJWT = decode(token);
+    return decodedJWT.getSubject();
+  }
+
+  public static Date extractExpiresAt(String token) throws IOException, InvalidKeySpecException {
+    DecodedJWT decodedJWT = decode(token);
+    return decodedJWT.getExpiresAt();
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> Optional<T> extractClaim(String token, CustomClaim claim)
+      throws IOException, InvalidKeySpecException {
+    DecodedJWT decodedJWT = decode(token);
+    Claim extractedClaim = decodedJWT.getClaim(claim.getClaimName());
+    return Optional.ofNullable((T) extractedClaim.as(claim.getClazz()));
+  }
+
+  private static DecodedJWT decode(String token) throws IOException, InvalidKeySpecException {
+    RSAPublicKey rsaPublicKey = RsaKeyLoader.loadPublicKey(SecurityConstant.RSA_PUBLIC_KEY_PATH);
+    Algorithm algorithm = Algorithm.RSA256(rsaPublicKey, null);
+    return JWT.require(algorithm)
+        .withIssuer(SecurityConstant.TOKEN_ISSUER)
+        .withAudience(SecurityConstant.TOKEN_AUDIENCE)
+        .build()
+        .verify(token);
+  }
+}

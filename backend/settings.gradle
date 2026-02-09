@@ -72,6 +72,10 @@ project(':libs.internal-api.product.grpc').projectDir = file('libs/internal-api/
 include(':libs.internal-api.product.rest')
 project(':libs.internal-api.product.rest').projectDir = file('libs/internal-api/product-api/product-api-rest')
 
+// JWT
+include(':libs.jwt')
+project(':libs.jwt').projectDir = file('libs/jwt')
+
 // Key-Value Store
 
 // Key-Value Store::Redis

@@ -170,8 +170,8 @@ services:
         condition: service_healthy
     <%_ } -%>
     environment:
-      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN:-atlas}
-      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-secret123456}
+      - KC_BOOTSTRAP_ADMIN_USERNAME=${KC_BOOTSTRAP_ADMIN_USERNAME:-atlas}
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=${KC_BOOTSTRAP_ADMIN_PASSWORD:-secret123456}
       <%_ if (hasMysql) { -%>
       - KC_DB=mysql
       - KC_DB_URL=jdbc:mysql://mysql:3306/db_keycloak?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false

@@ -11,7 +11,7 @@ import org.atlas.services.iam.port.in.auth.model.RefreshTokenOutput;
 
 public interface AuthenticationService {
 
-  Map<String, Object> jwkSet();
+  Map<String, Object> jwkSet() throws Exception;
 
   LoginOutput login(LoginInput input) throws Exception;
 

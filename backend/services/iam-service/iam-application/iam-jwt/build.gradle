@@ -29,10 +29,13 @@ dependencies {
     api project(':services.iam.port')
 
     // Spring Security
-    implementation 'org.springframework.boot:spring-boot-starter-security'
+    api 'org.springframework.boot:spring-boot-starter-security'
 
     // Supports HTTP handling
-    implementation project(':libs.api.server.rest')
+    api project(':libs.api.server.rest')
+
+    // JWT
+    api project(':libs.jwt')
 
     // Lombok
     compileOnly "org.projectlombok:lombok:${lombokVersion}"

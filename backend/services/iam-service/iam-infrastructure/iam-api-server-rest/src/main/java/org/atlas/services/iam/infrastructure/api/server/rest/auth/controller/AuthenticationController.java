@@ -103,8 +103,8 @@ public class AuthenticationController {
   }
 
   @GetMapping(value = "/.well-known/jwks.json")
-  @Operation(summary = "JwkSet")
-  public Map<String, Object> jwkSet() {
+  @Operation(summary = "JwkSet endpoint")
+  public Map<String, Object> jwkSet() throws Exception {
     return authenticationService.jwkSet();
   }
 }

@@ -429,7 +429,7 @@ main() {
     info "Debug template mode enabled. Skipping install script execution."
   else
     execute_install_script "${install_args[@]}"
-    info "Atlas deployment completed successfully"
+    info "Atlas installation completed successfully"
   fi  
 }
 

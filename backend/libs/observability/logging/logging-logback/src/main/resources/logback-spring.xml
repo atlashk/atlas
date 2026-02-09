@@ -3,15 +3,7 @@
   <springProperty name="SERVICE_NAME" scope="context" source="spring.application.name"/>
   <property name="LOG_DIR" value="/var/log/${SERVICE_NAME}"/>
 
-  <!-- MDC Filter to suppress logs -->
-  <turboFilter class="ch.qos.logback.classic.turbo.MDCFilter">
-    <MDCKey>suppressLog</MDCKey>
-    <Value>true</Value>
-    <OnMatch>DENY</OnMatch>
-    <OnMismatch>NEUTRAL</OnMismatch>
-  </turboFilter>
-
-  <!-- use Spring default values -->
+  <!-- Console adapter -->
   <appender class="ch.qos.logback.core.ConsoleAppender" name="CONSOLE">
     <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
       <layout
@@ -20,6 +12,8 @@
       </layout>
     </encoder>
   </appender>
+  
+  <!-- Rolling file adapter -->
   <appender class="ch.qos.logback.core.rolling.RollingFileAppender" name="FILE">
     <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
       <layout
@@ -42,12 +36,11 @@
   <!-- use Spring default values -->
   <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
+  <!-- Logger for specific packages -->
   <logger additivity="false" level="DEBUG" name="org.atlas">
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>
   </logger>
-
-  <!-- Logger for specific packages -->
   <logger additivity="false" level="DEBUG" name="reactor.netty.http.client">
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>
@@ -57,15 +50,8 @@
     <appender-ref ref="FILE"/>
   </logger>
 
-  <!-- Scheduler::Quartz -->
-  <property name="LOG_DIR" value="/var/log/${SERVICE_NAME}"/>
-
-  <!-- Spring Cloud Gateway -->
   <root level="INFO">
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>
   </root>
-
-  <!-- Spring Security -->
-  <springProperty name="SERVICE_NAME" scope="context" source="spring.application.name"/>
 </configuration>

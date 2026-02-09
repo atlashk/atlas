@@ -40,9 +40,9 @@ public class KeycloakUserClient {
   public List<UserEntity> retrieveUserList(RetrieveUserListRequest request) {
     UsersResource usersResource = getUsersResource();
 
-    if (StringUtil.isNotBlank(request.getId())) {
+    if (StringUtil.isNotBlank(request.getUserId())) {
       // Search by exact user ID
-      Optional<UserEntity> userOpt = retrieveUser(request.getId());
+      Optional<UserEntity> userOpt = retrieveUser(request.getUserId());
       if (userOpt.isEmpty()) {
         return CollectionUtil.emptyList();
       }
@@ -73,38 +73,38 @@ public class KeycloakUserClient {
             StringUtil.trimToEmpty(request.getEmail()), first, max);
         return MapperUtil.mapList(kcUsers, KeycloakUtil::toUserEntity);
       } catch (Exception e) {
-        throw new KeycloakClientException(
-            String.format("Failed to retrieve Keycloak user list: reason=%s", e.getMessage()), e);
+        log.error("Failed to retrieve Keycloak user list: reason={}", e.getMessage());
+        return Collections.emptyList();
       }
     }
   }
 
-  public List<UserEntity> retrieveUserList(List<String> ids) {
-    if (CollectionUtil.isEmpty(ids)) {
+  public List<UserEntity> retrieveUserList(List<String> userIds) {
+    if (CollectionUtil.isEmpty(userIds)) {
       return CollectionUtil.emptyList();
     }
 
     UsersResource usersResource = getUsersResource();
     List<UserEntity> userList = new ArrayList<>();
-    for (String id : ids) {
+    for (String userId : userIds) {
       try {
-        UserRepresentation kcUser = usersResource.get(id).toRepresentation();
+        UserRepresentation kcUser = usersResource.get(userId).toRepresentation();
         UserEntity user = KeycloakUtil.toUserEntity(kcUser);
         userList.add(user);
       } catch (Exception e) {
-        log.debug("Keycloak user {} not found: {}", id, ExceptionUtil.getStacktrace(e));
+        log.debug("Keycloak user {} not found: {}", userId, ExceptionUtil.getStacktrace(e));
       }
     }
     return userList;
   }
 
-  public Optional<UserEntity> retrieveUser(String id) {
+  public Optional<UserEntity> retrieveUser(String userId) {
     UsersResource usersResource = getUsersResource();
     try {
-      UserRepresentation kcUser = usersResource.get(id).toRepresentation();
+      UserRepresentation kcUser = usersResource.get(userId).toRepresentation();
       return Optional.of(KeycloakUtil.toUserEntity(kcUser));
     } catch (Exception e) {
-      log.debug("Keycloak user {} not found: {}", id, ExceptionUtil.getStacktrace(e));
+      log.debug("Keycloak user {} not found: {}", userId, ExceptionUtil.getStacktrace(e));
       return Optional.empty();
     }
   }
@@ -116,12 +116,14 @@ public class KeycloakUserClient {
 
   public boolean existsByUsername(String username) {
     RetrieveUserListRequest retrieveUserListRequest = RetrieveUserListRequest.builder()
-        .username(username).build();
+        .username(username)
+        .build();
     return CollectionUtil.isNotEmpty(retrieveUserList(retrieveUserListRequest));
   }
 
   public boolean existsByEmail(String email) {
-    RetrieveUserListRequest retrieveUserListRequest = RetrieveUserListRequest.builder().email(email)
+    RetrieveUserListRequest retrieveUserListRequest = RetrieveUserListRequest.builder()
+        .email(email)
         .build();
     return CollectionUtil.isNotEmpty(retrieveUserList(retrieveUserListRequest));
   }
@@ -133,9 +135,9 @@ public class KeycloakUserClient {
       String query = String.format("attribute:%s", value);
       return CollectionUtil.isNotEmpty(users.searchByAttributes(query));
     } catch (Exception e) {
-      throw new KeycloakClientException(
-          String.format("Failed to check exists by attribute: attribute=%s, reason=%s", 
-              attribute, e.getMessage()), e);
+      log.error("Failed to check exists by attribute: attribute={}, reason={}",
+          attribute, e.getMessage());
+      return false;
     }
   }
 
@@ -184,32 +186,32 @@ public class KeycloakUserClient {
     }
   }
 
-  public void deleteUser(String id) {
+  public void deleteUser(String userId) {
     UsersResource usersResource = getUsersResource();
-    try (Response response = usersResource.delete(id)) {
+    try (Response response = usersResource.delete(userId)) {
       if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
         throw new KeycloakClientException(
-            String.format("Failed to delete Keycloak user: id=%s, status=%d, reason=%s",
-                id, response.getStatus(), response.getStatusInfo().getReasonPhrase()));
+            String.format("Failed to delete Keycloak user: userId=%s, status=%d, reason=%s",
+                userId, response.getStatus(), response.getStatusInfo().getReasonPhrase()));
       }
     } catch (Exception e) {
       throw new KeycloakClientException(
-          String.format("Failed to delete Keycloak user: id=%s, reason=%s",
-              id, e.getMessage()));
+          String.format("Failed to delete Keycloak user: userId=%s, reason=%s",
+              userId, e.getMessage()));
     }
   }
 
-  public void changePassword(String id, String newPassword) {
+  public void changePassword(String userId, String newPassword) {
     UsersResource usersResource = getUsersResource();
     try {
-      UserResource userResource = usersResource.get(id);
+      UserResource userResource = usersResource.get(userId);
       CredentialRepresentation kcCredential = toCredentialRepresentation(newPassword);
       userResource.resetPassword(kcCredential);
-      log.info("Changed Keycloak user password successfully: id={}", id);
+      log.info("Changed Keycloak user password successfully: userId={}", userId);
     } catch (Exception e) {
       throw new KeycloakClientException(
           String.format("Failed to change Keycloak user password: id=%s, reason=%s",
-              id, e.getMessage()));
+              userId, e.getMessage()));
     }
   }
 

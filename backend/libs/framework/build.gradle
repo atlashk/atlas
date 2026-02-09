@@ -44,10 +44,6 @@ dependencies {
     // Reactor
     api "io.projectreactor:reactor-core:${ioProjectReactorVersion}"
 
-    // JWT/JWKS
-    api 'com.auth0:java-jwt:4.4.0'
-    api 'com.nimbusds:nimbus-jose-jwt:10.2'
-
     // JSON
 
     // JSON::Jackson

@@ -4,9 +4,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
+import org.atlas.libs.jwt.JwtUtil;
 import org.atlas.services.iam.application.keycloak.core.config.KeycloakProps;
+import org.atlas.services.iam.application.keycloak.core.exception.KeycloakClientException;
 import org.atlas.services.iam.application.keycloak.core.model.TokenResponse;
 import org.keycloak.OAuth2Constants;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.UserResource;
+import org.keycloak.admin.client.resource.UsersResource;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -19,6 +25,7 @@ import org.springframework.web.client.RestClient;
 @Slf4j
 public class KeycloakAuthenticationClient {
 
+  private final Keycloak keycloak;
   private final KeycloakProps keycloakProps;
   private final RestClient restClient;
 
@@ -57,6 +64,18 @@ public class KeycloakAuthenticationClient {
         .retrieve()
         .toEntity(TokenResponse.class)
         .getBody();
+  }
+
+  public void logout(String accessToken) throws Exception {
+    String userId = JwtUtil.extractSubject(accessToken);
+    UsersResource usersResource = getUsersResource();
+    UserResource userResource = usersResource.get(userId);
+    userResource.logout();
+  }
+
+  private UsersResource getUsersResource() {
+    RealmResource realm = keycloak.realm(keycloakProps.getRealm());
+    return realm.users();
   }
 }
 

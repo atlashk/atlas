@@ -18,10 +18,10 @@ public class JwtExtractorImpl implements JwtExtractor {
 
   @Override
   public UserRole extractUserRole(Jwt jwt) {
-    String claim = jwt.getClaimAsString(CustomClaim.USER_ROLE.getClaim());
+    String claim = jwt.getClaimAsString(CustomClaim.USER_ROLE.getClaimName());
     if (claim == null) {
       throw new IllegalArgumentException(
-          "Invalid JWT. Missing claim " + CustomClaim.USER_ROLE.getClaim());
+          "Invalid JWT. Missing claim " + CustomClaim.USER_ROLE.getClaimName());
     }
     return UserRole.valueOf(claim);
   }

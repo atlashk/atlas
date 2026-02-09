@@ -6,16 +6,14 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.cryptography.HashingUtil;
-import org.atlas.libs.framework.cryptography.RsaKeyLoader;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
-import org.atlas.libs.framework.jwks.JwkSetUtil;
-import org.atlas.libs.framework.jwt.Jwt;
 import org.atlas.libs.framework.kvstore.KvStoreService;
 import org.atlas.libs.framework.security.SecurityConstant;
 import org.atlas.libs.framework.util.DateUtil;
 import org.atlas.libs.framework.util.StringUtil;
-import org.atlas.services.iam.application.jwt.core.TokenService;
+import org.atlas.libs.jwt.IssueTokenInput;
+import org.atlas.libs.jwt.JwtUtil;
 import org.atlas.services.iam.application.jwt.core.UserDetailsImpl;
 import org.atlas.services.iam.domain.entity.UserEntity;
 import org.atlas.services.iam.port.in.auth.model.GenerateOneTimeTokenInput;
@@ -27,7 +25,6 @@ import org.atlas.services.iam.port.in.auth.model.RefreshTokenInput;
 import org.atlas.services.iam.port.in.auth.model.RefreshTokenOutput;
 import org.atlas.services.iam.port.in.auth.service.AuthenticationService;
 import org.atlas.services.iam.port.out.repository.UserRepository;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.ott.GenerateOneTimeTokenRequest;
@@ -41,26 +38,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AuthenticationServiceImpl implements AuthenticationService, InitializingBean {
+public class AuthenticationServiceImpl implements AuthenticationService {
 
   private final AuthenticationManager authenticationManager;
   private final OneTimeTokenService oneTimeTokenService;
   private final UserRepository userRepository;
-  private final TokenService tokenService;
   private final KvStoreService kvStoreService;
 
-  private Map<String, Object> jwkSet;
-
   @Override
-  public void afterPropertiesSet() throws Exception {
-    jwkSet = JwkSetUtil.getInstance()
-        .generate(RsaKeyLoader.loadPublicKey(SecurityConstant.RSA_PUBLIC_KEY_PATH),
-            SecurityConstant.JWKS_KEY_ID);
-  }
-
-  @Override
-  public Map<String, Object> jwkSet() {
-    return jwkSet;
+  public Map<String, Object> jwkSet() throws Exception {
+    return JwtUtil.jwkSet();
   }
 
   @Override
@@ -73,30 +60,18 @@ public class AuthenticationServiceImpl implements AuthenticationService, Initial
   @Override
   @Transactional(readOnly = true)
   public RefreshTokenOutput refreshToken(RefreshTokenInput input) throws Exception {
-    // Parse refresh token
-    Jwt refreshTokenJwt;
-    try {
-      refreshTokenJwt = tokenService.parseToken(input.getRefreshToken());
-    } catch (Exception e) {
-      throw new DomainException(DomainError.UNAUTHORIZED, "Invalid refresh token");
-    }
+    // Parse refresh token and extract userId (subject)
+    String userId = JwtUtil.extractSubject(input.getRefreshToken());
 
     // Reissue tokens
-    UserEntity user = userRepository.findById(refreshTokenJwt.getUserId())
+    UserEntity user = userRepository.findById(userId)
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
-    UserDetailsImpl userDetails = new UserDetailsImpl(user);
-
-    // Issue new access token
-    Date now = new Date();
-    Date accessTokenExpiresAt = new Date(
-        now.getTime() + SecurityConstant.ACCESS_TOKEN_EXPIRATION_TIME * 1000);
-    String accessToken = tokenService.issueAccessToken(userDetails, now, accessTokenExpiresAt);
-
-    // Issue new refresh token
-    now = new Date();
-    Date refreshTokenExpiresAt = new Date(
-        now.getTime() + SecurityConstant.REFRESH_TOKEN_EXPIRATION_TIME * 1000);
-    String refreshToken = tokenService.issueRefreshToken(userDetails, now, refreshTokenExpiresAt);
+    IssueTokenInput issueTokenInput = IssueTokenInput.builder()
+        .userId(user.getId())
+        .role(user.getRole())
+        .build();
+    String accessToken = JwtUtil.issueAccessToken(issueTokenInput);
+    String refreshToken = JwtUtil.issueRefreshToken(issueTokenInput);
 
     return new RefreshTokenOutput(accessToken, refreshToken);
   }
@@ -114,9 +89,9 @@ public class AuthenticationServiceImpl implements AuthenticationService, Initial
           "Access token has been already inactivated");
     }
 
-    Jwt jwt = tokenService.parseToken(accessToken);
+    Date expiresAt = JwtUtil.extractExpiresAt(accessToken);
     long now = DateUtil.timestamp();
-    long ttlMs = Math.max(1000L, jwt.getExpiresAt().getTime() - now);
+    long ttlMs = Math.max(1000L, expiresAt.getTime() - now);
     kvStoreService.put(SecurityConstant.TOKEN_BLACKLISTED_KV_STORE_NAME, hashedAccessToken, "1",
         Duration.ofMillis(ttlMs));
   }
@@ -138,19 +113,12 @@ public class AuthenticationServiceImpl implements AuthenticationService, Initial
   private LoginOutput doLogin(Authentication authenticationToken) throws Exception {
     Authentication authentication = authenticationManager.authenticate(authenticationToken);
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-
-    // Issue refresh token
-    Date now = new Date();
-    Date refreshTokenExpiresAt = new Date(
-        now.getTime() + SecurityConstant.REFRESH_TOKEN_EXPIRATION_TIME * 1000);
-    String refreshToken = tokenService.issueRefreshToken(userDetails, now, refreshTokenExpiresAt);
-
-    // Issue access token
-    now = new Date();
-    Date accessTokenExpiresAt = new Date(
-        now.getTime() + SecurityConstant.ACCESS_TOKEN_EXPIRATION_TIME * 1000);
-    String accessToken = tokenService.issueAccessToken(userDetails, now, accessTokenExpiresAt);
-
+    IssueTokenInput issueTokenInput = IssueTokenInput.builder()
+        .userId(userDetails.getId())
+        .role(userDetails.getRole())
+        .build();
+    String accessToken = JwtUtil.issueAccessToken(issueTokenInput);
+    String refreshToken = JwtUtil.issueRefreshToken(issueTokenInput);
     return new LoginOutput(accessToken, refreshToken);
   }
 }

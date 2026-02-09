@@ -1,17 +1,9 @@
 package org.atlas.services.iam.application.keycloak.auth;
 
-import com.auth0.jwt.JWT;
-import java.time.Duration;
-import java.util.Date;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.cryptography.HashingUtil;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
-import org.atlas.libs.framework.kvstore.KvStoreService;
-import org.atlas.libs.framework.security.SecurityConstant;
-import org.atlas.libs.framework.util.DateUtil;
-import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.iam.application.keycloak.core.client.KeycloakAuthenticationClient;
 import org.atlas.services.iam.application.keycloak.core.model.TokenResponse;
 import org.atlas.services.iam.port.in.auth.model.GenerateOneTimeTokenInput;
@@ -29,7 +21,6 @@ import org.springframework.stereotype.Service;
 public class AuthenticationServiceImpl implements AuthenticationService {
 
   private final KeycloakAuthenticationClient keycloakAuthenticationClient;
-  private final KvStoreService kvStoreService;
 
   @Override
   public Map<String, Object> jwkSet() {
@@ -37,51 +28,26 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   }
 
   @Override
-  public LoginOutput login(LoginInput input) {
+  public LoginOutput login(LoginInput input) throws Exception {
     TokenResponse tokenResponse = keycloakAuthenticationClient.login(input.getUsername(),
         input.getPassword());
     return new LoginOutput(tokenResponse.getAccessToken(), tokenResponse.getRefreshToken());
   }
 
   @Override
-  public RefreshTokenOutput refreshToken(RefreshTokenInput input) {
-    TokenResponse tokenResponse = keycloakAuthenticationClient.refreshToken(input.getRefreshToken());
+  public RefreshTokenOutput refreshToken(RefreshTokenInput input) throws Exception {
+    TokenResponse tokenResponse = keycloakAuthenticationClient.refreshToken(
+        input.getRefreshToken());
     return new RefreshTokenOutput(tokenResponse.getAccessToken(), tokenResponse.getRefreshToken());
   }
 
   @Override
-  public void logout(String accessToken) {
-    if (StringUtil.isBlank(accessToken)) {
-      throw new DomainException(DomainError.UNAUTHORIZED, "Missing access token");
-    }
-
-    String hashedAccessToken = HashingUtil.sha256ToHex(accessToken);
-    if (kvStoreService.exists(SecurityConstant.TOKEN_BLACKLISTED_KV_STORE_NAME,
-        hashedAccessToken)) {
-      throw new DomainException(DomainError.UNAUTHORIZED,
-          "Access token has been already inactivated");
-    }
-
-    Date expiresAt;
-    try {
-      expiresAt = JWT.decode(accessToken).getExpiresAt();
-    } catch (Exception e) {
-      throw new DomainException(DomainError.UNAUTHORIZED, "Invalid access token");
-    }
-
-    long now = DateUtil.timestamp();
-    long ttlMs;
-    if (expiresAt == null) {
-      ttlMs = Duration.ofDays(1).toMillis();
-    } else {
-      ttlMs = Math.max(1000L, expiresAt.getTime() - now);
-    }
-    kvStoreService.put(SecurityConstant.TOKEN_BLACKLISTED_KV_STORE_NAME, hashedAccessToken, "1",
-        Duration.ofMillis(ttlMs));
+  public void logout(String accessToken) throws Exception {
+    keycloakAuthenticationClient.logout(accessToken);
   }
 
   @Override
-  public LoginOutput oneTimeTokenLogin(OneTimeTokenLoginInput input) {
+  public LoginOutput oneTimeTokenLogin(OneTimeTokenLoginInput input) throws Exception {
     throw new DomainException(DomainError.BAD_REQUEST, "Not supported");
   }
 
