@@ -1,8 +1,4 @@
-<%
-  const notificationEmail = (stack.notificationEmail || (stack.notification && stack.notification.email) || '').toLowerCase();
-  const hasSmtp4dev = notificationEmail === 'spring';
-%>
-<% if (hasSmtp4dev) { -%>
+{{#hasService "smtp4dev"}}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -91,4 +87,4 @@ spec:
       targetPort: 25
       name: smtp
   type: ClusterIP
-<% } -%>
+{{/hasService}}

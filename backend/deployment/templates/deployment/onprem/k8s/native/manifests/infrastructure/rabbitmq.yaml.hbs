@@ -1,8 +1,4 @@
-<%
-  const messaging = (stack.messaging || '').toLowerCase();
-  const hasRabbit = messaging === 'rabbitmq';
-%>
-<% if (hasRabbit) { -%>
+{{#hasService "rabbitmq"}}
 apiVersion: v1
 kind: Secret
 metadata:
@@ -141,4 +137,4 @@ spec:
       targetPort: 15672
       name: management
   type: ClusterIP
-<% } -%>
+{{/hasService}}

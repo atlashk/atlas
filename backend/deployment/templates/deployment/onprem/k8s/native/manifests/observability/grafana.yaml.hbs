@@ -1,13 +1,4 @@
-<%
-  const observabilityLoggingStack = (stack.observability.logging.stack || '').toLowerCase();
-  const observabilityMetrics = (stack.observability.metrics || '').toLowerCase();
-  const observabilityTracing = (stack.observability.tracing || '').toLowerCase();
-
-  const hasLoki = observabilityLoggingStack === 'loki';
-  const hasPrometheus = observabilityMetrics === 'prometheus';
-  const hasZipkin = observabilityTracing === 'zipkin';
-%>
-<% if (hasLoki || hasPrometheus || hasZipkin) { -%>
+{{#ifObservability "grafana"}}
 
 apiVersion: apps/v1
 kind: Deployment
@@ -147,7 +138,7 @@ data:
     apiVersion: 1
 
     datasources:
-<% if (hasPrometheus) { -%>
+    {{#ifObservability "prometheus"}}
       - name: Prometheus
         type: prometheus
         access: proxy
@@ -160,8 +151,7 @@ data:
           queryTimeout: 60s
           httpMethod: POST
         secureJsonData: { }
-<% } -%>
-<% if (hasLoki) { -%>
+    {{#ifObservability "loki"}}
       - name: Loki
         type: loki
         access: proxy
@@ -171,15 +161,15 @@ data:
         jsonData:
           maxLines: 1000
           derivedFields:
-<% if (hasZipkin) { -%>
+        {{#ifObservability "zipkin"}}
             - datasourceUid: DS_ZIPKIN
               matcherRegex: "traceID=(\\w+)"
               name: TraceID
               url: "$${__value.raw}"
-<% } -%>
+        {{/ifObservability}}
         secureJsonData: { }
-<% } -%>
-<% if (hasZipkin) { -%>
+    {{/ifObservability}}
+    {{#ifObservability "zipkin"}}
       - name: Zipkin
         type: zipkin
         access: proxy
@@ -190,7 +180,7 @@ data:
           nodeGraph:
             enabled: true
         secureJsonData: { }
-<% } -%>
+    {{/ifObservability}}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -223,34 +213,4 @@ metadata:
     tier: infrastructure
 data:
   observability.json: |
-<%~ env.EJS_BODY_JSON || `{
-  "__elements": {},
-  "__requires": [
-    { "type": "panel", "id": "bargauge", "name": "Bar gauge", "version": "" },
-    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.1.0" },
-    { "type": "panel", "id": "stat", "name": "Stat", "version": "" },
-    { "type": "panel", "id": "timeseries", "name": "Time series", "version": "" },
-    { "type": "panel", "id": "gauge", "name": "Gauge", "version": "" }
-  ],
-  "annotations": { "list": [ { "builtIn": 1, "datasource": { "type": "datasource", "uid": "grafana" }, "enable": true, "hide": true, "iconColor": "rgba(0, 211, 255, 1)", "name": "Annotations & Alerts", "target": { "limit": 100, "matchAny": false, "tags": [], "type": "dashboard" }, "type": "dashboard" } ] },
-  "editable": true,
-  "fiscalYearStartMonth": 0,
-  "graphTooltip": 0,
-  "id": null,
-  "links": [],
-  "liveNow": false,
-  "panels": [
-    { "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }, "id": 201, "panels": [], "title": "Application Lifecycle Metrics", "type": "row" }
-  ],
-  "refresh": "10s",
-  "schemaVersion": 37,
-  "style": "dark",
-  "tags": ["atlas"],
-  "time": { "from": "now-30m", "to": "now" },
-  "timepicker": {},
-  "timezone": "browser",
-  "title": "Atlas Overview",
-  "uid": "atlas_overview",
-  "version": 1
-}` %>
-<% } -%>
+{{/ifObservability}}

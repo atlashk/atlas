@@ -1,8 +1,4 @@
-<%
-  const storage = (stack.storage || '').toLowerCase();
-  const hasMinio = storage === 'minio';
-%>
-<% if (hasMinio) { -%>
+{{#hasService "minio"}}
 apiVersion: v1
 kind: Secret
 metadata:
@@ -121,4 +117,4 @@ spec:
       targetPort: 9001
       name: console
   type: ClusterIP
-<% } -%>
+{{/hasService}}

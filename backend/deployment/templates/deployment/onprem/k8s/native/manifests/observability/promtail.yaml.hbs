@@ -1,8 +1,4 @@
-<%
-  const observabilityLoggingStack = (stack.observability.logging.stack || '').toLowerCase();
-  const hasLoki = observabilityLoggingStack === 'loki';
-%>
-<% if (hasLoki) { -%>
+{{#ifObservability "loki"}}
 ---
 # Promtail Service Account
 apiVersion: v1
@@ -81,4 +77,4 @@ data:
               tier: application
               namespace: atlas
               __path__: /var/log/${APP_NAME}/${APP_NAME}.log
-<% } -%>
+{{/ifObservability}}

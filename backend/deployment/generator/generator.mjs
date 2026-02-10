@@ -110,6 +110,7 @@ function registerHelpers() {
       'elasticsearch': getStackValue('full-text-search') === 'elasticsearch',
       'minio': getStackValue('storage') === 'minio',
       'smtp4dev': getStackValue('notification.email') === 'spring',
+      'jwt': getStackValue('iam') === 'jwt',
       'keycloak': getStackValue('iam') === 'keycloak',
       'nginx': getStackValue('reverse-proxy') === 'nginx',
       'prometheus': enableObservability && getStackValue('observability.metrics') === 'prometheus',

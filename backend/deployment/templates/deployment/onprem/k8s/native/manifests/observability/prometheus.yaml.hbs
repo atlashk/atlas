@@ -1,8 +1,4 @@
-<%
-  const observabilityMetrics = (stack.observability.metrics || '').toLowerCase();
-  const hasPrometheus = observabilityMetrics === 'prometheus';
-%>
-<% if (hasPrometheus) { -%>
+{{#ifObservability "prometheus"}}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -136,4 +132,4 @@ spec:
       targetPort: 9090
       name: http
   type: ClusterIP
-<% } -%>
+{{/ifObservability}}

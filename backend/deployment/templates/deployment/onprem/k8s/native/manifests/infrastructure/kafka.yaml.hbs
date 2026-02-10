@@ -1,8 +1,4 @@
-<%
-  const messaging = (stack.messaging || '').toLowerCase();
-  const hasKafka = messaging === 'kafka';
-%>
-<% if (hasKafka) { -%>
+{{#hasService "kafka"}}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -154,4 +150,4 @@ spec:
       targetPort: 9101
       name: jmx
   type: ClusterIP
-<% } -%>
+{{/hasService}}

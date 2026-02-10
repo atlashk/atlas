@@ -1,8 +1,4 @@
-<%
-  const search = (stack.search || '').toLowerCase();
-  const hasElasticsearch = search === 'elasticsearch';
-%>
-<% if (hasElasticsearch) { -%>
+{{#hasService "elasticsearch"}}
 apiVersion: v1
 kind: Secret
 metadata:
@@ -128,4 +124,4 @@ spec:
       targetPort: 9300
       name: transport
   type: ClusterIP
-<% } -%>
+{{/hasService}}

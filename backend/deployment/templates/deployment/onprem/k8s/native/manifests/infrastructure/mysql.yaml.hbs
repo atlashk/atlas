@@ -1,11 +1,4 @@
-<%
-  const datasource = (stack.datasource || '').toLowerCase();
-  const authServer = (stack['iam'] || '').toLowerCase();
-
-  const hasMysql = datasource === 'mysql';
-  const hasJwt = authServer === 'jwt';
-%>
-<% if (hasMysql) { -%>
+{{#hasService "mysql"}}
 apiVersion: v1
 kind: Secret
 metadata:
@@ -30,18 +23,18 @@ data:
     #!/bin/bash
     set -e
     cat <<EOF | mysql -uroot -p"${MYSQL_ROOT_PASSWORD}"
-    <%_ if (hasJwt) { -%>
+    {{#hasService "jwt"}}
     CREATE DATABASE db_iam;
-    <%_ } -%>
+    {{/hasService}}
     CREATE DATABASE db_iam;
     CREATE DATABASE db_notification;
     CREATE DATABASE db_order;
     CREATE DATABASE db_payment;
     CREATE DATABASE db_product;
 
-    <%_ if (hasJwt) { -%>
+    {{#hasService "jwt"}}
     GRANT ALL PRIVILEGES ON db_iam.* TO '${MYSQL_USER}'@'%';
-    <%_ } -%>
+    {{/hasService}}
     GRANT ALL PRIVILEGES ON db_iam.* TO '${MYSQL_USER}'@'%';
     GRANT ALL PRIVILEGES ON db_notification.* TO '${MYSQL_USER}'@'%';
     GRANT ALL PRIVILEGES ON db_order.* TO '${MYSQL_USER}'@'%';
@@ -163,4 +156,4 @@ spec:
       targetPort: 3306
       name: mysql
   type: ClusterIP
-<% } -%>
+{{/hasService}}

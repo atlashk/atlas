@@ -590,6 +590,12 @@ services:
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       {{/ifObservability}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      {{#hasService "jwt"}}
+      - IAM_SERVICE_URI=http://iam-service:8081
+      {{/hasService}}
+      {{#hasService "keycloak"}}
+      - KEYCLOAK_BASE_URL=http://keycloak:8443
+      {{/hasService}}
     depends_on:
       eureka-server:
         condition: service_healthy

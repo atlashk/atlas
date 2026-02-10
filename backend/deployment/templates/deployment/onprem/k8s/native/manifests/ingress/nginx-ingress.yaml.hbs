@@ -1,18 +1,4 @@
-<%
-  const reverseProxy = (stack['reverse-proxy'] || '').toLowerCase();
-  const notificationEmail = (stack.notification.email || '').toLowerCase();
-  const observabilityLoggingStack = (stack.observability.logging.stack || '').toLowerCase();
-  const observabilityMetrics = (stack.observability.metrics || '').toLowerCase();
-  const observabilityTracing = (stack.observability.tracing || '').toLowerCase();
-
-  const hasNginx = reverseProxy === 'nginx';
-  const hasSmtp4dev = notificationEmail === 'spring';
-  const hasLoki = observabilityLoggingStack === 'loki';
-  const hasPrometheus = observabilityMetrics === 'prometheus';
-  const hasZipkin = observabilityTracing === 'zipkin';
-  const hasGrafana = hasLoki || hasPrometheus || hasZipkin;
-%>
-<% if (hasNginx) { -%>
+{{#hasService "nginx"}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -39,7 +25,7 @@ spec:
                 name: api-gateway
                 port:
                   number: 8080
-<% if (hasGrafana) { -%>
+{{#ifObservability "grafana"}}
     - host: grafana.atlas.local
       http:
         paths:
@@ -50,8 +36,8 @@ spec:
                 name: grafana
                 port:
                   number: 3000
-<% } -%>
-<% if (hasZipkin) { -%>
+{{/ifObservability}}
+{{#ifObservability "zipkin"}}
     - host: zipkin.atlas.local
       http:
         paths:
@@ -62,8 +48,8 @@ spec:
                 name: zipkin
                 port:
                   number: 9411
-<% } -%>
-<% if (hasSmtp4dev) { -%>
+{{/ifObservability}}
+{{#hasService "smtp4dev"}}
     - host: smtp4dev.atlas.local
       http:
         paths:
@@ -74,7 +60,7 @@ spec:
                 name: smtp4dev
                 port:
                   number: 80
-<% } -%>
+{{/hasService}}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -89,4 +75,4 @@ data:
   X-Real-IP: $remote_addr
   X-Forwarded-For: $proxy_add_x_forwarded_for
   Host: $http_host
-<% } -%>
+{{/hasService}}

@@ -1,18 +1,3 @@
-<%
-  const datasource = (stack.datasource || '').toLowerCase();
-  const kvStore = (stack['kv-store'] || '').toLowerCase();
-  const messaging = (stack.messaging || '').toLowerCase();
-  const observabilityLoggingStack = (stack.observability.logging.stack || '').toLowerCase();
-  const observabilityTracing = (stack.observability.tracing || '').toLowerCase();
-
-  const hasMysql = datasource === 'mysql';
-  const hasPostgres = datasource === 'postgres' || datasource === 'postgresql';
-  const hasRedis = kvStore === 'redis';
-  const hasKafka = messaging === 'kafka';
-  const hasRabbit = messaging === 'rabbitmq';
-  const hasLoki = observabilityLoggingStack === 'loki';
-  const hasZipkin = observabilityTracing === 'zipkin';
-%>
 # Log volume changed to emptyDir for Promtail compatibility
 # PersistentVolumeClaim removed - logs now use emptyDir volume
 apiVersion: apps/v1
@@ -41,7 +26,7 @@ spec:
             - containerPort: 8084
               name: http
           env:
-            <% if (hasMysql) { %>
+            {{#hasService "mysql"}}
             - name: DB_URL
               value: "jdbc:mysql://mysql:3306/db_payment?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
             - name: DB_USERNAME
@@ -51,7 +36,7 @@ spec:
                 secretKeyRef:
                   name: mysql-secret
                   key: mysql-password
-            <% } else if (hasPostgres) { %>
+            {{/hasService}}{{#hasService "postgres"}}
             - name: DB_URL
               value: "jdbc:postgresql://postgres:5432/db_payment"
             - name: DB_USERNAME
@@ -61,17 +46,17 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: postgres-password
-            <% } %>
-            <% if (hasRedis) { %>
+            {{/hasService}}
+            {{#hasService "redis"}}
             - name: REDIS_HOST
               value: "redis"
             - name: REDIS_PORT
               value: "6379"
-            <% } %>
-            <% if (hasKafka) { %>
+            {{/hasService}}
+            {{#hasService "kafka"}}
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: "kafka:29092"
-            <% } else if (hasRabbit) { %>
+            {{/hasService}}{{#hasService "rabbitmq"}}
             - name: RABBITMQ_HOST
               value: "rabbitmq"
             - name: RABBITMQ_PORT
@@ -83,11 +68,11 @@ spec:
                 secretKeyRef:
                   name: rabbitmq-secret
                   key: rabbitmq-password
-            <% } %>
-            <% if (hasZipkin) { %>
+            {{/hasService}}
+            {{#ifObservability "zipkin"}}
             - name: ZIPKIN_ENDPOINT
               value: "http://zipkin:9411/api/v2/spans"
-            <% } %>
+            {{/hasService}}
           # startupProbe gives the Spring Boot app up to 5 min (30 × 10 s) to finish starting
           # before liveness/readiness probes are allowed to run. This prevents premature restarts.
           startupProbe:
@@ -132,7 +117,7 @@ spec:
           volumeMounts:
             - name: payment-service-logs
               mountPath: /var/log/payment-service
-        <% if (hasLoki) { %>
+        {{#ifObservability "loki"}}
         # Promtail sidecar for log collection
         - name: promtail
           image: grafana/promtail:main
@@ -175,15 +160,15 @@ spec:
             - name: payment-service-logs
               mountPath: /var/log/payment-service
               readOnly: true
-        <% } %>
+        {{/hasService}}
       volumes:
         - name: payment-service-logs
           emptyDir: {}
-        <% if (hasLoki) { %>
+        {{#ifObservability "loki"}}
         - name: promtail-config
           configMap:
             name: promtail-config
-        <% } %>
+        {{/hasService}}
       terminationGracePeriodSeconds: 30
 ---
 apiVersion: v1

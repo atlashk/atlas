@@ -1,8 +1,4 @@
-<%
-  const observabilityLoggingStack = (stack.observability.logging.stack || '').toLowerCase();
-  const hasLoki = observabilityLoggingStack === 'loki';
-%>
-<% if (hasLoki) { -%>
+{{#ifObservability "loki"}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -77,4 +73,4 @@ spec:
       targetPort: 3100
       name: http
   type: ClusterIP
-<% } -%>
+{{/ifObservability}}
