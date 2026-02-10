@@ -24,22 +24,6 @@ export const clearAuthCookies = () => {
   deleteCookie('refreshToken');
 };
 
-// Token validation utility
 export const isValidToken = (token: string | null): boolean => {
-  if (!token) return false;
-  
-  try {
-    // Basic JWT structure validation
-    const parts = token.split('.');
-    if (parts.length !== 3) return false;
-    
-    // Decode payload to check expiration
-    const payload = JSON.parse(atob(parts[1]));
-    const currentTime = Math.floor(Date.now() / 1000);
-    
-    // Check if token is expired (with 30 second buffer)
-    return payload.exp && payload.exp > (currentTime + 30);
-  } catch {
-    return false;
-  }
+  return !!token && token.length > 0;
 };

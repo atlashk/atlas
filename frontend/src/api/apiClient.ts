@@ -64,20 +64,16 @@ const shouldSkipAuthRedirect = (requestUrl?: string): boolean => {
   return requestUrl.includes('/services/iam/api/front/users/profile');
 };
 
-// Enhanced request interceptor
 apiClient.interceptors.request.use(
   (config) => {
     config.headers = config.headers || {};
 
-    // Conditionally set Content-Type header
-    // If data is FormData, let axios set the Content-Type with the correct boundary
     if (!(config.data instanceof FormData)) {
       config.headers["Content-Type"] = "application/json";
     }
 
-    // Add access token with validation from cookies
     const accessToken = getAccessTokenFromCookies();
-    if (isValidToken(accessToken)) {
+    if (accessToken) {
       config.headers["Authorization"] = `Bearer ${accessToken}`;
     }
 
@@ -88,7 +84,6 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Enhanced response interceptor with better race condition handling
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<ApiResponse<unknown>>) => {
@@ -97,9 +92,7 @@ apiClient.interceptors.response.use(
       _retryCount?: number;
     };
 
-    // Handle 401 errors (unauthorized)
     if (error.response?.status === 401 && !originalRequest._retry) {
-      // If already refreshing, queue the request
       if (isRefreshing && refreshPromise) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -118,7 +111,6 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
       originalRequest._retryCount = (originalRequest._retryCount || 0) + 1;
 
-      // Prevent infinite retry loops
       if (originalRequest._retryCount > MAX_REFRESH_RETRIES) {
         clearAuthCookies();
         if (!shouldSkipAuthRedirect(originalRequest.url)) {
@@ -129,7 +121,7 @@ apiClient.interceptors.response.use(
 
       const refreshToken = getRefreshTokenFromCookies();
 
-      if (!refreshToken || !isValidToken(refreshToken)) {
+      if (!refreshToken) {
         clearAuthCookies();
         if (!shouldSkipAuthRedirect(originalRequest.url)) {
           redirectToLogin();
@@ -137,7 +129,6 @@ apiClient.interceptors.response.use(
         return Promise.reject(error);
       }
 
-      // Start refresh process
       isRefreshing = true;
       refreshPromise = performTokenRefresh(refreshToken);
 
@@ -149,13 +140,12 @@ apiClient.interceptors.response.use(
           originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
         }
         
-        refreshRetryCount = 0; // Reset retry count on success
+        refreshRetryCount = 0;
         return apiClient(originalRequest);
       } catch (refreshError) {
         refreshRetryCount++;
         processQueue(refreshError as Error, null);
         
-        // If we've exceeded max retries, clear tokens and redirect
         if (refreshRetryCount >= MAX_REFRESH_RETRIES) {
           clearAuthCookies();
           if (!shouldSkipAuthRedirect(originalRequest.url)) {
@@ -185,14 +175,13 @@ function redirectToLogin(): void {
   }
 }
 
-// Centralized token refresh function
 async function performTokenRefresh(refreshToken: string): Promise<string> {
   try {
     const response = await axios.post(
       `${API_BASE_URL}/services/iam/api/authentication/refresh-token`,
       { refreshToken },
       {
-        timeout: 10000, // 10 second timeout for refresh requests
+        timeout: 10000,
         headers: {
           'Content-Type': 'application/json'
         }
@@ -205,18 +194,11 @@ async function performTokenRefresh(refreshToken: string): Promise<string> {
       throw new Error('Invalid refresh response: missing tokens');
     }
     
-    // Validate new tokens before storing
-    if (!isValidToken(newAccessToken)) {
-      throw new Error('Received invalid access token from refresh');
-    }
-    
-    // Store tokens in cookies using auth utilities
     setCookie('accessToken', newAccessToken);
     setCookie('refreshToken', newRefreshToken);
     
     return newAccessToken;
   } catch (error) {
-    // Log refresh errors for debugging
     console.error('Token refresh failed:', error);
     throw error;
   }
