@@ -24,13 +24,22 @@ public class OrderEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
   private String id;
+
   private Integer sagaId;
+
   private OrderStatus status;
+
   private UserSnapshot user;
+
   private Address address;
+
+  @Builder.Default
   private List<OrderItem> orderItems = new ArrayList<>();
+  
   private BigDecimal amount;
+  
   private PaymentSnapshot payment;
+
   private String cancellationReason;
 
   public void calculateOrderAmount() {

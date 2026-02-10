@@ -1,20 +1,27 @@
-// Simple EJS-based generator for rendering templates using app-stack.cfg
+// Handlebars-based generator for rendering templates using app-stack.cfg
 // Usage:
 //  - Render single file: node generate.mjs --template <path> --out <path> [--cfg <path>] [--json <path>]
 //  - Render directory:   node generate.mjs --dir <path> --out-dir <path> [--cfg <path>] [--json <path>]
 
 import fs from 'fs';
 import path from 'path';
-import ejs from 'ejs';
+import Handlebars from 'handlebars';
 
 function parseArgs(argv) {
   const args = {};
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a.startsWith('--')) {
-      const key = a.slice(2);
-      const val = argv[i + 1] && !argv[i + 1].startsWith('--') ? argv[++i] : true;
-      args[key] = val;
+      // Handle --key=value format
+      if (a.includes('=')) {
+        const [key, ...valueParts] = a.slice(2).split('=');
+        args[key] = valueParts.join('='); // Join back in case value contains '='
+      } else {
+        // Handle --key value format
+        const key = a.slice(2);
+        const val = argv[i + 1] && !argv[i + 1].startsWith('--') ? argv[++i] : true;
+        args[key] = val;
+      }
     }
   }
   return args;
@@ -43,14 +50,132 @@ function parseCfg(content) {
   return obj;
 }
 
-async function renderFile(templatePath, outPath, stack) {
-  // Render with whitespace trimming to avoid blank lines from EJS control tags
-  const rendered = await ejs.renderFile(
-    templatePath,
-    { stack, env: process.env },
-    { async: true }
-  );
-  let content = rendered.trim();
+// Register Handlebars helpers
+function registerHelpers() {
+  // Equality check
+  Handlebars.registerHelper('eq', function(a, b) {
+    return a === b;
+  });
+
+  // OR operation
+  Handlebars.registerHelper('or', function(...args) {
+    // Last argument is Handlebars options object
+    const values = args.slice(0, -1);
+    return values.some(v => !!v);
+  });
+
+  // AND operation
+  Handlebars.registerHelper('and', function(...args) {
+    const values = args.slice(0, -1);
+    return values.every(v => !!v);
+  });
+
+  // NOT operation
+  Handlebars.registerHelper('not', function(value) {
+    return !value;
+  });
+
+  // Get nested value from object
+  Handlebars.registerHelper('get', function(obj, path) {
+    if (!obj || !path) return '';
+    const parts = path.split('.');
+    let value = obj;
+    for (const part of parts) {
+      value = value?.[part];
+      if (value === undefined) return '';
+    }
+    return (value || '').toString().toLowerCase();
+  });
+
+  // Check if service should be enabled based on stack config
+  Handlebars.registerHelper('hasService', function(serviceName, options) {
+    const { stack, enableObservability } = this;
+    
+    const getStackValue = (path) => {
+      const parts = path.split('.');
+      let value = stack;
+      for (const part of parts) {
+        value = value?.[part];
+        if (value === undefined) return '';
+      }
+      return (value || '').toString().toLowerCase();
+    };
+
+    const checks = {
+      'mysql': getStackValue('datasource') === 'mysql',
+      'postgres': getStackValue('datasource') === 'postgres' || getStackValue('datasource') === 'postgresql',
+      'redis': getStackValue('kv-store') === 'redis',
+      'kafka': getStackValue('messaging') === 'kafka',
+      'rabbitmq': getStackValue('messaging') === 'rabbitmq',
+      'elasticsearch': getStackValue('full-text-search') === 'elasticsearch',
+      'minio': getStackValue('storage') === 'minio',
+      'smtp4dev': getStackValue('notification.email') === 'spring',
+      'keycloak': getStackValue('iam') === 'keycloak',
+      'nginx': getStackValue('reverse-proxy') === 'nginx',
+      'prometheus': enableObservability && getStackValue('observability.metrics') === 'prometheus',
+      'loki': enableObservability && getStackValue('observability.logging.stack') === 'loki',
+      'promtail': enableObservability && getStackValue('observability.logging.stack') === 'loki',
+      'zipkin': enableObservability && getStackValue('observability.tracing') === 'zipkin',
+      'grafana': enableObservability && (
+        getStackValue('observability.logging.stack') === 'loki' ||
+        getStackValue('observability.metrics') === 'prometheus' ||
+        getStackValue('observability.tracing') === 'zipkin'
+      )
+    };
+
+    const result = checks[serviceName] || false;
+    return result ? options.fn(this) : options.inverse(this);
+  });
+
+  // Check multiple conditions with observability
+  Handlebars.registerHelper('ifObservability', function(service, options) {
+    if (!this.enableObservability) {
+      return options.inverse(this);
+    }
+    
+    const { stack } = this;
+    const getStackValue = (path) => {
+      const parts = path.split('.');
+      let value = stack;
+      for (const part of parts) {
+        value = value?.[part];
+        if (value === undefined) return '';
+      }
+      return (value || '').toString().toLowerCase();
+    };
+
+    const checks = {
+      'prometheus': getStackValue('observability.metrics') === 'prometheus',
+      'loki': getStackValue('observability.logging.stack') === 'loki',
+      'zipkin': getStackValue('observability.tracing') === 'zipkin',
+      'grafana': (
+        getStackValue('observability.logging.stack') === 'loki' ||
+        getStackValue('observability.metrics') === 'prometheus' ||
+        getStackValue('observability.tracing') === 'zipkin'
+      )
+    };
+
+    const result = checks[service] || false;
+    return result ? options.fn(this) : options.inverse(this);
+  });
+
+  // Lowercase helper
+  Handlebars.registerHelper('lower', function(str) {
+    return (str || '').toLowerCase();
+  });
+}
+
+async function renderFile(templatePath, outPath, context) {
+  // Read template file
+  const templateContent = fs.readFileSync(templatePath, 'utf8');
+  
+  // Compile and render with Handlebars
+  const template = Handlebars.compile(templateContent, { 
+    noEscape: true,
+    strict: false 
+  });
+  
+  let content = template(context).trim();
 
   // Extract embedded file blocks from the rendered output.
   // Block syntax:
@@ -104,14 +229,72 @@ function collectTemplates(dir) {
     const full = path.join(dir, e.name);
     if (e.isDirectory()) {
       files.push(...collectTemplates(full));
-    } else if (e.isFile() && e.name.endsWith('.ejs')) {
+    } else if (e.isFile() && (e.name.endsWith('.hbs') || e.name.endsWith('.handlebars'))) {
       files.push(full);
     }
   }
   return files;
 }
 
+function shouldSkipFileByPath(filePath, context) {
+  const { stack, enableObservability } = context;
+  
+  const getStackValue = (path) => {
+    const parts = path.split('.');
+    let value = stack;
+    for (const part of parts) {
+      value = value?.[part];
+      if (value === undefined) return '';
+    }
+    return (value || '').toString().toLowerCase();
+  };
+  
+  // Normalize path separators
+  const normalizedPath = filePath.replace(/\\/g, '/');
+  
+  // Skip observability configs if observability is disabled
+  if (!enableObservability) {
+    if (normalizedPath.includes('/config/grafana/')) return true;
+    if (normalizedPath.includes('/config/prometheus/')) return true;
+    if (normalizedPath.includes('/config/promtail/')) return true;
+    if (normalizedPath.includes('/config/loki/')) return true;
+    if (normalizedPath.includes('/config/zipkin/')) return true;
+  }
+  
+  // Skip specific service configs based on stack
+  const datasource = getStackValue('datasource');
+  if (normalizedPath.includes('/config/mysql/') && datasource !== 'mysql') return true;
+  if (normalizedPath.includes('/config/postgres/') && datasource !== 'postgres' && datasource !== 'postgresql') return true;
+  
+  const kvStore = getStackValue('kv-store');
+  if (normalizedPath.includes('/config/redis/') && kvStore !== 'redis') return true;
+  
+  const messaging = getStackValue('messaging');
+  if (normalizedPath.includes('/config/kafka/') && messaging !== 'kafka') return true;
+  if (normalizedPath.includes('/config/rabbitmq/') && messaging !== 'rabbitmq') return true;
+  
+  const storage = getStackValue('storage');
+  if (normalizedPath.includes('/config/minio/') && storage !== 'minio') return true;
+  
+  const fullTextSearch = getStackValue('full-text-search');
+  if (normalizedPath.includes('/config/elasticsearch/') && fullTextSearch !== 'elasticsearch') return true;
+  
+  const reverseProxy = getStackValue('reverse-proxy');
+  if (normalizedPath.includes('/config/nginx/') && reverseProxy !== 'nginx') return true;
+  
+  const iam = getStackValue('iam');
+  if (normalizedPath.includes('/config/keycloak/') && iam !== 'keycloak') return true;
+  
+  const notificationEmail = getStackValue('notification.email');
+  if (normalizedPath.includes('/config/smtp4dev/') && notificationEmail !== 'spring') return true;
+  
+  return false;
+}
+
 (async () => {
+  // Register all helpers before processing
+  registerHelpers();
+  
   const args = parseArgs(process.argv.slice(2));
   const cwd = process.cwd();
 
@@ -134,10 +317,25 @@ function collectTemplates(dir) {
     }
   }
 
+  // Parse additional flags for template context
+  const infraOnly = args['infra-only'] === 'true' ? true : false;
+  
+  // Observability is infrastructure only - force to false if infra-only is false
+  let enableObservability = args['enable-observability'] === 'false' ? false : 
+                            args['enable-observability'] === 'true' ? true : true;
+
+  // Build template context with stack config + flags
+  const templateContext = {
+    stack,
+    env: process.env,
+    enableObservability,
+    infraOnly
+  };
+
   if (args.template && args.out) {
     const templatePath = path.resolve(cwd, args.template);
     const outPath = path.resolve(cwd, args.out);
-    const written = await renderFile(templatePath, outPath, stack);
+    const written = await renderFile(templatePath, outPath, templateContext);
     console.log(written ? `Generated: ${outPath}` : `Skipped empty output: ${outPath}`);
     return;
   }
@@ -146,13 +344,20 @@ function collectTemplates(dir) {
   const outDir = path.resolve(cwd, args['out-dir']);
   const templates = collectTemplates(templateDir);
   let count = 0;
+  let skipped = 0;
 
   for (const t of templates) {
-    const outRel = path.relative(templateDir, t).replace(/\.ejs$/, '');
+    // Check if file should be skipped based on path
+    if (shouldSkipFileByPath(t, templateContext)) {
+      skipped++;
+      continue;
+    }
+    
+    const outRel = path.relative(templateDir, t).replace(/\.(hbs|handlebars)$/, '');
     const outPath = path.join(outDir, outRel);
-    if (await renderFile(t, outPath, stack)) {
+    if (await renderFile(t, outPath, templateContext)) {
       count++;
     }
   }
-  console.log(`Rendered ${count} file(s)`);
+  console.log(`Rendered ${count} file(s), skipped ${skipped} file(s)`);
 })();

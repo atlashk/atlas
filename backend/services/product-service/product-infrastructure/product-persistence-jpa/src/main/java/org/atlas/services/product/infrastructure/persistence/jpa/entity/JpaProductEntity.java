@@ -72,6 +72,7 @@ public class JpaProductEntity extends JpaBaseEntity {
       mappedBy = "product",
       orphanRemoval = true
   )
+  @Builder.Default
   private Set<JpaProductAttributeEntity> attributes = new HashSet<>();
 
   @ManyToMany
@@ -80,6 +81,7 @@ public class JpaProductEntity extends JpaBaseEntity {
       joinColumns = {@JoinColumn(name = "product_id")},
       inverseJoinColumns = {@JoinColumn(name = "category_id")}
   )
+  @Builder.Default
   private Set<JpaCategoryEntity> categories = new HashSet<>();
 
   public void addAttribute(JpaProductAttributeEntity attribute) {

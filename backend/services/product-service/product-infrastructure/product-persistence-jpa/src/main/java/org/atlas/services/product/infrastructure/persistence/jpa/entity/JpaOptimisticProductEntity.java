@@ -77,6 +77,7 @@ public class JpaOptimisticProductEntity extends JpaBaseEntity {
       mappedBy = "product",
       orphanRemoval = true
   )
+  @Builder.Default
   private Set<JpaProductAttributeEntity> attributes = new HashSet<>();
 
   @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -85,5 +86,6 @@ public class JpaOptimisticProductEntity extends JpaBaseEntity {
       joinColumns = {@JoinColumn(name = "product_id")},
       inverseJoinColumns = {@JoinColumn(name = "category_id")}
   )
+  @Builder.Default
   private Set<JpaCategoryEntity> categories = new HashSet<>();
 }

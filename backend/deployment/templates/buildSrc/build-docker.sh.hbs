@@ -1,7 +1,3 @@
-<%
-  const serviceDiscovery = (stack['service-discovery'] || '').toLowerCase();
-  const hasEureka = serviceDiscovery === 'eureka';
-%>
 #!/bin/bash
 
 # Ensures that the script exits immediately if any command fails, or if you try to use an undefined variable.
@@ -19,13 +15,12 @@ SERVICES=(
     "payment-service:$PROJECT_ROOT/backend/services/payment-service/payment-bootstrap"
     "notification-service:$PROJECT_ROOT/backend/services/notification-service/notification-bootstrap"
     "api-gateway:$PROJECT_ROOT/backend/services/api-gateway/spring-cloud-gateway/spring-cloud-gateway-server"
-<%_ if (hasEureka) { -%>
+{{#if (eq (lower stack.service-discovery) "eureka")}}
     "eureka-server:$PROJECT_ROOT/backend/platform/discovery-server/eureka-server"
-<%_ } -%>
+{{/if}}
 )
 
 # Default values
-SERVICE_FILTER=""
 CLUSTER_TYPE=""
 CLUSTER_NAME=""
 
@@ -68,7 +63,6 @@ load_image_into_cluster() {
 usage() {
     echo "Usage: $0 [OPTIONS]"
     echo "Options:"
-    echo "  --service=NAME          Build only specific service (optional)"
     echo "  -h, --help              Show this help message"
     echo ""
     echo "Auto-load: If kubectl context is minikube or kind, images are loaded into cluster"
@@ -80,15 +74,11 @@ usage() {
     echo ""
     echo "Examples:"
     echo "  $0                              # Build all Docker images"
-    echo "  $0 --service=iam-service        # Build only iam-service Docker image"
 }
 
 # Parse named parameters
 for arg in "$@"; do
     case $arg in
-        --service=*)
-            SERVICE_FILTER="${arg#*=}"
-            ;;
         -h|--help)
             usage
             exit 0
@@ -121,11 +111,6 @@ fi
 for service in "${SERVICES[@]}"; do
     name="${service%%:*}"
     context="${service#*:}"
-
-    # Skip if service filter is specified and doesn't match
-    if [ -n "$SERVICE_FILTER" ] && [ "$name" != "$SERVICE_FILTER" ]; then
-        continue
-    fi
 
     echo "Building Docker image for $PROJECT_NAME-$name..."
     if ! docker build -t "$PROJECT_NAME-$name" "$context"; then

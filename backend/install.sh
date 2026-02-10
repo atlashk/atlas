@@ -39,33 +39,21 @@ err()  { printf "[ERROR] %s\n" "$*"; }
 
 usage() {
   local code="${1:-1}"
-  echo "Usage: $0 [--app-stack <name>] [--skip-build] [--infra-only] [--enable-observability <true|false>] [--debug-template]"
+  echo "Usage: $0 [--app-stack=<stack-name>] [--skip-build] [--infra-only] [--enable-observability=<true|false>] [--debug-template]"
   echo ""
   echo "Options:"
-  echo "  --app-stack <name>        Pick config/app-stack.<name>.yml"
-  echo "  --skip-build              Pass '--skip-build' to install.sh"
-  echo "  --infra-only              Pass '--infra-only' to install.sh"
-  echo "  --enable-observability    Pass '--enable-observability <true|false>' to install.sh"
-  echo "  --debug-template          Skip install.sh execution"
-  echo "  -h, --help                Show help and exit"
+  echo "  --app-stack=<stack-name>              Pick config/app-stack.<stack-name>.yml"
+  echo "  --skip-build                          Pass '--skip-build' to install.sh"
+  echo "  --infra-only                          Pass '--infra-only' to install.sh"
+  echo "  --enable-observability=<true|false>   Pass '--enable-observability=<true|false>' to install.sh"
+  echo "  --debug-template                      Skip install.sh execution"
+  echo "  -h, --help                            Show help and exit"
   echo ""
   echo "Defaults:"
-  echo "  - app-stack=onprem.compose"
-  echo "  - skip-build=false"
-  echo "  - infra-only=false"
-  echo "  - enable-observability=true"
-  echo "  - If app-stack=dev and infra-only not specified, infra-only=true"
-  echo "  - If app-stack=dev and enable-observability not specified, enable-observability=false"
-  echo ""
-  echo "Examples:"
-  echo "  $0"
-  echo "  $0 --app-stack onprem.compose"
-  echo "  $0 --app-stack onprem.k8s.native"
-  echo "  $0 --app-stack onprem.compose --skip-build"
-  echo "  $0 --app-stack onprem.compose --infra-only"
-  echo "  $0 --app-stack onprem.compose --enable-observability false"
-  echo "  $0 --app-stack dev                  # Defaults infra-only=true"
-  echo "  $0 --app-stack dev --skip-build     # dev + infra-only=true + skip-build=true"
+  echo "  - app-stack: onprem.compose"
+  echo "  - skip-build: No"
+  echo "  - infra-only: No"
+  echo "  - enable-observability: true"
   exit "$code"
 }
 
@@ -76,18 +64,18 @@ ensure_generator_deps() {
     exit 1
   fi
 
-  # Check if we're in the generator directory and ejs is available
-  if (cd "$GENERATOR_DIR" && node -e "try{require('ejs');}catch(e){process.exit(1)}" >/dev/null 2>&1); then
+  # Check if we're in the generator directory and handlebars is available
+  if (cd "$GENERATOR_DIR" && node -e "try{require('handlebars');}catch(e){process.exit(1)}" >/dev/null 2>&1); then
     return 0
   fi
 
-  warn "Missing Node package 'ejs' required by generator.mjs."
+  warn "Missing Node package 'handlebars' required by generator.mjs."
   if ! command -v npm >/dev/null 2>&1; then
     err "npm is required to install dependencies. Please install npm (Node.js)."
     exit 1
   fi
 
-  printf "Install 'ejs' in generator directory now? [Y/n] "
+  printf "Install 'handlebars' in generator directory now? [Y/n] "
   read -r answer
   answer=${answer:-Y}
   case "$answer" in
@@ -98,15 +86,15 @@ ensure_generator_deps() {
           info "Initializing npm in $GENERATOR_DIR"
           npm init -y >/dev/null 2>&1 || true
         fi
-        info "Installing ejs in $GENERATOR_DIR"
-        npm install ejs --save || {
-          err "Failed to install 'ejs'."
+        info "Installing handlebars in $GENERATOR_DIR"
+        npm install handlebars --save || {
+          err "Failed to install 'handlebars'."
           exit 1
         }
       )
       ;;
     *)
-      err "Cannot proceed without 'ejs'. Aborting."
+      err "Cannot proceed without 'handlebars'. Aborting."
       exit 1
       ;;
   esac
@@ -234,6 +222,8 @@ generate_templates() {
   # Generate templates using the generator script
   local cfg_file="$1"
   local deployment="$2"
+  local infra_only="$3"
+  local enable_observability="$4"
   
   ensure_generator_deps
   
@@ -241,7 +231,12 @@ generate_templates() {
   if [[ -d "$BUILDSRC_TEMPLATES_DIR" ]]; then
     (
       cd "$GENERATOR_DIR" || exit 1
-      node generator.mjs --dir "../templates/buildSrc" --out-dir "../dist" --cfg "$cfg_file"
+      node generator.mjs \
+        --dir "../templates/buildSrc" \
+        --out-dir "../dist" \
+        --cfg "$cfg_file" \
+        --infra-only "$infra_only" \
+        --enable-observability "$enable_observability"
     )
   else
     warn "buildSrc templates directory not found: $BUILDSRC_TEMPLATES_DIR"
@@ -268,7 +263,12 @@ generate_templates() {
   if [[ -d "$deployment_template_dir" ]]; then
     (
       cd "$GENERATOR_DIR" || exit 1
-      node generator.mjs --dir "$deployment_template_rel_path" --out-dir "../dist" --cfg "$cfg_file"
+      node generator.mjs \
+        --dir "$deployment_template_rel_path" \
+        --out-dir "../dist" \
+        --cfg "$cfg_file" \
+        --infra-only "$infra_only" \
+        --enable-observability "$enable_observability"
     )
   else
     err "Deployment templates directory not found: $deployment_template_dir"
@@ -306,15 +306,6 @@ main() {
       -h|--help)
         usage 0
         ;;
-      --app-stack)
-        shift
-        if [[ $# -eq 0 || "$1" == -* ]]; then
-          err "Missing value for --app-stack"
-          usage 1
-        fi
-        app_stack="$1"
-        shift
-        ;;
       --app-stack=*)
         app_stack="${1#--app-stack=}"
         if [[ -z "$app_stack" ]]; then
@@ -323,19 +314,13 @@ main() {
         fi
         shift
         ;;
+      --app-stack)
+        echo "Invalid usage: use --app-stack=<stack-name>" >&2
+        exit 1
+        ;;
       --infra-only)
         infra_only=true
         infra_only_specified=true
-        shift
-        ;;
-      --enable-observability)
-        shift
-        if [[ $# -eq 0 || "$1" == -* ]]; then
-          err "Missing value for --enable-observability"
-          usage 1
-        fi
-        enable_observability="$1"
-        enable_observability_specified=true
         shift
         ;;
       --enable-observability=*)
@@ -346,6 +331,10 @@ main() {
         fi
         enable_observability_specified=true
         shift
+        ;;
+      --enable-observability)
+        echo "Invalid usage: use --enable-observability=true|false" >&2
+        exit 1
         ;;
       --skip-build)
         skip_build=true
@@ -366,12 +355,6 @@ main() {
     esac
   done
 
-  if [[ "$app_stack" == "dev" && "$infra_only_specified" == "false" ]]; then
-    infra_only=true
-  fi
-  if [[ "$app_stack" == "dev" && "$enable_observability_specified" == "false" ]]; then
-    enable_observability=false
-  fi
   enable_observability="$(echo "$enable_observability" | tr '[:upper:]' '[:lower:]')"
   if [[ "$enable_observability" != "true" && "$enable_observability" != "false" ]]; then
     err "Invalid value for --enable-observability: $enable_observability"
@@ -381,12 +364,6 @@ main() {
   local install_args=()
   if [[ "$skip_build" == "true" ]]; then
     install_args+=("--skip-build")
-  fi
-  if [[ "$infra_only" == "true" ]]; then
-    install_args+=("--infra-only")
-  fi
-  if [[ "$enable_observability" == "false" ]]; then
-    install_args+=("--enable-observability=false")
   fi
 
   local config_file="$CONFIG_DIR/app-stack.${app_stack}.yml"
@@ -418,7 +395,7 @@ main() {
   convert_yaml_to_cfg "$config_file" "$temp_cfg_file"
 
   # Step 5: Generate templates
-  generate_templates "$temp_cfg_file" "$deployment"
+  generate_templates "$temp_cfg_file" "$deployment" "$infra_only" "$enable_observability"
   info "Generated files are available in: $DIST_DIR"
 
   # Step 6: Normalize line endings

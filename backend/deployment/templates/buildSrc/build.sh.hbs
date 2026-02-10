@@ -19,18 +19,15 @@ usage() {
     echo "  --skip-tests=BOOL       Skip tests during JAR build (default: true)"
     echo "  --build-jar=BOOL        Build JAR files (default: true)"
     echo "  --build-docker=BOOL     Build Docker images (default: false)"
-    echo "  --service=NAME          Build only specific Docker service (optional)"
     echo "  -h, --help              Show this help message"
     echo ""
     echo "Examples:"
     echo "  $0                                          # Build JAR files and Docker images"
     echo "  $0 --build-jar=false --build-docker=true    # Build Docker images only"
     echo "  $0 --skip-tests=false                       # Build JAR files with tests enabled"
-    echo "  $0 --build-docker=true --service=iam-service # Build JAR files and specific Docker image"
 }
 
 # Parse named parameters
-DOCKER_ARGS=()
 for arg in "$@"; do
     case $arg in
         --skip-tests=*)
@@ -41,9 +38,6 @@ for arg in "$@"; do
             ;;
         --build-docker=*)
             BUILD_DOCKER="${arg#*=}"
-            ;;
-        --service=*)
-            DOCKER_ARGS+=("$arg")
             ;;
         -h|--help)
             usage
@@ -72,7 +66,7 @@ echo
 # Build Docker images if requested
 if [ "$BUILD_DOCKER" = "true" ]; then
     echo "Starting Docker build process..."
-    if "$SCRIPT_DIR/build-docker.sh" "${DOCKER_ARGS[@]}"; then
+    if "$SCRIPT_DIR/build-docker.sh"; then
         echo "Docker build completed successfully."
     else
         echo "Docker build failed." >&2

@@ -77,6 +77,7 @@ public class JpaOrderEntity extends JpaBaseEntity {
       mappedBy = "order",
       orphanRemoval = true
   )
+  @Builder.Default
   private List<JpaOrderItemEntity> orderItems = new ArrayList<>();
 
   @Column(name = "amount")

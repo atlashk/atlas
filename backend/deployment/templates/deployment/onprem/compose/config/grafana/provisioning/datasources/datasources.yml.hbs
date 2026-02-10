@@ -1,17 +1,7 @@
-<%
-  const observabilityLoggingStack = (stack.observability.logging.stack || '').toLowerCase();
-  const observabilityMetrics = (stack.observability.metrics || '').toLowerCase();
-  const observabilityTracing = (stack.observability.tracing || '').toLowerCase();
-
-  const hasLoki = observabilityLoggingStack === 'loki';
-  const hasPrometheus = observabilityMetrics === 'prometheus';
-  const hasZipkin = observabilityTracing === 'zipkin';
-%>
-
 apiVersion: 1
 
 datasources:
-<% if (hasPrometheus) { %>
+{{#ifObservability "prometheus"}}
   - name: Prometheus
     type: prometheus
     access: proxy
@@ -24,9 +14,9 @@ datasources:
       queryTimeout: 60s
       httpMethod: POST
     secureJsonData: {}
-<% } %>
+{{/ifObservability}}
 
-<% if (hasLoki) { %>
+{{#ifObservability "loki"}}
   - name: Loki
     type: loki
     access: proxy
@@ -35,17 +25,17 @@ datasources:
     editable: true
     jsonData:
       maxLines: 1000
-<% if (hasZipkin) { %>
+{{#ifObservability "zipkin"}}
       derivedFields:
         - datasourceUid: DS_ZIPKIN
           matcherRegex: "traceID=(\\w+)"
           name: TraceID
           url: "$${__value.raw}"
-<% } %>
+{{/ifObservability}}
     secureJsonData: {}
-<% } %>
+{{/ifObservability}}
 
-<% if (hasZipkin) { %>
+{{#ifObservability "zipkin"}}
   - name: Zipkin
     type: zipkin
     access: proxy
@@ -56,4 +46,4 @@ datasources:
       nodeGraph:
         enabled: true
     secureJsonData: {}
-<% } %>
+{{/ifObservability}}

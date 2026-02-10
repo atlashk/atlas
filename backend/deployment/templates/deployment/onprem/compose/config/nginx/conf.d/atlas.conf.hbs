@@ -1,21 +1,3 @@
-<%
-  // Derive flags similar to docker-compose.yml.ejs
-  const authServer = (stack['iam'] || '').toLowerCase();
-  const notificationEmail = (stack.notification.email || '').toLowerCase();
-  const storage = (stack.storage || '').toLowerCase();
-  const observabilityLoggingStack = (stack.observability.logging.stack || '').toLowerCase();
-  const observabilityMetrics = (stack.observability.metrics || '').toLowerCase();
-  const observabilityTracing = (stack.observability.tracing || '').toLowerCase();
-
-  const hasKeycloak = authServer === 'keycloak'
-  const hasSmtp4dev = notificationEmail === 'spring';
-  const hasMinio = storage === 'minio';
-  const hasLoki = observabilityLoggingStack === 'loki';
-  const hasPrometheus = observabilityMetrics === 'prometheus';
-  const hasZipkin = observabilityTracing === 'zipkin';
-  const hasGrafana = hasLoki || hasPrometheus || hasZipkin;
-%>
-
 # Atlas reverse proxy configuration
 
 server {
@@ -31,7 +13,7 @@ server {
     }
 }
 
-<% if (hasKeycloak) { %>
+{{#hasService "keycloak"}}
 server {
     listen 80;
     server_name keycloak.atlas.local;
@@ -44,9 +26,9 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
-<% } %>
+{{/hasService}}
 
-<% if (hasSmtp4dev) { %>
+{{#hasService "smtp4dev"}}
 server {
     listen 80;
     server_name smtp4dev.atlas.local;
@@ -59,9 +41,9 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
-<% } %>
+{{/hasService}}
 
-<% if (hasMinio) { %>
+{{#hasService "minio"}}
 server {
     listen 80;
     server_name minio.atlas.local;
@@ -74,9 +56,9 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
-<% } %>
+{{/hasService}}
 
-<% if (hasPrometheus) { %>
+{{#ifObservability "prometheus"}}
 server {
     listen 80;
     server_name prometheus.atlas.local;
@@ -89,9 +71,9 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
-<% } %>
+{{/ifObservability}}
 
-<% if (hasZipkin) { %>
+{{#ifObservability "zipkin"}}
 server {
     listen 80;
     server_name zipkin.atlas.local;
@@ -105,7 +87,7 @@ server {
     }
 }
 
-<% if (hasGrafana) { %>
+{{#ifObservability "grafana"}}
 server {
     listen 80;
     server_name grafana.atlas.local;
@@ -118,5 +100,5 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
-<% } %>
-<% } %>
+{{/ifObservability}}
+{{/ifObservability}}

@@ -1,1 +1,0 @@
-https://levelup.gitconnected.com/system-design-concepts-disaster-recovery-dr-and-backup-strategies-%EF%B8%8F-4d2ccdf51085

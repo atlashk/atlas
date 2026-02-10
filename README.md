@@ -212,14 +212,7 @@ Open: http://localhost:8000
 ### Default Credentials (dev)
 
 - Admin: `admin` / `Aa@123456`
-
-## Documentation
-
-- System design and service landscape: `docs/system-design.md`
-- API gateway routing: `docs/api-gateway.md`
-- Messaging and outbox: `docs/messaging.md` and `docs/event-driven-architecture.md`
-- Observability stack: `docs/observability.md`
-- Security and IAM: `docs/security.md`
+- Storefront: `demo` / `Aa@123456`
 
 ## Contributing
 
