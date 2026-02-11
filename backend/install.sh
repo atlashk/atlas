@@ -26,12 +26,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_DIR="$SCRIPT_DIR"
 
-CONFIG_DIR="$BACKEND_DIR/config"
-GENERATOR_DIR="$BACKEND_DIR/deployment/generator"
-TEMPLATES_DIR="$BACKEND_DIR/deployment/templates"
+CONFIG_DIR="$BACKEND_DIR/app-stack/config"
+GENERATOR_DIR="$BACKEND_DIR/app-stack/generator"
+TEMPLATES_DIR="$BACKEND_DIR/app-stack/templates"
 BUILDSRC_TEMPLATES_DIR="$TEMPLATES_DIR/buildSrc"
 DEPLOYMENT_TEMPLATES_DIR="$TEMPLATES_DIR/deployment"
-DIST_DIR="$BACKEND_DIR/deployment/dist"
+DIST_DIR="$BACKEND_DIR/dist"
 
 info() { printf "[INFO] %s\n" "$*"; }
 warn() { printf "[WARN] %s\n" "$*"; }
@@ -120,81 +120,6 @@ read_deployment_from_config() {
   fi
 }
 
-convert_yaml_to_cfg() {
-  # Convert YAML config to .cfg format for the generator
-  local yaml_file="$1"
-  local cfg_file="$2"
-  
-  info "Converting $yaml_file to $cfg_file"
-  
-  # Create a temporary Node.js script for conversion
-  local temp_script="$DIST_DIR/yaml_converter.js"
-  cat > "$temp_script" << 'EOF'
-const fs = require('fs');
-const path = require('path');
-
-function parseYaml(content) {
-  const lines = content.split(/\r?\n/);
-  const result = {};
-  const stack = [];
-  
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) continue;
-    
-    const indent = line.match(/^\s*/)[0].length;
-    const level = Math.floor(indent / 2);
-    
-    // Adjust stack to current level
-    stack.length = level;
-    
-    const colonIndex = trimmed.indexOf(':');
-    if (colonIndex === -1) continue;
-    
-    const key = trimmed.substring(0, colonIndex).trim();
-    const value = trimmed.substring(colonIndex + 1).trim();
-    
-    const fullKey = stack.length > 0 ? stack.join('.') + '.' + key : key;
-    
-    if (value) {
-      result[fullKey] = value;
-    } else {
-      stack.push(key);
-    }
-  }
-  
-  return result;
-}
-
-const yamlFile = process.argv[2];
-const cfgFile = process.argv[3];
-
-try {
-  const yamlContent = fs.readFileSync(yamlFile, 'utf8');
-  const parsed = parseYaml(yamlContent);
-  
-  const cfgContent = Object.entries(parsed)
-    .map(([key, value]) => `${key}=${value}`)
-    .join('\n');
-  
-  fs.writeFileSync(cfgFile, cfgContent, 'utf8');
-  console.log('Conversion successful');
-} catch (error) {
-  console.error('Error:', error.message);
-  process.exit(1);
-}
-EOF
-
-  # Run the conversion script
-  node "$temp_script" "$yaml_file" "$cfg_file" || {
-    err "Failed to convert YAML to cfg format"
-    exit 1
-  }
-  
-  # Clean up temporary script
-  rm -f "$temp_script"
-}
-
 reset_dist_dir() {
   # Clean and recreate dist directory
   if [[ -d "$DIST_DIR" ]]; then
@@ -220,11 +145,10 @@ normalize_line_endings_to_lf() {
 
 generate_templates() {
   # Generate templates using the generator script
-  local cfg_file="$1"
-  local deployment="$2"
-  local infra_only="$3"
-  local enable_observability="$4"
-  local app_stack="$5"
+  local deployment="$1"
+  local infra_only="$2"
+  local enable_observability="$3"
+  local app_stack="$4"
   
   ensure_generator_deps
   
@@ -234,11 +158,10 @@ generate_templates() {
       cd "$GENERATOR_DIR" || exit 1
       node generator.mjs \
         --dir "../templates/buildSrc" \
-        --out-dir "../dist" \
-        --cfg "$cfg_file" \
+        --out-dir "../../dist" \
+        --app-stack "$app_stack" \
         --infra-only "$infra_only" \
-        --enable-observability "$enable_observability" \
-        --app-stack "$app_stack"
+        --enable-observability "$enable_observability"
     )
   else
     warn "buildSrc templates directory not found: $BUILDSRC_TEMPLATES_DIR"
@@ -267,11 +190,10 @@ generate_templates() {
       cd "$GENERATOR_DIR" || exit 1
       node generator.mjs \
         --dir "$deployment_template_rel_path" \
-        --out-dir "../dist" \
-        --cfg "$cfg_file" \
+        --out-dir "../../dist" \
+        --app-stack "$app_stack" \
         --infra-only "$infra_only" \
-        --enable-observability "$enable_observability" \
-        --app-stack "$app_stack"
+        --enable-observability "$enable_observability"
     )
   else
     err "Deployment templates directory not found: $deployment_template_dir"
@@ -324,6 +246,7 @@ main() {
       --infra-only)
         infra_only=true
         infra_only_specified=true
+        skip_build=true
         shift
         ;;
       --enable-observability=*)
@@ -370,7 +293,6 @@ main() {
   fi
 
   local config_file="$CONFIG_DIR/app-stack.${app_stack}.yml"
-  local temp_cfg_file="$DIST_DIR/app-stack.cfg"
   
   info "Starting Atlas deployment for app-stack: $app_stack"
   
@@ -394,17 +316,14 @@ main() {
   # Step 3: Reset dist directory
   reset_dist_dir
 
-  # Step 4: Convert YAML to cfg format for generator
-  convert_yaml_to_cfg "$config_file" "$temp_cfg_file"
-
-  # Step 5: Generate templates
-  generate_templates "$temp_cfg_file" "$deployment" "$infra_only" "$enable_observability" "$app_stack"
+  # Step 4: Generate templates
+  generate_templates "$deployment" "$infra_only" "$enable_observability" "$app_stack"
   info "Generated files are available in: $DIST_DIR"
 
-  # Step 6: Normalize line endings
+  # Step 5: Normalize line endings
   normalize_line_endings_to_lf "$DIST_DIR"
 
-  # Step 7: Execute install.sh
+  # Step 6: Execute install.sh
   if [[ "$debug_template" == "true" ]]; then
     info "Debug template mode enabled. Skipping install script execution."
   else

@@ -78,7 +78,7 @@ public class NotifyOrderFulfilledCommandHandler {
             .orderId(sagaData.getOrderId())
             .build();
         notification = Notification.builder()
-            .userId(sagaData.getUser().getUserId())
+            .userId(sagaData.getUser().getId())
             .type(NotificationType.ORDER_FULFILLED)
             .channel(NotificationChannel.EMAIL)
             .metadata(JsonUtil.getInstance().toJson(metadata))
@@ -172,7 +172,7 @@ public class NotifyOrderFulfilledCommandHandler {
             .orderId(sagaData.getOrderId())
             .build();
         notification = Notification.builder()
-            .userId(sagaData.getUser().getUserId())
+            .userId(sagaData.getUser().getId())
             .type(NotificationType.ORDER_FULFILLED)
             .channel(NotificationChannel.IN_APP)
             .message(message)
@@ -182,7 +182,7 @@ public class NotifyOrderFulfilledCommandHandler {
         notificationService.create(notification);
 
         SendInAppRequest request = SendInAppRequest.builder()
-            .receiverUserId(sagaData.getUser().getUserId())
+            .receiverUserId(sagaData.getUser().getId())
             .payload(Payload.builder()
                 .message(message)
                 .deliveredAt(notification.getCreatedAt())

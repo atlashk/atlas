@@ -1,10 +1,10 @@
 // Handlebars-based generator for rendering templates using app-stack.cfg
 // Usage:
-//  - Render single file: node generate.mjs --template <path> --out <path> [--cfg <path>] [--json <path>]
-//  - Render directory:   node generate.mjs --dir <path> --out-dir <path> [--cfg <path>] [--json <path>]
+//  - Render directory:   node generate.mjs --dir <path> --out-dir <path> [--app-stack <name>]
 
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import Handlebars from 'handlebars';
 
 function parseArgs(argv) {
@@ -27,17 +27,18 @@ function parseArgs(argv) {
   return args;
 }
 
+function setDeep(obj, keys, val) {
+  let cur = obj;
+  for (let i = 0; i < keys.length - 1; i++) {
+    const k = keys[i];
+    if (!(k in cur)) cur[k] = {};
+    cur = cur[k];
+  }
+  cur[keys[keys.length - 1]] = val;
+}
+
 function parseCfg(content) {
   const obj = {};
-  const setDeep = (o, keys, val) => {
-    let cur = o;
-    for (let i = 0; i < keys.length - 1; i++) {
-      const k = keys[i];
-      if (!(k in cur)) cur[k] = {};
-      cur = cur[k];
-    }
-    cur[keys[keys.length - 1]] = val;
-  };
   content.split(/\r?\n/).forEach(line => {
     const s = line.trim();
     if (!s || s.startsWith('#') || s.startsWith('//')) return;
@@ -48,6 +49,48 @@ function parseCfg(content) {
     setDeep(obj, key.split('.'), value);
   });
   return obj;
+}
+
+function parseYaml(content) {
+  const obj = {};
+  const lines = content.split(/\r?\n/);
+  const stack = [];
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const indent = line.match(/^\s*/)[0].length;
+    const level = Math.floor(indent / 2);
+    stack.length = level;
+    const colonIndex = trimmed.indexOf(':');
+    if (colonIndex === -1) continue;
+    const key = trimmed.substring(0, colonIndex).trim();
+    const value = trimmed.substring(colonIndex + 1).trim();
+    if (value) {
+      setDeep(obj, [...stack, key], value);
+    } else {
+      stack.push(key);
+    }
+  }
+  return obj;
+}
+
+function createStackAccessor(stack) {
+  const cache = new Map();
+  return (stackPath) => {
+    if (cache.has(stackPath)) return cache.get(stackPath);
+    const parts = stackPath.split('.');
+    let value = stack;
+    for (const part of parts) {
+      value = value?.[part];
+      if (value === undefined) {
+        cache.set(stackPath, '');
+        return '';
+      }
+    }
+    const normalized = (value || '').toString().toLowerCase();
+    cache.set(stackPath, normalized);
+    return normalized;
+  };
 }
 
 // Register Handlebars helpers
@@ -89,41 +132,32 @@ function registerHelpers() {
 
   // Check if service should be enabled based on stack config
   Handlebars.registerHelper('hasService', function(serviceName, options) {
-    const { stack, enableObservability } = this;
-    
-    const getStackValue = (path) => {
-      const parts = path.split('.');
-      let value = stack;
-      for (const part of parts) {
-        value = value?.[part];
-        if (value === undefined) return '';
-      }
-      return (value || '').toString().toLowerCase();
-    };
+    const { stack, enableObservability, getStackValue } = this;
+    const stackValue = getStackValue || createStackAccessor(stack);
 
     const checks = {
-      'mysql': getStackValue('datasource') === 'mysql',
-      'postgres': getStackValue('datasource') === 'postgres' || getStackValue('datasource') === 'postgresql',
-      'elasticsearch': getStackValue('full-text-search') === 'elasticsearch',
-      'redis': getStackValue('kv-store') === 'redis',
-      'jwt': getStackValue('iam') === 'jwt',
-      'keycloak': getStackValue('iam') === 'keycloak',
-      'rest': getStackValue('internal-api') === 'rest',
-      'grpc': getStackValue('internal-api') === 'grpc',
-      'kafka': getStackValue('messaging') === 'kafka',
-      'rabbitmq': getStackValue('messaging') === 'rabbitmq',
-      'smtp4dev': getStackValue('notification.email') === 'spring',
-      'prometheus': enableObservability && getStackValue('observability.metrics') === 'prometheus',
-      'loki': enableObservability && getStackValue('observability.logging.stack') === 'loki',
-      'promtail': enableObservability && getStackValue('observability.logging.stack') === 'loki',
-      'zipkin': enableObservability && getStackValue('observability.tracing') === 'zipkin',
+      'mysql': stackValue('datasource') === 'mysql',
+      'postgres': stackValue('datasource') === 'postgres' || stackValue('datasource') === 'postgresql',
+      'elasticsearch': stackValue('full-text-search') === 'elasticsearch',
+      'redis': stackValue('kv-store') === 'redis',
+      'jwt': stackValue('iam') === 'jwt',
+      'keycloak': stackValue('iam') === 'keycloak',
+      'rest': stackValue('internal-api') === 'rest',
+      'grpc': stackValue('internal-api') === 'grpc',
+      'kafka': stackValue('messaging') === 'kafka',
+      'rabbitmq': stackValue('messaging') === 'rabbitmq',
+      'smtp4dev': stackValue('notification.email') === 'spring',
+      'prometheus': enableObservability && stackValue('observability.metrics') === 'prometheus',
+      'loki': enableObservability && stackValue('observability.logging.stack') === 'loki',
+      'promtail': enableObservability && stackValue('observability.logging.stack') === 'loki',
+      'zipkin': enableObservability && stackValue('observability.tracing') === 'zipkin',
       'grafana': enableObservability && (
-        getStackValue('observability.logging.stack') === 'loki' ||
-        getStackValue('observability.metrics') === 'prometheus' ||
-        getStackValue('observability.tracing') === 'zipkin'
+        stackValue('observability.logging.stack') === 'loki' ||
+        stackValue('observability.metrics') === 'prometheus' ||
+        stackValue('observability.tracing') === 'zipkin'
       ),
-      'nginx': getStackValue('reverse-proxy') === 'nginx',
-      'minio': getStackValue('storage') === 'minio'
+      'nginx': stackValue('reverse-proxy') === 'nginx',
+      'minio': stackValue('storage') === 'minio'
     };
 
     const result = checks[serviceName] || false;
@@ -136,25 +170,17 @@ function registerHelpers() {
       return options.inverse(this);
     }
     
-    const { stack } = this;
-    const getStackValue = (path) => {
-      const parts = path.split('.');
-      let value = stack;
-      for (const part of parts) {
-        value = value?.[part];
-        if (value === undefined) return '';
-      }
-      return (value || '').toString().toLowerCase();
-    };
+    const { stack, getStackValue } = this;
+    const stackValue = getStackValue || createStackAccessor(stack);
 
     const checks = {
-      'prometheus': getStackValue('observability.metrics') === 'prometheus',
-      'loki': getStackValue('observability.logging.stack') === 'loki',
-      'zipkin': getStackValue('observability.tracing') === 'zipkin',
+      'prometheus': stackValue('observability.metrics') === 'prometheus',
+      'loki': stackValue('observability.logging.stack') === 'loki',
+      'zipkin': stackValue('observability.tracing') === 'zipkin',
       'grafana': (
-        getStackValue('observability.logging.stack') === 'loki' ||
-        getStackValue('observability.metrics') === 'prometheus' ||
-        getStackValue('observability.tracing') === 'zipkin'
+        stackValue('observability.logging.stack') === 'loki' ||
+        stackValue('observability.metrics') === 'prometheus' ||
+        stackValue('observability.tracing') === 'zipkin'
       )
     };
 
@@ -240,17 +266,8 @@ function collectTemplates(dir) {
 }
 
 function shouldSkipFileByPath(filePath, context) {
-  const { stack, enableObservability } = context;
-  
-  const getStackValue = (path) => {
-    const parts = path.split('.');
-    let value = stack;
-    for (const part of parts) {
-      value = value?.[part];
-      if (value === undefined) return '';
-    }
-    return (value || '').toString().toLowerCase();
-  };
+  const { stack, enableObservability, getStackValue } = context;
+  const stackValue = getStackValue || createStackAccessor(stack);
   
   // Normalize path separators
   const normalizedPath = filePath.replace(/\\/g, '/');
@@ -265,30 +282,30 @@ function shouldSkipFileByPath(filePath, context) {
   }
   
   // Skip specific service configs based on stack
-  const datasource = getStackValue('datasource');
+  const datasource = stackValue('datasource');
   if (normalizedPath.includes('/config/mysql/') && datasource !== 'mysql') return true;
   if (normalizedPath.includes('/config/postgres/') && datasource !== 'postgres' && datasource !== 'postgresql') return true;
   
-  const kvStore = getStackValue('kv-store');
+  const kvStore = stackValue('kv-store');
   if (normalizedPath.includes('/config/redis/') && kvStore !== 'redis') return true;
   
-  const messaging = getStackValue('messaging');
+  const messaging = stackValue('messaging');
   if (normalizedPath.includes('/config/kafka/') && messaging !== 'kafka') return true;
   if (normalizedPath.includes('/config/rabbitmq/') && messaging !== 'rabbitmq') return true;
   
-  const storage = getStackValue('storage');
+  const storage = stackValue('storage');
   if (normalizedPath.includes('/config/minio/') && storage !== 'minio') return true;
   
-  const fullTextSearch = getStackValue('full-text-search');
+  const fullTextSearch = stackValue('full-text-search');
   if (normalizedPath.includes('/config/elasticsearch/') && fullTextSearch !== 'elasticsearch') return true;
   
-  const reverseProxy = getStackValue('reverse-proxy');
+  const reverseProxy = stackValue('reverse-proxy');
   if (normalizedPath.includes('/config/nginx/') && reverseProxy !== 'nginx') return true;
   
-  const iam = getStackValue('iam');
+  const iam = stackValue('iam');
   if (normalizedPath.includes('/config/keycloak/') && iam !== 'keycloak') return true;
   
-  const notificationEmail = getStackValue('notification.email');
+  const notificationEmail = stackValue('notification.email');
   if (normalizedPath.includes('/config/smtp4dev/') && notificationEmail !== 'spring') return true;
   
   return false;
@@ -301,22 +318,27 @@ function shouldSkipFileByPath(filePath, context) {
   const args = parseArgs(process.argv.slice(2));
   const cwd = process.cwd();
 
-  if ((!args.template || !args.out) && (!args['dir'] || !args['out-dir'])) {
-    console.error('Usage: node generate.mjs --template <path> --out <path> [--cfg <path>] | --dir <path> --out-dir <path> [--cfg <path>]');
+  if (!args['dir'] || !args['out-dir']) {
+    console.error('Usage: node generate.mjs --dir <path> --out-dir <path> [--app-stack <name>]');
     process.exit(1);
   }
 
   let stack = {};
+  if (args['app-stack']) {
+    const appStackName = args['app-stack'];
+    const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+    const configPath = path.resolve(scriptDir, '..', 'config', `app-stack.${appStackName}.yml`);
+    if (fs.existsSync(configPath)) {
+      stack = { ...stack, ...parseYaml(fs.readFileSync(configPath, 'utf8')) };
+    } else {
+      console.error(`Config file not found: ${configPath}`);
+      process.exit(1);
+    }
+  }
   if (args.cfg) {
     const cfgPath = path.resolve(cwd, args.cfg);
     if (fs.existsSync(cfgPath)) {
       stack = { ...stack, ...parseCfg(fs.readFileSync(cfgPath, 'utf8')) };
-    }
-  }
-  if (args.json) {
-    const jsonPath = path.resolve(cwd, args.json);
-    if (fs.existsSync(jsonPath)) {
-      stack = { ...stack, ...JSON.parse(fs.readFileSync(jsonPath, 'utf8')) };
     }
   }
 
@@ -331,21 +353,15 @@ function shouldSkipFileByPath(filePath, context) {
   const appStack = args['app-stack'] || '';
 
   // Build template context with stack config + flags
+  const getStackValue = createStackAccessor(stack);
   const templateContext = {
     stack,
     env: process.env,
     enableObservability,
     infraOnly,
-    appStack
+    appStack,
+    getStackValue
   };
-
-  if (args.template && args.out) {
-    const templatePath = path.resolve(cwd, args.template);
-    const outPath = path.resolve(cwd, args.out);
-    const written = await renderFile(templatePath, outPath, templateContext);
-    console.log(written ? `Generated: ${outPath}` : `Skipped empty output: ${outPath}`);
-    return;
-  }
 
   const templateDir = path.resolve(cwd, args['dir']);
   const outDir = path.resolve(cwd, args['out-dir']);

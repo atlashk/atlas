@@ -8,7 +8,6 @@ import { createLogger } from "@/utils/logger";
 import { isValidToken } from "@/utils/cookies";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { useCartStore } from "./cart.store";
 
 const logger = createLogger('UserStore');
 
@@ -239,13 +238,6 @@ export const useUserStore = create<UserStore>()(
         logger.info('Logout initiated');
         await authService.logout();
         tokenManager.clearTokens();
-        
-        try {
-          const { clearCartState } = useCartStore.getState();
-          clearCartState();
-        } catch (error) {
-          logger.warn('Failed to clear cart state during logout', error);
-        }
         
         set({
           profile: null,

@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS payment_event
 (
     id                 INT         NOT NULL AUTO_INCREMENT PRIMARY KEY,
     payment_gateway_id INT         NOT NULL,
-    payment_id         VARCHAR(64) NOT NULL,
+    payment_id         VARCHAR(64),
     payload            TEXT        NOT NULL,
     headers            TEXT,
     status             VARCHAR(50) NOT NULL,

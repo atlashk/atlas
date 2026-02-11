@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_DIR="$SCRIPT_DIR"
-DIST_DIR="$BACKEND_DIR/deployment/dist"
+DIST_DIR="$BACKEND_DIR/dist"
 UNINSTALL_SCRIPT="$DIST_DIR/uninstall.sh"
 
 info() { printf "[INFO] %s\n" "$*"; }

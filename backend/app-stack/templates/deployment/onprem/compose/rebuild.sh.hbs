@@ -71,7 +71,7 @@ docker build --no-cache -t "${IMAGE_NAME}:latest" .
 
 # Stop and remove old container
 echo "==> Stopping old container..."
-cd "$PROJECT_ROOT/deployment/dist"
+cd "$PROJECT_ROOT/dist"
 docker-compose -f docker-compose.yml -p atlas stop "$SERVICE_NAME" 2>/dev/null || true
 docker-compose -f docker-compose.yml -p atlas rm -f "$SERVICE_NAME" 2>/dev/null || true
 

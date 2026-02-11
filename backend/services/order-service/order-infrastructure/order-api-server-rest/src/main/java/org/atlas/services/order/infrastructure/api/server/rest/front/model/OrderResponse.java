@@ -20,7 +20,7 @@ import org.atlas.libs.framework.domain.order.OrderStatus;
 public class OrderResponse {
 
   @Schema(description = "Unique identifier of the order", example = "12345")
-  private Integer id;
+  private String id;
 
   @Schema(description = "Unique order code for tracking and reference", example = "ORD-2024-001234")
   private String code;
@@ -91,7 +91,7 @@ public class OrderResponse {
   public static class Product {
 
     @Schema(description = "Unique identifier of the product in the product", example = "789")
-    private Integer id;
+    private String id;
 
     @Schema(description = "Display name of the product", example = "iPhone 15 Pro Max 256GB")
     private String name;

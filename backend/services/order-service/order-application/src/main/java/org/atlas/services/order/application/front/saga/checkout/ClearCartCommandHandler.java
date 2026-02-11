@@ -36,7 +36,7 @@ public class ClearCartCommandHandler {
     }
 
     try {
-      CartEntity cart = cartRepository.findByUserId(checkoutSagaData.getUser().getUserId())
+      CartEntity cart = cartRepository.findByUserId(checkoutSagaData.getUser().getId())
           .orElseThrow(() -> new DomainException(DomainError.CART_NOT_FOUND));
 
       if (CollectionUtil.isEmpty(cart.getCartItems())) {
@@ -48,19 +48,18 @@ public class ClearCartCommandHandler {
       cartRepository.update(cart);
       log.info("Successfully cleared cart in DB: sagaId={}, orderId={}, userId={}",
           sagaCommand.getSagaId(), checkoutSagaData.getOrderId(),
-          checkoutSagaData.getUser().getUserId());
+          checkoutSagaData.getUser().getId());
 
       // Clear cart in cache
-      cacheService.evict(ApplicationCache.CART, checkoutSagaData.getUser().getUserId());
+      cacheService.evict(ApplicationCache.CART, checkoutSagaData.getUser().getId());
       log.info("Successfully cleared cart in cache: sagaId={}, orderId={}, userId={}",
           sagaCommand.getSagaId(), checkoutSagaData.getOrderId(),
-          checkoutSagaData.getUser().getUserId());
+          checkoutSagaData.getUser().getId());
     } catch (Exception e) {
       // Don't compensate the previous steps
       log.error("Failed to clear cart: sagaId={}, orderId={}, userId={}, error={}",
           sagaCommand.getSagaId(), checkoutSagaData.getOrderId(),
-          checkoutSagaData.getUser().getUserId(),
-          e.getMessage(), e);
+          checkoutSagaData.getUser().getId(), e.getMessage(), e);
     }
 
     return SagaCommandResult.success();

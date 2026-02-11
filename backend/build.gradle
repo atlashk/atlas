@@ -12,7 +12,7 @@ buildscript {
 // Load app stack configs
 def loadAppStack() {
     def appStackName = project.findProperty('appStack') ?: 'dev'
-    File appStackFile = new File(rootDir, "config/app-stack.${appStackName}.yml")
+    File appStackFile = new File(rootDir, "app-stack/config/app-stack.${appStackName}.yml")
     if (!appStackFile.exists()) {
         throw new GradleException("App stack config file not found: ${appStackFile.absolutePath}")
     }

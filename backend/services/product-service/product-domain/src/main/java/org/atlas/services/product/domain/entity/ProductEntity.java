@@ -58,6 +58,7 @@ public class ProductEntity extends DomainEntity {
   private List<CategoryEntity> categories;
 
   public void setQuantity(Integer quantity) {
+    this.quantity = quantity;
     if (quantity == 0) {
       stockStatus = ProductStockStatus.OUT_STOCK;
     }

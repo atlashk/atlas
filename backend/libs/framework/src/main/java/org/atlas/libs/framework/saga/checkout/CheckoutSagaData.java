@@ -35,7 +35,7 @@ public class CheckoutSagaData {
   @Setter
   public static class User {
 
-    private String userId;
+    private String id;
     private String firstName;
     private String lastName;
     private String email;
@@ -74,7 +74,7 @@ public class CheckoutSagaData {
   @Setter
   public static class Product {
 
-    private String productId;
+    private String id;
     private String name;
     private BigDecimal price;
     private String image;

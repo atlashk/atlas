@@ -30,6 +30,7 @@ public class JpaOutboxMessage extends JpaBaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @EqualsAndHashCode.Include
   private Integer id;
 
   @Column(name = "message")

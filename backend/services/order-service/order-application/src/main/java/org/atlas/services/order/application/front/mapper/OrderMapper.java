@@ -29,6 +29,7 @@ public interface OrderMapper {
 
   Address toAddress(CheckoutInput.Address address);
 
+  @Mapping(target = "orderId", source = "id")
   @Mapping(target = "paymentGatewayId", source = "payment.paymentGatewayId")
   CheckoutSagaData toCheckoutSagaData(OrderEntity entity);
 

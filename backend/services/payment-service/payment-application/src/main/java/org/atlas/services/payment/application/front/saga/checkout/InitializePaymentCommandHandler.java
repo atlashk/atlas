@@ -6,6 +6,8 @@ import org.atlas.libs.framework.constant.CommonConstant;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
 import org.atlas.libs.framework.domain.payment.PaymentStatus;
+import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
+import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.libs.framework.util.ExceptionUtil;
 import org.atlas.libs.framework.json.jackson.JacksonService;
 import org.atlas.libs.framework.payment.PaymentGatewayService;
@@ -34,6 +36,7 @@ public class InitializePaymentCommandHandler {
   private final ApplicationContext applicationContext;
   private final PaymentRepository paymentRepository;
   private final PaymentGatewayRepository paymentGatewayRepository;
+  private final SequenceGenerator sequenceGenerator;
 
   @SagaCommandHandler(command = CheckoutCommand.INITIALIZE_PAYMENT)
   public SagaCommandResult initializePayment(SagaCommand sagaCommand) {
@@ -65,7 +68,8 @@ public class InitializePaymentCommandHandler {
 
     // Insert new payment entity
     PaymentEntity payment = new PaymentEntity();
-    payment.setUserId(checkoutSagaData.getUser().getUserId());
+    payment.setId(sequenceGenerator.generate(SequenceType.PAYMENT));
+    payment.setUserId(checkoutSagaData.getUser().getId());
     payment.setOrderId(checkoutSagaData.getOrderId());
     payment.setSagaId(sagaCommand.getSagaId());
     payment.setAmount(checkoutSagaData.getAmount());

@@ -5,7 +5,7 @@ SERVICE_NAME=""
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_DIR="$SCRIPT_DIR"
-DIST_DIR="$BACKEND_DIR/deployment/dist"
+DIST_DIR="$BACKEND_DIR/dist"
 REBUILD_SCRIPT="$DIST_DIR/rebuild.sh"
 
 info() { printf "[INFO] %s\n" "$*"; }
