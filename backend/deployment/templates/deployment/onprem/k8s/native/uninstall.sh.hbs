@@ -36,11 +36,24 @@ remove_namespace() {
   fi
 }
 
+remove_atlas_images() {
+  echo "Removing Atlas application images..."
+  # Check if docker is available
+  if command -v docker >/dev/null 2>&1; then
+    # Remove all images with atlas-* pattern
+    docker images --format "{{.Repository}}:{{.Tag}}" | grep "^atlas-" | xargs -r docker rmi -f 2>/dev/null || true
+    echo "Atlas images removed"
+  else
+    echo "Docker not found, skipping image cleanup"
+  fi
+}
+
 main() {
   echo "Atlas On-Premise Kubernetes Platform - Cleaning up..."
   check_prerequisites
   echo "Namespace: $NAMESPACE"
   remove_namespace
+  remove_atlas_images
   echo "Atlas platform resources cleanup completed successfully!"
 }
 

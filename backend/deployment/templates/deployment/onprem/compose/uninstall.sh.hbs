@@ -26,13 +26,25 @@ check_docker_compose() {
     fi
 }
 
+remove_atlas_images() {
+    echo "Removing Atlas application images..."
+    # Remove all images with atlas/* pattern
+    docker images --format "{{.Repository}}:{{.Tag}}" | grep "^atlas/" | xargs -r docker rmi -f 2>/dev/null || true
+    echo "Atlas images removed"
+}
+
 # =============================================================================
 # MAIN EXECUTION
 # =============================================================================
 
 main() {
     check_docker_compose
+
+    echo "Stopping and removing containers..."
     $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" -p "$PROJECT_NAME" down -v
+
+    remove_atlas_images
+    
     echo "Cleanup completed successfully"
 }
 
