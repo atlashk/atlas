@@ -160,25 +160,6 @@ data:
         editable: true
         jsonData:
           maxLines: 1000
-          derivedFields:
-        {{#ifObservability "zipkin"}}
-            - datasourceUid: DS_ZIPKIN
-              matcherRegex: "traceID=(\\w+)"
-              name: TraceID
-              url: "$${__value.raw}"
-        {{/ifObservability}}
-        secureJsonData: { }
-    {{/ifObservability}}
-    {{#ifObservability "zipkin"}}
-      - name: Zipkin
-        type: zipkin
-        access: proxy
-        url: http://zipkin:9411
-        uid: DS_ZIPKIN
-        editable: true
-        jsonData:
-          nodeGraph:
-            enabled: true
         secureJsonData: { }
     {{/ifObservability}}
 ---

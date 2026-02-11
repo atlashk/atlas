@@ -13,5 +13,5 @@ public class InternalRetrieveUserListRequest {
 
   @NotEmpty
   @Schema(description = "List of unique identifiers for the users to be retrieved", example = "[1,2,3,4]")
-  private List<Integer> ids;
+  private List<String> ids;
 }

@@ -36,6 +36,7 @@ export class ProductFrontApi extends BaseApi {
       maxPrice: filters.maxPrice,
       brandId: filters.brandId || undefined,
       categoryIds: filters.categoryIds?.length ? filters.categoryIds : undefined,
+      mode: filters.mode || "DATABASE",
     };
     return this.post<Product[], SearchProductFilters>("/products/list", payload);
   }

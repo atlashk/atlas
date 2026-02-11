@@ -11,6 +11,7 @@ import React, {
   useState,
 } from "react";
 import SockJS from "sockjs-client";
+import { API_BASE_URL } from "@/config/env.config";
 
 // Define a more specific type for notification messages to avoid 'any'
 interface NotificationMessage {
@@ -116,7 +117,7 @@ export const RealtimeProvider = ({
         if (serviceInfo.serviceType === "sse") {
           console.log("Connecting to SSE");
           const eventSource = new EventSource(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/services/notification/sse/inapp/${userId}`,
+            `${API_BASE_URL}/services/notification/sse/inapp/${userId}`,
             { withCredentials: true }
           );
 
@@ -166,7 +167,7 @@ export const RealtimeProvider = ({
           connectionRef.current = eventSource;
         } else if (serviceInfo.serviceType === "websocket") {
           console.log("Connecting to WebSocket (STOMP)");
-          const endpoint = `${process.env.NEXT_PUBLIC_API_BASE_URL}/services/notification/ws`;
+          const endpoint = `${API_BASE_URL}/services/notification/ws`;
           const client = new StompClient({
             webSocketFactory: () => new SockJS(endpoint),
             reconnectDelay: 5000,

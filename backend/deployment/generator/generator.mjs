@@ -104,15 +104,15 @@ function registerHelpers() {
     const checks = {
       'mysql': getStackValue('datasource') === 'mysql',
       'postgres': getStackValue('datasource') === 'postgres' || getStackValue('datasource') === 'postgresql',
-      'redis': getStackValue('kv-store') === 'redis',
-      'kafka': getStackValue('messaging') === 'kafka',
-      'rabbitmq': getStackValue('messaging') === 'rabbitmq',
       'elasticsearch': getStackValue('full-text-search') === 'elasticsearch',
-      'minio': getStackValue('storage') === 'minio',
-      'smtp4dev': getStackValue('notification.email') === 'spring',
+      'redis': getStackValue('kv-store') === 'redis',
       'jwt': getStackValue('iam') === 'jwt',
       'keycloak': getStackValue('iam') === 'keycloak',
-      'nginx': getStackValue('reverse-proxy') === 'nginx',
+      'rest': getStackValue('internal-api') === 'rest',
+      'grpc': getStackValue('internal-api') === 'grpc',
+      'kafka': getStackValue('messaging') === 'kafka',
+      'rabbitmq': getStackValue('messaging') === 'rabbitmq',
+      'smtp4dev': getStackValue('notification.email') === 'spring',
       'prometheus': enableObservability && getStackValue('observability.metrics') === 'prometheus',
       'loki': enableObservability && getStackValue('observability.logging.stack') === 'loki',
       'promtail': enableObservability && getStackValue('observability.logging.stack') === 'loki',
@@ -121,7 +121,9 @@ function registerHelpers() {
         getStackValue('observability.logging.stack') === 'loki' ||
         getStackValue('observability.metrics') === 'prometheus' ||
         getStackValue('observability.tracing') === 'zipkin'
-      )
+      ),
+      'nginx': getStackValue('reverse-proxy') === 'nginx',
+      'minio': getStackValue('storage') === 'minio'
     };
 
     const result = checks[serviceName] || false;
@@ -325,12 +327,16 @@ function shouldSkipFileByPath(filePath, context) {
   let enableObservability = args['enable-observability'] === 'false' ? false : 
                             args['enable-observability'] === 'true' ? true : true;
 
+  // App stack name (e.g., onprem.compose, dev, onprem.k8s.native)
+  const appStack = args['app-stack'] || '';
+
   // Build template context with stack config + flags
   const templateContext = {
     stack,
     env: process.env,
     enableObservability,
-    infraOnly
+    infraOnly,
+    appStack
   };
 
   if (args.template && args.out) {

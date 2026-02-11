@@ -1,5 +1,6 @@
 import { clearAuthCookies, getCookie, isValidToken, setCookie } from '@/utils/cookies';
 import axios, { AxiosError } from "axios";
+import { API_BASE_URL } from '@/config/env.config';
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -15,8 +16,6 @@ export interface Metadata {
   totalPages: number;
   totalRecords: number;
 }
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // Enhanced token refresh state management
 let isRefreshing = false;

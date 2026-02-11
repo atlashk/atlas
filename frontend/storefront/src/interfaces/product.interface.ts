@@ -43,6 +43,7 @@ export interface SearchProductFilters {
   categoryIds?: number[];
   page: number;
   size: number;
+  mode?: "DATABASE" | "FULL_TEXT_SEARCH";
 }
 
 export interface ListProductFilters {

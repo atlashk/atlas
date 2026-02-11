@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+
+# Ensures that the script exits immediately if any command fails, or if you try to use an undefined variable.
 set -euo pipefail
 
 # =============================================================================
@@ -37,15 +39,15 @@ remove_namespace() {
 }
 
 remove_atlas_images() {
-  echo "Removing Atlas application images..."
-  # Check if docker is available
-  if command -v docker >/dev/null 2>&1; then
-    # Remove all images with atlas-* pattern
-    docker images --format "{{.Repository}}:{{.Tag}}" | grep "^atlas-" | xargs -r docker rmi -f 2>/dev/null || true
-    echo "Atlas images removed"
-  else
-    echo "Docker not found, skipping image cleanup"
-  fi
+    echo "Removing Atlas application images..."
+    # Remove all images with atlas/* pattern
+    local images=$(docker images --format "\{{.Repository}}:\{{.Tag}}" | grep "^atlas/" || true)
+    if [ -n "$images" ]; then
+        echo "$images" | xargs docker rmi -f 2>/dev/null || true
+        echo "Atlas images removed"
+    else
+        echo "No Atlas images found to remove"
+    fi
 }
 
 main() {

@@ -23,6 +23,7 @@ import org.springframework.web.client.RestClient;
 public class RestProductApiClient implements ProductApiClient {
 
   private final RestClient restClient;
+
   @Value("${app.api-client.rest.product-service.base-url:http://localhost:8082}")
   private String baseUrl;
 

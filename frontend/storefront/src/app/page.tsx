@@ -1,7 +1,7 @@
 'use client';
 
 import React, { Suspense } from 'react';
-import { ProductSearch } from '../components/front';
+import { ProductSearch } from '../components/product';
 import { Spinner } from '../components/ui/spinner';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 

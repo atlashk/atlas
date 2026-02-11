@@ -69,17 +69,18 @@ spec:
                   name: rabbitmq-secret
                   key: rabbitmq-password
             {{/hasService}}
-            {{#eq stack.apiClient.prefix "grpc"}}
+            {{#hasService "grpc"}}
             - name: API_CLIENT_GRPC_IAM_SERVICE_ADDRESS
               value: "static://iam-service:50051"
             - name: API_CLIENT_GRPC_PRODUCT_SERVICE_ADDRESS
               value: "static://product-service:50052"
-            {{else}}
+            {{/hasService}}
+            {{#hasService "rest"}}
             - name: API_CLIENT_REST_IAM_SERVICE_BASE_URL
               value: "http://iam-service:8081"
             - name: API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL
               value: "http://product-service:8082"
-            {{/eq}}
+            {{/hasService}}
             {{#ifObservability "zipkin"}}
             - name: ZIPKIN_ENDPOINT
               value: "http://zipkin:9411/api/v2/spans"

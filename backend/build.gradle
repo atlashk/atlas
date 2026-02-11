@@ -11,17 +11,8 @@ buildscript {
 
 // Load app stack configs
 def loadAppStack() {
-    def appStackFileName = project.findProperty('appStackFile') ?: System.getProperty('appStackFile')
-    File appStackFile
-    if (appStackFileName) {
-        // Respect explicit override; do not fallback when user specifies a file
-        appStackFile = new File(rootDir, "config/${appStackFileName}")
-    } else {
-        appStackFile = new File(rootDir, "config/app-stack.yml")
-        if (!appStackFile.exists()) {
-            appStackFile = new File(rootDir, "config/app-stack.dev.yml")
-        }
-    }
+    def appStackName = project.findProperty('appStack') ?: 'dev'
+    File appStackFile = new File(rootDir, "config/app-stack.${appStackName}.yml")
     if (!appStackFile.exists()) {
         throw new GradleException("App stack config file not found: ${appStackFile.absolutePath}")
     }

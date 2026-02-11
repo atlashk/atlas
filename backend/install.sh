@@ -224,6 +224,7 @@ generate_templates() {
   local deployment="$2"
   local infra_only="$3"
   local enable_observability="$4"
+  local app_stack="$5"
   
   ensure_generator_deps
   
@@ -236,7 +237,8 @@ generate_templates() {
         --out-dir "../dist" \
         --cfg "$cfg_file" \
         --infra-only "$infra_only" \
-        --enable-observability "$enable_observability"
+        --enable-observability "$enable_observability" \
+        --app-stack "$app_stack"
     )
   else
     warn "buildSrc templates directory not found: $BUILDSRC_TEMPLATES_DIR"
@@ -268,7 +270,8 @@ generate_templates() {
         --out-dir "../dist" \
         --cfg "$cfg_file" \
         --infra-only "$infra_only" \
-        --enable-observability "$enable_observability"
+        --enable-observability "$enable_observability" \
+        --app-stack "$app_stack"
     )
   else
     err "Deployment templates directory not found: $deployment_template_dir"
@@ -395,7 +398,7 @@ main() {
   convert_yaml_to_cfg "$config_file" "$temp_cfg_file"
 
   # Step 5: Generate templates
-  generate_templates "$temp_cfg_file" "$deployment" "$infra_only" "$enable_observability"
+  generate_templates "$temp_cfg_file" "$deployment" "$infra_only" "$enable_observability" "$app_stack"
   info "Generated files are available in: $DIST_DIR"
 
   # Step 6: Normalize line endings

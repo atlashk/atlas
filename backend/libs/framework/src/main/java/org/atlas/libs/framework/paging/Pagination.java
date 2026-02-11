@@ -11,15 +11,15 @@ import org.atlas.libs.framework.util.PagingUtil;
 public class Pagination {
 
   /* ---------- Common ---------- */
-  private Integer pageSize;
-  private Boolean hasNext;
+  private int pageSize;
+  private boolean hasNext;
 
   /* ---------- Offset (optional) ---------- */
-  private Integer currentPage;
+  private int currentPage;
 
   /* ---------- Countable only ---------- */
-  private Long totalRecords;
-  private Integer totalPages;
+  private long totalRecords;
+  private int totalPages;
 
   /* ---------- Factories ---------- */
 

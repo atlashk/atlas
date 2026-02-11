@@ -98,17 +98,17 @@ function CartPage() {
           <div className="p-2 bg-primary/10 rounded-lg">
             <ShoppingCart className="h-6 w-6 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h3 className="text-2xl font-bold text-gray-900">
             Shopping Cart
-          </h1>
+          </h3>
         </div>
 
         {isEmpty ? (
           <Card className="shadow-sm border-0 bg-white">
             <CardContent className="flex flex-col items-center justify-center py-8">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">
                 Your cart is empty
-              </h2>
+              </h3>
               <Button onClick={() => router.push("/")} size="lg" className="px-8">
                 <ArrowLeft className="h-4 w-4" />
                 Continue Shopping

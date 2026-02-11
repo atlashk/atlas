@@ -21,9 +21,9 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p\"$MYSQL_ROOT_PASSWORD\" || exit 1"]
       interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
     networks:
       - atlas-network
 
@@ -307,9 +307,9 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
       interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 60s
+      timeout: 10s
+      retries: 15
+      start_period: 90s
     networks:
       - atlas-network
 
@@ -320,7 +320,7 @@ services:
       context: ../../services/iam-service/iam-bootstrap
       dockerfile: Dockerfile
     ports:
-      - "8881:8081"
+      - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       {{#hasService "mysql"}}
@@ -452,6 +452,14 @@ services:
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       {{/ifObservability}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      {{#hasService "grpc"}}
+      - API_CLIENT_GRPC_IAM_SERVICE_ADDRESS=static://iam-service:50051
+      - API_CLIENT_GRPC_PRODUCT_SERVICE_ADDRESS=static://product-service:50052
+      {{/hasService}}
+      {{#hasService "rest"}}
+      - API_CLIENT_REST_IAM_SERVICE_BASE_URL=http://iam-service:8081
+      - API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL=http://product-service:8082
+      {{/hasService}}
     depends_on:
       eureka-server:
         condition: service_healthy

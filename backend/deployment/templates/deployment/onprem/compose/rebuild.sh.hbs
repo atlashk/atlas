@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+
+# Ensures that the script exits immediately if any command fails, or if you try to use an undefined variable.
+set -euo pipefail
+
+show_usage() {
+  echo "Usage: $0 <service-name>"
+  echo ""
+  echo "Arguments:"
+  echo "  <service-name>     Service name to rebuild (required)"
+  echo ""
+  echo "Available services:"
+  {{#each services}}
+  echo "  - {{this.name}}"
+  {{/each}}
+  echo ""
+  echo "Examples:"
+  echo "  $0 product-service"
+  echo "  $0 api-gateway"
+}
+
+# Check for help flag
+if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+  show_usage
+  exit 0
+fi
+
+# Get service name from first positional argument
+SERVICE_NAME="$1"
+
+if [[ -z "$SERVICE_NAME" ]]; then
+  echo "Error: Missing required argument <service-name>" >&2
+  echo ""
+  show_usage
+  exit 1
+fi
+
+APP_STACK="{{#if appStack}}{{appStack}}{{/if}}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+echo "==> Rebuilding service: $SERVICE_NAME"
+echo "==> Using app-stack config: $APP_STACK"
+
+# Determine module path and image name based on service type
+if [[ "$SERVICE_NAME" == "api-gateway" ]]; then
+  MODULE_PATH="infrastructure/spring-cloud-gateway-server"
+  IMAGE_NAME="atlas/api-gateway"
+  GRADLE_TASK=":infrastructure.spring-cloud-gateway-server:bootJar"
+else
+  # Remove -service suffix to get base name (e.g., product-service -> product)
+  BASE_NAME="${SERVICE_NAME%-service}"
+  MODULE_PATH="services/${SERVICE_NAME}/${BASE_NAME}-bootstrap"
+  IMAGE_NAME="atlas/${SERVICE_NAME}"
+  GRADLE_TASK=":services.${BASE_NAME}.bootstrap:bootJar"
+fi
+
+# Build JAR
+echo "==> Building JAR for $SERVICE_NAME..."
+cd "$PROJECT_ROOT"
+./gradlew "$GRADLE_TASK" -PappStack="$APP_STACK"
+
+# Remove old images with same tag to prevent duplicates
+echo "==> Removing old Docker image if exists..."
+docker rmi "${IMAGE_NAME}:latest" 2>/dev/null || true
+
+# Build Docker image
+echo "==> Building Docker image..."
+cd "$PROJECT_ROOT/$MODULE_PATH"
+docker build --no-cache -t "${IMAGE_NAME}:latest" .
+
+# Stop and remove old container
+echo "==> Stopping old container..."
+cd "$PROJECT_ROOT/deployment/dist"
+docker-compose -f docker-compose.yml -p atlas stop "$SERVICE_NAME" 2>/dev/null || true
+docker-compose -f docker-compose.yml -p atlas rm -f "$SERVICE_NAME" 2>/dev/null || true
+
+# Start with new image
+echo "==> Starting service with new image..."
+docker-compose -f docker-compose.yml -p atlas up -d "$SERVICE_NAME"
+
+# Show status
+echo ""
+echo "==> Service status:"
+docker-compose -f docker-compose.yml -p atlas ps "$SERVICE_NAME"
+
+echo ""
+echo "Rebuilt and restarted $SERVICE_NAME"

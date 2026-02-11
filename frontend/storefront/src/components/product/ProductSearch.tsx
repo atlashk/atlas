@@ -35,6 +35,7 @@ interface SearchFilters {
   maxPrice?: number;
   brandId?: string;
   categoryIds?: number[];
+  mode?: "DATABASE" | "FULL_TEXT_SEARCH";
 }
 
 const ProductSearch: React.FC = () => {
@@ -74,6 +75,7 @@ const ProductSearch: React.FC = () => {
     maxPrice: undefined,
     brandId: "",
     categoryIds: [],
+    mode: "DATABASE",
   });
 
   // Filter update functions
@@ -91,6 +93,7 @@ const ProductSearch: React.FC = () => {
       maxPrice: undefined,
       brandId: "",
       categoryIds: [],
+      mode: "DATABASE",
     });
   }, []);
 
@@ -180,6 +183,7 @@ const ProductSearch: React.FC = () => {
           categoryIds: filters.categoryIds?.length
             ? filters.categoryIds
             : undefined,
+          mode: filters.mode || "DATABASE",
         };
 
         const response = await productFrontApi.retrieveProductList(apiSearchParams);
@@ -306,6 +310,7 @@ const ProductSearch: React.FC = () => {
           maxPrice: undefined,
           brandId: "",
           categoryIds: [],
+          mode: "DATABASE",
         });
         setCommittedSearchFilters({});
       }
@@ -505,6 +510,37 @@ const ProductSearch: React.FC = () => {
                       )}
                     </>
                   )}
+                </div>
+
+                {/* Search Mode */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Search Mode
+                  </label>
+                  <div className="space-y-2">
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="searchMode"
+                        value="DATABASE"
+                        checked={formFilters.mode === "DATABASE"}
+                        onChange={(e) => updateFilter("mode", e.target.value as "DATABASE" | "FULL_TEXT_SEARCH")}
+                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                      />
+                      <span className="text-sm">Database Search</span>
+                    </label>
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="searchMode"
+                        value="FULL_TEXT_SEARCH"
+                        checked={formFilters.mode === "FULL_TEXT_SEARCH"}
+                        onChange={(e) => updateFilter("mode", e.target.value as "DATABASE" | "FULL_TEXT_SEARCH")}
+                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                      />
+                      <span className="text-sm">Full Text Search</span>
+                    </label>
+                  </div>
                 </div>
 
                 {/* Action Buttons */}

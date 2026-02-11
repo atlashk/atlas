@@ -355,6 +355,18 @@ interface CountryComboboxProps {
   hasError?: boolean;
 }
 
+// Memoized country item component to avoid unnecessary re-renders
+const CountryItem = React.memo<{
+  country: { code: string; name: string };
+  onClick: () => void;
+}>(({ country, onClick }) => (
+  <DropdownMenuItem onClick={onClick}>
+    <span className="truncate">{country.name}</span>
+    <span className="ml-2 text-muted-foreground">({country.code})</span>
+  </DropdownMenuItem>
+));
+CountryItem.displayName = "CountryItem";
+
 const CountryCombobox: React.FC<CountryComboboxProps> = ({
   value,
   onChange,
@@ -377,13 +389,49 @@ const CountryCombobox: React.FC<CountryComboboxProps> = ({
     return COUNTRY_MAP[value];
   }, [value]);
 
-  const handleOpenChange = (isOpen: boolean) => {
+  const handleOpenChange = React.useCallback((isOpen: boolean) => {
     setOpen(isOpen);
     if (isOpen) {
       // Reset search when opening for a fresh start
       setQuery("");
     }
-  };
+  }, []);
+
+  // Memoize click handlers to prevent re-creating on each render
+  const handleCountryClick = React.useCallback(
+    (code: string) => {
+      onChange(code);
+      setOpen(false);
+    },
+    [onChange]
+  );
+
+  // Virtual scrolling: only render visible items + buffer
+  const [visibleRange, setVisibleRange] = React.useState({ start: 0, end: 20 });
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+
+  const handleScroll = React.useCallback(() => {
+    if (!scrollRef.current) return;
+    const { scrollTop, clientHeight } = scrollRef.current;
+    const itemHeight = 36; // approximate height of each item
+    const buffer = 5; // render extra items above and below
+
+    const start = Math.max(0, Math.floor(scrollTop / itemHeight) - buffer);
+    const end = Math.min(
+      filtered.length,
+      Math.ceil((scrollTop + clientHeight) / itemHeight) + buffer
+    );
+
+    setVisibleRange({ start, end });
+  }, [filtered.length]);
+
+  // Reset visible range when filter changes
+  React.useEffect(() => {
+    setVisibleRange({ start: 0, end: 20 });
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  }, [filtered]);
 
   return (
     <DropdownMenu open={open} onOpenChange={handleOpenChange}>
@@ -404,8 +452,8 @@ const CountryCombobox: React.FC<CountryComboboxProps> = ({
           <ChevronDown className="h-4 w-4 opacity-60" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="data-[state=open]:animate-none data-[state=closed]:animate-none w-[var(--radix-dropdown-menu-trigger-width)]">
-        <div className="p-2">
+      <DropdownMenuContent className="data-[state=open]:animate-none data-[state=closed]:animate-none w-[var(--radix-dropdown-menu-trigger-width)] p-0">
+        <div className="p-2 sticky top-0 bg-popover border-b z-10">
           <UiInput
             autoFocus
             placeholder="Type to filter countries..."
@@ -413,20 +461,30 @@ const CountryCombobox: React.FC<CountryComboboxProps> = ({
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
-        <div className="max-h-64 overflow-y-auto">
-          {filtered.map((c) => (
-            <DropdownMenuItem
-              key={c.code}
-              onClick={() => {
-                onChange(c.code);
-                setOpen(false);
-              }}
-            >
-              <span className="truncate">{c.name}</span>
-              <span className="ml-2 text-muted-foreground">({c.code})</span>
-            </DropdownMenuItem>
-          ))}
-          {!filtered.length && (
+        <div 
+          ref={scrollRef}
+          className="max-h-64 overflow-y-auto"
+          onScroll={handleScroll}
+        >
+          {filtered.length > 0 ? (
+            <div style={{ height: `${filtered.length * 36}px`, position: 'relative' }}>
+              {filtered.slice(visibleRange.start, visibleRange.end).map((c, idx) => (
+                <div
+                  key={c.code}
+                  style={{
+                    position: 'absolute',
+                    top: `${(visibleRange.start + idx) * 36}px`,
+                    width: '100%',
+                  }}
+                >
+                  <CountryItem
+                    country={c}
+                    onClick={() => handleCountryClick(c.code)}
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
             <div className="px-2 py-3 text-sm text-muted-foreground">
               No matches
             </div>
