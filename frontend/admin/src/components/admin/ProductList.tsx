@@ -30,7 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { PRODUCT_STATUSES } from "@/constants";
+import { PRODUCT_STOCK_STATUSES } from "@/constants";
 import {
   FileType,
   type Brand,
@@ -39,7 +39,7 @@ import {
   type ListProductFilters,
   type Product,
 } from "@/interfaces/product.interface";
-import { formatCurrency, getProductStatusBadge } from "@/utils/formatter.util";
+import { formatCurrency, getProductStockStatusBadge } from "@/utils/formatter.util";
 import { getProductImageUrl } from "@/utils/productImage.util";
 
 import { Metadata } from "@/api/apiClient";
@@ -152,7 +152,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     keyword: undefined,
     minPrice: undefined,
     maxPrice: undefined,
-    status: undefined,
+    stockStatus: undefined,
     availableFrom: undefined,
     isActive: undefined,
     brandId: undefined,
@@ -167,7 +167,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     keyword: undefined,
     minPrice: undefined,
     maxPrice: undefined,
-    status: undefined,
+    stockStatus: undefined,
     availableFrom: undefined,
     isActive: undefined,
     brandId: undefined,
@@ -392,7 +392,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
           keyword: appliedFilters.keyword,
           minPrice: appliedFilters.minPrice,
           maxPrice: appliedFilters.maxPrice,
-          status: appliedFilters.status,
+          stockStatus: appliedFilters.stockStatus,
           availableFrom: appliedFilters.availableFrom,
           isActive: appliedFilters.isActive,
           brandId: appliedFilters.brandId,
@@ -542,16 +542,16 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
           {/* Row 2: Product Status, Available From, Activity */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
             <div className="space-y-2">
-              <Label htmlFor="status">Product Status</Label>
+              <Label htmlFor="stockStatus">Product Stock Status</Label>
               <Select
-                value={formFilters.status || ""}
-                onValueChange={(value) => handleFilterChange("status", value)}
+                value={formFilters.stockStatus || ""}
+                onValueChange={(value) => handleFilterChange("stockStatus", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="All Statuses" />
                 </SelectTrigger>
                 <SelectContent>
-                  {PRODUCT_STATUSES.map((status) => (
+                  {PRODUCT_STOCK_STATUSES.map((status) => (
                     <SelectItem key={status} value={status}>
                       {status}
                     </SelectItem>
@@ -790,7 +790,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                         <TableCell>{formatCurrency(product.price)}</TableCell>
                         <TableCell>{product.quantity}</TableCell>
                         <TableCell>
-                          {getProductStatusBadge(product.status)}
+                          {getProductStockStatusBadge(product.stockStatus)}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">

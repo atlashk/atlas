@@ -20,10 +20,7 @@ import org.atlas.libs.framework.domain.order.OrderStatus;
 public class AdminOrderResponse {
 
   @Schema(description = "Unique identifier of the order", example = "1")
-  private Integer id;
-
-  @Schema(description = "Order code", example = "ORD123456")
-  private String code;
+  private String id;
 
   @Schema(description = "Current status of the order (PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED)")
   private OrderStatus status;
@@ -58,7 +55,7 @@ public class AdminOrderResponse {
   public static class User {
 
     @Schema(description = "Unique identifier of the user", example = "1")
-    private Integer id;
+    private String id;
 
     @Schema(description = "First name of the user", example = "John")
     private String firstName;
@@ -118,7 +115,7 @@ public class AdminOrderResponse {
   public static class Product {
 
     @Schema(description = "Unique identifier of the product in the product", example = "789")
-    private Integer id;
+    private String id;
 
     @Schema(description = "Display name of the product", example = "iPhone 15 Pro Max 256GB")
     private String name;

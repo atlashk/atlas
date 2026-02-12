@@ -1,3 +1,10 @@
+export const ROLES = [
+  "ADMIN",
+  "USER"
+] as const;
+
+export type Role = typeof ROLES[number];
+
 // Auth constants
 export const AUTH_CONFIG = {
   PROFILE_CACHE_TTL: 5 * 60 * 1000, // 5 minutes

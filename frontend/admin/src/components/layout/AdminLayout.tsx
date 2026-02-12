@@ -19,8 +19,9 @@ import {
   SidebarProvider,
   SidebarTrigger
 } from "@/components/ui/sidebar";
-import { Package, ShoppingCart, Users } from "lucide-react";
+import { Package, ShoppingCart, Users, LayoutDashboard } from "lucide-react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import React from "react";
 
 interface AdminLayoutProps {
@@ -46,19 +47,30 @@ const menuItems = [
 ];
 
 function AppSidebar() {
+  const pathname = usePathname();
+  
   return (
     <Sidebar>
-      <SidebarContent className="pt-16">
+      {/* Logo Section */}
+      <div className="flex h-16 items-center border-b px-6">
+        <Link href="/admin/dashboard" className="flex items-center space-x-2">
+          <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Atlas Admin
+          </div>
+        </Link>
+      </div>
+      
+      <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url} className="flex items-center gap-2">
+                  <SidebarMenuButton asChild isActive={pathname === item.url}>
+                    <Link href={item.url} className="flex items-center gap-2">
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -104,17 +116,20 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b">
-          <div className="flex items-center gap-2 px-4">
+        <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4">
+          <div className="flex items-center gap-2">
             <SidebarTrigger />
             <Separator orientation="vertical" className="mr-2 h-4" />
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbPage>{getBreadcrumbText()}</BreadcrumbPage>
+                  <BreadcrumbPage className="font-semibold">{getBreadcrumbText()}</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
+          </div>
+          <div className="flex items-center gap-2">
+            {/* Optional: Add user menu or other actions here */}
           </div>
         </header>
         <div className="flex flex-col h-full">

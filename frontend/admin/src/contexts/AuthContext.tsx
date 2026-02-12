@@ -2,7 +2,7 @@
 
 import LoadingScreen from '@/components/common/LoadingScreen';
 import type { LoginRequest } from '@/interfaces/auth.interface';
-import type { User } from '@/interfaces/user.interface';
+import type { User } from '@/interfaces/iam.interface';
 import { useUserStore } from '@/stores/user.store';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 

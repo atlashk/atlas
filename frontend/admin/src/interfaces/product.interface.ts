@@ -1,12 +1,12 @@
-import { ProductStatus } from "@/constants";
+import { ProductStockStatus } from "@/constants";
 
 export interface Product {
-  id: number;
+  id: string;
   name: string;
   image: string;
   price: number;
+  stockStatus?: ProductStockStatus;
   quantity?: number;
-  status?: ProductStatus;
   availableFrom?: string;
   isActive?: boolean;
   brand?: Brand;
@@ -46,11 +46,11 @@ export interface SearchProductFilters {
 }
 
 export interface ListProductFilters {
-  id?: number;
+  id?: string;
   keyword?: string;
   minPrice?: number;
   maxPrice?: number;
-  status?: ProductStatus;
+  stockStatus?: ProductStockStatus;
   availableFrom?: string;
   isActive?: boolean;
   brandId?: string;
@@ -62,8 +62,8 @@ export interface ListProductFilters {
 export interface CreateProductRequest {
   name: string;
   price: number;
+  stockStatus: ProductStockStatus;
   quantity: number;
-  status: ProductStatus;
   availableFrom: string;
   isActive: boolean;
   brandId: number;
@@ -73,11 +73,11 @@ export interface CreateProductRequest {
 }
 
 export interface UpdateProductRequest {
-  id: number;
+  id: string;
   name: string;
   price: number;
+  stockStatus: ProductStockStatus;
   quantity: number;
-  status: ProductStatus;
   availableFrom: string;
   isActive: boolean;
   brandId: number;
@@ -98,11 +98,11 @@ export interface ImportProductRequest {
 }
 
 export interface ExportProductFilters {
-  id?: number;
+  id?: string;
   keyword?: string;
   minPrice?: number;
   maxPrice?: number;
-  status?: string;
+  stockStatus?: string;
   availableFrom?: string;
   isActive?: boolean;
   brandId?: string;

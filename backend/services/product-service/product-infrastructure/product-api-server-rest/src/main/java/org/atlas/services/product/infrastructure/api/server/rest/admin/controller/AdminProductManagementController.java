@@ -59,7 +59,6 @@ public class AdminProductManagementController {
     input.setPagingRequest(PagingRequest.of(request.getPage() - 1, request.getSize()));
 
     PagingResult<ProductEntity> productPage = adminProductService.retrieveProductList(input);
-
     PagingResult<AdminProductResponse> responseData = MapperUtil.mapPage(productPage,
         AdminProductMapper.INSTANCE::toProductResponse);
     return ApiResponseWrapper.successPage(responseData);

@@ -2,27 +2,6 @@
 
 set -euo pipefail
 
-# -------------------------------------------------------------
-# Atlas Deployment Script
-# -------------------------------------------------------------
-# Goal:
-# - Read app-stack configuration from config directory
-# - Generate files from templates in buildSrc and deployment directories
-# - Execute install.sh script
-#
-# Usage:
-#   ./install.sh [--app-stack <name>] [--skip-build] [--infra-only]
-#
-# Parameters:
-#   app-stack: Configuration name (e.g., dev, local.compose, local.k8s.native); via --app-stack
-#   skip-build: Optional; default false
-#   infra-only: Optional; default false
-#              If app-stack is 'dev' and infra-only not specified, default true
-#
-# Notes:
-# - Requires Node.js; will install 'ejs' if missing (via npm).
-# - On Windows, recommended to run in Git Bash or WSL.
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_DIR="$SCRIPT_DIR"
 

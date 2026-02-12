@@ -1,7 +1,8 @@
 app:
   cors:
     allowed-origins:
-      - http://localhost:8000 # Frontend
+      - http://localhost:8000 # Storefront
+      - http://localhost:8001 # Admin
     allowed-methods:
       - "GET"
       - "POST"

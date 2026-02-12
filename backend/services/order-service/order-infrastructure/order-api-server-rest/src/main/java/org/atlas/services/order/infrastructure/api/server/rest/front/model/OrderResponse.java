@@ -22,9 +22,6 @@ public class OrderResponse {
   @Schema(description = "Unique identifier of the order", example = "12345")
   private String id;
 
-  @Schema(description = "Unique order code for tracking and reference", example = "ORD-2024-001234")
-  private String code;
-
   @Schema(description = "Current status of the order (PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED)")
   private OrderStatus status;
 

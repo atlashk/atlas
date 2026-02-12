@@ -1,4 +1,4 @@
-import type { User } from '@/interfaces/user.interface';
+import type { User } from '@/interfaces/iam.interface';
 import type { LoginRequest, LoginResponse } from '@/interfaces/auth.interface';
 import { iamAuthenticationApi, iamFrontApi } from '@/api/index.api';
 import { AUTH_CONFIG } from '@/constants/auth.constants';

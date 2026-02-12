@@ -1,10 +1,9 @@
-import { OrderStatus } from "@/constants";
-import type { PaymentStatus } from "./payment.interface";
+import { OrderStatus, PaymentStatus } from "@/constants";
 import type { Product } from "./product.interface";
-import type { User } from "./user.interface";
+import type { User } from "./iam.interface";
 
 export interface Order {
-  id: number;
+  id: string;
   code: string;
   user?: User;
   address?: Address;
@@ -17,7 +16,7 @@ export interface Order {
 }
 
 export interface Payment {
-  id?: number;
+  id?: string;
   transactionId?: string;
   amount?: number;
   currency?: string;
@@ -56,7 +55,7 @@ export interface CheckoutRequest {
 }
 
 export interface CheckoutResponse {
-  orderId: number;
+  orderId: string;
 }
 
 export interface OrderStatusResponse {
@@ -65,12 +64,12 @@ export interface OrderStatusResponse {
 }
 
 export interface ListOrderFilters {
-  orderId?: number;
-  userId?: number;
-  productId?: number;
+  id?: string;
+  userId?: string;
+  productId?: string;
   status?: string;
   startDate?: string;
   endDate?: string;
-  page: number
-  size: number
+  page: number;
+  size: number;
 }

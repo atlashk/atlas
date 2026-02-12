@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
+import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.iam.infrastructure.api.server.rest.admin.mapper.AdminUserMapper;
@@ -47,8 +48,9 @@ public class AdminUserManagementController {
   ) throws Exception {
     AdminRetrieveUserListInput input = AdminUserMapper.INSTANCE
         .toAdminRetrieveUserListInput(request);
+    input.setPagingRequest(PagingRequest.of(request.getPage() - 1, request.getSize()));
+    
     PagingResult<AdminUserOutput> userPage = adminUserService.retrieveUserList(input);
-
     PagingResult<AdminUserResponse> responseData = MapperUtil.mapPage(userPage,
         AdminUserMapper.INSTANCE::toUserResponse);
     return ApiResponseWrapper.successPage(responseData);

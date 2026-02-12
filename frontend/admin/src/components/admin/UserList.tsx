@@ -31,7 +31,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ROLES } from "@/constants";
-import type { ListUserFilters, User } from "@/interfaces/user.interface";
+import type { ListUserFilters, User } from "@/interfaces/iam.interface";
 import { Loader2, RotateCcw, Search } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";

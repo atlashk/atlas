@@ -1,7 +1,7 @@
 "use client";
 
 import { productFrontApi, productAdminApi } from "@/api/index.api";
-import AdminLayout from "@/components/admin/AdminLayout";
+import AdminLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { PRODUCT_STATUSES } from "@/constants";
+import { PRODUCT_STOCK_STATUSES } from "@/constants";
 import { withRequireAdmin } from "@/hoc/withAuth";
 
 import {
@@ -44,8 +44,8 @@ const productSchema = z.object({
   id: z.number().min(1, "Product ID is required"),
   name: z.string().min(1, "Product name is required"),
   price: z.number().min(0, "Price must be greater than or equal to 0"),
+  stockStatus: z.enum(PRODUCT_STOCK_STATUSES),
   quantity: z.number().min(0, "Quantity must be greater than or equal to 0"),
-  status: z.enum(PRODUCT_STATUSES),
   availableFrom: z.string().min(1, "Available from date is required"),
   isActive: z.boolean(),
   brandId: z.number().min(1, "Please select a brand"),
@@ -85,57 +85,13 @@ function AdminProductEditPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
-  // Load brands data
-  const loadBrands = useCallback(async () => {
-    try {
-      setIsLoadingBrands(true);
-
-      const brandsResponse = await productFrontApi.retrieveAllBrand();
-
-      if (!brandsResponse.success) {
-        throw new Error(brandsResponse.errorMessage || "Failed to load brands");
-      }
-
-      setBrands(brandsResponse.data || []);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to load brands";
-      toast.error(errorMessage);
-    } finally {
-      setIsLoadingBrands(false);
-    }
-  }, []);
-
-  // Load categories data
-  const loadCategories = useCallback(async () => {
-    try {
-      setIsLoadingCategories(true);
-
-      const categoriesResponse = await productFrontApi.retrieveAllCategory();
-
-      if (!categoriesResponse.success) {
-        throw new Error(
-          categoriesResponse.errorMessage || "Failed to load categories"
-        );
-      }
-
-      setCategories(categoriesResponse.data || []);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to load categories";
-      toast.error(errorMessage);
-    } finally {
-      setIsLoadingCategories(false);
-    }
-  }, []);
-
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: "",
       price: 0,
+      stockStatus: "IN_STOCK",
       quantity: 0,
-      status: "IN_STOCK",
       availableFrom: "",
       isActive: true,
       brandId: 0,
@@ -153,58 +109,6 @@ function AdminProductEditPage() {
     name: "attributes",
   });
 
-  const loadProduct = useCallback(async () => {
-    if (!productId) return;
-
-    setIsLoadingProduct(true);
-    try {
-      const productResponse = await productAdminApi.retrieveProduct(productId);
-      
-      if (productResponse.success) {
-        const productData = productResponse.data;
-        setProduct(productData);
-
-        // Format the date for datetime-local input
-        const availableFromDate = new Date(productData.availableFrom || new Date());
-        const formattedDate = availableFromDate.toISOString().slice(0, 16);
-
-        // Set form values
-        form.reset({
-          id: productData.id,
-          name: productData.name,
-          price: productData.price,
-          quantity: productData.quantity,
-          status: productData.status,
-          availableFrom: formattedDate,
-          isActive: productData.isActive,
-          brandId: productData.brand?.id || 0,
-          categoryIds: productData.categories?.map((cat) => cat.id) || [],
-          image: productData.image || "",
-          details: {
-            description: productData.details?.description || "",
-          },
-          attributes: productData.attributes || [],
-        });
-
-        // Set image preview
-        if (productData.image) {
-          setImagePreview(productData.image);
-        }
-
-        // Replace attributes array
-        replace(productData.attributes || []);
-      } else {
-        toast.error("Product not found");
-        router.push("/admin/product");
-      }
-    } catch {
-      toast.error("Failed to load product data");
-      router.push("/admin/product");
-    } finally {
-      setIsLoadingProduct(false);
-    }
-  }, [productId, form, replace, router]);
-
   // Load static data and product on component mount
   useEffect(() => {
     if (isInitialized.current) {
@@ -213,13 +117,106 @@ function AdminProductEditPage() {
     
     isInitialized.current = true;
     
+    const loadBrands = async () => {
+      try {
+        setIsLoadingBrands(true);
+        const brandsResponse = await productFrontApi.retrieveAllBrand();
+
+        if (!brandsResponse.success) {
+          throw new Error(brandsResponse.errorMessage || "Failed to load brands");
+        }
+
+        setBrands(brandsResponse.data || []);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Failed to load brands";
+        toast.error(errorMessage);
+      } finally {
+        setIsLoadingBrands(false);
+      }
+    };
+
+    const loadCategories = async () => {
+      try {
+        setIsLoadingCategories(true);
+        const categoriesResponse = await productFrontApi.retrieveAllCategory();
+
+        if (!categoriesResponse.success) {
+          throw new Error(
+            categoriesResponse.errorMessage || "Failed to load categories"
+          );
+        }
+
+        setCategories(categoriesResponse.data || []);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Failed to load categories";
+        toast.error(errorMessage);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+    
+    const loadProduct = async () => {
+      if (!productId) return;
+
+      setIsLoadingProduct(true);
+      try {
+        const productResponse = await productAdminApi.retrieveProduct(productId);
+        
+        if (productResponse.success) {
+          const productData = productResponse.data;
+          setProduct(productData);
+
+          // Format the date for datetime-local input
+          const availableFromDate = new Date(productData.availableFrom || new Date());
+          const formattedDate = availableFromDate.toISOString().slice(0, 16);
+
+          // Set form values
+          form.reset({
+            id: productData.id,
+            name: productData.name,
+            price: productData.price,
+            stockStatus: productData.stockStatus,
+            quantity: productData.quantity,
+            availableFrom: formattedDate,
+            isActive: productData.isActive,
+            brandId: productData.brand?.id || 0,
+            categoryIds: productData.categories?.map((cat) => cat.id) || [],
+            image: productData.image || "",
+            details: {
+              description: productData.details?.description || "",
+            },
+            attributes: productData.attributes || [],
+          });
+
+          // Set image preview
+          if (productData.image) {
+            setImagePreview(productData.image);
+          }
+
+          // Replace attributes array
+          replace(productData.attributes || []);
+        } else {
+          toast.error("Product not found");
+          router.push("/admin/product");
+        }
+      } catch {
+        toast.error("Failed to load product data");
+        router.push("/admin/product");
+      } finally {
+        setIsLoadingProduct(false);
+      }
+    };
+    
     const initializeData = async () => {
       await Promise.all([loadBrands(), loadCategories()]);
       await loadProduct();
     };
     
     initializeData();
-  }, [loadBrands, loadCategories, loadProduct]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productId]);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -397,8 +394,8 @@ function AdminProductEditPage() {
 
                   <FormField
                     control={form.control}
-                    name="status"
-                    render={({ field }: { field: ControllerRenderProps<ProductFormData, "status"> }) => (
+                    name="stockStatus"
+                    render={({ field }: { field: ControllerRenderProps<ProductFormData, "stockStatus"> }) => (
                       <FormItem>
                         <FormLabel>Status *</FormLabel>
                         <Select
@@ -411,7 +408,7 @@ function AdminProductEditPage() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {PRODUCT_STATUSES.map((status) => (
+                            {PRODUCT_STOCK_STATUSES.map((status) => (
                               <SelectItem key={status} value={status}>
                                 {formatStatusLabel(status)}
                               </SelectItem>

@@ -14,12 +14,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useEffect } from 'react';
 
 export default function NavBar() {
   const { user, logout } = useAuth();
-  const { getCartItemCount } = useCartStore();
+  const { getCartItemCount, loadCart } = useCartStore();
   
   const cartItemCount = getCartItemCount();
+
+  // Load cart when user is authenticated
+  useEffect(() => {
+    if (user) {
+      loadCart();
+    }
+  }, [user, loadCart]);
 
   const handleLogout = async () => {
     await logout();

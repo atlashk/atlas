@@ -1,7 +1,6 @@
-import type { User } from '@/interfaces/user.interface';
-import type { LoginRequest, LoginResponse } from '@/interfaces/auth.interface';
 import { iamAuthenticationApi, iamFrontApi } from '@/api/index.api';
-import { AUTH_CONFIG } from '@/constants/auth.constants';
+import { AUTH_CONFIG } from '@/constants';
+import type { LoginRequest, User } from '@/interfaces/iam.interface';
 import { createLogger } from '@/utils/logger';
 
 const logger = createLogger('AuthService');

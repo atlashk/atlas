@@ -1,11 +1,32 @@
 import { OrderStatus } from "@/constants";
 import type { PaymentStatus } from "./payment.interface";
 import type { Product } from "./product.interface";
-import type { User } from "./user.interface";
+import type { User } from "./iam.interface";
+
+export interface CartResponse {
+  id: number;
+  cartItems: CartItemResponse[];
+  totalAmount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CartItemResponse {
+  product: Product;
+  quantity: number;
+}
+
+export interface AddCartItemRequest {
+  productId: number;
+  quantity: number;
+}
+
+export interface UpdateCartItemRequest {
+  quantity: number;
+}
 
 export interface Order {
-  id: number;
-  code: string;
+  id: string;
   user?: User;
   address?: Address;
   orderItems: OrderItem[];
@@ -17,7 +38,7 @@ export interface Order {
 }
 
 export interface Payment {
-  id?: number;
+  id?: string;
   transactionId?: string;
   amount?: number;
   currency?: string;

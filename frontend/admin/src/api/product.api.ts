@@ -6,8 +6,7 @@ import {
   type ExportProductFilters,
   type ListProductFilters,
   type Product,
-  type SearchProductFilters,
-  type UpdateProductRequest,
+  type UpdateProductRequest
 } from "@/interfaces/product.interface";
 import { ApiResponse } from "./apiClient";
 import { BaseApi } from "./base.api";
@@ -24,25 +23,6 @@ export class ProductFrontApi extends BaseApi {
   async retrieveAllCategory(): Promise<ApiResponse<Category[]>> {
     return this.get<Category[]>("/categories");
   }
-
-  async retrieveProductList(
-    filters: Partial<SearchProductFilters> = {}
-  ): Promise<ApiResponse<Product[]>> {
-    const payload: SearchProductFilters = {
-      page: filters.page || 1,
-      size: filters.size || 20,
-      keyword: filters.keyword || undefined,
-      minPrice: filters.minPrice,
-      maxPrice: filters.maxPrice,
-      brandId: filters.brandId || undefined,
-      categoryIds: filters.categoryIds?.length ? filters.categoryIds : undefined,
-    };
-    return this.post<Product[], SearchProductFilters>("/products/list", payload);
-  }
-
-  async retrieveProduct(productId: number): Promise<ApiResponse<Product>> {
-    return this.get<Product>(`/products/${productId}`);
-  }
 }
 
 export class ProductAdminApi extends BaseApi {
@@ -56,8 +36,8 @@ export class ProductAdminApi extends BaseApi {
     return this.post<Product[], ListProductFilters>("/products/list", filters);
   }
 
-  async retrieveProduct(productId: number): Promise<ApiResponse<Product>> {
-    return this.get<Product>(`/products/${productId}`);
+  async retrieveProduct(id: string): Promise<ApiResponse<Product>> {
+    return this.get<Product>(`/products/${id}`);
   }
 
   async createProduct(
@@ -90,8 +70,8 @@ export class ProductAdminApi extends BaseApi {
     return this.put<void>(`/products/${data.id}`, formData);
   }
 
-  async deleteProduct(productId: number): Promise<ApiResponse<void>> {
-    return this.delete<void>(`/products/${productId}`);
+  async deleteProduct(id: string): Promise<ApiResponse<void>> {
+    return this.delete<void>(`/products/${id}`);
   }
 
   async importProduct(

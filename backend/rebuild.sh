@@ -12,40 +12,39 @@ info() { printf "[INFO] %s\n" "$*"; }
 err()  { printf "[ERROR] %s\n" "$*"; }
 
 show_usage() {
-  echo "Usage: $0 --service=<service-name>"
+  echo "Usage: $0 <service-name>"
   echo ""
-  echo "Options:"
-  echo "  --service=<name>     Service name to rebuild (required)"
+  echo "Arguments:"
+  echo "  <service-name>     Service name to rebuild (required)"
   echo ""
   echo "Examples:"
-  echo "  $0 --service=product-service"
-  echo "  $0 --service=api-gateway"
+  echo "  $0 product-service"
+  echo "  $0 api-gateway"
 }
 
 parse_args() {
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --service=*)
-        SERVICE_NAME="${1#*=}"
-        shift
-        ;;
-      -h|--help)
-        show_usage
-        exit 0
-        ;;
-      *)
-        err "Unknown option: $1"
-        show_usage
-        exit 1
-        ;;
-    esac
-  done
+  if [[ $# -eq 0 ]]; then
+    err "Missing required argument: service-name"
+    echo ""
+    show_usage
+    exit 1
+  fi
+
+  case "$1" in
+    -h|--help)
+      show_usage
+      exit 0
+      ;;
+    *)
+      SERVICE_NAME="$1"
+      ;;
+  esac
 }
 
 parse_args "$@"
 
 if [[ -z "$SERVICE_NAME" ]]; then
-  err "Missing required parameter: --service"
+  err "Missing service name"
   echo ""
   show_usage
   exit 1
@@ -60,6 +59,6 @@ fi
 info "Executing rebuild script for service: $SERVICE_NAME"
 chmod +x "$REBUILD_SCRIPT"
 
-"$REBUILD_SCRIPT" --service="$SERVICE_NAME"
+"$REBUILD_SCRIPT" "$SERVICE_NAME"
 
 info "Atlas rebuild completed successfully"

@@ -1,7 +1,7 @@
 "use client";
 
 import { productFrontApi, productAdminApi } from "@/api/index.api";
-import AdminLayout from "@/components/admin/AdminLayout";
+import AdminLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { PRODUCT_STATUSES } from "@/constants";
+import { PRODUCT_STOCK_STATUSES } from "@/constants";
 import { withRequireAdmin } from "@/hoc/withAuth";
 import {
   Brand,
@@ -41,8 +41,8 @@ import { z } from "zod";
 const productSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   price: z.number().min(0, "Price must be greater than or equal to 0"),
+  stockStatus: z.enum(PRODUCT_STOCK_STATUSES),
   quantity: z.number().min(0, "Quantity must be greater than or equal to 0"),
-  status: z.enum(PRODUCT_STATUSES),
   availableFrom: z.string().min(1, "Available from date is required"),
   isActive: z.boolean(),
   brandId: z.number().min(1, "Please select a brand"),
@@ -132,8 +132,8 @@ function AdminProductAddPage() {
     defaultValues: {
       name: "",
       price: 0,
+      stockStatus: "IN_STOCK",
       quantity: 0,
-      status: "IN_STOCK",
       availableFrom: "",
       isActive: true,
       brandId: 0,
@@ -282,10 +282,10 @@ function AdminProductAddPage() {
 
                   <FormField
                     control={form.control}
-                    name="status"
+                    name="stockStatus"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Status *</FormLabel>
+                        <FormLabel>Stock Status *</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
@@ -296,7 +296,7 @@ function AdminProductAddPage() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {PRODUCT_STATUSES.map((status) => (
+                            {PRODUCT_STOCK_STATUSES.map((status) => (
                               <SelectItem key={status} value={status}>
                                 {status}
                               </SelectItem>

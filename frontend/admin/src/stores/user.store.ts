@@ -1,11 +1,9 @@
-import { Role } from "@/constants";
-import { AUTH_STORAGE_KEYS } from "@/constants/auth.constants";
-import type { LoginRequest } from "@/interfaces/auth.interface";
-import type { RegisterRequest, User } from "@/interfaces/user.interface";
+import { AUTH_STORAGE_KEYS, Role } from "@/constants";
+import type { LoginRequest, RegisterRequest, User } from "@/interfaces/iam.interface";
 import { authService } from "@/services/auth.service";
 import { tokenManager } from "@/services/token.service";
-import { createLogger } from "@/utils/logger";
 import { isValidToken } from "@/utils/cookies";
+import { createLogger } from "@/utils/logger";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -32,9 +30,7 @@ interface UserActions {
     user: User | null;
   };
 
-  login: (
-    credentials: LoginRequest
-  ) => Promise<{ success: boolean; errorMessage?: string; userRole?: Role }>;
+  login: (credentials: LoginRequest) => Promise<{ success: boolean; errorMessage?: string; userRole?: Role }>;
   register: (userData: RegisterRequest) => Promise<void>;
   fetchProfile: (options?: { force?: boolean; skipCache?: boolean }) => Promise<void>;
   setTokens: (accessToken: string, refreshToken: string) => void;

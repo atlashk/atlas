@@ -1,13 +1,8 @@
-import { ProductStatus } from "@/constants";
-
 export interface Product {
   id: number;
   name: string;
   image: string;
   price: number;
-  quantity?: number;
-  status?: ProductStatus;
-  availableFrom?: string;
   isActive?: boolean;
   brand?: Brand;
   details?: ProductDetails;
@@ -35,7 +30,7 @@ export interface Category {
   name: string;
 }
 
-export interface SearchProductFilters {
+export interface RetrieveProductListFilter {
   keyword?: string;
   minPrice?: number;
   maxPrice?: number;
@@ -44,69 +39,4 @@ export interface SearchProductFilters {
   page: number;
   size: number;
   mode?: "DATABASE" | "FULL_TEXT_SEARCH";
-}
-
-export interface ListProductFilters {
-  id?: number;
-  keyword?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  status?: ProductStatus;
-  availableFrom?: string;
-  isActive?: boolean;
-  brandId?: string;
-  categoryIds?: number[];
-  page: number;
-  size: number;
-}
-
-export interface CreateProductRequest {
-  name: string;
-  price: number;
-  quantity: number;
-  status: ProductStatus;
-  availableFrom: string;
-  isActive: boolean;
-  brandId: number;
-  details: ProductDetails;
-  attributes: Omit<ProductAttribute, "id">[];
-  categoryIds: number[];
-}
-
-export interface UpdateProductRequest {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-  status: ProductStatus;
-  availableFrom: string;
-  isActive: boolean;
-  brandId: number;
-  details: ProductDetails;
-  attributes: ProductAttribute[];
-  categoryIds: number[];
-}
-
-export enum FileType {
-  CSV = "csv",
-  EXCEL = "excel",
-  PDF = "pdf",
-}
-
-export interface ImportProductRequest {
-  file: File;
-  fileType: FileType;
-}
-
-export interface ExportProductFilters {
-  id?: number;
-  keyword?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  status?: string;
-  availableFrom?: string;
-  isActive?: boolean;
-  brandId?: string;
-  categoryIds?: number[];
-  fileType: FileType;
 }

@@ -1,7 +1,6 @@
-// Essential auth interfaces - cleaned up version
+import { Role } from "@/constants";
 
-// Base types (used in useAuthRedirect and user.store)
-export type UserRole = 'USER' | 'ADMIN' | 'MODERATOR';
+export type UserRole = 'USER' | 'ADMIN';
 
 // Login interfaces (used in API calls)
 export interface LoginRequest {
@@ -22,4 +21,23 @@ export interface RefreshTokenRequest {
 export interface RefreshTokenResponse {
   accessToken: string;
   refreshToken: string;
+}
+
+export interface User {
+  id: number;
+  username: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  role: Role;
+}
+
+export interface RegisterRequest {
+  username: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
 }

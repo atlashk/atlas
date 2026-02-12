@@ -59,9 +59,9 @@ const OrderList: React.FC = () => {
   const isInitialized = useRef(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(true);
-  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [filters, setFilters] = useState<ListOrderFilters>({
-    orderId: undefined,
+    id: undefined,
     userId: undefined,
     productId: undefined,
     status: undefined,
@@ -78,7 +78,7 @@ const OrderList: React.FC = () => {
   });
 
   const toggleDetails = useCallback(
-    (orderId: number) => {
+    (orderId: string) => {
       setSelectedOrderId(selectedOrderId === orderId ? null : orderId);
     },
     [selectedOrderId]
@@ -138,7 +138,7 @@ const OrderList: React.FC = () => {
 
   const resetFilters = useCallback(() => {
     const resetFiltersData: ListOrderFilters = {
-      orderId: undefined,
+      id: undefined,
       userId: undefined,
       productId: undefined,
       status: undefined,
@@ -191,10 +191,10 @@ const OrderList: React.FC = () => {
                 type="number"
                 id="orderId"
                 placeholder="Enter order ID"
-                value={filters.orderId || ""}
+                value={filters.id || ""}
                 onChange={(e) =>
                   handleFilterChange(
-                    "orderId",
+                    "id",
                     e.target.value ? parseInt(e.target.value) : undefined
                   )
                 }

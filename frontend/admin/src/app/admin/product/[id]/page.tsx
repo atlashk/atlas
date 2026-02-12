@@ -1,14 +1,14 @@
 "use client";
 
 import { productAdminApi } from "@/api/index.api";
-import AdminLayout from "@/components/admin/AdminLayout";
+import AdminLayout from "@/components/layout/AdminLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { withRequireAdmin } from "@/hoc/withAuth";
 import { Product } from "@/interfaces/product.interface";
-import { getProductStatusBadge, formatCurrency } from "@/utils/formatter.util";
+import { formatCurrency, getProductStockStatusBadge } from "@/utils/formatter.util";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
@@ -23,7 +23,7 @@ function AdminProductDetailsPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const productId = parseInt(params.id as string, 10);
+  const productId = params.id as string;
 
   // Load product data
   const loadProduct = useCallback(async () => {
@@ -165,10 +165,10 @@ function AdminProductDetailsPage() {
 
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Status:</span>
-                    {getProductStatusBadge((product as Product).status)}
+                    {getProductStockStatusBadge((product as Product).stockStatus)}
                   </div>
 
-                  {(product as Product).status === "IN_STOCK" && (
+                  {(product as Product).stockStatus === "IN_STOCK" && (
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">Stock:</span>
                       <Badge variant="outline">{(product as Product).quantity}</Badge>

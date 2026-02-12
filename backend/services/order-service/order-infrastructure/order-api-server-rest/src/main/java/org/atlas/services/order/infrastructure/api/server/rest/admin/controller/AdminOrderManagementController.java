@@ -5,6 +5,7 @@ import java.util.List;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
+import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.order.infrastructure.api.server.rest.admin.mapper.OrderMapper;
@@ -33,6 +34,7 @@ public class AdminOrderManagementController {
   public ApiResponseWrapper<List<AdminOrderResponse>> retrieveOrderList(
       @Valid @RequestBody AdminRetrieveOrderListRequest request) throws Exception {
     AdminRetrieveOrderListInput input = OrderMapper.INSTANCE.toAdminRetrieveOrderListInput(request);
+    input.setPagingRequest(PagingRequest.of(request.getPage() - 1, request.getSize()));
 
     PagingResult<AdminOrderOutput> output = adminOrderService.retrieveOrderList(input);
     PagingResult<AdminOrderResponse> responseData = MapperUtil.mapPage(output,

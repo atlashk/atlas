@@ -17,8 +17,7 @@ import org.atlas.libs.framework.domain.payment.PaymentStatus;
 @Setter
 public class AdminOrderOutput {
 
-  private Integer id;
-  private String code;
+  private String id;
   private User user;
   private Address address;
   private List<OrderItem> orderItems;
@@ -45,7 +44,7 @@ public class AdminOrderOutput {
   @Setter
   public static class Product {
 
-    private String productId;
+    private String id;
     private String name;
     private BigDecimal price;
     private String image;
@@ -58,7 +57,7 @@ public class AdminOrderOutput {
   @Setter
   public static class User {
 
-    private Integer id;
+    private String id;
     private String firstName;
     private String lastName;
     private String email;
@@ -85,7 +84,7 @@ public class AdminOrderOutput {
   @Setter
   public static class Payment {
 
-    private Integer id;
+    private String id;
     private String transactionId;
     private BigDecimal amount;
     private String currency;

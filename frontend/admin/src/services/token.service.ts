@@ -1,5 +1,5 @@
-import { getCookie, setCookie, clearAuthCookies } from '@/utils/cookies';
-import { AUTH_STORAGE_KEYS } from '@/constants/auth.constants';
+import { AUTH_STORAGE_KEYS } from '@/constants';
+import { clearAuthCookies, getCookie, setCookie } from '@/utils/cookies';
 import { createLogger } from '@/utils/logger';
 
 const logger = createLogger('TokenManager');

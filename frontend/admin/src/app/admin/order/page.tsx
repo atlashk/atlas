@@ -1,6 +1,6 @@
 "use client";
 
-import AdminLayout from "@/components/admin/AdminLayout";
+import AdminLayout from "@/components/layout/AdminLayout";
 import OrderList from "@/components/admin/OrderList";
 import { withRequireAdmin } from "@/hoc/withAuth";
 
