@@ -1,11 +1,11 @@
-deployment: local-compose
+deployment: local-k8s-native
 datasource: mysql
 file:
   csv: opencsv
   excel: poi
   pdf: pdfbox
-full-text-search: none
-iam: jwt
+full-text-search: elasticsearch
+iam: keycloak
 internal-api: rest
 kv-store: redis
 messaging: kafka
@@ -15,14 +15,14 @@ notification:
   in-app: sse
 observability:
   logging:
-    stack: none
+    stack: loki
     framework: logback
-  metrics: none
-  tracing: none
+  metrics: prometheus
+  tracing: zipkin
 persistence: jpa
 redis: standalone
-reverse-proxy: none
+reverse-proxy: nginx
 scheduler: quartz
-service-discovery: eureka
-storage: filesystem
+service-discovery: kubernetes
+storage: minio
 template: freemarker

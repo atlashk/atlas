@@ -1,0 +1,272 @@
+#!/usr/bin/env bash
+
+# Ensures that the script exits immediately if any command fails, or if you try to use an undefined variable.
+set -euo pipefail
+
+SECONDS=0
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../../" && pwd)"
+NAMESPACE="atlas"
+MANIFESTS_DIR="$SCRIPT_DIR/manifests"
+
+SKIP_BUILD=false
+INFRA_ONLY=false
+ENABLE_OBSERVABILITY=true
+
+show_help() {
+  echo "Usage: $0 [--skip-build] [--infra-only] [--enable-observability <true|false>]"
+  echo ""
+  echo "Simplified Atlas Kubernetes deploy script"
+  echo "  --skip-build        Skip backend and Docker image builds"
+  echo "  --infra-only        Apply only infrastructure manifests"
+  echo "  --enable-observability <true|false>"
+}
+
+parse_arguments() {
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+      -h|--help)
+        show_help; exit 0;;
+      --skip-build)
+        SKIP_BUILD=true; shift;;
+      --infra-only)
+        INFRA_ONLY=true; SKIP_BUILD=true; shift;;
+      --enable-observability)
+        shift
+        if [[ $# -eq 0 || "$1" == -* ]]; then
+          echo "Missing value for --enable-observability" >&2
+          exit 1
+        fi
+        ENABLE_OBSERVABILITY="$1"; shift;;
+      --enable-observability=*)
+        ENABLE_OBSERVABILITY="${1#--enable-observability=}"
+        if [[ -z "$ENABLE_OBSERVABILITY" ]]; then
+          echo "Missing value for --enable-observability" >&2
+          exit 1
+        fi
+        shift;;
+      *)
+        echo "Unknown option: $1" >&2
+        echo "Use --help for usage information" >&2
+        exit 1;;
+    esac
+  done
+  ENABLE_OBSERVABILITY="$(echo "$ENABLE_OBSERVABILITY" | tr '[:upper:]' '[:lower:]')"
+  if [[ "$ENABLE_OBSERVABILITY" != "true" && "$ENABLE_OBSERVABILITY" != "false" ]]; then
+    echo "Invalid value for --enable-observability: $ENABLE_OBSERVABILITY" >&2
+    exit 1
+  fi
+}
+
+check_prerequisites() {
+  echo "Checking prerequisites..."
+  if ! command -v kubectl >/dev/null 2>&1; then
+    echo "kubectl is not installed" >&2; exit 1
+  fi
+  if ! kubectl cluster-info >/dev/null 2>&1; then
+    echo "Cannot connect to Kubernetes cluster" >&2; exit 1
+  fi
+  if [[ "$SKIP_BUILD" == false ]]; then
+    if ! command -v java >/dev/null 2>&1; then
+      echo "Java is not installed. Please install Java 17 or later." >&2; exit 1
+    fi
+    if ! docker info >/dev/null 2>&1; then
+      echo "Docker is not running. Please start Docker." >&2; exit 1
+    fi
+  fi
+  echo "Prerequisites check passed"
+}
+
+# =============================================================================
+# BUILD FUNCTIONS
+# =============================================================================
+
+build_services() {
+    echo "Building services..."
+
+    local build_script="$PROJECT_ROOT/backend/scripts/buildSrc/build.sh"
+    if [[ ! -f "$build_script" ]]; then
+        echo "Build script not found: $build_script" >&2
+        exit 1
+    fi
+
+    echo "Granting execute permissions to build scripts..."
+    chmod +x "$PROJECT_ROOT/backend/scripts/buildSrc/"*.sh
+
+    echo "Invoking build script..."
+    if "$build_script"; then
+        echo "Build completed successfully"
+    else
+        echo "Build failed" >&2
+        exit 1
+    fi
+    echo
+}
+
+# =============================================================================
+# DEPLOYMENT FUNCTIONS
+# =============================================================================
+
+create_namespace() {
+  if kubectl get namespace "$NAMESPACE" >/dev/null 2>&1; then
+    echo "Namespace '$NAMESPACE' already exists"
+  else
+    echo "Creating namespace '$NAMESPACE'"
+    kubectl create namespace "$NAMESPACE"
+  fi
+}
+
+apply_and_wait() {
+  local dir="$1"
+  local label="$2"
+  if [[ ! -d "$dir" ]]; then
+    return 0
+  fi
+  echo "Applying ${label} manifests..."
+  local apply_output
+  apply_output=$(kubectl apply -n "$NAMESPACE" -f "$dir")
+  echo "$apply_output"
+  local resources
+  resources=$(echo "$apply_output" | awk '{print $1}')
+  local crd_names
+  crd_names=$(echo "$resources" | awk -F'/' '/^customresourcedefinition(\.apiextensions\.k8s\.io)?\//{print $2}')
+  if [[ -n "$crd_names" ]]; then
+    echo "Waiting for applied CRDs to be Established..."
+    local wait_args=()
+    while IFS= read -r name; do
+      [[ -z "$name" ]] && continue
+      wait_args+=("customresourcedefinition.apiextensions.k8s.io/$name")
+    done <<< "$crd_names"
+    if [[ ${#wait_args[@]} -gt 0 ]]; then
+      kubectl wait --for=condition=Established "${wait_args[@]}" --timeout=0s || {
+        echo "CRDs failed to become Established" >&2
+        exit 1
+      }
+    fi
+  fi
+  local workloads
+  workloads=$(echo "$resources" |
+    sed -E 's/^deployment(\.apps)?\//deployment\//; s/^statefulset(\.apps)?\//statefulset\//; s/^daemonset(\.apps)?\//daemonset\//' |
+    grep -E '^(deployment|statefulset|daemonset)/' || true)
+  if [[ -n "$workloads" ]]; then
+    echo "Waiting for ${label} workloads to finish rollout in namespace '$NAMESPACE'..."
+    while IFS= read -r res; do
+      [[ -z "$res" ]] && continue
+      kubectl -n "$NAMESPACE" rollout status "$res" --timeout=0s || {
+        echo "Rollout did not complete for $res" >&2
+        exit 1
+      }
+    done <<< "$workloads"
+  fi
+  local jobs
+  jobs=$(echo "$resources" |
+    sed -E 's/^job(\.batch)?\//job\//' |
+    grep -E '^job/' || true)
+  if [[ -n "$jobs" ]]; then
+    echo "Waiting for ${label} jobs to complete in namespace '$NAMESPACE'..."
+    while IFS= read -r res; do
+      [[ -z "$res" ]] && continue
+      kubectl -n "$NAMESPACE" wait --for=condition=complete "$res" --timeout=0s || {
+        echo "Job did not complete: $res" >&2
+        exit 1
+      }
+    done <<< "$jobs"
+  fi
+}
+
+install_ingress_controller() {
+  {{#hasService "reverse-proxy" "nginx"}}
+  echo "Ensuring NGINX Ingress Controller is installed..."
+
+  # Detect cluster provider
+  local provider="baremetal"
+  if kubectl get nodes -o jsonpath='{.items[0].metadata.labels}' 2>/dev/null | grep -q 'ingress-ready=true'; then
+    provider="kind"
+  fi
+
+  # Check if already installed
+  if kubectl get namespace ingress-nginx >/dev/null 2>&1; then
+    echo "NGINX Ingress Controller namespace exists, checking deployment..."
+    if kubectl get deployment ingress-nginx-controller -n ingress-nginx >/dev/null 2>&1; then
+      echo "NGINX Ingress Controller already deployed"
+      return 0
+    fi
+  fi
+
+  # Install based on provider
+  echo "Installing NGINX Ingress Controller ($provider provider)..."
+  local manifest_url
+  if [[ "$provider" == "kind" ]]; then
+    manifest_url="https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml"
+  else
+    manifest_url="https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml"
+  fi
+
+  if ! kubectl apply -f "$manifest_url"; then
+    echo "Failed to install NGINX Ingress Controller" >&2
+    exit 1
+  fi
+
+  # Wait for readiness
+  echo "Waiting for NGINX Ingress Controller readiness..."
+  if ! kubectl wait \
+    --namespace ingress-nginx \
+    --for=condition=ready pod \
+    --selector=app.kubernetes.io/component=controller \
+    --timeout=0s; then
+    echo "Warning: NGINX Ingress Controller did not become ready" >&2
+    echo "Check status with: kubectl get pods -n ingress-nginx" >&2
+    exit 1
+  fi
+
+  echo "NGINX Ingress Controller is ready"
+  {{else}}
+  echo "Reverse proxy not set to NGINX; skipping ingress controller install"
+  {{/hasService}}
+}
+
+apply_manifests() {
+  echo "Applying Kubernetes manifests in namespace '$NAMESPACE'..."
+  apply_and_wait "$MANIFESTS_DIR/infrastructure" "infrastructure"
+  if [[ "$ENABLE_OBSERVABILITY" == "true" ]]; then
+    apply_and_wait "$MANIFESTS_DIR/observability" "observability"
+  fi
+  if [[ "$INFRA_ONLY" == "true" ]]; then
+    return 0
+  fi
+
+  apply_and_wait "$MANIFESTS_DIR/application" "application"
+  install_ingress_controller
+  apply_and_wait "$MANIFESTS_DIR/ingress" "ingress"
+}
+
+print_total_time() {
+  local d=$SECONDS
+  local h=$((d/3600))
+  local m=$(((d%3600)/60))
+  local s=$((d%60))
+  printf "Total runtime: %02d:%02d:%02d\n" "$h" "$m" "$s"
+}
+trap print_total_time EXIT
+
+# =============================================================================
+# MAIN EXECUTION
+# =============================================================================
+
+main() {
+  parse_arguments "$@"
+  check_prerequisites
+
+  if [[ "$SKIP_BUILD" == false ]]; then
+    build_services
+  else
+    echo "Skipping build step (--skip-build provided)"
+  fi
+
+  create_namespace
+
+  apply_manifests
+}
+
+main "$@"

@@ -34,8 +34,6 @@ def loadAppStack() {
         throw new GradleException("Failed to parse YAML file ${appStackFile.name}: ${e.message}")
     }
 
-    printf("Loaded app stack configuration from %s: %s%n", appStackFile.absolutePath, appStack)
-
     return appStack
 }
 

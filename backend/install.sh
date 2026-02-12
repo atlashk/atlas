@@ -14,7 +14,7 @@ set -euo pipefail
 #   ./install.sh [--app-stack <name>] [--skip-build] [--infra-only]
 #
 # Parameters:
-#   app-stack: Configuration name (e.g., onprem.compose, dev, onprem.k8s.native); via --app-stack
+#   app-stack: Configuration name (e.g., dev, local.compose, local.k8s.native); via --app-stack
 #   skip-build: Optional; default false
 #   infra-only: Optional; default false
 #              If app-stack is 'dev' and infra-only not specified, default true
@@ -29,8 +29,6 @@ BACKEND_DIR="$SCRIPT_DIR"
 CONFIG_DIR="$BACKEND_DIR/app-stack/config"
 GENERATOR_DIR="$BACKEND_DIR/app-stack/generator"
 TEMPLATES_DIR="$BACKEND_DIR/app-stack/templates"
-BUILDSRC_TEMPLATES_DIR="$TEMPLATES_DIR/buildSrc"
-DEPLOYMENT_TEMPLATES_DIR="$TEMPLATES_DIR/deployment"
 DIST_DIR="$BACKEND_DIR/dist"
 
 info() { printf "[INFO] %s\n" "$*"; }
@@ -50,7 +48,7 @@ usage() {
   echo "  -h, --help                            Show help and exit"
   echo ""
   echo "Defaults:"
-  echo "  - app-stack: onprem.compose"
+  echo "  - app-stack: dev"
   echo "  - skip-build: No"
   echo "  - infra-only: No"
   echo "  - enable-observability: true"
@@ -111,8 +109,8 @@ read_deployment_from_config() {
     if [[ -n "$deployment" ]]; then
       echo "$deployment"
     else
-      warn "No deployment field found in $config_file, defaulting to onprem-compose"
-      echo "onprem-compose"
+      warn "No deployment field found in $config_file, defaulting to dev"
+      echo "dev"
     fi
   else
     err "Config file not found: $config_file"
@@ -151,52 +149,37 @@ generate_templates() {
   local app_stack="$4"
   
   ensure_generator_deps
-  
-  info "Generating buildSrc templates..."
-  if [[ -d "$BUILDSRC_TEMPLATES_DIR" ]]; then
-    (
-      cd "$GENERATOR_DIR" || exit 1
-      node generator.mjs \
-        --dir "../templates/buildSrc" \
-        --out-dir "../../dist" \
-        --app-stack "$app_stack" \
-        --infra-only "$infra_only" \
-        --enable-observability "$enable_observability"
-    )
-  else
-    warn "buildSrc templates directory not found: $BUILDSRC_TEMPLATES_DIR"
-  fi
-  
-  info "Generating deployment templates for: $deployment"
-  local deployment_template_dir
-  local deployment_template_rel_path
+
+  info "Generating dist files from templates..."
+  local template_dir
+  local template_rel_path
   case "$deployment" in
-    onprem-compose)
-      deployment_template_dir="$DEPLOYMENT_TEMPLATES_DIR/onprem/compose"
-      deployment_template_rel_path="../templates/deployment/onprem/compose"
+    local-compose)
+      template_dir="$TEMPLATES_DIR/local/compose"
+      template_rel_path="../templates/local/compose"
       ;;
-    onprem-k8s-native)
-      deployment_template_dir="$DEPLOYMENT_TEMPLATES_DIR/onprem/k8s"
-      deployment_template_rel_path="../templates/deployment/onprem/k8s"
+    local-k8s-native)
+      template_dir="$TEMPLATES_DIR/local/k8s"
+      template_rel_path="../templates/local/k8s"
       ;;
     *)
       err "Unsupported deployment type: $deployment"
       exit 1
       ;;
   esac
-  
-  if [[ -d "$deployment_template_dir" ]]; then
+
+  if [[ -d "$template_dir" ]]; then
     (
       cd "$GENERATOR_DIR" || exit 1
       node generator.mjs \
-        --dir "$deployment_template_rel_path" \
+        --dir "$template_rel_path" \
         --out-dir "../../dist" \
         --app-stack "$app_stack" \
         --infra-only "$infra_only" \
         --enable-observability "$enable_observability"
     )
   else
-    err "Deployment templates directory not found: $deployment_template_dir"
+    err "Templates directory not found: $template_dir"
     exit 1
   fi
 }
@@ -218,7 +201,7 @@ execute_install_script() {
 }
 
 main() {
-  local app_stack="onprem.compose"
+  local app_stack="dev"
   local skip_build=false
   local infra_only=false
   local infra_only_specified=false

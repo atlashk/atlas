@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Generated simple clean script (Compose)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
+PROJECT_NAME="atlas"
+
+# Docker Compose command (will be set by check_docker_compose)
+DOCKER_COMPOSE_CMD="docker-compose"
+
+check_docker_compose() {
+    # Check for both docker-compose and docker compose (newer version)
+    if command -v docker-compose &> /dev/null; then
+        DOCKER_COMPOSE_CMD="docker-compose"
+        echo "Docker Compose (standalone) found"
+        return 0
+    elif docker compose version &> /dev/null; then
+        DOCKER_COMPOSE_CMD="docker compose"
+        echo "Docker Compose (plugin) found"
+        return 0
+    else
+        echo "Docker Compose is not installed or not available" >&2
+        echo "Please install Docker Compose or ensure Docker Desktop is running"
+        return 1
+    fi
+}
+
+remove_application_images() {
+    echo "Removing ${PROJECT_NAME} application images..."
+    # Remove all images with ${PROJECT_NAME}/* pattern
+    local images=$(docker images --format "\{{.Repository}}:\{{.Tag}}" | grep "^${PROJECT_NAME}/" || true)
+    if [ -n "$images" ]; then
+        echo "$images" | xargs docker rmi -f 2>/dev/null || true
+        echo "${PROJECT_NAME} images removed"
+    else
+        echo "No ${PROJECT_NAME} images found to remove"
+    fi
+}
+
+# =============================================================================
+# MAIN EXECUTION
+# =============================================================================
+
+main() {
+    check_docker_compose
+
+    echo "Stopping and removing containers..."
+    $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" -p "$PROJECT_NAME" down -v
+
+    remove_application_images    
+}
+
+# Execute main function
+main "$@"

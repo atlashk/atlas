@@ -130,67 +130,58 @@ function registerHelpers() {
     return (value || '').toString().toLowerCase();
   });
 
-  // Check if service should be enabled based on stack config
-  Handlebars.registerHelper('hasService', function(serviceName, options) {
-    const { stack, enableObservability, getStackValue } = this;
+  // Check if service matches based on stack config
+  // Usage: {{#hasService "datasource" "mysql"}}...{{/hasService}}
+  Handlebars.registerHelper('hasService', function(serviceType, serviceName, options) {
+    const { stack, getStackValue } = this;
     const stackValue = getStackValue || createStackAccessor(stack);
-
-    const checks = {
-      'mysql': stackValue('datasource') === 'mysql',
-      'postgres': stackValue('datasource') === 'postgres' || stackValue('datasource') === 'postgresql',
-      'elasticsearch': stackValue('full-text-search') === 'elasticsearch',
-      'redis': stackValue('kv-store') === 'redis',
-      'jwt': stackValue('iam') === 'jwt',
-      'keycloak': stackValue('iam') === 'keycloak',
-      'rest': stackValue('internal-api') === 'rest',
-      'grpc': stackValue('internal-api') === 'grpc',
-      'kafka': stackValue('messaging') === 'kafka',
-      'rabbitmq': stackValue('messaging') === 'rabbitmq',
-      'smtp4dev': stackValue('notification.email') === 'spring',
-      'prometheus': enableObservability && stackValue('observability.metrics') === 'prometheus',
-      'loki': enableObservability && stackValue('observability.logging.stack') === 'loki',
-      'promtail': enableObservability && stackValue('observability.logging.stack') === 'loki',
-      'zipkin': enableObservability && stackValue('observability.tracing') === 'zipkin',
-      'grafana': enableObservability && (
-        stackValue('observability.logging.stack') === 'loki' ||
-        stackValue('observability.metrics') === 'prometheus' ||
-        stackValue('observability.tracing') === 'zipkin'
-      ),
-      'nginx': stackValue('reverse-proxy') === 'nginx',
-      'minio': stackValue('storage') === 'minio'
-    };
-
-    const result = checks[serviceName] || false;
+    
+    // Get the value from stack using serviceType as the key
+    const actualValue = stackValue(serviceType);
+    
+    // Compare case-insensitive
+    const result = actualValue === (serviceName || '').toString().toLowerCase();
+    
     return result ? options.fn(this) : options.inverse(this);
   });
 
-  // Check multiple conditions with observability
-  Handlebars.registerHelper('ifObservability', function(service, options) {
+  // Check observability service - similar to hasService but with observability check
+  // Usage: {{#hasObservability "observability.metrics" "prometheus"}}...{{/hasObservability}}
+  Handlebars.registerHelper('hasObservability', function(serviceType, serviceName, options) {
+    // Check if observability is enabled first
     if (!this.enableObservability) {
       return options.inverse(this);
     }
     
     const { stack, getStackValue } = this;
     const stackValue = getStackValue || createStackAccessor(stack);
-
-    const checks = {
-      'prometheus': stackValue('observability.metrics') === 'prometheus',
-      'loki': stackValue('observability.logging.stack') === 'loki',
-      'zipkin': stackValue('observability.tracing') === 'zipkin',
-      'grafana': (
-        stackValue('observability.logging.stack') === 'loki' ||
-        stackValue('observability.metrics') === 'prometheus' ||
-        stackValue('observability.tracing') === 'zipkin'
-      )
-    };
-
-    const result = checks[service] || false;
+    
+    // Get the value from stack using serviceType as the key
+    const actualValue = stackValue(serviceType);
+    
+    // Compare case-insensitive
+    const result = actualValue === (serviceName || '').toString().toLowerCase();
+    
     return result ? options.fn(this) : options.inverse(this);
   });
 
-  // Lowercase helper
-  Handlebars.registerHelper('lower', function(str) {
-    return (str || '').toLowerCase();
+  // Special helper for Grafana - shows when any observability service is enabled
+  // Usage: {{#hasGrafana}}...{{/hasGrafana}}
+  Handlebars.registerHelper('hasGrafana', function(options) {
+    if (!this.enableObservability) {
+      return options.inverse(this);
+    }
+    
+    const { stack, getStackValue } = this;
+    const stackValue = getStackValue || createStackAccessor(stack);
+    
+    // Grafana is shown when any of these services are enabled
+    const hasPrometheus = stackValue('observability.metrics') === 'prometheus';
+    const hasLoki = stackValue('observability.logging.stack') === 'loki';
+    const hasZipkin = stackValue('observability.tracing') === 'zipkin';
+    
+    const result = hasPrometheus || hasLoki || hasZipkin;
+    return result ? options.fn(this) : options.inverse(this);
   });
 }
 
@@ -349,7 +340,7 @@ function shouldSkipFileByPath(filePath, context) {
   let enableObservability = args['enable-observability'] === 'false' ? false : 
                             args['enable-observability'] === 'true' ? true : true;
 
-  // App stack name (e.g., onprem.compose, dev, onprem.k8s.native)
+  // App stack name (e.g., dev, local.compose, local.k8s.native)
   const appStack = args['app-stack'] || '';
 
   // Build template context with stack config + flags

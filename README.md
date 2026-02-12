@@ -172,12 +172,12 @@ cd backend
 ```
 
 Supported app-stacks:
-- dev
-- onprem.compose (default)
-- onprem.k8s.native
+- dev (default)
+- local.compose
+- local.k8s.native
 
 Flags:
-- `--app-stack <name>` select the app-stack config (default: `onprem.compose`).
+- `--app-stack <name>` select the app-stack config (default: `local.compose`).
 - `--skip-build` skip building application services and use existing artifacts.
 - `--infra-only` deploy only infrastructure components and skip application services.
 - `--enable-observability <true|false>` toggle observability stacks in generated deployments.
