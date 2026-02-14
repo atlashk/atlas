@@ -167,12 +167,12 @@ public class KeycloakUserClient {
     }
   }
 
-  public void updateUser(UserEntity user, String password) {
+  public void updateUser(UserEntity user) {
     UsersResource usersResource = getUsersResource();
     try {
       // Update user info
       UserResource userResource = usersResource.get(user.getId());
-      UserRepresentation kcUser = toUserRepresentation(user, password);
+      UserRepresentation kcUser = toUserRepresentation(user);
       userResource.update(kcUser);
 
       // Assign role
@@ -201,20 +201,6 @@ public class KeycloakUserClient {
     }
   }
 
-  public void changePassword(String userId, String newPassword) {
-    UsersResource usersResource = getUsersResource();
-    try {
-      UserResource userResource = usersResource.get(userId);
-      CredentialRepresentation kcCredential = toCredentialRepresentation(newPassword);
-      userResource.resetPassword(kcCredential);
-      log.info("Changed Keycloak user password successfully: userId={}", userId);
-    } catch (Exception e) {
-      throw new KeycloakClientException(
-          String.format("Failed to change Keycloak user password: id=%s, reason=%s",
-              userId, e.getMessage()));
-    }
-  }
-
   private UsersResource getUsersResource() {
     RealmResource realm = keycloak.realm(keycloakProps.getRealm());
     return realm.users();
@@ -236,6 +222,17 @@ public class KeycloakUserClient {
     // Attributes
     kcUser.singleAttribute(KeycloakUserAttribute.PHONE_NUMBER.getName(), user.getPhoneNumber());
 
+    return kcUser;
+  }
+
+  private UserRepresentation toUserRepresentation(UserEntity user) {
+    UserRepresentation kcUser = new UserRepresentation();
+    kcUser.setUsername(user.getUsername());
+    kcUser.setFirstName(user.getFirstName());
+    kcUser.setLastName(user.getLastName());
+    kcUser.setEmail(user.getEmail());
+    kcUser.setEnabled(true);
+    kcUser.singleAttribute(KeycloakUserAttribute.PHONE_NUMBER.getName(), user.getPhoneNumber());
     return kcUser;
   }
 

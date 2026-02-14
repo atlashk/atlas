@@ -2,10 +2,13 @@ package org.atlas.services.iam.application.keycloak.auth;
 
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.atlas.libs.framework.context.Contexts;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
 import org.atlas.services.iam.application.keycloak.core.client.KeycloakAuthenticationClient;
+import org.atlas.services.iam.application.keycloak.core.client.KeycloakUserClient;
 import org.atlas.services.iam.application.keycloak.core.model.TokenResponse;
+import org.atlas.services.iam.domain.entity.UserEntity;
 import org.atlas.services.iam.port.in.auth.model.GenerateOneTimeTokenInput;
 import org.atlas.services.iam.port.in.auth.model.GenerateOneTimeTokenOutput;
 import org.atlas.services.iam.port.in.auth.model.LoginInput;
@@ -14,6 +17,7 @@ import org.atlas.services.iam.port.in.auth.model.OneTimeTokenLoginInput;
 import org.atlas.services.iam.port.in.auth.model.RefreshTokenInput;
 import org.atlas.services.iam.port.in.auth.model.RefreshTokenOutput;
 import org.atlas.services.iam.port.in.auth.service.AuthenticationService;
+import org.atlas.services.iam.port.in.front.model.ChangePasswordInput;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,6 +25,7 @@ import org.springframework.stereotype.Service;
 public class AuthenticationServiceImpl implements AuthenticationService {
 
   private final KeycloakAuthenticationClient keycloakAuthenticationClient;
+  private final KeycloakUserClient keycloakUserClient;
 
   @Override
   public Map<String, Object> jwkSet() {
@@ -44,6 +49,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   @Override
   public void logout(String accessToken) throws Exception {
     keycloakAuthenticationClient.logout(accessToken);
+  }
+
+  @Override
+  public void changePassword(ChangePasswordInput input) {
+    String userId = Contexts.getUserId();
+    UserEntity user = keycloakUserClient.retrieveUser(userId)
+        .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
+
+    // Verify the current password
+    try {
+      keycloakAuthenticationClient.login(user.getUsername(), input.getOldPassword());
+    } catch (Exception e) {
+      throw new DomainException(DomainError.WRONG_PASSWORD);
+    }
+
+    keycloakAuthenticationClient.changePassword(userId, input.getNewPassword());
   }
 
   @Override

@@ -2,7 +2,6 @@
 
 import { Metadata } from "@/api/apiClient";
 import { orderAdminApi } from "@/api/order.api";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -32,8 +31,8 @@ import {
 } from "@/components/ui/table";
 import { ORDER_STATUSES } from "@/constants";
 import {
-  type ListOrderFilters,
   type Order,
+  type RetrieveOrderFilter,
 } from "@/interfaces/order.interface";
 import {
   formatCurrency,
@@ -60,7 +59,7 @@ const OrderList: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(true);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
-  const [filters, setFilters] = useState<ListOrderFilters>({
+  const [filters, setFilters] = useState<RetrieveOrderFilter>({
     id: undefined,
     userId: undefined,
     productId: undefined,
@@ -85,7 +84,7 @@ const OrderList: React.FC = () => {
   );
 
   const applyFilters = useCallback(
-    async (page: number, currentFilters?: ListOrderFilters) => {
+    async (page: number, currentFilters?: RetrieveOrderFilter) => {
       setIsLoadingOrders(true);
       try {
         const filtersToUse = currentFilters || filters;
@@ -94,9 +93,9 @@ const OrderList: React.FC = () => {
         setMetadata((prev) => ({ ...prev, currentPage: page }));
 
         // Clean filters for API call - remove empty or undefined values
-        const apiFilters: ListOrderFilters = { ...updatedFilters };
+        const apiFilters: RetrieveOrderFilter = { ...updatedFilters };
         Object.keys(apiFilters).forEach((key) => {
-          const typedKey = key as keyof ListOrderFilters;
+          const typedKey = key as keyof RetrieveOrderFilter;
           if (
             apiFilters[typedKey] === "" ||
             apiFilters[typedKey] === undefined
@@ -137,7 +136,7 @@ const OrderList: React.FC = () => {
   );
 
   const resetFilters = useCallback(() => {
-    const resetFiltersData: ListOrderFilters = {
+    const resetFiltersData: RetrieveOrderFilter = {
       id: undefined,
       userId: undefined,
       productId: undefined,
@@ -153,7 +152,7 @@ const OrderList: React.FC = () => {
 
   const handleFilterChange = useCallback(
     (
-      field: keyof ListOrderFilters,
+      field: keyof RetrieveOrderFilter,
       value: string | number | boolean | undefined
     ) => {
       setFilters((prev) => ({ ...prev, [field]: value }));
@@ -188,45 +187,36 @@ const OrderList: React.FC = () => {
             <div className="space-y-2">
               <Label htmlFor="orderId">Order ID</Label>
               <Input
-                type="number"
+                type="text"
                 id="orderId"
                 placeholder="Enter order ID"
-                value={filters.id || ""}
+                value={filters.id ?? ""}
                 onChange={(e) =>
-                  handleFilterChange(
-                    "id",
-                    e.target.value ? parseInt(e.target.value) : undefined
-                  )
+                  handleFilterChange("id", e.target.value || undefined)
                 }
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="userId">User ID</Label>
               <Input
-                type="number"
+                type="text"
                 id="userId"
                 placeholder="Enter user ID"
-                value={filters.userId || ""}
+                value={filters.userId ?? ""}
                 onChange={(e) =>
-                  handleFilterChange(
-                    "userId",
-                    e.target.value ? parseInt(e.target.value) : undefined
-                  )
+                  handleFilterChange("userId", e.target.value || undefined)
                 }
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="productId">Product ID</Label>
               <Input
-                type="number"
+                type="text"
                 id="productId"
                 placeholder="Enter product ID"
-                value={filters.productId || ""}
+                value={filters.productId ?? ""}
                 onChange={(e) =>
-                  handleFilterChange(
-                    "productId",
-                    e.target.value ? parseInt(e.target.value) : undefined
-                  )
+                  handleFilterChange("productId", e.target.value || undefined)
                 }
               />
             </div>

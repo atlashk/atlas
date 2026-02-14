@@ -3,10 +3,7 @@
 import { NextActionHandler } from "@/components/payment/NextActionHandler";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  ORDER_STATUS_DESCRIPTIONS,
-  ORDER_STATUS_MESSAGES,
-} from "@/constants/checkout.constants";
+import { ORDER_STATUS_DESCRIPTIONS, ORDER_STATUS_MESSAGES } from "@/constants";
 import { OrderStatusResponse } from "@/interfaces/order.interface";
 import { PaymentGatewayResponse, PaymentNextAction } from "@/interfaces/payment.interface";
 import { useCartStore } from "@/stores/cart.store";

@@ -20,7 +20,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { LoginRequest } from "../../interfaces/auth.interface";
+import { LoginRequest } from "@/interfaces/iam.interface";
 import { useUserStore } from "../../stores/user.store";
 import { withGuestOnly } from "../../hoc/withAuth";
 

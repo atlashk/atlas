@@ -17,6 +17,8 @@ import org.atlas.services.iam.infrastructure.api.server.rest.auth.model.LoginRes
 import org.atlas.services.iam.infrastructure.api.server.rest.auth.model.OneTimeTokenLoginRequest;
 import org.atlas.services.iam.infrastructure.api.server.rest.auth.model.RefreshTokenRequest;
 import org.atlas.services.iam.infrastructure.api.server.rest.auth.model.RefreshTokenResponse;
+import org.atlas.services.iam.infrastructure.api.server.rest.front.mapper.UserMapper;
+import org.atlas.services.iam.infrastructure.api.server.rest.front.model.ChangePasswordRequest;
 import org.atlas.services.iam.port.in.auth.model.GenerateOneTimeTokenInput;
 import org.atlas.services.iam.port.in.auth.model.GenerateOneTimeTokenOutput;
 import org.atlas.services.iam.port.in.auth.model.LoginInput;
@@ -25,6 +27,7 @@ import org.atlas.services.iam.port.in.auth.model.OneTimeTokenLoginInput;
 import org.atlas.services.iam.port.in.auth.model.RefreshTokenInput;
 import org.atlas.services.iam.port.in.auth.model.RefreshTokenOutput;
 import org.atlas.services.iam.port.in.auth.service.AuthenticationService;
+import org.atlas.services.iam.port.in.front.model.ChangePasswordInput;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -41,6 +44,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthenticationController {
 
   private final AuthenticationService authenticationService;
+
+  @GetMapping(value = "/.well-known/jwks.json")
+  @Operation(summary = "JwkSet endpoint")
+  public Map<String, Object> jwkSet() throws Exception {
+    return authenticationService.jwkSet();
+  }
 
   @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "User login")
@@ -80,6 +89,16 @@ public class AuthenticationController {
     return ApiResponseWrapper.success();
   }
 
+  @PostMapping(value = "/change-password", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Change user password")
+  public ApiResponseWrapper<Void> changePassword(
+      @Parameter(description = "Request object containing the needed information to change user password", required = true)
+      @Valid @RequestBody ChangePasswordRequest request) {
+    ChangePasswordInput input = UserMapper.INSTANCE.toChangePasswordInput(request);
+    authenticationService.changePassword(input);
+    return ApiResponseWrapper.success();
+  }
+
   @PostMapping(value = "/ott/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "One-time token login")
   public ApiResponseWrapper<LoginResponse> oneTimeTokenLogin(
@@ -100,11 +119,5 @@ public class AuthenticationController {
     GenerateOneTimeTokenResponse response = AuthenticationMapper.INSTANCE
         .toGenerateOneTimeTokenResponse(output);
     return ApiResponseWrapper.success(response);
-  }
-
-  @GetMapping(value = "/.well-known/jwks.json")
-  @Operation(summary = "JwkSet endpoint")
-  public Map<String, Object> jwkSet() throws Exception {
-    return authenticationService.jwkSet();
   }
 }

@@ -13,6 +13,7 @@ import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.idm.CredentialRepresentation;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -73,9 +74,31 @@ public class KeycloakAuthenticationClient {
     userResource.logout();
   }
 
+  public void changePassword(String userId, String newPassword) {
+    UsersResource usersResource = getUsersResource();
+    try {
+      UserResource userResource = usersResource.get(userId);
+      CredentialRepresentation kcCredential = toCredentialRepresentation(newPassword);
+      userResource.resetPassword(kcCredential);
+      log.info("Changed Keycloak user password successfully: userId={}", userId);
+    } catch (Exception e) {
+      throw new KeycloakClientException(
+          String.format("Failed to change Keycloak user password: id=%s, reason=%s",
+              userId, e.getMessage()));
+    }
+  }
+
   private UsersResource getUsersResource() {
     RealmResource realm = keycloak.realm(keycloakProps.getRealm());
     return realm.users();
+  }
+
+  private CredentialRepresentation toCredentialRepresentation(String password) {
+    CredentialRepresentation kcCredential = new CredentialRepresentation();
+    kcCredential.setType(CredentialRepresentation.PASSWORD);
+    kcCredential.setValue(password);
+    kcCredential.setTemporary(Boolean.FALSE);
+    return kcCredential;
   }
 }
 

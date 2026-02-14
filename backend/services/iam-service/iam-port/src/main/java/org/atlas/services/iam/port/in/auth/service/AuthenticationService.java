@@ -8,6 +8,7 @@ import org.atlas.services.iam.port.in.auth.model.LoginOutput;
 import org.atlas.services.iam.port.in.auth.model.OneTimeTokenLoginInput;
 import org.atlas.services.iam.port.in.auth.model.RefreshTokenInput;
 import org.atlas.services.iam.port.in.auth.model.RefreshTokenOutput;
+import org.atlas.services.iam.port.in.front.model.ChangePasswordInput;
 
 public interface AuthenticationService {
 
@@ -18,6 +19,8 @@ public interface AuthenticationService {
   RefreshTokenOutput refreshToken(RefreshTokenInput input) throws Exception;
 
   void logout(String accessToken) throws Exception;
+
+  void changePassword(ChangePasswordInput input);
 
   LoginOutput oneTimeTokenLogin(OneTimeTokenLoginInput input) throws Exception;
   

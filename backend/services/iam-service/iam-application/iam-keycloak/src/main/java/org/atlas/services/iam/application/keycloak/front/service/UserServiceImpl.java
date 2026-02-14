@@ -11,7 +11,6 @@ import org.atlas.services.iam.application.keycloak.core.enums.KeycloakUserAttrib
 import org.atlas.services.iam.application.keycloak.event.service.UserEventService;
 import org.atlas.services.iam.application.keycloak.front.mapper.UserMapper;
 import org.atlas.services.iam.domain.entity.UserEntity;
-import org.atlas.services.iam.port.in.front.model.ChangePasswordInput;
 import org.atlas.services.iam.port.in.front.model.ProfileOutput;
 import org.atlas.services.iam.port.in.front.model.RegisterInput;
 import org.atlas.services.iam.port.in.front.service.UserService;
@@ -42,22 +41,6 @@ public class UserServiceImpl implements UserService {
     return keycloakUserClient.retrieveUser(userId)
         .map(UserMapper.INSTANCE::toProfileOutput)
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
-  }
-
-  @Override
-  public void changePassword(ChangePasswordInput input) {
-    String userId = Contexts.getUserId();
-    UserEntity user = keycloakUserClient.retrieveUser(userId)
-        .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
-
-    // Verify the current password
-    try {
-      keycloakAuthenticationClient.login(user.getUsername(), input.getOldPassword());
-    } catch (Exception e) {
-      throw new DomainException(DomainError.WRONG_PASSWORD);
-    }
-
-    keycloakUserClient.changePassword(userId, input.getNewPassword());
   }
 
   private void checkValidity(RegisterInput input) {

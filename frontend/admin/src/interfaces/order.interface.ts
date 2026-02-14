@@ -63,7 +63,7 @@ export interface OrderStatusResponse {
   cancellationReason?: string;
 }
 
-export interface ListOrderFilters {
+export interface RetrieveOrderFilter {
   id?: string;
   userId?: string;
   productId?: string;

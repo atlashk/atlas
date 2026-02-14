@@ -6,10 +6,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.services.iam.infrastructure.api.server.rest.front.mapper.UserMapper;
-import org.atlas.services.iam.infrastructure.api.server.rest.front.model.ChangePasswordRequest;
 import org.atlas.services.iam.infrastructure.api.server.rest.front.model.ProfileResponse;
 import org.atlas.services.iam.infrastructure.api.server.rest.front.model.RegisterRequest;
-import org.atlas.services.iam.port.in.front.model.ChangePasswordInput;
 import org.atlas.services.iam.port.in.front.model.ProfileOutput;
 import org.atlas.services.iam.port.in.front.model.RegisterInput;
 import org.atlas.services.iam.port.in.front.service.UserService;
@@ -45,15 +43,5 @@ public class UserController {
     ProfileOutput output = userService.retrieveProfile();
     ProfileResponse response = UserMapper.INSTANCE.toProfileResponse(output);
     return ApiResponseWrapper.success(response);
-  }
-
-  @PostMapping(value = "/change-password", produces = MediaType.APPLICATION_JSON_VALUE)
-  @Operation(summary = "Change user password")
-  public ApiResponseWrapper<Void> changePassword(
-      @Parameter(description = "Request object containing the needed information to change user password", required = true)
-      @Valid @RequestBody ChangePasswordRequest request) {
-    ChangePasswordInput input = UserMapper.INSTANCE.toChangePasswordInput(request);
-    userService.changePassword(input);
-    return ApiResponseWrapper.success();
   }
 }

@@ -1,5 +1,5 @@
 import type {
-  ListOrderFilters,
+  RetrieveOrderFilter,
   Order
 } from "@/interfaces/order.interface";
 import { ApiResponse } from "./apiClient";
@@ -10,7 +10,7 @@ export class OrderAdminApi extends BaseApi {
     super("/services/order/api/admin");
   }
 
-  async retrieveOrderList(filters: ListOrderFilters): Promise<ApiResponse<Order[]>> {
+  async retrieveOrderList(filters: RetrieveOrderFilter): Promise<ApiResponse<Order[]>> {
     const payload = {
       id: filters.id ? filters.id.toString() : undefined,
       userId: filters.userId ? filters.userId.toString() : undefined,

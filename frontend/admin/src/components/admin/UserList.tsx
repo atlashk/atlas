@@ -30,13 +30,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { ROLES } from "@/constants";
 import type { ListUserFilters, User } from "@/interfaces/iam.interface";
-import { Loader2, RotateCcw, Search } from "lucide-react";
+import { Edit, Loader2, Plus, RotateCcw, Search, Trash2 } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 const UserList: React.FC = () => {
+  const router = useRouter();
   const isInitialized = useRef(false);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
@@ -53,6 +65,9 @@ const UserList: React.FC = () => {
     totalPages: 1,
     totalRecords: 0,
   });
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const applyFilters = useCallback(
     async (page: number, currentFilters?: ListUserFilters) => {
@@ -131,6 +146,56 @@ const UserList: React.FC = () => {
   const handleSearch = useCallback(() => {
     applyFilters(1);
   }, [applyFilters]);
+
+  const openCreateUser = useCallback(() => {
+    router.push("/admin/user/add");
+  }, [router]);
+
+  const openEditUser = useCallback((user: User) => {
+    router.push(`/admin/user/${user.id}/edit`);
+  }, [router]);
+
+  const openDeleteDialog = useCallback((user: User) => {
+    setDeleteTarget(user);
+    setIsDeleteOpen(true);
+  }, []);
+
+  const closeDeleteDialog = useCallback(() => {
+    setIsDeleteOpen(false);
+    setDeleteTarget(null);
+  }, []);
+
+  const confirmDelete = useCallback(async () => {
+    if (!deleteTarget || isDeleting) return;
+    setIsDeleting(true);
+    try {
+      const response = await iamAdminApi.deleteUser(deleteTarget.id);
+      if (response.success) {
+        toast.success("User deleted successfully");
+        const targetPage =
+          users.length === 1 && metadata.currentPage > 1
+            ? metadata.currentPage - 1
+            : metadata.currentPage;
+        closeDeleteDialog();
+        applyFilters(targetPage);
+      } else {
+        toast.error(response.errorMessage || "Failed to delete user");
+      }
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to delete user";
+      toast.error(errorMessage);
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [
+    deleteTarget,
+    isDeleting,
+    users.length,
+    metadata.currentPage,
+    applyFilters,
+    closeDeleteDialog,
+  ]);
 
   // Load initial data on component mount
   useEffect(() => {
@@ -219,7 +284,13 @@ const UserList: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>User Results</CardTitle>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <CardTitle>User Results</CardTitle>
+            <Button onClick={openCreateUser}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add User
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoadingUsers ? (
@@ -238,13 +309,14 @@ const UserList: React.FC = () => {
                     <TableHead>Email</TableHead>
                     <TableHead>Phone</TableHead>
                     <TableHead>Role</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {users.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={6}
+                        colSpan={7}
                         className="text-center py-8 text-muted-foreground"
                       >
                         No users found
@@ -271,6 +343,25 @@ const UserList: React.FC = () => {
                             {user.role}
                           </Badge>
                         </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => openEditUser(user)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => openDeleteDialog(user)}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
                       </TableRow>
                     ))
                   )}
@@ -280,6 +371,28 @@ const UserList: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog open={isDeleteOpen} onOpenChange={(open) => (open ? setIsDeleteOpen(true) : closeDeleteDialog())}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete User</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget
+                ? `Are you sure you want to delete ${deleteTarget.username}? This action cannot be undone.`
+                : "Are you sure you want to delete this user?"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={closeDeleteDialog}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} disabled={isDeleting}>
+              {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Pagination */}
       {metadata.totalPages > 1 && (

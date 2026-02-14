@@ -6,7 +6,6 @@ import { useUserStore } from '@/stores/user.store';
 
 interface UseAuthRedirectOptions {
   requireAuth?: boolean;
-  requireAdmin?: boolean;
   redirectUnauthenticated?: string;
   redirectUnauthorized?: string;
   allowedRoles?: string[];
@@ -19,7 +18,6 @@ interface UseAuthRedirectOptions {
 export function useAuthRedirect(options: UseAuthRedirectOptions = {}) {
   const {
     requireAuth = false,
-    requireAdmin = false,
     redirectUnauthenticated = '/login',
     redirectUnauthorized = '/',
     allowedRoles = []
@@ -41,8 +39,7 @@ export function useAuthRedirect(options: UseAuthRedirectOptions = {}) {
     console.log('[useAuthRedirect] Checking access:', { 
       isUserAuthenticated, 
       userRole, 
-      requireAuth, 
-      requireAdmin 
+      requireAuth
     });
 
     // Handle unauthenticated users
@@ -56,35 +53,13 @@ export function useAuthRedirect(options: UseAuthRedirectOptions = {}) {
 
     // Handle authenticated users - role-based redirects
     if (isUserAuthenticated && userRole) {
-      // Admin users should go to admin dashboard from home
-      if (userRole === 'ADMIN' && window.location.pathname === '/') {
-        console.log('[useAuthRedirect] Admin user on home page, redirecting to dashboard');
-        router.push('/admin/dashboard');
-        return;
-      }
-
-      // Regular users should be blocked from admin routes
-      if (userRole === 'USER' && window.location.pathname.startsWith('/admin')) {
-        console.log('[useAuthRedirect] Regular user attempting to access admin route, redirecting home');
-        router.push('/');
-        return;
-      }
-
-      // Check admin requirement
-      if (requireAdmin && userRole !== 'ADMIN') {
-        console.log('[useAuthRedirect] User lacks admin privileges, redirecting');
-        router.push(redirectUnauthorized);
-        return;
-      }
-
-      // Check specific role requirements
       if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
         console.log('[useAuthRedirect] User role not in allowed roles, redirecting');
         router.push(redirectUnauthorized);
         return;
       }
     }
-  }, [loading, profileLoading, isAuthenticated, profile?.role, router, requireAuth, requireAdmin, redirectUnauthenticated, redirectUnauthorized, allowedRoles]);
+  }, [loading, profileLoading, isAuthenticated, profile?.role, router, requireAuth, redirectUnauthenticated, redirectUnauthorized, allowedRoles]);
 
   return {
     isLoading: loading || profileLoading,
@@ -97,7 +72,6 @@ export function useAuthRedirect(options: UseAuthRedirectOptions = {}) {
       const userRole = profile?.role;
 
       if (requireAuth && !isUserAuthenticated) return false;
-      if (requireAdmin && userRole !== 'ADMIN') return false;
       if (allowedRoles.length > 0 && userRole && !allowedRoles.includes(userRole)) return false;
 
       return true;
@@ -111,7 +85,7 @@ export function useAuthRedirect(options: UseAuthRedirectOptions = {}) {
  */
 export function useGuestRedirect() {
   const router = useRouter();
-  const { isAuthenticated, profile, loading, profileLoading } = useUserStore();
+  const { isAuthenticated, loading, profileLoading } = useUserStore();
 
   useEffect(() => {
     // Wait for both loading states
@@ -121,23 +95,19 @@ export function useGuestRedirect() {
     }
 
     const isUserAuthenticated = isAuthenticated();
-    const userRole = profile?.role;
 
     console.log('[useGuestRedirect] Checking guest access:', { 
-      isUserAuthenticated, 
-      userRole 
+      isUserAuthenticated
     });
 
-    if (isUserAuthenticated && userRole) {
-      console.log('[useGuestRedirect] User authenticated, redirecting based on role');
-      // Redirect based on user role
-      const destination = userRole === 'ADMIN' ? '/admin/dashboard' : '/';
-      router.push(destination);
+    if (isUserAuthenticated) {
+      console.log('[useGuestRedirect] User authenticated, redirecting to home');
+      router.push('/');
     }
-  }, [loading, profileLoading, isAuthenticated, profile?.role, router]);
+  }, [loading, profileLoading, isAuthenticated, router]);
 
   return {
     isLoading: loading || profileLoading,
-    shouldRedirect: isAuthenticated() && !!profile?.role
+    shouldRedirect: isAuthenticated()
   };
 }

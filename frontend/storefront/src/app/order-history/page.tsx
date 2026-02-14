@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/table";
 import { ORDER_STATUSES } from "@/constants";
 import { withAuth } from "@/hoc/withAuth";
-import { ListOrderFilters, Order } from "@/interfaces";
+import { RetrieveOrderListFilter, Order } from "@/interfaces";
 import {
   formatCurrency,
   formatDate,
@@ -53,10 +53,10 @@ const OrderHistoryContent: React.FC = () => {
   const isInitialized = useRef(false);
   const lastRefreshParam = useRef<string | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const [filters, setFilters] = useState<ListOrderFilters>({
+  const [filters, setFilters] = useState<RetrieveOrderListFilter>({
     status: undefined,
     startDate: undefined,
     endDate: undefined,
@@ -72,7 +72,7 @@ const OrderHistoryContent: React.FC = () => {
 
   // OrderHistory component functions
   const applyFilters = useCallback(
-    async (page: number, currentFilters?: ListOrderFilters) => {
+    async (page: number, currentFilters?: RetrieveOrderListFilter) => {
       // Prevent multiple simultaneous API calls
       if (isLoading || !isClient) return;
 
@@ -83,9 +83,9 @@ const OrderHistoryContent: React.FC = () => {
         setMetadata((prev) => ({ ...prev, currentPage: page }));
 
         // Clean up empty or undefined filters for API call
-        const apiFilters: ListOrderFilters = { ...updatedFilters };
+        const apiFilters: RetrieveOrderListFilter = { ...updatedFilters };
         Object.keys(apiFilters).forEach((key) => {
-          const typedKey = key as keyof ListOrderFilters;
+          const typedKey = key as keyof RetrieveOrderListFilter;
           if (
             apiFilters[typedKey] === "" ||
             apiFilters[typedKey] === undefined
@@ -126,7 +126,7 @@ const OrderHistoryContent: React.FC = () => {
   const resetFilters = useCallback(() => {
     if (isLoading) return;
 
-    const resetFilters: ListOrderFilters = {
+    const resetFilters: RetrieveOrderListFilter = {
       status: undefined,
       startDate: undefined,
       endDate: undefined,
@@ -138,7 +138,7 @@ const OrderHistoryContent: React.FC = () => {
   }, [applyFilters, isLoading]);
 
   const toggleDetails = useCallback(
-    (orderId: number) => {
+    (orderId: string) => {
       if (isLoading) return;
       setSelectedOrderId(selectedOrderId === orderId ? null : orderId);
     },
@@ -147,7 +147,7 @@ const OrderHistoryContent: React.FC = () => {
 
   const handleFilterChange = useCallback(
     (
-      field: keyof ListOrderFilters,
+      field: keyof RetrieveOrderListFilter,
       value: string | number | boolean | undefined
     ) => {
       setFilters((prev) => ({ ...prev, [field]: value }));
@@ -278,11 +278,15 @@ const OrderHistoryContent: React.FC = () => {
                   onChange={(e) => handleFilterChange("status", e.target.value)}
                 >
                   <option value="">All Statuses</option>
-                  {ORDER_STATUSES.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
-                  ))}
+                  {ORDER_STATUSES.map((status) => {
+                    const statusLabel = getOrderStatusBadge(status).props
+                      .children;
+                    return (
+                      <option key={status} value={status}>
+                        {statusLabel}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
             </div>
@@ -340,7 +344,7 @@ const OrderHistoryContent: React.FC = () => {
                     <div className="flex justify-between items-start">
                       <div className="space-y-2">
                         <p className="font-semibold text-lg">
-                          Order #{order.code} - {formatDate(order.createdAt)}
+                          Order #{order.id} - {formatDate(order.createdAt)}
                         </p>
                         <p>
                           <span className="font-medium">Total:</span>{" "}

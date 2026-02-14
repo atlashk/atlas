@@ -77,7 +77,6 @@ public class AdminUserServiceImpl implements AdminUserService {
         !Objects.equals(input.getLastName(), user.getLastName());
     
     AdminUserMapper.INSTANCE.merge(input, user);
-    user.setPassword(passwordEncoder.encode(input.getPassword()));
     userRepository.update(user);
 
     if (shouldPublishEvent) {

@@ -49,21 +49,6 @@ public class UserServiceImpl implements UserService {
     userEventService.publishUserCreatedEvent(user);
   }
 
-  @Override
-  @Transactional
-  public void changePassword(ChangePasswordInput input) {
-    String userId = Contexts.getUserId();
-    UserEntity user = userRepository.findById(userId)
-        .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
-
-    if (passwordEncoder.matches(input.getOldPassword(), user.getPassword())) {
-      throw new DomainException(DomainError.WRONG_PASSWORD);
-    }
-
-    user.setPassword(passwordEncoder.encode(input.getNewPassword()));
-    userRepository.update(user);
-  }
-
   private void checkValidity(RegisterInput input) {
     if (userRepository.existsByUsername(input.getUsername())) {
       throw new DomainException(DomainError.USERNAME_ALREADY_EXISTS);

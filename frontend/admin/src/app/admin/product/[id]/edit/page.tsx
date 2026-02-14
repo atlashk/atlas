@@ -6,6 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Form,
   FormControl,
   FormField,
@@ -35,13 +41,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useFieldArray, useForm, ControllerRenderProps } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
 const productSchema = z.object({
-  id: z.number().min(1, "Product ID is required"),
+  id: z.string().min(1, "Product ID is required"),
   name: z.string().min(1, "Product name is required"),
   price: z.number().min(0, "Price must be greater than or equal to 0"),
   stockStatus: z.enum(PRODUCT_STOCK_STATUSES),
@@ -70,8 +76,9 @@ type ProductFormData = z.infer<typeof productSchema>;
 function AdminProductEditPage() {
   const router = useRouter();
   const params = useParams();
-  const productId = parseInt(params.id as string, 10);
-  const isInitialized = useRef(false);
+  const productIdParam = params.id;
+  const productId = Array.isArray(productIdParam) ? productIdParam[0] : productIdParam;
+  const hasInitializedStaticData = useRef(false);
   const [isLoadingProduct, setIsLoadingProduct] = useState(true);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -88,6 +95,7 @@ function AdminProductEditPage() {
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: {
+      id: "",
       name: "",
       price: 0,
       stockStatus: "IN_STOCK",
@@ -111,12 +119,12 @@ function AdminProductEditPage() {
 
   // Load static data and product on component mount
   useEffect(() => {
-    if (isInitialized.current) {
+    if (hasInitializedStaticData.current) {
       return;
     }
-    
-    isInitialized.current = true;
-    
+
+    hasInitializedStaticData.current = true;
+
     const loadBrands = async () => {
       try {
         setIsLoadingBrands(true);
@@ -157,22 +165,32 @@ function AdminProductEditPage() {
       }
     };
     
-    const loadProduct = async () => {
-      if (!productId) return;
+    const initializeData = async () => {
+      await Promise.all([loadBrands(), loadCategories()]);
+    };
+    
+    initializeData();
+  }, []);
 
+  useEffect(() => {
+    if (!productId || typeof productId !== "string") {
+      setIsLoadingProduct(false);
+      setProduct(null);
+      return;
+    }
+
+    const loadProduct = async () => {
       setIsLoadingProduct(true);
       try {
         const productResponse = await productAdminApi.retrieveProduct(productId);
-        
+
         if (productResponse.success) {
           const productData = productResponse.data;
           setProduct(productData);
 
-          // Format the date for datetime-local input
           const availableFromDate = new Date(productData.availableFrom || new Date());
           const formattedDate = availableFromDate.toISOString().slice(0, 16);
 
-          // Set form values
           form.reset({
             id: productData.id,
             name: productData.name,
@@ -190,12 +208,10 @@ function AdminProductEditPage() {
             attributes: productData.attributes || [],
           });
 
-          // Set image preview
           if (productData.image) {
             setImagePreview(productData.image);
           }
 
-          // Replace attributes array
           replace(productData.attributes || []);
         } else {
           toast.error("Product not found");
@@ -208,15 +224,9 @@ function AdminProductEditPage() {
         setIsLoadingProduct(false);
       }
     };
-    
-    const initializeData = async () => {
-      await Promise.all([loadBrands(), loadCategories()]);
-      await loadProduct();
-    };
-    
-    initializeData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productId]);
+
+    loadProduct();
+  }, [form, productId, replace, router]);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -260,7 +270,7 @@ function AdminProductEditPage() {
 
       if (response.success) {
         toast.success("Product updated successfully!");
-        router.push(`/admin/product/${productId}`);
+        router.push(`/admin/product/${formData.id}`);
       } else {
         toast.error(response.errorMessage || "Failed to update product");
       }
@@ -506,28 +516,27 @@ function AdminProductEditPage() {
                             </span>
                           </div>
                         ) : (
-                          <Select value="placeholder" onValueChange={() => {}}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue>
-                                  {field.value && field.value.length > 0
-                                    ? `${field.value.length} categories selected`
-                                    : "Select categories"}
-                                </SelectValue>
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {categories.map((category) => (
-                                <label
-                                  key={category.id}
-                                  className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                    checked={field.value.includes(category.id)}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                      if (e.target.checked) {
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className="w-full justify-between font-normal"
+                                disabled={!categories.length}
+                              >
+                                {field.value && field.value.length > 0
+                                  ? `${field.value.length} categories selected`
+                                  : "Select categories"}
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-64">
+                              {categories.map((category) => {
+                                const isChecked = field.value.includes(category.id);
+                                return (
+                                  <DropdownMenuCheckboxItem
+                                    key={category.id}
+                                    checked={isChecked}
+                                    onCheckedChange={(checked) => {
+                                      if (checked) {
                                         field.onChange([
                                           ...field.value,
                                           category.id,
@@ -540,14 +549,13 @@ function AdminProductEditPage() {
                                         );
                                       }
                                     }}
-                                  />
-                                  <span className="text-sm">
+                                  >
                                     {category.name}
-                                  </span>
-                                </label>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                                  </DropdownMenuCheckboxItem>
+                                );
+                              })}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         )}
                         <FormMessage />
                       </FormItem>

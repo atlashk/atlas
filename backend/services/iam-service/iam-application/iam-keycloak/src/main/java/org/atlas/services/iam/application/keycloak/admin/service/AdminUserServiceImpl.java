@@ -78,7 +78,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         !Objects.equals(input.getLastName(), user.getLastName());
 
     AdminUserMapper.INSTANCE.merge(input, user);
-    keycloakUserClient.updateUser(user, input.getPassword());
+    keycloakUserClient.updateUser(user);
 
     if (shouldPublishEvent) {
       userEventService.publishUserUpdatedEvent(user);

@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.atlas.libs.framework.context.Contexts;
 import org.atlas.libs.framework.cryptography.HashingUtil;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
@@ -24,6 +25,7 @@ import org.atlas.services.iam.port.in.auth.model.OneTimeTokenLoginInput;
 import org.atlas.services.iam.port.in.auth.model.RefreshTokenInput;
 import org.atlas.services.iam.port.in.auth.model.RefreshTokenOutput;
 import org.atlas.services.iam.port.in.auth.service.AuthenticationService;
+import org.atlas.services.iam.port.in.front.model.ChangePasswordInput;
 import org.atlas.services.iam.port.out.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,6 +34,7 @@ import org.springframework.security.authentication.ott.OneTimeToken;
 import org.springframework.security.authentication.ott.OneTimeTokenAuthenticationToken;
 import org.springframework.security.authentication.ott.OneTimeTokenService;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,9 +43,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
 
+  private final UserRepository userRepository;
   private final AuthenticationManager authenticationManager;
   private final OneTimeTokenService oneTimeTokenService;
-  private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
   private final KvStoreService kvStoreService;
 
   @Override
@@ -51,6 +55,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public LoginOutput login(LoginInput input) throws Exception {
     Authentication authenticationToken = new UsernamePasswordAuthenticationToken(
         input.getUsername(), input.getPassword());
@@ -94,6 +99,21 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     long ttlMs = Math.max(1000L, expiresAt.getTime() - now);
     kvStoreService.put(SecurityConstant.TOKEN_BLACKLISTED_KV_STORE_NAME, hashedAccessToken, "1",
         Duration.ofMillis(ttlMs));
+  }
+
+  @Override
+  @Transactional
+  public void changePassword(ChangePasswordInput input) {
+    String userId = Contexts.getUserId();
+    UserEntity user = userRepository.findById(userId)
+        .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
+
+    if (passwordEncoder.matches(input.getOldPassword(), user.getPassword())) {
+      throw new DomainException(DomainError.WRONG_PASSWORD);
+    }
+
+    user.setPassword(passwordEncoder.encode(input.getNewPassword()));
+    userRepository.update(user);
   }
 
   @Override

@@ -19,9 +19,9 @@ import {
   SidebarProvider,
   SidebarTrigger
 } from "@/components/ui/sidebar";
-import { Package, ShoppingCart, Users, LayoutDashboard } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { Package, ShoppingCart, Users } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import React from "react";
 
 interface AdminLayoutProps {

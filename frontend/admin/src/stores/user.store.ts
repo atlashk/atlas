@@ -1,9 +1,8 @@
-import { AUTH_STORAGE_KEYS, Role } from "@/constants";
-import type { LoginRequest, RegisterRequest, User } from "@/interfaces/iam.interface";
-import { authService } from "@/services/auth.service";
-import { tokenManager } from "@/services/token.service";
-import { isValidToken } from "@/utils/cookies";
+import { AUTH_STORAGE_KEYS } from "@/constants";
+import type { LoginRequest, User } from "@/interfaces/iam.interface";
+import { iamAuthenticationApi, iamFrontApi } from "@/api/index.api";
 import { createLogger } from "@/utils/logger";
+import { clearAuthCookies, getCookie, isValidToken, setCookie } from "@/utils/cookies";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -12,28 +11,18 @@ const logger = createLogger('UserStore');
 interface UserState {
   profile: User | null;
   accessToken: string | null;
-  refreshToken: string | null;
   loading: boolean;
   error: string | null;
   profileLoading: boolean;
-  profileLastFetched: number | null;
 }
 
 interface UserActions {
   isAuthenticated: () => boolean;
-  isAdmin: () => boolean;
-  fullName: () => string;
-  hasRole: (role: string) => boolean;
-  authState: () => {
-    isAuthenticated: boolean;
-    isAdmin: boolean;
-    user: User | null;
-  };
 
-  login: (credentials: LoginRequest) => Promise<{ success: boolean; errorMessage?: string; userRole?: Role }>;
-  register: (userData: RegisterRequest) => Promise<void>;
-  fetchProfile: (options?: { force?: boolean; skipCache?: boolean }) => Promise<void>;
-  setTokens: (accessToken: string, refreshToken: string) => void;
+  login: (
+    credentials: LoginRequest
+  ) => Promise<{ success: boolean; errorMessage?: string }>;
+  fetchProfile: () => Promise<void>;
   logout: () => void;
   clearError: () => void;
   clearAuthState: () => void;
@@ -47,84 +36,48 @@ export const useUserStore = create<UserStore>()(
     (set, get) => ({
       profile: null,
       accessToken: null,
-      refreshToken: null,
       loading: false,
       error: null,
       profileLoading: false,
-      profileLastFetched: null,
 
       isAuthenticated: () => {
         const { accessToken } = get();
         return isValidToken(accessToken);
       },
 
-      isAdmin: () => {
-        const { profile } = get();
-        return profile?.role === "ADMIN";
-      },
-
-      fullName: () => {
-        const { profile } = get();
-        if (!profile) return "";
-        return `${profile.firstName} ${profile.lastName}`.trim();
-      },
-
-      hasRole: (role: string) => {
-        const { profile } = get();
-        return profile?.role === role;
-      },
-
-      authState: () => {
-        const state = get();
-        return {
-          isAuthenticated: state.isAuthenticated(),
-          isAdmin: state.isAdmin(),
-          user: state.profile,
-        };
-      },
-
       login: async (request: LoginRequest) => {
         set({ loading: true, error: null });
         
         try {
-          const result = await authService.login(request);
-          
-          if (result.success && result.accessToken && result.refreshToken) {
-            tokenManager.setTokens({
-              accessToken: result.accessToken,
-              refreshToken: result.refreshToken,
-            });
+          const response = await iamAuthenticationApi.login(request);
+
+          if (response.success && response.data) {
+            setCookie(AUTH_STORAGE_KEYS.ACCESS_TOKEN, response.data.accessToken);
+            setCookie(AUTH_STORAGE_KEYS.REFRESH_TOKEN, response.data.refreshToken);
 
             set({
-              accessToken: result.accessToken,
-              refreshToken: result.refreshToken,
+              accessToken: response.data.accessToken,
               profile: null,
               loading: false,
             });
 
             try {
               await get().fetchProfile();
-              const { profile } = get();
-              
-              return {
-                success: true,
-                userRole: profile?.role,
-              };
+              return { success: true };
             } catch (profileError) {
               logger.warn('Login successful but failed to fetch user profile', profileError);
               return {
                 success: true,
-                userRole: undefined,
               };
             }
           } else {
             set({
-              error: result.errorMessage || "Login failed",
+              error: response.errorMessage || "Login failed",
               loading: false,
             });
             return {
               success: false,
-              errorMessage: result.errorMessage || "Login failed",
+              errorMessage: response.errorMessage || "Login failed",
             };
           }
         } catch (error) {
@@ -138,32 +91,8 @@ export const useUserStore = create<UserStore>()(
         }
       },
 
-      register: async (userData: RegisterRequest) => {
-        set({ loading: true, error: null });
-        
-        try {
-          const { iamFrontApi } = await import('@/api/index.api');
-          const response = await iamFrontApi.register(userData);
-          
-          if (response.success) {
-            set({ loading: false });
-          } else {
-            set({
-              error: response.errorMessage || "Registration failed",
-              loading: false,
-            });
-          }
-        } catch (error) {
-          logger.error('Registration failed', error);
-          set({
-            error: error instanceof Error ? error.message : "Registration failed",
-            loading: false,
-          });
-        }
-      },
-
-      fetchProfile: async (options?: { force?: boolean; skipCache?: boolean }) => {
-        const { profile, profileLoading, accessToken, profileLastFetched } = get();
+      fetchProfile: async () => {
+        const { profileLoading, accessToken } = get();
         
         if (!isValidToken(accessToken)) {
           logger.info('No valid token, skipping profile fetch');
@@ -175,24 +104,16 @@ export const useUserStore = create<UserStore>()(
           return;
         }
 
-        const isCacheValid = authService.isProfileCacheValid(profileLastFetched);
-
-        if (!options?.skipCache && !options?.force && profile && isCacheValid) {
-          logger.info('Using cached profile');
-          return;
-        }
-
         logger.info('Fetching user profile...');
         set({ profileLoading: true, error: null });
         
         try {
-          const result = await authService.fetchProfile(options);
+          const result = await iamFrontApi.retrieveProfile();
           
-          if (result.success && result.profile) {
+          if (result.success && result.data) {
             set({
-              profile: result.profile,
+              profile: result.data,
               profileLoading: false,
-              profileLastFetched: Date.now(),
               error: null,
             });
           } else {
@@ -201,12 +122,10 @@ export const useUserStore = create<UserStore>()(
               profileLoading: false,
               error: result.errorMessage,
             });
-            tokenManager.clearTokens();
+            clearAuthCookies();
             set({
               accessToken: null,
-              refreshToken: null,
               profile: null,
-              profileLastFetched: null,
             });
           }
         } catch (error) {
@@ -215,34 +134,30 @@ export const useUserStore = create<UserStore>()(
             profileLoading: false,
             error: error instanceof Error ? error.message : 'Failed to load user profile',
           });
-          tokenManager.clearTokens();
+          clearAuthCookies();
           set({
             accessToken: null,
-            refreshToken: null,
             profile: null,
-            profileLastFetched: null,
           });
         }
       },
 
-      setTokens: (accessToken: string, refreshToken: string) => {
-        tokenManager.setTokens({ accessToken, refreshToken });
-        set({ accessToken, refreshToken });
-      },
-
       logout: async () => {
         logger.info('Logout initiated');
-        await authService.logout();
-        tokenManager.clearTokens();
+        try {
+          await iamAuthenticationApi.logout();
+          logger.info('Logout completed');
+        } catch (error) {
+          logger.error('Logout error', error);
+        }
+        clearAuthCookies();
         
         set({
           profile: null,
           accessToken: null,
-          refreshToken: null,
           loading: false,
           error: null,
           profileLoading: false,
-          profileLastFetched: null,
         });
         
         logger.info('Logout completed, redirecting to login');
@@ -257,38 +172,32 @@ export const useUserStore = create<UserStore>()(
       },
 
       clearAuthState: () => {
-        tokenManager.clearTokens();
+        clearAuthCookies();
         set({
           profile: null,
           accessToken: null,
-          refreshToken: null,
           loading: false,
           error: null,
           profileLoading: false,
-          profileLastFetched: null,
         });
       },
 
       initializeFromCookies: () => {
         logger.info('Initializing from cookies...');
         
-        const cookieAccessToken = tokenManager.getAccessToken();
-        const cookieRefreshToken = tokenManager.getRefreshToken();
+        const cookieAccessToken = getCookie(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
         const { accessToken } = get();
         
         if (isValidToken(cookieAccessToken) && !accessToken) {
           logger.info('Syncing valid tokens from cookies to store');
           set({
             accessToken: cookieAccessToken,
-            refreshToken: cookieRefreshToken,
           });
         } else if (!isValidToken(cookieAccessToken) && accessToken) {
           logger.info('Cookies invalid, clearing store');
           set({
             accessToken: null,
-            refreshToken: null,
             profile: null,
-            profileLastFetched: null,
           });
         } else if (isValidToken(cookieAccessToken) && isValidToken(accessToken)) {
           logger.info('Store and cookies are in sync');
@@ -302,9 +211,7 @@ export const useUserStore = create<UserStore>()(
       skipHydration: true,
       partialize: (state) => ({
         accessToken: state.accessToken,
-        refreshToken: state.refreshToken,
         profile: state.profile,
-        profileLastFetched: state.profileLastFetched,
       }),
     }
   )

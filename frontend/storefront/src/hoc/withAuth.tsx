@@ -6,7 +6,6 @@ import { Spinner } from '@/components/ui/spinner';
 
 interface WithAuthOptions {
   requireAuth?: boolean;
-  requireAdmin?: boolean;
   redirectTo?: string;
   allowedRoles?: string[];
   fallbackComponent?: ComponentType;
@@ -30,7 +29,6 @@ export function withAuth<P extends object>(
 ) {
   const {
     requireAuth = true,
-    requireAdmin = false,
     redirectTo,
     allowedRoles = [],
     fallbackComponent: FallbackComponent
@@ -41,7 +39,6 @@ export function withAuth<P extends object>(
 
     const { isLoading, canAccess } = useAuthRedirect({
       requireAuth,
-      requireAdmin,
       redirectUnauthenticated: redirectTo || '/login',
       redirectUnauthorized: redirectTo || '/',
       allowedRoles
@@ -78,9 +75,6 @@ export function withAuth<P extends object>(
 // Convenience HOCs for common use cases
 export const withRequireAuth = <P extends object>(Component: ComponentType<P>) =>
   withAuth(Component, { requireAuth: true });
-
-export const withRequireAdmin = <P extends object>(Component: ComponentType<P>) =>
-  withAuth(Component, { requireAuth: true, requireAdmin: true });
 
 // HOC for pages that should redirect authenticated users (like login/register)
 export const withGuestOnly = <P extends object>(

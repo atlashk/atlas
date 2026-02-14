@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/contexts/AuthContext';
+import { useUserStore } from '@/stores/user.store';
 import { useCartStore } from '@/stores/cart.store';
 import Link from 'next/link';
 import { ShoppingCart, User, LogOut, Package } from 'lucide-react';
@@ -17,17 +17,17 @@ import {
 import { useEffect } from 'react';
 
 export default function NavBar() {
-  const { user, logout } = useAuth();
+  const { profile, logout } = useUserStore();
   const { getCartItemCount, loadCart } = useCartStore();
   
   const cartItemCount = getCartItemCount();
 
   // Load cart when user is authenticated
   useEffect(() => {
-    if (user) {
+    if (profile) {
       loadCart();
     }
-  }, [user, loadCart]);
+  }, [profile, loadCart]);
 
   const handleLogout = async () => {
     await logout();
@@ -62,7 +62,7 @@ export default function NavBar() {
             </Link>
 
             {/* User Menu */}
-            {user ? (
+            {profile ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon">
@@ -73,11 +73,11 @@ export default function NavBar() {
                   <DropdownMenuLabel>
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium">
-                        {user.firstName && user.lastName 
-                          ? `${user.firstName} ${user.lastName}` 
-                          : user.username || user.email}
+                        {profile.firstName && profile.lastName 
+                          ? `${profile.firstName} ${profile.lastName}` 
+                          : profile.username || profile.email}
                       </p>
-                      <p className="text-xs text-gray-500">{user.email}</p>
+                      <p className="text-xs text-gray-500">{profile.email}</p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />

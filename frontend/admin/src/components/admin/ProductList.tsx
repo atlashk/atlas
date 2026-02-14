@@ -4,6 +4,12 @@ import { productFrontApi, productAdminApi } from "@/api/index.api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -367,7 +373,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
   }, [formFilters]);
 
   const handleDelete = useCallback(
-    async (productId: number) => {
+    async (productId: string) => {
       if (!confirm("Are you sure you want to delete this product?")) return;
 
       try {
@@ -478,15 +484,12 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
             <div className="space-y-2">
               <Label htmlFor="productId">Product ID</Label>
               <Input
-                type="number"
+                type="text"
                 id="productId"
                 placeholder="Enter product ID"
-                value={formFilters.id || ""}
+                value={formFilters.id ?? ""}
                 onChange={(e) =>
-                  handleFilterChange(
-                    "id",
-                    e.target.value ? Number(e.target.value) : undefined
-                  )
+                  handleFilterChange("id", e.target.value || undefined)
                 }
               />
             </div>
@@ -658,37 +661,36 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                 </div>
               ) : (
                 <>
-                  <Select value="placeholder" onValueChange={() => {}}>
-                    <SelectTrigger>
-                      <SelectValue>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-between font-normal"
+                        disabled={!categories.length}
+                      >
                         {formFilters.categoryIds &&
                         formFilters.categoryIds.length > 0
                           ? `${formFilters.categoryIds.length} categories selected`
                           : "All Categories"}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-64">
                       {categories
                         ?.filter(
                           (category): category is Category => category != null
                         )
-                        .map((category) => (
-                          <label
-                            key={category.id}
-                            className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded"
-                          >
-                            <input
-                              type="checkbox"
-                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                              checked={
-                                formFilters.categoryIds?.includes(
-                                  category.id
-                                ) || false
-                              }
-                              onChange={(e) => {
+                        .map((category) => {
+                          const isChecked =
+                            formFilters.categoryIds?.includes(category.id) ||
+                            false;
+                          return (
+                            <DropdownMenuCheckboxItem
+                              key={category.id}
+                              checked={isChecked}
+                              onCheckedChange={(checked) => {
                                 const currentCategories =
                                   formFilters.categoryIds || [];
-                                if (e.target.checked) {
+                                if (checked) {
                                   handleFilterChange("categoryIds", [
                                     ...currentCategories,
                                     category.id,
@@ -702,12 +704,13 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                                   );
                                 }
                               }}
-                            />
-                            <span className="text-sm">{category.name}</span>
-                          </label>
-                        ))}
-                    </SelectContent>
-                  </Select>
+                            >
+                              {category.name}
+                            </DropdownMenuCheckboxItem>
+                          );
+                        })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                   {!categories.length && (
                     <div className="text-gray-500 text-sm mt-1">
                       No categories available

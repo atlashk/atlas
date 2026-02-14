@@ -20,9 +20,9 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { LoginRequest } from "../../interfaces/auth.interface";
 import { useUserStore } from "../../stores/user.store";
 import { withGuestOnly } from "../../hoc/withAuth";
+import { LoginRequest } from "@/interfaces";
 
 const formSchema = z.object({
   username: z.string().min(1, {
@@ -82,9 +82,7 @@ const Login: React.FC = () => {
           console.log("Redirecting to original destination:", redirectUrl);
           router.push(redirectUrl);
         } else {
-          // Let useGuestRedirect handle the role-based redirect automatically
-          // This will redirect ADMIN to /admin/dashboard and USER to /
-          console.log("No redirect URL, letting useGuestRedirect handle role-based redirect");
+          console.log("No redirect URL, letting useGuestRedirect handle redirect");
         }
       } else {
         setErrorMessage(

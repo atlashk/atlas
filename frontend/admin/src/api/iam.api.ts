@@ -59,5 +59,20 @@ export class IamAdminApi extends BaseApi {
   }
 }
 
+export class IamFrontApi extends BaseApi {
+  constructor() {
+    super("/services/iam/api");
+  }
+
+  async retrieveProfile(): Promise<ApiResponse<User>> {
+    return this.get<User>("/front/users/profile");
+  }
+
+  async register(userData: RegisterRequest): Promise<ApiResponse<void>> {
+    return this.post<void>("/front/users/register", userData);
+  }
+}
+
 export const iamAuthenticationApi = new IamAuthenticationApi();
 export const iamAdminApi = new IamAdminApi();
+export const iamFrontApi = new IamFrontApi();

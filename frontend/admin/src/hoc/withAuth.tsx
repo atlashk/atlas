@@ -3,10 +3,13 @@
 import React, { ComponentType } from 'react';
 import { useAuthRedirect, useGuestRedirect } from '@/hooks/useAuthRedirect';
 import { Spinner } from '@/components/ui/spinner';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { useUserStore } from '@/stores/user.store';
+import { useRouter } from 'next/navigation';
 
 interface WithAuthOptions {
   requireAuth?: boolean;
-  requireAdmin?: boolean;
   redirectTo?: string;
   allowedRoles?: string[];
   fallbackComponent?: ComponentType;
@@ -30,7 +33,6 @@ export function withAuth<P extends object>(
 ) {
   const {
     requireAuth = true,
-    requireAdmin = false,
     redirectTo,
     allowedRoles = [],
     fallbackComponent: FallbackComponent
@@ -38,10 +40,11 @@ export function withAuth<P extends object>(
 
   const WithAuthComponent: React.FC<P> = (props) => {
     const isHydrated = true;
+    const { clearAuthState } = useUserStore();
+    const router = useRouter();
 
-    const { isLoading, canAccess } = useAuthRedirect({
+    const { isLoading, canAccess, isUnauthorized } = useAuthRedirect({
       requireAuth,
-      requireAdmin,
       redirectUnauthenticated: redirectTo || '/login',
       redirectUnauthorized: redirectTo || '/',
       allowedRoles
@@ -64,7 +67,26 @@ export function withAuth<P extends object>(
 
     // Check if user can access this component
     if (!canAccess()) {
-      return null; // Will redirect in useAuthRedirect
+      if (isUnauthorized) {
+        return (
+          <Dialog open>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Access denied</DialogTitle>
+                <DialogDescription>
+                  You do not have permission to access this page.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button onClick={() => { clearAuthState(); router.push('/login'); }}>Go to login</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        );
+      }
+      return FallbackComponent ? 
+        <FallbackComponent /> : 
+        <DefaultLoadingComponent message="Redirecting..." />;
     }
 
     return <WrappedComponent {...props} />;
@@ -80,7 +102,7 @@ export const withRequireAuth = <P extends object>(Component: ComponentType<P>) =
   withAuth(Component, { requireAuth: true });
 
 export const withRequireAdmin = <P extends object>(Component: ComponentType<P>) =>
-  withAuth(Component, { requireAuth: true, requireAdmin: true });
+  withAuth(Component, { requireAuth: true, allowedRoles: ['ADMIN'], redirectTo: '/login' });
 
 // HOC for pages that should redirect authenticated users (like login/register)
 export const withGuestOnly = <P extends object>(
