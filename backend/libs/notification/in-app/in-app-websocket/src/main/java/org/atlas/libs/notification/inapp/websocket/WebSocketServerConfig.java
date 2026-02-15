@@ -51,7 +51,7 @@ public class WebSocketServerConfig implements WebSocketMessageBrokerConfigurer {
   @Override
   public void registerStompEndpoints(StompEndpointRegistry registry) {
     // Get allowed origins from configuration
-    String[] allowedOrigins = applicationConfigService.getConfigAsList("cors.allowed-origins")
+    String[] allowedOrigins = applicationConfigService.getConfigAsList("security.cors.allowed-origins")
         .toArray(new String[0]);
 
     registry.addEndpoint(STOMP_ENDPOINT)

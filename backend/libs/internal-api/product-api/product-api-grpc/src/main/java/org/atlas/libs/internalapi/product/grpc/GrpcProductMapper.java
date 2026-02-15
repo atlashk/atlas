@@ -2,8 +2,8 @@ package org.atlas.libs.internalapi.product.grpc;
 
 import java.util.List;
 import org.atlas.libs.framework.util.CollectionUtil;
-import org.atlas.libs.framework.internalapi.product.model.ListProductRequest;
-import org.atlas.libs.framework.internalapi.product.model.ProductResponse;
+import org.atlas.libs.framework.internalapi.product.model.RetrieveProductListInput;
+import org.atlas.libs.framework.internalapi.product.model.ProductOutput;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.libs.protobuf.product.ListProductRequestProto;
 import org.atlas.libs.protobuf.product.ListProductResponseProto;
@@ -20,7 +20,7 @@ public interface GrpcProductMapper {
   /**
    * Maps ListProductRequest to ListProductRequestProto
    */
-  default ListProductRequestProto map(ListProductRequest request) {
+  default ListProductRequestProto map(RetrieveProductListInput request) {
     if (request == null) {
       return null;
     }
@@ -35,12 +35,12 @@ public interface GrpcProductMapper {
   /**
    * Maps ListProductResponseProto to List of ProductResponse
    */
-  default List<ProductResponse> map(ListProductResponseProto responseProto) {
+  default List<ProductOutput> map(ListProductResponseProto responseProto) {
     return MapperUtil.mapList(responseProto.getProductList(), this::map);
   }
 
   /**
    * Maps ProductProto to ProductResponse
    */
-  ProductResponse map(ProductProto productProto);
+  ProductOutput map(ProductProto productProto);
 }

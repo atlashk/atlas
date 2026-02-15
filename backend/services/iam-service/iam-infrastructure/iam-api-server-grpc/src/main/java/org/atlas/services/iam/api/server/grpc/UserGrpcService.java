@@ -9,22 +9,20 @@ import org.atlas.libs.protobuf.iam.ListUserRequestProto;
 import org.atlas.libs.protobuf.iam.ListUserResponseProto;
 import org.atlas.libs.protobuf.iam.UserProto;
 import org.atlas.libs.protobuf.iam.UserServiceGrpc;
-import org.atlas.services.iam.port.in.internal.model.InternalRetrieveUserListInput;
-import org.atlas.services.iam.port.in.internal.model.InternalUserOutput;
-import org.atlas.services.iam.port.in.internal.service.InternalUserService;
+import org.atlas.services.iam.port.in.user.service.UserInternalService;
 
 @GrpcService
 @RequiredArgsConstructor
 public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
 
-  private final InternalUserService internalUserService;
+  private final UserInternalService userInternalService;
 
   @Override
   public void listUser(ListUserRequestProto requestProto,
       StreamObserver<ListUserResponseProto> responseObserver) {
-    InternalRetrieveUserListInput input = map(requestProto);
+    RetrieveUserListInternalInput input = map(requestProto);
     try {
-      List<InternalUserOutput> users = internalUserService.retrieveUserList(input);
+      List<InternalUserOutput> users = userInternalService.retrieveUserList(input);
       ListUserResponseProto responseProto = map(users);
       responseObserver.onNext(responseProto);
       responseObserver.onCompleted();
@@ -33,8 +31,8 @@ public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
     }
   }
 
-  private InternalRetrieveUserListInput map(ListUserRequestProto requestProto) {
-    return new InternalRetrieveUserListInput(requestProto.getIdList());
+  private RetrieveUserListInternalInput map(ListUserRequestProto requestProto) {
+    return new RetrieveUserListInternalInput(requestProto.getIdList());
   }
 
   private ListUserResponseProto map(List<InternalUserOutput> users) {

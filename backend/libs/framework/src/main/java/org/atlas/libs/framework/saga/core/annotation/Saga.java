@@ -7,8 +7,8 @@ import java.lang.annotation.Target;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 @Service
 @Transactional
 public @interface Saga {

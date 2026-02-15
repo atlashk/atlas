@@ -6,8 +6,8 @@ import io.github.resilience4j.retry.annotation.Retry;
 import java.util.List;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.atlas.libs.framework.internalapi.iam.client.UserApiClient;
-import org.atlas.libs.framework.internalapi.iam.model.ListUserRequest;
-import org.atlas.libs.framework.internalapi.iam.model.UserResponse;
+import org.atlas.libs.framework.internalapi.iam.model.RetrieveUserListInput;
+import org.atlas.libs.framework.internalapi.iam.model.UserOutput;
 import org.atlas.libs.protobuf.iam.ListUserRequestProto;
 import org.atlas.libs.protobuf.iam.ListUserResponseProto;
 import org.atlas.libs.protobuf.iam.UserServiceGrpc;
@@ -23,7 +23,7 @@ public class GrpcUserApiClient implements UserApiClient {
   private UserServiceGrpc.UserServiceBlockingStub userServiceBlockingStub;
 
   @Override
-  public List<UserResponse> call(ListUserRequest request) {
+  public List<UserOutput> call(RetrieveUserListInput request) {
     ListUserRequestProto requestProto = GrpcUserMapper.INSTANCE.map(request);
     ListUserResponseProto responseProto = userServiceBlockingStub.listUser(requestProto);
     return GrpcUserMapper.INSTANCE.map(responseProto);

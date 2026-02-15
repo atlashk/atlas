@@ -1,0 +1,113 @@
+package org.atlas.services.iam.application.jwt.user.service;
+
+import java.util.Objects;
+import lombok.RequiredArgsConstructor;
+import org.atlas.libs.framework.domain.common.error.DomainError;
+import org.atlas.libs.framework.domain.common.exception.DomainException;
+import org.atlas.libs.framework.paging.PagingResult;
+import org.atlas.libs.framework.security.authorization.RequiredAdmin;
+import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
+import org.atlas.libs.framework.sequencegenerator.SequenceType;
+import org.atlas.libs.framework.util.MapperUtil;
+import org.atlas.services.iam.application.jwt.user.mapper.UserAdminMapper;
+import org.atlas.services.iam.application.jwt.event.service.UserEventService;
+import org.atlas.services.iam.domain.entity.UserEntity;
+import org.atlas.services.iam.port.in.user.model.admin.CreateUserInput;
+import org.atlas.services.iam.port.in.user.model.admin.RetrieveUserListInput;
+import org.atlas.services.iam.port.in.user.model.admin.UpdateUserInput;
+import org.atlas.services.iam.port.in.user.model.admin.UserOutput;
+import org.atlas.services.iam.port.in.user.service.UserAdminService;
+import org.atlas.services.iam.port.out.repository.UserRepository;
+import org.atlas.services.iam.port.out.repository.UserRepository.FindUserCriteria;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredAdmin
+@RequiredArgsConstructor
+public class UserAdminServiceImpl implements UserAdminService {
+
+  private final UserRepository userRepository;
+  private final SequenceGenerator sequenceGenerator;
+  private final PasswordEncoder passwordEncoder;
+  private final UserEventService userEventService;
+
+  @Override
+  @Transactional(readOnly = true)
+  public PagingResult<UserOutput> retrieveUserList(RetrieveUserListInput input) {
+    FindUserCriteria criteria = UserAdminMapper.INSTANCE.toFindUserCriteria(input);
+    PagingResult<UserEntity> userPage = userRepository.findByCriteria(criteria,
+        input.getPagingRequest());
+    return MapperUtil.mapPage(userPage, UserAdminMapper.INSTANCE::toUser);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Long retrieveUserCount() {
+    return userRepository.countAll();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public UserOutput retrieveUser(String id) {
+    return userRepository.findById(id)
+        .map(UserAdminMapper.INSTANCE::toUser)
+        .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
+  }
+
+  @Override
+  @Transactional
+  public void createUser(CreateUserInput input) {
+    checkValidity(input);
+
+    UserEntity user = UserAdminMapper.INSTANCE.toUser(input);
+    user.setId(sequenceGenerator.generate(SequenceType.USER));
+    user.setPassword(passwordEncoder.encode(input.getPassword()));
+    userRepository.insert(user);
+
+    userEventService.publishUserCreatedEvent(user);
+  }
+
+  @Override
+  @Transactional
+  public void updateUser(UpdateUserInput input) {
+    UserEntity user = userRepository.findById(input.getId())
+        .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
+
+    boolean shouldPublishEvent = !Objects.equals(input.getFirstName(), user.getFirstName()) ||
+        !Objects.equals(input.getLastName(), user.getLastName());
+    
+    UserAdminMapper.INSTANCE.merge(input, user);
+    userRepository.update(user);
+
+    if (shouldPublishEvent) {
+      userEventService.publishUserUpdatedEvent(user);
+    }
+  }
+
+  @Override
+  @Transactional
+  public void deleteUser(String id) {
+    userRepository.deleteById(id);
+
+    userEventService.publishUserDeletedEvent(id);
+  }
+
+  @Override
+  public boolean existsUser(String username) {
+    return userRepository.existsByUsername(username);
+  }
+
+  private void checkValidity(CreateUserInput input) {
+    if (userRepository.existsByUsername(input.getUsername())) {
+      throw new DomainException(DomainError.USERNAME_ALREADY_EXISTS);
+    }
+    if (userRepository.existsByEmail(input.getEmail())) {
+      throw new DomainException(DomainError.EMAIL_ALREADY_EXISTS);
+    }
+    if (userRepository.existsByPhoneNumber(input.getPhoneNumber())) {
+      throw new DomainException(DomainError.PHONE_NUMBER_ALREADY_EXISTS);
+    }
+  }
+}

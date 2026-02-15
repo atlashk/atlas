@@ -9,8 +9,8 @@ import org.atlas.libs.protobuf.product.ListProductRequestProto;
 import org.atlas.libs.protobuf.product.ListProductResponseProto;
 import org.atlas.libs.protobuf.product.ProductServiceGrpc;
 import org.atlas.libs.framework.internalapi.product.client.ProductApiClient;
-import org.atlas.libs.framework.internalapi.product.model.ListProductRequest;
-import org.atlas.libs.framework.internalapi.product.model.ProductResponse;
+import org.atlas.libs.framework.internalapi.product.model.RetrieveProductListInput;
+import org.atlas.libs.framework.internalapi.product.model.ProductOutput;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -23,7 +23,7 @@ public class GrpcProductApiClient implements ProductApiClient {
   private ProductServiceGrpc.ProductServiceBlockingStub productServiceBlockingStub;
 
   @Override
-  public List<ProductResponse> call(ListProductRequest request) {
+  public List<ProductOutput> call(RetrieveProductListInput request) {
     ListProductRequestProto requestProto = GrpcProductMapper.INSTANCE.map(request);
     ListProductResponseProto responseProto = productServiceBlockingStub.listProduct(requestProto);
     return GrpcProductMapper.INSTANCE.map(responseProto);

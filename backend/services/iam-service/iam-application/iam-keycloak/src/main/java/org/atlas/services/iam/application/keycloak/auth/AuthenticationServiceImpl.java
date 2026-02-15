@@ -5,19 +5,20 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.context.Contexts;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
+import org.atlas.libs.framework.random.RandomUtil;
 import org.atlas.services.iam.application.keycloak.core.client.KeycloakAuthenticationClient;
 import org.atlas.services.iam.application.keycloak.core.client.KeycloakUserClient;
 import org.atlas.services.iam.application.keycloak.core.model.TokenResponse;
 import org.atlas.services.iam.domain.entity.UserEntity;
-import org.atlas.services.iam.port.in.auth.model.GenerateOneTimeTokenInput;
-import org.atlas.services.iam.port.in.auth.model.GenerateOneTimeTokenOutput;
-import org.atlas.services.iam.port.in.auth.model.LoginInput;
-import org.atlas.services.iam.port.in.auth.model.LoginOutput;
-import org.atlas.services.iam.port.in.auth.model.OneTimeTokenLoginInput;
-import org.atlas.services.iam.port.in.auth.model.RefreshTokenInput;
-import org.atlas.services.iam.port.in.auth.model.RefreshTokenOutput;
-import org.atlas.services.iam.port.in.auth.service.AuthenticationService;
-import org.atlas.services.iam.port.in.front.model.ChangePasswordInput;
+import org.atlas.services.iam.port.in.authentication.model.GenerateOneTimeTokenInput;
+import org.atlas.services.iam.port.in.authentication.model.GenerateOneTimeTokenOutput;
+import org.atlas.services.iam.port.in.authentication.model.LoginInput;
+import org.atlas.services.iam.port.in.authentication.model.LoginOutput;
+import org.atlas.services.iam.port.in.authentication.model.OneTimeTokenLoginInput;
+import org.atlas.services.iam.port.in.authentication.model.RefreshTokenInput;
+import org.atlas.services.iam.port.in.authentication.model.RefreshTokenOutput;
+import org.atlas.services.iam.port.in.authentication.service.AuthenticationService;
+import org.atlas.services.iam.port.in.authentication.model.ChangePasswordInput;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -65,6 +66,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     keycloakAuthenticationClient.changePassword(userId, input.getNewPassword());
+  }
+
+  @Override
+  public String resetPassword(String userId) {
+    keycloakUserClient.retrieveUser(userId)
+        .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
+    String newPassword = RandomUtil.randomPassword(12, true, true, true);
+    keycloakAuthenticationClient.changePassword(userId, newPassword);
+    return newPassword;
   }
 
   @Override

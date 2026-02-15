@@ -12,6 +12,7 @@
 
 - Project Overview
 - Architecture Diagram
+- API Gateway Routing
 - Technology Stack
 - Project Structure
 - Getting Started
@@ -21,11 +22,12 @@
 
 ## Project Overview
 
-Atlas is a microservices-based e-commerce platform showcasing DDD and Hexagonal architecture.
+Atlas is a microservices-based e-commerce platform showcasing DDD, Hexagonal architecture, and a
+configurable infrastructure stack for local and containerized environments.
 
 ### Hexagonal Architecture
 
-Each service follows a consistent module layout:
+Each backend service follows a consistent module layout:
 
 - `domain`: aggregates, entities, value objects
 - `port`: inbound and outbound contracts
@@ -37,7 +39,8 @@ Each service follows a consistent module layout:
 
 The app-stack configuration allows swapping infrastructure components (database, cache, messaging,
 auth, storage, observability) with minimal code changes. App-stack selection drives both Gradle
-module wiring and deployment generation. See `backend/config/app-stack.*.yml`.
+module wiring and deployment generation. See `backend/app-stack/config/app-stack.*.yml` and
+`backend/app-stack/templates/`.
 
 ### Architecture Diagram
 
@@ -114,6 +117,14 @@ sequenceDiagram
 | Eureka Server | Service discovery | 8761 |
 | Config Server | Externalized configuration | 8888 |
 
+### API Gateway Routing
+
+The API Gateway exposes service endpoints using a consistent prefix and aggregates OpenAPI docs:
+
+- Service APIs: `/services/{service}/api/{front|admin|authentication|webhook}/**`
+- Notification channels: `/services/notification/sse/**` and `/services/notification/ws/**`
+- OpenAPI aggregation: `/api-docs/{service}` and Gateway UI at `/swagger-ui.html`
+
 ## Technology Stack
 
 ### Backend
@@ -145,8 +156,7 @@ sequenceDiagram
 ```
 .
 ├── backend/
-│   ├── config/            # app-stack definitions
-│   ├── deployment/        # generator + templates
+│   ├── app-stack/          # config + generator + templates
 │   ├── libs/              # shared adapters (messaging, storage, observability, etc.)
 │   ├── platform/          # config-server, discovery-server
 │   ├── services/          # api-gateway, iam, product, order, payment, notification
@@ -177,31 +187,40 @@ Supported app-stacks:
 - local.k8s.native
 
 Flags:
-- `--app-stack <name>` select the app-stack config (default: `local.compose`).
+- `--app-stack <name>` select the app-stack config (default: `dev`).
 - `--skip-build` skip building application services and use existing artifacts.
 - `--infra-only` deploy only infrastructure components and skip application services.
 - `--enable-observability <true|false>` toggle observability stacks in generated deployments.
 - Special case: `--app-stack dev` defaults `infra-only` to `true` unless explicitly set.
 
 Notes:
-- Requires Node.js to render EJS templates
-- If `ejs` is missing, install in `backend/deployment/generator/` via `npm install ejs --save`
+- Requires Node.js to render Handlebars templates
+- If `handlebars` is missing, install in `backend/app-stack/generator/` via `npm install handlebars --save`
 - On Windows, use Git Bash or WSL to run `install.sh`
-- Re-running `install.sh` regenerates `backend/deployment/dist/`
+- Re-running `install.sh` regenerates `backend/dist/`
 
 ### Frontend
 
 ```bash
-cd frontend
+cd frontend/storefront
 npm install
 npm run dev
 ```
 
-Open: http://localhost:8000
+```bash
+cd ../admin
+npm install
+npm run dev
+```
+
+Open:
+- Storefront: http://localhost:8000
+- Admin: http://localhost:8001
 
 ### Access URLs
 
-- Frontend: http://localhost:8000
+- Storefront: http://localhost:8000
+- Admin: http://localhost:8001
 - API Gateway: http://localhost:8080
 - Swagger UI (Gateway): http://localhost:8080/swagger-ui.html
 - Eureka: http://localhost:8761
@@ -211,8 +230,8 @@ Open: http://localhost:8000
 
 ### Default Credentials (dev)
 
-- Admin: `admin` / `Aa@123456`
-- Storefront: `demo` / `Aa@123456`
+- Admin: `admin` / `Atlas@123456`
+- Storefront: `demo` / `Atlas@123456`
 
 ## Contributing
 

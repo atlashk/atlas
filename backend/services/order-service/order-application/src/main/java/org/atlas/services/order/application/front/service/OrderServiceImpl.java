@@ -13,8 +13,8 @@ import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
 import org.atlas.libs.framework.domain.order.OrderStatus;
 import org.atlas.libs.framework.internalapi.iam.client.UserApiClient;
-import org.atlas.libs.framework.internalapi.iam.model.ListUserRequest;
-import org.atlas.libs.framework.internalapi.iam.model.UserResponse;
+import org.atlas.libs.framework.internalapi.iam.model.RetrieveUserListInput;
+import org.atlas.libs.framework.internalapi.iam.model.UserOutput;
 import org.atlas.libs.framework.lock.LockService;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.saga.checkout.CheckoutSagaData;
@@ -76,7 +76,7 @@ public class OrderServiceImpl implements OrderService {
   public String checkout(CheckoutInput input) {
     // Retrieve user
     String userId = Contexts.getUserId();
-    UserResponse userResponse = retrieveUser(userId);
+    UserOutput user = retrieveUser(userId);
 
     // Retrieve cart
     CartEntity cart = cartService.retrieveCart();
@@ -96,7 +96,7 @@ public class OrderServiceImpl implements OrderService {
 
     try {
       // Insert new order into DB
-      OrderEntity order = newOrder(input, userResponse, cart);
+      OrderEntity order = newOrder(input, user, cart);
       orderRepository.insert(order);
       log.info("Order created successfully for user {}", userId);
 
@@ -115,13 +115,13 @@ public class OrderServiceImpl implements OrderService {
     }
   }
 
-  private UserResponse retrieveUser(String userId) {
-    ListUserRequest request = new ListUserRequest(List.of(userId));
-    List<UserResponse> userResponses = userApiClient.call(request);
-    if (CollectionUtil.isEmpty(userResponses)) {
+  private UserOutput retrieveUser(String userId) {
+    RetrieveUserListInput request = new RetrieveUserListInput(List.of(userId));
+    List<UserOutput> users = userApiClient.call(request);
+    if (CollectionUtil.isEmpty(users)) {
       throw new DomainException(DomainError.USER_NOT_FOUND);
     }
-    return userResponses.get(0);
+    return users.get(0);
   }
 
   private String obtainLockKey(CartEntity cart) {
@@ -135,14 +135,14 @@ public class OrderServiceImpl implements OrderService {
     return String.format("checkout:%s:%s", cart.getUserId(), hash);
   }
 
-  private OrderEntity newOrder(CheckoutInput input, UserResponse userResponse, CartEntity cart) {
+  private OrderEntity newOrder(CheckoutInput input, UserOutput user, CartEntity cart) {
     // Order
     OrderEntity order = new OrderEntity();
     order.setId(sequenceGenerator.generate(SequenceType.ORDER));
     order.setStatus(OrderStatus.AWAITING_PRODUCT_RESERVATION);
 
     // User
-    order.setUser(OrderMapper.INSTANCE.toUserSnapshot(userResponse));
+    order.setUser(OrderMapper.INSTANCE.toUserSnapshot(user));
 
     // Address
     order.setAddress(OrderMapper.INSTANCE.toAddress(input.getAddress()));

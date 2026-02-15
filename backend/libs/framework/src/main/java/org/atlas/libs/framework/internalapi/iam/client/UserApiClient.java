@@ -1,10 +1,10 @@
 package org.atlas.libs.framework.internalapi.iam.client;
 
 import java.util.List;
-import org.atlas.libs.framework.internalapi.iam.model.ListUserRequest;
-import org.atlas.libs.framework.internalapi.iam.model.UserResponse;
+import org.atlas.libs.framework.internalapi.iam.model.RetrieveUserListInput;
+import org.atlas.libs.framework.internalapi.iam.model.UserOutput;
 
 public interface UserApiClient {
 
-  List<UserResponse> call(ListUserRequest request);
+  List<UserOutput> call(RetrieveUserListInput request);
 }

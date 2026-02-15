@@ -6,7 +6,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
-import org.atlas.libs.framework.internalapi.product.model.ProductResponse;
+import org.atlas.libs.framework.internalapi.product.model.ProductOutput;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.product.infrastructure.api.server.rest.internal.mapper.InternalProductMapper;
 import org.atlas.services.product.infrastructure.api.server.rest.internal.model.InternalRetrieveProductListRequest;
@@ -30,13 +30,13 @@ public class InternalProductController {
 
   @PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve a list of products based on specified criteria")
-  public ApiResponseWrapper<List<ProductResponse>> retrieveProductList(
+  public ApiResponseWrapper<List<ProductOutput>> retrieveProductList(
       @Parameter(description = "Request object containing the criteria for listing products", required = true)
       @Valid @RequestBody InternalRetrieveProductListRequest request) {
     InternalRetrieveProductListInput input = InternalProductMapper.INSTANCE
         .toInternalRetrieveProductListInput(request);
     List<ProductEntity> products = internalProductService.retrieveProductList(input);
-    List<ProductResponse> responseData = MapperUtil.mapList(products,
+    List<ProductOutput> responseData = MapperUtil.mapList(products,
         InternalProductMapper.INSTANCE::toProductResponse);
     return ApiResponseWrapper.success(responseData);
   }

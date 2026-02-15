@@ -6,10 +6,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.internalapi.product.client.ProductApiClient;
-import org.atlas.libs.framework.internalapi.product.model.ListProductRequest;
-import org.atlas.libs.framework.internalapi.product.model.ProductResponse;
+import org.atlas.libs.framework.internalapi.product.model.ProductOutput;
+import org.atlas.libs.framework.internalapi.product.model.RetrieveProductListInput;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.services.order.application.front.mapper.CartMapper;
 import org.atlas.services.order.domain.entity.CartEntity;
 import org.atlas.services.order.domain.entity.CartEntity.CartItem;
@@ -34,25 +34,24 @@ public class CartAggregator {
    */
   private boolean loadProducts(CartEntity cart) {
     List<String> productIds = cart.collectProductIds();
-    ListProductRequest request = new ListProductRequest(productIds);
-    List<ProductResponse> productResponses = productApiClient.call(request);
+    RetrieveProductListInput request = new RetrieveProductListInput(productIds);
+    List<ProductOutput> products = productApiClient.call(request);
 
-    if (CollectionUtil.isEmpty(productResponses)) {
+    if (CollectionUtil.isEmpty(products)) {
       log.error("All products are no longer available, clearing cart {}", cart.getId());
       cart.clear();
       return false;
     }
 
     // Update cart item's product
-    Map<String, ProductResponse> productResponseMap = productResponses.stream()
-        .collect(Collectors.toMap(ProductResponse::getId, Function.identity()));
+    Map<String, ProductOutput> productMap = products.stream()
+        .collect(Collectors.toMap(ProductOutput::getId, Function.identity()));
     boolean allProductsAreValid = true;
     for (CartItem cartItem : cart.getCartItems()) {
       String productId = cartItem.getProduct().getId();
-      ProductResponse productResponse = productResponseMap.get(productId);
-      if (productResponse != null) {
-        CartEntity.Product product = CartMapper.INSTANCE.toProduct(productResponse);
-        cartItem.setProduct(product);
+      ProductOutput product = productMap.get(productId);
+      if (product != null) {
+        cartItem.setProduct(CartMapper.INSTANCE.toProduct(product));
       } else {
         log.error("Product {} no longer exists, removing from cart {}", productId, cart.getId());
         cart.removeCartItem(productId);

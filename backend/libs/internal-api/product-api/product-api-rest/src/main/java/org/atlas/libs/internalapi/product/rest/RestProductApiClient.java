@@ -7,8 +7,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.internalapi.product.client.ProductApiClient;
-import org.atlas.libs.framework.internalapi.product.model.ListProductRequest;
-import org.atlas.libs.framework.internalapi.product.model.ProductResponse;
+import org.atlas.libs.framework.internalapi.product.model.RetrieveProductListInput;
+import org.atlas.libs.framework.internalapi.product.model.ProductOutput;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
@@ -28,14 +28,14 @@ public class RestProductApiClient implements ProductApiClient {
   private String baseUrl;
 
   @Override
-  public List<ProductResponse> call(ListProductRequest request) {
+  public List<ProductOutput> call(RetrieveProductListInput request) {
     String url = String.format("%s/api/internal/products/list", baseUrl);
-    ApiResponseWrapper<List<ProductResponse>> apiResponseWrapper = restClient.post()
+    ApiResponseWrapper<List<ProductOutput>> apiResponseWrapper = restClient.post()
         .uri(url)
         .contentType(MediaType.APPLICATION_JSON)
         .body(request)
         .retrieve()
-        .toEntity(new ParameterizedTypeReference<ApiResponseWrapper<List<ProductResponse>>>() {
+        .toEntity(new ParameterizedTypeReference<ApiResponseWrapper<List<ProductOutput>>>() {
         })
         .getBody();
     assert apiResponseWrapper != null;

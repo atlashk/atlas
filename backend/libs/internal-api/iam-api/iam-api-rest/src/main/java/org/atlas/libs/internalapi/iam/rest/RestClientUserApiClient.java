@@ -7,8 +7,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.internalapi.iam.client.UserApiClient;
-import org.atlas.libs.framework.internalapi.iam.model.ListUserRequest;
-import org.atlas.libs.framework.internalapi.iam.model.UserResponse;
+import org.atlas.libs.framework.internalapi.iam.model.RetrieveUserListInput;
+import org.atlas.libs.framework.internalapi.iam.model.UserOutput;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
@@ -28,14 +28,14 @@ public class RestClientUserApiClient implements UserApiClient {
   private String baseUrl;
 
   @Override
-  public List<UserResponse> call(ListUserRequest request) {
+  public List<UserOutput> call(RetrieveUserListInput request) {
     String url = String.format("%s/api/internal/users/list", baseUrl);
-    ApiResponseWrapper<List<UserResponse>> apiResponseWrapper = restClient.post()
+    ApiResponseWrapper<List<UserOutput>> apiResponseWrapper = restClient.post()
         .uri(url)
         .contentType(MediaType.APPLICATION_JSON)
         .body(request)
         .retrieve()
-        .toEntity(new ParameterizedTypeReference<ApiResponseWrapper<List<UserResponse>>>() {
+        .toEntity(new ParameterizedTypeReference<ApiResponseWrapper<List<UserOutput>>>() {
         })
         .getBody();
     assert apiResponseWrapper != null;

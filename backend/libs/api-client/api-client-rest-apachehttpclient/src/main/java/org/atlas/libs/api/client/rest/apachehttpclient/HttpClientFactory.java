@@ -14,7 +14,7 @@ import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
 import org.apache.hc.core5.pool.PoolReusePolicy;
 import org.apache.hc.core5.util.Timeout;
-import org.atlas.libs.framework.security.SSLUtil;
+import org.atlas.libs.framework.api.client.rest.SSLUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

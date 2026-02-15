@@ -7,8 +7,8 @@ import java.lang.annotation.Target;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 @Component
 @Transactional
 public @interface StartupHook {

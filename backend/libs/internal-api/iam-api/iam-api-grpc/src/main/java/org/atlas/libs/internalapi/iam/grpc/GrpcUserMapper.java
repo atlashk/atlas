@@ -1,10 +1,10 @@
 package org.atlas.libs.internalapi.iam.grpc;
 
 import java.util.List;
+import org.atlas.libs.framework.internalapi.iam.model.UserOutput;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.domain.user.UserRole;
-import org.atlas.libs.framework.internalapi.iam.model.ListUserRequest;
-import org.atlas.libs.framework.internalapi.iam.model.UserResponse;
+import org.atlas.libs.framework.internalapi.iam.model.RetrieveUserListInput;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.libs.protobuf.iam.ListUserRequestProto;
 import org.atlas.libs.protobuf.iam.ListUserResponseProto;
@@ -23,7 +23,7 @@ public interface GrpcUserMapper {
   /**
    * Maps ListUserRequest to ListUserRequestProto
    */
-  default ListUserRequestProto map(ListUserRequest request) {
+  default ListUserRequestProto map(RetrieveUserListInput request) {
     if (request == null) {
       return null;
     }
@@ -38,7 +38,7 @@ public interface GrpcUserMapper {
   /**
    * Maps ListUserResponseProto to List of UserResponse
    */
-  default List<UserResponse> map(ListUserResponseProto responseProto) {
+  default List<UserOutput> map(ListUserResponseProto responseProto) {
     return MapperUtil.mapList(responseProto.getUserList(), this::map);
   }
 
@@ -46,7 +46,7 @@ public interface GrpcUserMapper {
    * Maps UserProto to UserResponse
    */
   @Mapping(source = "role", target = "role", qualifiedByName = "stringToRole")
-  UserResponse map(UserProto userProto);
+  UserOutput map(UserProto userProto);
 
   /**
    * Converts string role to Role enum

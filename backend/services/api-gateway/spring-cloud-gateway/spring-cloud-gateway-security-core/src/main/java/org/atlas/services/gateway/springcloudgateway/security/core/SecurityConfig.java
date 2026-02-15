@@ -36,30 +36,30 @@ public class SecurityConfig {
 
           // Configure allowed origins (domains/URLs that can send requests)
           corsConfig.setAllowedOrigins(
-              applicationConfigService.getConfigAsList("cors.allowed-origins"));
+              applicationConfigService.getConfigAsList("security.cors.allowed-origins"));
 
           // Configure allowed HTTP methods
           corsConfig.setAllowedMethods(
-              applicationConfigService.getConfigAsList("cors.allowed-methods"));
+              applicationConfigService.getConfigAsList("security.cors.allowed-methods"));
 
           // Configure allowed headers that can be sent from client
           corsConfig.setAllowedHeaders(
-              applicationConfigService.getConfigAsList("cors.allowed-headers"));
+              applicationConfigService.getConfigAsList("security.cors.allowed-headers"));
 
           // Configure headers that are exposed from server to client
           List<String> exposedHeaders =
-              applicationConfigService.getConfigAsList("cors.exposed-headers");
+              applicationConfigService.getConfigAsList("security.cors.exposed-headers");
           if (CollectionUtil.isNotEmpty(exposedHeaders)) {
             exposedHeaders.forEach(corsConfig::addExposedHeader);
           }
 
           // Allow sending credentials (cookies, authorization headers) in CORS requests
           corsConfig.setAllowCredentials(
-              applicationConfigService.getConfigAsBoolean("cors.allow-credentials", true));
+              applicationConfigService.getConfigAsBoolean("security.cors.allow-credentials", true));
 
           // Cache time for preflight requests (seconds), 0 = no cache
           corsConfig.setMaxAge(
-              applicationConfigService.getConfigAsLong("cors.max-age", 0L));
+              applicationConfigService.getConfigAsLong("security.cors.max-age", 0L));
 
           return corsConfig;
         }))

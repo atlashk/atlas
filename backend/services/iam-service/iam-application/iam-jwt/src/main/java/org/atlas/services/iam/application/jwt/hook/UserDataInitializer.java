@@ -1,54 +1,62 @@
 package org.atlas.services.iam.application.jwt.hook;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.atlas.libs.framework.config.ApplicationConfigService;
 import org.atlas.libs.framework.domain.user.UserRole;
 import org.atlas.libs.framework.hook.StartupHook;
-import org.atlas.services.iam.port.in.admin.model.AdminCreateUserInput;
-import org.atlas.services.iam.port.in.admin.service.AdminUserService;
+import org.atlas.services.iam.port.in.user.model.admin.CreateUserInput;
+import org.atlas.services.iam.port.in.user.service.UserAdminService;
 
 @StartupHook
 @RequiredArgsConstructor
 @Slf4j
 public class UserDataInitializer {
 
-  private final AdminUserService adminUserService;
+  private final UserAdminService userAdminService;
+  private final ApplicationConfigService applicationConfigService;
 
   public void handle() throws Exception {
-    if (!adminUserService.existsUser("admin")) {
+    if (!userAdminService.existsUser("admin")) {
       createAdminUser();
     }
 
-    if (!adminUserService.existsUser("demo")) {
+    if (!userAdminService.existsUser("demo")) {
       createDemoUser();
     }
   }
 
   private void createAdminUser() throws Exception {
-    AdminCreateUserInput input = AdminCreateUserInput.builder()
+    CreateUserInput input = CreateUserInput.builder()
         .username("admin")
-        .password("Aa@123456")
+        .password(getDefaultPassword())
         .firstName("John")
         .lastName("Doe")
         .email("admin@atlas.org")
         .phoneNumber("0987654321")
         .role(UserRole.ADMIN)
         .build();
-    adminUserService.createUser(input);
+    userAdminService.createUser(input);
     log.info("Created admin user");
   }
 
   private void createDemoUser() throws Exception {
-    AdminCreateUserInput input = AdminCreateUserInput.builder()
+    CreateUserInput input = CreateUserInput.builder()
         .username("demo")
-        .password("Aa@123456")
+        .password(getDefaultPassword())
         .firstName("Demo")
         .lastName("User")
         .email("demo@atlas.org")
         .phoneNumber("0123456789")
         .role(UserRole.USER)
         .build();
-    adminUserService.createUser(input);
+    userAdminService.createUser(input);
     log.info("Created demo user");
+  }
+
+  private String getDefaultPassword() {
+    return Optional.ofNullable(applicationConfigService.getConfig("security.default-password"))
+        .orElseThrow(() -> new RuntimeException("Default password not set"));
   }
 }
