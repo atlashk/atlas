@@ -1,0 +1,258 @@
+"use client";
+
+import { identityApi } from "@/api/identity.api";
+import AdminLayout from "@/components/layout/AdminLayout";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ROLES } from "@/constants";
+import { withRequireAdmin } from "@/hoc/withAuth";
+import type { RegisterRequest } from "@/interfaces/identity.interface";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
+const userSchema = z
+  .object({
+    username: z.string().min(2, "Username must be at least 2 characters."),
+    firstName: z.string().min(1, "First name is required."),
+    lastName: z.string().min(1, "Last name is required."),
+    email: z.string().email("Please enter a valid email address."),
+    phoneNumber: z.string().min(1, "Phone number is required."),
+    password: z.string().min(6, "Password must be at least 6 characters."),
+    confirmPassword: z.string().min(6, "Confirm password is required."),
+    role: z.enum(ROLES),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
+
+type UserCreateFormData = z.infer<typeof userSchema>;
+
+function AdminUserAddPage() {
+  const router = useRouter();
+
+  const form = useForm<UserCreateFormData>({
+    resolver: zodResolver(userSchema),
+    defaultValues: {
+      username: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      phoneNumber: "",
+      password: "",
+      confirmPassword: "",
+      role: "USER",
+    },
+  });
+
+  const onSubmit = async (values: UserCreateFormData) => {
+    const request: RegisterRequest & { role?: string } = {
+      username: values.username,
+      firstName: values.firstName,
+      lastName: values.lastName,
+      email: values.email,
+      phoneNumber: values.phoneNumber,
+      password: values.password,
+      role: values.role,
+    };
+
+    try {
+      const response = await identityApi.createUser(request);
+      if (response.success) {
+        toast.success("User created successfully");
+        router.push("/admin/user");
+      } else {
+        toast.error(response.errorMessage || "Failed to create user");
+      }
+    } catch {
+      toast.error("Failed to create user");
+    }
+  };
+
+  return (
+    <AdminLayout>
+      <div className="container mx-auto px-2">
+        <div className="flex items-center justify-between mb-6">
+          <Button onClick={() => router.back()} variant="outline">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back
+          </Button>
+        </div>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>User Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="username"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Username *</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Enter username" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="role"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Role *</FormLabel>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select role" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {ROLES.map((role) => (
+                              <SelectItem key={role} value={role}>
+                                {role}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>First Name *</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Enter first name" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last Name *</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Enter last name" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email *</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="email" placeholder="Enter email" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="phoneNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone Number *</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Enter phone number" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem className="md:col-span-2">
+                        <FormLabel>Password *</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="password"
+                            placeholder="Enter password"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem className="md:col-span-2">
+                        <FormLabel>Confirm Password *</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="password"
+                            placeholder="Confirm password"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="flex justify-end space-x-2">
+              <Button type="button" variant="outline" onClick={() => router.back()}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Create User
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </div>
+    </AdminLayout>
+  );
+}
+
+export default withRequireAdmin(AdminUserAddPage);

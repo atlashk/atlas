@@ -41,17 +41,17 @@ dependencies {
     }
 
     // Internal API
-    switch (rootProject.ext.appStack['internal-api']) {
+    switch (rootProject.ext.appStack['internal']) {
         case 'grpc':
-            api project(':libs.internal-api.iam.grpc')
-            api project(':libs.internal-api.product.grpc')
+            api project(':libs.internal.identity.grpc')
+            api project(':libs.internal.product.grpc')
             break
         case 'rest':
-            api project(':libs.internal-api.iam.rest')
-            api project(':libs.internal-api.product.rest')
+            api project(':libs.internal.identity.rest')
+            api project(':libs.internal.product.rest')
             break
         default:
-            throw new IllegalArgumentException("Unsupported internal-api: ${rootProject.ext.appStack['internal-api']}")
+            throw new IllegalArgumentException("Unsupported internal: ${rootProject.ext.appStack['internal']}")
     }
 
     // KV store

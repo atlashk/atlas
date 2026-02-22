@@ -13,7 +13,7 @@ import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaOrderEn
 import org.atlas.services.order.infrastructure.persistence.jpa.mapper.JpaOrderMapper;
 import org.atlas.services.order.infrastructure.persistence.jpa.repository.CustomJpaOrderRepository;
 import org.atlas.services.order.infrastructure.persistence.jpa.repository.JpaOrderRepository;
-import org.atlas.services.order.port.in.admin.model.AdminMonthlyOrderAggregation;
+import org.atlas.services.order.port.in.order.model.admin.MonthlyOrderAggregation;
 import org.atlas.services.order.port.out.repository.OrderRepository;
 import org.springframework.stereotype.Component;
 
@@ -60,7 +60,7 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
   }
 
   @Override
-  public List<AdminMonthlyOrderAggregation> aggregateMonthlyByStatus(OrderStatus status) {
+  public List<MonthlyOrderAggregation> aggregateMonthlyByStatus(OrderStatus status) {
     return jpaOrderRepository.aggregateMonthlyByStatus(status);
   }
 

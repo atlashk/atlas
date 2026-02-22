@@ -1,0 +1,65 @@
+package org.atlas.services.identity.application.keycloak.user.service;
+
+import lombok.RequiredArgsConstructor;
+import org.atlas.libs.framework.context.Contexts;
+import org.atlas.libs.framework.domain.common.error.DomainError;
+import org.atlas.libs.framework.domain.common.event.DomainEventType;
+import org.atlas.libs.framework.domain.common.event.contract.user.UserEvent;
+import org.atlas.libs.framework.domain.common.exception.DomainException;
+import org.atlas.libs.framework.domain.identity.UserRole;
+import org.atlas.services.identity.application.keycloak.core.client.KeycloakUserClient;
+import org.atlas.services.identity.application.keycloak.core.enums.KeycloakUserAttribute;
+import org.atlas.services.identity.application.keycloak.user.mapper.UserEventMapper;
+import org.atlas.services.identity.application.keycloak.user.mapper.UserMapper;
+import org.atlas.services.identity.domain.entity.UserEntity;
+import org.atlas.services.identity.port.in.user.model.ProfileOutput;
+import org.atlas.services.identity.port.in.user.model.RegisterInput;
+import org.atlas.services.identity.port.in.user.service.UserService;
+import org.atlas.services.identity.port.out.messaging.UserEventMessagePublisher;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class UserServiceImpl implements UserService {
+
+  private final KeycloakUserClient keycloakUserClient;
+  private final UserEventMessagePublisher messagePublisher;
+
+  @Override
+  public void register(RegisterInput input) {
+    checkValidity(input);
+
+    UserEntity user = UserMapper.INSTANCE.toUser(input);
+    user.setRole(UserRole.USER);
+    keycloakUserClient.createUser(user, input.getPassword());
+
+    publishUserCreatedEvent(user);
+  }
+
+  @Override
+  public ProfileOutput retrieveProfile() {
+    String userId = Contexts.getUserId();
+    return keycloakUserClient.retrieveUser(userId)
+        .map(UserMapper.INSTANCE::toProfileOutput)
+        .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
+  }
+
+  private void checkValidity(RegisterInput input) {
+    if (keycloakUserClient.existsByUsername(input.getUsername())) {
+      throw new DomainException(DomainError.USERNAME_ALREADY_EXISTS);
+    }
+    if (keycloakUserClient.existsByEmail(input.getEmail())) {
+      throw new DomainException(DomainError.EMAIL_ALREADY_EXISTS);
+    }
+    if (keycloakUserClient.existsByAttribute(KeycloakUserAttribute.PHONE_NUMBER,
+        input.getPhoneNumber())) {
+      throw new DomainException(DomainError.PHONE_NUMBER_ALREADY_EXISTS);
+    }
+  }
+
+  private void publishUserCreatedEvent(UserEntity user) {
+    UserEvent event = new UserEvent(DomainEventType.USER_CREATED);
+    UserEventMapper.INSTANCE.merge(user, event);
+    messagePublisher.publish(event);
+  }
+}

@@ -1,7 +1,7 @@
 package org.atlas.services.gateway.springcloudgateway.security.jwt;
 
 import java.util.Optional;
-import org.atlas.libs.framework.domain.user.UserRole;
+import org.atlas.libs.framework.domain.identity.UserRole;
 import org.atlas.libs.framework.security.CustomClaim;
 import org.atlas.services.gateway.springcloudgateway.security.core.JwtExtractor;
 import org.springframework.security.oauth2.jwt.Jwt;

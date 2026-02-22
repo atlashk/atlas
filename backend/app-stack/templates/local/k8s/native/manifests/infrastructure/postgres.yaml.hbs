@@ -23,8 +23,8 @@ data:
     #!/bin/bash
     set -e
     psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
-    {{#hasService "iam" "jwt"}}
-    CREATE DATABASE db_iam OWNER "$POSTGRES_USER";
+    {{#hasService "identity" "jwt"}}
+    CREATE DATABASE db_identity OWNER "$POSTGRES_USER";
     {{/hasService}}
     CREATE DATABASE db_notification OWNER "$POSTGRES_USER";
     CREATE DATABASE db_order OWNER "$POSTGRES_USER";

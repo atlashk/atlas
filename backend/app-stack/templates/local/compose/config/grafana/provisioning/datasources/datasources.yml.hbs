@@ -1,7 +1,7 @@
 apiVersion: 1
 
 datasources:
-{{#hasObservability "observability.metrics" "prometheus"}}
+{{#hasObservability "metrics" "prometheus"}}
   - name: Prometheus
     type: prometheus
     access: proxy
@@ -16,7 +16,7 @@ datasources:
     secureJsonData: {}
 {{/hasObservability}}
 
-{{#hasObservability "observability.logging.stack" "loki"}}
+{{#hasObservability "logging.stack" "loki"}}
   - name: Loki
     type: loki
     access: proxy

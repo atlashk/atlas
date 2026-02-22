@@ -50,7 +50,7 @@ flowchart LR
   FE -->|HTTP| GW["API Gateway (Spring Cloud Gateway :8080)"]
 
   GW --> DS[Eureka Server :8761]
-  GW --> IAM[IAM Service :8081]
+  GW --> IDENTITY[IDENTITY Service :8081]
   GW --> PRD[Product Service :8082]
   GW --> ORD[Order Service :8083]
   GW --> PAY[Payment Service :8084]
@@ -62,13 +62,13 @@ flowchart LR
     MQ[(Kafka 7.9.0 / RabbitMQ)]
   end
 
-  IAM --> DB
+  IDENTITY --> DB
   PRD --> DB
   ORD --> DB
   PAY --> DB
   NOTIF --> DB
 
-  IAM --> CACHE
+  IDENTITY --> CACHE
   PRD --> CACHE
   ORD --> CACHE
   PAY --> CACHE
@@ -109,7 +109,7 @@ sequenceDiagram
 | Service | Responsibility | Default Port |
 | --- | --- | --- |
 | API Gateway | Routing, security, aggregated API docs | 8080 |
-| IAM Service | Authentication and user management | 8081 |
+| IDENTITY Service | Authentication and user management | 8081 |
 | Product Service | Product catalog and admin | 8082 |
 | Order Service | Checkout and saga orchestration | 8083 |
 | Payment Service | Payment processing and simulation | 8084 |
@@ -159,7 +159,7 @@ The API Gateway exposes service endpoints using a consistent prefix and aggregat
 │   ├── app-stack/          # config + generator + templates
 │   ├── libs/              # shared adapters (messaging, storage, observability, etc.)
 │   ├── platform/          # config-server, discovery-server
-│   ├── services/          # api-gateway, iam, product, order, payment, notification
+│   ├── services/          # api-gateway, identity, product, order, payment, notification
 │   ├── build.gradle
 │   └── install.sh
 ├── frontend/

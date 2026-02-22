@@ -13,7 +13,7 @@ server {
     }
 }
 
-{{#hasService "iam" "keycloak"}}
+{{#hasService "identity" "keycloak"}}
 server {
     listen 80;
     server_name keycloak.atlas.local;
@@ -58,7 +58,7 @@ server {
 }
 {{/hasService}}
 
-{{#hasObservability "observability.metrics" "prometheus"}}
+{{#hasObservability "metrics" "prometheus"}}
 server {
     listen 80;
     server_name prometheus.atlas.local;
@@ -73,7 +73,7 @@ server {
 }
 {{/hasObservability}}
 
-{{#hasObservability "observability.tracing" "zipkin"}}
+{{#hasObservability "tracing" "zipkin"}}
 server {
     listen 80;
     server_name zipkin.atlas.local;

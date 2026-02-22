@@ -1,4 +1,4 @@
-{{#hasObservability "observability.metrics" "prometheus"}}
+{{#hasObservability "metrics" "prometheus"}}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -30,10 +30,10 @@ data:
         metrics_path: '/actuator/prometheus'
         static_configs:
           - targets: ['api-gateway:8080']
-      - job_name: 'iam-service'
+      - job_name: 'identity-service'
         metrics_path: '/actuator/prometheus'
         static_configs:
-          - targets: ['iam-service:8081']
+          - targets: ['identity-service:8081']
       - job_name: 'product-service'
         metrics_path: '/actuator/prometheus'
         static_configs:

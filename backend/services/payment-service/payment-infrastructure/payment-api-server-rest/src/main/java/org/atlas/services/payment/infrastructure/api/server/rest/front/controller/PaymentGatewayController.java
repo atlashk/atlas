@@ -8,7 +8,7 @@ import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.payment.domain.entity.PaymentGatewayEntity;
 import org.atlas.services.payment.infrastructure.api.server.rest.front.mapper.PaymentGatewayMapper;
 import org.atlas.services.payment.infrastructure.api.server.rest.front.model.PaymentGatewayResponse;
-import org.atlas.services.payment.port.in.front.service.PaymentGatewayService;
+import org.atlas.services.payment.port.in.service.PaymentGatewayService;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;

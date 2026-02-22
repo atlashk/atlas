@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import org.atlas.libs.framework.domain.order.OrderStatus;
 import org.atlas.libs.persistence.jpa.repository.JpaBaseRepository;
-import org.atlas.services.order.port.in.admin.model.AdminMonthlyOrderAggregation;
+import org.atlas.services.order.port.in.order.model.admin.MonthlyOrderAggregation;
 import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaOrderEntity;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -46,5 +46,5 @@ public interface JpaOrderRepository extends JpaBaseRepository<JpaOrderEntity, In
         group by year(o.createdAt), month(o.createdAt)
         order by year(o.createdAt), month(o.createdAt)
       """)
-  List<AdminMonthlyOrderAggregation> aggregateMonthlyByStatus(@Param("status") OrderStatus status);
+  List<MonthlyOrderAggregation> aggregateMonthlyByStatus(@Param("status") OrderStatus status);
 }

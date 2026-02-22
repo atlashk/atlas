@@ -4,10 +4,10 @@ set -e
 echo "Initializing databases and granting privileges to ${MYSQL_USER}"
 
 cat <<EOF | mysql -uroot -p"${MYSQL_ROOT_PASSWORD}"
-{{#hasService "iam" "jwt"}}
-CREATE DATABASE IF NOT EXISTS db_iam;
+{{#hasService "identity" "jwt"}}
+CREATE DATABASE IF NOT EXISTS db_identity;
 {{/hasService}}
-{{#hasService "iam" "keycloak"}}
+{{#hasService "identity" "keycloak"}}
 CREATE DATABASE IF NOT EXISTS db_keycloak;
 {{/hasService}}
 CREATE DATABASE IF NOT EXISTS db_notification;
@@ -18,10 +18,10 @@ CREATE DATABASE IF NOT EXISTS db_product;
 CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
 ALTER USER '${MYSQL_USER}'@'%' IDENTIFIED WITH mysql_native_password BY '${MYSQL_PASSWORD}';
 
-{{#hasService "iam" "jwt"}}
-GRANT ALL PRIVILEGES ON db_iam.* TO '${MYSQL_USER}'@'%';
+{{#hasService "identity" "jwt"}}
+GRANT ALL PRIVILEGES ON db_identity.* TO '${MYSQL_USER}'@'%';
 {{/hasService}}
-{{#hasService "iam" "keycloak"}}
+{{#hasService "identity" "keycloak"}}
 GRANT ALL PRIVILEGES ON db_keycloak.* TO '${MYSQL_USER}'@'%';
 {{/hasService}}
 GRANT ALL PRIVILEGES ON db_notification.* TO '${MYSQL_USER}'@'%';

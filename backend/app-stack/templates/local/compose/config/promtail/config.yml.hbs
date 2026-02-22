@@ -1,7 +1,3 @@
-<%
-  const authServer = (stack['iam'] || '').toLowerCase();
-  const hasJwt = authServer === 'jwt';
-%>
 server:
   http_listen_port: 9080
   grpc_listen_port: 0
@@ -20,13 +16,13 @@ scrape_configs:
         labels:
           service_name: eureka-server
           __path__: /var/log/eureka-server/*.log
-  - job_name: iam-service
+  - job_name: identity-service
     static_configs:
       - targets:
           - localhost
         labels:
-          service_name: iam-service
-          __path__: /var/log/iam-service/*.log
+          service_name: identity-service
+          __path__: /var/log/identity-service/*.log
   - job_name: product-service
     static_configs:
       - targets:

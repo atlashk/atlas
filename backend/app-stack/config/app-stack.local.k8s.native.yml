@@ -5,8 +5,8 @@ file:
   excel: poi
   pdf: pdfbox
 full-text-search: elasticsearch
-iam: keycloak
-internal-api: rest
+identity: keycloak
+internal: rest
 kv-store: redis
 messaging: kafka
 migration: flyway

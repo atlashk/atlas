@@ -1,6 +1,6 @@
 "use client";
 
-import { iamFrontApi } from "@/api/index.api";
+import { identityApi } from "@/api/index.api";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

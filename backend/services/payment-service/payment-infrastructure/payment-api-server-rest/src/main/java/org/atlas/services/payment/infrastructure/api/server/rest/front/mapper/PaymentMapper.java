@@ -1,7 +1,7 @@
 package org.atlas.services.payment.infrastructure.api.server.rest.front.mapper;
 
 import org.atlas.services.payment.infrastructure.api.server.rest.front.model.RetrievePaymentNextActionResponse;
-import org.atlas.services.payment.port.in.front.model.RetrievePaymentNextActionOutput;
+import org.atlas.services.payment.port.in.model.RetrievePaymentNextActionOutput;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;

@@ -1,7 +1,0 @@
-grpc:
-  client:
-    iam-service:
-      enableKeepAlive: 'true'
-      negotiationType: plaintext
-      keepAliveWithoutCalls: 'true'
-      address: ${API_CLIENT_GRPC_IAM_SERVICE_ADDRESS:'static://127.0.0.1:50051'}

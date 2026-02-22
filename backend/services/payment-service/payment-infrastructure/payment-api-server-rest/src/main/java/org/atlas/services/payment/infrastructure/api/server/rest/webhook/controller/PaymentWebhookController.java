@@ -6,7 +6,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.payment.model.HandleWebhookResponse;
 import org.atlas.services.payment.infrastructure.api.server.rest.webhook.util.WebhookResponseUtil;
-import org.atlas.services.payment.port.in.webhook.service.PaymentWebhookService;
+import org.atlas.services.payment.port.in.service.PaymentWebhookService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;

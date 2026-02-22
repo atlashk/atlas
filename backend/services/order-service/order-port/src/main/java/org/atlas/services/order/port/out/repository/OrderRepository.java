@@ -13,7 +13,7 @@ import org.atlas.libs.framework.domain.order.OrderStatus;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.services.order.domain.entity.OrderEntity;
-import org.atlas.services.order.port.in.admin.model.AdminMonthlyOrderAggregation;
+import org.atlas.services.order.port.in.order.model.admin.MonthlyOrderAggregation;
 
 public interface OrderRepository {
 
@@ -23,7 +23,7 @@ public interface OrderRepository {
 
   BigDecimal sumAmountByStatus(OrderStatus status);
 
-  List<AdminMonthlyOrderAggregation> aggregateMonthlyByStatus(OrderStatus status);
+  List<MonthlyOrderAggregation> aggregateMonthlyByStatus(OrderStatus status);
 
   Optional<OrderEntity> findById(String id);
 

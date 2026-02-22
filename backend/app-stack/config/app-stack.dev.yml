@@ -5,8 +5,8 @@ file:
   excel: poi
   pdf: pdfbox
 full-text-search: none
-iam: jwt
-internal-api: rest
+identity: jwt
+internal: rest
 kv-store: redis
 messaging: kafka
 migration: flyway

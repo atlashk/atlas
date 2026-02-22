@@ -146,22 +146,22 @@ function registerHelpers() {
   });
 
   // Check observability service - similar to hasService but with observability check
-  // Usage: {{#hasObservability "observability.metrics" "prometheus"}}...{{/hasObservability}}
+  // Usage: {{#hasObservability "metrics" "prometheus"}}...{{/hasObservability}}
   Handlebars.registerHelper('hasObservability', function(serviceType, serviceName, options) {
     // Check if observability is enabled first
     if (!this.enableObservability) {
       return options.inverse(this);
     }
-    
+
     const { stack, getStackValue } = this;
     const stackValue = getStackValue || createStackAccessor(stack);
-    
+
     // Get the value from stack using serviceType as the key
-    const actualValue = stackValue(serviceType);
-    
+    const actualValue = stackValue('observability.' + serviceType);
+
     // Compare case-insensitive
     const result = actualValue === (serviceName || '').toString().toLowerCase();
-    
+
     return result ? options.fn(this) : options.inverse(this);
   });
 
@@ -171,15 +171,15 @@ function registerHelpers() {
     if (!this.enableObservability) {
       return options.inverse(this);
     }
-    
+
     const { stack, getStackValue } = this;
     const stackValue = getStackValue || createStackAccessor(stack);
-    
+
     // Grafana is shown when any of these services are enabled
     const hasPrometheus = stackValue('observability.metrics') === 'prometheus';
     const hasLoki = stackValue('observability.logging.stack') === 'loki';
     const hasZipkin = stackValue('observability.tracing') === 'zipkin';
-    
+
     const result = hasPrometheus || hasLoki || hasZipkin;
     return result ? options.fn(this) : options.inverse(this);
   });
@@ -293,9 +293,9 @@ function shouldSkipFileByPath(filePath, context) {
   const reverseProxy = stackValue('reverse-proxy');
   if (normalizedPath.includes('/config/nginx/') && reverseProxy !== 'nginx') return true;
   
-  const iam = stackValue('iam');
-  if (normalizedPath.includes('/config/keycloak/') && iam !== 'keycloak') return true;
-  
+  const identity = stackValue('identity');
+  if (normalizedPath.includes('/config/keycloak/') && identity !== 'keycloak') return true;
+
   const notificationEmail = stackValue('notification.email');
   if (normalizedPath.includes('/config/smtp4dev/') && notificationEmail !== 'spring') return true;
   

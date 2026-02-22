@@ -1,0 +1,11 @@
+package org.atlas.services.catalog.port.out.file.excel;
+
+import java.util.List;
+import org.atlas.services.catalog.port.out.file.model.ProductReadRow;
+
+public interface ProductExcelReader {
+
+  String SHEET_NAME = "Products";
+
+  List<ProductReadRow> read(byte[] fileContent) throws Exception;
+}

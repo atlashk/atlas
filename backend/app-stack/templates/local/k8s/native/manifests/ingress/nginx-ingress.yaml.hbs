@@ -37,7 +37,7 @@ spec:
                 port:
                   number: 3000
 {{/hasGrafana}}
-{{#hasObservability "observability.tracing" "zipkin"}}
+{{#hasObservability "tracing" "zipkin"}}
     - host: zipkin.atlas.local
       http:
         paths:

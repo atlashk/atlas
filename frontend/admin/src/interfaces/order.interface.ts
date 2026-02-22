@@ -1,6 +1,6 @@
 import { OrderStatus, PaymentStatus } from "@/constants";
 import type { Product } from "./product.interface";
-import type { User } from "./iam.interface";
+import type { User } from "./identity.interface";
 
 export interface Order {
   id: string;

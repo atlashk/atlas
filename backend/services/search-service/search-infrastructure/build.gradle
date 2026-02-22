@@ -1,0 +1,170 @@
+plugins {
+    id 'java-library'
+    id 'org.springframework.boot' version "${springBootPluginVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagementPluginVersion}"
+    id 'idea'
+}
+
+group = 'org.atlas'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // API server
+    api project(':services.search.api.server.rest')
+
+    // Datasource
+    switch (rootProject.ext.appStack['datasource']) {
+        case 'mysql':
+            api project(':services.search.datasource.mysql')
+            break
+        case 'postgres':
+            api project(':services.search.datasource.postgres')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported datasource: ${rootProject.ext.appStack['datasource']}")
+    }
+    
+    // Full-text search
+    switch (rootProject.ext.appStack['full-text-search']) {
+        case 'none':
+            break
+        case 'elasticsearch':
+            api project(':services.search.full-text-search.elasticsearch')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported full-text-search: ${rootProject.ext.appStack['full-text-search']}")
+    }
+    
+    // KV store
+    switch (rootProject.ext.appStack['kv-store']) {
+        case 'redis':
+            api project(':libs.kv-store.redis')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported kv-store: ${rootProject.ext.appStack['kv-store']}")
+    }
+    
+    // Messaging
+    switch (rootProject.ext.appStack['messaging']) {
+        case 'kafka':
+            api project(':services.search.messaging.kafka')
+            break
+        case 'rabbitmq':
+            api project(':services.search.messaging.rabbitmq')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported messaging: ${rootProject.ext.appStack['messaging']}")
+    }
+    
+    // Migration
+    switch (rootProject.ext.appStack['migration']) {
+        case 'flyway':
+            switch (rootProject.ext.appStack['datasource']) {
+                case 'mysql':
+                    api project(':services.search.migration.flyway.mysql')
+                    break
+                case 'postgres':
+                    api project(':services.search.migration.flyway.postgres')
+                    break
+                default:
+                    throw new IllegalArgumentException("Unsupported datasource: ${rootProject.ext.appStack['datasource']}")
+            }
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported migration: ${rootProject.ext.appStack['migration']}")
+    }
+    
+    // Observability
+    switch (rootProject.ext.appStack['observability.logging.framework']) {
+        case 'logback':
+            api project(':libs.observability.logging.logback')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported observability.logging.framework: ${rootProject.ext.appStack['observability.logging.framework']}")
+    }
+    switch (rootProject.ext.appStack['observability.metrics']) {
+        case 'none':
+            break;
+        case 'prometheus':
+            api project(':libs.observability.metrics.prometheus')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported observability.metrics: ${rootProject.ext.appStack['observability.metrics']}")
+    }
+    switch (rootProject.ext.appStack['observability.tracing']) {
+        case 'none':
+            break
+        case 'zipkin':
+            api project(':libs.observability.tracing.zipkin')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported observability.tracing: ${rootProject.ext.appStack['observability.tracing']}")
+    }
+    
+    // Outbox
+    api project(':libs.outbox')
+
+    // Persistence
+    switch (rootProject.ext.appStack.persistence) {
+        case 'jpa':
+            api project(':services.search.persistence.jpa')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported persistence: ${rootProject.ext.appStack.persistence}")
+    }
+
+    // Saga
+    api project(':libs.saga')
+
+    // Service discovery
+    switch (rootProject.ext.appStack['service-discovery']) {
+        case 'none':
+            break
+        case 'eureka':
+            api project(':libs.discovery-client.eureka')
+            break
+        case 'kubernetes':
+            api project(':libs.discovery-client.kubernetes')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported service-discovery: ${rootProject.ext.appStack['service-discovery']}")
+    }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+}
+
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}

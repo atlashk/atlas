@@ -1,0 +1,26 @@
+package org.atlas.services.identity.application.keycloak.user.mapper;
+
+import org.atlas.services.identity.domain.entity.UserEntity;
+import org.atlas.services.identity.port.in.user.model.ProfileOutput;
+import org.atlas.services.identity.port.in.user.model.RegisterInput;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
+import org.mapstruct.factory.Mappers;
+
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+public interface UserMapper {
+
+  UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
+
+  // Input --> Entity
+  // -----------------------------------------------------------------------------------------------
+
+  @Mapping(target = "password", ignore = true)
+  UserEntity toUser(RegisterInput input);
+
+  // Entity --> Output
+  // -----------------------------------------------------------------------------------------------
+
+  ProfileOutput toProfileOutput(UserEntity user);
+}

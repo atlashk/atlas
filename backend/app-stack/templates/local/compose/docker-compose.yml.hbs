@@ -119,7 +119,7 @@ services:
       - atlas-network
 {{/hasService}}
 
-{{#hasService "iam" "keycloak"}}
+{{#hasService "identity" "keycloak"}}
   keycloak:
     container_name: keycloak
     image: quay.io/keycloak/keycloak:23.0
@@ -212,7 +212,7 @@ services:
       - atlas-network
 {{/hasService}}
 
-{{#hasObservability "observability.metrics" "prometheus"}}
+{{#hasObservability "metrics" "prometheus"}}
   prometheus:
     container_name: prometheus
     image: prom/prometheus:main
@@ -230,7 +230,7 @@ services:
       - atlas-network
 {{/hasObservability}}
 
-{{#hasObservability "observability.logging.stack" "loki"}}
+{{#hasObservability "logging.stack" "loki"}}
   loki:
     container_name: loki
     image: grafana/loki:main
@@ -256,7 +256,7 @@ services:
       - atlas-network
 {{/hasObservability}}
 
-{{#hasObservability "observability.tracing" "zipkin"}}
+{{#hasObservability "tracing" "zipkin"}}
   zipkin:
     container_name: zipkin
     image: openzipkin/zipkin:latest
@@ -282,10 +282,10 @@ services:
       - grafana-data:/var/lib/grafana
       - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
     depends_on:
-      {{#hasObservability "observability.metrics" "prometheus"}}
+      {{#hasObservability "metrics" "prometheus"}}
       - prometheus
       {{/hasObservability}}
-      {{#hasObservability "observability.logging.stack" "loki"}}
+      {{#hasObservability "logging.stack" "loki"}}
       - loki
       {{/hasObservability}}
     networks:
@@ -326,23 +326,23 @@ services:
     networks:
       - atlas-network
 
-  iam-service:
-    container_name: iam-service
-    image: atlas/iam-service:latest
+  identity-service:
+    container_name: identity-service
+    image: atlas/identity-service:latest
     build:
-      context: ../../services/iam-service/iam-bootstrap
+      context: ../../services/identity-service/identity-bootstrap
       dockerfile: Dockerfile
     ports:
       - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       {{#hasService "datasource" "mysql"}}
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db_iam?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db_identity?createDatabaseIfNotExist=true
       - SPRING_DATASOURCE_USERNAME=${MYSQL_USER:-atlas}
       - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD:-secret123456}
       {{/hasService}}
       {{#hasService "datasource" "postgres"}}
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/db_iam
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/db_identity
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-atlas}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
       {{/hasService}}
@@ -359,10 +359,10 @@ services:
       - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER:-atlas}
       - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-secret123456}
       {{/hasService}}
-      {{#hasObservability "observability.tracing" "zipkin"}}
+      {{#hasObservability "tracing" "zipkin"}}
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       {{/hasObservability}}
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -410,10 +410,10 @@ services:
       - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER:-atlas}
       - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-secret123456}
       {{/hasService}}
-      {{#hasObservability "observability.tracing" "zipkin"}}
+      {{#hasObservability "tracing" "zipkin"}}
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       {{/hasObservability}}
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -461,16 +461,16 @@ services:
       - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER:-atlas}
       - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-secret123456}
       {{/hasService}}
-      {{#hasObservability "observability.tracing" "zipkin"}}
+      {{#hasObservability "tracing" "zipkin"}}
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       {{/hasObservability}}
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      {{#hasService "internal-api" "grpc"}}
-      - API_CLIENT_GRPC_IAM_SERVICE_ADDRESS=static://iam-service:50051
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      {{#hasService "internal" "grpc"}}
+      - API_CLIENT_GRPC_IDENTITY_SERVICE_ADDRESS=static://identity-service:50051
       - API_CLIENT_GRPC_PRODUCT_SERVICE_ADDRESS=static://product-service:50052
       {{/hasService}}
-      {{#hasService "internal-api" "rest"}}
-      - API_CLIENT_REST_IAM_SERVICE_BASE_URL=http://iam-service:8081
+      {{#hasService "internal" "rest"}}
+      - API_CLIENT_REST_IDENTITY_SERVICE_BASE_URL=http://identity-service:8081
       - API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL=http://product-service:8082
       {{/hasService}}
     depends_on:
@@ -520,10 +520,11 @@ services:
       - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER:-atlas}
       - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-secret123456}
       {{/hasService}}
-      {{#hasObservability "observability.tracing" "zipkin"}}
+      {{#hasObservability "tracing" "zipkin"}}
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       {{/hasObservability}}
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - PAYMENT_SIMULATOR_WEBHOOK_URL=http://api-gateway:8080/services/payment/api/webhook/simulator
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -575,10 +576,10 @@ services:
       - SPRING_MAIL_HOST=smtp4dev
       - SPRING_MAIL_PORT=25
       {{/hasService}}
-      {{#hasObservability "observability.tracing" "zipkin"}}
+      {{#hasObservability "tracing" "zipkin"}}
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       {{/hasObservability}}
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -607,14 +608,14 @@ services:
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
       {{/hasService}}
-      {{#hasObservability "observability.tracing" "zipkin"}}
+      {{#hasObservability "tracing" "zipkin"}}
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       {{/hasObservability}}
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      {{#hasService "iam" "jwt"}}
-      - IAM_SERVICE_URI=http://iam-service:8081
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      {{#hasService "identity" "jwt"}}
+      - IDENTITY_SERVICE_URI=http://identity-service:8081
       {{/hasService}}
-      {{#hasService "iam" "keycloak"}}
+      {{#hasService "identity" "keycloak"}}
       - KEYCLOAK_BASE_URL=http://keycloak:8443
       {{/hasService}}
     depends_on:
@@ -650,10 +651,10 @@ volumes:
 {{#hasService "storage" "minio"}}
   minio-data:
 {{/hasService}}
-{{#hasObservability "observability.metrics" "prometheus"}}
+{{#hasObservability "metrics" "prometheus"}}
   prometheus-data:
 {{/hasObservability}}
-{{#hasObservability "observability.logging.stack" "loki"}}
+{{#hasObservability "logging.stack" "loki"}}
   loki-data:
 {{/hasObservability}}
 {{#hasGrafana}}

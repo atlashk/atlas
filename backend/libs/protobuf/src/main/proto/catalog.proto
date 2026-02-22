@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "org.atlas.libs.protobuf.catalog";
+
+import "google/protobuf/empty.proto";
+
+package catalog;
+
+service ProductService {
+  rpc RetrieveProductList (RetrieveProductListRequestProto) returns (RetrieveProductListResponseProto) {};
+}
+
+message RetrieveProductListRequestProto {
+  repeated string id = 1;
+}
+
+message ProductProto {
+  string id = 1;
+  string name = 2;
+  double price = 3;
+}
+
+message RetrieveProductListResponseProto {
+  repeated ProductProto product = 1;
+}

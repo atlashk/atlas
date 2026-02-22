@@ -1,0 +1,53 @@
+plugins {
+    id 'java-library'
+    id 'org.springframework.boot' version "${springBootPluginVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagementPluginVersion}"
+    id 'idea'
+}
+
+group = 'org.atlas'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Port
+    api project(':services.catalog.port')
+    
+    // Kafka
+    api project(':libs.messaging.kafka')
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+}
+
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}

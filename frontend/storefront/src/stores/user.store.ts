@@ -1,6 +1,6 @@
 import { AUTH_STORAGE_KEYS } from "@/constants";
-import type { LoginRequest, User } from "@/interfaces/iam.interface";
-import { iamAuthenticationApi, iamFrontApi } from "@/api/index.api";
+import type { LoginRequest, User } from "@/interfaces/identity.interface";
+import { identityApi } from "@/api/index.api";
 import { createLogger } from "@/utils/logger";
 import { clearAuthCookies, getCookie, isValidToken, setCookie } from "@/utils/cookies";
 import { create } from "zustand";
@@ -50,7 +50,7 @@ export const useUserStore = create<UserStore>()(
         set({ loading: true, error: null });
         
         try {
-          const response = await iamAuthenticationApi.login(request);
+          const response = await identityApi.login(request);
 
           if (response.success && response.data) {
             setCookie(AUTH_STORAGE_KEYS.ACCESS_TOKEN, response.data.accessToken);
@@ -109,7 +109,7 @@ export const useUserStore = create<UserStore>()(
         set({ profileLoading: true, error: null });
         
         try {
-          const result = await iamFrontApi.retrieveProfile();
+          const result = await identityApi.retrieveProfile();
           
           if (result.success && result.data) {
             set({
@@ -146,7 +146,7 @@ export const useUserStore = create<UserStore>()(
       logout: async () => {
         logger.info('Logout initiated');
         try {
-          await iamAuthenticationApi.logout();
+          await identityApi.logout();
           logger.info('Logout completed');
         } catch (error) {
           logger.error('Logout error', error);

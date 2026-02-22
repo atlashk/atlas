@@ -1,0 +1,53 @@
+plugins {
+    id 'java-library'
+    id 'org.springframework.boot' version "${springBootPluginVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagementPluginVersion}"
+    id 'idea'
+}
+
+group = 'org.atlas'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    switch (rootProject.ext.appStack['identity']) {
+        case 'jwt':
+            implementation project(':services.identity.jwt')
+            break
+        case 'keycloak':
+            implementation project(':services.identity.keycloak')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported identity: ${rootProject.ext.appStack['identity']}")
+    }
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+}
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}

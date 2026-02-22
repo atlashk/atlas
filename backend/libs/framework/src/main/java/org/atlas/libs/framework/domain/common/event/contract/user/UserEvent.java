@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.framework.domain.common.event.DomainEvent;
 import org.atlas.libs.framework.domain.common.event.DomainEventType;
-import org.atlas.libs.framework.domain.user.UserRole;
+import org.atlas.libs.framework.domain.identity.UserRole;
 
 @NoArgsConstructor
 @AllArgsConstructor

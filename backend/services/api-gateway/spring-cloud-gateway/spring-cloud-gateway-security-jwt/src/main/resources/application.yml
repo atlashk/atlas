@@ -3,4 +3,4 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: ${IAM_SERVICE_URI:http://localhost:8081}/api/authentication/.well-known/jwks.json
+          jwk-set-uri: ${IDENTITY_SERVICE_URI:http://localhost:8081}/api/authentication/.well-known/jwks.json

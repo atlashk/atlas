@@ -68,7 +68,7 @@ dependencies {
     }
     
     // Security
-    switch (rootProject.ext.appStack['iam']) {
+    switch (rootProject.ext.appStack['identity']) {
         case 'keycloak':
             implementation project(':services.api-gateway.spring-cloud-gateway.security.keycloak')
             break
@@ -76,7 +76,7 @@ dependencies {
             implementation project(':services.api-gateway.spring-cloud-gateway.security.jwt')
             break
         default:
-            throw new IllegalArgumentException("Unsupported IAM: ${rootProject.ext.appStack['iam']}")
+            throw new IllegalArgumentException("Unsupported identity: ${rootProject.ext.appStack['identity']}")
     }
     
     // Service discovery

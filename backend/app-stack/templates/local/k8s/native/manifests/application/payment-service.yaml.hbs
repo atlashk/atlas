@@ -36,7 +36,8 @@ spec:
                 secretKeyRef:
                   name: mysql-secret
                   key: mysql-password
-            {{/hasService}}{{#hasService "datasource" "postgres"}}
+            {{/hasService}}
+            {{#hasService "datasource" "postgres"}}
             - name: DB_URL
               value: "jdbc:postgresql://postgres:5432/db_payment"
             - name: DB_USERNAME
@@ -70,10 +71,10 @@ spec:
                   name: rabbitmq-secret
                   key: rabbitmq-password
             {{/hasService}}
-            {{#hasObservability "observability.tracing" "zipkin"}}
+            {{#hasObservability "tracing" "zipkin"}}
             - name: ZIPKIN_ENDPOINT
               value: "http://zipkin:9411/api/v2/spans"
-            {{/hasService}}
+            {{/hasObservability}}
           # startupProbe gives the Spring Boot app up to 5 min (30 × 10 s) to finish starting
           # before liveness/readiness probes are allowed to run. This prevents premature restarts.
           startupProbe:
@@ -118,7 +119,7 @@ spec:
           volumeMounts:
             - name: payment-service-logs
               mountPath: /var/log/payment-service
-        {{#hasObservability "observability.logging.stack" "loki"}}
+        {{#hasObservability "logging.stack" "loki"}}
         # Promtail sidecar for log collection
         - name: promtail
           image: grafana/promtail:main
@@ -161,15 +162,15 @@ spec:
             - name: payment-service-logs
               mountPath: /var/log/payment-service
               readOnly: true
-        {{/hasService}}
+        {{/hasObservability}}
       volumes:
         - name: payment-service-logs
           emptyDir: {}
-        {{#hasObservability "observability.logging.stack" "loki"}}
+        {{#hasObservability "logging.stack" "loki"}}
         - name: promtail-config
           configMap:
             name: promtail-config
-        {{/hasService}}
+        {{/hasObservability}}
       terminationGracePeriodSeconds: 30
 ---
 apiVersion: v1

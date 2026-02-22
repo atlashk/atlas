@@ -31,39 +31,39 @@ spring:
             pool:
               max-idle-time: 45m # Allow connections to stay idle longer for SSE/WebSocket
           routes:
-            # IAM service
-            - id: iam-service-auth
-              uri: ${IAM_SERVICE_URI:lb://iam-service}
+            # Identity service
+            - id: identity-service-auth
+              uri: ${IDENTITY_SERVICE_URI:lb://identity-service}
               predicates:
-                - Path=/services/iam/api/authentication/**
+                - Path=/services/identity/api/authentication/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-                - RewritePath=/services/iam/api/authentication/(?<segment>.*), /api/authentication/${segment}
-            - id: iam-service-front
-              uri: ${IAM_SERVICE_URI:lb://iam-service}
+                - RewritePath=/services/identity/api/authentication/(?<segment>.*), /api/authentication/${segment}
+            - id: identity-service-front
+              uri: ${IDENTITY_SERVICE_URI:lb://identity-service}
               predicates:
-                - Path=/services/iam/api/front/**
+                - Path=/services/identity/api/front/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
                 - TokenValidation
                 - TokenRelay
-                - RewritePath=/services/iam/api/front/(?<segment>.*), /api/front/${segment}
-            - id: iam-service-admin
-              uri: ${IAM_SERVICE_URI:lb://iam-service}
+                - RewritePath=/services/identity/api/front/(?<segment>.*), /api/front/${segment}
+            - id: identity-service-admin
+              uri: ${IDENTITY_SERVICE_URI:lb://identity-service}
               predicates:
-                - Path=/services/iam/api/admin/**
+                - Path=/services/identity/api/admin/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
                 - TokenValidation
                 - Authorization=ADMIN
                 - TokenRelay
-                - RewritePath=/services/iam/api/admin/(?<segment>.*), /api/admin/${segment}
-            - id: iam-service-api-docs
-              uri: ${IAM_SERVICE_URI:lb://iam-service}
+                - RewritePath=/services/identity/api/admin/(?<segment>.*), /api/admin/${segment}
+            - id: identity-service-api-docs
+              uri: ${IDENTITY_SERVICE_URI:lb://identity-service}
               predicates:
-                - Path=/api-docs/iam-service
+                - Path=/api-docs/identity-service
               filters:
-                - RewritePath=/api-docs/iam-service, /api-docs
+                - RewritePath=/api-docs/identity-service, /api-docs
             # Product service
             - id: product-service-front
               uri: ${PRODUCT_SERVICE_URI:lb://product-service}
@@ -181,8 +181,8 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     urls:
-      - name: IAM Service
-        url: /api-docs/iam-service
+      - name: Identity Service
+        url: /api-docs/identity-service
       - name: Product Service
         url: /api-docs/product-service
       - name: Order Service

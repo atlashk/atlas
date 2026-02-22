@@ -23,19 +23,23 @@ data:
     #!/bin/bash
     set -e
     cat <<EOF | mysql -uroot -p"${MYSQL_ROOT_PASSWORD}"
-    {{#hasService "iam" "jwt"}}
-    CREATE DATABASE db_iam;
+    {{#hasService "identity" "jwt"}}
+    CREATE DATABASE db_identity;
     {{/hasService}}
-    CREATE DATABASE db_iam;
+    {{#hasService "identity" "keycloak"}}
+      CREATE DATABASE IF NOT EXISTS db_keycloak;
+    {{/hasService}}
     CREATE DATABASE db_notification;
     CREATE DATABASE db_order;
     CREATE DATABASE db_payment;
     CREATE DATABASE db_product;
 
-    {{#hasService "iam" "jwt"}}
-    GRANT ALL PRIVILEGES ON db_iam.* TO '${MYSQL_USER}'@'%';
+    {{#hasService "identity" "jwt"}}
+    GRANT ALL PRIVILEGES ON db_identity.* TO '${MYSQL_USER}'@'%';
     {{/hasService}}
-    GRANT ALL PRIVILEGES ON db_iam.* TO '${MYSQL_USER}'@'%';
+    {{#hasService "identity" "keycloak"}}
+      GRANT ALL PRIVILEGES ON db_keycloak.* TO '${MYSQL_USER}'@'%';
+    {{/hasService}}
     GRANT ALL PRIVILEGES ON db_notification.* TO '${MYSQL_USER}'@'%';
     GRANT ALL PRIVILEGES ON db_order.* TO '${MYSQL_USER}'@'%';
     GRANT ALL PRIVILEGES ON db_payment.* TO '${MYSQL_USER}'@'%';

@@ -7,9 +7,9 @@ scrape_configs:
     static_configs:
       - targets: [ 'eureka-server:8761' ]
     metrics_path: '/actuator/prometheus'
-  - job_name: 'iam-service-metrics'
+  - job_name: 'identity-service-metrics'
     static_configs:
-      - targets: [ 'iam-service:8081' ]
+      - targets: [ 'identity-service:8081' ]
     metrics_path: '/actuator/prometheus'
   - job_name: 'product-service-metrics'
     static_configs:

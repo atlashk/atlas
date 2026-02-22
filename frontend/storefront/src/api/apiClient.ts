@@ -60,7 +60,7 @@ const getRefreshTokenFromCookies = (): string | null => {
 
 const shouldSkipAuthRedirect = (requestUrl?: string): boolean => {
   if (!requestUrl) return false;
-  return requestUrl.includes('/services/iam/api/front/users/profile');
+  return requestUrl.includes('/services/identity/api/front/users/profile');
 };
 
 apiClient.interceptors.request.use(
@@ -177,7 +177,7 @@ function redirectToLogin(): void {
 async function performTokenRefresh(refreshToken: string): Promise<string> {
   try {
     const response = await axios.post(
-      `${API_BASE_URL}/services/iam/api/authentication/refresh-token`,
+      `${API_BASE_URL}/services/identity/api/authentication/refresh-token`,
       { refreshToken },
       {
         timeout: 10000,

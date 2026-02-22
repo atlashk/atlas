@@ -32,18 +32,18 @@ spec:
             - name: REDIS_PORT
               value: "6379"
             {{/hasService}}
-            {{#hasService "iam" "jwt"}}
-            - name: IAM_SERVICE_URI
-              value: "http://iam-service:8081"
+            {{#hasService "identity" "jwt"}}
+            - name: IDENTITY_SERVICE_URI
+              value: "http://identity-service:8081"
             {{/hasService}}
-            {{#hasService "iam" "keycloak"}}
+            {{#hasService "identity" "keycloak"}}
               - name: KEYCLOAK_BASE_URL
               value: "http://keycloak:8443"
             {{/hasService}}
-            {{#hasObservability "observability.tracing" "zipkin"}}
+            {{#hasObservability "tracing" "zipkin"}}
             - name: ZIPKIN_ENDPOINT
               value: "http://zipkin:9411/api/v2/spans"
-            {{/hasService}}
+            {{/hasObservability}}
           # startupProbe gives the Spring Boot app up to 5 min (30 × 10 s) to finish starting
           # before liveness/readiness probes are allowed to run. This prevents premature restarts.
           startupProbe:
@@ -88,7 +88,7 @@ spec:
           volumeMounts:
             - name: api-gateway-logs
               mountPath: /var/log/api-gateway
-        {{#hasObservability "observability.logging.stack" "loki"}}
+        {{#hasObservability "logging.stack" "loki"}}
         # Promtail sidecar for log collection
         - name: promtail
           image: grafana/promtail:main
@@ -131,15 +131,15 @@ spec:
             - name: api-gateway-logs
               mountPath: /var/log/api-gateway
               readOnly: true
-        {{/hasService}}
+        {{/hasObservability}}
       volumes:
         - name: api-gateway-logs
           emptyDir: {}
-        {{#hasObservability "observability.logging.stack" "loki"}}
+        {{#hasObservability "logging.stack" "loki"}}
         - name: promtail-config
           configMap:
             name: promtail-config
-        {{/hasService}}
+        {{/hasObservability}}
       terminationGracePeriodSeconds: 30
 ---
 apiVersion: v1

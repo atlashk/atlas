@@ -137,7 +137,7 @@ data:
     apiVersion: 1
 
     datasources:
-    {{#hasObservability "observability.metrics" "prometheus"}}
+    {{#hasObservability "metrics" "prometheus"}}
       - name: Prometheus
         type: prometheus
         access: proxy
@@ -150,7 +150,8 @@ data:
           queryTimeout: 60s
           httpMethod: POST
         secureJsonData: { }
-    {{#hasObservability "observability.logging.stack" "loki"}}
+    {{/hasObservability}}
+    {{#hasObservability "logging.stack" "loki"}}
       - name: Loki
         type: loki
         access: proxy
@@ -193,4 +194,4 @@ metadata:
     tier: infrastructure
 data:
   observability.json: |
-{{/hasGrafana}
+{{/hasGrafana}}
