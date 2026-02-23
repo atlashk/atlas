@@ -11,7 +11,7 @@ import org.atlas.libs.framework.util.PagingUtil;
 import org.atlas.libs.framework.util.SleepUtil;
 import org.atlas.services.product.port.out.fulltextsearch.FullTextSearchService;
 import org.atlas.services.product.port.out.fulltextsearch.SearchIndex;
-import org.atlas.services.product.port.out.repository.StockRepository;
+import org.atlas.services.inventory.port.out.repository.StockRepository;
 import org.atlas.services.inventory.domain.entity.StockEntity;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;

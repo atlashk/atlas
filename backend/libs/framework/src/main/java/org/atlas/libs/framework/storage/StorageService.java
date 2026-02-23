@@ -10,7 +10,7 @@ public interface StorageService {
 
   void uploadFile(UploadFileRequest request) throws IOException;
 
-  byte[] getFile(GetFileRequest request) throws IOException;
+  byte[] getFileContent(GetFileRequest request) throws IOException;
 
   String getDownloadUrl(GetDownloadUrlRequest request) throws IOException;
 

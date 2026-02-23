@@ -11,7 +11,7 @@ import org.atlas.libs.protobuf.product.ProductServiceGrpc;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.services.inventory.domain.entity.StockEntity;
 import org.atlas.services.product.port.in.internal.model.InternalRetrieveProductListInput;
-import org.atlas.services.product.port.in.service.StockInternalService;
+import org.atlas.services.inventory.port.in.service.StockInternalService;
 
 @GrpcService
 @RequiredArgsConstructor

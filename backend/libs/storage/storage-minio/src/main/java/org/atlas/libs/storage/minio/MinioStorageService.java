@@ -58,7 +58,7 @@ public class MinioStorageService implements StorageService {
   }
 
   @Override
-  public byte[] getFile(GetFileRequest request) throws IOException {
+  public byte[] getFileContent(GetFileRequest request) throws IOException {
     String bucket = request.getBucket();
     String objectKey = request.getObjectKey();
     try (InputStream stream = minioClient.getObject(

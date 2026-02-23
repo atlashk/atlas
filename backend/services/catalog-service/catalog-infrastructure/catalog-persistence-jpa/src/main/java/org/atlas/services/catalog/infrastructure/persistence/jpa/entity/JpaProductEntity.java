@@ -24,8 +24,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.services.catalog.domain.entity.ProductType;
 import org.atlas.libs.persistence.jpa.entity.JpaBaseEntity;
+import org.atlas.services.catalog.domain.entity.ProductType;
 
 @Entity
 @Table(name = "product")
@@ -39,26 +39,24 @@ public class JpaProductEntity extends JpaBaseEntity {
 
   @Id
   @Column(name = "id")
+  @EqualsAndHashCode.Include
   private String id;
 
   @Column(name = "name")
   private String name;
 
+  @Column(name = "type")
+  @Enumerated(EnumType.STRING)
+  private ProductType type;
+
   @Column(name = "price")
   private BigDecimal price;
 
-  @Column(name = "stock_status")
-  @Enumerated(EnumType.STRING)
-  private ProductType stockStatus;
+  @Column(name = "published_at")
+  private Date publishedAt;
 
-  @Column(name = "quantity")
-  private Integer quantity;
-
-  @Column(name = "available_from")
-  private Date availableFrom;
-
-  @Column(name = "is_active")
-  private Boolean isActive;
+  @Column(name = "in_stock")
+  private Boolean inStock;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "brand_id")

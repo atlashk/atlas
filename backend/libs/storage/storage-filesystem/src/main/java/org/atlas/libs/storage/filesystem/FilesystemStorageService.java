@@ -39,7 +39,7 @@ public class FilesystemStorageService implements StorageService {
   }
 
   @Override
-  public byte[] getFile(GetFileRequest request) throws IOException {
+  public byte[] getFileContent(GetFileRequest request) throws IOException {
     Path filePath = toFilePath(request);
     checkFileExists(filePath);
     return Files.readAllBytes(filePath);

@@ -32,8 +32,8 @@ import org.atlas.services.product.port.out.file.mapper.ProductWriteRowMapper;
 import org.atlas.services.product.port.out.file.model.ProductReadRow;
 import org.atlas.services.product.port.out.file.model.ProductWriteRow;
 import org.atlas.services.product.port.out.file.pdf.ProductPdfWriter;
-import org.atlas.services.product.port.out.messaging.StockEventMessagePublisher;
-import org.atlas.services.product.port.out.repository.StockRepository;
+import org.atlas.services.inventory.port.out.messaging.StockEventMessagePublisher;
+import org.atlas.services.inventory.port.out.repository.StockRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

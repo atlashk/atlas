@@ -29,7 +29,7 @@ public class RestClientUserApiClient implements UserApiClient {
 
   @Override
   public List<UserOutput> call(RetrieveUserListInput request) {
-    String url = String.format("%s/api/internal/users/list", baseUrl);
+    String url = String.format("%s/api/users/internal/list", baseUrl);
     ApiResponseWrapper<List<UserOutput>> apiResponseWrapper = restClient.post()
         .uri(url)
         .contentType(MediaType.APPLICATION_JSON)

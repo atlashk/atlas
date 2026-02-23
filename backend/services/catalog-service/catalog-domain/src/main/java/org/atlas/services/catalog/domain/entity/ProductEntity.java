@@ -31,7 +31,7 @@ public class ProductEntity extends DomainEntity {
   @Builder.Default
   private BigDecimal price = BigDecimal.ZERO;
 
-  private String imageUrl;
+  private String image;
 
   private Date publishedAt;
 

@@ -1,0 +1,5 @@
+app:
+  internal:
+    rest:
+      identity-service:
+        base-url: ${API_CLIENT_REST_INVENTORY_SERVICE_BASE_URL:http://localhost:8083}

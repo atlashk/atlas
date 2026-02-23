@@ -7,7 +7,7 @@ import org.atlas.libs.framework.json.JsonUtil;
 import org.atlas.libs.framework.messaging.publisher.Message;
 import org.atlas.libs.framework.messaging.publisher.MessagePublisher;
 import org.atlas.libs.messaging.kafka.common.KafkaTopics;
-import org.atlas.services.product.port.out.messaging.StockEventMessagePublisher;
+import org.atlas.services.inventory.port.out.messaging.StockEventMessagePublisher;
 import org.springframework.stereotype.Component;
 
 @Component

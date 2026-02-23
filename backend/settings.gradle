@@ -66,11 +66,17 @@ project(':libs.internal.identity.grpc').projectDir = file('libs/internal/identit
 include(':libs.internal.identity.rest')
 project(':libs.internal.identity.rest').projectDir = file('libs/internal/identity-api/identity-api-rest')
 
-// Internal::Product
-include(':libs.internal.product.grpc')
-project(':libs.internal.product.grpc').projectDir = file('libs/internal/product-api/product-api-grpc')
-include(':libs.internal.product.rest')
-project(':libs.internal.product.rest').projectDir = file('libs/internal/product-api/product-api-rest')
+// Internal::Catalog
+include(':libs.internal.catalog.grpc')
+project(':libs.internal.catalog.grpc').projectDir = file('libs/internal/catalog-api/catalog-api-grpc')
+include(':libs.internal.catalog.rest')
+project(':libs.internal.catalog.rest').projectDir = file('libs/internal/catalog-api/catalog-api-rest')
+
+// Internal::Inventory
+include(':libs.internal.inventory.grpc')
+project(':libs.internal.inventory.grpc').projectDir = file('libs/internal/inventory-api/inventory-api-grpc')
+include(':libs.internal.inventory.rest')
+project(':libs.internal.inventory.rest').projectDir = file('libs/internal/inventory-api/inventory-api-rest')
 
 // JWT
 include(':libs.jwt')
@@ -294,6 +300,8 @@ include(':services.catalog.file.excel.poi')
 project(':services.catalog.file.excel.poi').projectDir = file('services/catalog-service/catalog-infrastructure/catalog-file-excel-poi')
 include(':services.catalog.file.pdf.pdfbox')
 project(':services.catalog.file.pdf.pdfbox').projectDir = file('services/catalog-service/catalog-infrastructure/catalog-file-pdf-pdfbox')
+include(':services.catalog.full-text-search.elasticsearch')
+project(':services.catalog.full-text-search.elasticsearch').projectDir = file('services/catalog-service/catalog-infrastructure/catalog-full-text-search-elasticsearch')
 include(':services.catalog.messaging.kafka')
 project(':services.catalog.messaging.kafka').projectDir = file('services/catalog-service/catalog-infrastructure/catalog-messaging-kafka')
 include(':services.catalog.messaging.rabbitmq')
@@ -344,41 +352,6 @@ project(':services.inventory.persistence.jpa').projectDir = file('services/inven
 
 include(':services.inventory.bootstrap')
 project(':services.inventory.bootstrap').projectDir = file('services/inventory-service/inventory-bootstrap')
-
-//// -------------------------------------------------------------------------------------------------
-//// Search Service
-//// -------------------------------------------------------------------------------------------------
-//
-//include(':services.search.domain')
-//project(':services.search.domain').projectDir = file('services/search-service/search-domain')
-//
-//include(':services.search.port')
-//project(':services.search.port').projectDir = file('services/search-service/search-port')
-//
-//include(':services.search.application')
-//project(':services.search.application').projectDir = file('services/search-service/search-application')
-//
-//include(':services.search.infrastructure')
-//project(':services.search.infrastructure').projectDir = file('services/search-service/search-infrastructure')
-//include(':services.search.api.server.rest')
-//project(':services.search.api.server.rest').projectDir = file('services/search-service/search-infrastructure/product-api-server-rest')
-//include(':services.search.datasource.mysql')
-//project(':services.search.datasource.mysql').projectDir = file('services/search-service/search-infrastructure/product-datasource-mysql')
-//include(':services.search.datasource.postgres')
-//project(':services.search.datasource.postgres').projectDir = file('services/search-service/search-infrastructure/product-datasource-postgres')
-//include(':services.search.messaging.kafka')
-//project(':services.search.messaging.kafka').projectDir = file('services/search-service/search-infrastructure/product-messaging-kafka')
-//include(':services.search.messaging.rabbitmq')
-//project(':services.search.messaging.rabbitmq').projectDir = file('services/search-service/search-infrastructure/product-messaging-rabbitmq')
-//include(':services.search.migration.flyway.mysql')
-//project(':services.search.migration.flyway.mysql').projectDir = file('services/search-service/search-infrastructure/product-migration-flyway-mysql')
-//include(':services.search.migration.flyway.postgres')
-//project(':services.search.migration.flyway.postgres').projectDir = file('services/search-service/search-infrastructure/product-migration-flyway-postgres')
-//include(':services.search.persistence.jpa')
-//project(':services.search.persistence.jpa').projectDir = file('services/search-service/search-infrastructure/product-persistence-jpa')
-//
-//include(':services.search.bootstrap')
-//project(':services.search.bootstrap').projectDir = file('services/search-service/search-bootstrap')
 
 // -------------------------------------------------------------------------------------------------
 // Order Service

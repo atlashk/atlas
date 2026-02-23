@@ -87,9 +87,13 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
 
   private Specification<JpaProductEntity> buildSpec(ProductRepository.FindProductCriteria criteria) {
     QuerySpecification<JpaProductEntity> spec = new QuerySpecification<>();
+
+    // ID
     if (criteria.getId() != null) {
       spec.addFilter(QueryFilter.of("id", criteria.getId(), QueryOperator.EQUAL));
     }
+
+    // Keyword
     if (StringUtil.isNotBlank(criteria.getKeyword())) {
       String lowercaseKeyword = "%" + criteria.getKeyword().toLowerCase() + "%";
       spec.addFilter(QueryFilter.or(
@@ -99,6 +103,12 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
           QueryFilter.Condition.of("lower(attributes.value)", lowercaseKeyword,
               QueryOperator.LIKE)));
     }
+
+    // Type
+    if (criteria.getStockStatus() != null) {
+      spec.addFilter(QueryFilter.of("stockStatus", criteria.getStockStatus(), QueryOperator.EQUAL));
+    }
+
     if (criteria.getMinPrice() != null) {
       spec.addFilter(
           QueryFilter.of("price", criteria.getMinPrice(), QueryOperator.GREATER_THAN_EQUAL));
@@ -106,9 +116,6 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
     if (criteria.getMaxPrice() != null) {
       spec.addFilter(
           QueryFilter.of("price", criteria.getMaxPrice(), QueryOperator.LESS_THAN_EQUAL));
-    }
-    if (criteria.getStockStatus() != null) {
-      spec.addFilter(QueryFilter.of("stockStatus", criteria.getStockStatus(), QueryOperator.EQUAL));
     }
     if (criteria.getAvailableFrom() != null) {
       spec.addFilter(QueryFilter.of("availableFrom", criteria.getAvailableFrom(),

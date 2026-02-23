@@ -15,6 +15,8 @@ import org.atlas.services.catalog.domain.entity.ProductEntity;
 public class UpdateProductInput {
 
   private ProductEntity product;
+
   private byte[] imageBytes;
+
   private String imageContentType;
 }

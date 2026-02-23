@@ -19,13 +19,24 @@ import org.atlas.libs.framework.file.FileType;
 public class ExportProductInput {
 
   private String id;
+
   private String keyword;
+
+  private ProductType type;
+
   private BigDecimal minPrice;
+
   private BigDecimal maxPrice;
-  private ProductType stockStatus;
-  private Date availableFrom;
-  private Boolean isActive;
+
+  private Date startPublishedAt;
+
+  private Date endPublishedAt;
+
+  private Boolean inStock;
+
   private Integer brandId;
+
   private List<Integer> categoryIds;
+
   private FileType fileType;
 }

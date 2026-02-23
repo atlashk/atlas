@@ -3,7 +3,7 @@ package org.atlas.services.product.application.admin.mapper;
 import org.atlas.services.inventory.domain.entity.StockEntity;
 import org.atlas.services.product.port.in.admin.model.AdminExportProductInput;
 import org.atlas.services.product.port.in.admin.model.AdminRetrieveProductListInput;
-import org.atlas.services.product.port.out.repository.StockRepository;
+import org.atlas.services.inventory.port.out.repository.StockRepository;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;

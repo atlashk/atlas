@@ -45,17 +45,19 @@ public interface ProductRepository {
     private String keyword;
 
     private ProductType type;
-    
+
     private BigDecimal minPrice;
 
     private BigDecimal maxPrice;
 
-    private Boolean isActive;
+    private Date startPublishedAt;
 
-    private Date availableFrom;
+    private Date endPublishedAt;
 
-    private Integer brandId;
+    private Boolean inStock;
 
-    private List<Integer> categoryIds;
+    private String brandId;
+
+    private List<String> categoryIds;
   }
 }

@@ -178,19 +178,19 @@ public class ProductAdminServiceImpl implements ProductAdminService {
   }
 
   private void publishProductCreatedEvent(ProductEntity product) {
-    ProductCreatedEvent event = new ProductCreatedEvent(DomainEventType.PRODUCT_CREATED);
+    ProductCreatedEvent event = new ProductCreatedEvent();
     ProductEventMapper.INSTANCE.merge(product, event);
     productEventMessagePublisher.publish(event);
   }
 
   private void publishProductUpdatedEvent(ProductEntity product) {
-    ProductCreatedEvent event = new ProductCreatedEvent(DomainEventType.PRODUCT_UPDATED);
+    ProductCreatedEvent event = new ProductCreatedEvent();
     ProductEventMapper.INSTANCE.merge(product, event);
     productEventMessagePublisher.publish(event);
   }
 
   private void publishProductDeletedEvent(ProductEntity product) {
-    ProductCreatedEvent event = new ProductCreatedEvent(DomainEventType.PRODUCT_DELETED);
+    ProductCreatedEvent event = new ProductCreatedEvent();
     ProductEventMapper.INSTANCE.merge(product, event);
     productEventMessagePublisher.publish(event);
   }

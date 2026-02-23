@@ -7,7 +7,7 @@ import org.atlas.libs.framework.domain.common.event.contract.product.ProductCrea
 import org.atlas.libs.framework.json.JsonUtil;
 import org.atlas.libs.framework.messaging.publisher.Message;
 import org.atlas.libs.framework.messaging.publisher.MessagePublisher;
-import org.atlas.services.product.port.out.messaging.StockEventMessagePublisher;
+import org.atlas.services.inventory.port.out.messaging.StockEventMessagePublisher;
 import org.springframework.stereotype.Component;
 
 @Component

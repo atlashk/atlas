@@ -32,6 +32,8 @@ public class RetrieveProductListInput {
 
   private Date endPublishedAt;
 
+  private Boolean inStock;
+
   private Integer brandId;
 
   private List<Integer> categoryIds;

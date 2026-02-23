@@ -72,7 +72,30 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported file.pdf: ${rootProject.ext.appStack['file.pdf']}")
     }
-    
+
+    // Full-text search
+    switch (rootProject.ext.appStack['full-text-search']) {
+        case 'none':
+            break
+        case 'elasticsearch':
+            api project(':services.catalog.full-text-search.elasticsearch')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported full-text-search: ${rootProject.ext.appStack['full-text-search']}")
+    }
+
+    // Internal
+    switch (rootProject.ext.appStack['internal']) {
+        case 'grpc':
+            api project(':libs.internal.inventory.grpc')
+            break
+        case 'rest':
+            api project(':libs.internal.inventory.rest')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported internal: ${rootProject.ext.appStack['internal']}")
+    }
+
     // KV store
     switch (rootProject.ext.appStack['kv-store']) {
         case 'redis':

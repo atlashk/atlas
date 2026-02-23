@@ -17,7 +17,7 @@ import org.atlas.services.product.port.in.service.ProductImageService;
 import org.atlas.services.product.port.in.service.ProductService;
 import org.atlas.services.product.port.out.fulltextsearch.FullTextSearchService;
 import org.atlas.services.product.port.out.fulltextsearch.SearchProductCriteria;
-import org.atlas.services.product.port.out.repository.StockRepository;
+import org.atlas.services.inventory.port.out.repository.StockRepository;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
