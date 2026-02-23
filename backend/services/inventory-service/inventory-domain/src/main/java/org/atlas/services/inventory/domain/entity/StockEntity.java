@@ -23,5 +23,5 @@ public class StockEntity extends DomainEntity {
   private Integer availableQuantity = 0;
 
   @Builder.Default
-  private int reservedQuantity = 0;
+  private Integer reservedQuantity = 0;
 }

@@ -33,9 +33,13 @@ public class ProductEntity extends DomainEntity {
 
   private String imageUrl;
 
-  private Boolean isActive;
+  private Boolean featured;
 
-  private Date expiredAt;
+  private Date publishedAt;
+
+  // Based on inventory-service stock status
+  @Builder.Default
+  private Boolean inStock = true;
 
   // Associations
 

@@ -17,12 +17,20 @@ import org.atlas.services.catalog.domain.entity.ProductType;
 public class ProductWriteRow {
 
   private String id;
+
   private String name;
+
   private ProductType type;
+
   private BigDecimal price;
-  private Boolean isActive;
-  private Date availableFrom;
-  private String brandName;
-  private String categoryNames;
+
+  private Boolean featured;
+
+  private Date publishedAt;
+
   private Integer quantity;
+
+  private String brandName;
+
+  private String categoryNames;
 }

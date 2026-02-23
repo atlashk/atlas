@@ -17,10 +17,18 @@ import org.atlas.services.catalog.domain.entity.ProductType;
 public class ProductReadRow {
 
   private String name;
+
   private ProductType type;
+
   private BigDecimal price;
-  private Date availableFrom;
-  private Boolean isActive;
+
+  private Boolean featured;
+
+  private Date publishedAt;
+
+  private Integer quantity;
+
   private Integer brandId;
+
   private String categoryIds; // Split by |
 }
