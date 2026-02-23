@@ -10,8 +10,10 @@ import org.atlas.libs.framework.domain.common.event.DomainEventType;
 public class ProductCreatedEvent extends DomainEvent {
 
   private String productId;
+
   private String name;
-  private Integer stockQuantity;
+  
+  private Integer initialQuantity;
 
   public ProductCreatedEvent() {
     super(DomainEventType.PRODUCT_CREATED);

@@ -22,11 +22,9 @@ public class ProductReadRow {
 
   private BigDecimal price;
 
-  private Boolean featured;
-
   private Date publishedAt;
 
-  private Integer quantity;
+  private Integer initialQuantity;
 
   private Integer brandId;
 

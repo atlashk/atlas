@@ -33,8 +33,6 @@ public class ProductEntity extends DomainEntity {
 
   private String imageUrl;
 
-  private Boolean featured;
-
   private Date publishedAt;
 
   // Based on inventory-service stock status

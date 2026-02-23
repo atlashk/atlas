@@ -1,14 +1,12 @@
-package org.atlas.services.catalog.port.in.product.model.admin;
+package org.atlas.services.catalog.port.in.product.model;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.services.catalog.domain.entity.ProductType;
 import org.atlas.libs.framework.paging.PagingRequest;
 
 @NoArgsConstructor
@@ -18,23 +16,25 @@ import org.atlas.libs.framework.paging.PagingRequest;
 @Setter
 public class RetrieveProductListInput {
 
-  private String id;
-
+  // Product name, description, attribute name/value, brand name, category name
   private String keyword;
 
-  private ProductType type;
-  
   private BigDecimal minPrice;
 
   private BigDecimal maxPrice;
-
-  private Date startPublishedAt;
-
-  private Date endPublishedAt;
 
   private Integer brandId;
 
   private List<Integer> categoryIds;
 
   private PagingRequest pagingRequest;
+
+  @Builder.Default
+  private Mode mode = Mode.DATABASE;
+
+  public enum Mode {
+
+    DATABASE, // Dynamic search
+    FULL_TEXT_SEARCH,
+  }
 }

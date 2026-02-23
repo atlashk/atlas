@@ -24,11 +24,9 @@ public class ProductWriteRow {
 
   private BigDecimal price;
 
-  private Boolean featured;
-
   private Date publishedAt;
 
-  private Integer quantity;
+  private Boolean inStock;
 
   private String brandName;
 
