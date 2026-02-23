@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.libs.framework.domain.catalog.ProductType;
+import org.atlas.services.catalog.domain.entity.ProductType;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,9 +17,8 @@ import org.atlas.libs.framework.domain.catalog.ProductType;
 public class ProductReadRow {
 
   private String name;
+  private ProductType type;
   private BigDecimal price;
-  private Integer quantity;
-  private ProductType stockStatus;
   private Date availableFrom;
   private Boolean isActive;
   private Integer brandId;

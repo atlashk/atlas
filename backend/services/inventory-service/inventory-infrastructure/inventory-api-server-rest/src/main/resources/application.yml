@@ -1,2 +1,2 @@
 springdoc:
-  packages-to-scan: org.atlas.services.product.infrastructure.api.server.rest
+  packages-to-scan: org.atlas.services.reservation.infrastructure.api.server.rest

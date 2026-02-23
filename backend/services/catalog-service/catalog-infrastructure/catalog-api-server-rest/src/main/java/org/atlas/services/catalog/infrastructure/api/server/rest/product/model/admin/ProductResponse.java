@@ -9,7 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.libs.framework.domain.catalog.ProductType;
+import org.atlas.services.catalog.domain.entity.ProductType;
 import org.atlas.services.catalog.infrastructure.api.server.rest.brand.model.BrandResponse;
 import org.atlas.services.catalog.infrastructure.api.server.rest.category.model.CategoryResponse;
 import org.atlas.services.catalog.infrastructure.api.server.rest.product.model.ProductAttributeResponse;

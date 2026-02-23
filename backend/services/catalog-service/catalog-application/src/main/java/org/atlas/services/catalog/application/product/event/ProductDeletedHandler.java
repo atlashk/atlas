@@ -9,7 +9,7 @@ import org.atlas.libs.framework.cache.CacheService;
 import org.atlas.libs.framework.concurrent.AsyncUtil;
 import org.atlas.libs.framework.concurrent.AsyncUtil.AsyncTask;
 import org.atlas.libs.framework.domain.common.event.DomainEventType;
-import org.atlas.libs.framework.domain.common.event.contract.product.ProductEvent;
+import org.atlas.libs.framework.domain.common.event.contract.product.ProductCreatedEvent;
 import org.atlas.libs.framework.domain.common.event.handler.DomainEventHandler;
 import org.atlas.services.catalog.application.product.mapper.ProductEventMapper;
 import org.atlas.services.catalog.domain.entity.ProductEntity;
@@ -23,7 +23,7 @@ public class ProductDeletedHandler {
   private final ProductImageService productImageService;
   private final CacheService cacheService;
 
-  public void handle(ProductEvent event) {
+  public void handle(ProductCreatedEvent event) {
     ProductEntity product = ProductEventMapper.INSTANCE.toProduct(event);
 
     List<AsyncTask> tasks = new ArrayList<>();

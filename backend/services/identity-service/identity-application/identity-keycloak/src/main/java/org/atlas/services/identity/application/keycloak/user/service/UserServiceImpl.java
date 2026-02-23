@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.context.Contexts;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.event.DomainEventType;
-import org.atlas.libs.framework.domain.common.event.contract.user.UserEvent;
+import org.atlas.libs.framework.domain.common.event.contract.identity.UserCreatedEvent;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
 import org.atlas.libs.framework.domain.identity.UserRole;
 import org.atlas.services.identity.application.keycloak.core.client.KeycloakUserClient;
@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
   }
 
   private void publishUserCreatedEvent(UserEntity user) {
-    UserEvent event = new UserEvent(DomainEventType.USER_CREATED);
+    UserCreatedEvent event = new UserCreatedEvent(DomainEventType.USER_CREATED);
     UserEventMapper.INSTANCE.merge(user, event);
     messagePublisher.publish(event);
   }

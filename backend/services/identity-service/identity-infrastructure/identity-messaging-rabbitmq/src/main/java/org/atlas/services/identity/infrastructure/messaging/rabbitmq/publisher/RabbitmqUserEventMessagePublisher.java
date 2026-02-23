@@ -3,7 +3,7 @@ package org.atlas.services.identity.infrastructure.messaging.rabbitmq.publisher;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.domain.common.event.contract.user.UserEvent;
+import org.atlas.libs.framework.domain.common.event.contract.identity.UserCreatedEvent;
 import org.atlas.libs.framework.json.JsonUtil;
 import org.atlas.libs.framework.messaging.publisher.Message;
 import org.atlas.libs.framework.messaging.publisher.MessagePublisher;
@@ -18,7 +18,7 @@ public class RabbitmqUserEventMessagePublisher implements UserEventMessagePublis
   private final MessagePublisher messagePublisher;
 
   @Override
-  public void publish(UserEvent event) {
+  public void publish(UserCreatedEvent event) {
     final String exchange = "user_events";
     final String routingKey = "user_events";
     Message message = Message.builder()

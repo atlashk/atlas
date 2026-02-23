@@ -7,10 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.concurrent.AsyncUtil;
 import org.atlas.libs.framework.concurrent.AsyncUtil.AsyncTask;
 import org.atlas.libs.framework.domain.common.event.DomainEventType;
-import org.atlas.libs.framework.domain.common.event.contract.product.ProductEvent;
+import org.atlas.libs.framework.domain.common.event.contract.product.ProductCreatedEvent;
 import org.atlas.libs.framework.domain.common.event.handler.DomainEventHandler;
 import org.atlas.services.product.application.event.mapper.ProductEventMapper;
-import org.atlas.services.product.domain.entity.ProductEntity;
+import org.atlas.services.inventory.domain.entity.StockEntity;
 import org.atlas.services.product.port.out.fulltextsearch.FullTextSearchService;
 import org.springframework.beans.factory.ObjectProvider;
 
@@ -21,8 +21,8 @@ public class ProductCreatedHandler {
 
   private final ObjectProvider<FullTextSearchService> fullTextSearchServiceProvider;
 
-  public void handle(ProductEvent event) {
-    ProductEntity product = ProductEventMapper.INSTANCE.toProduct(event);
+  public void handle(ProductCreatedEvent event) {
+    StockEntity product = ProductEventMapper.INSTANCE.toProduct(event);
 
     List<AsyncTask> tasks = new ArrayList<>();
     FullTextSearchService fullTextSearchService = fullTextSearchServiceProvider.getIfAvailable();
@@ -37,7 +37,7 @@ public class ProductCreatedHandler {
     }
   }
 
-  private AsyncUtil.AsyncTask createFullTextSearchDocument(ProductEntity product) {
+  private AsyncUtil.AsyncTask createFullTextSearchDocument(StockEntity product) {
     return new AsyncUtil.AsyncTask() {
       @Override
       public void run() {

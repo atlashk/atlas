@@ -13,7 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.framework.constant.CommonConstant;
-import org.atlas.libs.framework.domain.catalog.ProductType;
+import org.atlas.services.catalog.domain.entity.ProductType;
 
 @Schema(description = "Request object for retrieving product list")
 @NoArgsConstructor

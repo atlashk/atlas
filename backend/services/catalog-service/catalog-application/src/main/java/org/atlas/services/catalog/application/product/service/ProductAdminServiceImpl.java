@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.event.DomainEventType;
-import org.atlas.libs.framework.domain.common.event.contract.product.ProductEvent;
+import org.atlas.libs.framework.domain.common.event.contract.product.ProductCreatedEvent;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
@@ -178,19 +178,19 @@ public class ProductAdminServiceImpl implements ProductAdminService {
   }
 
   private void publishProductCreatedEvent(ProductEntity product) {
-    ProductEvent event = new ProductEvent(DomainEventType.PRODUCT_CREATED);
+    ProductCreatedEvent event = new ProductCreatedEvent(DomainEventType.PRODUCT_CREATED);
     ProductEventMapper.INSTANCE.merge(product, event);
     productEventMessagePublisher.publish(event);
   }
 
   private void publishProductUpdatedEvent(ProductEntity product) {
-    ProductEvent event = new ProductEvent(DomainEventType.PRODUCT_UPDATED);
+    ProductCreatedEvent event = new ProductCreatedEvent(DomainEventType.PRODUCT_UPDATED);
     ProductEventMapper.INSTANCE.merge(product, event);
     productEventMessagePublisher.publish(event);
   }
 
   private void publishProductDeletedEvent(ProductEntity product) {
-    ProductEvent event = new ProductEvent(DomainEventType.PRODUCT_DELETED);
+    ProductCreatedEvent event = new ProductCreatedEvent(DomainEventType.PRODUCT_DELETED);
     ProductEventMapper.INSTANCE.merge(product, event);
     productEventMessagePublisher.publish(event);
   }

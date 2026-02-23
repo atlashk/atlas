@@ -11,7 +11,7 @@ import org.atlas.libs.framework.storage.model.GetFileRequest;
 import org.atlas.libs.framework.storage.model.UploadFileRequest;
 import org.atlas.libs.framework.util.ArrayUtil;
 import org.atlas.libs.framework.util.StringUtil;
-import org.atlas.services.product.port.in.front.service.ProductImageService;
+import org.atlas.services.product.port.in.service.ProductImageService;
 import org.springframework.stereotype.Service;
 
 @Service

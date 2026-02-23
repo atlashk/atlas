@@ -11,7 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.file.csv.opencsv.OpenCsvWriter;
-import org.atlas.libs.framework.domain.catalog.ProductType;
+import org.atlas.services.catalog.domain.entity.ProductType;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.catalog.port.out.file.csv.ProductCsvWriter;
 import org.atlas.services.catalog.port.out.file.model.ProductWriteRow;

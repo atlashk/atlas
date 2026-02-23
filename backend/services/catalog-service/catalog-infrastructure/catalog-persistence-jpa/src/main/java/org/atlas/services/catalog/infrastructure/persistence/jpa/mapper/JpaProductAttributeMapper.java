@@ -1,6 +1,6 @@
 package org.atlas.services.catalog.infrastructure.persistence.jpa.mapper;
 
-import org.atlas.services.product.domain.entity.ProductAttributeEntity;
+import org.atlas.services.catalog.domain.entity.ProductAttributeEntity;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.entity.JpaProductAttributeEntity;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;

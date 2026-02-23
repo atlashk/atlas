@@ -17,7 +17,7 @@ import org.atlas.libs.framework.domain.common.entity.DomainEntity;
 public class BrandEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
-  private Integer id;
+  private String id;
 
   private String name;
 }

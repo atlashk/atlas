@@ -9,8 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.libs.framework.domain.common.exception.OutOfStockException;
-import org.atlas.libs.framework.domain.catalog.ProductType;
+import org.atlas.services.catalog.domain.entity.ProductType;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.services.catalog.domain.entity.ProductEntity;
@@ -32,17 +31,6 @@ public interface ProductRepository {
 
   void update(ProductEntity product);
 
-  void decreaseQuantityWithConstraint(String id, Integer decrement)
-      throws OutOfStockException;
-
-  void decreaseQuantityWithPessimisticLock(String id, Integer decrement)
-      throws OutOfStockException;
-
-  void decreaseQuantityWithOptimisticLock(String id, Integer decrement)
-      throws OutOfStockException;
-
-  void increaseQuantity(String id, Integer increment);
-
   void deleteById(String id);
 
   @NoArgsConstructor
@@ -56,15 +44,15 @@ public interface ProductRepository {
 
     private String keyword;
 
+    private ProductType type;
+    
     private BigDecimal minPrice;
 
     private BigDecimal maxPrice;
 
-    private ProductType stockStatus;
+    private Boolean isActive;
 
     private Date availableFrom;
-
-    private Boolean isActive;
 
     private Integer brandId;
 

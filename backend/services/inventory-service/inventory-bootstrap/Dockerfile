@@ -35,7 +35,7 @@ COPY --from=builder /extracted/application/ ./
 USER spring:spring
 
 # Expose application port
-EXPOSE 8082
+EXPOSE 8083
 
 # Use dumb-init for proper signal handling and optimized JVM settings
 ENTRYPOINT ["dumb-init", "--", "java", \

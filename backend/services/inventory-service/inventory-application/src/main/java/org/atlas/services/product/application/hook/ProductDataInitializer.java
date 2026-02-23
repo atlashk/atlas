@@ -11,8 +11,8 @@ import org.atlas.libs.framework.util.PagingUtil;
 import org.atlas.libs.framework.util.SleepUtil;
 import org.atlas.services.product.port.out.fulltextsearch.FullTextSearchService;
 import org.atlas.services.product.port.out.fulltextsearch.SearchIndex;
-import org.atlas.services.product.port.out.repository.ProductRepository;
-import org.atlas.services.product.domain.entity.ProductEntity;
+import org.atlas.services.product.port.out.repository.StockRepository;
+import org.atlas.services.inventory.domain.entity.StockEntity;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 
@@ -23,7 +23,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 public class ProductDataInitializer {
 
   private final ObjectProvider<FullTextSearchService> fullTextSearchServiceProvider;
-  private final ProductRepository productRepository;
+  private final StockRepository stockRepository;
 
   private static final int BATCH_SIZE = 100;
 
@@ -52,7 +52,7 @@ public class ProductDataInitializer {
 
     int synchronizedCount = 0;
 
-    long totalProducts = productRepository.countAll();
+    long totalProducts = stockRepository.countAll();
     log.info("Total products to synchronize: {}", totalProducts);
 
     if (totalProducts == 0) {
@@ -74,11 +74,11 @@ public class ProductDataInitializer {
 
       try {
         PagingRequest pagingRequest = PagingRequest.of(batch, BATCH_SIZE);
-        ProductRepository.FindProductCriteria criteria = new ProductRepository.FindProductCriteria();
+        StockRepository.FindProductCriteria criteria = new StockRepository.FindProductCriteria();
 
-        PagingResult<ProductEntity> productPage = productRepository.findByCriteria(criteria,
+        PagingResult<StockEntity> productPage = stockRepository.findByCriteria(criteria,
             pagingRequest);
-        List<ProductEntity> products = productPage.getData();
+        List<StockEntity> products = productPage.getData();
 
         if (products.isEmpty()) {
           log.warn("Empty batch encountered at page {}/{}", batch + 1, totalBatches);

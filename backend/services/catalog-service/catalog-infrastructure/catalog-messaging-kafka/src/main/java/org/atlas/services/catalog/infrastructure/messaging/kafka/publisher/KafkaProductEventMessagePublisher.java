@@ -2,7 +2,7 @@ package org.atlas.services.catalog.infrastructure.messaging.kafka.publisher;
 
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.domain.common.event.contract.product.ProductEvent;
+import org.atlas.libs.framework.domain.common.event.contract.product.ProductCreatedEvent;
 import org.atlas.libs.framework.json.JsonUtil;
 import org.atlas.libs.framework.messaging.publisher.Message;
 import org.atlas.libs.framework.messaging.publisher.MessagePublisher;
@@ -17,7 +17,7 @@ public class KafkaProductEventMessagePublisher implements ProductEventMessagePub
   private final MessagePublisher messagePublisher;
 
   @Override
-  public void publish(ProductEvent event) {
+  public void publish(ProductCreatedEvent event) {
     Message message = Message.builder()
         .destination(KafkaTopics.PRODUCT_EVENTS)
         .routingAttributes(Map.of("messageKey", event.getProductId()))

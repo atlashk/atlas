@@ -26,7 +26,7 @@ repositories {
 
 dependencies {
     // Port
-    api project(':services.product.port')
+    api project(':services.inventory.port')
     
     // Kafka
     api project(':libs.messaging.kafka')

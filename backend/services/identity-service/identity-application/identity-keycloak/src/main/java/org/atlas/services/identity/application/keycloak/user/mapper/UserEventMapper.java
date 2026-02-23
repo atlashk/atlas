@@ -1,6 +1,6 @@
 package org.atlas.services.identity.application.keycloak.user.mapper;
 
-import org.atlas.libs.framework.domain.common.event.contract.user.UserEvent;
+import org.atlas.libs.framework.domain.common.event.contract.identity.UserCreatedEvent;
 import org.atlas.services.identity.domain.entity.UserEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -14,5 +14,5 @@ public interface UserEventMapper {
   UserEventMapper INSTANCE = Mappers.getMapper(UserEventMapper.class);
 
   @Mapping(target = "version", ignore = true)
-  void merge(UserEntity user, @MappingTarget UserEvent event);
+  void merge(UserEntity user, @MappingTarget UserCreatedEvent event);
 }

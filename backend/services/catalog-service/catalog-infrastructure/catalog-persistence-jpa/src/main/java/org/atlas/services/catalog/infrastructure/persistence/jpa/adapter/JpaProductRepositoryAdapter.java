@@ -6,20 +6,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
-import org.atlas.libs.framework.domain.common.exception.OutOfStockException;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.MapperUtil;
-import org.atlas.services.product.domain.entity.ProductEntity;
+import org.atlas.services.catalog.domain.entity.ProductEntity;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.entity.JpaProductEntity;
-import org.atlas.services.catalog.port.out.repository.ProductRepository;
-import org.atlas.services.catalog.infrastructure.persistence.jpa.entity.JpaOptimisticProductEntity;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.mapper.JpaProductMapper;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.repository.CustomJpaProductRepository;
-import org.atlas.services.catalog.infrastructure.persistence.jpa.repository.JpaOptimisticProductRepository;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.repository.JpaProductRepository;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.OptimisticLockingFailureException;
+import org.atlas.services.catalog.port.out.repository.ProductRepository;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -28,7 +23,6 @@ import org.springframework.stereotype.Component;
 public class JpaProductRepositoryAdapter implements ProductRepository {
 
   private final JpaProductRepository jpaProductRepository;
-  private final JpaOptimisticProductRepository jpaOptimisticProductRepository;
   private final CustomJpaProductRepository customJpaProductRepository;
 
   @Override
@@ -81,57 +75,6 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
         .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
     JpaProductMapper.INSTANCE.merge(product, jpaProduct);
     jpaProductRepository.save(jpaProduct);
-  }
-
-  @Override
-  public void decreaseQuantityWithConstraint(String id, Integer decrement)
-      throws OutOfStockException {
-    int updated = jpaProductRepository.decreaseQuantityWithConstraint(id, decrement);
-    if (updated == 0) {
-      throw new OutOfStockException();
-    }
-  }
-
-  // TODO: Implement retry
-  @Override
-  public void decreaseQuantityWithPessimisticLock(String id, Integer decrement)
-      throws OutOfStockException {
-    JpaProductEntity product = jpaProductRepository.findByIdWithLock(id)
-        .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
-    if (product.getQuantity() < decrement) {
-      throw new OutOfStockException();
-    }
-
-    product.setQuantity(product.getQuantity() - decrement);
-    try {
-      jpaProductRepository.save(product);
-    } catch (DataAccessException e) {
-      throw new OutOfStockException(e);
-    }
-  }
-
-  // TODO: Implement retry
-  @Override
-  public void decreaseQuantityWithOptimisticLock(String id, Integer decrement)
-      throws OutOfStockException {
-    JpaOptimisticProductEntity jpaOptimisticProduct =
-        jpaOptimisticProductRepository.findById(id)
-            .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
-    if (jpaOptimisticProduct.getQuantity() < decrement) {
-      throw new OutOfStockException();
-    }
-
-    jpaOptimisticProduct.setQuantity(jpaOptimisticProduct.getQuantity() - decrement);
-    try {
-      jpaOptimisticProductRepository.save(jpaOptimisticProduct);
-    } catch (OptimisticLockingFailureException e) {
-      throw new OutOfStockException(e);
-    }
-  }
-
-  @Override
-  public void increaseQuantity(String id, Integer increment) {
-    jpaProductRepository.increaseQuantity(id, increment);
   }
 
   @Override

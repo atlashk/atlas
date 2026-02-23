@@ -11,7 +11,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.atlas.libs.file.excel.poi.PoiUtil;
 import org.atlas.libs.framework.constant.CommonConstant;
-import org.atlas.libs.framework.domain.catalog.ProductType;
+import org.atlas.services.catalog.domain.entity.ProductType;
 import org.atlas.libs.framework.util.DateUtil;
 import org.atlas.services.catalog.port.out.file.excel.ProductExcelReader;
 import org.atlas.services.catalog.port.out.file.model.ProductReadRow;

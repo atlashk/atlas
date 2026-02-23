@@ -1,11 +1,10 @@
 package org.atlas.services.identity.application.jwt.user.mapper;
 
-import org.atlas.libs.framework.domain.common.event.contract.user.UserEvent;
+import org.atlas.libs.framework.domain.common.event.contract.identity.UserCreatedEvent;
 import org.atlas.services.identity.domain.entity.UserEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.Mappings;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
@@ -16,5 +15,5 @@ public interface UserEventMapper {
 
   @Mapping(target = "userId", source = "id")
   @Mapping(target = "version", ignore = true)
-  void merge(UserEntity user, @MappingTarget UserEvent event);
+  void merge(UserEntity user, @MappingTarget UserCreatedEvent event);
 }

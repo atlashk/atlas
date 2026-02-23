@@ -4,7 +4,7 @@ import com.alibaba.excel.converters.Converter;
 import com.alibaba.excel.converters.WriteConverterContext;
 import com.alibaba.excel.enums.CellDataTypeEnum;
 import com.alibaba.excel.metadata.data.WriteCellData;
-import org.atlas.libs.framework.domain.catalog.ProductType;
+import org.atlas.services.catalog.domain.entity.ProductType;
 
 public class ProductTypeConverter implements Converter<ProductType> {
 

@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
-import org.atlas.libs.framework.domain.catalog.ProductType;
+import org.atlas.services.catalog.domain.entity.ProductType;
 import org.atlas.libs.framework.file.FileType;
 
 @Schema(description = "Request object for exporting products")

@@ -9,11 +9,11 @@ import org.atlas.libs.framework.cache.CacheService;
 import org.atlas.libs.framework.concurrent.AsyncUtil;
 import org.atlas.libs.framework.concurrent.AsyncUtil.AsyncTask;
 import org.atlas.libs.framework.domain.common.event.DomainEventType;
-import org.atlas.libs.framework.domain.common.event.contract.product.ProductEvent;
+import org.atlas.libs.framework.domain.common.event.contract.product.ProductCreatedEvent;
 import org.atlas.libs.framework.domain.common.event.handler.DomainEventHandler;
 import org.atlas.services.product.application.event.mapper.ProductEventMapper;
-import org.atlas.services.product.domain.entity.ProductEntity;
-import org.atlas.services.product.port.in.front.service.ProductImageService;
+import org.atlas.services.inventory.domain.entity.StockEntity;
+import org.atlas.services.product.port.in.service.ProductImageService;
 import org.atlas.services.product.port.out.fulltextsearch.FullTextSearchService;
 import org.springframework.beans.factory.ObjectProvider;
 
@@ -26,8 +26,8 @@ public class ProductDeletedHandler {
   private final ObjectProvider<FullTextSearchService> fullTextSearchServiceProvider;
   private final CacheService cacheService;
 
-  public void handle(ProductEvent event) {
-    ProductEntity product = ProductEventMapper.INSTANCE.toProduct(event);
+  public void handle(ProductCreatedEvent event) {
+    StockEntity product = ProductEventMapper.INSTANCE.toProduct(event);
 
     List<AsyncTask> tasks = new ArrayList<>();
     tasks.add(deleteProductImage(product));
@@ -45,7 +45,7 @@ public class ProductDeletedHandler {
         });
   }
 
-  private AsyncUtil.AsyncTask deleteProductImage(ProductEntity product) {
+  private AsyncUtil.AsyncTask deleteProductImage(StockEntity product) {
     return new AsyncUtil.AsyncTask() {
       @Override
       public void run() {
@@ -65,7 +65,7 @@ public class ProductDeletedHandler {
     };
   }
 
-  private AsyncUtil.AsyncTask deleteFullTextSearchDocument(ProductEntity product) {
+  private AsyncUtil.AsyncTask deleteFullTextSearchDocument(StockEntity product) {
     return new AsyncUtil.AsyncTask() {
       @Override
       public void run() {
@@ -86,7 +86,7 @@ public class ProductDeletedHandler {
     };
   }
 
-  private AsyncUtil.AsyncTask evictProductCache(ProductEntity product) {
+  private AsyncUtil.AsyncTask evictProductCache(StockEntity product) {
     return new AsyncUtil.AsyncTask() {
       @Override
       public void run() {

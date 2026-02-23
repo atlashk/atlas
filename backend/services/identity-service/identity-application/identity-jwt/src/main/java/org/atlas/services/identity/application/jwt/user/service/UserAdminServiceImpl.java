@@ -4,7 +4,7 @@ import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.event.DomainEventType;
-import org.atlas.libs.framework.domain.common.event.contract.user.UserEvent;
+import org.atlas.libs.framework.domain.common.event.contract.identity.UserCreatedEvent;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.security.authorization.RequiredAdmin;
@@ -115,19 +115,19 @@ public class UserAdminServiceImpl implements UserAdminService {
   }
 
   private void publishUserCreatedEvent(UserEntity user) {
-    UserEvent event = new UserEvent(DomainEventType.USER_CREATED);
+    UserCreatedEvent event = new UserCreatedEvent(DomainEventType.USER_CREATED);
     UserEventMapper.INSTANCE.merge(user, event);
     messagePublisher.publish(event);
   }
 
   private void publishUserUpdatedEvent(UserEntity user) {
-    UserEvent event = new UserEvent(DomainEventType.USER_UPDATED);
+    UserCreatedEvent event = new UserCreatedEvent(DomainEventType.USER_UPDATED);
     UserEventMapper.INSTANCE.merge(user, event);
     messagePublisher.publish(event);
   }
 
   private void publishUserDeletedEvent(String userId) {
-    UserEvent event = new UserEvent(DomainEventType.USER_DELETED);
+    UserCreatedEvent event = new UserCreatedEvent(DomainEventType.USER_DELETED);
     event.setUserId(userId);
     messagePublisher.publish(event);
   }

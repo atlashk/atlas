@@ -308,40 +308,43 @@ project(':services.catalog.persistence.jpa').projectDir = file('services/catalog
 include(':services.catalog.bootstrap')
 project(':services.catalog.bootstrap').projectDir = file('services/catalog-service/catalog-bootstrap')
 
-//// -------------------------------------------------------------------------------------------------
-//// Inventory Service
-//// -------------------------------------------------------------------------------------------------
-//
-//include(':services.inventory.domain')
-//project(':services.inventory.domain').projectDir = file('services/inventory-service/inventory-domain')
-//
-//include(':services.inventory.port')
-//project(':services.inventory.port').projectDir = file('services/inventory-service/inventory-port')
-//
-//include(':services.inventory.application')
-//project(':services.inventory.application').projectDir = file('services/inventory-service/inventory-application')
-//
-//include(':services.inventory.infrastructure')
-//project(':services.inventory.infrastructure').projectDir = file('services/inventory-service/inventory-infrastructure')
-//include(':services.inventory.api.server.grpc')
-//project(':services.inventory.api.server.grpc').projectDir = file('services/inventory-service/inventory-infrastructure/product-api-server-grpc')
-//include(':services.inventory.api.server.rest')
-//project(':services.inventory.api.server.rest').projectDir = file('services/inventory-service/inventory-infrastructure/product-api-server-rest')
-//include(':services.inventory.datasource.mysql')
-//project(':services.inventory.datasource.mysql').projectDir = file('services/inventory-service/inventory-infrastructure/product-datasource-mysql')
-//include(':services.inventory.datasource.postgres')
-//project(':services.inventory.datasource.postgres').projectDir = file('services/inventory-service/inventory-infrastructure/product-datasource-postgres')
-//include(':services.inventory.messaging.kafka')
-//project(':services.inventory.messaging.kafka').projectDir = file('services/inventory-service/inventory-infrastructure/product-messaging-kafka')
-//include(':services.inventory.messaging.rabbitmq')
-//project(':services.inventory.messaging.rabbitmq').projectDir = file('services/inventory-service/inventory-infrastructure/product-messaging-rabbitmq')
-//include(':services.inventory.migration.flyway.mysql')
-//project(':services.inventory.migration.flyway.mysql').projectDir = file('services/inventory-service/inventory-infrastructure/product-migration-flyway-mysql')
-//include(':services.inventory.migration.flyway.postgres')
-//project(':services.inventory.migration.flyway.postgres').projectDir = file('services/inventory-service/inventory-infrastructure/product-migration-flyway-postgres')
-//include(':services.inventory.persistence.jpa')
-//project(':services.inventory.persistence.jpa').projectDir = file('services/inventory-service/inventory-infrastructure/product-persistence-jpa')
-//
+// -------------------------------------------------------------------------------------------------
+// Inventory Service
+// -------------------------------------------------------------------------------------------------
+
+include(':services.inventory.domain')
+project(':services.inventory.domain').projectDir = file('services/inventory-service/inventory-domain')
+
+include(':services.inventory.port')
+project(':services.inventory.port').projectDir = file('services/inventory-service/inventory-port')
+
+include(':services.inventory.application')
+project(':services.inventory.application').projectDir = file('services/inventory-service/inventory-application')
+
+include(':services.inventory.infrastructure')
+project(':services.inventory.infrastructure').projectDir = file('services/inventory-service/inventory-infrastructure')
+include(':services.inventory.api.server.grpc')
+project(':services.inventory.api.server.grpc').projectDir = file('services/inventory-service/inventory-infrastructure/inventory-api-server-grpc')
+include(':services.inventory.api.server.rest')
+project(':services.inventory.api.server.rest').projectDir = file('services/inventory-service/inventory-infrastructure/inventory-api-server-rest')
+include(':services.inventory.datasource.mysql')
+project(':services.inventory.datasource.mysql').projectDir = file('services/inventory-service/inventory-infrastructure/inventory-datasource-mysql')
+include(':services.inventory.datasource.postgres')
+project(':services.inventory.datasource.postgres').projectDir = file('services/inventory-service/inventory-infrastructure/inventory-datasource-postgres')
+include(':services.inventory.messaging.kafka')
+project(':services.inventory.messaging.kafka').projectDir = file('services/inventory-service/inventory-infrastructure/inventory-messaging-kafka')
+include(':services.inventory.messaging.rabbitmq')
+project(':services.inventory.messaging.rabbitmq').projectDir = file('services/inventory-service/inventory-infrastructure/inventory-messaging-rabbitmq')
+include(':services.inventory.migration.flyway.mysql')
+project(':services.inventory.migration.flyway.mysql').projectDir = file('services/inventory-service/inventory-infrastructure/inventory-migration-flyway-mysql')
+include(':services.inventory.migration.flyway.postgres')
+project(':services.inventory.migration.flyway.postgres').projectDir = file('services/inventory-service/inventory-infrastructure/inventory-migration-flyway-postgres')
+include(':services.inventory.persistence.jpa')
+project(':services.inventory.persistence.jpa').projectDir = file('services/inventory-service/inventory-infrastructure/inventory-persistence-jpa')
+
+include(':services.inventory.bootstrap')
+project(':services.inventory.bootstrap').projectDir = file('services/inventory-service/inventory-bootstrap')
+
 //// -------------------------------------------------------------------------------------------------
 //// Search Service
 //// -------------------------------------------------------------------------------------------------

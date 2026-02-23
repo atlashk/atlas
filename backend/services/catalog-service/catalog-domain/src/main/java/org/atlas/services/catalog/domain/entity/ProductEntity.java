@@ -11,7 +11,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.libs.framework.domain.catalog.ProductType;
 import org.atlas.libs.framework.domain.common.entity.DomainEntity;
 
 @NoArgsConstructor
@@ -36,9 +35,7 @@ public class ProductEntity extends DomainEntity {
 
   private Boolean isActive;
 
-  private Date availableFrom;
-
-  private Integer quantity;
+  private Date expiredAt;
 
   // Associations
 

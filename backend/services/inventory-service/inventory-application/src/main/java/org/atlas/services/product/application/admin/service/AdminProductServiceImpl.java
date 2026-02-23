@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.common.error.DomainError;
 import org.atlas.libs.framework.domain.common.event.DomainEventType;
-import org.atlas.libs.framework.domain.common.event.contract.product.ProductEvent;
+import org.atlas.libs.framework.domain.common.event.contract.product.ProductCreatedEvent;
 import org.atlas.libs.framework.domain.common.exception.DomainException;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
@@ -16,14 +16,14 @@ import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.product.application.admin.mapper.AdminProductMapper;
 import org.atlas.services.product.application.event.mapper.ProductEventMapper;
-import org.atlas.services.product.domain.entity.ProductEntity;
+import org.atlas.services.inventory.domain.entity.StockEntity;
 import org.atlas.services.product.port.in.admin.model.AdminCreateProductInput;
 import org.atlas.services.product.port.in.admin.model.AdminExportProductInput;
 import org.atlas.services.product.port.in.admin.model.AdminImportProductInput;
 import org.atlas.services.product.port.in.admin.model.AdminRetrieveProductListInput;
 import org.atlas.services.product.port.in.admin.model.AdminUpdateProductInput;
 import org.atlas.services.product.port.in.admin.service.AdminProductService;
-import org.atlas.services.product.port.in.front.service.ProductImageService;
+import org.atlas.services.product.port.in.service.ProductImageService;
 import org.atlas.services.product.port.out.file.csv.ProductCsvReader;
 import org.atlas.services.product.port.out.file.csv.ProductCsvWriter;
 import org.atlas.services.product.port.out.file.excel.ProductExcelReader;
@@ -32,8 +32,8 @@ import org.atlas.services.product.port.out.file.mapper.ProductWriteRowMapper;
 import org.atlas.services.product.port.out.file.model.ProductReadRow;
 import org.atlas.services.product.port.out.file.model.ProductWriteRow;
 import org.atlas.services.product.port.out.file.pdf.ProductPdfWriter;
-import org.atlas.services.product.port.out.messaging.ProductEventMessagePublisher;
-import org.atlas.services.product.port.out.repository.ProductRepository;
+import org.atlas.services.product.port.out.messaging.StockEventMessagePublisher;
+import org.atlas.services.product.port.out.repository.StockRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,10 +42,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class AdminProductServiceImpl implements AdminProductService {
 
-  private final ProductRepository productRepository;
+  private final StockRepository stockRepository;
   private final ProductImageService productImageService;
   private final SequenceGenerator sequenceGenerator;
-  private final ProductEventMessagePublisher productEventMessagePublisher;
+  private final StockEventMessagePublisher stockEventMessagePublisher;
   private final ProductCsvReader productCsvReader;
   private final ProductExcelReader productExcelReader;
   private final ProductCsvWriter productCsvWriter;
@@ -53,10 +53,10 @@ public class AdminProductServiceImpl implements AdminProductService {
   private final ProductPdfWriter productPdfWriter;
 
   @Override
-  public PagingResult<ProductEntity> retrieveProductList(AdminRetrieveProductListInput input) {
-    ProductRepository.FindProductCriteria criteria = AdminProductMapper.INSTANCE.toFindProductCriteria(
+  public PagingResult<StockEntity> retrieveProductList(AdminRetrieveProductListInput input) {
+    StockRepository.FindProductCriteria criteria = AdminProductMapper.INSTANCE.toFindProductCriteria(
         input);
-    PagingResult<ProductEntity> productPage = productRepository.findByCriteria(criteria,
+    PagingResult<StockEntity> productPage = stockRepository.findByCriteria(criteria,
         input.getPagingRequest());
 
     // Set image
@@ -68,23 +68,23 @@ public class AdminProductServiceImpl implements AdminProductService {
 
   @Override
   @Transactional(readOnly = true)
-  public ProductEntity retrieveProduct(String id) {
-    return productRepository.findById(id)
+  public StockEntity retrieveProduct(String id) {
+    return stockRepository.findById(id)
         .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
   }
 
   @Override
   @Transactional(readOnly = true)
   public Long retrieveProductCount() {
-    return productRepository.countAll();
+    return stockRepository.countAll();
   }
 
   @Override
   @Transactional
   public String createProduct(AdminCreateProductInput input) throws Exception {
-    ProductEntity product = input.getProduct();
+    StockEntity product = input.getProduct();
     product.setId(sequenceGenerator.generate(SequenceType.PRODUCT));
-    productRepository.insert(product);
+    stockRepository.insert(product);
 
     productImageService.uploadImage(product.getId(), input.getImageBytes(),
         input.getImageContentType());
@@ -97,12 +97,12 @@ public class AdminProductServiceImpl implements AdminProductService {
   @Override
   @Transactional
   public void updateProduct(AdminUpdateProductInput input) throws Exception {
-    ProductEntity product = input.getProduct();
-    ProductEntity existingProduct = productRepository.findById(product.getId())
+    StockEntity product = input.getProduct();
+    StockEntity existingProduct = stockRepository.findById(product.getId())
         .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
 
     AdminProductMapper.INSTANCE.merge(product, existingProduct);
-    productRepository.update(product);
+    stockRepository.update(product);
 
     if (ArrayUtil.isNotEmpty(input.getImageBytes())) {
       productImageService.uploadImage(product.getId(), input.getImageBytes(),
@@ -116,9 +116,9 @@ public class AdminProductServiceImpl implements AdminProductService {
   @Transactional
   public void deleteProduct(String id) {
     // Delete product from DB
-    ProductEntity product = productRepository.findById(id)
+    StockEntity product = stockRepository.findById(id)
         .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
-    productRepository.deleteById(product.getId());
+    stockRepository.deleteById(product.getId());
 
     // Publish event
     publishProductDeletedEvent(product);
@@ -140,14 +140,14 @@ public class AdminProductServiceImpl implements AdminProductService {
 
     // Sync into DB and publish events
     try {
-      List<ProductEntity> products = rows.stream()
+      List<StockEntity> products = rows.stream()
           .map(row -> {
-            ProductEntity product = ProductReadRowMapper.INSTANCE.toProduct(row);
+            StockEntity product = ProductReadRowMapper.INSTANCE.toProduct(row);
             product.setId(sequenceGenerator.generate(SequenceType.PRODUCT));
             return product;
           })
           .toList();
-      productRepository.insertBatch(products);
+      stockRepository.insertBatch(products);
       products.forEach(this::publishProductCreatedEvent);
       log.info("Imported {} products", rows.size());
     } catch (Exception e) {
@@ -157,9 +157,9 @@ public class AdminProductServiceImpl implements AdminProductService {
 
   @Override
   public byte[] exportProduct(AdminExportProductInput input) throws Exception {
-    ProductRepository.FindProductCriteria criteria = AdminProductMapper.INSTANCE
+    StockRepository.FindProductCriteria criteria = AdminProductMapper.INSTANCE
         .toFindProductCriteria(input);
-    PagingResult<ProductEntity> products = productRepository.findByCriteria(criteria,
+    PagingResult<StockEntity> products = stockRepository.findByCriteria(criteria,
         PagingRequest.unpaged());
 
     // Use custom mapping method for complex attribute mapping
@@ -177,21 +177,21 @@ public class AdminProductServiceImpl implements AdminProductService {
     return fileContent;
   }
 
-  private void publishProductCreatedEvent(ProductEntity product) {
-    ProductEvent event = new ProductEvent(DomainEventType.PRODUCT_CREATED);
+  private void publishProductCreatedEvent(StockEntity product) {
+    ProductCreatedEvent event = new ProductCreatedEvent(DomainEventType.PRODUCT_CREATED);
     ProductEventMapper.INSTANCE.merge(product, event);
-    productEventMessagePublisher.publish(event);
+    stockEventMessagePublisher.publish(event);
   }
 
-  private void publishProductUpdatedEvent(ProductEntity product) {
-    ProductEvent event = new ProductEvent(DomainEventType.PRODUCT_UPDATED);
+  private void publishProductUpdatedEvent(StockEntity product) {
+    ProductCreatedEvent event = new ProductCreatedEvent(DomainEventType.PRODUCT_UPDATED);
     ProductEventMapper.INSTANCE.merge(product, event);
-    productEventMessagePublisher.publish(event);
+    stockEventMessagePublisher.publish(event);
   }
 
-  private void publishProductDeletedEvent(ProductEntity product) {
-    ProductEvent event = new ProductEvent(DomainEventType.PRODUCT_DELETED);
+  private void publishProductDeletedEvent(StockEntity product) {
+    ProductCreatedEvent event = new ProductCreatedEvent(DomainEventType.PRODUCT_DELETED);
     ProductEventMapper.INSTANCE.merge(product, event);
-    productEventMessagePublisher.publish(event);
+    stockEventMessagePublisher.publish(event);
   }
 }

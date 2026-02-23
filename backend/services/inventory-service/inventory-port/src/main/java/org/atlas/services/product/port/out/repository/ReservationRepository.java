@@ -1,7 +1,7 @@
 package org.atlas.services.product.port.out.repository;
 
 import java.util.Optional;
-import org.atlas.services.product.domain.entity.ReservationEntity;
+import org.atlas.services.inventory.domain.entity.ReservationEntity;
 
 public interface ReservationRepository {
 
