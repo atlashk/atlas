@@ -30,11 +30,11 @@ public class RetrieveProductListRequest {
   @Schema(description = "Maximum price for filtering products.", example = "100.00")
   private BigDecimal maxPrice;
 
-  @Schema(description = "Brand ID for filtering products.", example = "1")
-  private Integer brandId;
+  @Schema(description = "Brand ID for filtering products.", example = "BRD0001")
+  private String brandId;
 
-  @Schema(description = "List of category IDs for filtering products.", example = "[1, 2, 3]")
-  private List<Integer> categoryIds;
+  @Schema(description = "List of category IDs for filtering products.", example = "[\"CAT00001\", \"CAT00002\", \"CAT00003\"]")
+  private List<String> categoryIds;
 
   @Schema(description = "Retrieve mode", example = "DATABASE")
   private Mode mode;

@@ -1,38 +1,38 @@
 INSERT INTO brand (id, name, created_at)
-VALUES (1, 'Apple', NOW()),
-       (2, 'Samsung', NOW()),
-       (3, 'Sony', NOW()),
-       (4, 'LG', NOW()),
-       (5, 'Dell', NOW());
+VALUES ('BRD0001', 'Apple', NOW()),
+       ('BRD0002', 'Samsung', NOW()),
+       ('BRD0003', 'Sony', NOW()),
+       ('BRD0004', 'LG', NOW()),
+       ('BRD0005', 'Dell', NOW());
 
 INSERT INTO category (id, name, created_at)
-VALUES (1, 'Laptops', NOW()),
-       (2, 'Smartphones', NOW()),
-       (3, 'Tablets', NOW()),
-       (4, 'Televisions', NOW()),
-       (5, 'Accessories', NOW());
+VALUES ('CAT0001', 'Laptops', NOW()),
+       ('CAT0002', 'Smartphones', NOW()),
+       ('CAT0003', 'Tablets', NOW()),
+       ('CAT0004', 'Televisions', NOW()),
+       ('CAT0005', 'Accessories', NOW());
 
-INSERT INTO product (id, name, price, stock_status, quantity, available_from, is_active, brand_id, created_at)
-VALUES ('PRD0000001', 'MacBook Pro 14"', 1999.99, 'IN_STOCK', 50, NOW(), 1, 1, NOW()),
-       ('PRD0000002', 'Samsung Galaxy S23', 899.99, 'IN_STOCK', 100, NOW(), 1, 2, NOW()),
-       ('PRD0000003', 'Sony WH-1000XM5', 349.99, 'IN_STOCK', 200, NOW(), 1, 3, NOW()),
-       ('PRD0000004', 'LG OLED 55"', 1499.99, 'DISCONTINUED', 0, NOW(), 1, 4, NOW()),
-       ('PRD0000005', 'Dell XPS 15', 1899.99, 'IN_STOCK', 60, NOW(), 1, 5, NOW()),
-       ('PRD0000006', 'iPad Pro 12.9"', 1099.99, 'IN_STOCK', 70, NOW(), 1, 1, NOW()),
-       ('PRD0000007', 'Samsung Galaxy Tab S8', 799.99, 'IN_STOCK', 80, NOW(), 1, 2, NOW()),
-       ('PRD0000008', 'Sony Bravia 65"', 1799.99, 'IN_STOCK', 40, NOW(), 1, 3, NOW()),
-       ('PRD0000009', 'LG NanoCell 75"', 1999.99, 'OUT_STOCK', 0, NOW(), 1, 4, NOW()),
-       ('PRD0000010', 'Dell Inspiron 15', 849.99, 'IN_STOCK', 90, NOW(), 1, 5, NOW()),
-       ('PRD0000011', 'MacBook Air 13"', 1299.99, 'IN_STOCK', 55, NOW(), 1, 1, NOW()),
-       ('PRD0000012', 'Samsung Galaxy A54', 499.99, 'IN_STOCK', 110, NOW(), 1, 2, NOW()),
-       ('PRD0000013', 'Sony WF-1000XM4', 279.99, 'IN_STOCK', 150, NOW(), 1, 3, NOW()),
-       ('PRD0000014', 'LG UltraGear Monitor', 399.99, 'IN_STOCK', 100, NOW(), 1, 4, NOW()),
-       ('PRD0000015', 'Dell Latitude 7420', 1599.99, 'IN_STOCK', 75, NOW(), 1, 5, NOW()),
-       ('PRD0000016', 'Mac Studio', 3999.99, 'IN_STOCK', 30, NOW(), 1, 1, NOW()),
-       ('PRD0000017', 'Samsung QLED TV', 2199.99, 'OUT_STOCK', 0, NOW(), 1, 2, NOW()),
-       ('PRD0000018', 'Sony PlayStation 5', 499.99, 'IN_STOCK', 200, NOW(), 1, 3, NOW()),
-       ('PRD0000019', 'LG Soundbar', 199.99, 'IN_STOCK', 180, NOW(), 1, 4, NOW()),
-       ('PRD0000020', 'Alienware m15', 2099.99, 'IN_STOCK', 40, NOW(), 1, 5, NOW());
+INSERT INTO product (id, name, type, price, published_at, in_stock, brand_id, created_at)
+VALUES ('PRD0000001', 'MacBook Pro 14"', 'PHYSICAL', 1999.99, NOW(), 1, 'BRD0001', NOW()),
+       ('PRD0000002', 'Samsung Galaxy S23', 'PHYSICAL', 899.99, NOW(), 1, 'BRD0002', NOW()),
+       ('PRD0000003', 'Sony WH-1000XM5', 'PHYSICAL', 349.99, NOW(), 1, 'BRD0003', NOW()),
+       ('PRD0000004', 'LG OLED 55"', 'PHYSICAL', 1499.99, NOW(), 1, 'BRD0004', NOW()),
+       ('PRD0000005', 'Dell XPS 15', 'PHYSICAL', 1899.99, NOW(), 1, 'BRD0005', NOW()),
+       ('PRD0000006', 'iPad Pro 12.9"', 'PHYSICAL', 1099.99, NOW(), 1, 'BRD0001', NOW()),
+       ('PRD0000007', 'Samsung Galaxy Tab S8', 'PHYSICAL', 799.99, NOW(), 1, 'BRD0002', NOW()),
+       ('PRD0000008', 'Sony Bravia 65"', 'PHYSICAL', 1799.99, NOW(), 1, 'BRD0003', NOW()),
+       ('PRD0000009', 'LG NanoCell 75"', 'PHYSICAL', 1999.99, NOW(), 1, 'BRD0004', NOW()),
+       ('PRD0000010', 'Dell Inspiron 15', 'PHYSICAL', 849.99, NOW(), 1, 'BRD0005', NOW()),
+       ('PRD0000011', 'MacBook Air 13"', 'PHYSICAL', 1299.99, NOW(), 1, 'BRD0001', NOW()),
+       ('PRD0000012', 'Samsung Galaxy A54', 'PHYSICAL', 499.99, NOW(), 1, 'BRD0002', NOW()),
+       ('PRD0000013', 'Sony WF-1000XM4', 'PHYSICAL', 279.99, NOW(), 1, 'BRD0003', NOW()),
+       ('PRD0000014', 'LG UltraGear Monitor', 'PHYSICAL', 399.99, NOW(), 1, 'BRD0004', NOW()),
+       ('PRD0000015', 'Dell Latitude 7420', 'PHYSICAL', 1599.99, NOW(), 1, 'BRD0005', NOW()),
+       ('PRD0000016', 'Mac Studio', 'PHYSICAL', 3999.99, NOW(), 1, 'BRD0001', NOW()),
+       ('PRD0000017', 'Samsung QLED TV', 'PHYSICAL', 2199.99, NOW(), 1, 'BRD0002', NOW()),
+       ('PRD0000018', 'Sony PlayStation 5', 'PHYSICAL', 499.99, NOW(), 1, 'BRD0003', NOW()),
+       ('PRD0000019', 'LG Soundbar', 'PHYSICAL', 199.99, NOW(), 1, 'BRD0004', NOW()),
+       ('PRD0000020', 'Alienware m15', 'PHYSICAL', 2099.99, NOW(), 1, 'BRD0005', NOW());
 
 INSERT INTO product_details (product_id, description, created_at)
 VALUES ('PRD0000001', 'A powerful MacBook with M2 chip and Retina display.', NOW()),
@@ -142,59 +142,59 @@ VALUES
 INSERT INTO product_category (product_id, category_id, created_at)
 VALUES
     -- Laptops
-    ('PRD0000001', 1, NOW()),
+    ('PRD0000001', 'CAT0001', NOW()),
     -- MacBook Pro 14" → Laptops
-    ('PRD0000005', 1, NOW()),
+    ('PRD0000005', 'CAT0001', NOW()),
     -- Dell XPS 15 → Laptops
-    ('PRD0000010', 1, NOW()),
+    ('PRD0000010', 'CAT0001', NOW()),
     -- Dell Inspiron 15 → Laptops
-    ('PRD0000011', 1, NOW()),
+    ('PRD0000011', 'CAT0001', NOW()),
     -- MacBook Air 13" → Laptops
-    ('PRD0000015', 1, NOW()),
+    ('PRD0000015', 'CAT0001', NOW()),
     -- Dell Latitude 7420 → Laptops
-    ('PRD0000016', 1, NOW()),
+    ('PRD0000016', 'CAT0001', NOW()),
     -- Mac Studio → Laptops
-    ('PRD0000020', 1, NOW()),
+    ('PRD0000020', 'CAT0001', NOW()),
     -- Alienware m15 → Laptops, also an accessory
     -- Smartphones
-    ('PRD0000002', 2, NOW()),
+    ('PRD0000002', 'CAT0002', NOW()),
     -- Samsung Galaxy S23 → Smartphones
-    ('PRD0000012', 2, NOW()),
+    ('PRD0000012', 'CAT0002', NOW()),
     -- Samsung Galaxy A54 → Smartphones
     -- Tablets (Sometimes used as Accessories or for Productivity)
-    ('PRD0000006', 3, NOW()),
+    ('PRD0000006', 'CAT0003', NOW()),
     -- iPad Pro 12.9" → Tablets
-    ('PRD0000007', 3, NOW()),
+    ('PRD0000007', 'CAT0003', NOW()),
     -- Samsung Galaxy Tab S8 → Tablets
-    ('PRD0000006', 5, NOW()),
+    ('PRD0000006', 'CAT0005', NOW()),
     -- iPad Pro 12.9" → Accessories (Used with Keyboard Case)
-    ('PRD0000007', 5, NOW()),
+    ('PRD0000007', 'CAT0005', NOW()),
     -- Galaxy Tab S8 → Accessories (Stylus, Keyboard Cases)
     -- Televisions (Also used for Gaming & Streaming)
-    ('PRD0000004', 4, NOW()),
+    ('PRD0000004', 'CAT0004', NOW()),
     -- LG OLED 55" → Televisions
-    ('PRD0000008', 4, NOW()),
+    ('PRD0000008', 'CAT0004', NOW()),
     -- Sony Bravia 65" → Televisions
-    ('PRD0000009', 4, NOW()),
+    ('PRD0000009', 'CAT0004', NOW()),
     -- LG NanoCell 75" → Televisions
-    ('PRD0000017', 4, NOW()),
+    ('PRD0000017', 'CAT0004', NOW()),
     -- Samsung QLED TV → Televisions
-    ('PRD0000004', 5, NOW()),
+    ('PRD0000004', 'CAT0005', NOW()),
     -- LG OLED 55" → Accessories (Used with Wall Mounts & Audio Systems)
-    ('PRD0000017', 5, NOW()),
+    ('PRD0000017', 'CAT0005', NOW()),
     -- Samsung QLED TV → Accessories (Wall Mounts & Soundbars)
     -- Gaming Consoles (Belongs to Televisions & Accessories)
-    ('PRD0000018', 4, NOW()),
+    ('PRD0000018', 'CAT0004', NOW()),
     -- PlayStation 5 → Televisions (for Gaming)
-    ('PRD0000018', 5, NOW()),
+    ('PRD0000018', 'CAT0005', NOW()),
     -- PlayStation 5 → Accessories (Extra Controllers, VR Headsets)
     -- Accessories (Standalone electronics)
-    ('PRD0000003', 5, NOW()),
+    ('PRD0000003', 'CAT0005', NOW()),
     -- Sony WH-1000XM5 → Accessories (Headphones)
-    ('PRD0000013', 5, NOW()),
+    ('PRD0000013', 'CAT0005', NOW()),
     -- Sony WF-1000XM4 → Accessories (Wireless Earbuds)
-    ('PRD0000014', 5, NOW()),
+    ('PRD0000014', 'CAT0005', NOW()),
     -- LG UltraGear Monitor → Accessories (Gaming Monitor)
-    ('PRD0000019', 5, NOW()),
+    ('PRD0000019', 'CAT0005', NOW()),
     -- LG Soundbar → Accessories (Audio Equipment)
-    ('PRD0000020', 5, NOW());
+    ('PRD0000020', 'CAT0005', NOW());

@@ -17,8 +17,7 @@ public class UserContextRequestInterceptor implements ClientHttpRequestIntercept
     ContextInfo contextInfo = Contexts.get();
     if (contextInfo != null) {
       if (contextInfo.getUserId() != null) {
-        request.getHeaders().add(CustomClaim.USER_ID.getHeader(),
-            String.valueOf(contextInfo.getUserId()));
+        request.getHeaders().add(CustomClaim.USER_ID.getHeader(), contextInfo.getUserId());
       }
       if (contextInfo.getUserRole() != null) {
         request.getHeaders().add(CustomClaim.USER_ROLE.getHeader(),

@@ -1,7 +1,3 @@
-{{!-- 
-  Docker Compose Template for Atlas Platform
-  Generated using Handlebars template engine
---}}
 services:
 
 {{#hasService "datasource" "mysql"}}
@@ -157,7 +153,7 @@ services:
 {{#hasService "full-text-search" "elasticsearch"}}
   elasticsearch:
     container_name: elasticsearch
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.11
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -219,10 +215,10 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./config/prometheus/config.yml:/etc/prometheus/config.yml:ro
       - prometheus-data:/prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--config.file=/etc/prometheus/config.yml'
       - '--storage.tsdb.path=/prometheus'
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
@@ -246,10 +242,10 @@ services:
     container_name: promtail
     image: grafana/promtail:main
     volumes:
-      - ./config/promtail/promtail.yml:/etc/promtail/promtail.yml:ro
+      - ./config/promtail/config.yml:/etc/promtail/config.yml:ro
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
-    command: -config.file=/etc/promtail/promtail.yml
+    command: -config.file=/etc/promtail/config.yml
     depends_on:
       - loki
     networks:
@@ -446,7 +442,7 @@ services:
       context: ../../services/inventory-service/inventory-bootstrap
       dockerfile: Dockerfile
     ports:
-      - "8082:8082"
+      - "8083:8083"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       {{#hasService "datasource" "mysql"}}
@@ -497,7 +493,7 @@ services:
       context: ../../services/order-service/order-bootstrap
       dockerfile: Dockerfile
     ports:
-      - "8083:8083"
+      - "8084:8084"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       {{#hasService "datasource" "mysql"}}
@@ -556,7 +552,7 @@ services:
       context: ../../services/payment-service/payment-bootstrap
       dockerfile: Dockerfile
     ports:
-      - "8084:8084"
+      - "8085:8085"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       {{#hasService "datasource" "mysql"}}

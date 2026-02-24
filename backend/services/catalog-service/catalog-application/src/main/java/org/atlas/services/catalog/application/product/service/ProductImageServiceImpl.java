@@ -70,8 +70,7 @@ public class ProductImageServiceImpl implements ProductImageService {
           .build();
       return storageService.getDownloadUrl(urlRequest);
     } catch (IOException e) {
-      log.warn("Failed to get download URL for productId='{}'. Fallback to getFileContent.",
-          productId, e);
+      log.warn("Failed to get download URL for productId='{}': {}", productId, e.getMessage());
       return StringUtil.EMPTY;
     }
   }
@@ -97,7 +96,7 @@ public class ProductImageServiceImpl implements ProductImageService {
       }
       return ImageUtil.toBase64(fileContent);
     } catch (IOException e) {
-      log.error("Failed to get file content for productId='{}'.", productId, e);
+      log.warn("Failed to get file content for productId='{}': {}", productId, e.getMessage());
       return StringUtil.EMPTY;
     }
   }

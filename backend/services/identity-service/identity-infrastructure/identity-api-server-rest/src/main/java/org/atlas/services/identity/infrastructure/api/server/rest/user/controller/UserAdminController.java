@@ -55,7 +55,7 @@ public class UserAdminController {
   @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve a user by ID")
   public ApiResponseWrapper<UserResponse> retrieveUser(
-      @Parameter(name = "id", description = "The unique identifier of the user to retrieve", example = "1")
+      @Parameter(name = "id", description = "The unique identifier of the user to retrieve", example = "USR0000001")
       @PathVariable String id) {
     UserOutput output = userAdminService.retrieveUser(id);
     UserResponse responseData = UserAdminMapper.INSTANCE.toUserResponse(output);
@@ -76,7 +76,7 @@ public class UserAdminController {
   @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Update an existing user by ID")
   public ApiResponseWrapper<Void> updateUser(
-      @Parameter(name = "id", description = "The unique identifier of the user to update", example = "1")
+      @Parameter(name = "id", description = "The unique identifier of the user to update", example = "USR0000001")
       @PathVariable String id,
       @Parameter(description = "Request object containing updated user details", required = true)
       @Valid @RequestBody UpdateUserRequest request) {
@@ -88,7 +88,7 @@ public class UserAdminController {
   @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Delete a user by ID")
   public ApiResponseWrapper<Void> deleteUser(
-      @Parameter(name = "id", description = "The unique identifier of the user to delete", example = "1")
+      @Parameter(name = "id", description = "The unique identifier of the user to delete", example = "USR0000001")
       @PathVariable String id) {
     userAdminService.deleteUser(id);
     return ApiResponseWrapper.success();

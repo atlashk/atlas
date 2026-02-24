@@ -60,7 +60,7 @@ const getRefreshTokenFromCookies = (): string | null => {
 
 const shouldSkipAuthRedirect = (requestUrl?: string): boolean => {
   if (!requestUrl) return false;
-  return requestUrl.includes('/services/identity/api/front/users/profile');
+  return requestUrl.includes('/services/identity/api/users/profile');
 };
 
 apiClient.interceptors.request.use(

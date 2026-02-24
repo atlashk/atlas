@@ -3,61 +3,65 @@ spring:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USERNAME:admin}
-    password: ${RABBITMQ_PASSWORD:-123456}
+    password: ${RABBITMQ_PASSWORD:-secret123456}
 
 app:
   messaging:
     rabbitmq:
       exchanges:
-        # Order service
-        - name: saga.checkout.commandreply
-          type: TOPIC
-        - name: saga.checkout.compensationreply
-          type: TOPIC
-        # Product service
-        - name: saga.checkout.command.product
-          type: TOPIC
-        - name: saga.checkout.compensation.product
-          type: TOPIC
-        # Product service
         - name: product_events
           type: TOPIC
+        - name: stock_events
+          type: TOPIC
+        - name: order_events
+          type: TOPIC
+        - name: saga.checkout.commandreply
+          type: TOPIC
+        - name: saga.checkout.compensationreply
+          type: TOPIC
+        - name: saga.checkout.command.inventory
+          type: TOPIC
+        - name: saga.checkout.compensation.inventory
+          type: TOPIC
         - name: saga.checkout.command.payment
           type: TOPIC
         - name: saga.checkout.compensation.payment
-          type: TOPIC
-        # User service
-        - name: user_events
           type: TOPIC
       queues:
-        # Order service
+        - name: product_events
+        - name: stock_events
+        - name: order_events
         - name: saga.checkout.commandreply
         - name: saga.checkout.compensationreply
-        # Payment service
+        - name: saga.checkout.command.inventory
+        - name: saga.checkout.compensation.inventory
         - name: saga.checkout.command.payment
         - name: saga.checkout.compensation.payment
-        # Product service
-        - name: saga.checkout.command.product
-        - name: saga.checkout.compensation.product
       bindings:
-        # Order service
+        - exchange: product_events
+          queue: product_events
+          routing-key: product_events
+        - exchange: stock_events
+          queue: stock_events
+          routing-key: stock_events
+        - exchange: order_events
+          queue: order_events
+          routing-key: order_events
         - exchange: saga.checkout.commandreply
           queue: saga.checkout.commandreply
           routing-key: saga.checkout.commandreply
         - exchange: saga.checkout.compensationreply
           queue: saga.checkout.compensationreply
           routing-key: saga.checkout.compensationreply
-        # Payment service
+        - exchange: saga.checkout.command.inventory
+          queue: saga.checkout.command.inventory
+          routing-key: saga.checkout.command.inventory
+        - exchange: saga.checkout.compensation.inventory
+          queue: saga.checkout.compensation.inventory
+          routing-key: saga.checkout.compensation.inventory
         - exchange: saga.checkout.command.payment
           queue: saga.checkout.command.payment
           routing-key: saga.checkout.command.payment
         - exchange: saga.checkout.compensation.payment
           queue: saga.checkout.compensation.payment
           routing-key: saga.checkout.compensation.payment
-        # Product service
-        - exchange: saga.checkout.command.product
-          queue: saga.checkout.command.product
-          routing-key: saga.checkout.command.product
-        - exchange: saga.checkout.compensation.product
-          queue: saga.checkout.compensation.product
-          routing-key: saga.checkout.compensation.product

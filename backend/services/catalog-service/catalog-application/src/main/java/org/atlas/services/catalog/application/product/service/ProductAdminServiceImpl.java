@@ -10,6 +10,7 @@ import org.atlas.libs.framework.domain.event.contract.catalog.ProductCreatedEven
 import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
+import org.atlas.libs.framework.security.authorization.RequiredAdmin;
 import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.libs.framework.util.ArrayUtil;
@@ -41,6 +42,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredAdmin
 @RequiredArgsConstructor
 @Slf4j
 public class ProductAdminServiceImpl implements ProductAdminService {

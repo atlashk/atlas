@@ -1,6 +1,6 @@
 "use client";
 
-import { orderFrontApi } from "@/api/order.api";
+import { orderApi } from "@/api/order.api";
 import { CheckoutForm } from "@/components/checkout/CheckoutForm";
 import { CheckoutProgress } from "@/components/checkout/CheckoutProgress";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
@@ -170,7 +170,7 @@ function CheckoutPageContent() {
     clearPaymentError();
 
     try {
-      const order = await orderFrontApi.checkout({
+      const order = await orderApi.checkout({
         address,
         paymentGatewayId: selectedPaymentGateway.id,
       });

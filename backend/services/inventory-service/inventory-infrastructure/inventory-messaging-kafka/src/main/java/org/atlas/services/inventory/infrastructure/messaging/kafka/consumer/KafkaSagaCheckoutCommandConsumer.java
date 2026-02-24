@@ -22,7 +22,7 @@ public class KafkaSagaCheckoutCommandConsumer extends BaseKafkaMessageConsumer {
   private final SagaCommandDispatcher dispatcher;
 
   @KafkaListener(
-      topics = "saga.checkout.command.product",
+      topics = "saga.checkout.command.inventory",
       containerFactory = "defaultContainerFactory"
   )
   // Non-blocking retry

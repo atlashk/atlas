@@ -25,7 +25,7 @@ public class JpaCategoryEntity extends JpaBaseEntity {
   @Id
   @Column(name = "id")
   @EqualsAndHashCode.Include
-  private Integer id;
+  private String id;
 
   @Column(name = "name")
   private String name;

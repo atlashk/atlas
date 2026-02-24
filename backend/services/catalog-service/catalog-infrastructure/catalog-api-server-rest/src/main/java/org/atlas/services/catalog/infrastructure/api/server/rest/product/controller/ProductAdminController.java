@@ -42,7 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/api/admin/products")
+@RequestMapping("/api/products/admin")
 @Validated
 @RequiredArgsConstructor
 public class ProductAdminController {
@@ -67,7 +67,7 @@ public class ProductAdminController {
   @GetMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve details of a specific product by ID")
   public ApiResponseWrapper<ProductResponse> retrieveProduct(
-      @Parameter(name = "productId", description = "The unique identifier of the product", example = "1")
+      @Parameter(name = "productId", description = "The unique identifier of the product", example = "PRD0000001")
       @PathVariable String productId) {
     ProductEntity product = productAdminService.retrieveProduct(productId);
 
@@ -97,7 +97,7 @@ public class ProductAdminController {
   @PutMapping(value = "/{productId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Update an existing product by ID")
   public ApiResponseWrapper<Void> updateProduct(
-      @Parameter(name = "productId", description = "The unique identifier of the product to update", example = "1")
+      @Parameter(name = "productId", description = "The unique identifier of the product to update", example = "PRD0000001")
       @PathVariable String productId,
       @Parameter(description = "Request object containing the new details for the product", required = true)
       @Valid @RequestPart("request") UpdateProductRequest request,
@@ -120,7 +120,7 @@ public class ProductAdminController {
   @DeleteMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Delete a product by ID")
   public ApiResponseWrapper<Void> deleteProduct(
-      @Parameter(name = "productId", description = "The unique identifier of the product to delete", example = "1")
+      @Parameter(name = "productId", description = "The unique identifier of the product to delete", example = "PRD0000001")
       @PathVariable String productId) {
     productAdminService.deleteProduct(productId);
     return ApiResponseWrapper.success();

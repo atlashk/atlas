@@ -16,8 +16,12 @@ import lombok.Setter;
 public class SearchProductCriteria {
 
   private String keyword;
+
   private BigDecimal minPrice;
+
   private BigDecimal maxPrice;
-  private Integer brandId;
-  private List<Integer> categoryIds;
+
+  private String brandId;
+
+  private List<String> categoryIds;
 }

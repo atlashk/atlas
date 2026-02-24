@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.error.DomainError;
 import org.atlas.libs.framework.domain.exception.DomainException;
+import org.atlas.libs.framework.security.authorization.RequiredAdmin;
 import org.atlas.services.inventory.application.mapper.StockAdminMapper;
 import org.atlas.services.inventory.domain.entity.StockEntity;
 import org.atlas.services.inventory.port.in.model.StockOutput;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredAdmin
 @RequiredArgsConstructor
 @Slf4j
 public class StockAdminServiceImpl implements StockAdminService {

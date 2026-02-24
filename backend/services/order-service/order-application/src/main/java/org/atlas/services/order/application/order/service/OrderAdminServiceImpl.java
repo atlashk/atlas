@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.shared.order.OrderStatus;
 import org.atlas.libs.framework.paging.PagingResult;
+import org.atlas.libs.framework.security.authorization.RequiredAdmin;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.order.application.order.mapper.OrderAdminMapper;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredAdmin
 @RequiredArgsConstructor
 @Slf4j
 public class OrderAdminServiceImpl implements OrderAdminService {

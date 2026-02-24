@@ -45,32 +45,28 @@ public class OpencsvProductCsvWriter implements ProductCsvWriter {
     @CsvBindByPosition(position = 1)
     private String name;
 
-    @CsvBindByName(column = "Price")
+    @CsvBindByName(column = "Type")
     @CsvBindByPosition(position = 2)
+    private ProductType type;
+
+    @CsvBindByName(column = "Price")
+    @CsvBindByPosition(position = 3)
     private BigDecimal price;
 
-    @CsvBindByName(column = "Quantity")
-    @CsvBindByPosition(position = 3)
-    private Integer quantity;
-
-    @CsvBindByName(column = "Stock Status")
+    @CsvBindByName(column = "Publish Date")
     @CsvBindByPosition(position = 4)
-    private ProductType stockStatus;
+    private Date publishedAt;
 
-    @CsvBindByName(column = "Available From")
+    @CsvBindByName(column = "In Stock")
     @CsvBindByPosition(position = 5)
-    private Date availableFrom;
-
-    @CsvBindByName(column = "Active")
-    @CsvBindByPosition(position = 6)
-    private Boolean isActive;
+    private Boolean inStock;
 
     @CsvBindByName(column = "Branch ID")
-    @CsvBindByPosition(position = 7)
-    private Integer brandId;
+    @CsvBindByPosition(position = 6)
+    private String brandId;
 
     @CsvBindByName(column = "Category IDs")
-    @CsvBindByPosition(position = 8)
+    @CsvBindByPosition(position = 7)
     private String categoryIds;
   }
 

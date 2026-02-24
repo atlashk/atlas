@@ -12,12 +12,12 @@ WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'db_identity')\gexec
 SELECT format('CREATE DATABASE %I OWNER %I;', 'db_keycloak', :'db_owner')
 WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'db_keycloak')\gexec
 {{/hasService}}
-SELECT format('CREATE DATABASE %I OWNER %I;', 'db_notification', :'db_owner')
-WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'db_notification')\gexec
+SELECT format('CREATE DATABASE %I OWNER %I;', 'db_catalog', :'db_owner')
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'db_catalog')\gexec
+SELECT format('CREATE DATABASE %I OWNER %I;', 'db_inventory', :'db_owner')
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'db_inventory')\gexec
 SELECT format('CREATE DATABASE %I OWNER %I;', 'db_order', :'db_owner')
 WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'db_order')\gexec
 SELECT format('CREATE DATABASE %I OWNER %I;', 'db_payment', :'db_owner')
 WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'db_payment')\gexec
-SELECT format('CREATE DATABASE %I OWNER %I;', 'db_product', :'db_owner')
-WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'db_product')\gexec
 EOSQL

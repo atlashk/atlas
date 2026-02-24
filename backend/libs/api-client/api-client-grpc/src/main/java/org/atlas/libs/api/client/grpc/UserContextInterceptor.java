@@ -30,7 +30,7 @@ public class UserContextInterceptor implements ClientInterceptor {
       @Override
       public void start(Listener<RespT> responseListener, Metadata headers) {
         if (contextInfo != null) {
-          headers.put(USER_ID_HEADER, String.valueOf(contextInfo.getUserId()));
+          headers.put(USER_ID_HEADER, contextInfo.getUserId());
           headers.put(USER_ROLE_HEADER, contextInfo.getUserRole().name());
         }
         super.start(responseListener, headers);

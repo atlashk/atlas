@@ -27,7 +27,7 @@ export const getOrderStatusBadge = (status: string): React.ReactElement => {
     return React.createElement(Badge, { variant: "outline" }, "Unknown");
   }
   switch (status.toUpperCase()) {
-    case "AWAITING_PRODUCT_RESERVATION":
+    case "AWAITING_STOCK_RESERVATION":
       return React.createElement(Badge, { variant: "outline", className: "bg-yellow-600 text-white" }, "Awaiting Product Reservation");
     case "AWAITING_PAYMENT_INITIALIZED":
       return React.createElement(Badge, { variant: "outline", className: "bg-yellow-600 text-white" }, "Awaiting Payment Initialization");

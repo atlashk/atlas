@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS brand
 (
-    id         INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    id         VARCHAR(64)  NOT NULL PRIMARY KEY,
     name       VARCHAR(255) NOT NULL,
     created_at DATETIME     NOT NULL,
     updated_at DATETIME
@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS brand
 
 CREATE TABLE IF NOT EXISTS category
 (
-    id         INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    id         VARCHAR(64)  NOT NULL PRIMARY KEY,
     name       VARCHAR(255) NOT NULL,
     created_at DATETIME     NOT NULL,
     updated_at DATETIME
@@ -16,17 +16,16 @@ CREATE TABLE IF NOT EXISTS category
 
 CREATE TABLE IF NOT EXISTS product
 (
-    id             VARCHAR(64)   NOT NULL PRIMARY KEY,
-    name           VARCHAR(255)  NOT NULL,
-    price          DECIMAL(9, 2) NOT NULL,
-    quantity       INT           NOT NULL,
-    stock_status   VARCHAR(20)   NOT NULL,
-    available_from DATETIME      NOT NULL,
-    is_active      TINYINT(1)    NOT NULL,
-    brand_id       INT           NOT NULL,
-    version        BIGINT DEFAULT 0,
-    created_at     DATETIME      NOT NULL,
-    updated_at     DATETIME
+    id           VARCHAR(64)   NOT NULL PRIMARY KEY,
+    name         VARCHAR(255)  NOT NULL,
+    type         VARCHAR(20)   NOT NULL,
+    price        DECIMAL(9, 2) NOT NULL,
+    published_at DATETIME      NOT NULL,
+    in_stock     TINYINT(1)    NOT NULL,
+    brand_id     VARCHAR(64)   NOT NULL,
+    version      BIGINT DEFAULT 0,
+    created_at   DATETIME      NOT NULL,
+    updated_at   DATETIME
 ) ENGINE = InnoDB;
 
 CREATE TABLE IF NOT EXISTS product_details
@@ -52,19 +51,8 @@ CREATE TABLE IF NOT EXISTS product_attribute
 CREATE TABLE IF NOT EXISTS product_category
 (
     product_id  VARCHAR(64) NOT NULL,
-    category_id INT         NOT NULL,
+    category_id VARCHAR(64) NOT NULL,
     created_at  DATETIME    NOT NULL,
     updated_at  DATETIME,
     PRIMARY KEY (product_id, category_id)
-) ENGINE = InnoDB;
-
-CREATE TABLE IF NOT EXISTS reservation
-(
-    id         INT         NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    order_id   VARCHAR(64) NOT NULL,
-    product_id VARCHAR(64) NOT NULL,
-    quantity   INT         NOT NULL,
-    created_at DATETIME    NOT NULL,
-    updated_at DATETIME,
-    UNIQUE INDEX idx_order_id_product_id (order_id, product_id)
 ) ENGINE = InnoDB;

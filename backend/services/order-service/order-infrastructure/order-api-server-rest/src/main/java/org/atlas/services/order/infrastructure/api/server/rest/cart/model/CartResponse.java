@@ -49,7 +49,7 @@ public class CartResponse {
   @Setter
   public static class Product {
 
-    @Schema(description = "Product ID", example = "1")
+    @Schema(description = "Product ID", example = "PRD0000001")
     private String id;
 
     @Schema(description = "Product name", example = "iPhone 15")

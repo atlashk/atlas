@@ -18,7 +18,7 @@ import org.atlas.libs.framework.domain.shared.identity.UserRole;
 @EqualsAndHashCode(callSuper = false)
 public class UserResponse {
 
-  @Schema(description = "Unique identifier of the user", example = "1")
+  @Schema(description = "Unique identifier of the user", example = "USR0000001")
   private String id;
 
   @Schema(description = "Username of the user", example = "john_doe")

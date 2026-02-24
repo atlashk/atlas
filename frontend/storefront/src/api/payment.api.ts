@@ -4,7 +4,7 @@ import { PaymentGatewayResponse, PaymentNextActionResponse } from '@/interfaces/
 
 class PaymentApi extends BaseApi {
   constructor() {
-    super('/services/payment/api/front');
+    super('/services/payment/api');
   }
 
   async retrievePaymentGatewayList(): Promise<ApiResponse<PaymentGatewayResponse[]>> {

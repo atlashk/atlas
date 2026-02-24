@@ -27,7 +27,7 @@ usage() {
   echo "  -h, --help                            Show help and exit"
   echo ""
   echo "Defaults:"
-  echo "  - app-stack: dev"
+  echo "  - app-stack: local.compose"
   echo "  - skip-build: No"
   echo "  - infra-only: No"
   echo "  - enable-observability: true"
@@ -88,8 +88,8 @@ read_deployment_from_config() {
     if [[ -n "$deployment" ]]; then
       echo "$deployment"
     else
-      warn "No deployment field found in $config_file, defaulting to dev"
-      echo "dev"
+      warn "No deployment field found in $config_file, defaulting to local.compose"
+      echo "local.compose"
     fi
   else
     err "Config file not found: $config_file"
@@ -180,7 +180,7 @@ execute_install_script() {
 }
 
 main() {
-  local app_stack="dev"
+  local app_stack="local.compose"
   local skip_build=false
   local infra_only=false
   local infra_only_specified=false

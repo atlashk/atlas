@@ -3,7 +3,7 @@
 import { NextActionHandler } from "@/components/payment/NextActionHandler";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ORDER_STATUS_DESCRIPTIONS, ORDER_STATUS_MESSAGES } from "@/constants";
+import { ORDER_STATUS_MESSAGES } from "@/constants";
 import { OrderStatusResponse } from "@/interfaces/order.interface";
 import { PaymentGatewayResponse, PaymentNextAction } from "@/interfaces/payment.interface";
 import { useCartStore } from "@/stores/cart.store";
@@ -145,9 +145,6 @@ export const CheckoutProgress = React.memo(function CheckoutProgress({
                       <h2 className="text-2xl font-bold text-green-600">
                         {ORDER_STATUS_MESSAGES.FULFILLED}
                       </h2>
-                      <p className="text-gray-600">
-                        {ORDER_STATUS_DESCRIPTIONS.FULFILLED}
-                      </p>
                       <p className="text-sm text-gray-500">
                         Order ID: {orderId}
                       </p>

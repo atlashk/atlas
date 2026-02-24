@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/front/payment-gateways")
+@RequestMapping("/api/payment-gateways")
 @Validated
 @RequiredArgsConstructor
 public class PaymentGatewayController {

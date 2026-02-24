@@ -11,9 +11,9 @@ import type {
 import { ApiResponse } from "./apiClient";
 import { BaseApi } from "./base.api";
 
-export class OrderFrontApi extends BaseApi {
+export class OrderApi extends BaseApi {
   constructor() {
-    super("/services/order/api/front");
+    super("/services/order/api");
   }
 
 async retrieveCart(): Promise<ApiResponse<CartResponse>> {
@@ -61,4 +61,4 @@ async retrieveCart(): Promise<ApiResponse<CartResponse>> {
   }
 }
 
-export const orderFrontApi = new OrderFrontApi();
+export const orderApi = new OrderApi();

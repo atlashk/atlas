@@ -42,23 +42,20 @@ public class EasyExcelProductExcelWriter implements ProductExcelWriter {
     @ExcelProperty(value = "Name")
     private String name;
 
+    @ExcelProperty(value = "Type", converter = ProductTypeConverter.class)
+    private ProductType type;
+    
     @ExcelProperty(value = "Price")
     private BigDecimal price;
 
-    @ExcelProperty(value = "Stock Status", converter = ProductTypeConverter.class)
-    private ProductType stockStatus;
+    @ExcelProperty(value = "Publish Date")
+    private Date publishedAt;
 
-    @ExcelProperty(value = "Quantity")
-    private Integer quantity;
-
-    @ExcelProperty(value = "Available From")
-    private Date availableFrom;
-
-    @ExcelProperty(value = "Active")
-    private Boolean isActive;
+    @ExcelProperty(value = "In Stock")
+    private Boolean inStock;
 
     @ExcelProperty(value = "Branch ID")
-    private Integer brandId;
+    private String brandId;
 
     @ExcelProperty(value = "Category IDs")
     private String categoryIds;

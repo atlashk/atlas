@@ -42,24 +42,24 @@ public class EasyExcelProductExcelReader implements ProductExcelReader {
     @ExcelProperty(value = "Name")
     private String name;
 
+    @ExcelProperty(value = "Type")
+    private ProductType type;
+    
     @ExcelProperty(value = "Price")
     private BigDecimal price;
-
-    @ExcelProperty(value = "Stock Status")
-    private ProductType stockStatus;
 
     @ExcelProperty(value = "Quantity")
     private Integer quantity;
 
-    @ExcelProperty(value = "Available From")
+    @ExcelProperty(value = "Publish Date")
     @DateTimeFormat(value = CommonConstant.DATE_TIME_FORMAT)
-    private Date availableFrom;
+    private Date publishedAt;
 
-    @ExcelProperty(value = "Active")
-    private Boolean isActive;
+    @ExcelProperty(value = "Quantity")
+    private Integer initialQuantity;
 
     @ExcelProperty(value = "Branch ID")
-    private Integer brandId;
+    private String brandId;
 
     @ExcelProperty(value = "Category IDs")
     private String categoryIds;

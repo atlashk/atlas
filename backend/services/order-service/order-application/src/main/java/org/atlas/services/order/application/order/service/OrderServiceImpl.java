@@ -140,7 +140,7 @@ public class OrderServiceImpl implements OrderService {
     // Order
     OrderEntity order = new OrderEntity();
     order.setId(sequenceGenerator.generate(SequenceType.ORDER));
-    order.setStatus(OrderStatus.AWAITING_PRODUCT_RESERVATION);
+    order.setStatus(OrderStatus.AWAITING_STOCK_RESERVATION);
 
     // User
     order.setUser(OrderMapper.INSTANCE.toUserSnapshot(user));

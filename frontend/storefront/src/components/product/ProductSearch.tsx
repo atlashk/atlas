@@ -1,5 +1,5 @@
 import { Metadata } from "@/api/apiClient";
-import { productFrontApi } from "@/api/index.api";
+import { catalogApi } from "@/api/index.api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -123,7 +123,7 @@ const ProductSearch: React.FC = () => {
     try {
       setIsLoadingBrands(true);
 
-      const brandsResponse = await productFrontApi.retrieveAllBrand();
+      const brandsResponse = await catalogApi.retrieveAllBrand();
 
       if (!brandsResponse.success) {
         throw new Error(brandsResponse.errorMessage || "Failed to load brands");
@@ -144,7 +144,7 @@ const ProductSearch: React.FC = () => {
     try {
       setIsLoadingCategories(true);
 
-      const categoriesResponse = await productFrontApi.retrieveAllCategory();
+      const categoriesResponse = await catalogApi.retrieveAllCategory();
 
       if (!categoriesResponse.success) {
         throw new Error(
@@ -186,7 +186,7 @@ const ProductSearch: React.FC = () => {
           mode: filters.mode || "DATABASE",
         };
 
-        const response = await productFrontApi.retrieveProductList(apiSearchParams);
+        const response = await catalogApi.retrieveProductList(apiSearchParams);
 
         if (!response.success) {
           throw new Error(response.errorMessage || "Failed to load products");
@@ -229,7 +229,7 @@ const ProductSearch: React.FC = () => {
   const loadProductDetails = useCallback(async (productId: number) => {
     try {
       setIsLoadingProductDetails(true);
-      const response = await productFrontApi.retrieveProduct(productId);
+      const response = await catalogApi.retrieveProduct(productId);
       
       if (!response.success) {
         throw new Error(response.errorMessage || "Failed to load product details");

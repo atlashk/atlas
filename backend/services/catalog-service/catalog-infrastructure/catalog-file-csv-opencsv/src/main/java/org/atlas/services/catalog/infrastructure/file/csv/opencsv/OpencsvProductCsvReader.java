@@ -42,33 +42,29 @@ public class OpencsvProductCsvReader implements ProductCsvReader {
     @CsvBindByPosition(position = 0)
     private String name;
 
-    @CsvBindByName(column = "Price")
+    @CsvBindByName(column = "Type")
     @CsvBindByPosition(position = 1)
+    private ProductType type;
+    
+    @CsvBindByName(column = "Price")
+    @CsvBindByPosition(position = 2)
     private BigDecimal price;
 
-    @CsvBindByName(column = "Stock Status")
-    @CsvBindByPosition(position = 2)
-    private ProductType stockStatus;
+    @CsvBindByName(column = "Publish Date")
+    @CsvBindByPosition(position = 3)
+    @CsvDate(value = "yyyy-MM-dd HH:mm:ss")
+    private Date publishedAt;
 
     @CsvBindByName(column = "Quantity")
-    @CsvBindByPosition(position = 3)
-    private Integer quantity;
-
-    @CsvBindByName(column = "Available From")
     @CsvBindByPosition(position = 4)
-    @CsvDate(value = "yyyy-MM-dd HH:mm:ss")
-    private Date availableFrom;
-
-    @CsvBindByName(column = "Active")
-    @CsvBindByPosition(position = 5)
-    private Boolean isActive;
+    private Integer initialQuantity;
 
     @CsvBindByName(column = "Branch ID")
-    @CsvBindByPosition(position = 6)
-    private Integer brandId;
+    @CsvBindByPosition(position = 5)
+    private String brandId;
 
     @CsvBindByName(column = "Category IDs")
-    @CsvBindByPosition(position = 7)
+    @CsvBindByPosition(position = 6)
     private String categoryIds;
   }
 

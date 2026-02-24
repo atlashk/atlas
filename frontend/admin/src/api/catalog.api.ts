@@ -11,9 +11,9 @@ import {
 import { ApiResponse } from "./apiClient";
 import { BaseApi } from "./base.api";
 
-export class ProductFrontApi extends BaseApi {
+export class CatalogApi extends BaseApi {
   constructor() {
-    super("/services/product/api/front");
+    super("/services/catalog/api");
   }
 
   async retrieveAllBrand(): Promise<ApiResponse<Brand[]>> {
@@ -23,21 +23,15 @@ export class ProductFrontApi extends BaseApi {
   async retrieveAllCategory(): Promise<ApiResponse<Category[]>> {
     return this.get<Category[]>("/categories");
   }
-}
-
-export class ProductAdminApi extends BaseApi {
-  constructor() {
-    super("/services/product/api/admin");
-  }
 
   async retrieveProductList(
     filters: ListProductFilters
   ): Promise<ApiResponse<Product[]>> {
-    return this.post<Product[], ListProductFilters>("/products/list", filters);
+    return this.post<Product[], ListProductFilters>("/products/admin/list", filters);
   }
 
   async retrieveProduct(id: string): Promise<ApiResponse<Product>> {
-    return this.get<Product>(`/products/${id}`);
+    return this.get<Product>(`/products/admin/${id}`);
   }
 
   async createProduct(
@@ -52,7 +46,7 @@ export class ProductAdminApi extends BaseApi {
     if (imageFile) {
       formData.append("image", imageFile);
     }
-    return this.post<string>("/products", formData);
+    return this.post<string>("/products/admin", formData);
   }
 
   async updateProduct(
@@ -67,11 +61,11 @@ export class ProductAdminApi extends BaseApi {
     if (imageFile) {
       formData.append("image", imageFile);
     }
-    return this.put<void>(`/products/${data.id}`, formData);
+    return this.put<void>(`/products/admin/${data.id}`, formData);
   }
 
   async deleteProduct(id: string): Promise<ApiResponse<void>> {
-    return this.delete<void>(`/products/${id}`);
+    return this.delete<void>(`/products/admin/${id}`);
   }
 
   async importProduct(
@@ -82,11 +76,11 @@ export class ProductAdminApi extends BaseApi {
     formData.append("file", file);
     formData.append("file_type", fileType);
 
-    return this.post<void>(`/products/import`, formData);
+    return this.post<void>(`/products/admin/import`, formData);
   }
 
   async exportProduct(filters: ExportProductFilters): Promise<void> {
-    const response = await this.postBlob("/products/export", filters);
+    const response = await this.postBlob("/products/admin/export", filters);
 
     const blob = new Blob([response.data], {
       type: response.headers["content-type"] || "application/octet-stream",
@@ -141,9 +135,8 @@ export class ProductAdminApi extends BaseApi {
   }
 
   async countProduct(): Promise<ApiResponse<number>> {
-    return this.get<number>("/products/statistics/count");
+    return this.get<number>("/products/admin/statistics/count");
   }
 }
 
-export const productFrontApi = new ProductFrontApi();
-export const productAdminApi = new ProductAdminApi();
+export const catalogApi = new CatalogApi();

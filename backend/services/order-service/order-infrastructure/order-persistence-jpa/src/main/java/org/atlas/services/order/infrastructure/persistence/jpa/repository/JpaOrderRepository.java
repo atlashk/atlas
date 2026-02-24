@@ -38,7 +38,7 @@ public interface JpaOrderRepository extends JpaBaseRepository<JpaOrderEntity, In
   BigDecimal sumAmountByStatus(@Param("status") OrderStatus status);
 
   @Query("""
-        select new org.atlas.services.order.port.in.admin.model.AdminMonthlyOrderAggregation(
+        select new org.atlas.services.order.port.in.order.model.admin.MonthlyOrderAggregation(
           year(o.createdAt), month(o.createdAt), coalesce(sum(o.amount), 0)
         )
         from JpaOrderEntity o

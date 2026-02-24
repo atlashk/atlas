@@ -1,6 +1,6 @@
 import { OrderStatus } from "@/constants";
 import type { PaymentStatus } from "./payment.interface";
-import type { Product } from "./product.interface";
+import type { Product } from "./catalog.interface";
 import type { User } from "./identity.interface";
 
 export interface CartResponse {

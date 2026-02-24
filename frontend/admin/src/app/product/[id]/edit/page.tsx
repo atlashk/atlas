@@ -1,6 +1,6 @@
 "use client";
 
-import { productFrontApi, productAdminApi } from "@/api/index.api";
+import { catalogApi } from "@/api/index.api";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -128,7 +128,7 @@ function AdminProductEditPage() {
     const loadBrands = async () => {
       try {
         setIsLoadingBrands(true);
-        const brandsResponse = await productFrontApi.retrieveAllBrand();
+        const brandsResponse = await catalogApi.retrieveAllBrand();
 
         if (!brandsResponse.success) {
           throw new Error(brandsResponse.errorMessage || "Failed to load brands");
@@ -147,7 +147,7 @@ function AdminProductEditPage() {
     const loadCategories = async () => {
       try {
         setIsLoadingCategories(true);
-        const categoriesResponse = await productFrontApi.retrieveAllCategory();
+        const categoriesResponse = await catalogApi.retrieveAllCategory();
 
         if (!categoriesResponse.success) {
           throw new Error(
@@ -182,7 +182,7 @@ function AdminProductEditPage() {
     const loadProduct = async () => {
       setIsLoadingProduct(true);
       try {
-        const productResponse = await productAdminApi.retrieveProduct(productId);
+        const productResponse = await catalogApi.retrieveProduct(productId);
 
         if (productResponse.success) {
           const productData = productResponse.data;
@@ -266,7 +266,7 @@ function AdminProductEditPage() {
         availableFrom: new Date(data.availableFrom).toISOString(),
       };
 
-      const response = await productAdminApi.updateProduct(formData, imageFile ?? undefined);
+      const response = await catalogApi.updateProduct(formData, imageFile ?? undefined);
 
       if (response.success) {
         toast.success("Product updated successfully!");

@@ -61,7 +61,7 @@ public class StripePaymentGatewayService implements PaymentGatewayService {
                       .setEnabled(true)
                       .build()
               )
-              .putAllMetadata(Map.of("paymentId", String.valueOf(request.getPaymentId())))
+              .putAllMetadata(Map.of("paymentId", request.getPaymentId()))
               .build();
       PaymentIntent paymentIntent = stripeClient.v1()
           .paymentIntents()

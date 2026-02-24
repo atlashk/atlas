@@ -1,6 +1,6 @@
 "use client";
 
-import { productAdminApi } from "@/api/index.api";
+import { catalogApi } from "@/api/index.api";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,7 @@ function AdminProductDetailsPage() {
   const loadProduct = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await productAdminApi.retrieveProduct(productId);
+      const response = await catalogApi.retrieveProduct(productId);
       if (response.success) {
         setProduct(response.data);
       } else {
@@ -63,7 +63,7 @@ function AdminProductDetailsPage() {
     if (confirm("Are you sure you want to delete this product?")) {
       setIsDeleting(true);
       try {
-        const response = await productAdminApi.deleteProduct((product as Product).id);
+        const response = await catalogApi.deleteProduct((product as Product).id);
         if (response.success) {
           toast.success("Product deleted successfully!");
           router.push("/admin/product");

@@ -1,7 +1,7 @@
 "use client";
 
 import { Metadata } from "@/api/apiClient";
-import { orderFrontApi } from "@/api/index.api";
+import { orderApi } from "@/api/index.api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -94,7 +94,7 @@ const OrderHistoryContent: React.FC = () => {
           }
         });
 
-        const response = await orderFrontApi.retrieveOrderList(apiFilters);
+        const response = await orderApi.retrieveOrderList(apiFilters);
         if (response.success) {
           setOrders(response.data || []);
           if (response.metadata) {

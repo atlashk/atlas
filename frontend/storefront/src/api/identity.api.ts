@@ -19,16 +19,16 @@ export class IdentityApi extends BaseApi {
     return this.post<void>("/authentication/logout");
   }
 
+  async changePassword(request: { oldPassword: string; newPassword: string }): Promise<ApiResponse<void>> {
+    return this.post<void>("/authentication/change-password", request);
+  }
+
   async retrieveProfile(): Promise<ApiResponse<User>> {
-    return this.get<User>("/front/users/profile");
+    return this.get<User>("/users/profile");
   }
 
   async register(userData: RegisterRequest): Promise<ApiResponse<void>> {
-    return this.post<void>("/front/users/register", userData);
-  }
-
-  async changePassword(request: { oldPassword: string; newPassword: string }): Promise<ApiResponse<void>> {
-    return this.post<void>("/front/users/change-password", request);
+    return this.post<void>("/users/register", userData);
   }
 }
 

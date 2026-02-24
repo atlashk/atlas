@@ -3,13 +3,13 @@ import {
   type Category,
   type Product,
   type RetrieveProductListFilter
-} from "@/interfaces/product.interface";
+} from "@/interfaces/catalog.interface";
 import { ApiResponse } from "./apiClient";
 import { BaseApi } from "./base.api";
 
-export class ProductFrontApi extends BaseApi {
+export class CatalogApi extends BaseApi {
   constructor() {
-    super("/services/product/api/front");
+    super("/services/catalog/api");
   }
 
   async retrieveAllBrand(): Promise<ApiResponse<Brand[]>> {
@@ -41,4 +41,4 @@ export class ProductFrontApi extends BaseApi {
   }
 }
 
-export const productFrontApi = new ProductFrontApi();
+export const catalogApi = new CatalogApi();

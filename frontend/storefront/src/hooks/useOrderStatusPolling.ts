@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { orderFrontApi } from '@/api/order.api';
+import { orderApi } from '@/api/order.api';
 import { OrderStatusResponse } from '@/interfaces/order.interface';
 
 export function useOrderStatusPolling(orderId: string | null) {
@@ -27,7 +27,7 @@ export function useOrderStatusPolling(orderId: string | null) {
     if (!currentOrderId) return;
 
     try {
-      const response = await orderFrontApi.getOrderStatus(currentOrderId);
+      const response = await orderApi.getOrderStatus(currentOrderId);
       
       if (response.success && response.data) {
         setOrderStatus(response.data);

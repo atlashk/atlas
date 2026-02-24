@@ -13,7 +13,7 @@ import lombok.Setter;
 public class AddCartItemRequest {
 
   @NotNull
-  @Schema(description = "Product ID to add to cart", example = "1", requiredMode = RequiredMode.REQUIRED)
+  @Schema(description = "Product ID to add to cart", example = "PRD0000001", requiredMode = RequiredMode.REQUIRED)
   private String productId;
 
   @NotNull

@@ -23,9 +23,9 @@ public class RetrieveProductListInput {
 
   private BigDecimal maxPrice;
 
-  private Integer brandId;
+  private String brandId;
 
-  private List<Integer> categoryIds;
+  private List<String> categoryIds;
 
   private PagingRequest pagingRequest;
 

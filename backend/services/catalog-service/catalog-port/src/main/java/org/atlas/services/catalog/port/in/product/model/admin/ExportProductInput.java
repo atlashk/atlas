@@ -34,9 +34,9 @@ public class ExportProductInput {
 
   private Boolean inStock;
 
-  private Integer brandId;
+  private String brandId;
 
-  private List<Integer> categoryIds;
+  private List<String> categoryIds;
 
   private FileType fileType;
 }

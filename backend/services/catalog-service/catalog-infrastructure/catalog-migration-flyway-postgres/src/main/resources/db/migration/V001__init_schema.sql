@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS brand
 (
-    id         SERIAL PRIMARY KEY,
+    id         VARCHAR(64) PRIMARY KEY,
     name       VARCHAR(255) NOT NULL,
     created_at TIMESTAMP    NOT NULL,
     updated_at TIMESTAMP
@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS brand
 
 CREATE TABLE IF NOT EXISTS category
 (
-    id         SERIAL PRIMARY KEY,
+    id         VARCHAR(64) PRIMARY KEY,
     name       VARCHAR(255) NOT NULL,
     created_at TIMESTAMP    NOT NULL,
     updated_at TIMESTAMP
@@ -16,17 +16,16 @@ CREATE TABLE IF NOT EXISTS category
 
 CREATE TABLE IF NOT EXISTS product
 (
-    id             VARCHAR(64) PRIMARY KEY,
-    name           VARCHAR(255)  NOT NULL,
-    price          DECIMAL(9, 2) NOT NULL,
-    quantity       INT           NOT NULL,
-    status         VARCHAR(20)   NOT NULL,
-    available_from TIMESTAMP     NOT NULL,
-    is_active      BOOLEAN       NOT NULL,
-    brand_id       INT           NOT NULL,
-    version        BIGINT DEFAULT 0,
-    created_at     TIMESTAMP     NOT NULL,
-    updated_at     TIMESTAMP
+    id           VARCHAR(64) PRIMARY KEY,
+    name         VARCHAR(255)  NOT NULL,
+    type         VARCHAR(20)   NOT NULL,
+    price        DECIMAL(9, 2) NOT NULL,
+    published_at TIMESTAMP     NOT NULL,
+    in_stock     BOOLEAN       NOT NULL,
+    brand_id     VARCHAR(64)   NOT NULL,
+    version      BIGINT DEFAULT 0,
+    created_at   TIMESTAMP     NOT NULL,
+    updated_at   TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS product_details
@@ -51,7 +50,7 @@ CREATE TABLE IF NOT EXISTS product_attribute
 CREATE TABLE IF NOT EXISTS product_category
 (
     product_id  VARCHAR(64) NOT NULL,
-    category_id INT         NOT NULL,
+    category_id VARCHAR(64) NOT NULL,
     created_at  TIMESTAMP   NOT NULL,
     updated_at  TIMESTAMP,
     PRIMARY KEY (product_id, category_id)
