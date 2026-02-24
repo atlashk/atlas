@@ -245,6 +245,7 @@ services:
       - ./config/promtail/config.yml:/etc/promtail/config.yml:ro
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - promtail-data:/var/lib/promtail
     command: -config.file=/etc/promtail/config.yml
     depends_on:
       - loki
@@ -659,6 +660,7 @@ volumes:
 {{/hasObservability}}
 {{#hasObservability "logging.stack" "loki"}}
   loki-data:
+  promtail-data:
 {{/hasObservability}}
 {{#hasGrafana}}
   grafana-data:
