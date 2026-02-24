@@ -3,7 +3,7 @@ package org.atlas.services.inventory.infrastructure.messaging.rabbitmq.publisher
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.domain.common.event.contract.product.ProductCreatedEvent;
+import org.atlas.libs.framework.domain.event.contract.inventory.StockStatusChangedEvent;
 import org.atlas.libs.framework.json.JsonUtil;
 import org.atlas.libs.framework.messaging.publisher.Message;
 import org.atlas.libs.framework.messaging.publisher.MessagePublisher;
@@ -18,9 +18,9 @@ public class RabbitmqStockEventMessagePublisher implements StockEventMessagePubl
   private final MessagePublisher messagePublisher;
 
   @Override
-  public void publish(ProductCreatedEvent event) {
-    final String exchange = "product_events";
-    final String routingKey = "product_events";
+  public void publish(StockStatusChangedEvent event) {
+    final String exchange = "inventory_events";
+    final String routingKey = "inventory_events";
     Message message = Message.builder()
         .destination(exchange)
         .routingAttributes(Map.of("routingKey", routingKey))

@@ -11,21 +11,21 @@ scrape_configs:
     static_configs:
       - targets: [ 'identity-service:8081' ]
     metrics_path: '/actuator/prometheus'
-  - job_name: 'product-service-metrics'
+  - job_name: 'catalog-service-metrics'
     static_configs:
-      - targets: [ 'product-service:8082' ]
+      - targets: [ 'catalog-service:8082' ]
+    metrics_path: '/actuator/prometheus'
+  - job_name: 'inventory-service-metrics'
+    static_configs:
+      - targets: [ 'inventory-service:8083' ]
     metrics_path: '/actuator/prometheus'
   - job_name: 'order-service-metrics'
     static_configs:
-      - targets: [ 'order-service:8083' ]
+      - targets: [ 'order-service:8084' ]
     metrics_path: '/actuator/prometheus'
   - job_name: 'payment-service-metrics'
     static_configs:
-      - targets: [ 'payment-service:8084' ]
-    metrics_path: '/actuator/prometheus'
-  - job_name: 'notification-service-metrics'
-    static_configs:
-      - targets: [ 'notification-service:8085' ]
+      - targets: [ 'payment-service:8085' ]
     metrics_path: '/actuator/prometheus'
   - job_name: 'api-gateway-metrics'
     static_configs:

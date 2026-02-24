@@ -7,8 +7,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.libs.framework.domain.common.entity.DomainEntity;
-import org.atlas.libs.framework.domain.payment.PaymentStatus;
+import org.atlas.libs.framework.domain.entity.DomainEntity;
+import org.atlas.libs.framework.domain.shared.payment.PaymentStatus;
 import org.atlas.libs.framework.payment.model.nextaction.NextAction;
 
 @NoArgsConstructor

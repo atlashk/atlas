@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.framework.constant.CommonConstant;
-import org.atlas.libs.framework.domain.identity.UserRole;
+import org.atlas.libs.framework.domain.shared.identity.UserRole;
 
 @Schema(description = "Request object for retrieving user list")
 @NoArgsConstructor

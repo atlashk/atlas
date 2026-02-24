@@ -6,7 +6,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
-import org.atlas.libs.framework.context.Contexts;
+import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.order.domain.entity.OrderEntity;
@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/front/orders")
+@RequestMapping("/api/orders")
 @Validated
 @RequiredArgsConstructor
 public class OrderController {
@@ -45,7 +45,7 @@ public class OrderController {
       @Parameter(description = "Retrieve order list request", required = true)
       @Valid @RequestBody RetrieveOrderListRequest request) {
     RetrieveOrderListInput input = OrderMapper.INSTANCE.toRetrieveOrderListInput(request);
-    input.setUserId(Contexts.getUserId());
+    input.setPagingRequest(PagingRequest.of(request.getPage() - 1, request.getSize()));
     PagingResult<OrderEntity> orderPage = orderService.retrieveOrderList(input);
     PagingResult<OrderResponse> responseData = MapperUtil.mapPage(orderPage,
         OrderMapper.INSTANCE::toOrderResponse);

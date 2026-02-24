@@ -1,7 +1,7 @@
 package org.atlas.libs.internal.identity.grpc;
 
 import java.util.List;
-import org.atlas.libs.framework.domain.identity.UserRole;
+import org.atlas.libs.framework.domain.shared.identity.UserRole;
 import org.atlas.libs.framework.internal.identity.model.RetrieveUserListInput;
 import org.atlas.libs.framework.internal.identity.model.UserOutput;
 import org.atlas.libs.framework.util.CollectionUtil;

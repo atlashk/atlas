@@ -7,7 +7,7 @@ import io.github.resilience4j.common.timelimiter.configuration.TimeLimiterConfig
 import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.TimeoutException;
-import org.atlas.libs.framework.domain.common.exception.DomainException;
+import org.atlas.libs.framework.domain.exception.DomainException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

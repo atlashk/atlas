@@ -64,7 +64,7 @@ public class StringUtil {
     return str.chars().allMatch(Character::isLetterOrDigit);
   }
 
-  public static String trimToEmpty(String str) {
+  public static String trim(String str) {
     return StringUtils.trimToEmpty(str);
   }
 

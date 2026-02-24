@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.libs.framework.domain.identity.UserRole;
+import org.atlas.libs.framework.domain.shared.identity.UserRole;
 
 @Schema(description = "Response object for retrieving user info")
 @NoArgsConstructor

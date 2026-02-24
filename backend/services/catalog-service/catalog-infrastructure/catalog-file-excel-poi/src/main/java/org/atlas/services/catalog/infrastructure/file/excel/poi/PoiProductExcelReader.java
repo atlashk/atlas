@@ -11,8 +11,8 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.atlas.libs.file.excel.poi.PoiUtil;
 import org.atlas.libs.framework.constant.CommonConstant;
-import org.atlas.services.catalog.domain.entity.ProductType;
 import org.atlas.libs.framework.util.DateUtil;
+import org.atlas.services.catalog.domain.entity.ProductType;
 import org.atlas.services.catalog.port.out.file.excel.ProductExcelReader;
 import org.atlas.services.catalog.port.out.file.model.ProductReadRow;
 import org.springframework.stereotype.Component;
@@ -48,14 +48,13 @@ public class PoiProductExcelReader implements ProductExcelReader {
   private ProductReadRow readRow(Row row) {
     ProductReadRow productRow = new ProductReadRow();
     productRow.setName(row.getCell(0).getStringCellValue());
-    productRow.setPrice(BigDecimal.valueOf(row.getCell(1).getNumericCellValue()));
-    productRow.setStockStatus(ProductType.valueOf(row.getCell(3).getStringCellValue()));
-    productRow.setQuantity((int) row.getCell(2).getNumericCellValue());
-    productRow.setAvailableFrom(DateUtil.parse(row.getCell(4).getStringCellValue(),
+    productRow.setType(ProductType.valueOf(row.getCell(1).getStringCellValue()));
+    productRow.setPrice(BigDecimal.valueOf(row.getCell(2).getNumericCellValue()));
+    productRow.setPublishedAt(DateUtil.parse(row.getCell(3).getStringCellValue(),
         CommonConstant.DATE_TIME_FORMAT));
-    productRow.setIsActive(row.getCell(5).getBooleanCellValue());
-    productRow.setBrandId((int) row.getCell(6).getNumericCellValue());
-    productRow.setCategoryIds(row.getCell(7).getStringCellValue());
+    productRow.setInitialQuantity((int) row.getCell(4).getNumericCellValue());
+    productRow.setBrandId(row.getCell(5).getStringCellValue());
+    productRow.setCategoryIds(row.getCell(6).getStringCellValue());
     return productRow;
   }
 }

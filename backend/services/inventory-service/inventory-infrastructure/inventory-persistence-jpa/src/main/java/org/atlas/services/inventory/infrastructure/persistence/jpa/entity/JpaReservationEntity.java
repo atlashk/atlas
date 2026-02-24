@@ -2,8 +2,8 @@ package org.atlas.services.inventory.infrastructure.persistence.jpa.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.persistence.jpa.entity.JpaBaseEntity;
+import org.atlas.services.inventory.domain.entity.ReservationStatus;
 
 @Entity
 @Table(name = "reservation")
@@ -25,9 +26,9 @@ import org.atlas.libs.persistence.jpa.entity.JpaBaseEntity;
 public class JpaReservationEntity extends JpaBaseEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id")
   @EqualsAndHashCode.Include
-  private Integer id;
+  private String id;
 
   @Column(name = "order_id")
   private String orderId;
@@ -37,4 +38,8 @@ public class JpaReservationEntity extends JpaBaseEntity {
 
   @Column(name = "quantity")
   private Integer quantity;
+
+  @Column(name = "status")
+  @Enumerated(EnumType.STRING)
+  private ReservationStatus status;
 }

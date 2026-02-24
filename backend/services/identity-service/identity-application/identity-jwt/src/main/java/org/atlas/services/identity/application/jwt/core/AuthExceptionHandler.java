@@ -3,7 +3,7 @@ package org.atlas.services.identity.application.jwt.core;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
-import org.atlas.libs.framework.domain.common.error.DomainError;
+import org.atlas.libs.framework.domain.error.DomainError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;

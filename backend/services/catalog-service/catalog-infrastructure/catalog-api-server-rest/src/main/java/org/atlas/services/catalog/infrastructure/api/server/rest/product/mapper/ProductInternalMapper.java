@@ -1,6 +1,6 @@
 package org.atlas.services.catalog.infrastructure.api.server.rest.product.mapper;
 
-import org.atlas.libs.framework.internal.product.model.RetrieveProductListInput;
+import org.atlas.libs.framework.internal.catalog.model.RetrieveProductListInput;
 import org.atlas.services.catalog.infrastructure.api.server.rest.product.model.internal.RetrieveProductListRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;

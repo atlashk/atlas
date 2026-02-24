@@ -25,30 +25,26 @@ public class CreateProductRequest {
   private String name;
 
   @NotNull
+  @Schema(description = "Type of the product", example = "PHYSICAL", requiredMode = RequiredMode.REQUIRED)
+  private ProductType type;
+  
+  @NotNull
   @DecimalMin(value = "0.0")
   @Schema(description = "Price of the product", example = "19.99", requiredMode = RequiredMode.REQUIRED)
   private BigDecimal price;
 
   @NotNull
+  @Schema(description = "Date and time the product was published (ISO 8601 format)", example = "2023-10-01T10:00:00Z", requiredMode = RequiredMode.REQUIRED)
+  private Date publishedAt;
+
+  @NotNull
   @PositiveOrZero
   @Schema(description = "Quantity of the product available", example = "100", requiredMode = RequiredMode.REQUIRED)
-  private Integer quantity;
+  private Integer initialQuantity;
 
   @NotNull
-  @Schema(description = "Stock status", example = "IN_STOCK", requiredMode = RequiredMode.REQUIRED)
-  private ProductType stockStatus;
-
-  @NotNull
-  @Schema(description = "Date and time the product becomes available in ISO 8601 format", example = "2023-10-01T10:00:00Z", requiredMode = RequiredMode.REQUIRED)
-  private Date availableFrom;
-
-  @NotNull
-  @Schema(description = "Indicates if the product is active", example = "true", requiredMode = RequiredMode.REQUIRED)
-  private Boolean isActive;
-
-  @NotNull
-  @Schema(description = "ID of the brand associated with the product", example = "1", requiredMode = RequiredMode.REQUIRED)
-  private Integer brandId;
+  @Schema(description = "ID of the brand associated with the product", example = "BRD0001", requiredMode = RequiredMode.REQUIRED)
+  private String brandId;
 
   @NotNull
   @Valid
@@ -60,8 +56,8 @@ public class CreateProductRequest {
   private List<ProductAttribute> attributes;
 
   @NotEmpty
-  @Schema(description = "List of category IDs the product belongs to", example = "[1, 2, 3]", requiredMode = RequiredMode.REQUIRED)
-  private List<Integer> categoryIds;
+  @Schema(description = "List of category IDs the product belongs to", example = "[\"CAT0001\", \"CAT0002\", \"CAT0003\"]", requiredMode = RequiredMode.REQUIRED)
+  private List<String> categoryIds;
 
   @Schema(description = "Detailed information about the product")
   @Getter

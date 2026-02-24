@@ -18,7 +18,7 @@ show_usage() {
   echo "  <service-name>     Service name to rebuild (required)"
   echo ""
   echo "Examples:"
-  echo "  $0 product-service"
+  echo "  $0 identity-service"
   echo "  $0 api-gateway"
 }
 

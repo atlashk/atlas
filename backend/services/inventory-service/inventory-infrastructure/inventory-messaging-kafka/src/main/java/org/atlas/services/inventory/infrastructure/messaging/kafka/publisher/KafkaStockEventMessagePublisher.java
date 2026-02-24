@@ -2,7 +2,7 @@ package org.atlas.services.inventory.infrastructure.messaging.kafka.publisher;
 
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.domain.common.event.contract.product.ProductCreatedEvent;
+import org.atlas.libs.framework.domain.event.contract.inventory.StockStatusChangedEvent;
 import org.atlas.libs.framework.json.JsonUtil;
 import org.atlas.libs.framework.messaging.publisher.Message;
 import org.atlas.libs.framework.messaging.publisher.MessagePublisher;
@@ -17,9 +17,9 @@ public class KafkaStockEventMessagePublisher implements StockEventMessagePublish
   private final MessagePublisher messagePublisher;
 
   @Override
-  public void publish(ProductCreatedEvent event) {
+  public void publish(StockStatusChangedEvent event) {
     Message message = Message.builder()
-        .destination(KafkaTopics.PRODUCT_EVENTS)
+        .destination(KafkaTopics.STOCK_EVENTS)
         .routingAttributes(Map.of("messageKey", event.getProductId()))
         .payload(JsonUtil.getInstance().toJson(event))
         .build();

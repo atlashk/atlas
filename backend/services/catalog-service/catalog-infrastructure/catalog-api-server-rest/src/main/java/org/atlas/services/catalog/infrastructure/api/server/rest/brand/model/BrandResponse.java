@@ -15,8 +15,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class BrandResponse {
 
-  @Schema(description = "Unique identifier of the brand", example = "1")
-  private Integer id;
+  @Schema(description = "Unique identifier of the brand", example = "BRD0001")
+  private String id;
 
   @Schema(description = "Name of the brand", example = "Brand Name")
   private String name;

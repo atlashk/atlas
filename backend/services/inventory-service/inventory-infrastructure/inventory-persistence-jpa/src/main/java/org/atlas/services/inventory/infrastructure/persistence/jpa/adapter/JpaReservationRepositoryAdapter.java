@@ -2,6 +2,7 @@ package org.atlas.services.inventory.infrastructure.persistence.jpa.adapter;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.atlas.services.inventory.domain.entity.ReservationStatus;
 import org.atlas.services.inventory.infrastructure.persistence.jpa.entity.JpaReservationEntity;
 import org.atlas.services.inventory.port.out.repository.ReservationRepository;
 import org.atlas.services.inventory.domain.entity.ReservationEntity;
@@ -29,7 +30,13 @@ public class JpaReservationRepositoryAdapter implements ReservationRepository {
   }
 
   @Override
-  public void delete(ReservationEntity reservation) {
-    jpaReservationRepository.deleteById(reservation.getId());
+  public void update(ReservationEntity reservation) {
+    JpaReservationEntity jpaReservation = JpaReservationMapper.INSTANCE.toJpaReservation(reservation);
+    jpaReservationRepository.save(jpaReservation);
+  }
+
+  @Override
+  public void updateStatus(String orderId, ReservationStatus status) {
+    jpaReservationRepository.updateStatusByOrderId(orderId, status);
   }
 }

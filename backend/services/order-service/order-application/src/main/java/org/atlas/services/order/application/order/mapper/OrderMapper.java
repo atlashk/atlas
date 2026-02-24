@@ -33,11 +33,15 @@ public interface OrderMapper {
   @Mapping(target = "paymentGatewayId", source = "payment.paymentGatewayId")
   CheckoutSagaData toCheckoutSagaData(OrderEntity entity);
 
+  // Don't remove it
   CheckoutSagaData.User toCheckoutSagaDataUser(UserSnapshot userSnapshot);
 
+  // Don't remove it
   CheckoutSagaData.Address toCheckoutSagaDataUser(Address address);
 
+  // Don't remove it
   CheckoutSagaData.OrderItem toCheckoutSagaDataOrderItem(OrderItem orderItem);
 
+  // Don't remove it
   CheckoutSagaData.Product toCheckoutSagaDataProduct(ProductSnapshot productSnapshot);
 }

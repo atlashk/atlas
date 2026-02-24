@@ -72,12 +72,6 @@ project(':libs.internal.catalog.grpc').projectDir = file('libs/internal/catalog-
 include(':libs.internal.catalog.rest')
 project(':libs.internal.catalog.rest').projectDir = file('libs/internal/catalog-api/catalog-api-rest')
 
-// Internal::Inventory
-include(':libs.internal.inventory.grpc')
-project(':libs.internal.inventory.grpc').projectDir = file('libs/internal/inventory-api/inventory-api-grpc')
-include(':libs.internal.inventory.rest')
-project(':libs.internal.inventory.rest').projectDir = file('libs/internal/inventory-api/inventory-api-rest')
-
 // JWT
 include(':libs.jwt')
 project(':libs.jwt').projectDir = file('libs/jwt')
@@ -255,10 +249,6 @@ include(':services.identity.datasource.mysql')
 project(':services.identity.datasource.mysql').projectDir = file('services/identity-service/identity-infrastructure/identity-datasource-mysql')
 include(':services.identity.datasource.postgres')
 project(':services.identity.datasource.postgres').projectDir = file('services/identity-service/identity-infrastructure/identity-datasource-postgres')
-include(':services.identity.messaging.kafka')
-project(':services.identity.messaging.kafka').projectDir = file('services/identity-service/identity-infrastructure/identity-messaging-kafka')
-include(':services.identity.messaging.rabbitmq')
-project(':services.identity.messaging.rabbitmq').projectDir = file('services/identity-service/identity-infrastructure/identity-messaging-rabbitmq')
 include(':services.identity.migration.flyway.mysql')
 project(':services.identity.migration.flyway.mysql').projectDir = file('services/identity-service/identity-infrastructure/identity-migration-flyway-mysql')
 include(':services.identity.migration.flyway.postgres')
@@ -331,8 +321,6 @@ project(':services.inventory.application').projectDir = file('services/inventory
 
 include(':services.inventory.infrastructure')
 project(':services.inventory.infrastructure').projectDir = file('services/inventory-service/inventory-infrastructure')
-include(':services.inventory.api.server.grpc')
-project(':services.inventory.api.server.grpc').projectDir = file('services/inventory-service/inventory-infrastructure/inventory-api-server-grpc')
 include(':services.inventory.api.server.rest')
 project(':services.inventory.api.server.rest').projectDir = file('services/inventory-service/inventory-infrastructure/inventory-api-server-rest')
 include(':services.inventory.datasource.mysql')
@@ -422,41 +410,6 @@ project(':services.payment.persistence.jpa').projectDir = file('services/payment
 
 include(':services.payment.bootstrap')
 project(':services.payment.bootstrap').projectDir = file('services/payment-service/payment-bootstrap')
-
-// -------------------------------------------------------------------------------------------------
-// Notification Service
-// -------------------------------------------------------------------------------------------------
-
-include(':services.notification.domain')
-project(':services.notification.domain').projectDir = file('services/notification-service/notification-domain')
-
-include(':services.notification.port')
-project(':services.notification.port').projectDir = file('services/notification-service/notification-port')
-
-include(':services.notification.application')
-project(':services.notification.application').projectDir = file('services/notification-service/notification-application')
-
-include(':services.notification.infrastructure')
-project(':services.notification.infrastructure').projectDir = file('services/notification-service/notification-infrastructure')
-include(':services.notification.api.server.rest')
-project(':services.notification.api.server.rest').projectDir = file('services/notification-service/notification-infrastructure/notification-api-server-rest')
-include(':services.notification.datasource.mysql')
-project(':services.notification.datasource.mysql').projectDir = file('services/notification-service/notification-infrastructure/notification-datasource-mysql')
-include(':services.notification.datasource.postgres')
-project(':services.notification.datasource.postgres').projectDir = file('services/notification-service/notification-infrastructure/notification-datasource-postgres')
-include(':services.notification.messaging.kafka')
-project(':services.notification.messaging.kafka').projectDir = file('services/notification-service/notification-infrastructure/notification-messaging-kafka')
-include(':services.notification.messaging.rabbitmq')
-project(':services.notification.messaging.rabbitmq').projectDir = file('services/notification-service/notification-infrastructure/notification-messaging-rabbitmq')
-include(':services.notification.migration.flyway.mysql')
-project(':services.notification.migration.flyway.mysql').projectDir = file('services/notification-service/notification-infrastructure/notification-migration-flyway-mysql')
-include(':services.notification.migration.flyway.postgres')
-project(':services.notification.migration.flyway.postgres').projectDir = file('services/notification-service/notification-infrastructure/notification-migration-flyway-postgres')
-include(':services.notification.persistence.jpa')
-project(':services.notification.persistence.jpa').projectDir = file('services/notification-service/notification-infrastructure/notification-persistence-jpa')
-
-include(':services.notification.bootstrap')
-project(':services.notification.bootstrap').projectDir = file('services/notification-service/notification-bootstrap')
 
 // -------------------------------------------------------------------------------------------------
 // API Gateway

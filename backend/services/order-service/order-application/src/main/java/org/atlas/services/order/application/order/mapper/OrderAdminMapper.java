@@ -22,13 +22,18 @@ public interface OrderAdminMapper {
 
   OrderOutput toAdminOrderOutput(OrderEntity order);
 
+  // Don't remove it
   OrderOutput.User toAdminOrderOutputUser(UserSnapshot user);
 
+  // Don't remove it
   OrderOutput.Address toAdminOrderOutputAddress(Address address);
 
+  // Don't remove it
   OrderOutput.OrderItem toAdminOrderOutputOrderItem(OrderItem orderItem);
 
+  // Don't remove it
   OrderOutput.Product toAdminOrderOutputProduct(ProductSnapshot product);
 
+  // Don't remove it
   OrderOutput.Payment toAdminOrderOutputPayment(PaymentSnapshot payment);
 }

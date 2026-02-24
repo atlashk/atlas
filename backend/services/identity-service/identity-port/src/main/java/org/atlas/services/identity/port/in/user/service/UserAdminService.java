@@ -20,5 +20,5 @@ public interface UserAdminService {
 
   boolean existsUser(String username);
 
-  Long retrieveTotalCount();
+  Long retrieveTotalUserCount();
 }

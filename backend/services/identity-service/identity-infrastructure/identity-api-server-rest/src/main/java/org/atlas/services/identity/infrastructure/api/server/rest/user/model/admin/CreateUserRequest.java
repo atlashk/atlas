@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 import org.atlas.libs.framework.constant.Patterns;
-import org.atlas.libs.framework.domain.identity.UserRole;
+import org.atlas.libs.framework.domain.shared.identity.UserRole;
 
 @Schema(description = "Request object for creating a user containing required data")
 @Getter

@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.libs.framework.domain.order.OrderStatus;
+import org.atlas.libs.framework.domain.shared.order.OrderStatus;
 import org.atlas.libs.framework.paging.PagingRequest;
 
 @NoArgsConstructor
@@ -16,7 +16,6 @@ import org.atlas.libs.framework.paging.PagingRequest;
 @Setter
 public class RetrieveOrderListInput {
 
-  private String userId;
   private OrderStatus status;
   private Date startDate;
   private Date endDate;

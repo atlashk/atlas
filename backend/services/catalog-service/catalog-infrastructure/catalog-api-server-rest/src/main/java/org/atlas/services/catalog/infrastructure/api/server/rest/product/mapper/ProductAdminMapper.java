@@ -49,7 +49,7 @@ public interface ProductAdminMapper {
   ExportProductInput toExportProductInput(ExportProductRequest request);
 
   // Helper methods for mapping complex objects
-  default BrandEntity mapBrandId(Integer brandId) {
+  default BrandEntity mapBrandId(String brandId) {
     if (brandId == null) {
       return null;
     }
@@ -58,7 +58,7 @@ public interface ProductAdminMapper {
         .build();
   }
 
-  default List<CategoryEntity> mapCategoryIds(List<Integer> categoryIds) {
+  default List<CategoryEntity> mapCategoryIds(List<String> categoryIds) {
     if (categoryIds == null) {
       return null;
     }

@@ -7,7 +7,7 @@ import jakarta.validation.Valid;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
-import org.atlas.libs.framework.domain.common.error.DomainError;
+import org.atlas.libs.framework.domain.error.DomainError;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.identity.infrastructure.api.server.rest.authentication.mapper.AuthenticationMapper;
 import org.atlas.services.identity.infrastructure.api.server.rest.authentication.model.GenerateOneTimeTokenRequest;

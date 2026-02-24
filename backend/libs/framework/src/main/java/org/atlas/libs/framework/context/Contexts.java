@@ -1,9 +1,9 @@
 package org.atlas.libs.framework.context;
 
 import jakarta.annotation.Nullable;
-import org.atlas.libs.framework.domain.common.error.DomainError;
-import org.atlas.libs.framework.domain.common.exception.DomainException;
-import org.atlas.libs.framework.domain.identity.UserRole;
+import org.atlas.libs.framework.domain.error.DomainError;
+import org.atlas.libs.framework.domain.exception.DomainException;
+import org.atlas.libs.framework.domain.shared.identity.UserRole;
 
 /**
  * Manages session info context for the current thread.

@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import lombok.Getter;
 import lombok.Setter;
-import org.atlas.libs.framework.domain.identity.UserRole;
+import org.atlas.libs.framework.domain.shared.identity.UserRole;
 import org.atlas.services.identity.domain.entity.UserEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

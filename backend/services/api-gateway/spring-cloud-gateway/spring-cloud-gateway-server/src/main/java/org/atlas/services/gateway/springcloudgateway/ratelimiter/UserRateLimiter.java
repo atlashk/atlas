@@ -2,7 +2,7 @@ package org.atlas.services.gateway.springcloudgateway.ratelimiter;
 
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.domain.identity.UserRole;
+import org.atlas.libs.framework.domain.shared.identity.UserRole;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.gateway.filter.ratelimit.RateLimiter;
 import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;

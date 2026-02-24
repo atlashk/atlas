@@ -15,7 +15,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.currency.CurrencyUtil;
-import org.atlas.libs.framework.domain.payment.PaymentStatus;
+import org.atlas.libs.framework.domain.shared.payment.PaymentStatus;
 import org.atlas.libs.framework.util.ExceptionUtil;
 import org.atlas.libs.framework.http.HttpStatusCode;
 import org.atlas.libs.framework.json.JsonUtil;

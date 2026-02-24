@@ -27,7 +27,7 @@ public interface ProductRepository {
 
   void insert(ProductEntity product);
 
-  void insertBatch(List<ProductEntity> products);
+  void insertAll(List<ProductEntity> products);
 
   void update(ProductEntity product);
 

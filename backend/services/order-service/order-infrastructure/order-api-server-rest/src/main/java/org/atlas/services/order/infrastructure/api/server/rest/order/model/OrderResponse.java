@@ -9,7 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.libs.framework.domain.order.OrderStatus;
+import org.atlas.libs.framework.domain.shared.order.OrderStatus;
 
 @Schema(description = "Complete order information including items, payment details, and delivery address")
 @Getter

@@ -15,8 +15,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CategoryResponse {
 
-  @Schema(description = "Unique identifier of the category", example = "1")
-  private Integer id;
+  @Schema(description = "Unique identifier of the category", example = "CAT0001")
+  private String id;
 
   @Schema(description = "Name of the category", example = "LAPTOP")
   private String name;

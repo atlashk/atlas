@@ -21,7 +21,7 @@ public class RabbitmqSagaCheckoutCompensationConsumer extends BaseRabbitmqMessag
   private final SagaCompensationDispatcher dispatcher;
 
   @RabbitListener(
-      queues = "saga.checkout.compensation.product",
+      queues = "saga.checkout.compensation.inventory",
       containerFactory = "customContainerFactory"
   )
   public void consumeCheckoutCompensation(@Payload Object payload,

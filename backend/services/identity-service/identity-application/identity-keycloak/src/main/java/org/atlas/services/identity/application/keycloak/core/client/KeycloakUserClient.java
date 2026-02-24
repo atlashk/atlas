@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.domain.identity.UserRole;
+import org.atlas.libs.framework.domain.shared.identity.UserRole;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.util.ExceptionUtil;
 import org.atlas.libs.framework.util.MapperUtil;
@@ -67,10 +67,10 @@ public class KeycloakUserClient {
         int max = request.getPagingRequest() == null ? 1 : request.getPagingRequest().getLimit();
 
         List<UserRepresentation> kcUsers = usersResource.search(
-            StringUtil.trimToEmpty(request.getUsername()),
-            StringUtil.trimToEmpty(request.getFirstName()),
-            StringUtil.trimToEmpty(request.getLastName()),
-            StringUtil.trimToEmpty(request.getEmail()), first, max);
+            StringUtil.trim(request.getUsername()),
+            StringUtil.trim(request.getFirstName()),
+            StringUtil.trim(request.getLastName()),
+            StringUtil.trim(request.getEmail()), first, max);
         return MapperUtil.mapList(kcUsers, KeycloakUtil::toUserEntity);
       } catch (Exception e) {
         log.error("Failed to retrieve Keycloak user list: reason={}", e.getMessage());
@@ -109,7 +109,7 @@ public class KeycloakUserClient {
     }
   }
 
-  public Long retrieveUserCount() {
+  public Long retrieveTotalUserCount() {
     UsersResource usersResource = getUsersResource();
     return (long) usersResource.count();
   }

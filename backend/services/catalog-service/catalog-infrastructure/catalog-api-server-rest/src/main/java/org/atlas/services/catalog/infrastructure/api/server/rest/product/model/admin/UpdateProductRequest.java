@@ -20,41 +20,29 @@ import org.atlas.services.catalog.domain.entity.ProductType;
 public class UpdateProductRequest {
 
   @NotBlank
-  @Schema(description = "Name of the product", example = "T-Shirt")
+  @Schema(description = "Name of the product", example = "T-Shirt", requiredMode = Schema.RequiredMode.REQUIRED)
   private String name;
 
   @NotNull
+  @Schema(description = "Type of the product", example = "PHYSICAL", requiredMode = Schema.RequiredMode.REQUIRED)
+  private ProductType type;
+  
+  @NotNull
   @DecimalMin(value = "0.0")
-  @Schema(description = "Price of the product", example = "19.99")
+  @Schema(description = "Price of the product", example = "19.99", requiredMode = Schema.RequiredMode.REQUIRED)
   private BigDecimal price = BigDecimal.ZERO;
 
-  @Schema(description = "Base64 string of the product's image", example = "data:image/jpeg;base64,...")
-  private String image;
+  @NotNull
+  @Schema(description = "Date and time the product was published (ISO 8601 format)", example = "2023-10-01T10:00:00Z", requiredMode = Schema.RequiredMode.REQUIRED)
+  private Date publishedAt;
 
   @NotNull
-  @Schema(description = "Stock status", example = "IN_STOCK")
-  private ProductType stockStatus;
-
-  @NotNull
-  @PositiveOrZero
-  @Schema(description = "Quantity of the product available", example = "100")
-  private Integer quantity;
-
-  @NotNull
-  @Schema(description = "Date and time the product becomes available in ISO 8601 format.", example = "2023-10-01T10:00:00Z")
-  private Date availableFrom;
-
-  @NotNull
-  @Schema(description = "Indicates if the product is active", example = "true")
-  private Boolean isActive;
-
-  @NotNull
-  @Schema(description = "ID of the brand associated with the product", example = "1")
-  private Integer brandId;
+  @Schema(description = "ID of the brand associated with the product", example = "BRD0001", requiredMode = Schema.RequiredMode.REQUIRED)
+  private String brandId;
 
   @NotNull
   @Valid
-  @Schema(description = "Detailed information about the product")
+  @Schema(description = "Detailed information about the product", requiredMode = Schema.RequiredMode.REQUIRED)
   private ProductDetails details;
 
   @Valid
@@ -62,8 +50,8 @@ public class UpdateProductRequest {
   private List<ProductAttribute> attributes;
 
   @NotEmpty
-  @Schema(description = "List of category IDs the product belongs to", example = "[1, 2, 3]")
-  private List<Integer> categoryIds;
+  @Schema(description = "List of category IDs the product belongs to", example = "[\"CAT0001\", \"CAT0002\", \"CAT0003\"]", requiredMode = Schema.RequiredMode.REQUIRED)
+  private List<String> categoryIds;
 
   @Getter
   @Setter
@@ -71,7 +59,7 @@ public class UpdateProductRequest {
   public static class ProductDetails {
 
     @NotBlank
-    @Schema(description = "Description of the product", example = "A comfortable cotton t-shirt")
+    @Schema(description = "Description of the product", example = "A comfortable cotton t-shirt", requiredMode = Schema.RequiredMode.REQUIRED)
     private String description;
   }
 
@@ -80,15 +68,15 @@ public class UpdateProductRequest {
   @Schema(description = "Attributes associated with the product")
   public static class ProductAttribute {
 
-    @Schema(description = "Unique identifier of the product attribute", example = "1")
+    @Schema(description = "Unique identifier of the product attribute", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer id;
 
     @NotBlank
-    @Schema(description = "Name of the product attribute", example = "Color")
+    @Schema(description = "Name of the product attribute", example = "Color", requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @NotBlank
-    @Schema(description = "Value of the product attribute", example = "Red")
+    @Schema(description = "Value of the product attribute", example = "Red", requiredMode = Schema.RequiredMode.REQUIRED)
     private String value;
   }
 }

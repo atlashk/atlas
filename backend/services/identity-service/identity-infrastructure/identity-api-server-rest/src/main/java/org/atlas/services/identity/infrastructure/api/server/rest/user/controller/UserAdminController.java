@@ -95,9 +95,9 @@ public class UserAdminController {
   }
 
   @GetMapping("/statistics/count")
-  @Operation(summary = "Retrieve the total count")
-  public ApiResponseWrapper<Long> retrieveTotalCount() throws Exception {
-    Long responseData = userAdminService.retrieveTotalCount();
+  @Operation(summary = "Retrieve the total user count")
+  public ApiResponseWrapper<Long> retrieveTotalUserCount() throws Exception {
+    Long responseData = userAdminService.retrieveTotalUserCount();
     return ApiResponseWrapper.success(responseData);
   }
 }

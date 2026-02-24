@@ -11,7 +11,7 @@ public interface OrderAdminService {
 
   PagingResult<OrderOutput> retrieveOrderList(RetrieveOrderListInput input);
 
-  Long retrieveTotalCount();
+  Long retrieveTotalOrderCount();
 
   BigDecimal retrieveTotalRevenue();
 

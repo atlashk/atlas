@@ -2,8 +2,8 @@ package org.atlas.services.identity.application.keycloak.core.client;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.domain.common.error.DomainError;
-import org.atlas.libs.framework.domain.common.exception.DomainException;
+import org.atlas.libs.framework.domain.error.DomainError;
+import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.libs.jwt.JwtUtil;
 import org.atlas.services.identity.application.keycloak.core.config.KeycloakProps;
 import org.atlas.services.identity.application.keycloak.core.exception.KeycloakClientException;

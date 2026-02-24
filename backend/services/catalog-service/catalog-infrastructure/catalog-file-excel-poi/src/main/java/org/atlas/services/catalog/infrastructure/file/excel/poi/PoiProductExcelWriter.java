@@ -50,12 +50,13 @@ public class PoiProductExcelWriter implements ProductExcelWriter {
     headerCell.setCellStyle(headerStyle);
 
     headerCell = header.createCell(2);
-    headerCell.setCellValue("Price");
+    headerCell.setCellValue("Type");
     headerCell.setCellStyle(headerStyle);
 
     headerCell = header.createCell(3);
-    headerCell.setCellValue("Stock Status");
+    headerCell.setCellValue("Price");
     headerCell.setCellStyle(headerStyle);
+
 
     headerCell = header.createCell(4);
     headerCell.setCellValue("Quantity");
@@ -96,32 +97,28 @@ public class PoiProductExcelWriter implements ProductExcelWriter {
       cell.setCellStyle(style);
 
       cell = row.createCell(2);
-      cell.setCellValue(productRow.getPrice().doubleValue());
+      cell.setCellValue(productRow.getType().name());
       cell.setCellStyle(style);
 
       cell = row.createCell(3);
-      cell.setCellValue(productRow.getStockStatus().name());
+      cell.setCellValue(productRow.getPrice().doubleValue());
       cell.setCellStyle(style);
-      
+
       cell = row.createCell(4);
-      cell.setCellValue(productRow.getQuantity());
+      cell.setCellValue(
+          DateUtil.format(productRow.getPublishedAt(), CommonConstant.DATE_TIME_FORMAT));
       cell.setCellStyle(style);
 
       cell = row.createCell(5);
-      cell.setCellValue(
-          DateUtil.format(productRow.getAvailableFrom(), CommonConstant.DATE_TIME_FORMAT));
+      cell.setCellValue(productRow.getInStock());
       cell.setCellStyle(style);
 
       cell = row.createCell(6);
-      cell.setCellValue(productRow.getIsActive());
+      cell.setCellValue(productRow.getBrandName());
       cell.setCellStyle(style);
 
       cell = row.createCell(7);
-      cell.setCellValue(productRow.getBrandId());
-      cell.setCellStyle(style);
-
-      cell = row.createCell(8);
-      cell.setCellValue(productRow.getCategoryIds());
+      cell.setCellValue(productRow.getCategoryNames());
       cell.setCellStyle(style);
 
       rowIndex++;

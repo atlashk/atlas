@@ -1,6 +1,6 @@
 package org.atlas.services.order.application.cart.mapper;
 
-import org.atlas.libs.framework.internal.product.model.ProductOutput;
+import org.atlas.libs.framework.internal.catalog.model.ProductOutput;
 import org.atlas.services.order.domain.entity.CartEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
@@ -11,5 +11,5 @@ public interface CartMapper {
 
   CartMapper INSTANCE = Mappers.getMapper(CartMapper.class);
 
-  CartEntity.Product toProduct(ProductOutput response);
+  CartEntity.Product toProduct(ProductOutput output);
 }

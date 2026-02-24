@@ -105,10 +105,11 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
     }
 
     // Type
-    if (criteria.getStockStatus() != null) {
-      spec.addFilter(QueryFilter.of("stockStatus", criteria.getStockStatus(), QueryOperator.EQUAL));
+    if (criteria.getType() != null) {
+      spec.addFilter(QueryFilter.of("type", criteria.getType(), QueryOperator.EQUAL));
     }
 
+    // Price
     if (criteria.getMinPrice() != null) {
       spec.addFilter(
           QueryFilter.of("price", criteria.getMinPrice(), QueryOperator.GREATER_THAN_EQUAL));
@@ -117,16 +118,31 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
       spec.addFilter(
           QueryFilter.of("price", criteria.getMaxPrice(), QueryOperator.LESS_THAN_EQUAL));
     }
-    if (criteria.getAvailableFrom() != null) {
-      spec.addFilter(QueryFilter.of("availableFrom", criteria.getAvailableFrom(),
+    
+    // Published date
+    if (criteria.getStartPublishedAt() != null) {
+      spec.addFilter(QueryFilter.of("publishedAt", criteria.getStartPublishedAt(),
           QueryOperator.GREATER_THAN_EQUAL));
     }
-    if (criteria.getIsActive() != null) {
-      spec.addFilter(QueryFilter.of("isActive", criteria.getIsActive(), QueryOperator.EQUAL));
+    if (criteria.getEndPublishedAt() != null) {
+      spec.addFilter(QueryFilter.of("publishedAt", criteria.getEndPublishedAt(),
+          QueryOperator.LESS_THAN_EQUAL));
     }
+
+    // In stock
+    if (criteria.getInStock() != null) {
+      spec.addFilter(QueryFilter.of("inStock", criteria.getInStock(), QueryOperator.EQUAL));
+    } else {
+      // Default to only show in-stock products
+      spec.addFilter(QueryFilter.of("inStock", true, QueryOperator.EQUAL));
+    }
+
+    // Brand
     if (criteria.getBrandId() != null) {
       spec.addFilter(QueryFilter.of("brand.id", criteria.getBrandId(), QueryOperator.EQUAL));
     }
+
+    // Categories
     if (CollectionUtil.isNotEmpty(criteria.getCategoryIds())) {
       spec.addFilter(QueryFilter.of("categories.id", criteria.getCategoryIds(), QueryOperator.IN));
     }

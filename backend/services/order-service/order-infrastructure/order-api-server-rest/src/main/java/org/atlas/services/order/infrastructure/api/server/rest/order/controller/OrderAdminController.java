@@ -38,7 +38,6 @@ public class OrderAdminController {
       @Valid @RequestBody RetrieveOrderListRequest request) throws Exception {
     RetrieveOrderListInput input = OrderAdminMapper.INSTANCE.toRetrieveOrderListInput(request);
     input.setPagingRequest(PagingRequest.of(request.getPage() - 1, request.getSize()));
-
     PagingResult<OrderOutput> output = orderAdminService.retrieveOrderList(input);
     PagingResult<OrderResponse> responseData = MapperUtil.mapPage(output,
         OrderAdminMapper.INSTANCE::toOrderResponse);
@@ -46,9 +45,9 @@ public class OrderAdminController {
   }
 
   @GetMapping(value = "/statistics/total-count", produces = MediaType.APPLICATION_JSON_VALUE)
-  @Operation(summary = "Retrieve total count")
-  public ApiResponseWrapper<Long> retrieveTotalCount() {
-    Long responseData = orderAdminService.retrieveTotalCount();
+  @Operation(summary = "Retrieve total order count")
+  public ApiResponseWrapper<Long> retrieveTotalOrderCount() {
+    Long responseData = orderAdminService.retrieveTotalOrderCount();
     return ApiResponseWrapper.success(responseData);
   }
 

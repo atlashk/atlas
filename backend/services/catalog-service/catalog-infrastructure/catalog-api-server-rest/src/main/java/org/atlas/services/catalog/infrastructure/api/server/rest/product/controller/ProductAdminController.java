@@ -160,9 +160,9 @@ public class ProductAdminController {
   }
 
   @GetMapping("/statistics/total-count")
-  @Operation(summary = "Retrieve the total count")
-  public ApiResponseWrapper<Long> retrieveTotalCount() {
-    Long responseData = productAdminService.retrieveTotalCount();
+  @Operation(summary = "Retrieve the total product count")
+  public ApiResponseWrapper<Long> retrieveTotalProductCount() {
+    Long responseData = productAdminService.retrieveTotalProductCount();
     return ApiResponseWrapper.success(responseData);
   }
 }

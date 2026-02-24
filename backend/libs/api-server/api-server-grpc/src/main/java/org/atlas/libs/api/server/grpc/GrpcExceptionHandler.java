@@ -3,7 +3,7 @@ package org.atlas.libs.api.server.grpc;
 import io.grpc.Status;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.advice.GrpcAdvice;
-import org.atlas.libs.framework.domain.common.exception.DomainException;
+import org.atlas.libs.framework.domain.exception.DomainException;
 
 @GrpcAdvice
 @Slf4j

@@ -31,18 +31,6 @@ dependencies {
         api project(':services.identity.api.server.grpc')
     }
 
-    // Messaging
-    switch (rootProject.ext.appStack['messaging']) {
-        case 'kafka':
-            api project(':services.identity.messaging.kafka')
-            break
-        case 'rabbitmq':
-            api project(':services.identity.messaging.rabbitmq')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported messaging: ${rootProject.ext.appStack['messaging']}")
-    }
-
     // Observability
     switch (rootProject.ext.appStack['observability.logging.framework']) {
         case 'logback':

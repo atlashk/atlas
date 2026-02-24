@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.libs.framework.domain.common.entity.DomainEntity;
+import org.atlas.libs.framework.domain.entity.DomainEntity;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -38,6 +38,8 @@ public class ProductEntity extends DomainEntity {
   // Based on inventory-service stock status
   @Builder.Default
   private Boolean inStock = true;
+
+  private Integer initialQuantity;
 
   // Associations
 

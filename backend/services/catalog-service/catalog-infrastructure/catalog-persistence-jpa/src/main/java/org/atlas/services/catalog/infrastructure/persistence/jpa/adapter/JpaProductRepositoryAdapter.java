@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.domain.common.error.DomainError;
-import org.atlas.libs.framework.domain.common.exception.DomainException;
+import org.atlas.libs.framework.domain.error.DomainError;
+import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.MapperUtil;
@@ -63,7 +63,7 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
   }
 
   @Override
-  public void insertBatch(List<ProductEntity> products) {
+  public void insertAll(List<ProductEntity> products) {
     List<JpaProductEntity> jpaProducts =
         MapperUtil.mapList(products, JpaProductMapper.INSTANCE::toJpaProduct);
     jpaProductRepository.saveAll(jpaProducts);

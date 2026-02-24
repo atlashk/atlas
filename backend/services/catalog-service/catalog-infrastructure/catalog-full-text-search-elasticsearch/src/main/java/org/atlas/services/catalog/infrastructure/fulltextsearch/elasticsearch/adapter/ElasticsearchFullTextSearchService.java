@@ -89,7 +89,7 @@ public class ElasticsearchFullTextSearchService implements FullTextSearchService
   }
 
   @Override
-  public void deleteProduct(String productId) {
+  public void delete(String productId) {
     ElasticsearchProduct elasticsearchProduct = elasticsearchProductRepository.findByProductId(
             productId)
         .orElseThrow(() -> new IllegalArgumentException(

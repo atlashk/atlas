@@ -167,22 +167,16 @@ public class PdfboxProductPdfWriter implements ProductPdfWriter {
   }
 
   private String[] mapRowToData(ProductWriteRow row) {
-    return new String[] {
-        safeString(row.getId()),
-        safeString(row.getName()),
+    return new String[]{
+        row.getId(),
+        row.getName(),
+        row.getType().name(),
         row.getPrice() != null ? String.format("%.2f", row.getPrice()) : "",
-        row.getStockStatus() != null ? row.getStockStatus().name() : "",
-        safeString(row.getQuantity()),
-        row.getAvailableFrom() != null ? DateUtil.format(row.getAvailableFrom(),
-            CommonConstant.DATE_TIME_FORMAT) : "",
-        String.valueOf(row.getIsActive()),
-        safeString(row.getBrandId()),
-        row.getCategoryIds() != null ? row.getCategoryIds() : ""
+        DateUtil.format(row.getPublishedAt(), CommonConstant.DATE_TIME_FORMAT),
+        String.valueOf(row.getInStock()),
+        row.getBrandName(),
+        row.getCategoryNames()
     };
-  }
-
-  private String safeString(Object obj) {
-    return obj != null ? String.valueOf(obj) : "";
   }
 
   private void writeCellText(PDPageContentStream contentStream, PDType1Font font,

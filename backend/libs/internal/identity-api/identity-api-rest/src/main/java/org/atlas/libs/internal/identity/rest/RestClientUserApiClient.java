@@ -25,11 +25,11 @@ public class RestClientUserApiClient implements UserApiClient {
   private final RestClient restClient;
 
   @Value("${app.internal.rest.identity-service.base-url:http://localhost:8081}")
-  private String baseUrl;
+  private String identityServiceBaseUrl;
 
   @Override
   public List<UserOutput> call(RetrieveUserListInput request) {
-    String url = String.format("%s/api/users/internal/list", baseUrl);
+    String url = String.format("%s/api/users/internal/list", identityServiceBaseUrl);
     ApiResponseWrapper<List<UserOutput>> apiResponseWrapper = restClient.post()
         .uri(url)
         .contentType(MediaType.APPLICATION_JSON)

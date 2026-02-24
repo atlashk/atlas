@@ -1,6 +1,6 @@
 package org.atlas.services.catalog.application.product.mapper;
 
-import org.atlas.libs.framework.internal.product.model.ProductOutput;
+import org.atlas.libs.framework.internal.catalog.model.ProductOutput;
 import org.atlas.services.catalog.domain.entity.ProductEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;

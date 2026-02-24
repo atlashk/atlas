@@ -10,7 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.framework.constant.CommonConstant;
-import org.atlas.libs.framework.domain.order.OrderStatus;
+import org.atlas.libs.framework.domain.shared.order.OrderStatus;
 
 @Schema(description = "Request object for retrieving admin order list")
 @NoArgsConstructor

@@ -377,23 +377,85 @@ services:
     networks:
       - atlas-network
 
-  product-service:
-    container_name: product-service
-    image: atlas/product-service:latest
+  catalog-service:
+    container_name: catalog-service
+    image: atlas/catalog-service:latest
     build:
-      context: ../../services/product-service/product-bootstrap
+      context: ../../services/catalog-service/catalog-bootstrap
       dockerfile: Dockerfile
     ports:
       - "8082:8082"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       {{#hasService "datasource" "mysql"}}
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db_product?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db_catalog?createDatabaseIfNotExist=true
       - SPRING_DATASOURCE_USERNAME=${MYSQL_USER:-atlas}
       - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD:-secret123456}
       {{/hasService}}
       {{#hasService "datasource" "postgres"}}
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/db_product
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/db_catalog
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-atlas}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
+      {{/hasService}}
+      {{#hasService "kv-store" "redis"}}
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      {{/hasService}}
+      {{#hasService "messaging" "kafka"}}
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      {{/hasService}}
+      {{#hasService "messaging" "rabbitmq"}}
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER:-atlas}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-secret123456}
+      {{/hasService}}
+      {{#hasService "full-text-search" "elasticsearch"}}
+      - ELASTICSEARCH_HOST=elasticsearch
+      - ELASTICSEARCH_PORT=9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD:-secret123456}
+      {{/hasService}}
+      {{#hasService "storage" "minio"}}
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-secret123456}
+      {{/hasService}}
+      {{#hasObservability "tracing" "zipkin"}}
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+      {{/hasObservability}}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      {{#hasService "datasource" "mysql"}}
+      mysql:
+        condition: service_healthy
+      {{/hasService}}
+      {{#hasService "datasource" "postgres"}}
+      postgres:
+        condition: service_healthy
+      {{/hasService}}
+    networks:
+      - atlas-network
+
+  inventory-service:
+    container_name: inventory-service
+    image: atlas/inventory-service:latest
+    build:
+      context: ../../services/inventory-service/inventory-bootstrap
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      {{#hasService "datasource" "mysql"}}
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db_inventory?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=${MYSQL_USER:-atlas}
+      - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD:-secret123456}
+      {{/hasService}}
+      {{#hasService "datasource" "postgres"}}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/db_inventory
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-atlas}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
       {{/hasService}}
@@ -467,11 +529,11 @@ services:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
       {{#hasService "internal" "grpc"}}
       - API_CLIENT_GRPC_IDENTITY_SERVICE_ADDRESS=static://identity-service:50051
-      - API_CLIENT_GRPC_PRODUCT_SERVICE_ADDRESS=static://product-service:50052
+      - API_CLIENT_GRPC_CATALOG_SERVICE_ADDRESS=static://catalog-service:50052
       {{/hasService}}
       {{#hasService "internal" "rest"}}
       - API_CLIENT_REST_IDENTITY_SERVICE_BASE_URL=http://identity-service:8081
-      - API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL=http://product-service:8082
+      - API_CLIENT_REST_CATALOG_SERVICE_BASE_URL=http://catalog-service:8082
       {{/hasService}}
     depends_on:
       eureka-server:
@@ -525,61 +587,6 @@ services:
       {{/hasObservability}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
       - PAYMENT_SIMULATOR_WEBHOOK_URL=http://api-gateway:8080/services/payment/api/webhook/simulator
-    depends_on:
-      eureka-server:
-        condition: service_healthy
-      {{#hasService "datasource" "mysql"}}
-      mysql:
-        condition: service_healthy
-      {{/hasService}}
-      {{#hasService "datasource" "postgres"}}
-      postgres:
-        condition: service_healthy
-      {{/hasService}}
-    networks:
-      - atlas-network
-
-  notification-service:
-    container_name: notification-service
-    image: atlas/notification-service:latest
-    build:
-      context: ../../services/notification-service/notification-bootstrap
-      dockerfile: Dockerfile
-    ports:
-      - "8085:8085"
-    environment:
-      - SPRING_PROFILES_ACTIVE=dev
-      {{#hasService "datasource" "mysql"}}
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db_notification?createDatabaseIfNotExist=true
-      - SPRING_DATASOURCE_USERNAME=${MYSQL_USER:-atlas}
-      - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD:-secret123456}
-      {{/hasService}}
-      {{#hasService "datasource" "postgres"}}
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/db_notification
-      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-atlas}
-      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
-      {{/hasService}}
-      {{#hasService "kv-store" "redis"}}
-      - SPRING_DATA_REDIS_HOST=redis
-      - SPRING_DATA_REDIS_PORT=6379
-      {{/hasService}}
-      {{#hasService "messaging" "kafka"}}
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      {{/hasService}}
-      {{#hasService "messaging" "rabbitmq"}}
-      - SPRING_RABBITMQ_HOST=rabbitmq
-      - SPRING_RABBITMQ_PORT=5672
-      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER:-atlas}
-      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-secret123456}
-      {{/hasService}}
-      {{#hasService "notification.email" "spring"}}
-      - SPRING_MAIL_HOST=smtp4dev
-      - SPRING_MAIL_PORT=25
-      {{/hasService}}
-      {{#hasObservability "tracing" "zipkin"}}
-      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
-      {{/hasObservability}}
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
     depends_on:
       eureka-server:
         condition: service_healthy

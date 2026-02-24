@@ -26,7 +26,7 @@ public class ProductReadRow {
 
   private Integer initialQuantity;
 
-  private Integer brandId;
+  private String brandId;
 
   private String categoryIds; // Split by |
 }

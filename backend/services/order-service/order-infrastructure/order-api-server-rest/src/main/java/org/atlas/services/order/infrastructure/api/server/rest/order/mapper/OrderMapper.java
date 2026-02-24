@@ -23,7 +23,6 @@ public interface OrderMapper {
 
   CheckoutInput toCheckoutInput(CheckoutRequest request);
 
-  @Mapping(target = "pagingRequest", expression = "java(toPagingRequest(request))")
   RetrieveOrderListInput toRetrieveOrderListInput(RetrieveOrderListRequest request);
 
   // Entity/Output -> Response

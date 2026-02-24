@@ -3,7 +3,7 @@ package org.atlas.services.order.infrastructure.persistence.jpa.repository;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import org.atlas.libs.framework.domain.order.OrderStatus;
+import org.atlas.libs.framework.domain.shared.order.OrderStatus;
 import org.atlas.libs.persistence.jpa.repository.JpaBaseRepository;
 import org.atlas.services.order.port.in.order.model.admin.MonthlyOrderAggregation;
 import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaOrderEntity;

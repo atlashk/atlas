@@ -4,7 +4,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.config.ApplicationConfigService;
-import org.atlas.libs.framework.domain.identity.UserRole;
+import org.atlas.libs.framework.domain.shared.identity.UserRole;
 import org.atlas.libs.framework.hook.StartupHook;
 import org.atlas.services.identity.port.in.user.model.admin.CreateUserInput;
 import org.atlas.services.identity.port.in.user.service.UserAdminService;

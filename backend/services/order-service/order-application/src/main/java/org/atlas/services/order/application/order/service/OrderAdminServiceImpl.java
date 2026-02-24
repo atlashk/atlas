@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.domain.order.OrderStatus;
+import org.atlas.libs.framework.domain.shared.order.OrderStatus;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.util.MapperUtil;
@@ -42,7 +42,7 @@ public class OrderAdminServiceImpl implements OrderAdminService {
 
   @Override
   @Transactional(readOnly = true)
-  public Long retrieveTotalCount() {
+  public Long retrieveTotalOrderCount() {
     return orderRepository.countAll();
   }
 

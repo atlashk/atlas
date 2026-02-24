@@ -23,29 +23,26 @@ import org.atlas.services.catalog.infrastructure.api.server.rest.product.model.P
 @AllArgsConstructor
 public class ProductResponse {
 
-  @Schema(description = "Unique identifier of the product", example = "123")
+  @Schema(description = "Unique identifier of the product", example = "PRD0000001")
   private String id;
 
   @Schema(description = "Name of the product", example = "T-Shirt")
   private String name;
 
+  @Schema(description = "Type of the product", example = "PHYSICAL")
+  private ProductType type;
+  
   @Schema(description = "Image of the product", example = "https://example.com/product-image.jpg")
   private String image;
 
   @Schema(description = "Price of the product", example = "19.99")
   private BigDecimal price;
 
-  @Schema(description = "Quantity of the product available", example = "100")
-  private Integer quantity;
+  @Schema(description = "Date and time the product was published in ISO 8601 format", example = "2023-10-01T10:00:00Z")
+  private Date publishedAt;
 
-  @Schema(description = "Stock status", example = "IN_STOCK")
-  private ProductType stockStatus;
-
-  @Schema(description = "Date and time the product becomes available in ISO 8601 format", example = "2023-10-01T10:00:00Z")
-  private Date availableFrom;
-
-  @Schema(description = "Indicates if the product is active", example = "true")
-  private Boolean isActive;
+  @Schema(description = "Indicates if the product is in stock", example = "true")
+  private Boolean inStock;
 
   @Schema(description = "Brand information of the product")
   private BrandResponse brand;

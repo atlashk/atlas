@@ -2,7 +2,7 @@ package org.atlas.services.gateway.springcloudgateway.filter;
 
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.cryptography.HashingUtil;
-import org.atlas.libs.framework.domain.common.error.DomainError;
+import org.atlas.libs.framework.domain.error.DomainError;
 import org.atlas.libs.framework.kvstore.ReactiveKvStoreService;
 import org.atlas.libs.framework.security.SecurityConstant;
 import org.atlas.services.gateway.springcloudgateway.util.HttpUtil;

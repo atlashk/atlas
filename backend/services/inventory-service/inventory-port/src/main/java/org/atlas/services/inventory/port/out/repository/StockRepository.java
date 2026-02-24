@@ -1,24 +1,27 @@
 package org.atlas.services.inventory.port.out.repository;
 
-import org.atlas.libs.framework.domain.common.exception.OutOfStockException;
+import java.util.Optional;
+import org.atlas.libs.framework.domain.shared.inventory.InsufficientStockException;
 import org.atlas.services.inventory.domain.entity.StockEntity;
 
 public interface StockRepository {
+
+  Optional<StockEntity> findByProductId(String productId);
 
   void insert(StockEntity stock);
 
   void update(StockEntity stock);
 
-  void decreaseQuantityWithConstraint(String productId, Integer decrement)
-      throws OutOfStockException;
+  StockEntity reserveStockWithConstraint(String productId, Integer decrement)
+      throws InsufficientStockException;
 
-  void decreaseQuantityWithPessimisticLock(String productId, Integer decrement)
-      throws OutOfStockException;
+  StockEntity reserveStockWithPessimisticLock(String productId, Integer decrement)
+      throws InsufficientStockException;
 
-  void decreaseQuantityWithOptimisticLock(String productId, Integer decrement)
-      throws OutOfStockException;
+  StockEntity reserveStockWithOptimisticLock(String productId, Integer decrement)
+      throws InsufficientStockException;
 
-  void increaseQuantity(String productId, Integer increment);
+  void releaseStock(String productId, Integer increment);
 
   void deleteByProductId(String productId);
 }

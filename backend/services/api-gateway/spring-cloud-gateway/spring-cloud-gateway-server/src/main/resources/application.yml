@@ -39,75 +39,79 @@ spring:
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
                 - RewritePath=/services/identity/api/authentication/(?<segment>.*), /api/authentication/${segment}
-            - id: identity-service-front
+            - id: identity-service
               uri: ${IDENTITY_SERVICE_URI:lb://identity-service}
               predicates:
-                - Path=/services/identity/api/front/**
+                - Path=/services/identity/api/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
                 - TokenValidation
                 - TokenRelay
-                - RewritePath=/services/identity/api/front/(?<segment>.*), /api/front/${segment}
-            - id: identity-service-admin
-              uri: ${IDENTITY_SERVICE_URI:lb://identity-service}
-              predicates:
-                - Path=/services/identity/api/admin/**
-              filters:
-                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-                - TokenValidation
-                - Authorization=ADMIN
-                - TokenRelay
-                - RewritePath=/services/identity/api/admin/(?<segment>.*), /api/admin/${segment}
+                - RewritePath=/services/identity/api/(?<segment>.*), /api/${segment}
             - id: identity-service-api-docs
               uri: ${IDENTITY_SERVICE_URI:lb://identity-service}
               predicates:
                 - Path=/api-docs/identity-service
               filters:
                 - RewritePath=/api-docs/identity-service, /api-docs
-            # Product service
-            - id: product-service-front
-              uri: ${PRODUCT_SERVICE_URI:lb://product-service}
+            # Catalog service
+            - id: catalog-service
+              uri: ${CATALOG_SERVICE_URI:lb://catalog-service}
               predicates:
-                - Path=/services/product/api/front/**
-              filters:
-                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-                - RewritePath=/services/product/api/front/(?<segment>.*), /api/front/${segment}
-            - id: product-service-admin
-              uri: ${PRODUCT_SERVICE_URI:lb://product-service}
-              predicates:
-                - Path=/services/product/api/admin/**
+                - Path=/services/catalog/api/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
                 - TokenValidation
-                - Authorization=ADMIN
                 - TokenRelay
-                - RewritePath=/services/product/api/admin/(?<segment>.*), /api/admin/${segment}
-            - id: product-service-api-docs
-              uri: ${PRODUCT_SERVICE_URI:lb://product-service}
+                - RewritePath=/services/catalog/api/(?<segment>.*), /api/${segment}
+            - id: catalog-service-api-docs
+              uri: ${CATALOG_SERVICE_URI:lb://catalog-service}
               predicates:
-                - Path=/api-docs/product-service
+                - Path=/api-docs/catalog-service
               filters:
-                - RewritePath=/api-docs/product-service, /api-docs
+                - RewritePath=/api-docs/catalog-service, /api-docs
+            # Inventory service
+            - id: inventory-service
+              uri: ${INVENTORY_SERVICE_URI:lb://inventory-service}
+              predicates:
+                - Path=/services/inventory/api/**
+              filters:
+                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+                - TokenValidation
+                - TokenRelay
+                - RewritePath=/services/inventory/api/(?<segment>.*), /api/${segment}
+            - id: inventory-service-api-docs
+              uri: ${INVENTORY_SERVICE_URI:lb://inventory-service}
+              predicates:
+                - Path=/api-docs/inventory-service
+              filters:
+                - RewritePath=/api-docs/inventory-service, /api-docs
             # Order service
-            - id: order-service-front
+            - id: order-service
               uri: ${ORDER_SERVICE_URI:lb://order-service}
               predicates:
-                - Path=/services/order/api/front/**
+                - Path=/services/order/api/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
                 - TokenValidation
                 - TokenRelay
-                - RewritePath=/services/order/api/front/(?<segment>.*), /api/front/${segment}
-            - id: order-service-admin
+                - RewritePath=/services/order/api/(?<segment>.*), /api/${segment}
+            - id: order-service-sse
               uri: ${ORDER_SERVICE_URI:lb://order-service}
               predicates:
-                - Path=/services/order/api/admin/**
+                - Path=/services/order/sse/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-                - TokenValidation
-                - Authorization=ADMIN
-                - TokenRelay
-                - RewritePath=/services/order/api/admin/(?<segment>.*), /api/admin/${segment}
+                - RewritePath=/services/order/sse/(?<segment>.*), /sse/${segment}
+              metadata:
+                response-timeout: -1 # Disables response timeout for SSE
+            - id: order-service-websocket
+              uri: ${ORDER_SERVICE_URI:lb://order-service}
+              predicates:
+                - Path=/services/order/ws/**
+              filters:
+                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+                - RewritePath=/services/order/ws/(?<segment>.*), /ws/${segment}
             - id: order-service-api-docs
               uri: ${ORDER_SERVICE_URI:lb://order-service}
               predicates:
@@ -115,15 +119,15 @@ spring:
               filters:
                 - RewritePath=/api-docs/order-service, /api-docs
             # Payment service
-            - id: payment-service-front
+            - id: payment-service
               uri: ${PAYMENT_SERVICE_URI:lb://payment-service}
               predicates:
-                - Path=/services/payment/api/front/**
+                - Path=/services/payment/api/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
                 - TokenValidation
                 - TokenRelay
-                - RewritePath=/services/payment/api/front/(?<segment>.*), /api/front/${segment}
+                - RewritePath=/services/payment/api/(?<segment>.*), /api/${segment}
             - id: payment-service-webhook
               uri: ${PAYMENT_SERVICE_URI:lb://payment-service}
               predicates:
@@ -136,38 +140,6 @@ spring:
                 - Path=/api-docs/payment-service
               filters:
                 - RewritePath=/api-docs/payment-service, /api-docs
-            # Notification service
-            - id: notification-service
-              uri: ${NOTIFICATION_SERVICE_URI:lb://notification-service}
-              predicates:
-                - Path=/services/notification/api/**
-              filters:
-                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-                - TokenValidation
-                - TokenRelay
-                - RewritePath=/services/notification/api/(?<segment>.*), /api/${segment}
-            - id: notification-service-sse
-              uri: ${NOTIFICATION_SERVICE_URI:lb://notification-service}
-              predicates:
-                - Path=/services/notification/sse/**
-              filters:
-                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-                - RewritePath=/services/notification/sse/(?<segment>.*), /sse/${segment}
-              metadata:
-                response-timeout: -1 # Disables response timeout for SSE
-            - id: notification-service-websocket
-              uri: ${NOTIFICATION_SERVICE_URI:lb://notification-service}
-              predicates:
-                - Path=/services/notification/ws/**
-              filters:
-                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-                - RewritePath=/services/notification/ws/(?<segment>.*), /ws/${segment}
-            - id: notification-service-api-docs
-              uri: ${NOTIFICATION_SERVICE_URI:lb://notification-service}
-              predicates:
-                - Path=/api-docs/notification-service
-              filters:
-                - RewritePath=/api-docs/notification-service, /api-docs
           discovery:
             locator:
               enabled: true
@@ -183,12 +155,12 @@ springdoc:
     urls:
       - name: Identity Service
         url: /api-docs/identity-service
-      - name: Product Service
-        url: /api-docs/product-service
+      - name: Catalog Service
+        url: /api-docs/catalog-service
+      - name: Inventory Service
+        url: /api-docs/inventory-service
       - name: Order Service
         url: /api-docs/order-service
       - name: Payment Service
         url: /api-docs/payment-service
-      - name: Notification Service
-        url: /api-docs/notification-service
     default-models-expand-depth: -1 # Hide Schemas section

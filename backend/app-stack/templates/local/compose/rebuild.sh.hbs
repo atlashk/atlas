@@ -15,7 +15,7 @@ show_usage() {
   {{/each}}
   echo ""
   echo "Examples:"
-  echo "  $0 product-service"
+  echo "  $0 identity-service"
   echo "  $0 api-gateway"
 }
 
@@ -49,7 +49,7 @@ if [[ "$SERVICE_NAME" == "api-gateway" ]]; then
   IMAGE_NAME="${PROJECT_NAME}/api-gateway"
   GRADLE_TASK=":infrastructure.spring-cloud-gateway-server:bootJar"
 else
-  # Remove -service suffix to get base name (e.g., product-service -> product)
+  # Remove -service suffix to get base name (e.g., identity-service -> identity)
   BASE_NAME="${SERVICE_NAME%-service}"
   MODULE_PATH="backend/services/${SERVICE_NAME}/${BASE_NAME}-bootstrap"
   IMAGE_NAME="${PROJECT_NAME}/${SERVICE_NAME}"

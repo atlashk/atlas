@@ -3,7 +3,7 @@ package org.atlas.services.gateway.springcloudgateway.security.keycloak;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.atlas.libs.framework.domain.identity.UserRole;
+import org.atlas.libs.framework.domain.shared.identity.UserRole;
 import org.atlas.services.gateway.springcloudgateway.security.core.JwtExtractor;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;

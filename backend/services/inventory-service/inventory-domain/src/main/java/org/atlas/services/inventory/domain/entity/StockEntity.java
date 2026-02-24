@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.libs.framework.domain.common.entity.DomainEntity;
+import org.atlas.libs.framework.domain.entity.DomainEntity;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,4 +24,8 @@ public class StockEntity extends DomainEntity {
 
   @Builder.Default
   private Integer reservedQuantity = 0;
+  
+  public boolean isOutOfStock() {
+    return availableQuantity <= 0;
+  }
 }

@@ -1,7 +1,7 @@
 package org.atlas.services.identity.application.keycloak.core.client;
 
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.domain.identity.UserRole;
+import org.atlas.libs.framework.domain.shared.identity.UserRole;
 import org.atlas.services.identity.application.keycloak.core.config.KeycloakProps;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;

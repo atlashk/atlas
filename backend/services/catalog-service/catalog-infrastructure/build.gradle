@@ -84,18 +84,6 @@ dependencies {
             throw new IllegalArgumentException("Unsupported full-text-search: ${rootProject.ext.appStack['full-text-search']}")
     }
 
-    // Internal
-    switch (rootProject.ext.appStack['internal']) {
-        case 'grpc':
-            api project(':libs.internal.inventory.grpc')
-            break
-        case 'rest':
-            api project(':libs.internal.inventory.rest')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported internal: ${rootProject.ext.appStack['internal']}")
-    }
-
     // KV store
     switch (rootProject.ext.appStack['kv-store']) {
         case 'redis':

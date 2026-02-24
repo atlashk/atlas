@@ -21,7 +21,7 @@ public class RabbitmqSagaCheckoutCommandConsumer extends BaseRabbitmqMessageCons
   private final SagaCommandDispatcher dispatcher;
 
   @RabbitListener(
-      queues = "saga.checkout.command.product",
+      queues = "saga.checkout.command.inventory",
       containerFactory = "customContainerFactory"
   )
   public void consumeCheckoutCommand(@Payload Object payload,

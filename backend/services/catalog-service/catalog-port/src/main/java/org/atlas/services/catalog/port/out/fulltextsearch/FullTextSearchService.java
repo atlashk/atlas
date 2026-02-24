@@ -20,5 +20,5 @@ public interface FullTextSearchService {
 
   void saveAll(List<ProductEntity> products);
 
-  void deleteProduct(String productId);
+  void delete(String productId);
 }

@@ -1,6 +1,6 @@
 package org.atlas.services.catalog.application.product.mapper;
 
-import org.atlas.libs.framework.domain.common.event.contract.product.ProductCreatedEvent;
+import org.atlas.libs.framework.domain.event.contract.catalog.ProductCreatedEvent;
 import org.atlas.services.catalog.domain.entity.ProductEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;

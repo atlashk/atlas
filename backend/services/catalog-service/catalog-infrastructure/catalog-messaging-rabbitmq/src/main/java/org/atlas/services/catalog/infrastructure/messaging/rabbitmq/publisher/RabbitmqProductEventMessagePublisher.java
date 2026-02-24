@@ -3,7 +3,7 @@ package org.atlas.services.catalog.infrastructure.messaging.rabbitmq.publisher;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.domain.common.event.contract.product.ProductCreatedEvent;
+import org.atlas.libs.framework.domain.event.contract.catalog.ProductCreatedEvent;
 import org.atlas.libs.framework.json.JsonUtil;
 import org.atlas.libs.framework.messaging.publisher.Message;
 import org.atlas.libs.framework.messaging.publisher.MessagePublisher;

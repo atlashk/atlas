@@ -1,16 +1,17 @@
 package org.atlas.services.inventory.infrastructure.persistence.jpa.adapter;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.domain.common.error.DomainError;
-import org.atlas.libs.framework.domain.common.exception.DomainException;
-import org.atlas.libs.framework.domain.common.exception.OutOfStockException;
+import org.atlas.libs.framework.domain.error.DomainError;
+import org.atlas.libs.framework.domain.exception.DomainException;
+import org.atlas.libs.framework.domain.shared.inventory.InsufficientStockException;
 import org.atlas.services.inventory.domain.entity.StockEntity;
-import org.atlas.services.inventory.infrastructure.persistence.jpa.entity.JpaOptimisticProductEntity;
+import org.atlas.services.inventory.infrastructure.persistence.jpa.entity.JpaOptimisticStockEntity;
 import org.atlas.services.inventory.infrastructure.persistence.jpa.entity.JpaStockEntity;
-import org.atlas.services.inventory.infrastructure.persistence.jpa.mapper.JpaProductMapper;
-import org.atlas.services.inventory.infrastructure.persistence.jpa.repository.JpaOptimisticProductRepository;
-import org.atlas.services.inventory.infrastructure.persistence.jpa.repository.JpaProductRepository;
+import org.atlas.services.inventory.infrastructure.persistence.jpa.mapper.JpaStockMapper;
+import org.atlas.services.inventory.infrastructure.persistence.jpa.repository.JpaOptimisticStockRepository;
+import org.atlas.services.inventory.infrastructure.persistence.jpa.repository.JpaStockRepository;
 import org.atlas.services.inventory.port.out.repository.StockRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -21,76 +22,91 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class JpaStockRepositoryAdapter implements StockRepository {
 
-  private final JpaProductRepository jpaProductRepository;
-  private final JpaOptimisticProductRepository jpaOptimisticProductRepository;
+  private final JpaStockRepository jpaStockRepository;
+  private final JpaOptimisticStockRepository jpaOptimisticStockRepository;
 
   @Override
-  public void insert(StockEntity product) {
-    JpaStockEntity jpaProduct = JpaProductMapper.INSTANCE.toJpaProduct(product);
-    jpaProductRepository.insert(jpaProduct);
+  public Optional<StockEntity> findByProductId(String productId) {
+    return jpaStockRepository.findByProductId(productId)
+        .map(JpaStockMapper.INSTANCE::toStock);
   }
 
   @Override
-  public void update(StockEntity product) {
-    JpaStockEntity jpaProduct = jpaProductRepository.findByIdWithAssociations(product.getId())
+  public void insert(StockEntity stock) {
+    JpaStockEntity jpaStock = JpaStockMapper.INSTANCE.toJpaStock(stock);
+    jpaStockRepository.insert(jpaStock);
+  }
+
+  @Override
+  public void update(StockEntity stock) {
+    JpaStockEntity jpaStock = jpaStockRepository.findByProductId(stock.getProductId())
         .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
-    JpaProductMapper.INSTANCE.merge(product, jpaProduct);
-    jpaProductRepository.save(jpaProduct);
+    JpaStockMapper.INSTANCE.merge(stock, jpaStock);
+    jpaStockRepository.save(jpaStock);
   }
 
   @Override
-  public void decreaseQuantityWithConstraint(String id, Integer decrement)
-      throws OutOfStockException {
-    int updated = jpaProductRepository.decreaseQuantityWithConstraint(id, decrement);
+  public StockEntity reserveStockWithConstraint(String productId, Integer quantity)
+      throws InsufficientStockException {
+    int updated = jpaStockRepository.reserveStockWithConstraint(productId, quantity);
     if (updated == 0) {
-      throw new OutOfStockException();
+      throw new InsufficientStockException();
     }
+
+    // Return the updated entity
+    return jpaStockRepository.findByProductId(productId)
+        .map(JpaStockMapper.INSTANCE::toStock)
+        .orElseThrow(() -> new DomainException(DomainError.STOCK_NOT_FOUND));
   }
 
   // TODO: Implement retry
   @Override
-  public void decreaseQuantityWithPessimisticLock(String id, Integer decrement)
-      throws OutOfStockException {
-    JpaStockEntity product = jpaProductRepository.findByIdWithLock(id)
-        .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
-    if (product.getQuantity() < decrement) {
-      throw new OutOfStockException();
+  public StockEntity reserveStockWithPessimisticLock(String productId, Integer quantity)
+      throws InsufficientStockException {
+    JpaStockEntity jpaStock = jpaStockRepository.findByProductIdWithLock(productId)
+        .orElseThrow(() -> new DomainException(DomainError.STOCK_NOT_FOUND));
+    if (jpaStock.getAvailableQuantity() < quantity) {
+      throw new InsufficientStockException();
     }
 
-    product.setQuantity(product.getQuantity() - decrement);
+    jpaStock.setAvailableQuantity(jpaStock.getAvailableQuantity() - quantity);
+    jpaStock.setReservedQuantity(jpaStock.getReservedQuantity() + quantity);
     try {
-      jpaProductRepository.save(product);
+      JpaStockEntity saved = jpaStockRepository.save(jpaStock);
+      return JpaStockMapper.INSTANCE.toStock(saved);
     } catch (DataAccessException e) {
-      throw new OutOfStockException(e);
+      throw new InsufficientStockException(e);
     }
   }
 
   // TODO: Implement retry
   @Override
-  public void decreaseQuantityWithOptimisticLock(String id, Integer decrement)
-      throws OutOfStockException {
-    JpaOptimisticProductEntity jpaOptimisticProduct =
-        jpaOptimisticProductRepository.findById(id)
-            .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
-    if (jpaOptimisticProduct.getQuantity() < decrement) {
-      throw new OutOfStockException();
+  public StockEntity reserveStockWithOptimisticLock(String productId, Integer quantity)
+      throws InsufficientStockException {
+    JpaOptimisticStockEntity jpaOptimisticStock =
+        jpaOptimisticStockRepository.findById(productId)
+            .orElseThrow(() -> new DomainException(DomainError.STOCK_NOT_FOUND));
+    if (jpaOptimisticStock.getAvailableQuantity() < quantity) {
+      throw new InsufficientStockException();
     }
 
-    jpaOptimisticProduct.setQuantity(jpaOptimisticProduct.getQuantity() - decrement);
+    jpaOptimisticStock.setAvailableQuantity(jpaOptimisticStock.getAvailableQuantity() - quantity);
+    jpaOptimisticStock.setReservedQuantity(jpaOptimisticStock.getReservedQuantity() + quantity);
     try {
-      jpaOptimisticProductRepository.save(jpaOptimisticProduct);
+      JpaOptimisticStockEntity saved = jpaOptimisticStockRepository.save(jpaOptimisticStock);
+      return JpaStockMapper.INSTANCE.toStock(saved);
     } catch (OptimisticLockingFailureException e) {
-      throw new OutOfStockException(e);
+      throw new InsufficientStockException(e);
     }
   }
 
   @Override
-  public void increaseQuantity(String id, Integer increment) {
-    jpaProductRepository.increaseQuantity(id, increment);
+  public void releaseStock(String productId, Integer quantity) {
+    jpaStockRepository.releaseStock(productId, quantity);
   }
 
   @Override
-  public void deleteById(String id) {
-    jpaProductRepository.deleteById(id);
+  public void deleteByProductId(String productId) {
+    jpaStockRepository.deleteByProductId(productId);
   }
 }

@@ -24,5 +24,5 @@ public interface ProductAdminService {
 
   byte[] exportProduct(ExportProductInput input) throws Exception;
 
-  Long retrieveTotalCount();
+  Long retrieveTotalProductCount();
 }

@@ -72,14 +72,14 @@ spec:
             {{#hasService "internal" "grpc"}}
             - name: API_CLIENT_GRPC_IDENTITY_SERVICE_ADDRESS
               value: "static://identity-service:50051"
-            - name: API_CLIENT_GRPC_PRODUCT_SERVICE_ADDRESS
-              value: "static://product-service:50052"
+            - name: API_CLIENT_GRPC_CATALOG_SERVICE_ADDRESS
+              value: "static://catalog-service:50052"
             {{/hasService}}
             {{#hasService "internal" "rest"}}
             - name: API_CLIENT_REST_IDENTITY_SERVICE_BASE_URL
               value: "http://identity-service:8081"
-            - name: API_CLIENT_REST_PRODUCT_SERVICE_BASE_URL
-              value: "http://product-service:8082"
+            - name: API_CLIENT_REST_CATALOG_SERVICE_BASE_URL
+              value: "http://catalog-service:8082"
             {{/hasService}}
             {{#hasObservability "tracing" "zipkin"}}
             - name: ZIPKIN_ENDPOINT

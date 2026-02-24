@@ -23,13 +23,20 @@ scrape_configs:
         labels:
           service_name: identity-service
           __path__: /var/log/identity-service/*.log
-  - job_name: product-service
+  - job_name: catalog-service
     static_configs:
       - targets:
           - localhost
         labels:
-          service_name: product-service
-          __path__: /var/log/product-service/*.log
+          service_name: catalog-service
+          __path__: /var/log/catalog-service/*.log
+  - job_name: inventory-service
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          service_name: inventory-service
+          __path__: /var/log/inventory-service/*.log
   - job_name: order-service
     static_configs:
       - targets:
@@ -44,13 +51,6 @@ scrape_configs:
         labels:
           service_name: payment-service
           __path__: /var/log/payment-service/*.log
-  - job_name: notification-service
-    static_configs:
-      - targets:
-          - localhost
-        labels:
-          service_name: notification-service
-          __path__: /var/log/notification-service/*.log
   - job_name: api-gateway
     static_configs:
       - targets:

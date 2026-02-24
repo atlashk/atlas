@@ -3,7 +3,7 @@ package org.atlas.libs.framework.security;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.atlas.libs.framework.domain.identity.UserRole;
+import org.atlas.libs.framework.domain.shared.identity.UserRole;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter

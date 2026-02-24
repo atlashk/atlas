@@ -4,12 +4,13 @@ import io.grpc.stub.StreamObserver;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.server.service.GrpcService;
+import org.atlas.libs.framework.internal.catalog.model.ProductOutput;
+import org.atlas.libs.framework.internal.catalog.model.RetrieveProductListInput;
 import org.atlas.libs.framework.util.CollectionUtil;
+import org.atlas.libs.protobuf.catalog.ProductProto;
 import org.atlas.libs.protobuf.catalog.ProductServiceGrpc;
 import org.atlas.libs.protobuf.catalog.RetrieveProductListRequestProto;
 import org.atlas.libs.protobuf.catalog.RetrieveProductListResponseProto;
-import org.atlas.services.catalog.domain.entity.ProductEntity;
-import org.atlas.services.catalog.port.in.product.model.internal.RetrieveProductListInput;
 import org.atlas.services.catalog.port.in.product.service.ProductInternalService;
 
 @GrpcService
@@ -23,8 +24,8 @@ public class ProductGrpcService extends ProductServiceGrpc.ProductServiceImplBas
       StreamObserver<RetrieveProductListResponseProto> responseObserver) {
     RetrieveProductListInput input = map(requestProto);
     try {
-      List<ProductEntity> products = productInternalService.retrieveProductList(input);
-      ListProductResponseProto productResponseProtoList = map(products);
+      List<ProductOutput> products = productInternalService.retrieveProductList(input);
+      RetrieveProductListResponseProto productResponseProtoList = map(products);
       responseObserver.onNext(productResponseProtoList);
       responseObserver.onCompleted();
     } catch (Exception e) {
@@ -32,24 +33,25 @@ public class ProductGrpcService extends ProductServiceGrpc.ProductServiceImplBas
     }
   }
 
-  private RetrieveProductListInput map(ListProductRequestProto requestProto) {
+  private RetrieveProductListInput map(RetrieveProductListRequestProto requestProto) {
     return new RetrieveProductListInput(requestProto.getIdList());
   }
 
-  private ListProductResponseProto map(List<ProductEntity> products) {
+  private RetrieveProductListResponseProto map(List<ProductOutput> products) {
     if (CollectionUtil.isEmpty(products)) {
-      return ListProductResponseProto.getDefaultInstance();
+      return RetrieveProductListResponseProto.getDefaultInstance();
     }
-    ListProductResponseProto.Builder builder = ListProductResponseProto.newBuilder();
+    RetrieveProductListResponseProto.Builder builder = RetrieveProductListResponseProto.newBuilder();
     products.forEach(product -> builder.addProduct(map(product)));
     return builder.build();
   }
 
-  private ProductProto map(ProductEntity product) {
+  private ProductProto map(ProductOutput product) {
     return ProductProto.newBuilder()
         .setId(product.getId())
         .setName(product.getName())
         .setPrice(product.getPrice().doubleValue())
+        .setImage(product.getImage())
         .build();
   }
 }

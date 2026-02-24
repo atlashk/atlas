@@ -2,6 +2,7 @@ package org.atlas.services.inventory.port.out.repository;
 
 import java.util.Optional;
 import org.atlas.services.inventory.domain.entity.ReservationEntity;
+import org.atlas.services.inventory.domain.entity.ReservationStatus;
 
 public interface ReservationRepository {
 
@@ -9,5 +10,7 @@ public interface ReservationRepository {
 
   void insert(ReservationEntity reservation);
 
-  void delete(ReservationEntity reservation);
+  void update(ReservationEntity reservation);
+  
+  void updateStatus(String orderId, ReservationStatus status);
 }

@@ -3,7 +3,7 @@ package org.atlas.services.inventory.infrastructure.messaging.kafka.consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.atlas.libs.framework.domain.common.event.handler.DomainEventDispatcher;
+import org.atlas.libs.framework.domain.event.handler.DomainEventDispatcher;
 import org.atlas.libs.messaging.kafka.common.KafkaTopics;
 import org.atlas.libs.messaging.kafka.consumer.BaseKafkaMessageConsumer;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -31,7 +31,7 @@ public class KafkaProductEventConsumer extends BaseKafkaMessageConsumer {
       topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE,
       backoff = @Backoff(delay = 1000, multiplier = 2, random = true)
   )
-  public void consumeProductEvent(ConsumerRecord<String, Object> record, Acknowledgment ack) {
+  public void consumeProductEvents(ConsumerRecord<String, Object> record, Acknowledgment ack) {
     super.consumeMessage(record, ack);
   }
 

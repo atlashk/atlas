@@ -16,7 +16,6 @@ public interface ProductWriteRowMapper {
 
   ProductWriteRowMapper INSTANCE = Mappers.getMapper(ProductWriteRowMapper.class);
 
-  @Mapping(target = "brandId", source = "brand.id")
   ProductWriteRow toProductWriteRow(ProductEntity product);
 
   @AfterMapping
@@ -26,6 +25,7 @@ public interface ProductWriteRowMapper {
       row.setBrandName(product.getBrand().getName());  
     }
 
+    // Category names
     if (CollectionUtil.isNotEmpty(product.getCategories())) {
       String categoryIds = product.getCategories().stream()
           .map(CategoryEntity::getName)
