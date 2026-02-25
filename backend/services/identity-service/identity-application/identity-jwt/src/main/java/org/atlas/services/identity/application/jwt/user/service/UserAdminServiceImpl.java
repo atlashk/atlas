@@ -1,8 +1,6 @@
 package org.atlas.services.identity.application.jwt.user.service;
 
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.domain.error.DomainError;
-import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.security.authorization.RequiredAdmin;
 import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
@@ -10,6 +8,8 @@ import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.identity.application.jwt.user.mapper.UserAdminMapper;
 import org.atlas.services.identity.domain.entity.UserEntity;
+import org.atlas.services.identity.domain.error.DomainError;
+import org.atlas.services.identity.domain.exception.DomainException;
 import org.atlas.services.identity.port.in.user.model.admin.CreateUserInput;
 import org.atlas.services.identity.port.in.user.model.admin.RetrieveUserListInput;
 import org.atlas.services.identity.port.in.user.model.admin.UpdateUserInput;

@@ -22,7 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { withAuth } from "@/hoc/withAuth";
-import { RetrieveOrderListFilter, Order } from "@/interfaces";
+import { Order, RetrieveOrderListFilter } from "@/interfaces";
 import {
   formatCurrency,
   formatDate,
@@ -56,7 +56,7 @@ const OrderHistoryContent: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [orderStatuses, setOrderStatuses] = useState<Record<string, string>>({});
-  const [isLoadingStatuses, setIsLoadingStatuses] = useState(false);
+  const [isLoadingOrderStatuses, setIsLoadingOrderStatuses] = useState(false);
   const [filters, setFilters] = useState<RetrieveOrderListFilter>({
     status: undefined,
     startDate: undefined,
@@ -73,11 +73,11 @@ const OrderHistoryContent: React.FC = () => {
 
   // OrderHistory component functions
   const loadOrderStatuses = useCallback(async () => {
-    if (isLoadingStatuses || Object.keys(orderStatuses).length > 0) return;
+    if (isLoadingOrderStatuses || Object.keys(orderStatuses).length > 0) return;
 
-    setIsLoadingStatuses(true);
+    setIsLoadingOrderStatuses(true);
     try {
-      const response = await orderApi.getOrderStatuses();
+      const response = await orderApi.retrieveOrderStatuses();
       if (response.success && response.data) {
         setOrderStatuses(response.data);
       } else {
@@ -88,9 +88,9 @@ const OrderHistoryContent: React.FC = () => {
         error instanceof Error ? error.message : "Failed to load order statuses";
       toast.error(errorMessage);
     } finally {
-      setIsLoadingStatuses(false);
+      setIsLoadingOrderStatuses(false);
     }
-  }, [isLoadingStatuses, orderStatuses]);
+  }, [isLoadingOrderStatuses, orderStatuses]);
 
   const applyFilters = useCallback(
     async (page: number, currentFilters?: RetrieveOrderListFilter) => {
@@ -304,7 +304,7 @@ const OrderHistoryContent: React.FC = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   value={filters.status || ""}
                   onChange={(e) => handleFilterChange("status", e.target.value)}
-                  disabled={isLoadingStatuses}
+                  disabled={isLoadingOrderStatuses}
                 >
                   <option value="">All Statuses</option>
                   {Object.entries(orderStatuses).map(([statusKey, statusLabel]) => (

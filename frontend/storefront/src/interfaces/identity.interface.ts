@@ -1,4 +1,4 @@
-// Login interfaces (used in API calls)
+// Login interfaces
 export interface LoginRequest {
   username: string;
   password: string;
@@ -9,7 +9,7 @@ export interface LoginResponse {
   refreshToken: string;
 }
 
-// Token refresh interfaces (used in API calls)
+// Token refresh interfaces
 export interface RefreshTokenRequest {
   refreshToken: string;
 }

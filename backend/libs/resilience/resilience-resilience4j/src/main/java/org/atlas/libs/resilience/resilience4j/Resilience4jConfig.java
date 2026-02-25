@@ -7,7 +7,7 @@ import io.github.resilience4j.common.timelimiter.configuration.TimeLimiterConfig
 import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.TimeoutException;
-import org.atlas.libs.framework.domain.exception.DomainException;
+import org.atlas.libs.framework.domain.exception.BaseDomainException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,7 +22,7 @@ public class Resilience4jConfig {
           .maxAttempts(4)
           .waitDuration(Duration.ofMillis(1000))
           .retryExceptions(IOException.class, TimeoutException.class)
-          .ignoreExceptions(DomainException.class);
+          .ignoreExceptions(BaseDomainException.class);
     });
   }
 
@@ -43,7 +43,7 @@ public class Resilience4jConfig {
           // In half-open state, allow 2 calls to test if the underlying service has recovered
           .permittedNumberOfCallsInHalfOpenState(2)
           .recordExceptions(IOException.class, TimeoutException.class)
-          .ignoreExceptions(DomainException.class);
+          .ignoreExceptions(BaseDomainException.class);
     });
   }
 

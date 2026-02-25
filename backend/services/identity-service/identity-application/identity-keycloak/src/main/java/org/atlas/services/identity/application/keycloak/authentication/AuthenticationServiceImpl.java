@@ -3,13 +3,15 @@ package org.atlas.services.identity.application.keycloak.authentication;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.context.Contexts;
-import org.atlas.libs.framework.domain.error.DomainError;
-import org.atlas.libs.framework.domain.exception.DomainException;
+import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.random.RandomUtil;
 import org.atlas.services.identity.application.keycloak.core.client.KeycloakAuthenticationClient;
 import org.atlas.services.identity.application.keycloak.core.client.KeycloakUserClient;
 import org.atlas.services.identity.application.keycloak.core.model.TokenResponse;
 import org.atlas.services.identity.domain.entity.UserEntity;
+import org.atlas.services.identity.domain.error.DomainError;
+import org.atlas.services.identity.domain.exception.DomainException;
+import org.atlas.services.identity.port.in.authentication.model.ChangePasswordInput;
 import org.atlas.services.identity.port.in.authentication.model.GenerateOneTimeTokenInput;
 import org.atlas.services.identity.port.in.authentication.model.GenerateOneTimeTokenOutput;
 import org.atlas.services.identity.port.in.authentication.model.LoginInput;
@@ -18,7 +20,6 @@ import org.atlas.services.identity.port.in.authentication.model.OneTimeTokenLogi
 import org.atlas.services.identity.port.in.authentication.model.RefreshTokenInput;
 import org.atlas.services.identity.port.in.authentication.model.RefreshTokenOutput;
 import org.atlas.services.identity.port.in.authentication.service.AuthenticationService;
-import org.atlas.services.identity.port.in.authentication.model.ChangePasswordInput;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -79,11 +80,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   @Override
   public LoginOutput oneTimeTokenLogin(OneTimeTokenLoginInput input) throws Exception {
-    throw new DomainException(DomainError.BAD_REQUEST, "Not supported");
+    throw new DomainException(CommonDomainError.BAD_REQUEST, "Not supported");
   }
 
   @Override
   public GenerateOneTimeTokenOutput generateOneTimeToken(GenerateOneTimeTokenInput input) {
-    throw new DomainException(DomainError.BAD_REQUEST, "Not supported");
+    throw new DomainException(CommonDomainError.BAD_REQUEST, "Not supported");
   }
 }

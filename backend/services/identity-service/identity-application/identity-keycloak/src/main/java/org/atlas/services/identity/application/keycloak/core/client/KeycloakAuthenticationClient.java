@@ -2,8 +2,8 @@ package org.atlas.services.identity.application.keycloak.core.client;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.domain.error.DomainError;
-import org.atlas.libs.framework.domain.exception.DomainException;
+import org.atlas.libs.framework.domain.error.CommonDomainError;
+import org.atlas.libs.framework.domain.exception.BaseDomainException;
 import org.atlas.libs.jwt.JwtUtil;
 import org.atlas.services.identity.application.keycloak.core.config.KeycloakProps;
 import org.atlas.services.identity.application.keycloak.core.exception.KeycloakClientException;
@@ -45,7 +45,7 @@ public class KeycloakAuthenticationClient {
         .body(form)
         .retrieve()
         .onStatus(HttpStatusCode::isError, (request, response) -> {
-          throw new DomainException(DomainError.UNAUTHORIZED);
+          throw new BaseDomainException(CommonDomainError.UNAUTHORIZED);
         })
         .body(TokenResponse.class);
   }

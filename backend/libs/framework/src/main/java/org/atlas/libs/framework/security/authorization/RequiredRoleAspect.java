@@ -7,8 +7,8 @@ import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.atlas.libs.framework.context.Contexts;
-import org.atlas.libs.framework.domain.error.DomainError;
-import org.atlas.libs.framework.domain.exception.DomainException;
+import org.atlas.libs.framework.domain.error.CommonDomainError;
+import org.atlas.libs.framework.domain.exception.BaseDomainException;
 import org.atlas.libs.framework.domain.shared.identity.UserRole;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +26,7 @@ public class RequiredRoleAspect {
     public void checkRole(JoinPoint joinPoint) {
         UserRole currentRole = Contexts.getUserRole();
         if (currentRole == null) {
-            throw new DomainException(DomainError.UNAUTHORIZED);
+            throw new BaseDomainException(CommonDomainError.UNAUTHORIZED);
         }
 
         // Prioritize method annotation
@@ -55,7 +55,7 @@ public class RequiredRoleAspect {
         }
 
         if (currentRole != requiredRole) {
-            throw new DomainException(DomainError.FORBIDDEN);
+            throw new BaseDomainException(CommonDomainError.FORBIDDEN);
         }
     }
 }

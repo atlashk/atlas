@@ -1,9 +1,0 @@
-export const ORDER_STATUSES = [
-  "AWAITING_STOCK_RESERVATION",
-  "AWAITING_PAYMENT_INITIALIZED",
-  "AWAITING_PAYMENT_PROCESSED",
-  "FULFILLED",
-  "CANCELED"
-] as const;
-
-export type OrderStatus = typeof ORDER_STATUSES[number];

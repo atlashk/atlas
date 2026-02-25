@@ -1,8 +1,8 @@
 package org.atlas.libs.framework.context;
 
 import jakarta.annotation.Nullable;
-import org.atlas.libs.framework.domain.error.DomainError;
-import org.atlas.libs.framework.domain.exception.DomainException;
+import org.atlas.libs.framework.domain.error.CommonDomainError;
+import org.atlas.libs.framework.domain.exception.BaseDomainException;
 import org.atlas.libs.framework.domain.shared.identity.UserRole;
 
 /**
@@ -43,7 +43,7 @@ public class Contexts {
   private static ContextInfo require() {
     ContextInfo context = get();
     if (context == null) {
-      throw new DomainException(DomainError.UNAUTHORIZED);
+      throw new BaseDomainException(CommonDomainError.UNAUTHORIZED);
     }
     return context;
   }

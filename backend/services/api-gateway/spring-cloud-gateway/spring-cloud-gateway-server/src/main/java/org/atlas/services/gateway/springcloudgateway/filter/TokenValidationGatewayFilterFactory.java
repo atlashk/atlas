@@ -2,7 +2,7 @@ package org.atlas.services.gateway.springcloudgateway.filter;
 
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.cryptography.HashingUtil;
-import org.atlas.libs.framework.domain.error.DomainError;
+import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.kvstore.ReactiveKvStoreService;
 import org.atlas.libs.framework.security.SecurityConstant;
 import org.atlas.services.gateway.springcloudgateway.util.HttpUtil;
@@ -50,7 +50,7 @@ public class TokenValidationGatewayFilterFactory extends
         .flatMap(isBlacklisted -> {
           if (isBlacklisted) {
             ApiResponseWrapper<Void> response = ApiResponseWrapper.error(
-                DomainError.UNAUTHORIZED.getErrorCode(), "Token has been inactivated");
+                CommonDomainError.UNAUTHORIZED.getErrorCode(), "Token has been inactivated");
             return HttpUtil.respond(exchange, response, HttpStatus.UNAUTHORIZED);
           }
           return chain.filter(exchange);

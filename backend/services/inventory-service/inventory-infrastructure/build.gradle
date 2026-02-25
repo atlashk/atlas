@@ -25,9 +25,6 @@ repositories {
 }
 
 dependencies {
-    // API server
-    api project(':services.inventory.api.server.rest')
-
     // Datasource
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':

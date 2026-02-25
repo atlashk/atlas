@@ -4,9 +4,9 @@ import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.config.ApplicationConfigService;
-import org.atlas.libs.framework.domain.error.DomainError;
+import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.domain.event.contract.inventory.StockStatusChangedEvent;
-import org.atlas.libs.framework.domain.exception.DomainException;
+import org.atlas.libs.framework.domain.exception.BaseDomainException;
 import org.atlas.libs.framework.domain.shared.inventory.InsufficientStockException;
 import org.atlas.libs.framework.json.jackson.JacksonService;
 import org.atlas.libs.framework.lock.LockAcquisitionException;
@@ -26,6 +26,8 @@ import org.atlas.services.inventory.domain.entity.ReservationEntity;
 import org.atlas.services.inventory.domain.entity.ReservationStatus;
 import org.atlas.services.inventory.domain.entity.ReserveStockStrategy;
 import org.atlas.services.inventory.domain.entity.StockEntity;
+import org.atlas.services.inventory.domain.error.DomainError;
+import org.atlas.services.inventory.domain.exception.DomainException;
 import org.atlas.services.inventory.port.out.messaging.StockEventMessagePublisher;
 import org.atlas.services.inventory.port.out.repository.ReservationRepository;
 import org.atlas.services.inventory.port.out.repository.StockRepository;
@@ -165,7 +167,7 @@ public class ReserveStockCommandHandler {
 
           // Check reservation exists or not
           ReservationEntity reservation = reservationRepository.findByOrderIdAndProductId(
-              orderId, productId)
+                  orderId, productId)
               .orElseThrow(() -> new DomainException(DomainError.RESERVATION_NOT_FOUND));
 
           StockEntity stock = stockRepository.findByProductId(productId)

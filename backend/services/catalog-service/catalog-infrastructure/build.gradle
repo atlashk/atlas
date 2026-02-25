@@ -25,12 +25,6 @@ repositories {
 }
 
 dependencies {
-    // API server
-    api project(':services.catalog.api.server.rest')
-    if (rootProject.ext.appStack['internal'] == 'grpc') {
-        api project(':services.catalog.api.server.grpc')
-    }
-    
     // Datasource
     switch (rootProject.ext.appStack['datasource']) {
         case 'mysql':

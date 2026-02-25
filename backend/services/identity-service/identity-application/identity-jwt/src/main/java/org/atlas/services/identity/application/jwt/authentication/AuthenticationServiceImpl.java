@@ -7,8 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.context.Contexts;
 import org.atlas.libs.framework.cryptography.HashingUtil;
-import org.atlas.libs.framework.domain.error.DomainError;
-import org.atlas.libs.framework.domain.exception.DomainException;
+import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.kvstore.KvStoreService;
 import org.atlas.libs.framework.random.RandomUtil;
 import org.atlas.libs.framework.security.SecurityConstant;
@@ -18,6 +17,9 @@ import org.atlas.libs.jwt.IssueTokenInput;
 import org.atlas.libs.jwt.JwtUtil;
 import org.atlas.services.identity.application.jwt.core.UserDetailsImpl;
 import org.atlas.services.identity.domain.entity.UserEntity;
+import org.atlas.services.identity.domain.error.DomainError;
+import org.atlas.services.identity.domain.exception.DomainException;
+import org.atlas.services.identity.port.in.authentication.model.ChangePasswordInput;
 import org.atlas.services.identity.port.in.authentication.model.GenerateOneTimeTokenInput;
 import org.atlas.services.identity.port.in.authentication.model.GenerateOneTimeTokenOutput;
 import org.atlas.services.identity.port.in.authentication.model.LoginInput;
@@ -26,7 +28,6 @@ import org.atlas.services.identity.port.in.authentication.model.OneTimeTokenLogi
 import org.atlas.services.identity.port.in.authentication.model.RefreshTokenInput;
 import org.atlas.services.identity.port.in.authentication.model.RefreshTokenOutput;
 import org.atlas.services.identity.port.in.authentication.service.AuthenticationService;
-import org.atlas.services.identity.port.in.authentication.model.ChangePasswordInput;
 import org.atlas.services.identity.port.out.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -85,13 +86,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   @Override
   public void logout(String accessToken) throws Exception {
     if (StringUtil.isBlank(accessToken)) {
-      throw new DomainException(DomainError.UNAUTHORIZED, "Missing access token");
+      throw new DomainException(CommonDomainError.UNAUTHORIZED, "Missing access token");
     }
 
     String hashedAccessToken = HashingUtil.sha256ToHex(accessToken);
     if (kvStoreService.exists(SecurityConstant.TOKEN_BLACKLISTED_KV_STORE_NAME,
         hashedAccessToken)) {
-      throw new DomainException(DomainError.UNAUTHORIZED,
+      throw new DomainException(CommonDomainError.UNAUTHORIZED,
           "Access token has been already inactivated");
     }
 

@@ -20,12 +20,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ROLES } from "@/constants";
 import { withRequireAdmin } from "@/hoc/withAuth";
 import type { RegisterRequest } from "@/interfaces/identity.interface";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -39,7 +39,7 @@ const userSchema = z
     phoneNumber: z.string().min(1, "Phone number is required."),
     password: z.string().min(6, "Password must be at least 6 characters."),
     confirmPassword: z.string().min(6, "Confirm password is required."),
-    role: z.enum(ROLES),
+    role: z.string().min(1, "Role is required."),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match.",
@@ -50,6 +50,8 @@ type UserCreateFormData = z.infer<typeof userSchema>;
 
 function AdminUserAddPage() {
   const router = useRouter();
+  const [userRoles, setUserRoles] = useState<Record<string, string>>({});
+  const [isLoadingUserRoles, setIsLoadingUserRoles] = useState(false);
 
   const form = useForm<UserCreateFormData>({
     resolver: zodResolver(userSchema),
@@ -64,6 +66,32 @@ function AdminUserAddPage() {
       role: "USER",
     },
   });
+
+  const loadUserRoles = useCallback(async () => {
+    if (isLoadingUserRoles || Object.keys(userRoles).length > 0) return;
+
+    setIsLoadingUserRoles(true);
+    try {
+      const response = await identityApi.retrieveUserRoles();
+      if (response.success) {
+        setUserRoles(response.data || {});
+      } else {
+        toast.error(response.errorMessage || "Failed to load roles");
+        setUserRoles({});
+      }
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to load roles";
+      toast.error(errorMessage);
+      setUserRoles({});
+    } finally {
+      setIsLoadingUserRoles(false);
+    }
+  }, [isLoadingUserRoles, userRoles]);
+
+  useEffect(() => {
+    loadUserRoles();
+  }, [loadUserRoles]);
 
   const onSubmit = async (values: UserCreateFormData) => {
     const request: RegisterRequest & { role?: string } = {
@@ -129,6 +157,7 @@ function AdminUserAddPage() {
                         <Select
                           value={field.value}
                           onValueChange={field.onChange}
+                          disabled={isLoadingUserRoles}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -136,11 +165,13 @@ function AdminUserAddPage() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {ROLES.map((role) => (
-                              <SelectItem key={role} value={role}>
-                                {role}
-                              </SelectItem>
-                            ))}
+                            {Object.entries(userRoles).map(
+                              ([roleKey, roleLabel]) => (
+                                <SelectItem key={roleKey} value={roleKey}>
+                                  {roleLabel}
+                                </SelectItem>
+                              )
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />

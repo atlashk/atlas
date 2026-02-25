@@ -24,6 +24,14 @@ export class CatalogApi extends BaseApi {
     return this.get<Category[]>("/categories");
   }
 
+  async retrieveReferenceData(type: string): Promise<ApiResponse<Record<string, string>>> {
+    return this.get<Record<string, string>>(`/reference-data?type=${type}`);
+  }
+
+  async retrieveProductTypes(): Promise<ApiResponse<Record<string, string>>> {
+    return this.retrieveReferenceData('PRODUCT_TYPE');
+  }
+
   async retrieveProductList(
     filters: ListProductFilters
   ): Promise<ApiResponse<Product[]>> {
@@ -134,7 +142,7 @@ export class CatalogApi extends BaseApi {
     window.URL.revokeObjectURL(url);
   }
 
-  async countProduct(): Promise<ApiResponse<number>> {
+  async retrieveTotalProductCount(): Promise<ApiResponse<number>> {
     return this.get<number>("/products/admin/statistics/count");
   }
 }

@@ -36,6 +36,14 @@ export class IdentityApi extends BaseApi {
     return this.post<User[]>("/users/admin/list", payload);
   }
 
+  async retrieveReferenceData(type: string): Promise<ApiResponse<Record<string, string>>> {
+    return this.get<Record<string, string>>(`/reference-data?type=${type}`);
+  }
+
+  async retrieveUserRoles(): Promise<ApiResponse<Record<string, string>>> {
+    return this.retrieveReferenceData('USER_ROLE');
+  }
+
   async retrieveUser(id: string): Promise<ApiResponse<User>> {
     return this.get<User>(`/users/admin/${id}`);
   }
@@ -56,7 +64,7 @@ export class IdentityApi extends BaseApi {
     return this.post<void>("/authentication/admin/reset-password", { userId });
   }
 
-  async countUser(): Promise<ApiResponse<number>> {
+  async retrieveTotalUserCount(): Promise<ApiResponse<number>> {
     return this.get<number>("/users/admin/count");
   }
 }

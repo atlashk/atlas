@@ -31,17 +31,17 @@ interface AdminLayoutProps {
 const menuItems = [
   {
     title: "Users",
-    url: "/admin/user",
+    url: "/user",
     icon: Users,
   },
   {
     title: "Products",
-    url: "/admin/product",
+    url: "/product",
     icon: Package,
   },
   {
     title: "Orders",
-    url: "/admin/order",
+    url: "/order",
     icon: ShoppingCart,
   },
 ];
@@ -53,7 +53,7 @@ function AppSidebar() {
     <Sidebar>
       {/* Logo Section */}
       <div className="flex h-16 items-center border-b px-6">
-        <Link href="/admin/dashboard" className="flex items-center space-x-2">
+        <Link href="/" className="flex items-center space-x-2">
           <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             Atlas Admin
           </div>
@@ -88,17 +88,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   // Function to get breadcrumb text based on current path
   const getBreadcrumbText = () => {
     switch (pathname) {
-      case '/admin/dashboard':
+      case '/':
+      case '/dashboard':
         return 'Dashboard';
-      case '/admin/user':
+      case '/user':
         return 'User Management';
-      case '/admin/product':
+      case '/product':
         return 'Product Management';
-      case '/admin/order':
+      case '/order':
         return 'Order Management';
       default:
         // Handle dynamic product routes
-        if (pathname.startsWith('/admin/product/')) {
+        if (pathname.startsWith('/product/')) {
           if (pathname.includes('/edit')) {
             return 'Edit Product';
           } else if (pathname.endsWith('/add')) {
@@ -108,7 +109,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             return 'Product Details';
           }
         }
-        return 'Admin Dashboard';
+        return 'Dashboard';
     }
   };
 

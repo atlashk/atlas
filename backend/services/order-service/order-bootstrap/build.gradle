@@ -25,8 +25,11 @@ repositories {
 }
 
 dependencies {
-    // Application
+    // Domain & Application
     implementation project(':services.order.application')
+
+    // API
+    implementation project(':services.order.api')
 
     // Infrastructure
     implementation project(':services.order.infrastructure')

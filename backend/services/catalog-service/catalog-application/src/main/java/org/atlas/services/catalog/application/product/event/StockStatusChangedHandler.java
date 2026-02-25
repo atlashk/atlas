@@ -2,12 +2,12 @@ package org.atlas.services.catalog.application.product.event;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.domain.error.DomainError;
 import org.atlas.libs.framework.domain.event.DomainEventType;
 import org.atlas.libs.framework.domain.event.contract.inventory.StockStatusChangedEvent;
 import org.atlas.libs.framework.domain.event.handler.DomainEventHandler;
-import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.services.catalog.domain.entity.ProductEntity;
+import org.atlas.services.catalog.domain.error.DomainError;
+import org.atlas.services.catalog.domain.exception.DomainException;
 import org.atlas.services.catalog.port.out.repository.ProductRepository;
 import org.springframework.transaction.annotation.Transactional;
 

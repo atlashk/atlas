@@ -25,8 +25,11 @@ repositories {
 }
 
 dependencies {
-    // Application
+    // Domain & Application
     implementation project(':services.identity.application')
+
+    // API
+    implementation project(':services.identity.api')
 
     // Infrastructure
     implementation project(':services.identity.infrastructure')

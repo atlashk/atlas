@@ -1,18 +1,15 @@
-import { ProductStockStatus } from "@/constants";
-
 export interface Product {
   id: string;
   name: string;
+  type: string;
   image: string;
   price: number;
-  stockStatus?: ProductStockStatus;
-  quantity?: number;
-  availableFrom?: string;
-  isActive?: boolean;
-  brand?: Brand;
-  details?: ProductDetails;
-  attributes?: ProductAttribute[];
-  categories?: Category[];
+  publishedAt: string;
+  inStock: boolean;
+  brand: Brand;
+  details: ProductDetails;
+  attributes: ProductAttribute[];
+  categories: Category[];
 }
 
 export interface Brand {
@@ -35,24 +32,15 @@ export interface Category {
   name: string;
 }
 
-export interface SearchProductFilters {
-  keyword?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  brandId?: string;
-  categoryIds?: number[];
-  page: number;
-  size: number;
-}
-
-export interface ListProductFilters {
+export interface RetrieveProductListFilters {
   id?: string;
   keyword?: string;
+  type?: string;
   minPrice?: number;
   maxPrice?: number;
-  stockStatus?: ProductStockStatus;
-  availableFrom?: string;
-  isActive?: boolean;
+  startPublishedAt?: string;
+  endPublishedAt?: string;
+  inStock?: boolean;
   brandId?: string;
   categoryIds?: number[];
   page: number;
@@ -61,11 +49,10 @@ export interface ListProductFilters {
 
 export interface CreateProductRequest {
   name: string;
+  type: string;
   price: number;
-  stockStatus: ProductStockStatus;
-  quantity: number;
-  availableFrom: string;
-  isActive: boolean;
+  publishedAt: string;
+  initialQuantity: number;
   brandId: number;
   details: ProductDetails;
   attributes: Omit<ProductAttribute, "id">[];
@@ -75,11 +62,9 @@ export interface CreateProductRequest {
 export interface UpdateProductRequest {
   id: string;
   name: string;
+  type: string;
   price: number;
-  stockStatus: ProductStockStatus;
-  quantity: number;
-  availableFrom: string;
-  isActive: boolean;
+  publishedAt: string;
   brandId: number;
   details: ProductDetails;
   attributes: ProductAttribute[];
@@ -100,11 +85,12 @@ export interface ImportProductRequest {
 export interface ExportProductFilters {
   id?: string;
   keyword?: string;
+  type?: string;
   minPrice?: number;
   maxPrice?: number;
-  stockStatus?: string;
-  availableFrom?: string;
-  isActive?: boolean;
+  startPublishedAt?: string;
+  endPublishedAt?: string;
+  inStock?: boolean;
   brandId?: string;
   categoryIds?: number[];
   fileType: FileType;

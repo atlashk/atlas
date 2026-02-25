@@ -6,11 +6,9 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.context.Contexts;
 import org.atlas.libs.framework.cryptography.HashingUtil;
-import org.atlas.libs.framework.domain.error.DomainError;
-import org.atlas.libs.framework.domain.exception.DomainException;
+import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.domain.shared.order.OrderStatus;
 import org.atlas.libs.framework.internal.identity.client.UserApiClient;
 import org.atlas.libs.framework.internal.identity.model.RetrieveUserListInput;
@@ -22,16 +20,19 @@ import org.atlas.libs.framework.saga.core.context.SagaContext;
 import org.atlas.libs.framework.saga.core.orchestrator.SagaOrchestrator;
 import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.libs.framework.sequencegenerator.SequenceType;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.services.order.application.order.mapper.OrderMapper;
 import org.atlas.services.order.domain.entity.CartEntity;
 import org.atlas.services.order.domain.entity.OrderEntity;
 import org.atlas.services.order.domain.entity.OrderEntity.OrderItem;
 import org.atlas.services.order.domain.entity.OrderEntity.PaymentSnapshot;
 import org.atlas.services.order.domain.entity.OrderEntity.ProductSnapshot;
+import org.atlas.services.order.domain.error.DomainError;
+import org.atlas.services.order.domain.exception.DomainException;
+import org.atlas.services.order.port.in.cart.service.CartService;
 import org.atlas.services.order.port.in.order.model.CheckoutInput;
 import org.atlas.services.order.port.in.order.model.RetrieveOrderListInput;
 import org.atlas.services.order.port.in.order.model.RetrieveOrderStatusOutput;
-import org.atlas.services.order.port.in.cart.service.CartService;
 import org.atlas.services.order.port.in.order.service.OrderService;
 import org.atlas.services.order.port.out.repository.OrderRepository;
 import org.springframework.stereotype.Service;
@@ -66,7 +67,7 @@ public class OrderServiceImpl implements OrderService {
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
 
     if (!Objects.equals(order.getUser().getId(), userId)) {
-      throw new DomainException(DomainError.FORBIDDEN);
+      throw new DomainException(CommonDomainError.FORBIDDEN);
     }
 
     return new RetrieveOrderStatusOutput(order.getStatus(), order.getCancellationReason());
@@ -91,7 +92,7 @@ public class OrderServiceImpl implements OrderService {
     Duration leaseTime = Duration.ofMinutes(15);
     boolean lockAcquired = lockService.acquireLock(lockKey, waitTime, leaseTime);
     if (!lockAcquired) {
-      throw new DomainException(DomainError.CONFLICT,
+      throw new DomainException(CommonDomainError.CONFLICT,
           "Another checkout operation is already in progress.");
     }
 
@@ -120,7 +121,7 @@ public class OrderServiceImpl implements OrderService {
     RetrieveUserListInput request = new RetrieveUserListInput(List.of(userId));
     List<UserOutput> users = userApiClient.call(request);
     if (CollectionUtil.isEmpty(users)) {
-      throw new DomainException(DomainError.USER_NOT_FOUND);
+      throw new DomainException(CommonDomainError.BAD_REQUEST, "User not found");
     }
     return users.get(0);
   }

@@ -27,7 +27,7 @@ export function useOrderStatusPolling(orderId: string | null) {
     if (!currentOrderId) return;
 
     try {
-      const response = await orderApi.getOrderStatus(currentOrderId);
+      const response = await orderApi.retrieveOrderStatus(currentOrderId);
       
       if (response.success && response.data) {
         setOrderStatus(response.data);

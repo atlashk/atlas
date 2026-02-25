@@ -5,8 +5,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
-import org.atlas.libs.framework.domain.error.DomainError;
-import org.atlas.libs.framework.domain.exception.DomainException;
+import org.atlas.libs.framework.domain.error.CommonDomainError;
+import org.atlas.libs.framework.domain.exception.BaseDomainException;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,9 +27,9 @@ public class ReferenceDataController {
   public ApiResponseWrapper<Map<String, String>> retrieveReferenceData(
       @Parameter(name = "type", description = "Type of reference data", example = "ORDER_STATUS", required = true)
       @RequestParam String type) {
-    Map<String, String> responseData = referenceDataService.getData(type);
+    Map<String, String> responseData = referenceDataService.retrieveReferenceData(type);
     if (responseData == null) {
-      throw new DomainException(DomainError.BAD_REQUEST, "Unknown reference data type: " + type);
+      throw new BaseDomainException(CommonDomainError.BAD_REQUEST, "Unknown reference data type: " + type);
     }
     return ApiResponseWrapper.success(responseData);
   }

@@ -30,13 +30,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ROLES } from "@/constants";
 import { withRequireAdmin } from "@/hoc/withAuth";
 import type { RegisterRequest, User } from "@/interfaces/identity.interface";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -44,7 +43,7 @@ import { z } from "zod";
 const userSchema = z.object({
   firstName: z.string().min(1, "First name is required."),
   lastName: z.string().min(1, "Last name is required."),
-  role: z.enum(ROLES),
+  role: z.string().min(1, "Role is required."),
 });
 
 type UserEditFormData = z.infer<typeof userSchema>;
@@ -59,6 +58,8 @@ function AdminUserEditPage() {
   const [user, setUser] = useState<User | null>(null);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [userRoles, setUserRoles] = useState<Record<string, string>>({});
+  const [isLoadingUserRoles, setIsLoadingUserRoles] = useState(false);
 
   const form = useForm<UserEditFormData>({
     resolver: zodResolver(userSchema),
@@ -68,6 +69,28 @@ function AdminUserEditPage() {
       role: "USER",
     },
   });
+
+  const loadUserRoles = useCallback(async () => {
+    if (isLoadingUserRoles || Object.keys(userRoles).length > 0) return;
+
+    setIsLoadingUserRoles(true);
+    try {
+      const response = await identityApi.retrieveUserRoles();
+      if (response.success) {
+        setUserRoles(response.data || {});
+      } else {
+        toast.error(response.errorMessage || "Failed to load roles");
+        setUserRoles({});
+      }
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to load roles";
+      toast.error(errorMessage);
+      setUserRoles({});
+    } finally {
+      setIsLoadingUserRoles(false);
+    }
+  }, [isLoadingUserRoles, userRoles]);
 
   useEffect(() => {
     if (isInitialized.current) {
@@ -108,6 +131,10 @@ function AdminUserEditPage() {
 
     loadUser();
   }, [form, router, userId]);
+
+  useEffect(() => {
+    loadUserRoles();
+  }, [loadUserRoles]);
 
   const onSubmit = async (values: UserEditFormData) => {
     if (!userId) {
@@ -248,6 +275,7 @@ function AdminUserEditPage() {
                         <Select
                           value={field.value}
                           onValueChange={field.onChange}
+                          disabled={isLoadingUserRoles}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -255,11 +283,13 @@ function AdminUserEditPage() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {ROLES.map((role) => (
-                              <SelectItem key={role} value={role}>
-                                {role}
-                              </SelectItem>
-                            ))}
+                            {Object.entries(userRoles).map(
+                              ([roleKey, roleLabel]) => (
+                                <SelectItem key={roleKey} value={roleKey}>
+                                  {roleLabel}
+                                </SelectItem>
+                              )
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />

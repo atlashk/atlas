@@ -21,7 +21,10 @@ public class I18nConfig {
   public MessageSource messageSource(Locale locale) {
     ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
     // src/main/resources/messages_{locale}.properties file
-    messageSource.setBasename("messages");
+    messageSource.setBasenames(
+        "messages.common", // Common
+        "messages" // Service-specified
+    );
     messageSource.setDefaultEncoding("UTF-8");
     messageSource.setDefaultLocale(locale);
     return messageSource;

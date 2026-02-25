@@ -72,7 +72,7 @@ public class ReferenceDataService {
         .toUpperCase();
   }
 
-  public Map<String, String> getData(String type) {
+  public Map<String, String> retrieveReferenceData(String type) {
     Class<? extends Enum<?>> enumClass = registry.get(type.toUpperCase());
     if (enumClass == null) {
       return null;

@@ -3,7 +3,7 @@ package org.atlas.libs.api.server.grpc;
 import io.grpc.Status;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.advice.GrpcAdvice;
-import org.atlas.libs.framework.domain.exception.DomainException;
+import org.atlas.libs.framework.domain.exception.BaseDomainException;
 
 @GrpcAdvice
 @Slf4j
@@ -12,7 +12,7 @@ public class GrpcExceptionHandler {
   @net.devh.boot.grpc.server.advice.GrpcExceptionHandler
   public Status handleException(Throwable e) {
     log.error("Occurred an exception", e);
-    if (e instanceof DomainException) {
+    if (e instanceof BaseDomainException) {
       return Status.INTERNAL
           .withDescription(e.getMessage())
           .withCause(e);

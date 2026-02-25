@@ -4,12 +4,12 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.cache.Cache;
-import org.atlas.libs.framework.domain.error.DomainError;
-import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.services.catalog.application.product.mapper.ProductMapper;
 import org.atlas.services.catalog.domain.entity.ProductEntity;
+import org.atlas.services.catalog.domain.error.DomainError;
+import org.atlas.services.catalog.domain.exception.DomainException;
 import org.atlas.services.catalog.port.in.product.model.RetrieveProductListInput;
 import org.atlas.services.catalog.port.in.product.model.RetrieveProductListInput.Mode;
 import org.atlas.services.catalog.port.in.product.service.ProductImageService;
@@ -61,7 +61,8 @@ public class ProductServiceImpl implements ProductService {
   }
 
   private PagingResult<ProductEntity> retrieveByDatabase(RetrieveProductListInput input) {
-    ProductRepository.FindProductCriteria criteria = ProductMapper.INSTANCE.toFindProductCriteria(input);
+    ProductRepository.FindProductCriteria criteria = ProductMapper.INSTANCE.toFindProductCriteria(
+        input);
     criteria.setInStock(true);
     return productRepository.findByCriteria(criteria, input.getPagingRequest());
   }

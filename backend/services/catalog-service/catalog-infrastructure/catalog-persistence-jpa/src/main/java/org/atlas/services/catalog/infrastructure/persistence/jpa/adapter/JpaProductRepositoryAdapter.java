@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.domain.error.DomainError;
-import org.atlas.libs.framework.domain.exception.DomainException;
+import org.atlas.libs.framework.domain.error.CommonDomainError;
+import org.atlas.libs.framework.domain.exception.BaseDomainException;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.MapperUtil;
@@ -72,7 +72,7 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
   @Override
   public void update(ProductEntity product) {
     JpaProductEntity jpaProduct = jpaProductRepository.findByIdWithAssociations(product.getId())
-        .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
+        .orElseThrow(() -> new BaseDomainException(CommonDomainError.PRODUCT_NOT_FOUND));
     JpaProductMapper.INSTANCE.merge(product, jpaProduct);
     jpaProductRepository.save(jpaProduct);
   }

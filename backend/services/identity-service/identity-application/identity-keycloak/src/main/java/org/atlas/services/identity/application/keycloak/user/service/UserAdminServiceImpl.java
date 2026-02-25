@@ -2,8 +2,8 @@ package org.atlas.services.identity.application.keycloak.user.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.domain.error.DomainError;
-import org.atlas.libs.framework.domain.exception.DomainException;
+import org.atlas.libs.framework.domain.error.CommonDomainError;
+import org.atlas.libs.framework.domain.exception.BaseDomainException;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.services.identity.application.keycloak.core.client.KeycloakUserClient;
@@ -47,7 +47,7 @@ public class UserAdminServiceImpl implements UserAdminService {
   public UserOutput retrieveUser(String userId) {
     return keycloakUserClient.retrieveUser(userId)
         .map(UserAdminMapper.INSTANCE::toUserOutput)
-        .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
+        .orElseThrow(() -> new BaseDomainException(CommonDomainError.USER_NOT_FOUND));
   }
 
   @Override
@@ -61,7 +61,7 @@ public class UserAdminServiceImpl implements UserAdminService {
   @Override
   public void updateUser(UpdateUserInput input) {
     UserEntity user = keycloakUserClient.retrieveUser(input.getId())
-        .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
+        .orElseThrow(() -> new BaseDomainException(CommonDomainError.USER_NOT_FOUND));
 
     UserAdminMapper.INSTANCE.merge(input, user);
     keycloakUserClient.updateUser(user);
@@ -84,14 +84,14 @@ public class UserAdminServiceImpl implements UserAdminService {
 
   private void checkValidity(CreateUserInput input) {
     if (keycloakUserClient.existsByUsername(input.getUsername())) {
-      throw new DomainException(DomainError.USERNAME_ALREADY_EXISTS);
+      throw new BaseDomainException(CommonDomainError.USERNAME_ALREADY_EXISTS);
     }
     if (keycloakUserClient.existsByEmail(input.getEmail())) {
-      throw new DomainException(DomainError.EMAIL_ALREADY_EXISTS);
+      throw new BaseDomainException(CommonDomainError.EMAIL_ALREADY_EXISTS);
     }
     if (keycloakUserClient.existsByAttribute(KeycloakUserAttribute.PHONE_NUMBER,
         input.getPhoneNumber())) {
-      throw new DomainException(DomainError.PHONE_NUMBER_ALREADY_EXISTS);
+      throw new BaseDomainException(CommonDomainError.PHONE_NUMBER_ALREADY_EXISTS);
     }
   }
 }

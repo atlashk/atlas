@@ -5,7 +5,7 @@ import type {
 import { ApiResponse } from "./apiClient";
 import { BaseApi } from "./base.api";
 
-export class OrderAdminApi extends BaseApi {
+export class OrderApi extends BaseApi {
   constructor() {
     super("/services/order/api/admin");
   }
@@ -24,7 +24,7 @@ export class OrderAdminApi extends BaseApi {
     return this.post<Order[], typeof payload>("/orders/list", payload);
   }
 
-  async retrieveOrderCount(): Promise<ApiResponse<number>> {
+  async retrieveTotalOrderCount(): Promise<ApiResponse<number>> {
     return this.get<number>("/orders/statistics/count");
   }
 
@@ -39,6 +39,14 @@ export class OrderAdminApi extends BaseApi {
       "/orders/statistics/monthly"
     );
   }
+
+  async retrieveReferenceData(type: string): Promise<ApiResponse<Record<string, string>>> {
+    return this.get<Record<string, string>>(`/reference-data?type=${type}`);
+  }
+
+  async retrieveOrderStatuses(): Promise<ApiResponse<Record<string, string>>> {
+    return this.retrieveReferenceData('ORDER_STATUS');
+  }
 }
 
-export const orderAdminApi = new OrderAdminApi();
+export const orderApi = new OrderApi();

@@ -4,10 +4,12 @@ import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.context.Contexts;
-import org.atlas.libs.framework.domain.error.DomainError;
-import org.atlas.libs.framework.domain.exception.DomainException;
+import org.atlas.libs.framework.domain.error.CommonDomainError;
+import org.atlas.libs.framework.domain.exception.BaseDomainException;
 import org.atlas.libs.framework.domain.shared.payment.PaymentStatus;
 import org.atlas.services.payment.application.mapper.PaymentMapper;
+import org.atlas.services.payment.domain.error.DomainError;
+import org.atlas.services.payment.domain.exception.DomainException;
 import org.atlas.services.payment.port.in.model.RetrievePaymentNextActionOutput;
 import org.atlas.services.payment.port.in.service.PaymentService;
 import org.atlas.services.payment.port.out.repository.PaymentRepository;
@@ -36,7 +38,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     if (!Objects.equals(userId, payment.getUserId())) {
-      throw new DomainException(DomainError.FORBIDDEN);
+      throw new DomainException(CommonDomainError.FORBIDDEN);
     }
 
     return PaymentMapper.INSTANCE.toRetrievePaymentNextActionOutput(payment);

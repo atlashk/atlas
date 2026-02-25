@@ -7,7 +7,7 @@ import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.api.server.rest.util.HttpUtil;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
-import org.atlas.libs.framework.domain.error.DomainError;
+import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -29,7 +29,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     }
 
     ApiResponseWrapper<Void> restApiResponseWrapper = ApiResponseWrapper.error(
-        DomainError.FORBIDDEN.getErrorCode(), exception.getMessage());
+        CommonDomainError.FORBIDDEN.getErrorCode(), exception.getMessage());
     HttpUtil.respondJson(response, restApiResponseWrapper, HttpStatus.FORBIDDEN);
   }
 }
