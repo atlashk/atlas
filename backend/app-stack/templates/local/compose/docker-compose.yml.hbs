@@ -278,6 +278,7 @@ services:
     volumes:
       - grafana-data:/var/lib/grafana
       - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./config/grafana/dashboards:/etc/grafana/dashboards:ro
     depends_on:
       {{#hasObservability "metrics" "prometheus"}}
       - prometheus
@@ -431,6 +432,10 @@ services:
       {{/hasService}}
       {{#hasService "datasource" "postgres"}}
       postgres:
+        condition: service_healthy
+      {{/hasService}}
+      {{#hasService "full-text-search" "elasticsearch"}}
+      elasticsearch:
         condition: service_healthy
       {{/hasService}}
     networks:

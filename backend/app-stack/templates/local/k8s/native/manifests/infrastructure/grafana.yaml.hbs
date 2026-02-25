@@ -31,8 +31,6 @@ spec:
                   key: admin-password
             - name: GF_PATHS_PROVISIONING
               value: "/etc/grafana/provisioning"
-            - name: GF_INSTALL_PLUGINS
-              value: "grafana-piechart-panel,grafana-worldmap-panel,grafana-clock-panel"
           ports:
             - containerPort: 3000
               name: http
