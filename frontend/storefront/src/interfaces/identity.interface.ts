@@ -1,7 +1,3 @@
-import { Role } from "@/constants";
-
-export type UserRole = 'USER' | 'ADMIN';
-
 // Login interfaces (used in API calls)
 export interface LoginRequest {
   username: string;
@@ -30,7 +26,7 @@ export interface User {
   lastName: string;
   email: string;
   phoneNumber: string;
-  role: Role;
+  role: string;
 }
 
 export interface RegisterRequest {

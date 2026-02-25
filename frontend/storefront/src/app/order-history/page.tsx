@@ -21,7 +21,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ORDER_STATUSES } from "@/constants";
 import { withAuth } from "@/hoc/withAuth";
 import { RetrieveOrderListFilter, Order } from "@/interfaces";
 import {
@@ -56,6 +55,8 @@ const OrderHistoryContent: React.FC = () => {
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [orderStatuses, setOrderStatuses] = useState<Record<string, string>>({});
+  const [isLoadingStatuses, setIsLoadingStatuses] = useState(false);
   const [filters, setFilters] = useState<RetrieveOrderListFilter>({
     status: undefined,
     startDate: undefined,
@@ -71,6 +72,26 @@ const OrderHistoryContent: React.FC = () => {
   });
 
   // OrderHistory component functions
+  const loadOrderStatuses = useCallback(async () => {
+    if (isLoadingStatuses || Object.keys(orderStatuses).length > 0) return;
+
+    setIsLoadingStatuses(true);
+    try {
+      const response = await orderApi.getOrderStatuses();
+      if (response.success && response.data) {
+        setOrderStatuses(response.data);
+      } else {
+        toast.error(response.errorMessage || "Failed to load order statuses");
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to load order statuses";
+      toast.error(errorMessage);
+    } finally {
+      setIsLoadingStatuses(false);
+    }
+  }, [isLoadingStatuses, orderStatuses]);
+
   const applyFilters = useCallback(
     async (page: number, currentFilters?: RetrieveOrderListFilter) => {
       // Prevent multiple simultaneous API calls
@@ -178,6 +199,13 @@ const OrderHistoryContent: React.FC = () => {
     setIsClient(true);
   }, []);
 
+  // Load order statuses on mount
+  useEffect(() => {
+    if (isClient) {
+      loadOrderStatuses();
+    }
+  }, [isClient, loadOrderStatuses]);
+
   // Load initial data only after client hydration to avoid early exit
   useEffect(() => {
     if (isInitialized.current || !isClient || hasFetchedRef.current) {
@@ -276,17 +304,14 @@ const OrderHistoryContent: React.FC = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   value={filters.status || ""}
                   onChange={(e) => handleFilterChange("status", e.target.value)}
+                  disabled={isLoadingStatuses}
                 >
                   <option value="">All Statuses</option>
-                  {ORDER_STATUSES.map((status) => {
-                    const statusLabel = getOrderStatusBadge(status).props
-                      .children;
-                    return (
-                      <option key={status} value={status}>
-                        {statusLabel}
-                      </option>
-                    );
-                  })}
+                  {Object.entries(orderStatuses).map(([statusKey, statusLabel]) => (
+                    <option key={statusKey} value={statusKey}>
+                      {statusLabel}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>

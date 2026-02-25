@@ -1,9 +1,5 @@
-// Re-export types from constants to avoid duplication
-export type { PaymentNextActionType, PaymentStatus } from '@/constants';
-import type { PaymentNextActionType } from '@/constants';
-
 export interface PaymentNextAction {
-  type: PaymentNextActionType;
+  type: string;
   clientSecret?: string;
   publishableKey?: string;
   url?: string; // For redirect_url and deeplink
@@ -21,7 +17,7 @@ export interface PaymentGatewayResponse {
 
 // Payment next action response interface
 export interface PaymentNextActionResponse {
-  nextAction?: PaymentNextAction;
+  nextAction?: string;
   amount?: number;
   currency?: string;
 }

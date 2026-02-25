@@ -274,7 +274,7 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-atlas}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-secret123456}
-      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+      - GF_PLUGIN_CATALOG_SKIP_TLS_VERIFY=true
     volumes:
       - grafana-data:/var/lib/grafana
       - ./config/grafana/provisioning:/etc/grafana/provisioning:ro

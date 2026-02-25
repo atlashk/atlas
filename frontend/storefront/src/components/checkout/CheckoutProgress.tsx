@@ -3,7 +3,6 @@
 import { NextActionHandler } from "@/components/payment/NextActionHandler";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ORDER_STATUS_MESSAGES } from "@/constants";
 import { OrderStatusResponse } from "@/interfaces/order.interface";
 import { PaymentGatewayResponse, PaymentNextAction } from "@/interfaces/payment.interface";
 import { useCartStore } from "@/stores/cart.store";
@@ -11,6 +10,14 @@ import { CheckCircle, CreditCard, Loader2, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
+
+const ORDER_STATUS_MESSAGES = {
+  AWAITING_STOCK_RESERVATION: "Reserving stock...",
+  AWAITING_PAYMENT_INITIALIZED: "Initializing payment...",
+  AWAITING_PAYMENT_PROCESSED: "Processing payment...",
+  FULFILLED: "Order Completed!",
+  CANCELED: "Order Canceled",
+} as const;
 
 interface CheckoutProgressProps {
   orderId: string;

@@ -67,7 +67,7 @@ public class OrderController {
   @GetMapping(value = "/{id}/status", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve order status")
   public ApiResponseWrapper<RetrieveOrderStatusResponse> retrieveOrderStatus(
-      @Parameter(name = "id", description = "ID of the order to retrieve the status for", example = "123")
+      @Parameter(name = "id", description = "ID of the order to retrieve the status for", example = "ORD0000001", required = true)
       @PathVariable String id) {
     RetrieveOrderStatusOutput output = orderService.retrieveOrderStatus(id);
     RetrieveOrderStatusResponse responseData = OrderMapper.INSTANCE.toRetrieveOrderStatusResponse(

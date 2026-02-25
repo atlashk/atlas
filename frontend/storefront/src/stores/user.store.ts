@@ -1,4 +1,3 @@
-import { AUTH_STORAGE_KEYS } from "@/constants";
 import type { LoginRequest, User } from "@/interfaces/identity.interface";
 import { identityApi } from "@/api/index.api";
 import { createLogger } from "@/utils/logger";
@@ -6,6 +5,12 @@ import { clearAuthCookies, getCookie, isValidToken, setCookie } from "@/utils/co
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useCartStore } from "./cart.store";
+
+const AUTH_STORAGE_KEYS = {
+  USER_STORE: 'user-store',
+  ACCESS_TOKEN: 'accessToken',
+  REFRESH_TOKEN: 'refreshToken',
+} as const;
 
 const logger = createLogger('UserStore');
 

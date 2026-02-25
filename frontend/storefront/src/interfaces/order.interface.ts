@@ -1,7 +1,6 @@
-import { OrderStatus } from "@/constants";
-import type { PaymentStatus } from "./payment.interface";
 import type { Product } from "./catalog.interface";
 import type { User } from "./identity.interface";
+import type { PaymentStatus } from "./payment.interface";
 
 export interface CartResponse {
   id: number;
@@ -32,7 +31,7 @@ export interface Order {
   orderItems: OrderItem[];
   amount: number;
   payment?: Payment;
-  status: OrderStatus;
+  status: string;
   cancellationReason?: string;
   createdAt: string; // Date usually handled as ISO string
 }
@@ -81,7 +80,7 @@ export interface CheckoutResponse {
 }
 
 export interface OrderStatusResponse {
-  status: OrderStatus;
+  status: string;
   cancellationReason?: string;
 }
 

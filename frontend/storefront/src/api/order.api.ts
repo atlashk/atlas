@@ -59,6 +59,14 @@ async retrieveCart(): Promise<ApiResponse<CartResponse>> {
   async getOrderStatus(orderId: string): Promise<ApiResponse<OrderStatusResponse>> {
     return this.get<OrderStatusResponse>(`/orders/${orderId}/status`);
   }
+
+  async getReferenceData(type: string): Promise<ApiResponse<Record<string, string>>> {
+    return this.get<Record<string, string>>(`/reference-data?type=${type}`);
+  }
+
+  async getOrderStatuses(): Promise<ApiResponse<Record<string, string>>> {
+    return this.getReferenceData('ORDER_STATUS');
+  }
 }
 
 export const orderApi = new OrderApi();

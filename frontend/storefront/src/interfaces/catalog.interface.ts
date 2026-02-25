@@ -36,7 +36,7 @@ export interface RetrieveProductListFilter {
   maxPrice?: number;
   brandId?: string;
   categoryIds?: number[];
+  mode?: string;
   page: number;
   size: number;
-  mode?: "DATABASE" | "FULL_TEXT_SEARCH";
 }
