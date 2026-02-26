@@ -1,4 +1,3 @@
 export * from './identity.interface';
+export * from './catalog.interface'
 export * from './order.interface';
-export * from './product.interface';
-export * from './notification.interface';

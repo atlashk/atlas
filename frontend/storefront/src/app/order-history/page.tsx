@@ -4,6 +4,8 @@ import { Metadata } from "@/api/apiClient";
 import { orderApi } from "@/api/index.api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Pagination,
   PaginationContent,
@@ -12,6 +14,13 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import {
   Table,
@@ -25,8 +34,7 @@ import { withAuth } from "@/hoc/withAuth";
 import { Order, RetrieveOrderListFilter } from "@/interfaces";
 import {
   formatCurrency,
-  formatDate,
-  getOrderStatusBadge,
+  formatDate
 } from "@/utils/formatter.util";
 import {
   ChevronDown,
@@ -70,6 +78,25 @@ const OrderHistoryContent: React.FC = () => {
     totalPages: 1,
     totalRecords: 0,
   });
+  const [dateError, setDateError] = useState<string | null>(null);
+
+  const getDateRangeError = useCallback(
+    (startDate?: string, endDate?: string) => {
+      if (!startDate || !endDate) return null;
+      const parsedStartDate = new Date(startDate);
+      const parsedEndDate = new Date(endDate);
+      if (
+        Number.isNaN(parsedStartDate.getTime()) ||
+        Number.isNaN(parsedEndDate.getTime())
+      ) {
+        return null;
+      }
+      return parsedStartDate > parsedEndDate
+        ? "Start date cannot be after end date"
+        : null;
+    },
+    []
+  );
 
   // OrderHistory component functions
   const loadOrderStatuses = useCallback(async () => {
@@ -155,6 +182,7 @@ const OrderHistoryContent: React.FC = () => {
       size: 20,
     };
     setFilters(resetFilters);
+    setDateError(null);
     applyFilters(1, resetFilters);
   }, [applyFilters, isLoading]);
 
@@ -180,9 +208,15 @@ const OrderHistoryContent: React.FC = () => {
     (e: React.FormEvent) => {
       e.preventDefault();
       if (isLoading) return;
+      const error = getDateRangeError(filters.startDate, filters.endDate);
+      if (error) {
+        setDateError(error);
+        toast.error(error);
+        return;
+      }
       applyFilters(1, filters);
     },
-    [applyFilters, filters, isLoading]
+    [applyFilters, filters, getDateRangeError, isLoading]
   );
 
   // Keep a stable reference to applyFilters to avoid changing effect dependencies size
@@ -190,6 +224,10 @@ const OrderHistoryContent: React.FC = () => {
   useEffect(() => {
     applyFiltersRef.current = applyFilters;
   }, [applyFilters]);
+
+  useEffect(() => {
+    setDateError(getDateRangeError(filters.startDate, filters.endDate));
+  }, [filters.endDate, filters.startDate, getDateRangeError]);
 
   // Guard to prevent duplicate initial fetch
   const hasFetchedRef = useRef(false);
@@ -259,16 +297,12 @@ const OrderHistoryContent: React.FC = () => {
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label
-                  htmlFor="startDate"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
+                <Label htmlFor="startDate" className="mb-2">
                   Start Date
-                </label>
-                <input
+                </Label>
+                <Input
                   id="startDate"
                   type="date"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   value={filters.startDate || ""}
                   onChange={(e) =>
                     handleFilterChange("startDate", e.target.value || undefined)
@@ -276,16 +310,12 @@ const OrderHistoryContent: React.FC = () => {
                 />
               </div>
               <div>
-                <label
-                  htmlFor="endDate"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
+                <Label htmlFor="endDate" className="mb-2">
                   End Date
-                </label>
-                <input
+                </Label>
+                <Input
                   id="endDate"
                   type="date"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   value={filters.endDate || ""}
                   onChange={(e) =>
                     handleFilterChange("endDate", e.target.value || undefined)
@@ -293,33 +323,43 @@ const OrderHistoryContent: React.FC = () => {
                 />
               </div>
               <div>
-                <label
-                  htmlFor="status"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
+                <Label htmlFor="status" className="mb-2">
                   Status
-                </label>
-                <select
-                  id="status"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  value={filters.status || ""}
-                  onChange={(e) => handleFilterChange("status", e.target.value)}
+                </Label>
+                <Select
+                  value={filters.status || "all"}
+                  onValueChange={(value) =>
+                    handleFilterChange(
+                      "status",
+                      value === "all" ? undefined : value
+                    )
+                  }
                   disabled={isLoadingOrderStatuses}
                 >
-                  <option value="">All Statuses</option>
-                  {Object.entries(orderStatuses).map(([statusKey, statusLabel]) => (
-                    <option key={statusKey} value={statusKey}>
-                      {statusLabel}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Statuses" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    {Object.entries(orderStatuses).map(([statusKey, statusLabel]) => (
+                      <SelectItem key={statusKey} value={statusKey}>
+                        {statusLabel}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
+            {dateError && (
+              <p className="text-sm text-red-600 mt-2" role="alert">
+                {dateError}
+              </p>
+            )}
             <div className="flex gap-2 mt-4">
               <Button
                 type="submit"
                 className="flex items-center gap-2"
-                disabled={isLoading}
+                disabled={isLoading || Boolean(dateError)}
               >
                 <Search className="h-4 w-4" />
                 Search
@@ -377,7 +417,7 @@ const OrderHistoryContent: React.FC = () => {
                         </p>
                         <p className="flex items-center gap-2">
                           <span className="font-medium">Status:</span>
-                          {getOrderStatusBadge(order.status)}
+                          {orderStatuses[order.status] || "Unknown"}
                         </p>
                         {order.status === "CANCELED" &&
                           order.cancellationReason && (

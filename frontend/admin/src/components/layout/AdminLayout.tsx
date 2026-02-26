@@ -105,7 +105,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           } else if (pathname.endsWith('/add')) {
             return 'Add Product';
           } else {
-            // Product details page (e.g., /admin/product/123)
+            // Product details page (e.g., /product/123)
             return 'Product Details';
           }
         }

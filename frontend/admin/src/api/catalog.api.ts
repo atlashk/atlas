@@ -4,10 +4,10 @@ import {
   type Category,
   type CreateProductRequest,
   type ExportProductFilters,
-  type ListProductFilters,
+  type RetrieveProductListFilters,
   type Product,
   type UpdateProductRequest
-} from "@/interfaces/product.interface";
+} from "@/interfaces/catalog.interface";
 import { ApiResponse } from "./apiClient";
 import { BaseApi } from "./base.api";
 
@@ -33,9 +33,9 @@ export class CatalogApi extends BaseApi {
   }
 
   async retrieveProductList(
-    filters: ListProductFilters
+    filters: RetrieveProductListFilters
   ): Promise<ApiResponse<Product[]>> {
-    return this.post<Product[], ListProductFilters>("/products/admin/list", filters);
+    return this.post<Product[], RetrieveProductListFilters>("/products/admin/list", filters); 
   }
 
   async retrieveProduct(id: string): Promise<ApiResponse<Product>> {

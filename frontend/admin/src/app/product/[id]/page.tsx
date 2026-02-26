@@ -7,12 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { withRequireAdmin } from "@/hoc/withAuth";
-import { Product } from "@/interfaces/product.interface";
-import { formatCurrency, getProductStockStatusBadge } from "@/utils/formatter.util";
+import { Product } from "@/interfaces/catalog.interface";
+import { formatCurrency } from "@/utils/formatter.util";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 function AdminProductDetailsPage() {
@@ -34,11 +34,11 @@ function AdminProductDetailsPage() {
         setProduct(response.data);
       } else {
         toast.error(response.errorMessage || 'Product not found');
-        router.push('/admin/product');
+        router.push('/product');
       }
     } catch {
       toast.error('Failed to load product');
-      router.push('/admin/product');
+      router.push('/product');
     } finally {
       setIsLoading(false);
     }
@@ -54,7 +54,7 @@ function AdminProductDetailsPage() {
   }, [loadProduct]);
 
   const handleEdit = () => {
-    router.push(`/admin/product/${productId}/edit`);
+    router.push(`/product/${productId}/edit`);
   };
 
   const handleDelete = async () => {
@@ -66,7 +66,7 @@ function AdminProductDetailsPage() {
         const response = await catalogApi.deleteProduct((product as Product).id);
         if (response.success) {
           toast.success("Product deleted successfully!");
-          router.push("/admin/product");
+          router.push("/product");
         } else {
           toast.error(response.errorMessage || "Failed to delete product");
         }
@@ -157,6 +157,11 @@ function AdminProductDetailsPage() {
 
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Type:</span>
+                    {(product as Product).type}
+                  </div>
+
+                  <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Price:</span>
                     <span className="font-bold text-primary">
                       {formatCurrency((product as Product).price)}
@@ -164,29 +169,10 @@ function AdminProductDetailsPage() {
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Status:</span>
-                    {getProductStockStatusBadge((product as Product).stockStatus)}
-                  </div>
-
-                  {(product as Product).stockStatus === "IN_STOCK" && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Stock:</span>
-                      <Badge variant="outline">{(product as Product).quantity}</Badge>
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Active:</span>
-                    <Badge variant={(product as Product).isActive ? "default" : "secondary"}>
-                      {(product as Product).isActive ? "Yes" : "No"}
-                    </Badge>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Available From:</span>
+                    <span className="text-sm font-medium">Publish Date:</span>
                     <span className="text-sm">
-                      {(product as Product).availableFrom 
-                        ? new Date((product as Product).availableFrom!).toLocaleDateString()
+                      {(product as Product).publishedAt 
+                        ? new Date((product as Product).publishedAt!).toLocaleDateString()
                         : 'Not set'
                       }
                     </span>
@@ -194,7 +180,15 @@ function AdminProductDetailsPage() {
 
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Brand:</span>
-                    <span className="text-sm">{(product as Product).brand?.name || 'No brand'}</span>
+                    <div className="flex flex-wrap gap-1">
+                      {(product as Product).brand?.name ? (
+                        <Badge variant="secondary">
+                          {(product as Product).brand?.name}
+                        </Badge>
+                      ) : (
+                        <span className="text-sm text-gray-500">No brand</span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="flex items-center justify-between">

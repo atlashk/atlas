@@ -37,8 +37,7 @@ import {
 } from "@/interfaces/order.interface";
 import {
   formatCurrency,
-  formatDate,
-  getOrderStatusBadge,
+  formatDate
 } from "@/utils/formatter.util";
 import {
   ChevronDown,
@@ -78,6 +77,25 @@ const OrderList: React.FC = () => {
     totalPages: 1,
     totalRecords: 0,
   });
+  const [dateError, setDateError] = useState<string | null>(null);
+
+  const getDateRangeError = useCallback(
+    (startDate?: string, endDate?: string) => {
+      if (!startDate || !endDate) return null;
+      const parsedStartDate = new Date(startDate);
+      const parsedEndDate = new Date(endDate);
+      if (
+        Number.isNaN(parsedStartDate.getTime()) ||
+        Number.isNaN(parsedEndDate.getTime())
+      ) {
+        return null;
+      }
+      return parsedStartDate > parsedEndDate
+        ? "Start date cannot be after end date"
+        : null;
+    },
+    []
+  );
 
   const toggleDetails = useCallback(
     (orderId: string) => {
@@ -169,6 +187,7 @@ const OrderList: React.FC = () => {
       size: 20,
     };
     setFilters(resetFiltersData);
+    setDateError(null);
     applyFilters(1, resetFiltersData);
   }, [applyFilters]);
 
@@ -183,8 +202,14 @@ const OrderList: React.FC = () => {
   );
 
   const handleSearch = useCallback(() => {
+    const error = getDateRangeError(filters.startDate, filters.endDate);
+    if (error) {
+      setDateError(error);
+      toast.error(error);
+      return;
+    }
     applyFilters(1);
-  }, [applyFilters]);
+  }, [applyFilters, filters.endDate, filters.startDate, getDateRangeError]);
 
   // Load reference data and initial list on mount
   useEffect(() => {
@@ -199,6 +224,10 @@ const OrderList: React.FC = () => {
     isInitialized.current = true;
     applyFilters(1);
   }, [applyFilters]);
+
+  useEffect(() => {
+    setDateError(getDateRangeError(filters.startDate, filters.endDate));
+  }, [filters.endDate, filters.startDate, getDateRangeError]);
 
   return (
     <div className="space-y-6">
@@ -289,9 +318,17 @@ const OrderList: React.FC = () => {
               </Select>
             </div>
           </div>
+          {dateError && (
+            <p className="text-sm text-red-600 mt-2" role="alert">
+              {dateError}
+            </p>
+          )}
 
           <div className="flex justify-start space-x-2 mt-4">
-            <Button onClick={handleSearch} disabled={isLoadingOrders}>
+            <Button
+              onClick={handleSearch}
+              disabled={isLoadingOrders || Boolean(dateError)}
+            >
               <Search className="h-4 w-4 mr-2" />
               Search
             </Button>
@@ -354,7 +391,7 @@ const OrderList: React.FC = () => {
                           </TableCell>
                           <TableCell>{formatCurrency(order.amount)}</TableCell>
                           <TableCell>
-                            {getOrderStatusBadge(order.status)}
+                            {orderStatuses[order.status] || "Unknown"}
                           </TableCell>
                           <TableCell>{formatDate(order.createdAt)}</TableCell>
                           <TableCell>

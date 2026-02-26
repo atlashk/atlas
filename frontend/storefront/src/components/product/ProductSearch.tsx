@@ -3,6 +3,14 @@ import { catalogApi } from "@/api/index.api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
   Pagination,
   PaginationContent,
   PaginationItem,
@@ -10,6 +18,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -360,16 +369,12 @@ const ProductSearch: React.FC = () => {
             <div className="space-y-6">
                 {/* Search Input */}
                 <div>
-                  <label
-                    htmlFor="keyword"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
+                  <Label htmlFor="keyword" className="mb-2">
                     Product Keyword
-                  </label>
-                  <input
+                  </Label>
+                  <Input
                     id="keyword"
                     type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Product name, description, attributes, etc."
                     value={formFilters.keyword || ""}
                     onChange={(e) => updateFilter("keyword", e.target.value)}
@@ -378,14 +383,13 @@ const ProductSearch: React.FC = () => {
 
                 {/* Price Range */}
                  <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-2">
+                   <Label className="mb-2">
                      Price Range
-                   </label>
+                   </Label>
                    <div className="grid grid-cols-2 gap-3">
                      <div>
-                       <input
+                       <Input
                          type="number"
-                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                          placeholder="Min Price"
                          min="0"
                          step="0.01"
@@ -396,9 +400,8 @@ const ProductSearch: React.FC = () => {
                        />
                      </div>
                      <div>
-                       <input
+                       <Input
                          type="number"
-                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                          placeholder="Max Price"
                          min="0"
                          step="0.01"
@@ -413,12 +416,9 @@ const ProductSearch: React.FC = () => {
 
                 {/* Brand Filter */}
                 <div>
-                  <label
-                    htmlFor="brand"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
+                  <Label htmlFor="brand" className="mb-2">
                     Brand
-                  </label>
+                  </Label>
                   {isLoadingBrands ? (
                     <div className="flex justify-center py-3">
                       <Spinner className="text-blue-600" />
@@ -461,48 +461,45 @@ const ProductSearch: React.FC = () => {
 
                 {/* Category Filter */}
                 <div>
-                  <label
-                    htmlFor="category"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
+                  <Label htmlFor="category" className="mb-2">
                     Categories
-                  </label>
+                  </Label>
                   {isLoadingCategories ? (
                     <div className="flex justify-center py-3">
                       <Spinner className="text-blue-600" />
                     </div>
                   ) : (
                     <>
-                      <Select value="placeholder" onValueChange={() => {}}>
-                        <SelectTrigger>
-                          <SelectValue>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-between font-normal"
+                            disabled={!categories.length}
+                          >
                             {formFilters.categoryIds &&
                             formFilters.categoryIds.length > 0
                               ? `${formFilters.categoryIds.length} categories selected`
                               : "All Categories"}
-                          </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          {categories.map((category) => (
-                            <label
-                              key={category.id}
-                              className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded"
-                            >
-                              <input
-                                type="checkbox"
-                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                checked={
-                                  formFilters.categoryIds?.includes(
-                                    category.id
-                                  ) ?? false
-                                }
-                                onChange={() => changeCategory(category.id)}
-                              />
-                              <span className="text-sm">{category.name}</span>
-                            </label>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-64">
+                          {categories.map((category) => {
+                            const isChecked =
+                              formFilters.categoryIds?.includes(category.id) ??
+                              false;
+                            return (
+                              <DropdownMenuCheckboxItem
+                                key={category.id}
+                                checked={isChecked}
+                                onCheckedChange={() => changeCategory(category.id)}
+                              >
+                                {category.name}
+                              </DropdownMenuCheckboxItem>
+                            );
+                          })}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                       {!categories.length && (
                         <div className="text-gray-500 text-sm mt-1">
                           No categories available
@@ -514,33 +511,25 @@ const ProductSearch: React.FC = () => {
 
                 {/* Search Mode */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Label className="mb-2">
                     Search Mode
-                  </label>
-                  <div className="space-y-2">
-                    <label className="flex items-center space-x-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="searchMode"
-                        value="DATABASE"
-                        checked={formFilters.mode === "DATABASE"}
-                        onChange={(e) => updateFilter("mode", e.target.value as "DATABASE" | "FULL_TEXT_SEARCH")}
-                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                      />
-                      <span className="text-sm">Database Search</span>
-                    </label>
-                    <label className="flex items-center space-x-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="searchMode"
-                        value="FULL_TEXT_SEARCH"
-                        checked={formFilters.mode === "FULL_TEXT_SEARCH"}
-                        onChange={(e) => updateFilter("mode", e.target.value as "DATABASE" | "FULL_TEXT_SEARCH")}
-                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                      />
-                      <span className="text-sm">Full Text Search</span>
-                    </label>
-                  </div>
+                  </Label>
+                  <RadioGroup
+                    value={formFilters.mode}
+                    onValueChange={(val) =>
+                      updateFilter("mode", val as "DATABASE" | "FULL_TEXT_SEARCH")
+                    }
+                    className="gap-2"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem id="mode-db" value="DATABASE" />
+                      <Label htmlFor="mode-db">Database Search</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem id="mode-fts" value="FULL_TEXT_SEARCH" />
+                      <Label htmlFor="mode-fts">Full Text Search</Label>
+                    </div>
+                  </RadioGroup>
                 </div>
 
                 {/* Action Buttons */}

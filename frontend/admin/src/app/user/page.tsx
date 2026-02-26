@@ -172,11 +172,11 @@ const AdminUserListPage: React.FC = () => {
   }, [applyFilters]);
 
   const openCreateUser = useCallback(() => {
-    router.push("/admin/user/add");
+    router.push("/user/add");
   }, [router]);
 
   const openEditUser = useCallback((user: User) => {
-    router.push(`/admin/user/${user.id}/edit`);
+    router.push(`/user/${user.id}/edit`);
   }, [router]);
 
   const openDeleteDialog = useCallback((user: User) => {
@@ -250,7 +250,7 @@ const AdminUserListPage: React.FC = () => {
               <div className="space-y-2">
                 <Label htmlFor="userId">User ID</Label>
                 <Input
-                  type="number"
+                  type="text"
                   id="userId"
                   placeholder="Enter user ID"
                   value={filters.id || ""}
@@ -368,7 +368,7 @@ const AdminUserListPage: React.FC = () => {
                                 user.role === "ADMIN" ? "default" : "secondary"
                               }
                             >
-                              {user.role}
+                              {userRoles[user.role] || "Unknown"}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">

@@ -23,9 +23,9 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
   
-  // Redirect to admin dashboard if already logged in and trying to access auth pages
+  // Redirect to home if already logged in and trying to access auth pages
   if (isAuthRoute && hasToken) {
-    return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+    return NextResponse.redirect(new URL('/', request.url));
   }
   
   return NextResponse.next();

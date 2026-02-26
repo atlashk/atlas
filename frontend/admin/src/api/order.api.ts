@@ -7,7 +7,7 @@ import { BaseApi } from "./base.api";
 
 export class OrderApi extends BaseApi {
   constructor() {
-    super("/services/order/api/admin");
+    super("/services/order/api");
   }
 
   async retrieveOrderList(filters: RetrieveOrderFilter): Promise<ApiResponse<Order[]>> {
@@ -21,22 +21,22 @@ export class OrderApi extends BaseApi {
       page: filters.page || 1,
       size: filters.size || 20,
     };
-    return this.post<Order[], typeof payload>("/orders/list", payload);
+    return this.post<Order[], typeof payload>("/orders/admin/list", payload);
   }
 
   async retrieveTotalOrderCount(): Promise<ApiResponse<number>> {
-    return this.get<number>("/orders/statistics/count");
+    return this.get<number>("/orders/admin/statistics/count");
   }
 
   async retrieveTotalRevenue(): Promise<ApiResponse<number>> {
-    return this.get<number>("/orders/statistics/total-revenue");
+    return this.get<number>("/orders/admin/statistics/total-revenue");
   }
 
   async retrieveMonthlyOrderStatistics(): Promise<
     ApiResponse<{ year: number; month: number; totalRevenue: number }[]>
   > {
     return this.get<{ year: number; month: number; totalRevenue: number }[]>(
-      "/orders/statistics/monthly"
+      "/orders/admin/statistics/monthly"
     );
   }
 

@@ -30,6 +30,7 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
+import Link from "next/link";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import { toast } from "sonner";
@@ -162,9 +163,14 @@ const Dashboard: React.FC = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {loading ? "Loading..." : displayStats.totalUserCount.toLocaleString()}
-            </div>
+            <Link
+              href="/user"
+              className="text-2xl font-bold text-primary hover:underline underline-offset-4"
+            >
+              {loading
+                ? "Loading..."
+                : displayStats.totalUserCount.toLocaleString()}
+            </Link>
           </CardContent>
         </Card>
 
@@ -176,9 +182,14 @@ const Dashboard: React.FC = () => {
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {loading ? "Loading..." : displayStats.totalProductCount.toLocaleString()}
-            </div>
+            <Link
+              href="/product"
+              className="text-2xl font-bold text-primary hover:underline underline-offset-4"
+            >
+              {loading
+                ? "Loading..."
+                : displayStats.totalProductCount.toLocaleString()}
+            </Link>
           </CardContent>
         </Card>
 
@@ -188,9 +199,14 @@ const Dashboard: React.FC = () => {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {loading ? "Loading..." : displayStats.totalOrderCount.toLocaleString()}
-            </div>
+            <Link
+              href="/order"
+              className="text-2xl font-bold text-primary hover:underline underline-offset-4"
+            >
+              {loading
+                ? "Loading..."
+                : displayStats.totalOrderCount.toLocaleString()}
+            </Link>
           </CardContent>
         </Card>
 
@@ -200,11 +216,12 @@ const Dashboard: React.FC = () => {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {loading
-                ? "Loading..."
-                : formatCurrency(displayStats.totalRevenue)}
-            </div>
+            <Link
+              href="/order"
+              className="text-2xl font-bold text-primary hover:underline underline-offset-4"
+            >
+              {loading ? "Loading..." : formatCurrency(displayStats.totalRevenue)}
+            </Link>
           </CardContent>
         </Card>
       </div>

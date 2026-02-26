@@ -102,7 +102,7 @@ export function useGuestRedirect() {
 
     if (isUserAuthenticated && userRole === 'ADMIN') {
       console.log('[useGuestRedirect] Admin authenticated, redirecting to dashboard');
-      router.push('/admin/dashboard');
+      router.push('/');
     }
   }, [loading, profileLoading, isAuthenticated, profile?.role, router]);
 

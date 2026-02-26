@@ -53,10 +53,10 @@ export interface CreateProductRequest {
   price: number;
   publishedAt: string;
   initialQuantity: number;
-  brandId: number;
+  brandId: string;
   details: ProductDetails;
   attributes: Omit<ProductAttribute, "id">[];
-  categoryIds: number[];
+  categoryIds: string[];
 }
 
 export interface UpdateProductRequest {
@@ -65,10 +65,10 @@ export interface UpdateProductRequest {
   type: string;
   price: number;
   publishedAt: string;
-  brandId: number;
+  brandId: string;
   details: ProductDetails;
   attributes: ProductAttribute[];
-  categoryIds: number[];
+  categoryIds: string[];
 }
 
 export enum FileType {
@@ -92,6 +92,6 @@ export interface ExportProductFilters {
   endPublishedAt?: string;
   inStock?: boolean;
   brandId?: string;
-  categoryIds?: number[];
+  categoryIds?: string[];
   fileType: FileType;
 }

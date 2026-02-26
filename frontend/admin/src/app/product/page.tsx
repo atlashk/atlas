@@ -48,7 +48,7 @@ import {
   type ExportProductFilters,
   type Product,
   type RetrieveProductListFilters,
-} from "@/interfaces/product.interface";
+} from "@/interfaces/catalog.interface";
 import { formatCurrency } from "@/utils/formatter.util";
 import { getProductImageUrl } from "@/utils/productImage.util";
 import {
@@ -475,7 +475,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={() => router.push("/admin/product/add")}
+            onClick={() => router.push("/product/add")}
           >
             <Plus className="h-4 w-4" />
             New Product
@@ -532,6 +532,28 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="productType">Product Type</Label>
+              <Select
+                value={formFilters.type || ""}
+                onValueChange={(value) => handleFilterChange("type", value)}
+                disabled={isLoadingProductTypes}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Types" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(productTypes).map(([typeKey, typeLabel]) => (
+                    <SelectItem key={typeKey} value={typeKey}>
+                      {typeLabel}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
+            <div className="space-y-2">
               <Label htmlFor="minPrice">Min Price</Label>
               <Input
                 type="number"
@@ -564,35 +586,13 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                 }
               />
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
-            <div className="space-y-2">
-              <Label htmlFor="productType">Product Type</Label>
-              <Select
-                value={formFilters.type || ""}
-                onValueChange={(value) => handleFilterChange("type", value)}
-                disabled={isLoadingProductTypes}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="All Types" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(productTypes).map(([typeKey, typeLabel]) => (
-                    <SelectItem key={typeKey} value={typeKey}>
-                      {typeLabel}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
 
             <div className="space-y-2">
-              <Label htmlFor="availableFrom">Available From</Label>
+              <Label htmlFor="startPublishedAt">Start Publish date</Label>
               <Input
                 type="date"
                 id="startPublishedAt"
-                placeholder="Available From"
+                placeholder="Start Publish date"
                 value={formFilters.startPublishedAt || ""}
                 onChange={(e) =>
                   handleFilterChange(
@@ -603,6 +603,24 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
               />
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="endPublishedAt">End Publish date</Label>
+              <Input
+                type="date"
+                id="endPublishedAt"
+                placeholder="End Publish date"
+                value={formFilters.endPublishedAt || ""}
+                onChange={(e) =>
+                  handleFilterChange(
+                    "endPublishedAt",
+                    e.target.value || undefined
+                  )
+                }
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
             <div className="space-y-2">
               <Label>Stock Status</Label>
               <div className="border rounded p-3 flex items-center space-x-6">
@@ -634,9 +652,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
             <div className="space-y-2">
               <Label htmlFor="brandId">Brand</Label>
               {isLoadingBrands ? (
@@ -804,7 +820,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                       <TableRow key={product.id}>
                         <TableCell>{product.id}</TableCell>
                         <TableCell>{product.name}</TableCell>
-                        <TableCell>{product.type}</TableCell>
+                        <TableCell>{productTypes[product.type] || "Unknown"}</TableCell>
                         <TableCell>
                           <Image
                             src={getProductImageUrl(product.image)}
@@ -822,7 +838,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                               variant="outline"
                               size="sm"
                               onClick={() =>
-                                router.push(`/admin/product/${product.id}`)
+                                router.push(`/product/${product.id}`)
                               }
                               title="View Product"
                             >
@@ -832,7 +848,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                               variant="outline"
                               size="sm"
                               onClick={() =>
-                                router.push(`/admin/product/${product.id}/edit`)
+                                router.push(`/product/${product.id}/edit`)
                               }
                               title="Edit Product"
                             >

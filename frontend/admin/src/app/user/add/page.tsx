@@ -108,7 +108,7 @@ function AdminUserAddPage() {
       const response = await identityApi.createUser(request);
       if (response.success) {
         toast.success("User created successfully");
-        router.push("/admin/user");
+        router.push("/user");
       } else {
         toast.error(response.errorMessage || "Failed to create user");
       }

@@ -70,8 +70,12 @@ public class DateUtil {
   }
 
   public static Date getTomorrowMidnight() {
+    return getNextMidnight(now());
+  }
+
+  public static Date getNextMidnight(Date date) {
     Calendar calendar = Calendar.getInstance();
-    calendar.setTime(new Date());
+    calendar.setTime(date);
     resetToMidnight(calendar);
     calendar.add(Calendar.DAY_OF_YEAR, 1);
     return calendar.getTime();

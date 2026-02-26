@@ -4,7 +4,6 @@ import { catalogApi } from "@/api/index.api";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -28,7 +27,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { PRODUCT_STOCK_STATUSES } from "@/constants";
 import { withRequireAdmin } from "@/hoc/withAuth";
 
 import {
@@ -36,27 +34,25 @@ import {
   Category,
   Product,
   UpdateProductRequest,
-} from "@/interfaces/product.interface";
+} from "@/interfaces/catalog.interface";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
-import { useFieldArray, useForm, ControllerRenderProps } from "react-hook-form";
+import { useEffect, useRef, useState } from "react";
+import { ControllerRenderProps, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
 const productSchema = z.object({
   id: z.string().min(1, "Product ID is required"),
   name: z.string().min(1, "Product name is required"),
+  type: z.string().min(1, "Product type is required"),
   price: z.number().min(0, "Price must be greater than or equal to 0"),
-  stockStatus: z.enum(PRODUCT_STOCK_STATUSES),
-  quantity: z.number().min(0, "Quantity must be greater than or equal to 0"),
-  availableFrom: z.string().min(1, "Available from date is required"),
-  isActive: z.boolean(),
-  brandId: z.number().min(1, "Please select a brand"),
+  publishedAt: z.string().min(1, "Published at date is required"),
+  brandId: z.string().min(1, "Please select a brand"),
   categoryIds: z
-    .array(z.number())
+    .array(z.string())
     .min(1, "Please select at least one category"),
   image: z.string().optional(),
   details: z.object({
@@ -92,17 +88,19 @@ function AdminProductEditPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
+  // Product types state
+  const [productTypes, setProductTypes] = useState<Record<string, string>>({});
+  const [isLoadingProductTypes, setIsLoadingProductTypes] = useState(false);
+
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: {
       id: "",
       name: "",
+      type: "",
       price: 0,
-      stockStatus: "IN_STOCK",
-      quantity: 0,
-      availableFrom: "",
-      isActive: true,
-      brandId: 0,
+      publishedAt: "",
+      brandId: "",
       categoryIds: [],
       image: "",
       details: {
@@ -164,11 +162,30 @@ function AdminProductEditPage() {
         setIsLoadingCategories(false);
       }
     };
-    
-    const initializeData = async () => {
-      await Promise.all([loadBrands(), loadCategories()]);
+
+    const loadProductTypes = async () => {
+      if (isLoadingProductTypes || Object.keys(productTypes).length > 0) return;
+      setIsLoadingProductTypes(true);
+      try {
+        const response = await catalogApi.retrieveProductTypes();
+        if (response.success && response.data) {
+          setProductTypes(response.data);
+        } else {
+          toast.error(response.errorMessage || "Failed to load product types");
+        }
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Failed to load product types";
+        toast.error(errorMessage);
+      } finally {
+        setIsLoadingProductTypes(false);
+      }
     };
-    
+
+    const initializeData = async () => {
+      await Promise.all([loadBrands(), loadCategories(), loadProductTypes()]);
+    };
+
     initializeData();
   }, []);
 
@@ -188,19 +205,17 @@ function AdminProductEditPage() {
           const productData = productResponse.data;
           setProduct(productData);
 
-          const availableFromDate = new Date(productData.availableFrom || new Date());
-          const formattedDate = availableFromDate.toISOString().slice(0, 16);
+          const publishedAtDate = new Date(productData.publishedAt || new Date());
+          const formattedDate = publishedAtDate.toISOString().slice(0, 16);
 
           form.reset({
             id: productData.id,
             name: productData.name,
+            type: productData.type, 
             price: productData.price,
-            stockStatus: productData.stockStatus,
-            quantity: productData.quantity,
-            availableFrom: formattedDate,
-            isActive: productData.isActive,
-            brandId: productData.brand?.id || 0,
-            categoryIds: productData.categories?.map((cat) => cat.id) || [],
+            publishedAt: formattedDate,
+            brandId: productData.brand?.id?.toString() || "",
+            categoryIds: productData.categories?.map((cat: Category) => cat.id.toString()) || [],
             image: productData.image || "",
             details: {
               description: productData.details?.description || "",
@@ -215,11 +230,11 @@ function AdminProductEditPage() {
           replace(productData.attributes || []);
         } else {
           toast.error("Product not found");
-          router.push("/admin/product");
+          router.push("/product");
         }
       } catch {
         toast.error("Failed to load product data");
-        router.push("/admin/product");
+        router.push("/product");
       } finally {
         setIsLoadingProduct(false);
       }
@@ -263,14 +278,14 @@ function AdminProductEditPage() {
       const formData: UpdateProductRequest = {
         ...data,
         attributes: filteredAttributes,
-        availableFrom: new Date(data.availableFrom).toISOString(),
+        publishedAt: new Date(data.publishedAt).toISOString(),
       };
 
       const response = await catalogApi.updateProduct(formData, imageFile ?? undefined);
 
       if (response.success) {
         toast.success("Product updated successfully!");
-        router.push(`/admin/product/${formData.id}`);
+        router.push(`/product/${formData.id}`);
       } else {
         toast.error(response.errorMessage || "Failed to update product");
       }
@@ -310,7 +325,7 @@ function AdminProductEditPage() {
             <p className="text-gray-600 mb-4">
               The product you&apos;re looking for doesn&apos;t exist.
             </p>
-            <Button onClick={() => router.push("/admin/product")}>
+            <Button onClick={() => router.push("/product")}>
               Back to Products
             </Button>
           </div>
@@ -383,44 +398,24 @@ function AdminProductEditPage() {
 
                   <FormField
                     control={form.control}
-                    name="quantity"
-                    render={({ field }: { field: ControllerRenderProps<ProductFormData, "quantity"> }) => (
+                    name="type"
+                    render={({ field }: { field: ControllerRenderProps<ProductFormData, "type"> }) => (
                       <FormItem>
-                        <FormLabel>Quantity *</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="number"
-                            min="0"
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                              field.onChange(parseInt(e.target.value) || 0)
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="stockStatus"
-                    render={({ field }: { field: ControllerRenderProps<ProductFormData, "stockStatus"> }) => (
-                      <FormItem>
-                        <FormLabel>Status *</FormLabel>
+                        <FormLabel>Product Type *</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           value={field.value}
+                          disabled={isLoadingProductTypes}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
+                              <SelectValue placeholder="Select type" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {PRODUCT_STOCK_STATUSES.map((status) => (
-                              <SelectItem key={status} value={status}>
-                                {formatStatusLabel(status)}
+                            {Object.entries(productTypes).map(([typeKey, typeLabel]) => (
+                              <SelectItem key={typeKey} value={typeKey}>
+                                {typeLabel}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -432,32 +427,14 @@ function AdminProductEditPage() {
 
                   <FormField
                     control={form.control}
-                    name="availableFrom"
-                    render={({ field }: { field: ControllerRenderProps<ProductFormData, "availableFrom"> }) => (
+                    name="publishedAt"
+                    render={({ field }: { field: ControllerRenderProps<ProductFormData, "publishedAt"> }) => (
                       <FormItem>
-                        <FormLabel>Available From *</FormLabel>
+                        <FormLabel>Publish Date *</FormLabel>
                         <FormControl>
                           <Input {...field} type="datetime-local" />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="isActive"
-                    render={({ field }: { field: ControllerRenderProps<ProductFormData, "isActive"> }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Product is active</FormLabel>
-                        </div>
                       </FormItem>
                     )}
                   />
@@ -469,10 +446,8 @@ function AdminProductEditPage() {
                       <FormItem>
                         <FormLabel>Brand *</FormLabel>
                         <Select
-                          onValueChange={(value: string) =>
-                            field.onChange(parseInt(value))
-                          }
-                          value={field.value.toString()}
+                          onValueChange={field.onChange}
+                          value={field.value}
                           disabled={isLoadingBrands || brands.length === 0}
                         >
                           <FormControl>
@@ -530,7 +505,8 @@ function AdminProductEditPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="w-64">
                               {categories.map((category) => {
-                                const isChecked = field.value.includes(category.id);
+                                const categoryId = category.id.toString();
+                                const isChecked = field.value.includes(categoryId);
                                 return (
                                   <DropdownMenuCheckboxItem
                                     key={category.id}
@@ -539,12 +515,12 @@ function AdminProductEditPage() {
                                       if (checked) {
                                         field.onChange([
                                           ...field.value,
-                                          category.id,
+                                          categoryId,
                                         ]);
                                       } else {
                                         field.onChange(
                                           field.value.filter(
-                                            (id) => id !== category.id
+                                            (id) => id !== categoryId
                                           )
                                         );
                                       }

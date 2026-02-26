@@ -44,7 +44,7 @@ public class OrderAdminController {
     return ApiResponseWrapper.successPage(responseData);
   }
 
-  @GetMapping(value = "/statistics/total-count", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/statistics/count", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve total order count")
   public ApiResponseWrapper<Long> retrieveTotalOrderCount() {
     Long responseData = orderAdminService.retrieveTotalOrderCount();

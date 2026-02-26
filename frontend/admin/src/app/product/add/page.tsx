@@ -4,7 +4,6 @@ import { catalogApi } from "@/api/index.api";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -22,13 +21,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { PRODUCT_STOCK_STATUSES } from "@/constants";
 import { withRequireAdmin } from "@/hoc/withAuth";
 import {
   Brand,
   Category,
   CreateProductRequest,
-} from "@/interfaces/product.interface";
+} from "@/interfaces/catalog.interface";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
@@ -40,14 +38,13 @@ import { z } from "zod";
 
 const productSchema = z.object({
   name: z.string().min(1, "Product name is required"),
+  type: z.string().min(1, "Product type is required"),
   price: z.number().min(0, "Price must be greater than or equal to 0"),
-  stockStatus: z.enum(PRODUCT_STOCK_STATUSES),
-  quantity: z.number().min(0, "Quantity must be greater than or equal to 0"),
-  availableFrom: z.string().min(1, "Available from date is required"),
-  isActive: z.boolean(),
-  brandId: z.number().min(1, "Please select a brand"),
+  publishedAt: z.string().min(1, "Published at date is required"),
+  initialQuantity: z.number().min(0, "Initial quantity must be greater than or equal to 0"),
+  brandId: z.string().min(1, "Please select a brand"),
   categoryIds: z
-    .array(z.number())
+    .array(z.string())
     .min(1, "Please select at least one category"),
   details: z.object({
     description: z.string().min(1, "Description is required"),
@@ -66,7 +63,7 @@ function AdminProductAddPage() {
   const router = useRouter();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  
+
   // Brands state
   const [brands, setBrands] = useState<Brand[]>([]);
   const [isLoadingBrands, setIsLoadingBrands] = useState(true);
@@ -74,6 +71,10 @@ function AdminProductAddPage() {
   // Categories state
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+  // Product types state
+  const [productTypes, setProductTypes] = useState<Record<string, string>>({});
+  const [isLoadingProductTypes, setIsLoadingProductTypes] = useState(false);
 
   // Load brands data
   const loadBrands = useCallback(async () => {
@@ -119,24 +120,42 @@ function AdminProductAddPage() {
     }
   }, []);
 
+  const loadProductTypes = useCallback(async () => {
+    if (isLoadingProductTypes || Object.keys(productTypes).length > 0) return;
+    setIsLoadingProductTypes(true);
+    try {
+      const response = await catalogApi.retrieveProductTypes();
+      if (response.success && response.data) {
+        setProductTypes(response.data);
+      } else {
+        toast.error(response.errorMessage || "Failed to load product types");
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to load product types";
+      toast.error(errorMessage);
+    } finally {
+      setIsLoadingProductTypes(false);
+    }
+  }, [isLoadingProductTypes, productTypes]);
+
   // Initial data loading - load static data once
   useEffect(() => {
     const initializeData = async () => {
-      await Promise.all([loadBrands(), loadCategories()]);
+      await Promise.all([loadBrands(), loadCategories(), loadProductTypes()]);
     };
     initializeData();
-  }, [loadBrands, loadCategories]);
+  }, [loadBrands, loadCategories, loadProductTypes]);
 
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: "",
+      type: "",
       price: 0,
-      stockStatus: "IN_STOCK",
-      quantity: 0,
-      availableFrom: "",
-      isActive: true,
-      brandId: 0,
+      publishedAt: "",
+      initialQuantity: 0,
+      brandId: "",
       categoryIds: [],
       details: {
         description: "",
@@ -181,14 +200,14 @@ function AdminProductAddPage() {
       const formData: CreateProductRequest = {
         ...data,
         attributes: filteredAttributes,
-        availableFrom: new Date(data.availableFrom).toISOString(),
+        publishedAt: new Date(data.publishedAt).toISOString(),
       };
 
       const response = await catalogApi.createProduct(formData, imageFile ?? undefined);
 
       if (response.success) {
         toast.success("Product created successfully!");
-        router.push("/admin/product");
+        router.push("/product");
       } else {
         toast.error(response.errorMessage || "Failed to create product");
       }
@@ -261,10 +280,53 @@ function AdminProductAddPage() {
 
                   <FormField
                     control={form.control}
-                    name="quantity"
+                    name="type"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Quantity *</FormLabel>
+                        <FormLabel>Product Type *</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          disabled={isLoadingProductTypes}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {Object.entries(productTypes).map(([typeKey, typeLabel]) => (
+                              <SelectItem key={typeKey} value={typeKey}>
+                                {typeLabel}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="publishedAt"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Published At *</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="datetime-local" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="initialQuantity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Initial Quantity *</FormLabel>
                         <FormControl>
                           <Input
                             {...field}
@@ -282,74 +344,13 @@ function AdminProductAddPage() {
 
                   <FormField
                     control={form.control}
-                    name="stockStatus"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Stock Status *</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {PRODUCT_STOCK_STATUSES.map((status) => (
-                              <SelectItem key={status} value={status}>
-                                {status}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="availableFrom"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Available From *</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="datetime-local" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="isActive"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Product is active</FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
                     name="brandId"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Brand *</FormLabel>
                         <Select
-                          onValueChange={(value) =>
-                            field.onChange(parseInt(value))
-                          }
+                          onValueChange={field.onChange}
+                          value={field.value}
                           disabled={isLoadingBrands || brands.length === 0}
                         >
                           <FormControl>
@@ -393,7 +394,7 @@ function AdminProductAddPage() {
                             </span>
                           </div>
                         ) : (
-                          <Select value="placeholder" onValueChange={() => {}}>
+                          <Select value="placeholder" onValueChange={() => { }}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue>
@@ -404,7 +405,9 @@ function AdminProductAddPage() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {categories.map((category) => (
+                              {categories.map((category) => {
+                                const categoryId = category.id.toString();
+                                return (
                                 <label
                                   key={category.id}
                                   className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded"
@@ -412,17 +415,17 @@ function AdminProductAddPage() {
                                   <input
                                     type="checkbox"
                                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                    checked={field.value.includes(category.id)}
+                                    checked={field.value.includes(categoryId)}
                                     onChange={(e) => {
                                       if (e.target.checked) {
                                         field.onChange([
                                           ...field.value,
-                                          category.id,
+                                          categoryId,
                                         ]);
                                       } else {
                                         field.onChange(
                                           field.value.filter(
-                                            (id) => id !== category.id
+                                            (id) => id !== categoryId
                                           )
                                         );
                                       }
@@ -432,7 +435,7 @@ function AdminProductAddPage() {
                                     {category.name}
                                   </span>
                                 </label>
-                              ))}
+                              )})}
                             </SelectContent>
                           </Select>
                         )}

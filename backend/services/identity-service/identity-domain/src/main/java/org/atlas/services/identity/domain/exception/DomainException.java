@@ -15,7 +15,7 @@ public class DomainException extends BaseDomainException {
   }
 
   public DomainException(CommonDomainError commonDomainError, String message) {
-    super(commonDomainError.getErrorCode(), message);
+    super(commonDomainError, message);
   }
 
   public DomainException(DomainError domainError, String message) {

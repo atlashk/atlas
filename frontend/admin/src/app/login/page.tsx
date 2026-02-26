@@ -83,7 +83,6 @@ const Login: React.FC = () => {
           router.push(redirectUrl);
         } else {
           // Let useGuestRedirect handle the role-based redirect automatically
-          // This will redirect ADMIN to /admin/dashboard and USER to /
           console.log("No redirect URL, letting useGuestRedirect handle role-based redirect");
         }
       } else {

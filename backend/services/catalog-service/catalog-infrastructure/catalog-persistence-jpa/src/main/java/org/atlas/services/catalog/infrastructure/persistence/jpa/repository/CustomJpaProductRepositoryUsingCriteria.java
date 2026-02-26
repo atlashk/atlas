@@ -8,9 +8,11 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.util.Date;
 import java.util.List;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.util.CollectionUtil;
+import org.atlas.libs.framework.util.DateUtil;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.libs.persistence.jpa.specification.QueryFilter;
 import org.atlas.libs.persistence.jpa.specification.QueryOperator;
@@ -111,22 +113,19 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
 
     // Price
     if (criteria.getMinPrice() != null) {
-      spec.addFilter(
-          QueryFilter.of("price", criteria.getMinPrice(), QueryOperator.GREATER_THAN_EQUAL));
+      spec.addFilter(QueryFilter.of("price", criteria.getMinPrice(), QueryOperator.GREATER_THAN_EQUAL));
     }
     if (criteria.getMaxPrice() != null) {
-      spec.addFilter(
-          QueryFilter.of("price", criteria.getMaxPrice(), QueryOperator.LESS_THAN_EQUAL));
+      spec.addFilter(QueryFilter.of("price", criteria.getMaxPrice(), QueryOperator.LESS_THAN_EQUAL));
     }
     
     // Published date
     if (criteria.getStartPublishedAt() != null) {
-      spec.addFilter(QueryFilter.of("publishedAt", criteria.getStartPublishedAt(),
-          QueryOperator.GREATER_THAN_EQUAL));
+      spec.addFilter(QueryFilter.of("publishedAt", criteria.getStartPublishedAt(), QueryOperator.GREATER_THAN_EQUAL));
     }
     if (criteria.getEndPublishedAt() != null) {
-      spec.addFilter(QueryFilter.of("publishedAt", criteria.getEndPublishedAt(),
-          QueryOperator.LESS_THAN_EQUAL));
+      Date nextDateOfEndDate = DateUtil.getNextMidnight(criteria.getEndPublishedAt());
+      spec.addFilter(QueryFilter.of("publishedAt", nextDateOfEndDate, QueryOperator.LESS_THAN));
     }
 
     // In stock

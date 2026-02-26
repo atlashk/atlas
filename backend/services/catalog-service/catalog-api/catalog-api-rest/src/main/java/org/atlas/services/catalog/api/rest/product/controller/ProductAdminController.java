@@ -75,7 +75,7 @@ public class ProductAdminController {
     return ApiResponseWrapper.success(response);
   }
 
-  @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(summary = "Create a new product")
   public ApiResponseWrapper<String> createProduct(
@@ -94,7 +94,7 @@ public class ProductAdminController {
     return ApiResponseWrapper.success(responseData);
   }
 
-  @PutMapping(value = "/{productId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping(value = "/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Update an existing product by ID")
   public ApiResponseWrapper<Void> updateProduct(
       @Parameter(name = "productId", description = "The unique identifier of the product to update", example = "PRD0000001")
@@ -159,7 +159,7 @@ public class ProductAdminController {
         .body(fileContent);
   }
 
-  @GetMapping("/statistics/total-count")
+  @GetMapping("/statistics/count")
   @Operation(summary = "Retrieve the total product count")
   public ApiResponseWrapper<Long> retrieveTotalProductCount() {
     Long responseData = productAdminService.retrieveTotalProductCount();

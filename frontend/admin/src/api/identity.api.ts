@@ -65,7 +65,7 @@ export class IdentityApi extends BaseApi {
   }
 
   async retrieveTotalUserCount(): Promise<ApiResponse<number>> {
-    return this.get<number>("/users/admin/count");
+    return this.get<number>("/users/admin/statistics/count");
   }
 }
 

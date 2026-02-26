@@ -102,7 +102,7 @@ function AdminUserEditPage() {
     const loadUser = async () => {
       if (!userId) {
         toast.error("User not found");
-        router.push("/admin/user");
+        router.push("/user");
         return;
       }
 
@@ -119,11 +119,11 @@ function AdminUserEditPage() {
           });
         } else {
           toast.error(response.errorMessage || "User not found");
-          router.push("/admin/user");
+          router.push("/user");
         }
       } catch {
         toast.error("Failed to load user");
-        router.push("/admin/user");
+        router.push("/user");
       } finally {
         setIsLoadingUser(false);
       }
@@ -152,7 +152,7 @@ function AdminUserEditPage() {
       const response = await identityApi.updateUser(userId, payload);
       if (response.success) {
         toast.success("User updated successfully");
-        router.push("/admin/user");
+        router.push("/user");
       } else {
         toast.error(response.errorMessage || "Failed to update user");
       }
@@ -213,7 +213,7 @@ function AdminUserEditPage() {
             <p className="text-gray-600 mb-4">
               The user you&apos;re looking for doesn&apos;t exist.
             </p>
-            <Button onClick={() => router.push("/admin/user")}>
+            <Button onClick={() => router.push("/user")}>
               Back to Users
             </Button>
           </div>

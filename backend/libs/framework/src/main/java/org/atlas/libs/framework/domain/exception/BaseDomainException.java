@@ -26,4 +26,8 @@ public class BaseDomainException extends RuntimeException {
   public BaseDomainException(CommonDomainError commonDomainError) {
     this(commonDomainError.getErrorCode(), commonDomainError.getMessageCode());
   }
+
+  public BaseDomainException(CommonDomainError commonDomainError, String message) {
+    this(commonDomainError.getErrorCode(), message);
+  }
 }

@@ -8,8 +8,10 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.util.Date;
 import java.util.List;
 import org.atlas.libs.framework.paging.PagingRequest;
+import org.atlas.libs.framework.util.DateUtil;
 import org.atlas.libs.persistence.jpa.specification.QueryFilter;
 import org.atlas.libs.persistence.jpa.specification.QueryOperator;
 import org.atlas.libs.persistence.jpa.specification.QuerySpecification;
@@ -88,8 +90,7 @@ public class CustomJpaOrderRepositoryUsingCriteria implements CustomJpaOrderRepo
     }
 
     if (criteria.getProductId() != null) {
-      spec.addFilter(
-          QueryFilter.of("orderItems.productId", criteria.getProductId(), QueryOperator.EQUAL));
+      spec.addFilter(QueryFilter.of("orderItems.productId", criteria.getProductId(), QueryOperator.EQUAL));
     }
 
     if (criteria.getStatus() != null) {
@@ -97,13 +98,12 @@ public class CustomJpaOrderRepositoryUsingCriteria implements CustomJpaOrderRepo
     }
 
     if (criteria.getStartDate() != null) {
-      spec.addFilter(
-          QueryFilter.of("createdAt", criteria.getStartDate(), QueryOperator.GREATER_THAN_EQUAL));
+      spec.addFilter(QueryFilter.of("createdAt", criteria.getStartDate(), QueryOperator.GREATER_THAN_EQUAL));
     }
 
     if (criteria.getEndDate() != null) {
-      spec.addFilter(
-          QueryFilter.of("createdAt", criteria.getEndDate(), QueryOperator.LESS_THAN_EQUAL));
+      Date nextDateOfEndDate = DateUtil.getNextMidnight(criteria.getEndDate());
+      spec.addFilter(QueryFilter.of("createdAt", nextDateOfEndDate, QueryOperator.LESS_THAN));
     }
 
     return spec;

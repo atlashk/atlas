@@ -10,6 +10,8 @@ import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.catalog.domain.entity.ProductEntity;
+import org.atlas.services.catalog.domain.error.DomainError;
+import org.atlas.services.catalog.domain.exception.DomainException;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.entity.JpaProductEntity;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.mapper.JpaProductMapper;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.repository.CustomJpaProductRepository;
@@ -72,7 +74,7 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
   @Override
   public void update(ProductEntity product) {
     JpaProductEntity jpaProduct = jpaProductRepository.findByIdWithAssociations(product.getId())
-        .orElseThrow(() -> new BaseDomainException(CommonDomainError.PRODUCT_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
     JpaProductMapper.INSTANCE.merge(product, jpaProduct);
     jpaProductRepository.save(jpaProduct);
   }
