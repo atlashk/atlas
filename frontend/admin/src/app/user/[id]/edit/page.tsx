@@ -152,7 +152,6 @@ function AdminUserEditPage() {
       const response = await identityApi.updateUser(userId, payload);
       if (response.success) {
         toast.success("User updated successfully");
-        router.push("/user");
       } else {
         toast.error(response.errorMessage || "Failed to update user");
       }

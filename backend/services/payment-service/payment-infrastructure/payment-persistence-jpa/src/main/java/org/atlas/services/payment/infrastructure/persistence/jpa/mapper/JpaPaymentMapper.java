@@ -1,12 +1,12 @@
 package org.atlas.services.payment.infrastructure.persistence.jpa.mapper;
 
 import org.atlas.libs.framework.json.JsonUtil;
-import org.atlas.libs.framework.payment.model.nextaction.DeepLink;
-import org.atlas.libs.framework.payment.model.nextaction.NextAction;
-import org.atlas.libs.framework.payment.model.nextaction.NextActionType;
-import org.atlas.libs.framework.payment.model.nextaction.QRCode;
-import org.atlas.libs.framework.payment.model.nextaction.RedirectUrl;
-import org.atlas.libs.framework.payment.model.nextaction.UsePaymentElement;
+import org.atlas.services.payment.domain.entity.nextaction.DeepLink;
+import org.atlas.services.payment.domain.entity.nextaction.NextAction;
+import org.atlas.services.payment.domain.entity.nextaction.NextActionType;
+import org.atlas.services.payment.domain.entity.nextaction.QRCode;
+import org.atlas.services.payment.domain.entity.nextaction.RedirectUrl;
+import org.atlas.services.payment.domain.entity.nextaction.UsePaymentElement;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.payment.domain.entity.PaymentEntity;
 import org.atlas.services.payment.infrastructure.persistence.jpa.entity.JpaPaymentEntity;

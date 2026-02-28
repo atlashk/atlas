@@ -1,7 +1,7 @@
-import type { LoginRequest, User } from "@/interfaces/identity.interface";
 import { identityApi } from "@/api/index.api";
-import { createLogger } from "@/utils/logger";
+import type { ChangePasswordRequest, LoginRequest, User } from "@/interfaces/identity.interface";
 import { clearAuthCookies, getCookie, isValidToken, setCookie } from "@/utils/cookies";
+import { createLogger } from "@/utils/logger";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useCartStore } from "./cart.store";
@@ -29,6 +29,9 @@ interface UserActions {
     credentials: LoginRequest
   ) => Promise<{ success: boolean; errorMessage?: string }>;
   fetchProfile: () => Promise<void>;
+  changePassword: (
+    request: ChangePasswordRequest
+  ) => Promise<{ success: boolean; errorMessage?: string }>;
   logout: () => void;
   clearError: () => void;
   clearAuthState: () => void;
@@ -145,6 +148,25 @@ export const useUserStore = create<UserStore>()(
             accessToken: null,
             profile: null,
           });
+        }
+      },
+
+      changePassword: async (request: ChangePasswordRequest) => {
+        logger.info("Change password initiated");
+        try {
+          const result = await identityApi.changePassword(request);
+          if (result.success) {
+            logger.info("Change password completed");
+            return { success: true };
+          }
+          logger.warn("Change password failed", result.errorMessage);
+          return { success: false, errorMessage: result.errorMessage || "Change password failed" };
+        } catch (error) {
+          logger.error("Change password error", error);
+          return {
+            success: false,
+            errorMessage: error instanceof Error ? error.message : "Change password failed",
+          };
         }
       },
 

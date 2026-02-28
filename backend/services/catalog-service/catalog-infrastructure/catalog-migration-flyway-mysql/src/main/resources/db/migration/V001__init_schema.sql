@@ -52,7 +52,5 @@ CREATE TABLE IF NOT EXISTS product_category
 (
     product_id  VARCHAR(64) NOT NULL,
     category_id VARCHAR(64) NOT NULL,
-    created_at  DATETIME    NOT NULL,
-    updated_at  DATETIME,
     PRIMARY KEY (product_id, category_id)
 ) ENGINE = InnoDB;

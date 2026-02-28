@@ -139,62 +139,62 @@ VALUES
     (59, 'PRD0000020', 'GPU', 'NVIDIA RTX 3080', NOW()),
     (60, 'PRD0000020', 'Storage', '2TB SSD', NOW());
 
-INSERT INTO product_category (product_id, category_id, created_at)
+INSERT INTO product_category (product_id, category_id)
 VALUES
     -- Laptops
-    ('PRD0000001', 'CAT0001', NOW()),
+    ('PRD0000001', 'CAT0001'),
     -- MacBook Pro 14" → Laptops
-    ('PRD0000005', 'CAT0001', NOW()),
+    ('PRD0000005', 'CAT0001'),
     -- Dell XPS 15 → Laptops
-    ('PRD0000010', 'CAT0001', NOW()),
+    ('PRD0000010', 'CAT0001'),
     -- Dell Inspiron 15 → Laptops
-    ('PRD0000011', 'CAT0001', NOW()),
+    ('PRD0000011', 'CAT0001'),
     -- MacBook Air 13" → Laptops
-    ('PRD0000015', 'CAT0001', NOW()),
+    ('PRD0000015', 'CAT0001'),
     -- Dell Latitude 7420 → Laptops
-    ('PRD0000016', 'CAT0001', NOW()),
+    ('PRD0000016', 'CAT0001'),
     -- Mac Studio → Laptops
-    ('PRD0000020', 'CAT0001', NOW()),
+    ('PRD0000020', 'CAT0001'),
     -- Alienware m15 → Laptops, also an accessory
     -- Smartphones
-    ('PRD0000002', 'CAT0002', NOW()),
+    ('PRD0000002', 'CAT0002'),
     -- Samsung Galaxy S23 → Smartphones
-    ('PRD0000012', 'CAT0002', NOW()),
+    ('PRD0000012', 'CAT0002'),
     -- Samsung Galaxy A54 → Smartphones
     -- Tablets (Sometimes used as Accessories or for Productivity)
-    ('PRD0000006', 'CAT0003', NOW()),
+    ('PRD0000006', 'CAT0003'),
     -- iPad Pro 12.9" → Tablets
-    ('PRD0000007', 'CAT0003', NOW()),
+    ('PRD0000007', 'CAT0003'),
     -- Samsung Galaxy Tab S8 → Tablets
-    ('PRD0000006', 'CAT0005', NOW()),
+    ('PRD0000006', 'CAT0005'),
     -- iPad Pro 12.9" → Accessories (Used with Keyboard Case)
-    ('PRD0000007', 'CAT0005', NOW()),
+    ('PRD0000007', 'CAT0005'),
     -- Galaxy Tab S8 → Accessories (Stylus, Keyboard Cases)
     -- Televisions (Also used for Gaming & Streaming)
-    ('PRD0000004', 'CAT0004', NOW()),
+    ('PRD0000004', 'CAT0004'),
     -- LG OLED 55" → Televisions
-    ('PRD0000008', 'CAT0004', NOW()),
+    ('PRD0000008', 'CAT0004'),
     -- Sony Bravia 65" → Televisions
-    ('PRD0000009', 'CAT0004', NOW()),
+    ('PRD0000009', 'CAT0004'),
     -- LG NanoCell 75" → Televisions
-    ('PRD0000017', 'CAT0004', NOW()),
+    ('PRD0000017', 'CAT0004'),
     -- Samsung QLED TV → Televisions
-    ('PRD0000004', 'CAT0005', NOW()),
+    ('PRD0000004', 'CAT0005'),
     -- LG OLED 55" → Accessories (Used with Wall Mounts & Audio Systems)
-    ('PRD0000017', 'CAT0005', NOW()),
+    ('PRD0000017', 'CAT0005'),
     -- Samsung QLED TV → Accessories (Wall Mounts & Soundbars)
     -- Gaming Consoles (Belongs to Televisions & Accessories)
-    ('PRD0000018', 'CAT0004', NOW()),
+    ('PRD0000018', 'CAT0004'),
     -- PlayStation 5 → Televisions (for Gaming)
-    ('PRD0000018', 'CAT0005', NOW()),
+    ('PRD0000018', 'CAT0005'),
     -- PlayStation 5 → Accessories (Extra Controllers, VR Headsets)
     -- Accessories (Standalone electronics)
-    ('PRD0000003', 'CAT0005', NOW()),
+    ('PRD0000003', 'CAT0005'),
     -- Sony WH-1000XM5 → Accessories (Headphones)
-    ('PRD0000013', 'CAT0005', NOW()),
+    ('PRD0000013', 'CAT0005'),
     -- Sony WF-1000XM4 → Accessories (Wireless Earbuds)
-    ('PRD0000014', 'CAT0005', NOW()),
+    ('PRD0000014', 'CAT0005'),
     -- LG UltraGear Monitor → Accessories (Gaming Monitor)
-    ('PRD0000019', 'CAT0005', NOW()),
+    ('PRD0000019', 'CAT0005'),
     -- LG Soundbar → Accessories (Audio Equipment)
-    ('PRD0000020', 'CAT0005', NOW());
+    ('PRD0000020', 'CAT0005');

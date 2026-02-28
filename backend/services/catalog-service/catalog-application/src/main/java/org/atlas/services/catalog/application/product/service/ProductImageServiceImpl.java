@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.image.ImageUtil;
 import org.atlas.libs.framework.storage.StorageConstant;
 import org.atlas.libs.framework.storage.StorageService;
+import org.atlas.libs.framework.storage.model.CheckExistRequest;
 import org.atlas.libs.framework.storage.model.DeleteFileRequest;
 import org.atlas.libs.framework.storage.model.GetDownloadUrlRequest;
 import org.atlas.libs.framework.storage.model.GetFileRequest;
@@ -43,6 +44,10 @@ public class ProductImageServiceImpl implements ProductImageService {
     String bucket = StorageConstant.PRODUCT_IMAGE_BUCKET;
     String objectKey = getObjectKey(productId);
 
+    if (!checkExist(bucket, objectKey)) {
+      return StringUtil.EMPTY;
+    }
+
     // First, try to get a downloadable URL
     String downloadUrl = tryGetDownloadUrl(bucket, objectKey, productId);
     if (StringUtil.isNotBlank(downloadUrl)) {
@@ -51,6 +56,34 @@ public class ProductImageServiceImpl implements ProductImageService {
 
     // Fallback to fetching the file content directly if URL is unavailable
     return tryGetFileContentAsBase64(bucket, objectKey, productId);
+  }
+
+  @Override
+  public void deleteImage(String productId) {
+    String bucket = StorageConstant.PRODUCT_IMAGE_BUCKET;
+    String objectKey = getObjectKey(productId);
+    DeleteFileRequest storageRequest = DeleteFileRequest.builder()
+        .bucket(bucket)
+        .objectKey(objectKey)
+        .build();
+    try {
+      storageService.deleteFile(storageRequest);
+      log.info("Deleted product image: productId={}", productId);
+    } catch (IOException e) {
+      log.error("Failed to delete image: productId={}", productId);
+    }
+  }
+
+  private String getObjectKey(String productId) {
+    return String.format("%s.jpg", productId);
+  }
+
+  private boolean checkExist(String bucket, String objectKey) {
+    CheckExistRequest checkExistRequest = CheckExistRequest.builder()
+        .bucket(bucket)
+        .objectKey(objectKey)
+        .build();
+    return storageService.checkExist(checkExistRequest);
   }
 
   /**
@@ -99,25 +132,5 @@ public class ProductImageServiceImpl implements ProductImageService {
       log.warn("Failed to get file content for productId='{}': {}", productId, e.getMessage());
       return StringUtil.EMPTY;
     }
-  }
-
-  @Override
-  public void deleteImage(String productId) {
-    String bucket = StorageConstant.PRODUCT_IMAGE_BUCKET;
-    String objectKey = getObjectKey(productId);
-    DeleteFileRequest storageRequest = DeleteFileRequest.builder()
-        .bucket(bucket)
-        .objectKey(objectKey)
-        .build();
-    try {
-      storageService.deleteFile(storageRequest);
-      log.info("Deleted product image: productId={}", productId);
-    } catch (IOException e) {
-      log.error("Failed to delete image: productId={}", productId);
-    }
-  }
-
-  private String getObjectKey(String productId) {
-    return String.format("%s.jpg", productId);
   }
 }

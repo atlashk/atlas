@@ -4,7 +4,6 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.context.Contexts;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
-import org.atlas.libs.framework.random.RandomUtil;
 import org.atlas.services.identity.application.keycloak.core.client.KeycloakAuthenticationClient;
 import org.atlas.services.identity.application.keycloak.core.client.KeycloakUserClient;
 import org.atlas.services.identity.application.keycloak.core.model.TokenResponse;
@@ -67,15 +66,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     keycloakAuthenticationClient.changePassword(userId, input.getNewPassword());
-  }
-
-  @Override
-  public String resetPassword(String userId) {
-    keycloakUserClient.retrieveUser(userId)
-        .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
-    String newPassword = RandomUtil.randomPassword(12, true, true, true);
-    keycloakAuthenticationClient.changePassword(userId, newPassword);
-    return newPassword;
   }
 
   @Override

@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Webhook;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.payment.model.HandleWebhookResponse;
+import org.atlas.services.payment.port.out.gateway.model.HandleWebhookResponse;
 import org.atlas.services.payment.api.rest.util.WebhookResponseUtil;
 import org.atlas.services.payment.port.in.service.PaymentWebhookService;
 import org.springframework.http.ResponseEntity;

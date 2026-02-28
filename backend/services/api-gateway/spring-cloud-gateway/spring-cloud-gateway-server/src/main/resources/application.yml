@@ -38,6 +38,7 @@ spring:
                 - Path=/services/identity/api/authentication/**
               filters:
                 - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+                - TokenRelay
                 - RewritePath=/services/identity/api/authentication/(?<segment>.*), /api/authentication/${segment}
             - id: identity-service
               uri: ${IDENTITY_SERVICE_URI:lb://identity-service}

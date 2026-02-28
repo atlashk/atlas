@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Atlas Store",
-  description: "Your one-stop shop for all your needs",
+  title: "Atlas Storefront",
+  description: "Atlas Storefront",
 };
 
 export default function RootLayout({

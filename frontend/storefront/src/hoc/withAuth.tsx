@@ -81,12 +81,7 @@ export const withGuestOnly = <P extends object>(
   Component: ComponentType<P>
 ) => {
   const WithGuestOnlyComponent: React.FC<P> = (props) => {
-    const { isLoading, shouldRedirect } = useGuestRedirect();
-
-    // Show loading while checking auth status
-    if (isLoading) {
-      return <DefaultLoadingComponent />;
-    }
+    const { shouldRedirect } = useGuestRedirect();
 
     // Redirect if authenticated (handled in useGuestRedirect)
     if (shouldRedirect) {

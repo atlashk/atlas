@@ -7,6 +7,7 @@ import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
+import io.minio.StatObjectArgs;
 import io.minio.http.Method;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.storage.StorageService;
+import org.atlas.libs.framework.storage.model.CheckExistRequest;
 import org.atlas.libs.framework.storage.model.DeleteFileRequest;
 import org.atlas.libs.framework.storage.model.GetDownloadUrlRequest;
 import org.atlas.libs.framework.storage.model.GetFileRequest;
@@ -54,6 +56,22 @@ public class MinioStorageService implements StorageService {
       log.info("Uploaded object to MinIO: {}/{} ({} bytes)", bucket, objectKey, bytes.length);
     } catch (Exception e) {
       throw new IOException("Failed to upload object to MinIO: " + bucket + "/" + objectKey, e);
+    }
+  }
+
+  @Override
+  public boolean checkExist(CheckExistRequest request) {
+    String bucket = request.getBucket();
+    String objectKey = request.getObjectKey();
+    try {
+      StatObjectArgs statObjectArgs = StatObjectArgs.builder()
+          .bucket(bucket)
+          .object(objectKey)
+          .build();
+      minioClient.statObject(statObjectArgs);
+      return true;
+    } catch (Exception e) {
+      return false;
     }
   }
 

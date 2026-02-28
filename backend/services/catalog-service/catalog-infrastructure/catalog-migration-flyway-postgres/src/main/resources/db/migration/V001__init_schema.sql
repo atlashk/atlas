@@ -51,7 +51,5 @@ CREATE TABLE IF NOT EXISTS product_category
 (
     product_id  VARCHAR(64) NOT NULL,
     category_id VARCHAR(64) NOT NULL,
-    created_at  TIMESTAMP   NOT NULL,
-    updated_at  TIMESTAMP,
     PRIMARY KEY (product_id, category_id)
 );

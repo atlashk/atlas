@@ -12,6 +12,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { LoginRequest } from "@/interfaces";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Lock, User } from "lucide-react";
 import Link from "next/link";
@@ -20,17 +21,16 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { useUserStore } from "../../stores/user.store";
 import { withGuestOnly } from "../../hoc/withAuth";
-import { LoginRequest } from "@/interfaces";
+import { useUserStore } from "../../stores/user.store";
 
 const formSchema = z.object({
   username: z.string().min(1, {
     message: "Username is required.",
   }),
-  password: z.string().min(1, {
-    message: "Password is required.",
-  }),
+  password: z
+    .string()
+    .min(1, { message: "Password is required." }),
 });
 
 const Login: React.FC = () => {
@@ -85,13 +85,12 @@ const Login: React.FC = () => {
           console.log("No redirect URL, letting useGuestRedirect handle redirect");
         }
       } else {
-        setErrorMessage(
-          response.errorMessage ||
-            "Login failed. Please check your credentials."
-        );
+        const message = response.errorMessage || "Login failed. Please check your credentials.";
+        setErrorMessage(message);
       }
     } catch {
-      setErrorMessage("An unexpected error occurred. Please try again.");
+      const message = "An unexpected error occurred. Please try again.";
+      setErrorMessage(message);
     } finally {
       setIsLoggingIn(false);
     }
@@ -132,7 +131,7 @@ const Login: React.FC = () => {
                         <Input
                           {...field}
                           type="text"
-                          className="pl-10"
+                          className={`pl-10 ${errorMessage ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                           placeholder="Enter your username"
                         />
                       </div>
@@ -162,7 +161,7 @@ const Login: React.FC = () => {
                         <Input
                           {...field}
                           type="password"
-                          className="pl-10"
+                          className={`pl-10 ${errorMessage ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                           placeholder="Enter your password"
                         />
                       </div>

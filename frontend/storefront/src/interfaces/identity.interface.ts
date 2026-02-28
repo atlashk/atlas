@@ -19,6 +19,11 @@ export interface RefreshTokenResponse {
   refreshToken: string;
 }
 
+export interface ChangePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+}
+
 export interface User {
   id: number;
   username: string;

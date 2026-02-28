@@ -145,6 +145,7 @@ function AdminProductDetailsPage() {
                       width={280}
                       height={280}
                       className="w-full h-full object-cover"
+                      unoptimized
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-muted-foreground">

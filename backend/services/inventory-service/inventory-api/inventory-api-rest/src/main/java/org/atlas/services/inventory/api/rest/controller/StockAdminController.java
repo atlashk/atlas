@@ -30,7 +30,7 @@ public class StockAdminController {
   @GetMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve stock information for a product")
   public ApiResponseWrapper<RetrieveStockResponse> retrieveStock(
-      @Parameter(name = "productId", description = "ID of the product to retrieve stock for", example = "123")
+      @Parameter(name = "productId", description = "ID of the product to retrieve stock for", example = "PRD0000001")
       @PathVariable String productId) {
     StockOutput output = stockAdminService.retrieveStock(productId);
     RetrieveStockResponse responseData = StockAdminMapper.INSTANCE.toRetrieveStockResponse(output);
@@ -40,7 +40,7 @@ public class StockAdminController {
   @PutMapping(value = "/{productId}/available-quantity", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Update available quantity for a product")
   public ApiResponseWrapper<Void> updateAvailableQuantity(
-      @Parameter(name = "productId", description = "ID of the product to update available quantity for", example = "123")
+      @Parameter(name = "productId", description = "ID of the product to update available quantity for", example = "PRD0000001")
       @PathVariable String productId,
       @Parameter(description = "Update available quantity request", required = true)
       @Valid @RequestBody UpdateAvailableQuantityRequest request) {

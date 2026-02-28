@@ -285,7 +285,6 @@ function AdminProductEditPage() {
 
       if (response.success) {
         toast.success("Product updated successfully!");
-        router.push(`/product/${formData.id}`);
       } else {
         toast.error(response.errorMessage || "Failed to update product");
       }
@@ -560,6 +559,7 @@ function AdminProductEditPage() {
                             width={128}
                             height={128}
                             className="h-32 w-32 object-cover rounded-md"
+                            unoptimized
                           />
                         </div>
                       )}

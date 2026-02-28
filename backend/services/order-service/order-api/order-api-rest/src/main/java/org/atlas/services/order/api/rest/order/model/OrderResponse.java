@@ -19,7 +19,7 @@ import org.atlas.libs.framework.domain.shared.order.OrderStatus;
 @AllArgsConstructor
 public class OrderResponse {
 
-  @Schema(description = "Unique identifier of the order", example = "12345")
+  @Schema(description = "Unique identifier of the order", example = "ORD0000001")
   private String id;
 
   @Schema(description = "Current status of the order (PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED)")

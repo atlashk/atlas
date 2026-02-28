@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.constant.CommonConstant;
 import org.atlas.libs.framework.domain.shared.payment.PaymentStatus;
 import org.atlas.libs.framework.json.jackson.JacksonService;
-import org.atlas.libs.framework.payment.PaymentGatewayService;
-import org.atlas.libs.framework.payment.model.CreatePaymentRequest;
-import org.atlas.libs.framework.payment.model.CreatePaymentResponse;
+import org.atlas.services.payment.port.out.gateway.service.PaymentGatewayIntegrationService;
+import org.atlas.services.payment.port.out.gateway.model.CreatePaymentRequest;
+import org.atlas.services.payment.port.out.gateway.model.CreatePaymentResponse;
 import org.atlas.libs.framework.saga.checkout.CheckoutCommand;
 import org.atlas.libs.framework.saga.checkout.CheckoutSagaData;
 import org.atlas.libs.framework.saga.checkout.InitializePaymentCommandMetadata;
@@ -58,10 +58,10 @@ public class InitializePaymentCommandHandler {
     // Find the corresponding payment gateway service implementation
     String paymentGatewayServiceBeanName = String.format("%sPaymentGatewayService",
         paymentGateway.getCode().toLowerCase());
-    PaymentGatewayService paymentGatewayService;
+    PaymentGatewayIntegrationService paymentGatewayIntegrationService;
     try {
-      paymentGatewayService = applicationContext.getBean(
-          paymentGatewayServiceBeanName, PaymentGatewayService.class);
+      paymentGatewayIntegrationService = applicationContext.getBean(
+          paymentGatewayServiceBeanName, PaymentGatewayIntegrationService.class);
     } catch (NoSuchBeanDefinitionException e) {
       throw new DomainException(DomainError.PAYMENT_GATEWAY_NOT_FOUND);
     }
@@ -84,7 +84,7 @@ public class InitializePaymentCommandHandler {
         .amount(payment.getAmount())
         .currency(payment.getCurrency())
         .build();
-    CreatePaymentResponse response = paymentGatewayService.createPayment(createPaymentRequest);
+    CreatePaymentResponse response = paymentGatewayIntegrationService.createPayment(createPaymentRequest);
 
     if (response.isSuccess()) {
       log.info(

@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.libs.framework.payment.model.nextaction.NextAction;
+import org.atlas.services.payment.domain.entity.nextaction.NextAction;
 
 @Schema(description = "Response object for payment next action")
 @Getter

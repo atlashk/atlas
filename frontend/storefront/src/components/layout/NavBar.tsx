@@ -1,24 +1,25 @@
 'use client';
 
-import { useUserStore } from '@/stores/user.store';
-import { useCartStore } from '@/stores/cart.store';
-import Link from 'next/link';
-import { ShoppingCart, User, LogOut, Package } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import ChangePasswordDialog from '@/components/layout/ChangePasswordDialog';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useEffect } from 'react';
+import { useCartStore } from '@/stores/cart.store';
+import { useUserStore } from '@/stores/user.store';
+import { KeyRound, LogOut, Package, ShoppingCart, User } from 'lucide-react';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 export default function NavBar() {
   const { profile, logout } = useUserStore();
   const { getCartItemCount, loadCart } = useCartStore();
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   
   const cartItemCount = getCartItemCount();
 
@@ -28,6 +29,11 @@ export default function NavBar() {
       loadCart();
     }
   }, [profile, loadCart]);
+
+  const userDisplayName =
+    profile?.firstName && profile?.lastName
+      ? `${profile.firstName} ${profile.lastName}`
+      : profile?.username || profile?.email || 'User';
 
   const handleLogout = async () => {
     await logout();
@@ -40,7 +46,7 @@ export default function NavBar() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Atlas Store
+              Atlas Storefront
             </div>
           </Link>
 
@@ -65,31 +71,28 @@ export default function NavBar() {
             {profile ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="sm" className="flex items-center gap-2">
                     <User className="h-5 w-5" />
+                    <span className="hidden sm:inline text-sm font-medium max-w-[10rem] truncate">
+                      {userDisplayName}
+                    </span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium">
-                        {profile.firstName && profile.lastName 
-                          ? `${profile.firstName} ${profile.lastName}` 
-                          : profile.username || profile.email}
-                      </p>
-                      <p className="text-xs text-gray-500">{profile.email}</p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/order-history" className="cursor-pointer">
-                      <Package className="mr-2 h-4 w-4" />
-                      Order History
+                    <Link href="/order-history" className="flex items-center gap-2 cursor-pointer whitespace-nowrap">
+                      <Package className="h-4 w-4" />
+                      <span>Order History</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => setIsChangePasswordOpen(true)} className="cursor-pointer">
+                    <KeyRound className="h-4 w-4" />
+                    Change password
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600">
-                    <LogOut className="mr-2 h-4 w-4" />
+                    <LogOut className="h-4 w-4" />
                     Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -111,6 +114,7 @@ export default function NavBar() {
           </div>
         </div>
       </div>
+      <ChangePasswordDialog open={isChangePasswordOpen} onOpenChange={setIsChangePasswordOpen} />
     </nav>
   );
 }

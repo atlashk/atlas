@@ -9,7 +9,6 @@ import org.atlas.libs.framework.context.Contexts;
 import org.atlas.libs.framework.cryptography.HashingUtil;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.kvstore.KvStoreService;
-import org.atlas.libs.framework.random.RandomUtil;
 import org.atlas.libs.framework.security.SecurityConstant;
 import org.atlas.libs.framework.util.DateUtil;
 import org.atlas.libs.framework.util.StringUtil;
@@ -110,23 +109,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     UserEntity user = userRepository.findById(userId)
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
 
-    if (passwordEncoder.matches(input.getOldPassword(), user.getPassword())) {
+    if (!passwordEncoder.matches(input.getOldPassword(), user.getPassword())) {
       throw new DomainException(DomainError.WRONG_PASSWORD);
     }
 
     user.setPassword(passwordEncoder.encode(input.getNewPassword()));
     userRepository.update(user);
-  }
-
-  @Override
-  @Transactional
-  public String resetPassword(String userId) {
-    UserEntity user = userRepository.findById(userId)
-        .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
-    String newPassword = RandomUtil.randomPassword(12, true, true, true);
-    user.setPassword(passwordEncoder.encode(newPassword));
-    userRepository.update(user);
-    return newPassword;
   }
 
   @Override

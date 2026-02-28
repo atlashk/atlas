@@ -5,7 +5,7 @@ metadata:
   name: grafana
   labels:
     app: grafana
-    tier: observability
+    tier: infrastructure
 spec:
   replicas: 1
   selector:
@@ -15,7 +15,7 @@ spec:
     metadata:
       labels:
         app: grafana
-        tier: observability
+        tier: infrastructure
     spec:
       containers:
         - name: grafana

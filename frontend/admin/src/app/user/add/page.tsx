@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { withRequireAdmin } from "@/hoc/withAuth";
 import type { RegisterRequest } from "@/interfaces/identity.interface";
+import { PASSWORD_REGEX, PASSWORD_REQUIREMENTS_MESSAGE } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -35,10 +36,15 @@ const userSchema = z
     username: z.string().min(2, "Username must be at least 2 characters."),
     firstName: z.string().min(1, "First name is required."),
     lastName: z.string().min(1, "Last name is required."),
-    email: z.string().email("Please enter a valid email address."),
+    email: z.email("Please enter a valid email address."),
     phoneNumber: z.string().min(1, "Phone number is required."),
-    password: z.string().min(6, "Password must be at least 6 characters."),
-    confirmPassword: z.string().min(6, "Confirm password is required."),
+    password: z
+      .string()
+      .min(1, "Password is required.")
+      .refine((value) => PASSWORD_REGEX.test(value), {
+        message: PASSWORD_REQUIREMENTS_MESSAGE,
+      }),
+    confirmPassword: z.string().min(1, "Confirm password is required."),
     role: z.string().min(1, "Role is required."),
   })
   .refine((data) => data.password === data.confirmPassword, {

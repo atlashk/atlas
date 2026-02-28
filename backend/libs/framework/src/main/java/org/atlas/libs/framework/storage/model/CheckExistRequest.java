@@ -1,0 +1,14 @@
+package org.atlas.libs.framework.storage.model;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+
+@SuperBuilder
+@Getter
+@Setter
+@EqualsAndHashCode(callSuper = false)
+public class CheckExistRequest extends BaseRequest {
+
+}

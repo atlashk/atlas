@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.services.catalog.api.rest.brand.model.BrandResponse;
 import org.atlas.services.catalog.api.rest.category.model.CategoryResponse;
+import org.atlas.services.catalog.domain.entity.ProductType;
 
 @Schema(description = "Response object for retrieving product details")
 @Getter
@@ -19,11 +20,14 @@ import org.atlas.services.catalog.api.rest.category.model.CategoryResponse;
 @AllArgsConstructor
 public class ProductResponse {
 
-  @Schema(description = "Unique identifier of the product", example = "123")
+  @Schema(description = "Unique identifier of the product", example = "PRD0000001")
   private String id;
 
   @Schema(description = "Name of the product", example = "T-Shirt")
   private String name;
+
+  @Schema(description = "Type of the product", example = "PHYSICAL")
+  private ProductType type;
 
   @Schema(description = "Image of the product", example = "https://example.com/product-image.jpg")
   private String image;

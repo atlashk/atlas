@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { orderApi } from "@/api/index.api";
-import type { CartResponse } from "@/interfaces/cart.interface";
+import type { CartResponse } from "@/interfaces/order.interface";
 import { useUserStore } from "./user.store";
 
 interface CartState {

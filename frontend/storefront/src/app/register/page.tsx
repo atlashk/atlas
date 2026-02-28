@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { withGuestOnly } from "@/hoc/withAuth";
 import { RegisterRequest } from "@/interfaces";
+import { PASSWORD_REGEX, PASSWORD_REQUIREMENTS_MESSAGE } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Lock, Mail, Phone, User, UserPlus } from "lucide-react";
 import Link from "next/link";
@@ -35,18 +36,19 @@ const formSchema = z
     lastName: z.string().min(1, {
       message: "Last name is required.",
     }),
-    email: z.string().email({
+    email: z.email({
       message: "Please enter a valid email address.",
     }),
     phoneNumber: z.string().min(1, {
       message: "Phone number is required.",
     }),
-    password: z.string().min(6, {
-      message: "Password must be at least 6 characters.",
-    }),
-    confirmPassword: z.string().min(6, {
-      message: "Password must be at least 6 characters.",
-    }),
+    password: z
+      .string()
+      .min(1, { message: "Password is required." })
+      .refine((value) => PASSWORD_REGEX.test(value), {
+        message: PASSWORD_REQUIREMENTS_MESSAGE,
+      }),
+    confirmPassword: z.string().min(1, { message: "Confirm password is required." }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",

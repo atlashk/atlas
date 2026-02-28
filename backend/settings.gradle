@@ -148,14 +148,6 @@ project(':libs.outbox.scheduler.quartz').projectDir = file('libs/outbox/outbox-s
 include(':libs.outbox.scheduler.spring')
 project(':libs.outbox.scheduler.spring').projectDir = file('libs/outbox/outbox-scheduler-spring')
 
-// Payment
-include(':libs.payment')
-project(':libs.payment').projectDir = file('libs/payment')
-include(':libs.payment.simulator')
-project(':libs.payment.simulator').projectDir = file('libs/payment/payment-simulator')
-include(':libs.payment.stripe')
-project(':libs.payment.stripe').projectDir = file('libs/payment/payment-stripe')
-
 // Persistence
 include(':libs.persistence.jpa')
 project(':libs.persistence.jpa').projectDir = file('libs/persistence/persistence-jpa')
@@ -412,6 +404,12 @@ include(':services.payment.datasource.mysql')
 project(':services.payment.datasource.mysql').projectDir = file('services/payment-service/payment-infrastructure/payment-datasource-mysql')
 include(':services.payment.datasource.postgres')
 project(':services.payment.datasource.postgres').projectDir = file('services/payment-service/payment-infrastructure/payment-datasource-postgres')
+include(':services.payment.gateway')
+project(':services.payment.gateway').projectDir = file('services/payment-service/payment-infrastructure/payment-gateway')
+include(':services.payment.gateway.simulator')
+project(':services.payment.gateway.simulator').projectDir = file('services/payment-service/payment-infrastructure/payment-gateway/simulator')
+include(':services.payment.gateway.stripe')
+project(':services.payment.gateway.stripe').projectDir = file('services/payment-service/payment-infrastructure/payment-gateway/stripe')
 include(':services.payment.messaging.kafka')
 project(':services.payment.messaging.kafka').projectDir = file('services/payment-service/payment-infrastructure/payment-messaging-kafka')
 include(':services.payment.messaging.rabbitmq')

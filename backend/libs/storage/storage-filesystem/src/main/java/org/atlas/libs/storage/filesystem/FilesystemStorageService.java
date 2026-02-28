@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.storage.StorageService;
 import org.atlas.libs.framework.storage.model.BaseRequest;
+import org.atlas.libs.framework.storage.model.CheckExistRequest;
 import org.atlas.libs.framework.storage.model.DeleteFileRequest;
 import org.atlas.libs.framework.storage.model.GetDownloadUrlRequest;
 import org.atlas.libs.framework.storage.model.GetFileRequest;
@@ -36,6 +37,12 @@ public class FilesystemStorageService implements StorageService {
       outputStream.write(request.getBytes());
     }
     log.info("Uploaded file successfully: {}", filePath);
+  }
+
+  @Override
+  public boolean checkExist(CheckExistRequest request) {
+    Path filePath = toFilePath(request);
+    return Files.exists(filePath);
   }
 
   @Override

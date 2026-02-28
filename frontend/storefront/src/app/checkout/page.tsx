@@ -4,12 +4,13 @@ import { orderApi } from "@/api/order.api";
 import { CheckoutForm } from "@/components/checkout/CheckoutForm";
 import { CheckoutProgress } from "@/components/checkout/CheckoutProgress";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
+import { withAuth } from '@/hoc/withAuth';
 import { useCheckoutState } from "@/hooks/useCheckoutState";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { useOrderStatusPolling } from "@/hooks/useOrderStatusPolling";
 import { usePaymentGateways } from "@/hooks/usePaymentGateways";
 import { usePaymentProcessing } from "@/hooks/usePaymentProcessing";
-import { withAuth } from '@/hoc/withAuth';
+import type { CartItemResponse } from "@/interfaces/order.interface";
 import { useCartStore } from "@/stores/cart.store";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -235,7 +236,7 @@ function CheckoutPageContent() {
     <CheckoutForm
       cart={{
         items:
-          cart?.cartItems?.map((item) => ({
+          cart?.cartItems?.map((item: CartItemResponse) => ({
             product: {
               id: item.product.id.toString(),
               name: item.product.name,

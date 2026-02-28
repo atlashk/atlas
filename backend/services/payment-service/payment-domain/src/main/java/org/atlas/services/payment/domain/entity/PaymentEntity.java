@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.framework.domain.entity.DomainEntity;
 import org.atlas.libs.framework.domain.shared.payment.PaymentStatus;
-import org.atlas.libs.framework.payment.model.nextaction.NextAction;
+import org.atlas.services.payment.domain.entity.nextaction.NextAction;
 
 @NoArgsConstructor
 @AllArgsConstructor

@@ -106,8 +106,8 @@ dependencies {
     // Outbox
     api project(':libs.outbox')
 
-    // Payment
-    api project(':libs.payment')
+    // Payment gateway
+    api project(':services.payment.gateway')
 
     // Persistence
     switch (rootProject.ext.appStack.persistence) {

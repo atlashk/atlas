@@ -846,6 +846,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                             width={48}
                             height={48}
                             className="rounded object-cover"
+                            unoptimized
                           />
                         </TableCell>
                         <TableCell>{formatCurrency(product.price)}</TableCell>

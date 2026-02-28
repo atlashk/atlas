@@ -2,7 +2,7 @@ package org.atlas.services.payment.api.rest.util;
 
 import java.util.Map;
 import lombok.experimental.UtilityClass;
-import org.atlas.libs.framework.payment.model.HandleWebhookResponse;
+import org.atlas.services.payment.port.out.gateway.model.HandleWebhookResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 

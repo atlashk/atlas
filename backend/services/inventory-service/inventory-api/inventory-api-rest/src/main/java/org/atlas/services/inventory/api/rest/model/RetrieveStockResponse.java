@@ -7,7 +7,7 @@ import lombok.Data;
 @Schema(description = "Response object containing stock information for a product")
 public class RetrieveStockResponse {
 
-  @Schema(description = "Product ID", example = "123")
+  @Schema(description = "Product ID", example = "PRD0000001")
   private String productId;
 
   @Schema(description = "Available quantity in stock", example = "100")

@@ -83,6 +83,7 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                   alt={product.name}
                   width={400}
                   height={384}
+                  unoptimized
                 />
               </div>
               <div className="space-y-4 md:col-span-3">

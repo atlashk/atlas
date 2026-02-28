@@ -5,7 +5,7 @@ metadata:
   name: zipkin
   labels:
     app: zipkin
-    tier: observability
+    tier: infrastructure
 spec:
   replicas: 1
   selector:
@@ -15,7 +15,7 @@ spec:
     metadata:
       labels:
         app: zipkin
-        tier: observability
+        tier: infrastructure
     spec:
       containers:
         - name: zipkin
@@ -57,7 +57,7 @@ metadata:
   name: zipkin
   labels:
     app: zipkin
-    tier: observability
+    tier: infrastructure
 spec:
   selector:
     app: zipkin

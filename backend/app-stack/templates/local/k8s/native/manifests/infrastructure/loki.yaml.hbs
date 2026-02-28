@@ -5,7 +5,7 @@ metadata:
   name: loki
   labels:
     app: loki
-    tier: observability
+    tier: infrastructure
 spec:
   replicas: 1
   selector:
@@ -15,7 +15,7 @@ spec:
     metadata:
       labels:
         app: loki
-        tier: observability
+        tier: infrastructure
     spec:
       containers:
         - name: loki
@@ -64,7 +64,7 @@ metadata:
   name: loki
   labels:
     app: loki
-    tier: observability
+    tier: infrastructure
 spec:
   selector:
     app: loki

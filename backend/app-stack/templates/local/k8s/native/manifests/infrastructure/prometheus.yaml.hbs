@@ -5,7 +5,7 @@ metadata:
   name: prometheus-storage
   labels:
     app: prometheus
-    tier: observability
+    tier: infrastructure
 spec:
   accessModes:
     - ReadWriteOnce
@@ -19,7 +19,7 @@ metadata:
   name: prometheus-config
   labels:
     app: prometheus
-    tier: observability
+    tier: infrastructure
 data:
   prometheus.yml: |
     global:
@@ -57,7 +57,7 @@ metadata:
   name: prometheus
   labels:
     app: prometheus
-    tier: observability
+    tier: infrastructure
 spec:
   replicas: 1
   selector:
@@ -67,7 +67,7 @@ spec:
     metadata:
       labels:
         app: prometheus
-        tier: observability
+        tier: infrastructure
     spec:
       containers:
         - name: prometheus
@@ -123,7 +123,7 @@ metadata:
   name: prometheus
   labels:
     app: prometheus
-    tier: observability
+    tier: infrastructure
 spec:
   selector:
     app: prometheus

@@ -16,4 +16,3 @@ public interface StockAdminMapper {
 
   RetrieveStockResponse toRetrieveStockResponse(StockOutput output);
 }
-

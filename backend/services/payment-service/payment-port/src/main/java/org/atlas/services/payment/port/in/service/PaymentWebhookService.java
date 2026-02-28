@@ -1,7 +1,7 @@
 package org.atlas.services.payment.port.in.service;
 
 import java.util.Map;
-import org.atlas.libs.framework.payment.model.HandleWebhookResponse;
+import org.atlas.services.payment.port.out.gateway.model.HandleWebhookResponse;
 
 public interface PaymentWebhookService {
 

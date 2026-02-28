@@ -462,6 +462,7 @@ function AdminProductAddPage() {
                         width={128}
                         height={128}
                         className="h-32 w-32 object-cover rounded-md"
+                        unoptimized
                       />
                     </div>
                   )}

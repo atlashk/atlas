@@ -7,9 +7,9 @@ import org.atlas.libs.framework.async.AsyncUtil;
 import org.atlas.libs.framework.domain.shared.payment.PaymentStatus;
 import org.atlas.libs.framework.http.HttpStatusCode;
 import org.atlas.libs.framework.json.JsonUtil;
-import org.atlas.libs.framework.payment.PaymentGatewayService;
-import org.atlas.libs.framework.payment.model.HandleWebhookRequest;
-import org.atlas.libs.framework.payment.model.HandleWebhookResponse;
+import org.atlas.services.payment.port.out.gateway.service.PaymentGatewayIntegrationService;
+import org.atlas.services.payment.port.out.gateway.model.HandleWebhookRequest;
+import org.atlas.services.payment.port.out.gateway.model.HandleWebhookResponse;
 import org.atlas.libs.framework.saga.checkout.CheckoutCommand;
 import org.atlas.libs.framework.saga.checkout.ProcessPaymentCommandMetadata;
 import org.atlas.libs.framework.saga.core.command.SagaCommandResult;
@@ -59,10 +59,10 @@ public class PaymentWebhookServiceImpl implements PaymentWebhookService {
     // Find the corresponding payment gateway service implementation
     String paymentGatewayServiceBeanName = String.format("%sPaymentGatewayService",
         paymentGateway.getCode().toLowerCase());
-    PaymentGatewayService paymentGatewayService;
+    PaymentGatewayIntegrationService paymentGatewayIntegrationService;
     try {
-      paymentGatewayService = applicationContext.getBean(
-          paymentGatewayServiceBeanName, PaymentGatewayService.class);
+      paymentGatewayIntegrationService = applicationContext.getBean(
+          paymentGatewayServiceBeanName, PaymentGatewayIntegrationService.class);
     } catch (NoSuchBeanDefinitionException e) {
       throw new DomainException(DomainError.PAYMENT_GATEWAY_NOT_FOUND);
     }
@@ -85,7 +85,7 @@ public class PaymentWebhookServiceImpl implements PaymentWebhookService {
 
     // Update payment event status
     try {
-      handleResponse = paymentGatewayService.handleWebhook(handleRequest);
+      handleResponse = paymentGatewayIntegrationService.handleWebhook(handleRequest);
       paymentEvent.setPaymentId(handleResponse.getResult().getPaymentId());
       if (handleResponse.getResponseStatus() == HttpStatusCode.OK.getCode()) {
         paymentEvent.setStatus(PaymentEventStatus.SUCCEEDED);

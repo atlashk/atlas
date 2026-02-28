@@ -1,4 +1,4 @@
-import type { LoginRequest, LoginResponse, RegisterRequest, User } from "@/interfaces/identity.interface";
+import type { ChangePasswordRequest, LoginRequest, LoginResponse, RegisterRequest, User } from "@/interfaces/identity.interface";
 import { ApiResponse } from "./apiClient";
 import { BaseApi } from "./base.api";
 
@@ -19,7 +19,7 @@ export class IdentityApi extends BaseApi {
     return this.post<void>("/authentication/logout");
   }
 
-  async changePassword(request: { oldPassword: string; newPassword: string }): Promise<ApiResponse<void>> {
+  async changePassword(request: ChangePasswordRequest): Promise<ApiResponse<void>> {
     return this.post<void>("/authentication/change-password", request);
   }
 

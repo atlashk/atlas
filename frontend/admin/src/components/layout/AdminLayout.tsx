@@ -6,6 +6,14 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import {
   Sidebar,
@@ -19,10 +27,12 @@ import {
   SidebarProvider,
   SidebarTrigger
 } from "@/components/ui/sidebar";
-import { Package, ShoppingCart, Users } from "lucide-react";
+import ChangePasswordDialog from "@/components/layout/ChangePasswordDialog";
+import { useUserStore } from "@/stores/user.store";
+import { KeyRound, LogOut, Package, ShoppingCart, User as UserIcon, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React from "react";
+import React, { useMemo, useState } from "react";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -84,6 +94,22 @@ function AppSidebar() {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
+  const { profile, logout } = useUserStore();
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+
+  const displayName = useMemo(() => {
+    if (!profile) return "Account";
+    if (profile.firstName && profile.lastName) return `${profile.firstName} ${profile.lastName}`;
+    return profile.username || profile.email || "Account";
+  }, [profile]);
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
+  const handleOpenChangePassword = () => {
+    setIsChangePasswordOpen(true);
+  };
   
   // Function to get breadcrumb text based on current path
   const getBreadcrumbText = () => {
@@ -130,7 +156,25 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             </Breadcrumb>
           </div>
           <div className="flex items-center gap-2">
-            {/* Optional: Add user menu or other actions here */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="gap-2">
+                  <UserIcon className="h-4 w-4" />
+                  <span className="max-w-[220px] truncate">{displayName}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                <DropdownMenuItem onSelect={handleOpenChangePassword}>
+                  <KeyRound className="h-4 w-4" />
+                  Change password
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem variant="destructive" onClick={handleLogout}>
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
         <div className="flex flex-col h-full">
@@ -141,6 +185,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </div>
         </div>
       </SidebarInset>
+      <ChangePasswordDialog open={isChangePasswordOpen} onOpenChange={setIsChangePasswordOpen} />
     </SidebarProvider>
   );
 }

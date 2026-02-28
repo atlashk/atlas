@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Atlas Admin",
-  description: "Admin dashboard for Atlas Store",
+  description: "Atlas Admin",
 };
 
 export default function RootLayout({
