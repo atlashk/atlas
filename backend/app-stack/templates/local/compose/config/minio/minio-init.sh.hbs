@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# Set up MinIO alias
+mc alias set local "$MINIO_ENDPOINT" "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"
+
+# Create buckets
+mc mb local/product-image
+
+# Add user and set policy
+mc admin user add local "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
+mc admin policy attach local readwrite --user "$MINIO_ACCESS_KEY"
+
+echo "MinIO initialized"

@@ -5,6 +5,7 @@ import { catalogApi } from "@/api/index.api";
 import ExportDropdown from "@/components/common/ExportDropdown";
 import AdminLayout from "@/components/layout/AdminLayout";
 import ImportProductModal from "@/components/product/ImportProductModal";
+import StockDialog from "@/components/product/StockDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -52,6 +53,7 @@ import {
 import { formatCurrency } from "@/utils/formatter.util";
 import { getProductImageUrl } from "@/utils/productImage.util";
 import {
+  Boxes,
   Edit,
   Eye,
   Plus,
@@ -173,6 +175,9 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [productsError, setProductsError] = useState<string | null>(null);
   const [pagination, setPagination] = useState<Metadata | null>(null);
+
+  const [isStockDialogOpen, setIsStockDialogOpen] = useState(false);
+  const [stockProductId, setStockProductId] = useState<string | null>(null);
 
   // Filter state - current form values being edited by user (UI only)
   const [formFilters, setFormFilters] = useState<RetrieveProductListFilters>({
@@ -413,6 +418,19 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     [reloadProducts]
   );
 
+  const closeStockDialog = useCallback(() => {
+    setIsStockDialogOpen(false);
+    setStockProductId(null);
+  }, []);
+
+  const openStockDialog = useCallback(
+    (productId: string) => {
+      setIsStockDialogOpen(true);
+      setStockProductId(productId);
+    },
+    []
+  );
+
   const handleExport = useCallback(
     async (fileType: "csv" | "excel" | "pdf") => {
       if (isExporting) return;
@@ -429,7 +447,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
           endPublishedAt: appliedFilters.endPublishedAt,
           inStock: appliedFilters.inStock,
           brandId: appliedFilters.brandId,
-          categoryIds: appliedFilters.categoryIds,
+          categoryIds: appliedFilters.categoryIds?.map(String),
           fileType: FileType[fileType.toUpperCase() as keyof typeof FileType],
         };
         await catalogApi.exportProduct(exportFilters);
@@ -847,6 +865,14 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                             <Button
                               variant="outline"
                               size="sm"
+                              onClick={() => openStockDialog(product.id)}
+                              title="Stock"
+                            >
+                              <Boxes className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
                               onClick={() =>
                                 router.push(`/product/${product.id}/edit`)
                               }
@@ -873,6 +899,12 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
           )}
         </CardContent>
       </Card>
+
+      <StockDialog
+        isVisible={isStockDialogOpen}
+        productId={stockProductId}
+        onClose={closeStockDialog}
+      />
 
       {pagination && pagination.totalPages > 1 && (
         <div className="flex items-center justify-between">

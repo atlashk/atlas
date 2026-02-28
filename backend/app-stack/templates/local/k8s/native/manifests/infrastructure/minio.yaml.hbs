@@ -8,8 +8,10 @@ metadata:
     tier: infrastructure
 type: Opaque
 data:
-  access-key: YWRtaW4=
-  secret-key: c2VjcmV0MTIzNDU2
+  minio-root-user: bWluaW9hZG1pbg==
+  minio-root-password: c2VjcmV0MTIzNDU2
+  minio-access-key: YXRsYXM=
+  minio-secret-key: c2VjcmV0MTIzNDU2
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -30,22 +32,58 @@ spec:
         app: minio
         tier: infrastructure
     spec:
+      initContainers:
+        - name: minio-init
+          image: minio/mc:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MINIO_ENDPOINT
+              value: http://minio:9000
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: minio-secret
+                  key: minio-root-user
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: minio-secret
+                  key: minio-root-password
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-secret
+                  key: minio-access-key
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-secret
+                  key: minio-secret-key
+          command:
+            - /bin/sh
+            - -c
+            - |
+              mc alias set local "$MINIO_ENDPOINT" "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"
+              mc mb local/product-image
+              mc admin user add local "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
+              mc admin policy attach local readwrite --user "$MINIO_ACCESS_KEY"
+              echo "MinIO initialized"
       containers:
         - name: minio
           image: minio/minio:latest
           imagePullPolicy: IfNotPresent
           args: ["server", "/data", "--console-address", ":9001"]
           env:
-            - name: MINIO_ACCESS_KEY
+            - name: MINIO_ROOT_USER
               valueFrom:
                 secretKeyRef:
                   name: minio-secret
-                  key: access-key
-            - name: MINIO_SECRET_KEY
+                  key: minio-root-user
+            - name: MINIO_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: minio-secret
-                  key: secret-key
+                  key: minio-root-password
           ports:
             - containerPort: 9000
               name: s3

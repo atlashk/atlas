@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice(basePackages = {
-    "org.atlas.infrastructure.api.server.rest.impl",
-    "org.atlas.edge.auth"
+    "org.atlas.libs.api.server.rest",
+    "org.atlas.services"
 })
 @RequiredArgsConstructor
 @Slf4j
@@ -46,9 +46,8 @@ public class RestExceptionHandler {
   public ApiResponseWrapper<Void> handle(MethodArgumentNotValidException e) {
     log.error("Invalid request", e);
     FieldError firstFieldError = e.getBindingResult().getFieldErrors().get(0);
-    String message = String.format("[%s] %s", firstFieldError.getField(),
-        firstFieldError.getDefaultMessage());
-    return ApiResponseWrapper.error(CommonDomainError.BAD_REQUEST.getErrorCode(), message);
+    String errorMessage = firstFieldError.getDefaultMessage();
+    return ApiResponseWrapper.error(CommonDomainError.BAD_REQUEST.getErrorCode(), errorMessage);
   }
 
   /**

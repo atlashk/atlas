@@ -124,28 +124,28 @@ services:
     environment:
       - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN:-admin}
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-secret123456}
-{{#hasService "datasource" "postgres"}}
+      {{#hasService "datasource" "postgres"}}
       - KC_DB=postgres
       - KC_DB_URL=jdbc:postgresql://postgres:5432/db_keycloak
       - KC_DB_USERNAME=${POSTGRES_USER:-atlas}
       - KC_DB_PASSWORD=${POSTGRES_PASSWORD:-secret123456}
-{{/hasService}}
-{{#hasService "datasource" "mysql"}}
+      {{/hasService}}
+      {{#hasService "datasource" "mysql"}}
       - KC_DB=mysql
       - KC_DB_URL=jdbc:mysql://mysql:3306/db_keycloak
       - KC_DB_USERNAME=${MYSQL_USER:-atlas}
       - KC_DB_PASSWORD=${MYSQL_PASSWORD:-secret123456}
-{{/hasService}}
+      {{/hasService}}
     command: start-dev
     depends_on:
-{{#hasService "datasource" "postgres"}}
+      {{#hasService "datasource" "postgres"}}
       postgres:
         condition: service_healthy
-{{/hasService}}
-{{#hasService "datasource" "mysql"}}
+      {{/hasService}}
+      {{#hasService "datasource" "mysql"}}
       mysql:
         condition: service_healthy
-{{/hasService}}
+      {{/hasService}}
     networks:
       - atlas-network
 {{/hasService}}
@@ -191,6 +191,24 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - atlas-network
+
+  minio-init:
+    container_name: minio-init
+    image: minio/mc:latest
+    environment:
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-http://minio:9000}
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-secret123456}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-atlas}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-secret123456}
+    volumes:
+      - ./config/minio/minio-init.sh:/minio-init.sh:ro
+    entrypoint: ["/bin/sh", "/minio-init.sh"]
+    depends_on:
+      minio:
+        condition: service_healthy
     networks:
       - atlas-network
 {{/hasService}}

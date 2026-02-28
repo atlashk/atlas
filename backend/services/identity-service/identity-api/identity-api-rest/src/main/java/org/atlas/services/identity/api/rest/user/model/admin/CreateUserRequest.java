@@ -20,7 +20,7 @@ public class CreateUserRequest {
   private String username;
 
   @NotBlank
-  @Pattern(regexp = Patterns.PASSWORD)
+  @Pattern(regexp = Patterns.PASSWORD, message = "{error.user.invalid_password}")
   @Schema(description = "Password for the new user, must meet security requirements", example = "P@ssw0rd123", requiredMode = RequiredMode.REQUIRED)
   private String password;
 

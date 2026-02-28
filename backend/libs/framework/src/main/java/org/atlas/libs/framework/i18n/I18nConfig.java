@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
 @Configuration
 @RequiredArgsConstructor
@@ -19,11 +19,11 @@ public class I18nConfig {
 
   @Bean
   public MessageSource messageSource(Locale locale) {
-    ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+    ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
     // src/main/resources/messages_{locale}.properties file
     messageSource.setBasenames(
-        "messages.common", // Common
-        "messages" // Service-specified
+        "classpath:messages.common", // Common
+        "classpath:messages" // Service-specified
     );
     messageSource.setDefaultEncoding("UTF-8");
     messageSource.setDefaultLocale(locale);

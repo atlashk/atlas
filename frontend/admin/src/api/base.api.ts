@@ -1,5 +1,5 @@
 import apiClient, { ApiResponse } from "@/api/apiClient";
-import type { AxiosResponse } from "axios";
+import type { AxiosError, AxiosResponse } from "axios";
 
 export abstract class BaseApi {
   protected baseUrl: string;
@@ -77,11 +77,55 @@ export abstract class BaseApi {
 
   private handleError<T>(error: unknown): ApiResponse<T> {
     console.error("Service error:", error);
+    const fallbackMessage = error instanceof Error ? error.message : "An error occurred";
+
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "isAxiosError" in error &&
+      (error as { isAxiosError?: boolean }).isAxiosError
+    ) {
+      const axiosError = error as AxiosError<unknown>;
+      const statusCode = axiosError.response?.status;
+      const responseData = axiosError.response?.data;
+
+      if (responseData && typeof responseData === "object") {
+        const apiResponseData = responseData as Partial<ApiResponse<unknown>>;
+
+        const errorMessage = apiResponseData.errorMessage || fallbackMessage;
+
+        const errorCode = apiResponseData.errorCode ??
+          (statusCode !== undefined ? String(statusCode) : undefined);
+
+        return {
+          success: false,
+          data: null as T,
+          errorCode: errorCode !== undefined ? String(errorCode) : undefined,
+          errorMessage,
+        };
+      }
+
+      if (typeof responseData === "string") {
+        return {
+          success: false,
+          data: null as T,
+          errorCode: statusCode !== undefined ? String(statusCode) : undefined,
+          errorMessage: responseData,
+        };
+      }
+
+      return {
+        success: false,
+        data: null as T,
+        errorCode: statusCode !== undefined ? String(statusCode) : undefined,
+        errorMessage: fallbackMessage,
+      };
+    }
+
     return {
       success: false,
       data: null as T,
-      errorMessage:
-        error instanceof Error ? error.message : "An error occurred",
+      errorMessage: fallbackMessage,
     };
   }
 }
