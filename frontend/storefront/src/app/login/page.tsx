@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { LoginRequest } from "@/interfaces";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Lock, User } from "lucide-react";
+import { Eye, EyeOff, Loader2, Lock, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -36,6 +36,7 @@ const formSchema = z.object({
 const Login: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const { login } = useUserStore();
   const router = useRouter();
 
@@ -148,22 +149,34 @@ const Login: React.FC = () => {
                   <FormItem>
                     <div className="flex justify-between items-center">
                       <FormLabel>Password</FormLabel>
-                      <Link
-                        href="#"
-                        className="text-sm text-primary hover:underline"
-                      >
-                        Forgot password?
-                      </Link>
                     </div>
                     <FormControl>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                           {...field}
-                          type="password"
-                          className={`pl-10 ${errorMessage ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                          type={isPasswordVisible ? "text" : "password"}
+                          className={`pl-10 pr-10 ${errorMessage ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                           placeholder="Enter your password"
                         />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-xs"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          aria-label={
+                            isPasswordVisible ? "Hide password" : "Show password"
+                          }
+                          onClick={() =>
+                            setIsPasswordVisible((current) => !current)
+                          }
+                        >
+                          {isPasswordVisible ? (
+                            <EyeOff className="size-4" />
+                          ) : (
+                            <Eye className="size-4" />
+                          )}
+                        </Button>
                       </div>
                     </FormControl>
                     <FormMessage />

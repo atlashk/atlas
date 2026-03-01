@@ -4,6 +4,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: inventory-service
+  namespace: atlas
   labels:
     app: inventory-service
     tier: application
@@ -23,12 +24,8 @@ spec:
           image: atlas/inventory-service:latest
           imagePullPolicy: Never
           ports:
-            - containerPort: 8082
+            - containerPort: 8083
               name: http
-            {{#hasService "internal" "grpc"}}
-            - containerPort: 50052
-              name: grpc
-            {{/hasService}}
           env:
             {{#hasService "datasource" "mysql"}}
             - name: DB_URL
@@ -84,7 +81,7 @@ spec:
           startupProbe:
             httpGet:
               path: /actuator/health/liveness
-              port: 8082
+              port: 8083
               scheme: HTTP
             periodSeconds: 10
             timeoutSeconds: 3
@@ -94,7 +91,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
-              port: 8082
+              port: 8083
               scheme: HTTP
             initialDelaySeconds: 0
             periodSeconds: 30
@@ -106,7 +103,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
-              port: 8082
+              port: 8083
               scheme: HTTP
             initialDelaySeconds: 0
             periodSeconds: 10
@@ -123,64 +120,16 @@ spec:
           volumeMounts:
             - name: inventory-service-logs
               mountPath: /var/log/inventory-service
-        {{#hasObservability "logging.stack" "loki"}}
-        # Promtail sidecar for log collection
-        - name: promtail
-          image: grafana/promtail:main
-          imagePullPolicy: IfNotPresent
-          args:
-            - -config.file=/etc/promtail/promtail.yml
-            - -config.expand-env
-          env:
-            - name: APP_NAME
-              value: "inventory-service"
-          ports:
-            - containerPort: 9080
-              name: http
-          livenessProbe:
-            httpGet:
-              path: /ready
-              port: 9080
-            initialDelaySeconds: 30
-            periodSeconds: 30
-            timeoutSeconds: 10
-            failureThreshold: 3
-          readinessProbe:
-            httpGet:
-              path: /ready
-              port: 9080
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 3
-          resources:
-            requests:
-              cpu: "50m"
-              memory: "64Mi"
-            limits:
-              cpu: "100m"
-              memory: "128Mi"
-          volumeMounts:
-            - name: promtail-config
-              mountPath: /etc/promtail
-            - name: inventory-service-logs
-              mountPath: /var/log/inventory-service
-              readOnly: true
-        {{/hasObservability}}
       volumes:
         - name: inventory-service-logs
           emptyDir: {}
-        {{#hasObservability "logging.stack" "loki"}}
-        - name: promtail-config
-          configMap:
-            name: promtail-config
-        {{/hasObservability}}
       terminationGracePeriodSeconds: 30
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: inventory-service
+  namespace: atlas
   labels:
     app: inventory-service
     tier: application
@@ -188,10 +137,7 @@ spec:
   selector:
     app: inventory-service
   ports:
-    - port: 8082
-      targetPort: 8082
+    - port: 8083
+      targetPort: 8083
       name: http
-    - port: 50052
-      targetPort: 50052
-      name: grpc
   type: ClusterIP

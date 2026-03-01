@@ -21,19 +21,33 @@ public class PaymentEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
   private String id;
+
   private String userId;
+
   private String orderId;
+
   private Integer sagaId; // Support for webhook case
+
   private BigDecimal amount;
+
   private String currency;
+
   private Integer paymentGatewayId;
+
   private String paymentMethod;
+
   private String paymentMethodDetails;
+
   private PaymentStatus status;
 
   // External payment gateway information
+  // -----------------------------------------------------------------------------------------------
+
   private String transactionId;
+
   private NextAction nextAction;
+
   private String error;
+
   private String cancellationReason;
 }

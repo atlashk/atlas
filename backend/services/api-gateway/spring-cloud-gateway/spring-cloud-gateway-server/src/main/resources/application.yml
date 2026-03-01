@@ -97,22 +97,6 @@ spring:
                 - TokenValidation
                 - TokenRelay
                 - RewritePath=/services/order/api/(?<segment>.*), /api/${segment}
-            - id: order-service-sse
-              uri: ${ORDER_SERVICE_URI:lb://order-service}
-              predicates:
-                - Path=/services/order/sse/**
-              filters:
-                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-                - RewritePath=/services/order/sse/(?<segment>.*), /sse/${segment}
-              metadata:
-                response-timeout: -1 # Disables response timeout for SSE
-            - id: order-service-websocket
-              uri: ${ORDER_SERVICE_URI:lb://order-service}
-              predicates:
-                - Path=/services/order/ws/**
-              filters:
-                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-                - RewritePath=/services/order/ws/(?<segment>.*), /ws/${segment}
             - id: order-service-api-docs
               uri: ${ORDER_SERVICE_URI:lb://order-service}
               predicates:

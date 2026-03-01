@@ -1,0 +1,133 @@
+{{#hasService "identity" "keycloak"}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: keycloak-secret
+  namespace: atlas
+  labels:
+    app: keycloak
+    tier: infrastructure
+type: Opaque
+data:
+  keycloak-admin: YWRtaW4=
+  keycloak-admin-password: c2VjcmV0MTIzNDU2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: atlas
+  labels:
+    app: keycloak
+    tier: infrastructure
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+        tier: infrastructure
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:23.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - start-dev
+          env:
+            - name: KEYCLOAK_ADMIN
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: keycloak-admin
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: keycloak-admin-password
+            - name: KC_HEALTH_ENABLED
+              value: "true"
+            - name: KC_METRICS_ENABLED
+              value: "true"
+            - name: KC_PROXY_HEADERS
+              value: "xforwarded"
+            - name: KC_HOSTNAME_STRICT
+              value: "false"
+            - name: KC_HOSTNAME_STRICT_HTTPS
+              value: "false"
+            {{#hasService "datasource" "postgres"}}
+            - name: KC_DB
+              value: "postgres"
+            - name: KC_DB_URL
+              value: "jdbc:postgresql://postgres:5432/db_keycloak"
+            - name: KC_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: postgres-user
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: postgres-password
+            {{/hasService}}
+            {{#hasService "datasource" "mysql"}}
+            - name: KC_DB
+              value: "mysql"
+            - name: KC_DB_URL
+              value: "jdbc:mysql://mysql:3306/db_keycloak?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
+            - name: KC_DB_USERNAME
+              value: "atlas"
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: mysql-password
+            {{/hasService}}
+          ports:
+            - containerPort: 8080
+              name: http
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: atlas
+  labels:
+    app: keycloak
+    tier: infrastructure
+spec:
+  selector:
+    app: keycloak
+  ports:
+    - port: 8443
+      targetPort: 8080
+      name: http
+  type: ClusterIP
+{{/hasService}}

@@ -7,6 +7,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.paging.PagingRequest;
+import org.atlas.libs.framework.paging.PagingRequest.SortOrder;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.order.domain.entity.OrderEntity;
@@ -45,7 +46,7 @@ public class OrderController {
       @Parameter(description = "Retrieve order list request", required = true)
       @Valid @RequestBody RetrieveOrderListRequest request) {
     RetrieveOrderListInput input = OrderMapper.INSTANCE.toRetrieveOrderListInput(request);
-    input.setPagingRequest(PagingRequest.of(request.getPage() - 1, request.getSize()));
+    input.setPagingRequest(PagingRequest.of(request.getPage() - 1, request.getSize(), "createdAt", SortOrder.DESC));
     PagingResult<OrderEntity> orderPage = orderService.retrieveOrderList(input);
     PagingResult<OrderResponse> responseData = MapperUtil.mapPage(orderPage,
         OrderMapper.INSTANCE::toOrderResponse);

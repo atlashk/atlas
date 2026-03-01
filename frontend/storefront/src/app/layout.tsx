@@ -32,7 +32,7 @@ export default function RootLayout({
       >
         <AuthProvider>
           <NavBar />
-          <main className="px-10 py-20">{children}</main>
+          <main className="pt-20">{children}</main>
           <Toaster />
         </AuthProvider>
       </body>

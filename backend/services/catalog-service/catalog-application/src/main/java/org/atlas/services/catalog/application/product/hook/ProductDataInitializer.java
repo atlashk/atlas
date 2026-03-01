@@ -3,20 +3,23 @@ package org.atlas.services.catalog.application.product.hook;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.hook.StartupHook;
 import org.atlas.libs.framework.measurement.StopWatch;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.PagingUtil;
 import org.atlas.libs.framework.util.SleepUtil;
+import org.atlas.services.catalog.domain.entity.ProductEntity;
 import org.atlas.services.catalog.port.out.fulltextsearch.FullTextSearchService;
 import org.atlas.services.catalog.port.out.fulltextsearch.SearchIndex;
 import org.atlas.services.catalog.port.out.repository.ProductRepository;
-import org.atlas.services.catalog.domain.entity.ProductEntity;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 
-@StartupHook
+@Component
 @ConditionalOnBean(FullTextSearchService.class)
 @RequiredArgsConstructor
 @Slf4j
@@ -27,10 +30,17 @@ public class ProductDataInitializer {
 
   private static final int BATCH_SIZE = 100;
 
-  public void handle() {
-    FullTextSearchService fullTextSearchService = fullTextSearchServiceProvider.getIfAvailable();
-    if (fullTextSearchService != null) {
-      synchronizeFullTextSearchData();
+  @EventListener(ApplicationReadyEvent.class)
+  public void initialize(ApplicationReadyEvent event) {
+    try {
+      FullTextSearchService fullTextSearchService = fullTextSearchServiceProvider.getIfAvailable();
+      if (fullTextSearchService != null) {
+        synchronizeFullTextSearchData();
+      }
+    } catch (Exception e) {
+      // Fail-fast
+      log.error("Failed to initialize product data", e);
+      SpringApplication.exit(event.getApplicationContext());
     }
   }
 

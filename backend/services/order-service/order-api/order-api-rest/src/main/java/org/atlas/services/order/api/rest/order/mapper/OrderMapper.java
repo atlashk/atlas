@@ -39,9 +39,8 @@ public interface OrderMapper {
   OrderResponse.OrderItem toOrderResponseOrderItem(OrderEntity.OrderItem orderItem);
 
   // Don't remove it
-  OrderResponse.Product toOrderResponseProduct(OrderEntity.ProductSnapshot product);
+  OrderResponse.Product toOrderResponseProduct(OrderEntity.ProductSnapshot productSnapshot);
 
   // Don't remove it
-  @Mapping(target = "paymentGateway", source = "paymentGatewayName")
-  OrderResponse.Payment toOrderResponsePayment(OrderEntity.PaymentSnapshot payment);
+  OrderResponse.Payment toOrderResponsePayment(OrderEntity.PaymentSnapshot paymentSnapshot);
 }

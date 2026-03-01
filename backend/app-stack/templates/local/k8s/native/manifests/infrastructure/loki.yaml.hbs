@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: loki
+  namespace: atlas
   labels:
     app: loki
     tier: infrastructure
@@ -62,6 +63,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: loki
+  namespace: atlas
   labels:
     app: loki
     tier: infrastructure

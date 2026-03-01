@@ -23,8 +23,8 @@ import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.payment.domain.entity.nextaction.UsePaymentElement;
 import org.atlas.services.payment.port.out.gateway.exception.PaymentGatewayException;
 import org.atlas.services.payment.port.out.gateway.method.Card;
-import org.atlas.services.payment.port.out.gateway.model.CreatePaymentRequest;
-import org.atlas.services.payment.port.out.gateway.model.CreatePaymentResponse;
+import org.atlas.services.payment.port.out.gateway.model.CreateExternalPaymentRequest;
+import org.atlas.services.payment.port.out.gateway.model.CreateExternalPaymentResponse;
 import org.atlas.services.payment.port.out.gateway.model.HandleWebhookRequest;
 import org.atlas.services.payment.port.out.gateway.model.HandleWebhookResponse;
 import org.atlas.services.payment.port.out.gateway.model.HandleWebhookResponse.Result;
@@ -46,9 +46,9 @@ public class StripeIntegrationService implements PaymentGatewayIntegrationServic
   );
 
   @Override
-  public CreatePaymentResponse createPayment(CreatePaymentRequest request)
+  public CreateExternalPaymentResponse createPayment(CreateExternalPaymentRequest request)
       throws PaymentGatewayException {
-    CreatePaymentResponse response = new CreatePaymentResponse();
+    CreateExternalPaymentResponse response = new CreateExternalPaymentResponse();
     try {
       // Create payment intent
       PaymentIntentCreateParams params =

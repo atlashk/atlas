@@ -18,8 +18,8 @@ public class JpaPaymentRepositoryAdapter implements PaymentRepository {
   private final JpaPaymentRepository jpaPaymentRepository;
 
   @Override
-  public Optional<PaymentEntity> findByPaymentId(String paymentId) {
-    return jpaPaymentRepository.findById(paymentId)
+  public Optional<PaymentEntity> findById(String id) {
+    return jpaPaymentRepository.findById(id)
         .map(JpaPaymentMapper.INSTANCE::toPayment);
   }
 

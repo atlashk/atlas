@@ -109,11 +109,8 @@ public class OrderResponse {
   @AllArgsConstructor
   public static class Payment {
 
-    @Schema(description = "External transaction identifier of the payment", example = "TXN_123456789")
-    private String transactionId;
-
     @Schema(description = "Payment processing gateway used for the transaction", example = "Stripe")
-    private String paymentGateway;
+    private String paymentGatewayName;
 
     @Schema(description = "Payment method type used by the customer", example = "Credit Card")
     private String paymentMethod;
@@ -121,5 +118,8 @@ public class OrderResponse {
     @Schema(description = "Additional details about the payment method (e.g., last 4 digits of card)",
         example = "{\"last4\":\"1234\"}")
     private String paymentMethodDetails;
+
+    @Schema(description = "External transaction identifier of the payment", example = "TXN_123456789")
+    private String transactionId;
   }
 }

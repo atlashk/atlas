@@ -1,6 +1,5 @@
 import type { Product } from "./catalog.interface";
 import type { User } from "./identity.interface";
-import type { PaymentStatus } from "./payment.interface";
 
 export interface CartResponse {
   id: number;
@@ -26,8 +25,7 @@ export interface UpdateCartItemRequest {
 
 export interface Order {
   id: string;
-  user?: User;
-  address?: Address;
+  address: Address;
   orderItems: OrderItem[];
   amount: number;
   payment?: Payment;
@@ -37,20 +35,10 @@ export interface Order {
 }
 
 export interface Payment {
-  id?: string;
-  transactionId?: string;
-  amount?: number;
-  currency?: string;
-  method?: string;
-  gateway?: string;
-  status?: PaymentStatus;
-  errorCode?: string;
-  errorMessage?: string;
-  cancellationReason?: string;
-  // Alternative property names from API response
-  paymentMethod?: string;
-  paymentGateway?: string;
-  paymentMethodDetails?: string;
+  paymentGatewayName: string;
+  paymentMethod: string;
+  paymentMethodDetails: string;
+  transactionId: string;
 }
 
 export interface OrderItem {
@@ -91,6 +79,6 @@ export interface RetrieveOrderListFilter {
   status?: string;
   startDate?: string;
   endDate?: string;
-  page: number
-  size: number
+  page: number;
+  size: number;
 }

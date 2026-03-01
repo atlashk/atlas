@@ -112,6 +112,13 @@ function CheckoutPageContent() {
   // Handle payment next action when order status indicates payment processing is needed
   useEffect(() => {
     const handlePaymentNextAction = async () => {
+      const isSimulatorGateway =
+        selectedPaymentGateway?.code?.toUpperCase() === "SIMULATOR";
+
+      if (isSimulatorGateway) {
+        return;
+      }
+
       if (needsPaymentProcessing && orderId && !paymentNextAction) {
         try {
           const response = await fetchPaymentNextAction(orderId);
@@ -132,6 +139,7 @@ function CheckoutPageContent() {
     needsPaymentProcessing,
     orderId,
     paymentNextAction,
+    selectedPaymentGateway?.code,
     fetchPaymentNextAction,
     setPaymentNextAction,
   ]);

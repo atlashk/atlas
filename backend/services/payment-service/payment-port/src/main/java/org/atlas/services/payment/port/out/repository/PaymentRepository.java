@@ -5,7 +5,7 @@ import org.atlas.services.payment.domain.entity.PaymentEntity;
 
 public interface PaymentRepository {
 
-  Optional<PaymentEntity> findByPaymentId(String paymentId);
+  Optional<PaymentEntity> findById(String id);
 
   Optional<PaymentEntity> findByOrderId(String orderId);
 

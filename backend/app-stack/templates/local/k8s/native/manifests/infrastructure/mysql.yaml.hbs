@@ -3,6 +3,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: mysql-secret
+  namespace: atlas
   labels:
     app: mysql
     tier: infrastructure
@@ -15,6 +16,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: mysql-init
+  namespace: atlas
   labels:
     app: mysql
     tier: infrastructure
@@ -22,28 +24,34 @@ data:
   initdb.sh: |
     #!/bin/bash
     set -e
+
+    echo "Initializing databases and granting privileges to ${MYSQL_USER}"
+
     cat <<EOF | mysql -uroot -p"${MYSQL_ROOT_PASSWORD}"
     {{#hasService "identity" "jwt"}}
-    CREATE DATABASE db_identity;
+    CREATE DATABASE IF NOT EXISTS db_identity;
     {{/hasService}}
     {{#hasService "identity" "keycloak"}}
-      CREATE DATABASE IF NOT EXISTS db_keycloak;
+    CREATE DATABASE IF NOT EXISTS db_keycloak;
     {{/hasService}}
-    CREATE DATABASE db_notification;
-    CREATE DATABASE db_order;
-    CREATE DATABASE db_payment;
-    CREATE DATABASE db_product;
+    CREATE DATABASE IF NOT EXISTS db_catalog;
+    CREATE DATABASE IF NOT EXISTS db_inventory;
+    CREATE DATABASE IF NOT EXISTS db_order;
+    CREATE DATABASE IF NOT EXISTS db_payment;
+
+    CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
+    ALTER USER '${MYSQL_USER}'@'%' IDENTIFIED WITH mysql_native_password BY '${MYSQL_PASSWORD}';
 
     {{#hasService "identity" "jwt"}}
     GRANT ALL PRIVILEGES ON db_identity.* TO '${MYSQL_USER}'@'%';
     {{/hasService}}
     {{#hasService "identity" "keycloak"}}
-      GRANT ALL PRIVILEGES ON db_keycloak.* TO '${MYSQL_USER}'@'%';
+    GRANT ALL PRIVILEGES ON db_keycloak.* TO '${MYSQL_USER}'@'%';
     {{/hasService}}
-    GRANT ALL PRIVILEGES ON db_notification.* TO '${MYSQL_USER}'@'%';
+    GRANT ALL PRIVILEGES ON db_catalog.* TO '${MYSQL_USER}'@'%';
+    GRANT ALL PRIVILEGES ON db_inventory.* TO '${MYSQL_USER}'@'%';
     GRANT ALL PRIVILEGES ON db_order.* TO '${MYSQL_USER}'@'%';
     GRANT ALL PRIVILEGES ON db_payment.* TO '${MYSQL_USER}'@'%';
-    GRANT ALL PRIVILEGES ON db_product.* TO '${MYSQL_USER}'@'%';
     FLUSH PRIVILEGES;
     EOF
 ---
@@ -51,6 +59,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mysql
+  namespace: atlas
   labels:
     app: mysql
     tier: infrastructure
@@ -148,6 +157,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mysql
+  namespace: atlas
   labels:
     app: mysql
     tier: infrastructure

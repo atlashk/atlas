@@ -7,26 +7,25 @@ import org.atlas.libs.framework.async.AsyncUtil;
 import org.atlas.libs.framework.domain.shared.payment.PaymentStatus;
 import org.atlas.libs.framework.http.HttpStatusCode;
 import org.atlas.libs.framework.json.JsonUtil;
-import org.atlas.services.payment.port.out.gateway.service.PaymentGatewayIntegrationService;
-import org.atlas.services.payment.port.out.gateway.model.HandleWebhookRequest;
-import org.atlas.services.payment.port.out.gateway.model.HandleWebhookResponse;
 import org.atlas.libs.framework.saga.checkout.CheckoutCommand;
 import org.atlas.libs.framework.saga.checkout.ProcessPaymentCommandMetadata;
 import org.atlas.libs.framework.saga.core.command.SagaCommandResult;
 import org.atlas.libs.framework.saga.core.messaging.SagaMessagePublisher;
 import org.atlas.libs.framework.saga.core.messaging.payload.SagaCommandReply;
 import org.atlas.services.payment.domain.entity.PaymentEntity;
-import org.atlas.services.payment.domain.entity.PaymentEventEntity;
 import org.atlas.services.payment.domain.entity.PaymentEventStatus;
 import org.atlas.services.payment.domain.entity.PaymentGatewayEntity;
-import org.atlas.services.payment.domain.error.DomainError;
-import org.atlas.services.payment.domain.exception.DomainException;
+import org.atlas.services.payment.port.in.model.CreatePaymentEventInput;
+import org.atlas.services.payment.port.in.model.RetrievePaymentGatewayInput;
+import org.atlas.services.payment.port.in.model.UpdatePaymentEventInput;
+import org.atlas.services.payment.port.in.model.UpdatePaymentInput;
+import org.atlas.services.payment.port.in.service.PaymentEventService;
+import org.atlas.services.payment.port.in.service.PaymentGatewayService;
+import org.atlas.services.payment.port.in.service.PaymentService;
 import org.atlas.services.payment.port.in.service.PaymentWebhookService;
-import org.atlas.services.payment.port.out.repository.PaymentEventRepository;
-import org.atlas.services.payment.port.out.repository.PaymentGatewayRepository;
-import org.atlas.services.payment.port.out.repository.PaymentRepository;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.context.ApplicationContext;
+import org.atlas.services.payment.port.out.gateway.model.HandleWebhookRequest;
+import org.atlas.services.payment.port.out.gateway.model.HandleWebhookResponse;
+import org.atlas.services.payment.port.out.gateway.service.PaymentGatewayIntegrationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,10 +34,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class PaymentWebhookServiceImpl implements PaymentWebhookService {
 
-  private final ApplicationContext applicationContext;
-  private final PaymentRepository paymentRepository;
-  private final PaymentEventRepository paymentEventRepository;
-  private final PaymentGatewayRepository paymentGatewayRepository;
+  private final PaymentGatewayService paymentGatewayService;
+  private final PaymentEventService paymentEventService;
+  private final PaymentService paymentService;
   private final SagaMessagePublisher sagaMessagePublisher;
 
   @Override
@@ -49,32 +47,24 @@ public class PaymentWebhookServiceImpl implements PaymentWebhookService {
         paymentGatewayCode, rawPayload, headers);
 
     // Find payment gateway
-    PaymentGatewayEntity paymentGateway = paymentGatewayRepository.findByCode(
-            paymentGatewayCode.toUpperCase())
-        .orElseThrow(() -> {
-          log.error("Payment gateway {} not found", paymentGatewayCode);
-          return new DomainException(DomainError.PAYMENT_GATEWAY_NOT_FOUND);
-        });
+    PaymentGatewayEntity paymentGateway = paymentGatewayService.retrievePaymentGateway(
+        RetrievePaymentGatewayInput.builder()
+            .code(paymentGatewayCode)
+            .build()
+    );
 
     // Find the corresponding payment gateway service implementation
-    String paymentGatewayServiceBeanName = String.format("%sPaymentGatewayService",
-        paymentGateway.getCode().toLowerCase());
-    PaymentGatewayIntegrationService paymentGatewayIntegrationService;
-    try {
-      paymentGatewayIntegrationService = applicationContext.getBean(
-          paymentGatewayServiceBeanName, PaymentGatewayIntegrationService.class);
-    } catch (NoSuchBeanDefinitionException e) {
-      throw new DomainException(DomainError.PAYMENT_GATEWAY_NOT_FOUND);
-    }
+    PaymentGatewayIntegrationService paymentGatewayIntegrationService =
+        paymentGatewayService.retrievePaymentGatewayIntegrationService(paymentGateway);
 
-    // Persist payment event
-    PaymentEventEntity paymentEvent = PaymentEventEntity.builder()
+    // Create new payment event
+    CreatePaymentEventInput createPaymentEventInput = CreatePaymentEventInput.builder()
         .paymentGatewayId(paymentGateway.getId())
         .payload(JsonUtil.getInstance().compact(rawPayload))
         .headers(JsonUtil.getInstance().toJson(headers))
         .status(PaymentEventStatus.PROCESSING)
         .build();
-    paymentEventRepository.insert(paymentEvent);
+    Integer paymentEventId = paymentEventService.createPaymentEvent(createPaymentEventInput);
 
     // Delegate webhook to the payment gateway service
     HandleWebhookRequest handleRequest = HandleWebhookRequest.builder()
@@ -83,49 +73,54 @@ public class PaymentWebhookServiceImpl implements PaymentWebhookService {
         .build();
     HandleWebhookResponse handleResponse = null;
 
-    // Update payment event status
+    // Update payment event after handling webhook request
+    UpdatePaymentEventInput updatePaymentEventInput = new UpdatePaymentEventInput();
+    updatePaymentEventInput.setId(paymentEventId);
     try {
       handleResponse = paymentGatewayIntegrationService.handleWebhook(handleRequest);
-      paymentEvent.setPaymentId(handleResponse.getResult().getPaymentId());
+      updatePaymentEventInput.setPaymentId(handleResponse.getResult().getPaymentId());
       if (handleResponse.getResponseStatus() == HttpStatusCode.OK.getCode()) {
-        paymentEvent.setStatus(PaymentEventStatus.SUCCEEDED);
+        updatePaymentEventInput.setStatus(PaymentEventStatus.SUCCEEDED);
       } else {
-        paymentEvent.setStatus(PaymentEventStatus.FAILED);
-        paymentEvent.setError(
+        updatePaymentEventInput.setStatus(PaymentEventStatus.FAILED);
+        updatePaymentEventInput.setError(
             (String) handleResponse.getResponseBody().get(HandleWebhookResponse.BODY_FIELD_ERROR));
       }
-      paymentEventRepository.update(paymentEvent);
     } catch (Exception e) {
-      paymentEvent.setStatus(PaymentEventStatus.FAILED);
-      paymentEvent.setError(e.getMessage());
-      paymentEventRepository.update(paymentEvent);
+      updatePaymentEventInput.setStatus(PaymentEventStatus.FAILED);
+      updatePaymentEventInput.setError(e.getMessage());
     }
+    paymentEventService.updatePaymentEvent(updatePaymentEventInput);
 
     // Execute the remaining tasks asynchronously to be quickly respond the external payment gateway
     if (handleResponse != null && handleResponse.getResult() != null) {
       HandleWebhookResponse.Result handleResult = handleResponse.getResult();
       AsyncUtil.executeTask(() -> {
-        // Update payment entity
-        PaymentEntity payment = paymentRepository.findByPaymentId(handleResult.getPaymentId())
-            .orElseThrow(() -> new DomainException(DomainError.PAYMENT_NOT_FOUND));
+        // Retrieve payment
+        final String paymentId = handleResult.getPaymentId();
+        PaymentEntity payment = paymentService.retrievePayment(paymentId);
+
+        // Update payment
+        UpdatePaymentInput updatePaymentInput = new UpdatePaymentInput();
+        updatePaymentInput.setId(paymentId);
         switch (handleResult.getStatus()) {
           case SUCCEEDED -> {
-            payment.setPaymentMethod(handleResult.getPaymentMethod());
-            payment.setPaymentMethodDetails(
+            updatePaymentInput.setPaymentMethod(handleResult.getPaymentMethod());
+            updatePaymentInput.setPaymentMethodDetails(
                 JsonUtil.getInstance().toJson(handleResult.getPaymentMethodDetails()));
-            payment.setStatus(PaymentStatus.SUCCEEDED);
+            updatePaymentInput.setStatus(PaymentStatus.SUCCEEDED);
           }
           case FAILED -> {
-            payment.setStatus(PaymentStatus.FAILED);
-            payment.setError(handleResult.getError());
+            updatePaymentInput.setStatus(PaymentStatus.FAILED);
+            updatePaymentInput.setError(handleResult.getError());
           }
           case CANCELED -> {
-            payment.setStatus(PaymentStatus.CANCELED);
-            payment.setCancellationReason(handleResult.getCancellationReason());
+            updatePaymentInput.setStatus(PaymentStatus.CANCELED);
+            updatePaymentInput.setCancellationReason(handleResult.getCancellationReason());
           }
-          default -> payment.setStatus(PaymentStatus.UNKNOWN);
+          default -> updatePaymentInput.setStatus(PaymentStatus.UNKNOWN);
         }
-        paymentRepository.update(payment);
+        paymentService.updatePayment(updatePaymentInput);
 
         // Publish saga command reply message
         SagaCommandReply.SagaCommandReplyBuilder sagaCommandReplyBuilder = SagaCommandReply.builder()
@@ -137,16 +132,16 @@ public class PaymentWebhookServiceImpl implements PaymentWebhookService {
           case SUCCEEDED -> sagaCommandResult = SagaCommandResult.success(
               ProcessPaymentCommandMetadata.builder()
                   .paymentStatus(PaymentStatus.SUCCEEDED)
-                  .paymentMethod(payment.getPaymentMethod())
-                  .paymentMethodDetails(payment.getPaymentMethodDetails())
+                  .paymentMethod(updatePaymentInput.getPaymentMethod())
+                  .paymentMethodDetails(updatePaymentInput.getPaymentMethodDetails())
                   .build());
           case FAILED -> sagaCommandResult = SagaCommandResult.failure(
-              payment.getError(),
+              updatePaymentInput.getError(),
               ProcessPaymentCommandMetadata.builder()
                   .paymentStatus(PaymentStatus.FAILED)
                   .build());
           case CANCELED -> sagaCommandResult = SagaCommandResult.failure(
-              payment.getCancellationReason(),
+              updatePaymentInput.getCancellationReason(),
               ProcessPaymentCommandMetadata.builder()
                   .paymentStatus(PaymentStatus.CANCELED)
                   .build());

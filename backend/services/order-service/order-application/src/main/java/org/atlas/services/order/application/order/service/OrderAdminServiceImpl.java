@@ -13,11 +13,9 @@ import org.atlas.libs.framework.domain.shared.order.OrderStatus;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.security.authorization.RequiredAdmin;
 import org.atlas.libs.framework.util.CollectionUtil;
-import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.order.application.order.mapper.OrderAdminMapper;
 import org.atlas.services.order.domain.entity.OrderEntity;
 import org.atlas.services.order.port.in.order.model.admin.MonthlyOrderAggregation;
-import org.atlas.services.order.port.in.order.model.admin.OrderOutput;
 import org.atlas.services.order.port.in.order.model.admin.RetrieveOrderListInput;
 import org.atlas.services.order.port.in.order.service.OrderAdminService;
 import org.atlas.services.order.port.out.repository.OrderRepository;
@@ -34,12 +32,10 @@ public class OrderAdminServiceImpl implements OrderAdminService {
 
   @Override
   @Transactional(readOnly = true)
-  public PagingResult<OrderOutput> retrieveOrderList(RetrieveOrderListInput input) {
+  public PagingResult<OrderEntity> retrieveOrderList(RetrieveOrderListInput input) {
     OrderRepository.FindOrderCriteria criteria = OrderAdminMapper.INSTANCE
         .toFindOrderCriteria(input);
-    PagingResult<OrderEntity> orderPage = orderRepository.findByCriteria(criteria,
-        input.getPagingRequest());
-    return MapperUtil.mapPage(orderPage, OrderAdminMapper.INSTANCE::toAdminOrderOutput);
+    return orderRepository.findByCriteria(criteria, input.getPagingRequest());
   }
 
   @Override

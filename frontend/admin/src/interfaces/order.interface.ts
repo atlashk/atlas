@@ -3,7 +3,6 @@ import type { User } from "./identity.interface";
 
 export interface Order {
   id: string;
-  code: string;
   user?: User;
   address?: Address;
   orderItems: OrderItem[];
@@ -26,8 +25,8 @@ export interface Payment {
   errorMessage?: string;
   cancellationReason?: string;
   // Alternative property names from API response
+  paymentGatewayName?: string;
   paymentMethod?: string;
-  paymentGateway?: string;
   paymentMethodDetails?: string;
 }
 

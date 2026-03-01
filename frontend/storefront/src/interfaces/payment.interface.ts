@@ -8,8 +8,6 @@ export interface PaymentNextAction {
   currency?: string; // Payment currency
 }
 
-export type PaymentStatus = string;
-
 // Payment gateway response interface
 export interface PaymentGatewayResponse {
   id: number;

@@ -13,8 +13,8 @@ import org.atlas.libs.framework.random.RandomUtil;
 import org.atlas.services.payment.domain.entity.nextaction.UsePaymentElement;
 import org.atlas.services.payment.port.out.gateway.exception.PaymentGatewayException;
 import org.atlas.services.payment.port.out.gateway.method.Card;
-import org.atlas.services.payment.port.out.gateway.model.CreatePaymentRequest;
-import org.atlas.services.payment.port.out.gateway.model.CreatePaymentResponse;
+import org.atlas.services.payment.port.out.gateway.model.CreateExternalPaymentRequest;
+import org.atlas.services.payment.port.out.gateway.model.CreateExternalPaymentResponse;
 import org.atlas.services.payment.port.out.gateway.model.HandleWebhookRequest;
 import org.atlas.services.payment.port.out.gateway.model.HandleWebhookResponse;
 import org.atlas.services.payment.port.out.gateway.model.HandleWebhookResponse.Result;
@@ -37,7 +37,7 @@ public class SimulatorPaymentGatewayIntegrationService implements PaymentGateway
   private static final String SIGNATURE_HEADER_NAME = "x-simulator-signature";
 
   @Override
-  public CreatePaymentResponse createPayment(CreatePaymentRequest request)
+  public CreateExternalPaymentResponse createPayment(CreateExternalPaymentRequest request)
       throws PaymentGatewayException {
     log.info("Creating simulated payment for paymentId={}, amount={}, currency={}",
         request.getPaymentId(), request.getAmount(), request.getCurrency());
@@ -55,14 +55,14 @@ public class SimulatorPaymentGatewayIntegrationService implements PaymentGateway
           .clientSecret("cs-test-1234")
           .build();
 
-      return CreatePaymentResponse.builder()
+      return CreateExternalPaymentResponse.builder()
           .success(true)
           .transactionId(transactionId)
           .nextAction(nextAction)
           .build();
     } catch (Exception e) {
       log.error("Failed to create simulated payment for paymentId={}", request.getPaymentId(), e);
-      return CreatePaymentResponse.builder()
+      return CreateExternalPaymentResponse.builder()
           .success(false)
           .errorCode("SIMULATOR_ERROR")
           .errorMessage("Failed to create simulated payment: " + e.getMessage())
@@ -119,7 +119,7 @@ public class SimulatorPaymentGatewayIntegrationService implements PaymentGateway
   }
 
   private void scheduleWebhookCall(String paymentId, String transactionId) {
-    int delaySeconds = RandomUtil.randomInt(10, 15);
+    int delaySeconds = RandomUtil.randomInt(2, 3);
     scheduledExecutorService.schedule(() -> {
       log.info("Executing scheduled webhook call for paymentId={}, transactionId={}",
           paymentId, transactionId);

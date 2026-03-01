@@ -156,9 +156,6 @@ dependencies {
             throw new IllegalArgumentException("Unsupported persistence: ${rootProject.ext.appStack.persistence}")
     }
 
-    // Saga
-    api project(':libs.saga')
-
     // Sequence generator
     api project(':libs.sequence-generator')
 

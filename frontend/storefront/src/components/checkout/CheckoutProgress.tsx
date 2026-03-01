@@ -52,6 +52,7 @@ export const CheckoutProgress = React.memo(function CheckoutProgress({
 
   const router = useRouter();
   const { clearCartState } = useCartStore();
+  const isSimulatorGateway = selectedPaymentGateway?.code?.toUpperCase() === "SIMULATOR";
   
   // Ref to prevent multiple payment completion calls
   const paymentCompletedRef = useRef(false);
@@ -109,6 +110,15 @@ export const CheckoutProgress = React.memo(function CheckoutProgress({
     router.push("/cart");
   }, [router]);
 
+  const defaultProcessingContent = (
+    <div className="text-center space-y-4">
+      <Loader2 className="w-10 h-10 text-blue-500 mx-auto animate-spin" />
+      <h2 className="text-lg font-semibold">Processing your order...</h2>
+      <p className="text-gray-600">Please wait while we process your payment.</p>
+      <p className="text-sm text-gray-500">Order ID: {orderId}</p>
+    </div>
+  );
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <Card>
@@ -135,8 +145,8 @@ export const CheckoutProgress = React.memo(function CheckoutProgress({
                 <>
                   {isLoading || !orderStatus ? (
                     <div className="text-center space-y-4">
-                      <Loader2 className="w-16 h-16 text-blue-500 mx-auto animate-spin" />
-                      <h2 className="text-xl font-semibold">
+                      <Loader2 className="w-10 h-10 text-blue-500 mx-auto animate-spin" />
+                      <h2 className="text-lg font-semibold">
                         Processing your order...
                       </h2>
                       <p className="text-gray-600">
@@ -148,8 +158,8 @@ export const CheckoutProgress = React.memo(function CheckoutProgress({
                     </div>
                   ) : orderStatus.status === "FULFILLED" ? (
                     <div className="text-center space-y-4">
-                      <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
-                      <h2 className="text-2xl font-bold text-green-600">
+                      <CheckCircle className="w-10 h-10 text-green-500 mx-auto" />
+                      <h2 className="text-lg font-bold text-green-600">
                         {ORDER_STATUS_MESSAGES.FULFILLED}
                       </h2>
                       <p className="text-sm text-gray-500">
@@ -191,7 +201,7 @@ export const CheckoutProgress = React.memo(function CheckoutProgress({
               ) : (
                 // Show payment actions or loading for non-final states
                 <>
-                  {paymentNextAction ? (
+                  {!isSimulatorGateway && paymentNextAction ? (
                     <NextActionHandler
                       nextAction={paymentNextAction}
                       orderId={orderId}
@@ -202,19 +212,7 @@ export const CheckoutProgress = React.memo(function CheckoutProgress({
                       onPaymentError={handlePaymentError}
                     />
                   ) : (
-                    // Default loading state
-                    <div className="text-center space-y-4">
-                      <Loader2 className="w-16 h-16 text-blue-500 mx-auto animate-spin" />
-                      <h2 className="text-xl font-semibold">
-                        Processing your order...
-                      </h2>
-                      <p className="text-gray-600">
-                        Please wait while we process your payment.
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Order ID: {orderId}
-                      </p>
-                    </div>
+                    defaultProcessingContent
                   )}
                 </>
               )}

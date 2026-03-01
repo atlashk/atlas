@@ -7,7 +7,6 @@ import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.domain.exception.BaseDomainException;
 import org.atlas.libs.framework.i18n.I18nService;
 import org.atlas.libs.framework.util.StringUtil;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +17,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@Order(Ordered.LOWEST_PRECEDENCE)
+@Order
 @RestControllerAdvice(basePackages = {
     "org.atlas.libs.api.server.rest",
     "org.atlas.services"

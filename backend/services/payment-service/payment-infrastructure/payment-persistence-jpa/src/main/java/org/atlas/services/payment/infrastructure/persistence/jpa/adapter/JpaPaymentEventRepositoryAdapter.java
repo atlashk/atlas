@@ -1,5 +1,6 @@
 package org.atlas.services.payment.infrastructure.persistence.jpa.adapter;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.services.payment.domain.entity.PaymentEventEntity;
@@ -15,6 +16,12 @@ import org.springframework.stereotype.Component;
 public class JpaPaymentEventRepositoryAdapter implements PaymentEventRepository {
 
   private final JpaPaymentEventRepository jpaPaymentEventRepository;
+
+  @Override
+  public Optional<PaymentEventEntity> findById(Integer id) {
+    return jpaPaymentEventRepository.findById(id)
+        .map(JpaPaymentEventMapper.INSTANCE::toPaymentEvent);
+  }
 
   @Override
   public void insert(PaymentEventEntity paymentEvent) {

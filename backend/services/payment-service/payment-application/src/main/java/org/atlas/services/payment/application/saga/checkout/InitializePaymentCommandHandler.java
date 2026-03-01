@@ -5,9 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.constant.CommonConstant;
 import org.atlas.libs.framework.domain.shared.payment.PaymentStatus;
 import org.atlas.libs.framework.json.jackson.JacksonService;
-import org.atlas.services.payment.port.out.gateway.service.PaymentGatewayIntegrationService;
-import org.atlas.services.payment.port.out.gateway.model.CreatePaymentRequest;
-import org.atlas.services.payment.port.out.gateway.model.CreatePaymentResponse;
 import org.atlas.libs.framework.saga.checkout.CheckoutCommand;
 import org.atlas.libs.framework.saga.checkout.CheckoutSagaData;
 import org.atlas.libs.framework.saga.checkout.InitializePaymentCommandMetadata;
@@ -15,17 +12,16 @@ import org.atlas.libs.framework.saga.core.annotation.SagaCommandHandler;
 import org.atlas.libs.framework.saga.core.command.SagaCommandResult;
 import org.atlas.libs.framework.saga.core.context.SagaContext;
 import org.atlas.libs.framework.saga.core.messaging.payload.SagaCommand;
-import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
-import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.libs.framework.util.ExceptionUtil;
-import org.atlas.services.payment.domain.entity.PaymentEntity;
 import org.atlas.services.payment.domain.entity.PaymentGatewayEntity;
-import org.atlas.services.payment.domain.error.DomainError;
-import org.atlas.services.payment.domain.exception.DomainException;
-import org.atlas.services.payment.port.out.repository.PaymentGatewayRepository;
-import org.atlas.services.payment.port.out.repository.PaymentRepository;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.context.ApplicationContext;
+import org.atlas.services.payment.port.in.model.CreatePaymentInput;
+import org.atlas.services.payment.port.in.model.RetrievePaymentGatewayInput;
+import org.atlas.services.payment.port.in.model.UpdatePaymentInput;
+import org.atlas.services.payment.port.in.service.PaymentGatewayService;
+import org.atlas.services.payment.port.in.service.PaymentService;
+import org.atlas.services.payment.port.out.gateway.model.CreateExternalPaymentRequest;
+import org.atlas.services.payment.port.out.gateway.model.CreateExternalPaymentResponse;
+import org.atlas.services.payment.port.out.gateway.service.PaymentGatewayIntegrationService;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -33,10 +29,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class InitializePaymentCommandHandler {
 
-  private final ApplicationContext applicationContext;
-  private final PaymentRepository paymentRepository;
-  private final PaymentGatewayRepository paymentGatewayRepository;
-  private final SequenceGenerator sequenceGenerator;
+  private final PaymentGatewayService paymentGatewayService;
+  private final PaymentService paymentService;
 
   @SagaCommandHandler(command = CheckoutCommand.INITIALIZE_PAYMENT)
   public SagaCommandResult initializePayment(SagaCommand sagaCommand) {
@@ -48,75 +42,79 @@ public class InitializePaymentCommandHandler {
     }
 
     // Find payment gateway
-    PaymentGatewayEntity paymentGateway = paymentGatewayRepository.findById(
-            checkoutSagaData.getPaymentGatewayId())
-        .orElseThrow(() -> {
-          log.error("Payment gateway {} not found", checkoutSagaData.getPaymentGatewayId());
-          return new DomainException(DomainError.PAYMENT_GATEWAY_NOT_FOUND);
-        });
+    PaymentGatewayEntity paymentGateway = paymentGatewayService.retrievePaymentGateway(
+        RetrievePaymentGatewayInput.builder()
+            .id(checkoutSagaData.getPaymentGatewayId())
+            .build()
+    );
 
-    // Find the corresponding payment gateway service implementation
-    String paymentGatewayServiceBeanName = String.format("%sPaymentGatewayService",
-        paymentGateway.getCode().toLowerCase());
-    PaymentGatewayIntegrationService paymentGatewayIntegrationService;
-    try {
-      paymentGatewayIntegrationService = applicationContext.getBean(
-          paymentGatewayServiceBeanName, PaymentGatewayIntegrationService.class);
-    } catch (NoSuchBeanDefinitionException e) {
-      throw new DomainException(DomainError.PAYMENT_GATEWAY_NOT_FOUND);
-    }
+    // Find the corresponding payment gateway integration service implementation
+    PaymentGatewayIntegrationService paymentGatewayIntegrationService =
+        paymentGatewayService.retrievePaymentGatewayIntegrationService(paymentGateway);
 
-    // Insert new payment entity
-    PaymentEntity payment = new PaymentEntity();
-    payment.setId(sequenceGenerator.generate(SequenceType.PAYMENT));
-    payment.setUserId(checkoutSagaData.getUser().getId());
-    payment.setOrderId(checkoutSagaData.getOrderId());
-    payment.setSagaId(sagaCommand.getSagaId());
-    payment.setAmount(checkoutSagaData.getAmount());
-    payment.setCurrency(CommonConstant.DEFAULT_CURRENCY);
-    payment.setPaymentGatewayId(paymentGateway.getId());
-    payment.setStatus(PaymentStatus.PENDING);
-    paymentRepository.insert(payment);
+    // Create new payment entity
+    final String userId = checkoutSagaData.getUser().getId();
+    final String orderId = checkoutSagaData.getOrderId();
+    CreatePaymentInput createPaymentInput = CreatePaymentInput.builder()
+        .userId(userId)
+        .orderId(orderId)
+        .sagaId(sagaCommand.getSagaId())
+        .amount(checkoutSagaData.getAmount())
+        .currency(CommonConstant.DEFAULT_CURRENCY)
+        .paymentGatewayId(paymentGateway.getId())
+        .status(PaymentStatus.PENDING)
+        .build();
+    String paymentId = paymentService.createPayment(createPaymentInput);
 
     // Create external payment
-    CreatePaymentRequest createPaymentRequest = CreatePaymentRequest.builder()
-        .paymentId(payment.getId())
-        .amount(payment.getAmount())
-        .currency(payment.getCurrency())
+    CreateExternalPaymentRequest createExternalPaymentRequest = CreateExternalPaymentRequest.builder()
+        .paymentId(paymentId)
+        .amount(createPaymentInput.getAmount())
+        .currency(createPaymentInput.getCurrency())
         .build();
-    CreatePaymentResponse response = paymentGatewayIntegrationService.createPayment(createPaymentRequest);
+    CreateExternalPaymentResponse response = paymentGatewayIntegrationService.createPayment(
+        createExternalPaymentRequest);
 
+    // Proceed the response of external payment creation
     if (response.isSuccess()) {
       log.info(
-          "Created payment via payment gateway successfully: orderId={}, userId={}, paymentId={}, transactionId={}",
-          payment.getOrderId(), payment.getUserId(), payment.getId(),
-          response.getTransactionId());
+          "Created payment successfully: "
+              + "orderId={}, userId={}, paymentId={}, paymentGateway={}, transactionId={}",
+          orderId, userId, paymentId, paymentGateway.getCode(), response.getTransactionId());
 
-      // Update payment entity
-      payment.setTransactionId(response.getTransactionId());
-      payment.setNextAction(response.getNextAction());
-      payment.setStatus(PaymentStatus.CREATED);
-      paymentRepository.update(payment);
+      // Update payment status
+      UpdatePaymentInput updatePaymentInput = UpdatePaymentInput.builder()
+          .id(paymentId)
+          .status(PaymentStatus.CREATED)
+          .transactionId(response.getTransactionId())
+          .nextAction(response.getNextAction())
+          .build();
+      paymentService.updatePayment(updatePaymentInput);
 
       // Saga command result
       InitializePaymentCommandMetadata metadata = InitializePaymentCommandMetadata.builder()
-          .transactionId(payment.getTransactionId())
+          .transactionId(response.getTransactionId())
           .paymentGatewayName(paymentGateway.getName())
           .build();
       return SagaCommandResult.success(metadata);
     } else {
       log.error(
-          "Failed to create payment via payment gateway: orderId={}, userId={}, paymentId={}, errorCode={}, errorMessage={}",
-          payment.getOrderId(), payment.getUserId(), payment.getId(),
+          "Failed to create payment via payment gateway: "
+              + "orderId={}, userId={}, paymentId={}, paymentGateway={}, errorCode={}, errorMessage={}",
+          orderId, userId, paymentId, paymentGateway.getCode(), response.getErrorCode(), response.getErrorMessage());
+
+      // Update payment status
+      String error = ExceptionUtil.buildErrorMessage(
           response.getErrorCode(), response.getErrorMessage());
+      UpdatePaymentInput updatePaymentInput = UpdatePaymentInput.builder()
+          .id(paymentId)
+          .status(PaymentStatus.FAILED)
+          .error(error)
+          .build();
+      paymentService.updatePayment(updatePaymentInput);
 
-      // Update payment entity
-      payment.setStatus(PaymentStatus.FAILED);
-      payment.setError(
-          ExceptionUtil.buildErrorMessage(response.getErrorCode(), response.getErrorMessage()));
-      paymentRepository.update(payment);
-
-      return SagaCommandResult.failure(payment.getError());
+      // Saga command result
+      return SagaCommandResult.failure(error);
     }
   }
 }

@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PaymentGatewayResponse, PaymentNextAction } from "@/interfaces/payment.interface";
 import { StripeForm } from "../StripeForm";
-import { PaymentSimulatorForm } from "../PaymentSimulatorForm";
 
 // Supported payment gateway codes
 const SUPPORTED_PAYMENT_GATEWAYS = ["STRIPE", "SIMULATOR"] as const;
@@ -90,23 +89,7 @@ export function PaymentElementAction({
         );
       
       case "SIMULATOR":
-        return (
-          <PaymentSimulatorForm
-            amount={amount || 0}
-            currency={currency || "USD"}
-            onSubmit={(data) => {
-              console.log("Simulator payment started:", data);
-              onPaymentComplete?.();
-            }}
-            onError={(error) => {
-              console.error("Simulator payment error:", error);
-              onPaymentError?.(error);
-            }}
-            onCancel={() => {
-              onPaymentError?.("Payment cancelled by user");
-            }}
-          />
-        );
+        return null;
       
       default:
         return (

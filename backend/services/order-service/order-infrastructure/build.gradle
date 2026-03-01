@@ -102,18 +102,6 @@ dependencies {
             throw new IllegalArgumentException("Unsupported notification.email: ${rootProject.ext.appStack['notification.email']}")
     }
 
-    // Notification::In-App
-    switch (rootProject.ext.appStack['notification.in-app']) {
-        case 'sse':
-            api project(':libs.notification.in-app.sse')
-            break
-        case 'websocket':
-            api project(':libs.notification.in-app.websocket')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported notification.in-app: ${rootProject.ext.appStack['notification.in-app']}")
-    }
-
     // Observability
     switch (rootProject.ext.appStack['observability.logging.framework']) {
         case 'logback':

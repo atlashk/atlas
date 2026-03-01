@@ -79,7 +79,7 @@ public class JpaUserRepositoryAdapter implements UserRepository {
   @Override
   public void insert(UserEntity user) {
     JpaUserEntity jpaUser = JpaUserMapper.INSTANCE.toJpaUser(user);
-    jpaUserRepository.save(jpaUser);
+    jpaUserRepository.insert(jpaUser);
   }
 
   @Override

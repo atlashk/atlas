@@ -35,10 +35,7 @@ import {
   type Order,
   type RetrieveOrderFilter,
 } from "@/interfaces/order.interface";
-import {
-  formatCurrency,
-  formatDate
-} from "@/utils/formatter.util";
+import { formatCurrency, formatDate } from "@/utils/formatter.util";
 import {
   ChevronDown,
   ChevronUp,
@@ -59,7 +56,9 @@ const OrderList: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(true);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
-  const [orderStatuses, setOrderStatuses] = useState<Record<string, string>>({});
+  const [orderStatuses, setOrderStatuses] = useState<Record<string, string>>(
+    {}
+  );
   const [isLoadingOrderStatuses, setIsLoadingOrderStatuses] = useState(false);
   const [filters, setFilters] = useState<RetrieveOrderFilter>({
     id: undefined,
@@ -116,7 +115,9 @@ const OrderList: React.FC = () => {
       }
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to load order statuses";
+        error instanceof Error
+          ? error.message
+          : "Failed to load order statuses";
       toast.error(errorMessage);
     } finally {
       setIsLoadingOrderStatuses(false);
@@ -309,11 +310,13 @@ const OrderList: React.FC = () => {
                   <SelectValue placeholder="All Statuses" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(orderStatuses).map(([statusKey, statusLabel]) => (
-                    <SelectItem key={statusKey} value={statusKey}>
-                      {statusLabel}
-                    </SelectItem>
-                  ))}
+                  {Object.entries(orderStatuses).map(
+                    ([statusKey, statusLabel]) => (
+                      <SelectItem key={statusKey} value={statusKey}>
+                        {statusLabel}
+                      </SelectItem>
+                    )
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -360,7 +363,6 @@ const OrderList: React.FC = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>ID</TableHead>
-                    <TableHead>Code</TableHead>
                     <TableHead>User</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>Status</TableHead>
@@ -383,7 +385,6 @@ const OrderList: React.FC = () => {
                       <React.Fragment key={order.id}>
                         <TableRow className="hover:bg-muted/50">
                           <TableCell>{order.id}</TableCell>
-                          <TableCell>{order.code}</TableCell>
                           <TableCell>
                             {order.user
                               ? `${order.user.firstName} ${order.user.lastName}`
@@ -585,20 +586,21 @@ const OrderList: React.FC = () => {
                                         <CreditCard className="w-4 h-4" />
                                         Payment Information
                                       </h6>
-                                      {order.payment.paymentGateway && (
+                                      {order.payment.paymentGatewayName && (
                                         <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
                                           <span className="text-sm font-medium text-gray-600 min-w-[140px]">
                                             Payment Gateway
                                           </span>
                                           <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
                                             {(() => {
-                                              const paymentGateway =
-                                                order.payment.paymentGateway;
-                                              return paymentGateway
-                                                ? paymentGateway
+                                              const paymentGatewayName =
+                                                order.payment
+                                                  .paymentGatewayName;
+                                              return paymentGatewayName
+                                                ? paymentGatewayName
                                                     .charAt(0)
                                                     .toUpperCase() +
-                                                    paymentGateway
+                                                    paymentGatewayName
                                                       .slice(1)
                                                       .toLowerCase()
                                                 : "";

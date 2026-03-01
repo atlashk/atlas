@@ -15,5 +15,7 @@ public interface JpaPaymentEventMapper {
 
   JpaPaymentEventMapper INSTANCE = Mappers.getMapper(JpaPaymentEventMapper.class);
 
+  PaymentEventEntity toPaymentEvent(JpaPaymentEventEntity jpaPaymentEvent);
+
   JpaPaymentEventEntity toJpaPaymentEvent(PaymentEventEntity paymentEvent);
 }

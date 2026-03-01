@@ -73,9 +73,7 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
 
   @Override
   public void update(ProductEntity product) {
-    JpaProductEntity jpaProduct = jpaProductRepository.findByIdWithAssociations(product.getId())
-        .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
-    JpaProductMapper.INSTANCE.merge(product, jpaProduct);
+    JpaProductEntity jpaProduct = JpaProductMapper.INSTANCE.toJpaProduct(product);
     jpaProductRepository.save(jpaProduct);
   }
 

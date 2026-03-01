@@ -14,12 +14,11 @@ import org.atlas.libs.framework.context.ContextInfo;
 import org.atlas.libs.framework.context.Contexts;
 import org.atlas.libs.framework.domain.shared.order.OrderStatus;
 import org.atlas.libs.framework.file.FileUtil;
+import org.atlas.libs.framework.i18n.I18nService;
 import org.atlas.libs.framework.json.jackson.JacksonService;
 import org.atlas.libs.framework.notification.email.Attachment;
 import org.atlas.libs.framework.notification.email.EmailService;
 import org.atlas.libs.framework.notification.email.SendEmailRequest;
-import org.atlas.libs.framework.notification.inapp.InAppService;
-import org.atlas.libs.framework.notification.inapp.SendInAppRequest;
 import org.atlas.libs.framework.saga.checkout.CheckoutCommand;
 import org.atlas.libs.framework.saga.checkout.InitializePaymentCommandMetadata;
 import org.atlas.libs.framework.saga.checkout.ProcessPaymentCommandMetadata;
@@ -31,7 +30,7 @@ import org.atlas.libs.framework.saga.core.entity.SagaEntity;
 import org.atlas.libs.framework.saga.core.orchestrator.SagaOrchestrator;
 import org.atlas.libs.framework.template.ResolveTemplateException;
 import org.atlas.libs.framework.template.TemplateService;
-import org.atlas.libs.framework.util.DateUtil;
+import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.order.domain.entity.OrderEntity;
 import org.atlas.services.order.domain.entity.OrderEntity.CancellationReason;
 import org.atlas.services.order.domain.error.DomainError;
@@ -51,8 +50,8 @@ public class CheckoutSaga {
   private final SagaOrchestrator sagaOrchestrator;
   private final CartService cartService;
   private final ApplicationConfigService applicationConfigService;
+  private final I18nService i18nService;
   private final EmailService emailService;
-  private final InAppService inAppService;
   private final TemplateService templateService;
 
   @StartSaga
@@ -70,10 +69,13 @@ public class CheckoutSaga {
       order.setStatus(OrderStatus.AWAITING_PAYMENT_INITIALIZED);
     } else {
       order.setStatus(OrderStatus.CANCELED);
+
+      String i18nMessage = i18nService.getMessage(sagaCommandResult.getError());
+      String errorMessage =
+          StringUtil.isNotBlank(i18nMessage) ? i18nMessage : sagaCommandResult.getError();
       order.setCancellationReason(
-          String.format("%s: %s",
-              CancellationReason.FAILED_TO_RESERVE_PRODUCT.getValue(),
-              sagaCommandResult.getError()));
+          String.format("%s: %s", CancellationReason.FAILED_TO_RESERVE_PRODUCT.getValue(),
+              errorMessage));
     }
     orderRepository.update(order);
 
@@ -105,12 +107,14 @@ public class CheckoutSaga {
       sagaOrchestrator.createSagaCommand(
           saga.getId(), CheckoutCommand.PROCESS_PAYMENT, Services.EXTERNAL_PAYMENT_SERVICE);
     } else {
-      // Update order status
       order.setStatus(OrderStatus.CANCELED);
+
+      String i18nMessage = i18nService.getMessage(sagaCommandResult.getError());
+      String errorMessage =
+          StringUtil.isNotBlank(i18nMessage) ? i18nMessage : sagaCommandResult.getError();
       order.setCancellationReason(
-          String.format("%s: %s",
-              CancellationReason.FAILED_TO_INITIALIZE_PAYMENT.getValue(),
-              sagaCommandResult.getError()));
+          String.format("%s: %s", CancellationReason.FAILED_TO_INITIALIZE_PAYMENT.getValue(),
+              errorMessage));
 
       orderRepository.update(order);
     }
@@ -144,10 +148,6 @@ public class CheckoutSaga {
             sendEmailForFulfilledOrder(order);
           },
           () -> {
-            // Send in-app notification
-            sendInAppNotificationForFulfilledOrder(order);
-          },
-          () -> {
             // Clear cart
             String userId = order.getUser().getId();
             ContextInfo contextInfo = ContextInfo.builder()
@@ -160,12 +160,14 @@ public class CheckoutSaga {
           }
       );
     } else {
-      // Update order status
       order.setStatus(OrderStatus.CANCELED);
+
+      String i18nMessage = i18nService.getMessage(sagaCommandResult.getError());
+      String errorMessage =
+          StringUtil.isNotBlank(i18nMessage) ? i18nMessage : sagaCommandResult.getError();
       order.setCancellationReason(
-          String.format("%s: %s",
-              CancellationReason.FAILED_TO_PROCESS_PAYMENT.getValue(),
-              sagaCommandResult.getError()));
+          String.format("%s: %s", CancellationReason.FAILED_TO_PROCESS_PAYMENT.getValue(),
+              errorMessage));
 
       orderRepository.update(order);
     }
@@ -224,38 +226,6 @@ public class CheckoutSaga {
     } catch (Exception e) {
       log.error("Failed to send order fulfilled email: orderId={}, userEmail={}, error={}",
           order.getId(), order.getUser().getEmail(), e.getMessage(), e);
-    }
-  }
-
-  private void sendInAppNotificationForFulfilledOrder(OrderEntity order) {
-    try {
-      // Model
-      Map<String, Object> model = new HashMap<>();
-      model.put("order", order);
-
-      // Message
-      String message;
-      try {
-        message = templateService.resolveInAppMessage("order_fulfilled", model);
-      } catch (Exception e) {
-        throw new ResolveTemplateException("Could not resolve in-app message template", e);
-      }
-
-      SendInAppRequest request = SendInAppRequest.builder()
-          .receiverUserId(order.getUser().getId())
-          .payload(SendInAppRequest.Payload.builder()
-              .message(message)
-              .deliveredAt(DateUtil.now())
-              .build())
-          .build();
-      inAppService.send(request);
-
-      log.info("Sent order fulfilled in-app notification: orderId={}, userId={}",
-          order.getId(), order.getUser().getId());
-    } catch (Exception e) {
-      log.error(
-          "Failed to send order fulfilled in-app notification: orderId={}, userId={}, error={}",
-          order.getId(), order.getUser().getId(), e.getMessage(), e);
     }
   }
 }

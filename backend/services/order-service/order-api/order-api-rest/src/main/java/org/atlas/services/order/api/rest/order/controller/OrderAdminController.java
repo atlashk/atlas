@@ -7,13 +7,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.paging.PagingRequest;
+import org.atlas.libs.framework.paging.PagingRequest.SortOrder;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.order.api.rest.order.mapper.OrderAdminMapper;
 import org.atlas.services.order.api.rest.order.model.admin.OrderResponse;
 import org.atlas.services.order.api.rest.order.model.admin.RetrieveOrderListRequest;
+import org.atlas.services.order.domain.entity.OrderEntity;
 import org.atlas.services.order.port.in.order.model.admin.MonthlyOrderAggregation;
-import org.atlas.services.order.port.in.order.model.admin.OrderOutput;
 import org.atlas.services.order.port.in.order.model.admin.RetrieveOrderListInput;
 import org.atlas.services.order.port.in.order.service.OrderAdminService;
 import org.springframework.http.MediaType;
@@ -37,9 +38,9 @@ public class OrderAdminController {
   public ApiResponseWrapper<List<OrderResponse>> retrieveOrderList(
       @Valid @RequestBody RetrieveOrderListRequest request) throws Exception {
     RetrieveOrderListInput input = OrderAdminMapper.INSTANCE.toRetrieveOrderListInput(request);
-    input.setPagingRequest(PagingRequest.of(request.getPage() - 1, request.getSize()));
-    PagingResult<OrderOutput> output = orderAdminService.retrieveOrderList(input);
-    PagingResult<OrderResponse> responseData = MapperUtil.mapPage(output,
+    input.setPagingRequest(PagingRequest.of(request.getPage() - 1, request.getSize(), "createdAt", SortOrder.DESC));
+    PagingResult<OrderEntity> orders = orderAdminService.retrieveOrderList(input);
+    PagingResult<OrderResponse> responseData = MapperUtil.mapPage(orders,
         OrderAdminMapper.INSTANCE::toOrderResponse);
     return ApiResponseWrapper.successPage(responseData);
   }

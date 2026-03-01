@@ -5,15 +5,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.context.Contexts;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
-import org.atlas.libs.framework.domain.exception.BaseDomainException;
 import org.atlas.libs.framework.domain.shared.payment.PaymentStatus;
+import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
+import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.services.payment.application.mapper.PaymentMapper;
+import org.atlas.services.payment.domain.entity.PaymentEntity;
 import org.atlas.services.payment.domain.error.DomainError;
 import org.atlas.services.payment.domain.exception.DomainException;
+import org.atlas.services.payment.port.in.model.CreatePaymentInput;
 import org.atlas.services.payment.port.in.model.RetrievePaymentNextActionOutput;
+import org.atlas.services.payment.port.in.model.UpdatePaymentInput;
 import org.atlas.services.payment.port.in.service.PaymentService;
 import org.atlas.services.payment.port.out.repository.PaymentRepository;
-import org.atlas.services.payment.domain.entity.PaymentEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +26,31 @@ import org.springframework.transaction.annotation.Transactional;
 public class PaymentServiceImpl implements PaymentService {
 
   private final PaymentRepository paymentRepository;
+  private final SequenceGenerator sequenceGenerator;
+
+  @Override
+  public PaymentEntity retrievePayment(String id) {
+    return paymentRepository.findById(id)
+        .orElseThrow(() -> new DomainException(DomainError.PAYMENT_NOT_FOUND));
+  }
+
+  @Override
+  @Transactional
+  public String createPayment(CreatePaymentInput input) {
+    PaymentEntity payment = PaymentMapper.INSTANCE.toPayment(input);
+    payment.setId(sequenceGenerator.generate(SequenceType.PAYMENT));
+    paymentRepository.insert(payment);
+    return payment.getId();
+  }
+
+  @Override
+  @Transactional
+  public void updatePayment(UpdatePaymentInput input) {
+    PaymentEntity payment = paymentRepository.findById(input.getId())
+        .orElseThrow(() -> new DomainException(DomainError.PAYMENT_NOT_FOUND));
+    PaymentMapper.INSTANCE.merge(input, payment);
+    paymentRepository.update(payment);
+  }
 
   @Override
   @Transactional(readOnly = true)

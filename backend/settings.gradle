@@ -110,12 +110,6 @@ project(':libs.notification.email.spring').projectDir = file('libs/notification/
 include(':libs.notification.email.sendgrid')
 project(':libs.notification.email.sendgrid').projectDir = file('libs/notification/email/email-sendgrid')
 
-// Notification::In-App
-include(':libs.notification.in-app.sse')
-project(':libs.notification.in-app.sse').projectDir = file('libs/notification/in-app/in-app-sse')
-include(':libs.notification.in-app.websocket')
-project(':libs.notification.in-app.websocket').projectDir = file('libs/notification/in-app/in-app-websocket')
-
 // Observability
 
 // Observability::Actuator

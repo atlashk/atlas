@@ -18,10 +18,16 @@ public class PaymentEventEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
   private Integer id;
+
   private Integer paymentGatewayId;
+
   private String paymentId;
+
   private String payload;
+
   private String headers;
+
   private PaymentEventStatus status;
+
   private String error;
 }

@@ -32,10 +32,7 @@ import {
 } from "@/components/ui/table";
 import { withAuth } from "@/hoc/withAuth";
 import { Order, RetrieveOrderListFilter } from "@/interfaces";
-import {
-  formatCurrency,
-  formatDate
-} from "@/utils/formatter.util";
+import { formatCurrency, formatDate } from "@/utils/formatter.util";
 import {
   ChevronDown,
   ChevronUp,
@@ -63,7 +60,9 @@ const OrderHistoryContent: React.FC = () => {
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const [orderStatuses, setOrderStatuses] = useState<Record<string, string>>({});
+  const [orderStatuses, setOrderStatuses] = useState<Record<string, string>>(
+    {}
+  );
   const [isLoadingOrderStatuses, setIsLoadingOrderStatuses] = useState(false);
   const [filters, setFilters] = useState<RetrieveOrderListFilter>({
     status: undefined,
@@ -112,7 +111,9 @@ const OrderHistoryContent: React.FC = () => {
       }
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to load order statuses";
+        error instanceof Error
+          ? error.message
+          : "Failed to load order statuses";
       toast.error(errorMessage);
     } finally {
       setIsLoadingOrderStatuses(false);
@@ -252,7 +253,7 @@ const OrderHistoryContent: React.FC = () => {
 
     isInitialized.current = true;
     // If a refresh param is present on first load, record it to avoid a second call
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
       const initialRefresh = urlParams.get("refresh");
       if (initialRefresh) {
@@ -266,8 +267,9 @@ const OrderHistoryContent: React.FC = () => {
 
   // Listen for refresh parameter changes to reload data after first fetch
   useEffect(() => {
-    if (!isInitialized.current || !isClient || typeof window === 'undefined') return;
-    
+    if (!isInitialized.current || !isClient || typeof window === "undefined")
+      return;
+
     // Use window.location.search to avoid hydration issues with useSearchParams
     const urlParams = new URLSearchParams(window.location.search);
     const refreshParam = urlParams.get("refresh");
@@ -341,11 +343,13 @@ const OrderHistoryContent: React.FC = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Statuses</SelectItem>
-                    {Object.entries(orderStatuses).map(([statusKey, statusLabel]) => (
-                      <SelectItem key={statusKey} value={statusKey}>
-                        {statusLabel}
-                      </SelectItem>
-                    ))}
+                    {Object.entries(orderStatuses).map(
+                      ([statusKey, statusLabel]) => (
+                        <SelectItem key={statusKey} value={statusKey}>
+                          {statusLabel}
+                        </SelectItem>
+                      )
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -557,17 +561,25 @@ const OrderHistoryContent: React.FC = () => {
                               <CreditCard className="w-4 h-4" />
                               Payment Information
                             </h6>
-                            {order.payment.paymentGateway && (
+                            {order.payment.paymentGatewayName && (
                               <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
                                 <span className="text-sm font-medium text-gray-600 min-w-[120px]">
                                   Payment Gateway
                                 </span>
-                                {order.payment.paymentGateway
-                                  .charAt(0)
-                                  .toUpperCase() +
-                                  order.payment.paymentGateway
-                                    .slice(1)
-                                    .toLowerCase()}
+                                <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
+                                  {(() => {
+                                    const paymentGatewayName =
+                                      order.payment.paymentGatewayName;
+                                    return paymentGatewayName
+                                      ? paymentGatewayName
+                                          .charAt(0)
+                                          .toUpperCase() +
+                                          paymentGatewayName
+                                            .slice(1)
+                                            .toLowerCase()
+                                      : "";
+                                  })()}
+                                </span>
                               </div>
                             )}
                             {order.payment.paymentMethod && (
@@ -589,6 +601,14 @@ const OrderHistoryContent: React.FC = () => {
                                   Payment Details
                                 </span>
                                 {order.payment.paymentMethodDetails}
+                              </div>
+                            )}
+                            {order.payment.transactionId && (
+                              <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                  Transaction ID
+                                </span>
+                                {order.payment.transactionId}
                               </div>
                             )}
                           </div>
