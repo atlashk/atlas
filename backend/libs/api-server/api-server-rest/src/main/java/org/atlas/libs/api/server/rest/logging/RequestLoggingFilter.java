@@ -33,7 +33,6 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
-
     // Check if this is a multipart request
     String contentType = request.getContentType();
     boolean isMultipartRequest =

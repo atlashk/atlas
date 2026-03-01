@@ -1,16 +1,16 @@
 package org.atlas.services.catalog.api.rest.product.mapper;
 
 import java.util.List;
-import org.atlas.services.catalog.domain.entity.BrandEntity;
-import org.atlas.services.catalog.domain.entity.CategoryEntity;
-import org.atlas.services.catalog.domain.entity.ProductAttributeEntity;
-import org.atlas.services.catalog.domain.entity.ProductDetailsEntity;
-import org.atlas.services.catalog.domain.entity.ProductEntity;
 import org.atlas.services.catalog.api.rest.product.model.admin.CreateProductRequest;
 import org.atlas.services.catalog.api.rest.product.model.admin.ExportProductRequest;
 import org.atlas.services.catalog.api.rest.product.model.admin.ProductResponse;
 import org.atlas.services.catalog.api.rest.product.model.admin.RetrieveProductListRequest;
 import org.atlas.services.catalog.api.rest.product.model.admin.UpdateProductRequest;
+import org.atlas.services.catalog.domain.entity.BrandEntity;
+import org.atlas.services.catalog.domain.entity.CategoryEntity;
+import org.atlas.services.catalog.domain.entity.ProductAttributeEntity;
+import org.atlas.services.catalog.domain.entity.ProductDetailsEntity;
+import org.atlas.services.catalog.domain.entity.ProductEntity;
 import org.atlas.services.catalog.port.in.product.model.admin.ExportProductInput;
 import org.atlas.services.catalog.port.in.product.model.admin.RetrieveProductListInput;
 import org.mapstruct.Mapper;

@@ -1,8 +1,8 @@
 package org.atlas.services.payment.infrastructure.gateway.stripe;
 
 import com.stripe.StripeClient;
-import org.atlas.services.payment.port.out.gateway.exception.PaymentGatewayException;
 import org.atlas.libs.framework.util.StringUtil;
+import org.atlas.services.payment.port.out.gateway.exception.PaymentGatewayException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

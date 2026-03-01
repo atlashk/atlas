@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.saga.core.entity.SagaCommandEntity;
 import org.atlas.libs.framework.saga.core.repository.SagaCommandRepository;
 import org.atlas.libs.framework.util.MapperUtil;
-import org.atlas.libs.saga.persistence.jpa.entity.JpaSagaCommand;
+import org.atlas.libs.saga.persistence.jpa.entity.JpaSagaCommandEntity;
 import org.atlas.libs.saga.persistence.jpa.mapper.JpaSagaCommandMapper;
 import org.atlas.libs.saga.persistence.jpa.repository.JpaSagaCommandRepository;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ public class JpaSagaCommandRepositoryAdapter implements SagaCommandRepository {
 
   @Override
   public List<SagaCommandEntity> findBySagaId(Integer sagaId) {
-    List<JpaSagaCommand> jpaSagaCommands = jpaSagaCommandRepository.findBySagaId(sagaId);
+    List<JpaSagaCommandEntity> jpaSagaCommands = jpaSagaCommandRepository.findBySagaId(sagaId);
     return MapperUtil.mapList(jpaSagaCommands,
         JpaSagaCommandMapper.INSTANCE::toSagaCommandEntity);
   }
@@ -32,7 +32,7 @@ public class JpaSagaCommandRepositoryAdapter implements SagaCommandRepository {
 
   @Override
   public void insert(SagaCommandEntity sagaCommand) {
-    JpaSagaCommand jpaSagaCommand =
+    JpaSagaCommandEntity jpaSagaCommand =
         JpaSagaCommandMapper.INSTANCE.toJpaSagaCommandEntity(sagaCommand);
     jpaSagaCommandRepository.insert(jpaSagaCommand);
     sagaCommand.setId(jpaSagaCommand.getId());
@@ -40,7 +40,7 @@ public class JpaSagaCommandRepositoryAdapter implements SagaCommandRepository {
 
   @Override
   public void update(SagaCommandEntity sagaCommand) {
-    JpaSagaCommand jpaSagaCommand =
+    JpaSagaCommandEntity jpaSagaCommand =
         JpaSagaCommandMapper.INSTANCE.toJpaSagaCommandEntity(sagaCommand);
     jpaSagaCommandRepository.save(jpaSagaCommand);
   }

@@ -1,7 +1,7 @@
 package org.atlas.libs.outbox.persistence.jpa.mapper;
 
-import org.atlas.libs.framework.messaging.outbox.OutboxMessage;
-import org.atlas.libs.outbox.persistence.jpa.entity.JpaOutboxMessage;
+import org.atlas.libs.framework.messaging.outbox.OutboxMessageEntity;
+import org.atlas.libs.outbox.persistence.jpa.entity.JpaOutboxMessageEntity;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
@@ -15,7 +15,7 @@ public interface JpaOutboxMessageMapper {
 
   JpaOutboxMessageMapper INSTANCE = Mappers.getMapper(JpaOutboxMessageMapper.class);
 
-  OutboxMessage toOutboxMessage(JpaOutboxMessage jpaOutboxMessage);
+  OutboxMessageEntity toOutboxMessage(JpaOutboxMessageEntity jpaOutboxMessage);
 
-  JpaOutboxMessage toJpaOutboxMessage(OutboxMessage outboxMessage);
+  JpaOutboxMessageEntity toJpaOutboxMessage(OutboxMessageEntity outboxMessage);
 }

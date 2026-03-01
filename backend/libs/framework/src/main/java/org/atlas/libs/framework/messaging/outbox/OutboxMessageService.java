@@ -22,7 +22,7 @@ public class OutboxMessageService {
   private final MessagePublisher messagePublisher;
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public void processOutboxMessage(OutboxMessage outboxMessage) {
+  public void processOutboxMessage(OutboxMessageEntity outboxMessage) {
     try {
       Message message = JsonUtil.getInstance()
           .toObject(outboxMessage.getMessage(), Message.class);

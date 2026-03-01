@@ -9,9 +9,10 @@ import org.atlas.services.catalog.port.out.file.model.ProductReadRow;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProductReadRowMapper {
 
   ProductReadRowMapper INSTANCE = Mappers.getMapper(ProductReadRowMapper.class);

@@ -10,6 +10,7 @@ import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.identity.api.rest.authentication.mapper.AuthenticationMapper;
+import org.atlas.services.identity.api.rest.authentication.model.ChangePasswordRequest;
 import org.atlas.services.identity.api.rest.authentication.model.GenerateOneTimeTokenRequest;
 import org.atlas.services.identity.api.rest.authentication.model.GenerateOneTimeTokenResponse;
 import org.atlas.services.identity.api.rest.authentication.model.LoginRequest;
@@ -18,7 +19,7 @@ import org.atlas.services.identity.api.rest.authentication.model.OneTimeTokenLog
 import org.atlas.services.identity.api.rest.authentication.model.RefreshTokenRequest;
 import org.atlas.services.identity.api.rest.authentication.model.RefreshTokenResponse;
 import org.atlas.services.identity.api.rest.user.mapper.UserMapper;
-import org.atlas.services.identity.api.rest.authentication.model.ChangePasswordRequest;
+import org.atlas.services.identity.port.in.authentication.model.ChangePasswordInput;
 import org.atlas.services.identity.port.in.authentication.model.GenerateOneTimeTokenInput;
 import org.atlas.services.identity.port.in.authentication.model.GenerateOneTimeTokenOutput;
 import org.atlas.services.identity.port.in.authentication.model.LoginInput;
@@ -27,7 +28,6 @@ import org.atlas.services.identity.port.in.authentication.model.OneTimeTokenLogi
 import org.atlas.services.identity.port.in.authentication.model.RefreshTokenInput;
 import org.atlas.services.identity.port.in.authentication.model.RefreshTokenOutput;
 import org.atlas.services.identity.port.in.authentication.service.AuthenticationService;
-import org.atlas.services.identity.port.in.authentication.model.ChangePasswordInput;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;

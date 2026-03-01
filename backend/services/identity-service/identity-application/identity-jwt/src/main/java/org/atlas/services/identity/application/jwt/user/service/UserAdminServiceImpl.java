@@ -49,13 +49,15 @@ public class UserAdminServiceImpl implements UserAdminService {
 
   @Override
   @Transactional
-  public void createUser(CreateUserInput input) {
+  public String createUser(CreateUserInput input) {
     checkValidity(input);
 
     UserEntity user = UserAdminMapper.INSTANCE.toUser(input);
     user.setId(sequenceGenerator.generate(SequenceType.USER));
     user.setPassword(passwordEncoder.encode(input.getPassword()));
     userRepository.insert(user);
+
+    return user.getId();
   }
 
   @Override

@@ -15,40 +15,37 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.libs.framework.saga.core.entity.SagaCommandStatus;
+import org.atlas.libs.framework.saga.core.entity.SagaStatus;
 import org.atlas.libs.persistence.jpa.entity.JpaBaseEntity;
 
 @Entity
-@Table(name = "saga_command")
+@Table(name = "saga")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
-public class JpaSagaCommand extends JpaBaseEntity {
+public class JpaSagaEntity extends JpaBaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @EqualsAndHashCode.Include
   private Integer id;
 
-  @Column(name = "saga_id")
-  private Integer sagaId;
-
   @Column(name = "name")
   private String name;
 
-  @Column(name = "target_service_name")
-  private String targetServiceName;
+  @Column(name = "context")
+  private String context;
 
   @Column(name = "status")
   @Enumerated(EnumType.STRING)
-  private SagaCommandStatus status;
+  private SagaStatus status;
 
   @Column(name = "completed_at")
   private Date completedAt;
 
-  @Column(name = "compensation_error")
-  private String compensationError;
+  @Column(name = "error")
+  private String error;
 }

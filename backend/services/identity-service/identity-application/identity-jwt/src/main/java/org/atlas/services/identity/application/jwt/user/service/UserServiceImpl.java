@@ -3,7 +3,6 @@ package org.atlas.services.identity.application.jwt.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.context.Contexts;
-import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.domain.shared.identity.UserRole;
 import org.atlas.services.identity.application.jwt.user.mapper.UserMapper;
 import org.atlas.services.identity.domain.entity.UserEntity;

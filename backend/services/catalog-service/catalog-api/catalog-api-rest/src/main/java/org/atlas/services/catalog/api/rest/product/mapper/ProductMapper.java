@@ -1,8 +1,8 @@
 package org.atlas.services.catalog.api.rest.product.mapper;
 
-import org.atlas.services.catalog.domain.entity.ProductEntity;
 import org.atlas.services.catalog.api.rest.product.model.ProductResponse;
 import org.atlas.services.catalog.api.rest.product.model.RetrieveProductListRequest;
+import org.atlas.services.catalog.domain.entity.ProductEntity;
 import org.atlas.services.catalog.port.in.product.model.RetrieveProductListInput;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;

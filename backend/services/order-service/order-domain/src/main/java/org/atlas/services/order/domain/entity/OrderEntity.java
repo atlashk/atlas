@@ -10,9 +10,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.domain.entity.DomainEntity;
 import org.atlas.libs.framework.domain.shared.order.OrderStatus;
+import org.atlas.libs.framework.util.CollectionUtil;
 
 @NoArgsConstructor
 @AllArgsConstructor

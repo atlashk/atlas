@@ -141,7 +141,10 @@ public class KeycloakUserClient {
     }
   }
 
-  public void createUser(UserEntity user, String password) {
+  /**
+   * @return Keycloak created user ID
+   */
+  public String createUser(UserEntity user, String password) {
     RealmResource realm = keycloak.realm(keycloakProps.getRealm());
     UsersResource usersResource = realm.users();
     UserRepresentation kcUser = toUserRepresentation(user, password);
@@ -160,6 +163,7 @@ public class KeycloakUserClient {
 
       log.info("Created Keycloak user successfully: username={}, keycloakUserId={}",
           user.getUsername(), kcCreatedId);
+      return kcCreatedId;
     } catch (Exception e) {
       throw new KeycloakClientException(
           String.format("Failed to create Keycloak user: username=%s, reason=%s",

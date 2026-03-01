@@ -1,10 +1,10 @@
 package org.atlas.services.identity.port.in.user.service;
 
 import org.atlas.libs.framework.paging.PagingResult;
+import org.atlas.services.identity.port.in.user.model.admin.CreateUserInput;
 import org.atlas.services.identity.port.in.user.model.admin.RetrieveUserListInput;
 import org.atlas.services.identity.port.in.user.model.admin.UpdateUserInput;
 import org.atlas.services.identity.port.in.user.model.admin.UserOutput;
-import org.atlas.services.identity.port.in.user.model.admin.CreateUserInput;
 
 public interface UserAdminService {
 
@@ -12,7 +12,7 @@ public interface UserAdminService {
 
   UserOutput retrieveUser(String id);
 
-  void createUser(CreateUserInput input);
+  String createUser(CreateUserInput input);
 
   void updateUser(UpdateUserInput input);
 

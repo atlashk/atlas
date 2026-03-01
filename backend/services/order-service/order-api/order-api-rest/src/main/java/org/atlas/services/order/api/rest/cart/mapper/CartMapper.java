@@ -1,7 +1,7 @@
 package org.atlas.services.order.api.rest.cart.mapper;
 
-import org.atlas.services.order.domain.entity.CartEntity;
 import org.atlas.services.order.api.rest.cart.model.CartResponse;
+import org.atlas.services.order.domain.entity.CartEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;

@@ -2,7 +2,6 @@ package org.atlas.services.order.domain.error;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.http.HttpStatusCode;
 
 @Getter
 @RequiredArgsConstructor

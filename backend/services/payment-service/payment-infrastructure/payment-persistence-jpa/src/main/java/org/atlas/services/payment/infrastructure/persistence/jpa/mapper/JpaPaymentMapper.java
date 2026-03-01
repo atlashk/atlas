@@ -1,14 +1,14 @@
 package org.atlas.services.payment.infrastructure.persistence.jpa.mapper;
 
 import org.atlas.libs.framework.json.JsonUtil;
+import org.atlas.libs.framework.util.StringUtil;
+import org.atlas.services.payment.domain.entity.PaymentEntity;
 import org.atlas.services.payment.domain.entity.nextaction.DeepLink;
 import org.atlas.services.payment.domain.entity.nextaction.NextAction;
 import org.atlas.services.payment.domain.entity.nextaction.NextActionType;
 import org.atlas.services.payment.domain.entity.nextaction.QRCode;
 import org.atlas.services.payment.domain.entity.nextaction.RedirectUrl;
 import org.atlas.services.payment.domain.entity.nextaction.UsePaymentElement;
-import org.atlas.libs.framework.util.StringUtil;
-import org.atlas.services.payment.domain.entity.PaymentEntity;
 import org.atlas.services.payment.infrastructure.persistence.jpa.entity.JpaPaymentEntity;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Builder;
@@ -25,19 +25,6 @@ import org.mapstruct.factory.Mappers;
 public interface JpaPaymentMapper {
 
   JpaPaymentMapper INSTANCE = Mappers.getMapper(JpaPaymentMapper.class);
-
-  @Mapping(target = "nextAction", ignore = true)
-  JpaPaymentEntity toJpaPayment(PaymentEntity payment);
-
-  /**
-   * After mapping for Payment to JpaPayment - handle NextAction serialization
-   */
-  @AfterMapping
-  default void afterToJpaPayment(@MappingTarget JpaPaymentEntity jpaPayment, PaymentEntity payment) {
-    if (payment.getNextAction() != null) {
-      jpaPayment.setNextAction(JsonUtil.getInstance().toJson(payment.getNextAction()));
-    }
-  }
 
   @Mapping(target = "nextAction", ignore = true)
   PaymentEntity toPayment(JpaPaymentEntity jpaPayment);
@@ -64,6 +51,19 @@ public interface JpaPaymentMapper {
             throw new IllegalStateException("Unexpected next action type: " + nextActionType);
       }
       payment.setNextAction(nextAction);
+    }
+  }
+
+  @Mapping(target = "nextAction", ignore = true)
+  JpaPaymentEntity toJpaPayment(PaymentEntity payment);
+
+  /**
+   * After mapping for Payment to JpaPayment - handle NextAction serialization
+   */
+  @AfterMapping
+  default void afterToJpaPayment(@MappingTarget JpaPaymentEntity jpaPayment, PaymentEntity payment) {
+    if (payment.getNextAction() != null) {
+      jpaPayment.setNextAction(JsonUtil.getInstance().toJson(payment.getNextAction()));
     }
   }
 }

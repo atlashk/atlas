@@ -4,14 +4,10 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.domain.error.CommonDomainError;
-import org.atlas.libs.framework.domain.exception.BaseDomainException;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.catalog.domain.entity.ProductEntity;
-import org.atlas.services.catalog.domain.error.DomainError;
-import org.atlas.services.catalog.domain.exception.DomainException;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.entity.JpaProductEntity;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.mapper.JpaProductMapper;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.repository.CustomJpaProductRepository;
@@ -73,7 +69,8 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
 
   @Override
   public void update(ProductEntity product) {
-    JpaProductEntity jpaProduct = JpaProductMapper.INSTANCE.toJpaProduct(product);
+    JpaProductEntity jpaProduct = jpaProductRepository.getReferenceById(product.getId());
+    JpaProductMapper.INSTANCE.merge(product, jpaProduct);
     jpaProductRepository.save(jpaProduct);
   }
 

@@ -9,11 +9,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.services.catalog.domain.entity.ProductType;
 import org.atlas.services.catalog.api.rest.brand.model.BrandResponse;
 import org.atlas.services.catalog.api.rest.category.model.CategoryResponse;
 import org.atlas.services.catalog.api.rest.product.model.ProductAttributeResponse;
 import org.atlas.services.catalog.api.rest.product.model.ProductDetailsResponse;
+import org.atlas.services.catalog.domain.entity.ProductType;
 
 @Schema(description = "Response object for retrieving product details")
 @Getter

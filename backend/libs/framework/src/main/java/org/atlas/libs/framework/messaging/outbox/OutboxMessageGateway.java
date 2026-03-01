@@ -20,7 +20,7 @@ public class OutboxMessageGateway implements MessageGateway {
 
   @Override
   public void sendMessage(Message message) {
-    OutboxMessage outboxMessage = OutboxMessage.builder()
+    OutboxMessageEntity outboxMessage = OutboxMessageEntity.builder()
         .message(JsonUtil.getInstance().toJson(message))
         .status(OutboxMessageStatus.PENDING)
         .retries(0)

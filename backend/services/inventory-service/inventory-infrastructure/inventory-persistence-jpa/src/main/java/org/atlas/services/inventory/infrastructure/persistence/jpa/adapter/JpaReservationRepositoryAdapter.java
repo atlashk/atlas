@@ -2,12 +2,12 @@ package org.atlas.services.inventory.infrastructure.persistence.jpa.adapter;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.atlas.services.inventory.domain.entity.ReservationEntity;
 import org.atlas.services.inventory.domain.entity.ReservationStatus;
 import org.atlas.services.inventory.infrastructure.persistence.jpa.entity.JpaReservationEntity;
-import org.atlas.services.inventory.port.out.repository.ReservationRepository;
-import org.atlas.services.inventory.domain.entity.ReservationEntity;
 import org.atlas.services.inventory.infrastructure.persistence.jpa.mapper.JpaReservationMapper;
 import org.atlas.services.inventory.infrastructure.persistence.jpa.repository.JpaReservationRepository;
+import org.atlas.services.inventory.port.out.repository.ReservationRepository;
 import org.springframework.stereotype.Component;
 
 @Component

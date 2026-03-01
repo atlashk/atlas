@@ -5,7 +5,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,17 +42,15 @@ public class ApiLatencyFilter extends OncePerRequestFilter {
       String endpoint = request.getRequestURI();
       String method = request.getMethod();
       int httpStatus = response.getStatus();
-      String channel = Optional.ofNullable(request.getHeader("X-Channel")).orElse("unknown");
       try {
-        apiLatencyMetricsCollector.collect(service, endpoint, method, httpStatus, channel,
-            elapsedTimeMs);
+        apiLatencyMetricsCollector.collect(service, endpoint, method, httpStatus, elapsedTimeMs);
         log.debug(
-            "Collected API Latency metrics: service={}, endpoint={}, method={}, httpStatus={}, channel={}, elapsedTimeMs={}",
-            service, endpoint, method, httpStatus, channel, elapsedTimeMs);
+            "Collected API Latency metrics: service={}, endpoint={}, method={}, httpStatus={}, elapsedTimeMs={}",
+            service, endpoint, method, httpStatus, elapsedTimeMs);
       } catch (Exception e) {
         log.error(
-            "Failed to collect API latency metrics: service={}, endpoint={}, method={}, httpStatus={}, channel={}, elapsedTimeMs={}",
-            service, endpoint, method, httpStatus, channel, elapsedTimeMs, e);
+            "Failed to collect API latency metrics: service={}, endpoint={}, method={}, httpStatus={}, elapsedTimeMs={}",
+            service, endpoint, method, httpStatus, elapsedTimeMs, e);
       }
     }
   }

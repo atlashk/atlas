@@ -15,7 +15,7 @@ import org.atlas.libs.framework.domain.entity.DomainEntity;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
-public class OutboxMessage extends DomainEntity {
+public class OutboxMessageEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
   private Integer id;

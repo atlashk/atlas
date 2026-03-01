@@ -13,12 +13,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.cryptography.Base64Util;
 import org.atlas.libs.framework.notification.email.Attachment;
 import org.atlas.libs.framework.notification.email.EmailService;
 import org.atlas.libs.framework.notification.email.SendEmailException;
 import org.atlas.libs.framework.notification.email.SendEmailRequest;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.springframework.stereotype.Service;
 
 @Service

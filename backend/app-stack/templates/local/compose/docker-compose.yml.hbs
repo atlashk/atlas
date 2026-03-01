@@ -240,6 +240,12 @@ services:
       - '--storage.tsdb.path=/prometheus'
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9090/-/healthy || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - atlas-network
 {{/hasObservability}}
@@ -253,20 +259,36 @@ services:
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
       - loki-data:/loki
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - atlas-network
 
   promtail:
     container_name: promtail
     image: grafana/promtail:main
-    volumes:
-      - ./config/promtail/config.yml:/etc/promtail/config.yml:ro
-      - /var/log:/var/log:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - promtail-data:/var/lib/promtail
     command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - ./config/promtail/config.yml:/etc/promtail/config.yml
+      - eureka-server-log:/var/log/eureka-server
+      - identity-service-log:/var/log/identity-service
+      - catalog-service-log:/var/log/catalog-service
+      - inventory-service-log:/var/log/inventory-service
+      - order-service-log:/var/log/order-service
+      - payment-service-log:/var/log/payment-service
+      - api-gateway-log:/var/log/api-gateway
     depends_on:
       - loki
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9080/metrics || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - atlas-network
 {{/hasObservability}}
@@ -297,6 +319,12 @@ services:
       - grafana-data:/var/lib/grafana
       - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
       - ./config/grafana/dashboards:/etc/grafana/dashboards:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
     depends_on:
       {{#hasObservability "metrics" "prometheus"}}
       - prometheus
@@ -333,12 +361,14 @@ services:
       - "8761:8761"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+    volumes:
+      - eureka-server-log:/var/log/eureka-server
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health/liveness"]
       interval: 10s
       timeout: 10s
       retries: 15
-      start_period: 90s
+      start_period: 180s
     networks:
       - atlas-network
 
@@ -379,6 +409,14 @@ services:
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       {{/hasObservability}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+    volumes:
+      - identity-service-log:/var/log/identity-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health/liveness"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 180s
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -441,6 +479,14 @@ services:
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       {{/hasObservability}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+    volumes:
+      - catalog-service-log:/var/log/catalog-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health/liveness"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 180s
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -496,6 +542,14 @@ services:
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       {{/hasObservability}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+    volumes:
+      - inventory-service-log:/var/log/inventory-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health/liveness"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 180s
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -555,6 +609,14 @@ services:
       - API_CLIENT_REST_IDENTITY_SERVICE_BASE_URL=http://identity-service:8081
       - API_CLIENT_REST_CATALOG_SERVICE_BASE_URL=http://catalog-service:8082
       {{/hasService}}
+    volumes:
+      - order-service-log:/var/log/order-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health/liveness"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 180s
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -607,6 +669,14 @@ services:
       {{/hasObservability}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
       - PAYMENT_SIMULATOR_WEBHOOK_URL=http://api-gateway:8080/services/payment/api/webhook/simulator
+    volumes:
+      - payment-service-log:/var/log/payment-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health/liveness"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 180s
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -645,6 +715,14 @@ services:
       {{#hasService "identity" "keycloak"}}
       - KEYCLOAK_BASE_URL=http://keycloak:8443
       {{/hasService}}
+    volumes:
+      - api-gateway-log:/var/log/api-gateway
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health/liveness"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 180s
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -688,3 +766,12 @@ volumes:
 {{#hasGrafana}}
   grafana-data:
 {{/hasGrafana}}
+{{#unless infraOnly}}
+  eureka-server-log:
+  identity-service-log:
+  catalog-service-log:
+  inventory-service-log:
+  order-service-log:
+  payment-service-log:
+  api-gateway-log:
+{{/unless}}

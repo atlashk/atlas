@@ -26,6 +26,7 @@ repositories {
 
 dependencies {
     // Observability
+    api project(':libs.observability.actuator')
     switch (rootProject.ext.appStack['observability.logging.framework']) {
         case 'logback':
             api project(':libs.observability.logging.logback')

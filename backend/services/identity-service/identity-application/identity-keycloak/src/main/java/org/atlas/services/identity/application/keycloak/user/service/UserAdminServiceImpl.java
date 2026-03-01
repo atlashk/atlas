@@ -51,11 +51,11 @@ public class UserAdminServiceImpl implements UserAdminService {
   }
 
   @Override
-  public void createUser(CreateUserInput input) {
+  public String createUser(CreateUserInput input) {
     checkValidity(input);
 
     UserEntity user = UserAdminMapper.INSTANCE.toUser(input);
-    keycloakUserClient.createUser(user, input.getPassword());
+    return keycloakUserClient.createUser(user, input.getPassword());
   }
 
   @Override

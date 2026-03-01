@@ -116,8 +116,9 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported migration: ${rootProject.ext.appStack['migration']}")
     }
-    
+
     // Observability
+    api project(':libs.observability.actuator')
     switch (rootProject.ext.appStack['observability.logging.framework']) {
         case 'logback':
             api project(':libs.observability.logging.logback')

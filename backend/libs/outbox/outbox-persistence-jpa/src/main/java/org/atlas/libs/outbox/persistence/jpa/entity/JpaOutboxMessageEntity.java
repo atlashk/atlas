@@ -1,4 +1,4 @@
-package org.atlas.libs.saga.persistence.jpa.entity;
+package org.atlas.libs.outbox.persistence.jpa.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,37 +15,38 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.libs.framework.saga.core.entity.SagaStatus;
+import org.atlas.libs.framework.messaging.outbox.OutboxMessageStatus;
 import org.atlas.libs.persistence.jpa.entity.JpaBaseEntity;
 
 @Entity
-@Table(name = "saga")
+@Table(name = "outbox_message")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
-public class JpaSaga extends JpaBaseEntity {
+public class JpaOutboxMessageEntity extends JpaBaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @EqualsAndHashCode.Include
   private Integer id;
 
-  @Column(name = "name")
-  private String name;
-
-  @Column(name = "context")
-  private String context;
+  @Column(name = "message")
+  private String message;
 
   @Column(name = "status")
   @Enumerated(EnumType.STRING)
-  private SagaStatus status;
+  private OutboxMessageStatus status;
 
-  @Column(name = "completed_at")
-  private Date completedAt;
+  @Column(name = "processed_at")
+  private Date processedAt;
 
   @Column(name = "error")
   private String error;
+
+  @Column(name = "retries")
+  @Builder.Default
+  private Integer retries = 0;
 }

@@ -1,15 +1,14 @@
 package org.atlas.services.order.api.rest.order.mapper;
 
-import org.atlas.services.order.domain.entity.OrderEntity;
 import org.atlas.services.order.api.rest.order.model.CheckoutRequest;
 import org.atlas.services.order.api.rest.order.model.OrderResponse;
 import org.atlas.services.order.api.rest.order.model.RetrieveOrderListRequest;
 import org.atlas.services.order.api.rest.order.model.RetrieveOrderStatusResponse;
+import org.atlas.services.order.domain.entity.OrderEntity;
 import org.atlas.services.order.port.in.order.model.CheckoutInput;
 import org.atlas.services.order.port.in.order.model.RetrieveOrderListInput;
 import org.atlas.services.order.port.in.order.model.RetrieveOrderStatusOutput;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 

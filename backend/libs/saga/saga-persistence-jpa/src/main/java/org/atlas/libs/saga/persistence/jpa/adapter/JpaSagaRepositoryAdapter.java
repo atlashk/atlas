@@ -4,7 +4,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.saga.core.entity.SagaEntity;
 import org.atlas.libs.framework.saga.core.repository.SagaRepository;
-import org.atlas.libs.saga.persistence.jpa.entity.JpaSaga;
+import org.atlas.libs.saga.persistence.jpa.entity.JpaSagaEntity;
 import org.atlas.libs.saga.persistence.jpa.mapper.JpaSagaMapper;
 import org.atlas.libs.saga.persistence.jpa.repository.JpaSagaRepository;
 import org.springframework.stereotype.Component;
@@ -23,14 +23,14 @@ public class JpaSagaRepositoryAdapter implements SagaRepository {
 
   @Override
   public void insert(SagaEntity saga) {
-    JpaSaga jpaSaga = JpaSagaMapper.INSTANCE.toJpaSagaEntity(saga);
+    JpaSagaEntity jpaSaga = JpaSagaMapper.INSTANCE.toJpaSagaEntity(saga);
     jpaSagaRepository.insert(jpaSaga);
     saga.setId(jpaSaga.getId());
   }
 
   @Override
   public void update(SagaEntity saga) {
-    JpaSaga jpaSaga = JpaSagaMapper.INSTANCE.toJpaSagaEntity(saga);
+    JpaSagaEntity jpaSaga = JpaSagaMapper.INSTANCE.toJpaSagaEntity(saga);
     jpaSagaRepository.save(jpaSaga);
   }
 }

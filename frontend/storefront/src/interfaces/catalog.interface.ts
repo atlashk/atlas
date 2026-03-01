@@ -1,9 +1,11 @@
 export interface Product {
-  id: number;
+  id: string;
   name: string;
+  type: string;
   image: string;
   price: number;
-  isActive?: boolean;
+  publishedAt: string;
+  inStock: boolean;
   brand?: Brand;
   details?: ProductDetails;
   attributes?: ProductAttribute[];
@@ -11,7 +13,7 @@ export interface Product {
 }
 
 export interface Brand {
-  id: number;
+  id: string;
   name: string;
 }
 
@@ -26,7 +28,7 @@ export interface ProductAttribute {
 }
 
 export interface Category {
-  id: number;
+  id: string;
   name: string;
 }
 
@@ -35,8 +37,8 @@ export interface RetrieveProductListFilter {
   minPrice?: number;
   maxPrice?: number;
   brandId?: string;
-  categoryIds?: number[];
-  mode?: string;
+  categoryIds?: string[];
+  mode: string;
   page: number;
   size: number;
 }

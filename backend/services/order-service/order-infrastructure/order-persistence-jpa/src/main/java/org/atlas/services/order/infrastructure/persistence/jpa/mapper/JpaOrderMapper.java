@@ -21,6 +21,27 @@ public interface JpaOrderMapper {
 
   JpaOrderMapper INSTANCE = Mappers.getMapper(JpaOrderMapper.class);
 
+  @Mapping(target = "user.id", source = "userId")
+  @Mapping(target = "user.firstName", source = "userFirstName")
+  @Mapping(target = "user.lastName", source = "userLastName")
+  @Mapping(target = "user.email", source = "userEmail")
+  @Mapping(target = "user.phoneNumber", source = "userPhoneNumber")
+  @Mapping(target = "address.street", source = "addressStreet")
+  @Mapping(target = "address.city", source = "addressCity")
+  @Mapping(target = "address.country", source = "addressCountry")
+  @Mapping(target = "address.postalCode", source = "addressPostalCode")
+  @Mapping(target = "payment.paymentGatewayId", source = "paymentGatewayId")
+  @Mapping(target = "payment.paymentGatewayName", source = "paymentGatewayName")
+  @Mapping(target = "payment.paymentMethod", source = "paymentMethod")
+  @Mapping(target = "payment.paymentMethodDetails", source = "paymentMethodDetails")
+  @Mapping(target = "payment.transactionId", source = "paymentTransactionId")
+  OrderEntity toOrder(JpaOrderEntity jpaOrder);
+
+  @Mapping(target = "product.id", source = "productId")
+  @Mapping(target = "product.name", source = "productName")
+  @Mapping(target = "product.price", source = "productPrice")
+  OrderItem toOrderItem(JpaOrderItemEntity jpaOrderItem);
+
   @Mapping(target = "userId", source = "user.id")
   @Mapping(target = "userFirstName", source = "user.firstName")
   @Mapping(target = "userLastName", source = "user.lastName")
@@ -56,25 +77,4 @@ public interface JpaOrderMapper {
       });
     }
   }
-
-  @Mapping(target = "user.id", source = "userId")
-  @Mapping(target = "user.firstName", source = "userFirstName")
-  @Mapping(target = "user.lastName", source = "userLastName")
-  @Mapping(target = "user.email", source = "userEmail")
-  @Mapping(target = "user.phoneNumber", source = "userPhoneNumber")
-  @Mapping(target = "address.street", source = "addressStreet")
-  @Mapping(target = "address.city", source = "addressCity")
-  @Mapping(target = "address.country", source = "addressCountry")
-  @Mapping(target = "address.postalCode", source = "addressPostalCode")
-  @Mapping(target = "payment.paymentGatewayId", source = "paymentGatewayId")
-  @Mapping(target = "payment.paymentGatewayName", source = "paymentGatewayName")
-  @Mapping(target = "payment.paymentMethod", source = "paymentMethod")
-  @Mapping(target = "payment.paymentMethodDetails", source = "paymentMethodDetails")
-  @Mapping(target = "payment.transactionId", source = "paymentTransactionId")
-  OrderEntity toOrder(JpaOrderEntity jpaOrder);
-
-  @Mapping(target = "product.id", source = "productId")
-  @Mapping(target = "product.name", source = "productName")
-  @Mapping(target = "product.price", source = "productPrice")
-  OrderItem toOrderItem(JpaOrderItemEntity jpaOrderItem);
 }

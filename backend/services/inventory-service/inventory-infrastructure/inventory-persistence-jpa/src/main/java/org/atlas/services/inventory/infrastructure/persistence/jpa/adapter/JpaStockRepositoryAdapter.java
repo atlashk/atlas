@@ -3,8 +3,6 @@ package org.atlas.services.inventory.infrastructure.persistence.jpa.adapter;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.domain.error.CommonDomainError;
-import org.atlas.libs.framework.domain.exception.BaseDomainException;
 import org.atlas.libs.framework.domain.shared.inventory.InsufficientStockException;
 import org.atlas.services.inventory.domain.entity.StockEntity;
 import org.atlas.services.inventory.domain.error.DomainError;

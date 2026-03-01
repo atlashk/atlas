@@ -66,6 +66,7 @@ public class RestExceptionHandler {
   @ExceptionHandler(Exception.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public ApiResponseWrapper<Void> handle(Exception e) {
+    log.error("API error: {}", e.getMessage(), e);
     return ApiResponseWrapper.error(CommonDomainError.DEFAULT.getErrorCode(), e.getMessage());
   }
 }

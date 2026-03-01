@@ -1,12 +1,10 @@
 package org.atlas.services.payment.port.in.model;
 
-import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.libs.framework.domain.shared.payment.PaymentStatus;
 import org.atlas.services.payment.domain.entity.PaymentEventStatus;
 
 @NoArgsConstructor

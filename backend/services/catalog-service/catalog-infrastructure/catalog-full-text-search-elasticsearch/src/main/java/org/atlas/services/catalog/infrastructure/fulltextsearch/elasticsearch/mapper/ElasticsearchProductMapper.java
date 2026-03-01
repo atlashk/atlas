@@ -2,9 +2,9 @@ package org.atlas.services.catalog.infrastructure.fulltextsearch.elasticsearch.m
 
 import org.atlas.services.catalog.domain.entity.BrandEntity;
 import org.atlas.services.catalog.domain.entity.CategoryEntity;
-import org.atlas.services.catalog.domain.entity.ProductEntity;
 import org.atlas.services.catalog.domain.entity.ProductAttributeEntity;
 import org.atlas.services.catalog.domain.entity.ProductDetailsEntity;
+import org.atlas.services.catalog.domain.entity.ProductEntity;
 import org.atlas.services.catalog.infrastructure.fulltextsearch.elasticsearch.document.ElasticsearchProduct;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

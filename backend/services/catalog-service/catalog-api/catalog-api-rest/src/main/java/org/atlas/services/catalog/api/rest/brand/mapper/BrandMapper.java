@@ -1,7 +1,7 @@
 package org.atlas.services.catalog.api.rest.brand.mapper;
 
-import org.atlas.services.catalog.domain.entity.BrandEntity;
 import org.atlas.services.catalog.api.rest.brand.model.BrandResponse;
+import org.atlas.services.catalog.domain.entity.BrandEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;

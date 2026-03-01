@@ -1,5 +1,4 @@
 import type { Product } from "./catalog.interface";
-import type { User } from "./identity.interface";
 
 export interface CartResponse {
   id: number;
@@ -15,7 +14,7 @@ export interface CartItemResponse {
 }
 
 export interface AddCartItemRequest {
-  productId: number;
+  productId: string;
   quantity: number;
 }
 
@@ -64,7 +63,7 @@ export interface CheckoutRequest {
 }
 
 export interface CheckoutResponse {
-  orderId: number;
+  orderId: string;
 }
 
 export interface OrderStatusResponse {
@@ -73,9 +72,9 @@ export interface OrderStatusResponse {
 }
 
 export interface RetrieveOrderListFilter {
-  orderId?: number;
-  userId?: number;
-  productId?: number;
+  orderId?: string;
+  userId?: string;
+  productId?: string;
   status?: string;
   startDate?: string;
   endDate?: string;

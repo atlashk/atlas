@@ -8,8 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.services.catalog.domain.entity.ProductType;
 import org.atlas.libs.framework.file.FileType;
+import org.atlas.services.catalog.domain.entity.ProductType;
 
 @NoArgsConstructor
 @AllArgsConstructor
