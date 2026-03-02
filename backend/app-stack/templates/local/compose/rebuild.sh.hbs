@@ -1,88 +1,138 @@
 #!/usr/bin/env bash
-
-# Ensures that the script exits immediately if any command fails, or if you try to use an undefined variable.
 set -euo pipefail
 
+# =============================================================================
+# CONFIGURATION
+# =============================================================================
+
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+readonly PROJECT_NAME="{{dotenv.PROJECT_NAME}}"
+readonly APP_STACK="{{#if appStack}}{{appStack}}{{/if}}"
+readonly COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
+
+DOCKER_COMPOSE_CMD=""
+
+# =============================================================================
+# UTILITIES
+# =============================================================================
+
+die() { echo "Error: $1" >&2; exit 1; }
+info() { echo "==> $1"; }
+
+# =============================================================================
+# USAGE
+# =============================================================================
+
 show_usage() {
-  echo "Usage: $0 <service-name>"
-  echo ""
-  echo "Arguments:"
-  echo "  <service-name>     Service name to rebuild (required)"
-  echo ""
-  echo "Available services:"
-  {{#each services}}
-  echo "  - {{this.name}}"
-  {{/each}}
-  echo ""
-  echo "Examples:"
-  echo "  $0 identity-service"
-  echo "  $0 api-gateway"
+  cat <<EOF
+Usage: $0 <service-name>
+
+Rebuild and redeploy a single service using Docker Compose
+
+Arguments:
+  <service-name>     Service name to rebuild (required)
+
+Available services:
+{{#each services}}
+  - {{this.name}}
+{{/each}}
+
+Examples:
+  $0 identity-service
+  $0 api-gateway
+EOF
 }
 
-# Check for help flag
-if [[ "$1" == "-h" || "$1" == "--help" ]]; then
-  show_usage
-  exit 0
-fi
+parse_arguments() {
+  [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { show_usage; exit 0; }
 
-# Get service name from first positional argument
-SERVICE_NAME="$1"
+  SERVICE_NAME="${1:-}"
+  [[ -z "$SERVICE_NAME" ]] && { echo "Error: Missing required argument <service-name>" >&2; echo; show_usage; exit 1; }
+}
 
-if [[ -z "$SERVICE_NAME" ]]; then
-  echo "Error: Missing required argument <service-name>" >&2
-  echo ""
-  show_usage
-  exit 1
-fi
+# =============================================================================
+# PREREQUISITES
+# =============================================================================
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PROJECT_NAME="{{dotenv.PROJECT_NAME}}"
-APP_STACK="{{#if appStack}}{{appStack}}{{/if}}"
+check_docker_compose() {
+  if command -v docker-compose &>/dev/null; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+  elif docker compose version &>/dev/null; then
+    DOCKER_COMPOSE_CMD="docker compose"
+  else
+    die "Docker Compose is not installed"
+  fi
+}
 
-echo "Rebuilding service: $SERVICE_NAME..."
+# =============================================================================
+# BUILD
+# =============================================================================
 
-# Determine module path and image name based on service type
-if [[ "$SERVICE_NAME" == "api-gateway" ]]; then
-  MODULE_PATH="backend/infrastructure/spring-cloud-gateway-server"
-  IMAGE_NAME="${PROJECT_NAME}/api-gateway"
-  GRADLE_TASK=":infrastructure.spring-cloud-gateway-server:bootJar"
-else
-  # Remove -service suffix to get base name (e.g., identity-service -> identity)
-  BASE_NAME="${SERVICE_NAME%-service}"
-  MODULE_PATH="backend/services/${SERVICE_NAME}/${BASE_NAME}-bootstrap"
-  IMAGE_NAME="${PROJECT_NAME}/${SERVICE_NAME}"
-  GRADLE_TASK=":services.${BASE_NAME}.bootstrap:bootJar"
-fi
+resolve_service_paths() {
+  if [[ "$SERVICE_NAME" == "api-gateway" ]]; then
+    MODULE_PATH="backend/infrastructure/spring-cloud-gateway-server"
+    IMAGE_NAME="${PROJECT_NAME}/api-gateway"
+    GRADLE_TASK=":infrastructure.spring-cloud-gateway-server:bootJar"
+  else
+    local base_name="${SERVICE_NAME%-service}"
+    MODULE_PATH="backend/services/${SERVICE_NAME}/${base_name}-bootstrap"
+    IMAGE_NAME="${PROJECT_NAME}/${SERVICE_NAME}"
+    GRADLE_TASK=":services.${base_name}.bootstrap:bootJar"
+  fi
+}
 
-# Build JAR
-echo "==> Building JAR for $SERVICE_NAME..."
-cd "$PROJECT_ROOT/backend"
-./gradlew "$GRADLE_TASK" -PappStack="$APP_STACK"
+build_jar() {
+  info "Building JAR for $SERVICE_NAME..."
+  cd "$PROJECT_ROOT/backend"
+  ./gradlew "$GRADLE_TASK" -PappStack="$APP_STACK"
+}
 
-# Remove old images with same tag to prevent duplicates
-echo "==> Removing old Docker image if exists..."
-docker rmi "${IMAGE_NAME}:latest" 2>/dev/null || true
+build_docker_image() {
+  info "Removing old Docker image if exists..."
+  docker rmi "${IMAGE_NAME}:latest" 2>/dev/null || true
 
-# Build Docker image
-echo "==> Building Docker image..."
-cd "$PROJECT_ROOT/$MODULE_PATH"
-docker build --no-cache -t "${IMAGE_NAME}:latest" .
+  info "Building Docker image..."
+  cd "$PROJECT_ROOT/$MODULE_PATH"
+  docker build --no-cache -t "${IMAGE_NAME}:latest" .
+}
 
-# Stop and remove old container
-echo "==> Stopping old container..."
-cd "$SCRIPT_DIR"
-docker-compose -f docker-compose.yml -p "${PROJECT_NAME}" stop "$SERVICE_NAME" 2>/dev/null || true
-docker-compose -f docker-compose.yml -p "${PROJECT_NAME}" rm -f "$SERVICE_NAME" 2>/dev/null || true
+# =============================================================================
+# DEPLOYMENT
+# =============================================================================
 
-# Start with new image
-echo "==> Starting service with new image..."
-docker-compose -f docker-compose.yml -p "${PROJECT_NAME}" up -d "$SERVICE_NAME"
+restart_service() {
+  cd "$SCRIPT_DIR"
 
-# Show status
-echo ""
-echo "==> Service status:"
-docker-compose -f docker-compose.yml -p "${PROJECT_NAME}" ps "$SERVICE_NAME"
+  info "Stopping old container..."
+  $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" -p "$PROJECT_NAME" stop "$SERVICE_NAME" 2>/dev/null || true
+  $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" -p "$PROJECT_NAME" rm -f "$SERVICE_NAME" 2>/dev/null || true
 
-echo ""
-echo "Rebuilt and restarted $SERVICE_NAME"
+  info "Starting service with new image..."
+  $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" -p "$PROJECT_NAME" up -d "$SERVICE_NAME"
+
+  echo
+  info "Service status:"
+  $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" -p "$PROJECT_NAME" ps "$SERVICE_NAME"
+}
+
+# =============================================================================
+# MAIN
+# =============================================================================
+
+main() {
+  parse_arguments "$@"
+  check_docker_compose
+
+  echo "Rebuilding service: $SERVICE_NAME..."
+
+  resolve_service_paths
+  build_jar
+  build_docker_image
+  restart_service
+
+  echo
+  echo "Successfully rebuilt and restarted $SERVICE_NAME"
+}
+
+main "$@"

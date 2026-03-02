@@ -1,183 +1,155 @@
-#!/bin/bash
-
-# Ensures that the script exits immediately if any command fails, or if you try to use an undefined variable.
+#!/usr/bin/env bash
 set -euo pipefail
 
+# =============================================================================
+# CONFIGURATION
+# =============================================================================
+
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+readonly COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
+readonly PROJECT_NAME="{{dotenv.PROJECT_NAME}}"
+
 SECONDS=0
-
-# =============================================================================
-# VARIABLES
-# =============================================================================
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
-PROJECT_NAME="{{dotenv.PROJECT_NAME}}"
-
 SKIP_BUILD=false
 DOCKER_COMPOSE_CMD=""
 
 # =============================================================================
-# PREREQUISITE CHECKS
+# UTILITIES
 # =============================================================================
 
-check_java_version() {
-    if ! command -v java &> /dev/null; then
-        echo "Java is not installed or not in PATH" >&2
-        return 1
-    fi
-
-    local java_version
-    java_version=$(java -version 2>&1 | head -n 1)
-    
-    local major_version
-    if [[ "$java_version" =~ \"1\.([0-9]+) ]]; then
-        major_version="${BASH_REMATCH[1]}"
-    elif [[ "$java_version" =~ \"([0-9]+) ]]; then
-        major_version="${BASH_REMATCH[1]}"
-    else
-        major_version=""
-    fi
-
-    if [[ $major_version -lt 17 ]]; then
-        return 1
-    fi
-    
-    echo "Java found: $java_version"
-    return 0
-}
-
-check_docker() {
-    if ! docker info > /dev/null 2>&1; then
-        return 1
-    fi
-    echo "Docker found and running"
-    return 0
-}
-
-check_docker_compose() {
-    # Check for both docker-compose and docker compose (newer version)
-    if command -v docker-compose &> /dev/null; then
-        DOCKER_COMPOSE_CMD="docker-compose"
-        echo "Docker Compose (standalone) found"
-        return 0
-    elif docker compose version &> /dev/null; then
-        DOCKER_COMPOSE_CMD="docker compose"
-        echo "Docker Compose (plugin) found"
-        return 0
-    else
-        echo "Docker Compose is not installed or not available" >&2
-        echo "Please install Docker Compose or ensure Docker Desktop is running"
-        return 1
-    fi
-}
-
-check_prerequisites() {
-    echo "Checking prerequisites..."
-    check_docker || exit 1
-    check_docker_compose || exit 1
-    echo "Prerequisites check passed"
-}
+die() { echo "Error: $1" >&2; exit 1; }
+info() { echo "$1"; }
 
 # =============================================================================
-# ARGUMENT PARSING
+# USAGE
 # =============================================================================
 
 show_usage() {
-    echo "Usage: $(basename "$0") [options]"
-    echo
-    echo "Options:"
-    echo "  --skip-build      Skip service build step"
-    echo "  -h, --help        Show this help and exit"
+  cat <<EOF
+Usage: $0 [OPTIONS]
+
+Deploy services using Docker Compose
+
+Options:
+  --skip-build      Skip service build step
+  -h, --help        Show this help message
+EOF
 }
 
-parse_args() {
-    while [[ $# -gt 0 ]]; do
-        case "$1" in
-            --skip-build|skip-build)
-                SKIP_BUILD=true
-                shift
-                ;;
-            -h|--help)
-                show_usage
-                exit 0
-                ;;
-            *)
-                shift
-                ;;
-        esac
-    done
+parse_arguments() {
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+      --skip-build) SKIP_BUILD=true; shift ;;
+      -h|--help)    show_usage; exit 0 ;;
+      *)            shift ;;
+    esac
+  done
 }
 
 # =============================================================================
-# BUILD FUNCTIONS
+# PREREQUISITES
+# =============================================================================
+
+check_java() {
+  command -v java &>/dev/null || die "Java is not installed or not in PATH"
+
+  local version
+  version=$(java -version 2>&1 | head -n 1)
+
+  local major
+  if [[ "$version" =~ \"1\.([0-9]+) ]]; then
+    major="${BASH_REMATCH[1]}"
+  elif [[ "$version" =~ \"([0-9]+) ]]; then
+    major="${BASH_REMATCH[1]}"
+  else
+    major=0
+  fi
+
+  [[ $major -ge 17 ]] || die "Java 17 or later is required (found: $version)"
+  info "Java found: $version"
+}
+
+check_docker() {
+  docker info &>/dev/null || die "Docker is not running"
+  info "Docker found and running"
+}
+
+check_docker_compose() {
+  if command -v docker-compose &>/dev/null; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+    info "Docker Compose (standalone) found"
+  elif docker compose version &>/dev/null; then
+    DOCKER_COMPOSE_CMD="docker compose"
+    info "Docker Compose (plugin) found"
+  else
+    die "Docker Compose is not installed. Please install Docker Compose or ensure Docker Desktop is running"
+  fi
+}
+
+check_prerequisites() {
+  info "Checking prerequisites..."
+  check_docker
+  check_docker_compose
+  info "Prerequisites check passed"
+}
+
+# =============================================================================
+# BUILD
 # =============================================================================
 
 build_services() {
-    echo "Building services..."
+  info "Building services..."
 
-    local build_script="$SCRIPT_DIR/build.sh"
-    if [[ ! -f "$build_script" ]]; then
-        echo "Build script not found: $build_script" >&2
-        exit 1
-    fi
+  local build_script="$SCRIPT_DIR/build.sh"
+  [[ -f "$build_script" ]] || die "Build script not found: $build_script"
 
-    echo "Granting execute permissions to build scripts..."
-    chmod +x "$SCRIPT_DIR/"*.sh
+  chmod +x "$SCRIPT_DIR/"*.sh
+  "$build_script" || die "Build failed"
 
-    echo "Invoking build script..."
-    if "$build_script"; then
-        echo "Build completed successfully"
-    else
-        echo "Build failed" >&2
-        exit 1
-    fi
-    echo
+  info "Build completed successfully"
+  echo
 }
 
 # =============================================================================
-# DEPLOYMENT FUNCTIONS
+# DEPLOYMENT
 # =============================================================================
 
 deploy_services() {
-    echo "Deploying services using compose file: $COMPOSE_FILE"
-    
-    # Start all services - template đã được generate với đúng services
-    if $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" -p "$PROJECT_NAME" up -d; then
-        echo "Compose stack started"
-    else
-        echo "Failed to start compose stack" >&2
-        echo "You can check logs with: $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME logs"
-        exit 1
-    fi
-    echo
+  info "Deploying services using compose file: $COMPOSE_FILE"
+
+  $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" -p "$PROJECT_NAME" up -d || {
+    die "Failed to start compose stack. Check logs with: $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE -p $PROJECT_NAME logs"
+  }
+
+  info "Compose stack started"
+  echo
 }
 
+# =============================================================================
+# RUNTIME
+# =============================================================================
+
 print_total_time() {
-    local d=$SECONDS
-    local h=$((d/3600))
-    local m=$(((d%3600)/60))
-    local s=$((d%60))
-    printf "Total runtime: %02d:%02d:%02d\n" "$h" "$m" "$s"
+  printf "Total runtime: %02d:%02d:%02d\n" $((SECONDS/3600)) $(((SECONDS%3600)/60)) $((SECONDS%60))
 }
 trap print_total_time EXIT
 
 # =============================================================================
-# MAIN EXECUTION
+# MAIN
 # =============================================================================
 
 main() {
-    parse_args "$@"
-    check_prerequisites
+  parse_arguments "$@"
+  check_prerequisites
 
-    if [[ "$SKIP_BUILD" == "true" ]]; then
-        echo "Skip build enabled; skipping build step"
-    else
-        build_services
-    fi
+  if [[ "$SKIP_BUILD" == true ]]; then
+    info "Skipping build step"
+  else
+    build_services
+  fi
 
-    deploy_services
+  deploy_services
 }
 
-# Execute main function
 main "$@"

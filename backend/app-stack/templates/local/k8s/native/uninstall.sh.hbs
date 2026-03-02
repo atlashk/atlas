@@ -1,53 +1,82 @@
 #!/usr/bin/env bash
-
-# Ensures that the script exits immediately if any command fails, or if you try to use an undefined variable.
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_NAME="{{dotenv.PROJECT_NAME}}"
-NAMESPACE="{{dotenv.PROJECT_NAME}}"
+# =============================================================================
+# CONFIGURATION
+# =============================================================================
+
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly PROJECT_NAME="{{dotenv.PROJECT_NAME}}"
+readonly NAMESPACE="{{dotenv.PROJECT_NAME}}"
+readonly NAMESPACE_TIMEOUT=120
+
+# =============================================================================
+# UTILITIES
+# =============================================================================
+
+die() { echo "Error: $1" >&2; exit 1; }
+info() { echo "$1"; }
+warn() { echo "Warning: $1" >&2; }
+
+command_exists() { command -v "$1" >/dev/null 2>&1; }
+
+# =============================================================================
+# PREREQUISITES
+# =============================================================================
 
 check_prerequisites() {
-  echo "Checking prerequisites..."
-  if ! command -v kubectl >/dev/null 2>&1; then
-    echo "kubectl is not installed" >&2; exit 1
+  info "Checking prerequisites..."
+  command_exists kubectl || die "kubectl is not installed"
+  kubectl cluster-info >/dev/null 2>&1 || die "Cannot connect to Kubernetes cluster"
+  info "Prerequisites check passed"
+}
+
+# =============================================================================
+# CLEANUP
+# =============================================================================
+
+wait_for_namespace_deletion() {
+  local timeout=$NAMESPACE_TIMEOUT
+  while kubectl get namespace "$NAMESPACE" >/dev/null 2>&1 && [[ $timeout -gt 0 ]]; do
+    sleep 2
+    ((timeout -= 2))
+  done
+
+  if kubectl get namespace "$NAMESPACE" >/dev/null 2>&1; then
+    warn "Namespace deletion is taking longer than expected"
+  else
+    info "Namespace '$NAMESPACE' deleted"
   fi
-  if ! kubectl cluster-info >/dev/null 2>&1; then
-    echo "Cannot connect to Kubernetes cluster" >&2; exit 1
-  fi
-  echo "Prerequisites check passed"
 }
 
 remove_namespace() {
-  echo "Deleting namespace '$NAMESPACE' (this will remove all resources within)..."
+  info "Deleting namespace '$NAMESPACE'..."
   kubectl delete namespace "$NAMESPACE" --ignore-not-found=true
-  echo "Waiting for namespace deletion..."
-  local timeout=120
-  while kubectl get namespace "$NAMESPACE" >/dev/null 2>&1 && [[ $timeout -gt 0 ]]; do
-    sleep 2; ((timeout-=2))
-  done
-  if kubectl get namespace "$NAMESPACE" >/dev/null 2>&1; then
-    echo "Namespace deletion is taking longer than expected"
-  else
-    echo "Namespace '$NAMESPACE' deleted"
-  fi
+  wait_for_namespace_deletion
 }
 
 remove_application_images() {
-    echo "Removing ${PROJECT_NAME} application images..."
-    # Remove all images with ${PROJECT_NAME}/* pattern
-    local images=$(docker images --format "\{{.Repository}}:\{{.Tag}}" | grep "^${PROJECT_NAME}/" || true)
-    if [ -n "$images" ]; then
-        echo "$images" | xargs docker rmi -f 2>/dev/null || true
-        echo "${PROJECT_NAME} images removed"
-    else
-        echo "No ${PROJECT_NAME} images found to remove"
-    fi
+  info "Removing ${PROJECT_NAME} application images..."
+
+  local images
+  images=$(docker images --format "\{{.Repository}}:\{{.Tag}}" | grep "^${PROJECT_NAME}/" || true)
+
+  if [[ -z "$images" ]]; then
+    info "No ${PROJECT_NAME} images found"
+    return 0
+  fi
+
+  echo "$images" | xargs docker rmi -f 2>/dev/null || true
+  info "${PROJECT_NAME} images removed"
 }
+
+# =============================================================================
+# MAIN
+# =============================================================================
 
 main() {
   check_prerequisites
-  echo "Namespace: $NAMESPACE"
+  info "Namespace: $NAMESPACE"
   remove_namespace
   remove_application_images
 }
