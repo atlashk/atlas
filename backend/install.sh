@@ -132,7 +132,7 @@ resolve_template_path() {
 
   case "$deployment" in
     local-compose)    echo "local/compose" ;;
-    local-k8s-native) echo "local/k8s" ;;
+    local-k8s-native) echo "local/k8s/native" ;;
     *)                die "Unsupported deployment type: $deployment" ;;
   esac
 }
@@ -270,7 +270,7 @@ main() {
     [[ "$SKIP_BUILD" == true ]] && install_args+=("--skip-build")
 
     execute_install_script "${install_args[@]}"
-    info "Installation completed successfully! 🚀"
+    info "Installation completed successfully!"
   fi
 }
 

@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j(topic = "payment.stripe")
+@Slf4j(topic = "stripe")
 public class StripeIntegrationService implements PaymentGatewayIntegrationService {
 
   private final StripeClient stripeClient;

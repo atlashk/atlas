@@ -17,7 +17,7 @@ data:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: minio-sss
+  name: minio-sts
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: minio
@@ -101,6 +101,7 @@ spec:
             initialDelaySeconds: 20
             periodSeconds: 10
             timeoutSeconds: 5
+            successThreshold: 1
             failureThreshold: 30
           livenessProbe:
             httpGet:
@@ -109,6 +110,7 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
+            successThreshold: 1
             failureThreshold: 3
           readinessProbe:
             httpGet:
@@ -117,14 +119,15 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 5
+            successThreshold: 1
             failureThreshold: 3
           resources:
             requests:
-              cpu: "200m"
-              memory: "256Mi"
+              cpu: 200m
+              memory: 256Mi
             limits:
-              cpu: "500m"
-              memory: "512Mi"
+              cpu: 500m
+              memory: 512Mi
   volumeClaimTemplates:
     - metadata:
         name: minio-data

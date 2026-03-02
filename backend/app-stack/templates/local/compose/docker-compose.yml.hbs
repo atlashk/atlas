@@ -52,9 +52,9 @@ services:
     image: redis:7
     ports:
       - "6379:6379"
-    command: redis-server --appendonly yes
     volumes:
       - redis-data:/data
+    command: redis-server --appendonly yes
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -118,12 +118,14 @@ services:
 {{#hasService "identity" "keycloak"}}
   keycloak:
     container_name: keycloak
-    image: quay.io/keycloak/keycloak:23.0
+    image: quay.io/keycloak/keycloak:26.5.4
     ports:
       - "8443:8080"
     environment:
-      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN:-admin}
-      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-secret123456}
+      - KC_BOOTSTRAP_ADMIN_USERNAME=${KC_BOOTSTRAP_ADMIN_USERNAME:-atlas}
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=${KC_BOOTSTRAP_ADMIN_PASSWORD:-secret123456}
+      - KC_HEALTH_ENABLED=true
+      - KC_HTTP_MANAGEMENT_PORT=9000
       {{#hasService "datasource" "postgres"}}
       - KC_DB=postgres
       - KC_DB_URL=jdbc:postgresql://postgres:5432/db_keycloak
@@ -136,7 +138,26 @@ services:
       - KC_DB_USERNAME=${MYSQL_USER:-atlas}
       - KC_DB_PASSWORD=${MYSQL_PASSWORD:-secret123456}
       {{/hasService}}
-    command: start-dev
+    volumes:
+      - ./config/keycloak:/opt/keycloak/data/import:ro
+    command:
+      - start-dev
+      - --import-realm
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - |
+          exec 3<>/dev/tcp/127.0.0.1/9000 || exit 1;
+          echo -e "GET /health/ready HTTP/1.0\r\nHost: localhost\r\n\r\n" >&3;
+          if timeout 3 cat <&3 | grep -q "\"status\": \"UP\""; then
+            exit 0
+          else
+            exit 1
+          fi
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
     depends_on:
       {{#hasService "datasource" "postgres"}}
       postgres:
@@ -160,7 +181,7 @@ services:
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms512m -Xmx1Gi"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx1g"
     volumes:
       - elasticsearch-data:/usr/share/elasticsearch/data
     healthcheck:
@@ -183,9 +204,9 @@ services:
     environment:
       - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-secret123456}
-    command: server /data --console-address ":9001"
     volumes:
       - minio-data:/data
+    command: server /data --console-address ":9001"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 10s
@@ -256,9 +277,9 @@ services:
     image: grafana/loki:main
     ports:
       - "3100:3100"
-    command: -config.file=/etc/loki/local-config.yaml
     volumes:
       - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1"]
       interval: 10s
@@ -364,7 +385,7 @@ services:
     volumes:
       - eureka-server-log:/var/log/eureka-server
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health/liveness"]
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health/readiness"]
       interval: 10s
       timeout: 10s
       retries: 15
@@ -409,10 +430,19 @@ services:
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       {{/hasService}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      {{#hasService "identity" "keycloak"}}
+      - KEYCLOAK_BASE_URL=http://keycloak:8080
+      - KC_BOOTSTRAP_ADMIN_USERNAME=${KC_BOOTSTRAP_ADMIN_USERNAME:-atlas}
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=${KC_BOOTSTRAP_ADMIN_PASSWORD:-secret123456}
+      # Refer config/keycloak/realm.json file
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM:-atlas}
+      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-atlas-auth}
+      - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET:-9cvF5MPJnwfhEOCwNnQ79RmlkckAsDCj}
+      {{/hasService}}
     volumes:
       - identity-service-log:/var/log/identity-service
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health/liveness"]
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health/readiness"]
       interval: 10s
       timeout: 10s
       retries: 15
@@ -426,6 +456,10 @@ services:
       {{/hasService}}
       {{#hasService "datasource" "postgres"}}
       postgres:
+        condition: service_healthy
+      {{/hasService}}
+      {{#hasService "identity" "keycloak"}}
+      keycloak:
         condition: service_healthy
       {{/hasService}}
     networks:
@@ -482,7 +516,7 @@ services:
     volumes:
       - catalog-service-log:/var/log/catalog-service
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health/liveness"]
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health/readiness"]
       interval: 10s
       timeout: 10s
       retries: 15
@@ -545,7 +579,7 @@ services:
     volumes:
       - inventory-service-log:/var/log/inventory-service
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health/liveness"]
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health/readiness"]
       interval: 10s
       timeout: 10s
       retries: 15
@@ -612,7 +646,7 @@ services:
     volumes:
       - order-service-log:/var/log/order-service
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health/liveness"]
+      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health/readiness"]
       interval: 10s
       timeout: 10s
       retries: 15
@@ -672,7 +706,7 @@ services:
     volumes:
       - payment-service-log:/var/log/payment-service
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health/liveness"]
+      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health/readiness"]
       interval: 10s
       timeout: 10s
       retries: 15
@@ -713,12 +747,12 @@ services:
       - IDENTITY_SERVICE_URI=http://identity-service:8081
       {{/hasService}}
       {{#hasService "identity" "keycloak"}}
-      - KEYCLOAK_BASE_URL=http://keycloak:8443
+      - KEYCLOAK_BASE_URL=http://keycloak:8080
       {{/hasService}}
     volumes:
       - api-gateway-log:/var/log/api-gateway
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health/liveness"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health/readiness"]
       interval: 10s
       timeout: 10s
       retries: 15

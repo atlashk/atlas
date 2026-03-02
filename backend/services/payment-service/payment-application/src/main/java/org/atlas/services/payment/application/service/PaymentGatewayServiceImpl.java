@@ -49,7 +49,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
   public PaymentGatewayIntegrationService retrievePaymentGatewayIntegrationService(
       PaymentGatewayEntity paymentGateway) {
     String paymentGatewayIntegrationServiceBeanName =
-        String.format("%sPaymentGatewayIntegrationService", paymentGateway.getCode().toLowerCase());
+        String.format("%sIntegrationService", paymentGateway.getCode().toLowerCase());
     try {
       return applicationContext.getBean(
           paymentGatewayIntegrationServiceBeanName, PaymentGatewayIntegrationService.class);

@@ -27,10 +27,10 @@ import org.springframework.web.client.RestClient;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j(topic = "payment.simulator")
-public class SimulatorPaymentGatewayIntegrationService implements PaymentGatewayIntegrationService {
+@Slf4j(topic = "simulator")
+public class SimulatorIntegrationService implements PaymentGatewayIntegrationService {
 
-  private final PaymentSimulatorProps paymentSimulatorProps;
+  private final SimulatorProps simulatorProps;
   private final RestClient restClient;
   private final ScheduledExecutorService scheduledExecutorService;
 
@@ -99,8 +99,8 @@ public class SimulatorPaymentGatewayIntegrationService implements PaymentGateway
     log.info("Webhook signature verified successfully");
 
     // Parse the simulated webhook payload
-    PaymentSimulatorWebhookPayload payload = JsonUtil.getInstance()
-        .toObject(request.getRawPayload(), PaymentSimulatorWebhookPayload.class);
+    SimulatorWebhookPayload payload = JsonUtil.getInstance()
+        .toObject(request.getRawPayload(), SimulatorWebhookPayload.class);
 
     Result result = Result.builder()
         .paymentId(payload.getPaymentId())
@@ -129,7 +129,7 @@ public class SimulatorPaymentGatewayIntegrationService implements PaymentGateway
 
   private void sendWebhook(String paymentId) {
     // Create webhook payload
-    PaymentSimulatorWebhookPayload payload = PaymentSimulatorWebhookPayload.builder()
+    SimulatorWebhookPayload payload = SimulatorWebhookPayload.builder()
         .paymentId(paymentId)
         .paymentMethod("card")
         .paymentMethodDetails("{\"brand\":\"visa\",\"last4\":\"1234\"}")
@@ -138,12 +138,12 @@ public class SimulatorPaymentGatewayIntegrationService implements PaymentGateway
 
     // Send webhook
     log.info("Sending simulated webhook to: {} for paymentId={}",
-        paymentSimulatorProps.getWebhookUrl(), paymentId);
+        simulatorProps.getWebhookUrl(), paymentId);
 
     String payloadJson = JsonUtil.getInstance().toJson(payload);
 
     ResponseEntity<?> response = restClient.post()
-        .uri(paymentSimulatorProps.getWebhookUrl())
+        .uri(simulatorProps.getWebhookUrl())
         .contentType(MediaType.APPLICATION_JSON)
         .header(SIGNATURE_HEADER_NAME, generateSignature(payloadJson))
         .body(payloadJson)

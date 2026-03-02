@@ -35,6 +35,7 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 30
             timeoutSeconds: 10
+            successThreshold: 1
             failureThreshold: 3
           readinessProbe:
             httpGet:
@@ -43,6 +44,7 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 5
+            successThreshold: 1
             failureThreshold: 3
           startupProbe:
             httpGet:
@@ -51,14 +53,15 @@ spec:
             initialDelaySeconds: 20
             periodSeconds: 10
             timeoutSeconds: 5
+            successThreshold: 1
             failureThreshold: 60
           resources:
             requests:
-              cpu: "200m"
-              memory: "256Mi"
+              cpu: 200m
+              memory: 256Mi
             limits:
-              cpu: "500m"
-              memory: "512Mi"
+              cpu: 500m
+              memory: 512Mi
           volumeMounts:
             - name: loki-data
               mountPath: /loki

@@ -1,0 +1,18 @@
+{
+  "realm": "atlas",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "atlas-auth",
+      "name": "atlas-auth",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "9cvF5MPJnwfhEOCwNnQ79RmlkckAsDCj",
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": false
+    }
+  ]
+}

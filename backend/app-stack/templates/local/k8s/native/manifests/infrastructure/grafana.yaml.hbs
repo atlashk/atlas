@@ -2602,7 +2602,7 @@ spec:
             - name: GF_SECURITY_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: grafana-admin-secret
+                  name: grafana-secret
                   key: admin-password
             - name: GF_PATHS_PROVISIONING
               value: "/etc/grafana/provisioning"
@@ -2615,7 +2615,8 @@ spec:
               port: 3000
             initialDelaySeconds: 60
             periodSeconds: 30
-            timeoutSeconds: 10
+            timeoutSeconds: 30
+            successThreshold: 1
             failureThreshold: 3
           readinessProbe:
             httpGet:
@@ -2623,14 +2624,16 @@ spec:
               port: 3000
             initialDelaySeconds: 30
             periodSeconds: 10
-            timeoutSeconds: 5
+            timeoutSeconds: 30
+            successThreshold: 1
+            failureThreshold: 3
           resources:
             requests:
-              cpu: "100m"
-              memory: "256Mi"
+              cpu: 100m
+              memory: 256Mi
             limits:
-              cpu: "500m"
-              memory: "512Mi"
+              cpu: 500m
+              memory: 512Mi
           volumeMounts:
             - name: grafana-data
               mountPath: /var/lib/grafana

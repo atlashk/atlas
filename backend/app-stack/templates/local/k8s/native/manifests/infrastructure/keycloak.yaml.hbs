@@ -9,19 +9,20 @@ metadata:
     tier: backend
 type: Opaque
 data:
-  keycloak-admin: YWRtaW4=
-  keycloak-admin-password: c2VjcmV0MTIzNDU2
+  kc-bootstrap-admin-username: YWRtaW4=
+  kc-bootstrap-admin-password: c2VjcmV0MTIzNDU2
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: keycloak-dp
+  name: keycloak-sts
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: keycloak
     tier: backend
 spec:
   replicas: 1
+  serviceName: keycloak
   selector:
     matchLabels:
       app: keycloak
@@ -33,21 +34,20 @@ spec:
     spec:
       containers:
         - name: keycloak
-          image: quay.io/keycloak/keycloak:23.0
+          image: quay.io/keycloak/keycloak:26.5.4
           imagePullPolicy: IfNotPresent
-          args:
-            - start-dev
+          args: ["start-dev"]
           env:
-            - name: KEYCLOAK_ADMIN
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: keycloak-secret
-                  key: keycloak-admin
-            - name: KEYCLOAK_ADMIN_PASSWORD
+                  key: kc-bootstrap-admin-username
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: keycloak-secret
-                  key: keycloak-admin-password
+                  key: kc-bootstrap-admin-password
             {{#hasService "datasource" "postgres"}}
             - name: KC_DB
               value: "postgres"
@@ -77,32 +77,51 @@ spec:
                   name: mysql-secret
                   key: mysql-password
             {{/hasService}}
+            - name: KC_HEALTH_ENABLED
+              value: "true"
+            - name: KC_HTTP_MANAGEMENT_PORT
+              value: "9000"
+            - name: KC_METRICS_ENABLED
+              value: "true"
           ports:
             - containerPort: 8080
               name: http
+            - containerPort: 9000
+              name: management
+          startupProbe:
+            httpGet:
+              path: /health/started
+              port: 9000
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            timeoutSeconds: 30
+            successThreshold: 1
+            failureThreshold: 60
           livenessProbe:
             httpGet:
               path: /health/live
-              port: 8080
+              port: 9000
             initialDelaySeconds: 60
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 6
+            periodSeconds: 30
+            timeoutSeconds: 30
+            successThreshold: 1
+            failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /health/ready
-              port: 8080
+              port: 9000
             initialDelaySeconds: 30
             periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 6
+            timeoutSeconds: 30
+            successThreshold: 1
+            failureThreshold: 3
           resources:
-            requests:
-              cpu: "200m"
-              memory: "512Mi"
             limits:
-              cpu: "500m"
-              memory: "1Gi"
+              cpu: 2000m
+              memory: 2000Mi
+            requests:
+              cpu: 500m
+              memory: 1700Mi
 ---
 apiVersion: v1
 kind: Service
@@ -116,7 +135,7 @@ spec:
   selector:
     app: keycloak
   ports:
-    - port: 8443
+    - port: 8080
       targetPort: 8080
       name: http
   type: ClusterIP

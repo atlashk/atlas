@@ -13,4 +13,4 @@ die()  { printf "[ERROR] %s\n" "$*" >&2; exit 1; }
 info "Executing uninstall script: $UNINSTALL_SCRIPT"
 chmod +x "$UNINSTALL_SCRIPT"
 "$UNINSTALL_SCRIPT" "$@"
-info "Uninstallation completed successfully! 🚀"
+info "Uninstallation completed successfully!"

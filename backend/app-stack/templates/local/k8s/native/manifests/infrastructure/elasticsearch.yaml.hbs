@@ -46,7 +46,7 @@ spec:
             - name: xpack.security.enabled
               value: "true"
             - name: ES_JAVA_OPTS
-              value: "-Xms512m -Xmx1Gi"
+              value: "-Xms512m -Xmx1g"
           ports:
             - containerPort: 9200
               name: http
@@ -56,37 +56,37 @@ spec:
             - name: elasticsearch-data
               mountPath: /usr/share/elasticsearch/data
           startupProbe:
-            httpGet:
-              path: /
-              port: 9200
-              httpHeaders:
-                - name: Authorization
-                  value: "Basic ZWxhc3RpYzpzZWNyZXQxMjM0NTY="
+            exec:
+              command:
+                - sh
+                - -c
+                - 'curl -fsS --max-time 5 -u "elastic:${ELASTIC_PASSWORD}" http://127.0.0.1:9200/ >/dev/null'
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 10
+            successThreshold: 1
             failureThreshold: 30
           livenessProbe:
-            httpGet:
-              path: /_cluster/health
-              port: 9200
-              httpHeaders:
-                - name: Authorization
-                  value: "Basic ZWxhc3RpYzpzZWNyZXQxMjM0NTY="
+            exec:
+              command:
+                - sh
+                - -c
+                - 'curl -fsS --max-time 5 -u "elastic:${ELASTIC_PASSWORD}" "http://127.0.0.1:9200/_cluster/health?local=true" >/dev/null'
             initialDelaySeconds: 60
             periodSeconds: 20
             timeoutSeconds: 10
+            successThreshold: 1
             failureThreshold: 3
           readinessProbe:
-            httpGet:
-              path: /_cluster/health
-              port: 9200
-              httpHeaders:
-                - name: Authorization
-                  value: "Basic ZWxhc3RpYzpzZWNyZXQxMjM0NTY="
+            exec:
+              command:
+                - sh
+                - -c
+                - 'curl -fsS --max-time 5 -u "elastic:${ELASTIC_PASSWORD}" "http://127.0.0.1:9200/_cluster/health?wait_for_status=yellow&timeout=1s" >/dev/null'
             initialDelaySeconds: 20
             periodSeconds: 10
             timeoutSeconds: 5
+            successThreshold: 1
             failureThreshold: 3
           resources:
             requests:

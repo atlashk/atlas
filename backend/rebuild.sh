@@ -52,7 +52,7 @@ main() {
   chmod +x "$REBUILD_SCRIPT"
   "$REBUILD_SCRIPT" "$service_name"
 
-  info "Rebuild completed successfully! 🚀"
+  info "Rebuild completed successfully!"
 }
 
 main "$@"

@@ -37,6 +37,7 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 30
             timeoutSeconds: 10
+            successThreshold: 1
             failureThreshold: 3
           readinessProbe:
             httpGet:
@@ -45,13 +46,15 @@ spec:
             initialDelaySeconds: 15
             periodSeconds: 10
             timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
           resources:
             requests:
-              cpu: "50m"
-              memory: "128Mi"
+              cpu: 50m
+              memory: 128Mi
             limits:
-              cpu: "200m"
-              memory: "256Mi"
+              cpu: 200m
+              memory: 256Mi
 ---
 apiVersion: v1
 kind: Service

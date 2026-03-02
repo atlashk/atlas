@@ -6,10 +6,9 @@ set -euo pipefail
 # =============================================================================
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../../" && pwd)"
+readonly PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../" && pwd)"
 readonly NAMESPACE="{{dotenv.PROJECT_NAME}}"
 readonly MANIFESTS_DIR="$SCRIPT_DIR/manifests"
-readonly BUILD_SCRIPT="$PROJECT_ROOT/backend/scripts/buildSrc/build.sh"
 
 SECONDS=0
 SKIP_BUILD=false
@@ -78,12 +77,56 @@ check_prerequisites() {
 build_services() {
   info "Building services..."
 
-  [[ -f "$BUILD_SCRIPT" ]] || die "Build script not found: $BUILD_SCRIPT"
+  local build_script="$SCRIPT_DIR/build.sh"
+  [[ -f "$build_script" ]] || die "Build script not found: $build_script"
 
-  chmod +x "$PROJECT_ROOT/backend/scripts/buildSrc/"*.sh
-  "$BUILD_SCRIPT" || die "Build failed"
+  chmod +x "$SCRIPT_DIR/"*.sh
+  "$build_script" || die "Build failed"
 
   info "Build completed successfully"
+  echo
+}
+
+# =============================================================================
+# INGRESS CONTROLLER
+# =============================================================================
+
+detect_cluster_provider() {
+  if kubectl get nodes -o jsonpath='{.items[0].metadata.labels}' 2>/dev/null | grep -q 'ingress-ready=true'; then
+    echo "kind"
+  else
+    echo "cloud"
+  fi
+}
+
+install_ingress_controller() {
+  {{#hasService "reverse-proxy" "nginx"}}
+  info "Ensuring NGINX Ingress Controller is installed..."
+
+  # Check if already deployed
+  if kubectl get deployment ingress-nginx-controller -n ingress-nginx >/dev/null 2>&1; then
+    info "NGINX Ingress Controller already deployed"
+    return 0
+  fi
+
+  local provider
+  provider=$(detect_cluster_provider)
+  info "Installing NGINX Ingress Controller ($provider provider)..."
+
+  local manifest_url="https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/${provider}/deploy.yaml"
+  kubectl apply -f "$manifest_url" || die "Failed to install NGINX Ingress Controller"
+
+  info "Waiting for NGINX Ingress Controller readiness..."
+  kubectl wait \
+    --namespace ingress-nginx \
+    --for=condition=ready pod \
+    --selector=app.kubernetes.io/component=controller \
+    --timeout=0s || die "NGINX Ingress Controller did not become ready. Check status with: kubectl get pods -n ingress-nginx"
+
+  info "NGINX Ingress Controller is ready"
+  {{else}}
+  info "Reverse proxy not set to NGINX; skipping ingress controller install"
+  {{/hasService}}
 }
 
 # =============================================================================
@@ -152,11 +195,10 @@ wait_for_jobs() {
 
 apply_and_wait() {
   local dir="$1"
-  local label="$2"
 
   [[ -d "$dir" ]] || return 0
 
-  info "Applying ${label} manifests..."
+  info "Applying manifests from $dir..."
   local output
   output=$(kubectl apply -n "$NAMESPACE" -f "$dir")
   echo "$output"
@@ -169,59 +211,17 @@ apply_and_wait() {
   wait_for_jobs "$resources"
 }
 
-# =============================================================================
-# INGRESS CONTROLLER
-# =============================================================================
-
-detect_cluster_provider() {
-  if kubectl get nodes -o jsonpath='{.items[0].metadata.labels}' 2>/dev/null | grep -q 'ingress-ready=true'; then
-    echo "kind"
-  else
-    echo "cloud"
-  fi
-}
-
-install_ingress_controller() {
-  {{#hasService "reverse-proxy" "nginx"}}
-  info "Ensuring NGINX Ingress Controller is installed..."
-
-  # Check if already deployed
-  if kubectl get deployment ingress-nginx-controller -n ingress-nginx >/dev/null 2>&1; then
-    info "NGINX Ingress Controller already deployed"
-    return 0
-  fi
-
-  local provider
-  provider=$(detect_cluster_provider)
-  info "Installing NGINX Ingress Controller ($provider provider)..."
-
-  local manifest_url="https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/${provider}/deploy.yaml"
-  kubectl apply -f "$manifest_url" || die "Failed to install NGINX Ingress Controller"
-
-  info "Waiting for NGINX Ingress Controller readiness..."
-  kubectl wait \
-    --namespace ingress-nginx \
-    --for=condition=ready pod \
-    --selector=app.kubernetes.io/component=controller \
-    --timeout=0s || die "NGINX Ingress Controller did not become ready. Check status with: kubectl get pods -n ingress-nginx"
-
-  info "NGINX Ingress Controller is ready"
-  {{else}}
-  info "Reverse proxy not set to NGINX; skipping ingress controller install"
-  {{/hasService}}
-}
-
 apply_manifests() {
   info "Applying Kubernetes manifests to namespace '$NAMESPACE'..."
 
-  apply_and_wait "$MANIFESTS_DIR/infrastructure" "infrastructure"
+  apply_and_wait "$MANIFESTS_DIR/infrastructure"
 
   [[ "$INFRA_ONLY" == true ]] && return 0
 
-  apply_and_wait "$MANIFESTS_DIR/application" "application"
+  apply_and_wait "$MANIFESTS_DIR/application"
 
   install_ingress_controller
-  apply_and_wait "$MANIFESTS_DIR/ingress" "ingress"
+  apply_and_wait "$MANIFESTS_DIR/ingress"
 }
 
 # =============================================================================

@@ -5,7 +5,7 @@ file:
   excel: poi
   pdf: pdfbox
 full-text-search: elasticsearch
-identity: jwt
+identity: keycloak
 internal: rest
 kv-store: redis
 messaging: kafka

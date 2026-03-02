@@ -78,8 +78,8 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 30
-            failureThreshold: 30
             successThreshold: 1
+            failureThreshold: 30
           livenessProbe:
             exec:
               command:
@@ -89,8 +89,8 @@ spec:
             initialDelaySeconds: 60
             periodSeconds: 30
             timeoutSeconds: 30
-            failureThreshold: 3
             successThreshold: 1
+            failureThreshold: 3
           readinessProbe:
             exec:
               command:
@@ -104,11 +104,11 @@ spec:
             failureThreshold: 3
           resources:
             requests:
-              cpu: "300m"
-              memory: "768Mi"
+              cpu: 300m
+              memory: 768Mi
             limits:
-              cpu: "1000m"
-              memory: "1.5Gi"
+              cpu: 1000m
+              memory: 1.5Gi
           volumeMounts:
             - name: kafka-data
               mountPath: /var/lib/kafka/data

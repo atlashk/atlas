@@ -245,7 +245,7 @@ function collectTemplates(dir) {
     const full = path.join(dir, e.name);
     if (e.isDirectory()) {
       files.push(...collectTemplates(full));
-    } else if (e.isFile() && (e.name.endsWith('.hbs') || e.name.endsWith('.handlebars'))) {
+    } else if (e.isFile()) {
       files.push(full);
     }
   }
@@ -359,9 +359,18 @@ function shouldSkipFileByPath(filePath, context) {
       continue;
     }
     
-    const outRel = path.relative(templateDir, t).replace(/\.(hbs|handlebars)$/, '');
+    const relPath = path.relative(templateDir, t);
+    const isHandlebarsTemplate = t.endsWith('.hbs') || t.endsWith('.handlebars');
+    const outRel = isHandlebarsTemplate ? relPath.replace(/\.(hbs|handlebars)$/, '') : relPath;
     const outPath = path.join(outDir, outRel);
-    if (await renderFile(t, outPath, templateContext)) {
+
+    if (isHandlebarsTemplate) {
+      if (await renderFile(t, outPath, templateContext)) {
+        count++;
+      }
+    } else {
+      fs.mkdirSync(path.dirname(outPath), { recursive: true });
+      fs.copyFileSync(t, outPath);
       count++;
     }
   }
