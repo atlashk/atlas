@@ -1,270 +1,277 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BACKEND_DIR="$SCRIPT_DIR"
+# =============================================================================
+# CONFIGURATION
+# =============================================================================
 
-CONFIG_DIR="$BACKEND_DIR/app-stack/config"
-GENERATOR_DIR="$BACKEND_DIR/app-stack/generator"
-TEMPLATES_DIR="$BACKEND_DIR/app-stack/templates"
-DIST_DIR="$BACKEND_DIR/dist"
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly BACKEND_DIR="$SCRIPT_DIR"
+readonly CONFIG_DIR="$BACKEND_DIR/app-stack/config"
+readonly GENERATOR_DIR="$BACKEND_DIR/app-stack/generator"
+readonly TEMPLATES_DIR="$BACKEND_DIR/app-stack/templates"
+readonly DIST_DIR="$BACKEND_DIR/dist"
+
+# =============================================================================
+# UTILITIES
+# =============================================================================
 
 info() { printf "[INFO] %s\n" "$*"; }
-warn() { printf "[WARN] %s\n" "$*"; }
-err()  { printf "[ERROR] %s\n" "$*"; }
+warn() { printf "[WARN] %s\n" "$*" >&2; }
+die()  { printf "[ERROR] %s\n" "$*" >&2; exit 1; }
 
-usage() {
-  local code="${1:-1}"
-  echo "Usage: $0 [--app-stack=<stack-name>] [--skip-build] [--infra-only] [--debug-template]"
-  echo ""
-  echo "Options:"
-  echo "  --app-stack=<stack-name>              Pick config/app-stack.<stack-name>.yml"
-  echo "  --skip-build                          Pass '--skip-build' to install.sh"
-  echo "  --infra-only                          Pass '--infra-only' to install.sh"
-  echo "  --debug-template                      Skip install.sh execution"
-  echo "  -h, --help                            Show help and exit"
-  echo ""
-  echo "Defaults:"
-  echo "  - app-stack: local.compose"
-  echo "  - skip-build: No"
-  echo "  - infra-only: No"
-  exit "$code"
+command_exists() { command -v "$1" >/dev/null 2>&1; }
+
+# =============================================================================
+# USAGE
+# =============================================================================
+
+show_usage() {
+  cat <<EOF
+Usage: $0 [OPTIONS]
+
+Atlas deployment orchestrator - generates and executes deployment scripts
+
+Options:
+  --app-stack=<name>    Pick config/app-stack.<name>.yml (default: local.compose)
+  --skip-build          Skip backend and Docker image builds
+  --infra-only          Deploy only infrastructure (implies --skip-build)
+  --debug-template      Generate templates only, skip install execution
+  -h, --help            Show this help message
+
+Examples:
+  $0                              # Deploy with local.compose config
+  $0 --app-stack=local.k8s        # Deploy with local.k8s config
+  $0 --skip-build                 # Deploy without rebuilding
+  $0 --debug-template             # Generate templates only
+EOF
+  exit "${1:-0}"
 }
 
-ensure_generator_deps() {
-  # Ensure Node.js is available for template rendering
-  if ! command -v node >/dev/null 2>&1; then
-    err "Node.js is required to render templates. Please install Node.js."
-    exit 1
-  fi
+# =============================================================================
+# PREREQUISITES
+# =============================================================================
 
-  # Check if we're in the generator directory and handlebars is available
-  if (cd "$GENERATOR_DIR" && node -e "try{require('handlebars');}catch(e){process.exit(1)}" >/dev/null 2>&1); then
+ensure_generator_deps() {
+  command_exists node || die "Node.js is required to render templates. Please install Node.js."
+
+  # Check if handlebars is available
+  if (cd "$GENERATOR_DIR" && node -e "require('handlebars')" &>/dev/null); then
     return 0
   fi
 
   warn "Missing Node package 'handlebars' required by generator.mjs."
-  if ! command -v npm >/dev/null 2>&1; then
-    err "npm is required to install dependencies. Please install npm (Node.js)."
-    exit 1
-  fi
+  command_exists npm || die "npm is required to install dependencies. Please install npm."
 
   printf "Install 'handlebars' in generator directory now? [Y/n] "
   read -r answer
-  answer=${answer:-Y}
-  case "$answer" in
-    Y|y|Yes|yes)
+  case "${answer:-Y}" in
+    [Yy]|[Yy]es)
       (
         cd "$GENERATOR_DIR" || exit 1
-        if [[ ! -f package.json ]]; then
-          info "Initializing npm in $GENERATOR_DIR"
-          npm init -y >/dev/null 2>&1 || true
-        fi
-        info "Installing handlebars in $GENERATOR_DIR"
-        npm install handlebars --save || {
-          err "Failed to install 'handlebars'."
-          exit 1
-        }
+        [[ -f package.json ]] || { info "Initializing npm in $GENERATOR_DIR"; npm init -y &>/dev/null || true; }
+        info "Installing handlebars..."
+        npm install handlebars --save || die "Failed to install 'handlebars'"
       )
       ;;
     *)
-      err "Cannot proceed without 'handlebars'. Aborting."
-      exit 1
+      die "Cannot proceed without 'handlebars'. Aborting."
       ;;
   esac
 }
 
+# =============================================================================
+# CONFIG PARSING
+# =============================================================================
+
 read_deployment_from_config() {
-  # Read deployment value from the app-stack config file
   local config_file="$1"
-  if [[ -f "$config_file" ]]; then
-    # Parse YAML to get deployment value
-    # Simple grep approach for deployment field
-    local deployment
-    deployment=$(grep '^deployment:' "$config_file" | sed 's/deployment:[[:space:]]*//' | tr -d '[:space:]')
-    if [[ -n "$deployment" ]]; then
-      echo "$deployment"
-    else
-      warn "No deployment field found in $config_file, defaulting to local.compose"
-      echo "local.compose"
-    fi
+  [[ -f "$config_file" ]] || die "Config file not found: $config_file"
+
+  local deployment
+  deployment=$(grep '^deployment:' "$config_file" | sed 's/deployment:[[:space:]]*//' | tr -d '[:space:]')
+
+  if [[ -n "$deployment" ]]; then
+    echo "$deployment"
   else
-    err "Config file not found: $config_file"
-    exit 1
+    warn "No deployment field found in $config_file, defaulting to local.compose"
+    echo "local.compose"
   fi
 }
 
+# =============================================================================
+# FILE OPERATIONS
+# =============================================================================
+
 reset_dist_dir() {
-  # Clean and recreate dist directory
-  if [[ -d "$DIST_DIR" ]]; then
-    rm -rf "$DIST_DIR"
-  fi
+  rm -rf "$DIST_DIR"
   mkdir -p "$DIST_DIR"
 }
 
-normalize_line_endings_to_lf() {
-  # Normalize line endings to LF in generated scripts for better cross-platform compatibility
+normalize_line_endings() {
   local dir="$1"
-  if [[ -d "$dir" ]]; then
-    if command -v dos2unix >/dev/null 2>&1; then
-      find "$dir" -type f \( -name "*.sh" -o -name "*.sql" \) -exec dos2unix -q {} \;
-    else
-      while IFS= read -r -d '' f; do
-        awk '{ sub(/\r$/, ""); print }' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
-      done < <(find "$dir" -type f \( -name "*.sh" -o -name "*.sql" \) -print0)
-    fi
-    find "$dir" -type f -name "*.sh" -exec chmod +x {} \;
+  [[ -d "$dir" ]] || return 0
+
+  if command_exists dos2unix; then
+    find "$dir" -type f \( -name "*.sh" -o -name "*.sql" \) -exec dos2unix -q {} \;
+  else
+    while IFS= read -r -d '' f; do
+      awk '{ sub(/\r$/, ""); print }' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+    done < <(find "$dir" -type f \( -name "*.sh" -o -name "*.sql" \) -print0)
   fi
+
+  find "$dir" -type f -name "*.sh" -exec chmod +x {} \;
+}
+
+# =============================================================================
+# TEMPLATE GENERATION
+# =============================================================================
+
+resolve_template_path() {
+  local deployment="$1"
+
+  case "$deployment" in
+    local-compose)    echo "local/compose" ;;
+    local-k8s-native) echo "local/k8s" ;;
+    *)                die "Unsupported deployment type: $deployment" ;;
+  esac
 }
 
 generate_templates() {
-  # Generate templates using the generator script
   local deployment="$1"
   local infra_only="$2"
   local app_stack="$3"
-  
+
   ensure_generator_deps
 
-  info "Generating dist files from templates..."
-  local template_dir
   local template_rel_path
-  case "$deployment" in
-    local-compose)
-      template_dir="$TEMPLATES_DIR/local/compose"
-      template_rel_path="../templates/local/compose"
-      ;;
-    local-k8s-native)
-      template_dir="$TEMPLATES_DIR/local/k8s"
-      template_rel_path="../templates/local/k8s"
-      ;;
-    *)
-      err "Unsupported deployment type: $deployment"
-      exit 1
-      ;;
-  esac
+  template_rel_path=$(resolve_template_path "$deployment")
+  local template_dir="$TEMPLATES_DIR/$template_rel_path"
 
-  if [[ -d "$template_dir" ]]; then
-    (
-      cd "$GENERATOR_DIR" || exit 1
-      node generator.mjs \
-        --dir "$template_rel_path" \
-        --out-dir "../../dist" \
-        --app-stack "$app_stack" \
-        --infra-only "$infra_only"
-    )
-  else
-    err "Templates directory not found: $template_dir"
-    exit 1
-  fi
+  [[ -d "$template_dir" ]] || die "Templates directory not found: $template_dir"
+
+  info "Generating dist files from templates..."
+  (
+    cd "$GENERATOR_DIR" || exit 1
+    node generator.mjs \
+      --dir "../templates/$template_rel_path" \
+      --out-dir "../../dist" \
+      --app-stack "$app_stack" \
+      --infra-only "$infra_only"
+  )
 }
 
+# =============================================================================
+# DEPLOYMENT
+# =============================================================================
+
 execute_install_script() {
-  # Execute install.sh if it exists in the dist directory
   local install_script="$DIST_DIR/install.sh"
-  if [[ ! -f "$install_script" && -f "$DIST_DIR/native/install.sh" ]]; then
-    install_script="$DIST_DIR/native/install.sh"
-  fi
-  local install_args=("$@")
+  [[ -f "$install_script" ]] || install_script="$DIST_DIR/native/install.sh"
+
   if [[ -f "$install_script" ]]; then
     info "Executing install script: $install_script"
     chmod +x "$install_script"
-    "$install_script" "${install_args[@]}"
+    "$install_script" "$@"
   else
     warn "install.sh not found in $DIST_DIR, skipping installation step"
   fi
 }
 
-main() {
-  local app_stack="local.compose"
-  local skip_build=false
-  local infra_only=false
-  local debug_template=false
+# =============================================================================
+# ARGUMENT PARSING
+# =============================================================================
+
+parse_arguments() {
+  APP_STACK="local.compose"
+  SKIP_BUILD=false
+  INFRA_ONLY=false
+  DEBUG_TEMPLATE=false
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
       -h|--help)
-        usage 0
+        show_usage 0
         ;;
       --app-stack=*)
-        app_stack="${1#--app-stack=}"
-        if [[ -z "$app_stack" ]]; then
-          err "Missing value for --app-stack"
-          usage 1
-        fi
+        APP_STACK="${1#--app-stack=}"
+        [[ -n "$APP_STACK" ]] || die "Missing value for --app-stack"
         shift
         ;;
       --app-stack)
-        echo "Invalid usage: use --app-stack=<stack-name>" >&2
-        exit 1
+        die "Invalid usage: use --app-stack=<stack-name>"
         ;;
       --infra-only)
-        infra_only=true
-        skip_build=true
+        INFRA_ONLY=true
+        SKIP_BUILD=true
         shift
         ;;
       --skip-build)
-        skip_build=true
+        SKIP_BUILD=true
         shift
         ;;
       --debug-template)
-        debug_template=true
+        DEBUG_TEMPLATE=true
         shift
         ;;
       -*)
-        err "Unsupported option: $1"
-        usage 1
+        die "Unsupported option: $1"
         ;;
       *)
-        err "Unsupported argument: $1"
-        usage 1
+        die "Unsupported argument: $1"
         ;;
     esac
   done
+}
 
-  local install_args=()
-  if [[ "$skip_build" == "true" ]]; then
-    install_args+=("--skip-build")
+list_available_configs() {
+  if [[ -d "$CONFIG_DIR" ]]; then
+    info "Available configurations:"
+    find "$CONFIG_DIR" -name "app-stack.*.yml" -exec basename {} \; | sed 's/app-stack\.\(.*\)\.yml/  - \1/'
   fi
+}
 
-  local config_file="$CONFIG_DIR/app-stack.${app_stack}.yml"
-  
-  info "Starting Atlas deployment for app-stack: $app_stack"
-  
-  # Step 1: Check if config file exists
+# =============================================================================
+# MAIN
+# =============================================================================
+
+main() {
+  parse_arguments "$@"
+
+  local config_file="$CONFIG_DIR/app-stack.${APP_STACK}.yml"
+
+  info "Starting Atlas deployment for app-stack: $APP_STACK"
+
+  # Validate config file
   if [[ ! -f "$config_file" ]]; then
-    err "Configuration file not found: $config_file"
-    err "Available configurations:"
-    if [[ -d "$CONFIG_DIR" ]]; then
-      find "$CONFIG_DIR" -name "app-stack.*.yml" -exec basename {} \; | sed 's/app-stack\.\(.*\)\.yml/  \1/'
-    fi
-    exit 1
+    die "Configuration file not found: $config_file$(echo; list_available_configs)"
   fi
-  
+
   info "Reading configuration from: $config_file"
-  
-  # Step 2: Read deployment value from config
+
+  # Read deployment type
   local deployment
   deployment=$(read_deployment_from_config "$config_file")
   info "Deployment type: $deployment"
 
-  # Step 3: Reset dist directory
+  # Generate templates
   reset_dist_dir
-
-  # Step 4: Generate templates
-  generate_templates "$deployment" "$infra_only" "$app_stack"
+  generate_templates "$deployment" "$INFRA_ONLY" "$APP_STACK"
   info "Generated files are available in: $DIST_DIR"
 
-  # Step 5: Normalize line endings
-  normalize_line_endings_to_lf "$DIST_DIR"
+  # Normalize line endings
+  normalize_line_endings "$DIST_DIR"
 
-  # Step 6: Execute install.sh
-  if [[ "$debug_template" == "true" ]]; then
+  # Execute install script
+  if [[ "$DEBUG_TEMPLATE" == true ]]; then
     info "Debug template mode enabled. Skipping install script execution."
   else
+    local install_args=()
+    [[ "$SKIP_BUILD" == true ]] && install_args+=("--skip-build")
+
     execute_install_script "${install_args[@]}"
     info "Installation completed successfully! 🚀"
-  fi  
+  fi
 }
 
 main "$@"

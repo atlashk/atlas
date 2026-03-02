@@ -1,18 +1,14 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BACKEND_DIR="$SCRIPT_DIR"
-DIST_DIR="$BACKEND_DIR/dist"
-UNINSTALL_SCRIPT="$DIST_DIR/uninstall.sh"
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly DIST_DIR="$SCRIPT_DIR/dist"
+readonly UNINSTALL_SCRIPT="$DIST_DIR/uninstall.sh"
 
 info() { printf "[INFO] %s\n" "$*"; }
-err()  { printf "[ERROR] %s\n" "$*"; }
+die()  { printf "[ERROR] %s\n" "$*" >&2; exit 1; }
 
-if [[ ! -f "$UNINSTALL_SCRIPT" ]]; then
-  err "Uninstall script not found: $UNINSTALL_SCRIPT"
-  exit 1
-fi
+[[ -f "$UNINSTALL_SCRIPT" ]] || die "Uninstall script not found: $UNINSTALL_SCRIPT\nPlease run ./install.sh first to generate deployment scripts"
 
 info "Executing uninstall script: $UNINSTALL_SCRIPT"
 chmod +x "$UNINSTALL_SCRIPT"

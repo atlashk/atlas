@@ -1,64 +1,58 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
-SERVICE_NAME=""
+# =============================================================================
+# CONFIGURATION
+# =============================================================================
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BACKEND_DIR="$SCRIPT_DIR"
-DIST_DIR="$BACKEND_DIR/dist"
-REBUILD_SCRIPT="$DIST_DIR/rebuild.sh"
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly DIST_DIR="$SCRIPT_DIR/dist"
+readonly REBUILD_SCRIPT="$DIST_DIR/rebuild.sh"
+
+# =============================================================================
+# UTILITIES
+# =============================================================================
 
 info() { printf "[INFO] %s\n" "$*"; }
-err()  { printf "[ERROR] %s\n" "$*"; }
+die()  { printf "[ERROR] %s\n" "$*" >&2; exit 1; }
+
+# =============================================================================
+# USAGE
+# =============================================================================
 
 show_usage() {
-  echo "Usage: $0 <service-name>"
-  echo ""
-  echo "Arguments:"
-  echo "  <service-name>     Service name to rebuild (required)"
-  echo ""
-  echo "Examples:"
-  echo "  $0 identity-service"
-  echo "  $0 api-gateway"
+  cat <<EOF
+Usage: $0 <service-name>
+
+Rebuild and redeploy a single service
+
+Arguments:
+  <service-name>     Service name to rebuild (required)
+
+Examples:
+  $0 identity-service
+  $0 api-gateway
+EOF
+  exit "${1:-0}"
 }
 
-parse_args() {
-  if [[ $# -eq 0 ]]; then
-    err "Missing required argument: service-name"
-    echo ""
-    show_usage
-    exit 1
-  fi
+# =============================================================================
+# MAIN
+# =============================================================================
 
-  case "$1" in
-    -h|--help)
-      show_usage
-      exit 0
-      ;;
-    *)
-      SERVICE_NAME="$1"
-      ;;
-  esac
+main() {
+  [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && show_usage 0
+  [[ $# -eq 0 ]] && { die "Missing required argument: service-name"; }
+
+  local service_name="$1"
+
+  [[ -f "$REBUILD_SCRIPT" ]] || die "Rebuild script not found: $REBUILD_SCRIPT\nPlease run ./install.sh first to generate deployment scripts"
+
+  info "Executing rebuild script for service: $service_name"
+  chmod +x "$REBUILD_SCRIPT"
+  "$REBUILD_SCRIPT" "$service_name"
+
+  info "Rebuild completed successfully! 🚀"
 }
 
-parse_args "$@"
-
-if [[ -z "$SERVICE_NAME" ]]; then
-  err "Missing service name"
-  echo ""
-  show_usage
-  exit 1
-fi
-
-if [[ ! -f "$REBUILD_SCRIPT" ]]; then
-  err "Rebuild script not found: $REBUILD_SCRIPT"
-  err "Please run ./install.sh first to generate deployment scripts"
-  exit 1
-fi
-
-info "Executing rebuild script for service: $SERVICE_NAME"
-chmod +x "$REBUILD_SCRIPT"
-
-"$REBUILD_SCRIPT" "$SERVICE_NAME"
-
-info "Rebuild completed successfully! 🚀"
+main "$@"
