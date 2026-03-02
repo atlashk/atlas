@@ -3,7 +3,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: nginx-ingress
-  namespace: atlas
+  namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: nginx-ingress
     tier: frontend
@@ -12,11 +12,11 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
     nginx.ingress.kubernetes.io/upstream-vhost: $http_host
-    nginx.ingress.kubernetes.io/proxy-set-headers: "atlas-proxy-headers"
+    nginx.ingress.kubernetes.io/proxy-set-headers: "{{dotenv.PROJECT_NAME}}-proxy-headers"
 spec:
   ingressClassName: nginx
   rules:
-    - host: api.atlas.local
+    - host: api.{{dotenv.PROJECT_NAME}}.local
       http:
         paths:
           - path: /
@@ -27,7 +27,7 @@ spec:
                 port:
                   number: 8080
 {{#hasGrafana}}
-    - host: grafana.atlas.local
+    - host: grafana.{{dotenv.PROJECT_NAME}}.local
       http:
         paths:
           - path: /
@@ -38,8 +38,8 @@ spec:
                 port:
                   number: 3000
 {{/hasGrafana}}
-{{#hasObservability "tracing" "zipkin"}}
-    - host: zipkin.atlas.local
+{{#hasService "observability.tracing" "zipkin"}}
+    - host: zipkin.{{dotenv.PROJECT_NAME}}.local
       http:
         paths:
           - path: /
@@ -49,9 +49,9 @@ spec:
                 name: zipkin
                 port:
                   number: 9411
-{{/hasObservability}}
+{{/hasService}}
 {{#hasService "notification.email" "spring"}}
-    - host: smtp4dev.atlas.local
+    - host: smtp4dev.{{dotenv.PROJECT_NAME}}.local
       http:
         paths:
           - path: /
@@ -63,7 +63,7 @@ spec:
                   number: 80
 {{/hasService}}
 {{#hasService "identity" "keycloak"}}
-    - host: keycloak.atlas.local
+    - host: keycloak.{{dotenv.PROJECT_NAME}}.local
       http:
         paths:
           - path: /
@@ -75,7 +75,7 @@ spec:
                   number: 8080
 {{/hasService}}
 {{#hasService "storage" "minio"}}
-    - host: minio.atlas.local
+    - host: minio.{{dotenv.PROJECT_NAME}}.local
       http:
         paths:
           - path: /
@@ -86,8 +86,8 @@ spec:
                 port:
                   number: 9001
 {{/hasService}}
-{{#hasObservability "metrics" "prometheus"}}
-    - host: prometheus.atlas.local
+{{#hasService "observability.metrics" "prometheus"}}
+    - host: prometheus.{{dotenv.PROJECT_NAME}}.local
       http:
         paths:
           - path: /
@@ -97,13 +97,13 @@ spec:
                 name: prometheus
                 port:
                   number: 9090
-{{/hasObservability}}
+{{/hasService}}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nginx-ingress-config
-  namespace: atlas
+  namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: nginx-ingress
     tier: frontend

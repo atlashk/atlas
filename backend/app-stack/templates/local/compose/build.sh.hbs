@@ -5,8 +5,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+PROJECT_NAME="{{dotenv.PROJECT_NAME}}"
 GRADLEW="$PROJECT_ROOT/backend/gradlew"
-PROJECT_NAME="atlas"
 
 # Service definitions with name and build context
 SERVICES=(

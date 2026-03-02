@@ -1,9 +1,9 @@
-{{#hasObservability "tracing" "zipkin"}}
+{{#hasService "observability.tracing" "zipkin"}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: zipkin-dp
-  namespace: atlas
+  namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: zipkin
     tier: backend
@@ -56,7 +56,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: zipkin
-  namespace: atlas
+  namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: zipkin
     tier: backend
@@ -68,4 +68,4 @@ spec:
       targetPort: 9411
       name: http
   type: ClusterIP
-{{/hasObservability}}
+{{/hasService}}

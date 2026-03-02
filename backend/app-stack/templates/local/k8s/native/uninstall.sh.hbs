@@ -4,8 +4,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_NAME="atlas"
-NAMESPACE="atlas"
+PROJECT_NAME="{{dotenv.PROJECT_NAME}}"
+NAMESPACE="{{dotenv.PROJECT_NAME}}"
 
 check_prerequisites() {
   echo "Checking prerequisites..."

@@ -35,13 +35,12 @@ if [[ -z "$SERVICE_NAME" ]]; then
   exit 1
 fi
 
-PROJECT_NAME="atlas"
-APP_STACK="{{#if appStack}}{{appStack}}{{/if}}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+PROJECT_NAME="{{dotenv.PROJECT_NAME}}"
+APP_STACK="{{#if appStack}}{{appStack}}{{/if}}"
 
-echo "==> Rebuilding service: $SERVICE_NAME"
-echo "==> Using app-stack config: $APP_STACK"
+echo "Rebuilding service: $SERVICE_NAME..."
 
 # Determine module path and image name based on service type
 if [[ "$SERVICE_NAME" == "api-gateway" ]]; then

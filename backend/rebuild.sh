@@ -61,4 +61,4 @@ chmod +x "$REBUILD_SCRIPT"
 
 "$REBUILD_SCRIPT" "$SERVICE_NAME"
 
-info "Atlas rebuild completed successfully"
+info "Rebuild completed successfully! 🚀"

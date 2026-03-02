@@ -17,4 +17,4 @@ fi
 info "Executing uninstall script: $UNINSTALL_SCRIPT"
 chmod +x "$UNINSTALL_SCRIPT"
 "$UNINSTALL_SCRIPT" "$@"
-info "Atlas uninstallation completed successfully"
+info "Uninstallation completed successfully! 🚀"

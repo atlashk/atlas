@@ -1,7 +1,7 @@
 apiVersion: 1
 
 datasources:
-{{#hasObservability "metrics" "prometheus"}}
+{{#hasService "observability.metrics" "prometheus"}}
   - name: Prometheus
     type: prometheus
     access: proxy
@@ -14,9 +14,9 @@ datasources:
       queryTimeout: 60s
       httpMethod: POST
     secureJsonData: {}
-{{/hasObservability}}
+{{/hasService}}
 
-{{#hasObservability "logging.stack" "loki"}}
+{{#hasService "observability.logging.stack" "loki"}}
   - name: Loki
     type: loki
     access: proxy
@@ -26,4 +26,4 @@ datasources:
     jsonData:
       maxLines: 1000
     secureJsonData: {}
-{{/hasObservability}}
+{{/hasService}}

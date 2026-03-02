@@ -16,13 +16,12 @@ err()  { printf "[ERROR] %s\n" "$*"; }
 
 usage() {
   local code="${1:-1}"
-  echo "Usage: $0 [--app-stack=<stack-name>] [--skip-build] [--infra-only] [--enable-observability=<true|false>] [--debug-template]"
+  echo "Usage: $0 [--app-stack=<stack-name>] [--skip-build] [--infra-only] [--debug-template]"
   echo ""
   echo "Options:"
   echo "  --app-stack=<stack-name>              Pick config/app-stack.<stack-name>.yml"
   echo "  --skip-build                          Pass '--skip-build' to install.sh"
   echo "  --infra-only                          Pass '--infra-only' to install.sh"
-  echo "  --enable-observability=<true|false>   Pass '--enable-observability=<true|false>' to install.sh"
   echo "  --debug-template                      Skip install.sh execution"
   echo "  -h, --help                            Show help and exit"
   echo ""
@@ -30,7 +29,6 @@ usage() {
   echo "  - app-stack: local.compose"
   echo "  - skip-build: No"
   echo "  - infra-only: No"
-  echo "  - enable-observability: true"
   exit "$code"
 }
 
@@ -124,8 +122,7 @@ generate_templates() {
   # Generate templates using the generator script
   local deployment="$1"
   local infra_only="$2"
-  local enable_observability="$3"
-  local app_stack="$4"
+  local app_stack="$3"
   
   ensure_generator_deps
 
@@ -154,8 +151,7 @@ generate_templates() {
         --dir "$template_rel_path" \
         --out-dir "../../dist" \
         --app-stack "$app_stack" \
-        --infra-only "$infra_only" \
-        --enable-observability "$enable_observability"
+        --infra-only "$infra_only"
     )
   else
     err "Templates directory not found: $template_dir"
@@ -183,9 +179,6 @@ main() {
   local app_stack="local.compose"
   local skip_build=false
   local infra_only=false
-  local infra_only_specified=false
-  local enable_observability=true
-  local enable_observability_specified=false
   local debug_template=false
 
   while [[ $# -gt 0 ]]; do
@@ -207,22 +200,8 @@ main() {
         ;;
       --infra-only)
         infra_only=true
-        infra_only_specified=true
         skip_build=true
         shift
-        ;;
-      --enable-observability=*)
-        enable_observability="${1#--enable-observability=}"
-        if [[ -z "$enable_observability" ]]; then
-          err "Missing value for --enable-observability"
-          usage 1
-        fi
-        enable_observability_specified=true
-        shift
-        ;;
-      --enable-observability)
-        echo "Invalid usage: use --enable-observability=true|false" >&2
-        exit 1
         ;;
       --skip-build)
         skip_build=true
@@ -242,12 +221,6 @@ main() {
         ;;
     esac
   done
-
-  enable_observability="$(echo "$enable_observability" | tr '[:upper:]' '[:lower:]')"
-  if [[ "$enable_observability" != "true" && "$enable_observability" != "false" ]]; then
-    err "Invalid value for --enable-observability: $enable_observability"
-    usage 1
-  fi
 
   local install_args=()
   if [[ "$skip_build" == "true" ]]; then
@@ -279,7 +252,7 @@ main() {
   reset_dist_dir
 
   # Step 4: Generate templates
-  generate_templates "$deployment" "$infra_only" "$enable_observability" "$app_stack"
+  generate_templates "$deployment" "$infra_only" "$app_stack"
   info "Generated files are available in: $DIST_DIR"
 
   # Step 5: Normalize line endings
@@ -290,7 +263,7 @@ main() {
     info "Debug template mode enabled. Skipping install script execution."
   else
     execute_install_script "${install_args[@]}"
-    info "Atlas installation completed successfully"
+    info "Installation completed successfully! 🚀"
   fi  
 }
 

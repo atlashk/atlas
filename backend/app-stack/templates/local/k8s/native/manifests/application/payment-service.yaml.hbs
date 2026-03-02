@@ -1,10 +1,8 @@
-# Log volume changed to emptyDir for Promtail compatibility
-# PersistentVolumeClaim removed - logs now use emptyDir volume
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: payment-service
-  namespace: atlas
+  namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: payment-service
     tier: backend
@@ -19,9 +17,10 @@ spec:
         app: payment-service
         tier: backend
     spec:
+      serviceAccountName: cluster-sa
       containers:
         - name: payment-service
-          image: atlas/payment-service:latest
+          image: {{dotenv.PROJECT_NAME}}/payment-service:latest
           imagePullPolicy: Never
           ports:
             - containerPort: 8085
@@ -72,10 +71,10 @@ spec:
                   name: rabbitmq-secret
                   key: rabbitmq-password
             {{/hasService}}
-            {{#hasObservability "tracing" "zipkin"}}
+            {{#hasService "observability.tracing" "zipkin"}}
             - name: ZIPKIN_ENDPOINT
               value: "http://zipkin:9411/api/v2/spans"
-            {{/hasObservability}}
+            {{/hasService}}
             - name: PAYMENT_SIMULATOR_WEBHOOK_URL
               value: "http://api-gateway:8080/services/payment/api/webhook/simulator"
           # startupProbe gives the Spring Boot app up to 5 min (30 × 10 s) to finish starting
@@ -131,7 +130,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: payment-service
-  namespace: atlas
+  namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: payment-service
     tier: backend

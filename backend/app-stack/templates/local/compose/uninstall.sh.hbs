@@ -4,7 +4,7 @@ set -euo pipefail
 # Generated simple clean script (Compose)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
-PROJECT_NAME="atlas"
+PROJECT_NAME="{{dotenv.PROJECT_NAME}}"
 
 # Docker Compose command (will be set by check_docker_compose)
 DOCKER_COMPOSE_CMD="docker-compose"

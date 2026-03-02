@@ -51,6 +51,26 @@ function parseCfg(content) {
   return obj;
 }
 
+function parseEnv(content) {
+  const obj = {};
+  content.split(/\r?\n/).forEach(line => {
+    const s = line.trim();
+    // Skip empty lines and comments
+    if (!s || s.startsWith('#')) return;
+    const idx = s.indexOf('=');
+    if (idx === -1) return;
+    const key = s.slice(0, idx).trim();
+    let value = s.slice(idx + 1).trim();
+    // Remove surrounding quotes if present
+    if ((value.startsWith('"') && value.endsWith('"')) || 
+        (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    obj[key] = value;
+  });
+  return obj;
+}
+
 function parseYaml(content) {
   const obj = {};
   const lines = content.split(/\r?\n/);
@@ -145,33 +165,9 @@ function registerHelpers() {
     return result ? options.fn(this) : options.inverse(this);
   });
 
-  // Check observability service - similar to hasService but with observability check
-  // Usage: {{#hasObservability "metrics" "prometheus"}}...{{/hasObservability}}
-  Handlebars.registerHelper('hasObservability', function(serviceType, serviceName, options) {
-    // Check if observability is enabled first
-    if (!this.enableObservability) {
-      return options.inverse(this);
-    }
-
-    const { stack, getStackValue } = this;
-    const stackValue = getStackValue || createStackAccessor(stack);
-
-    // Get the value from stack using serviceType as the key
-    const actualValue = stackValue('observability.' + serviceType);
-
-    // Compare case-insensitive
-    const result = actualValue === (serviceName || '').toString().toLowerCase();
-
-    return result ? options.fn(this) : options.inverse(this);
-  });
-
   // Special helper for Grafana - shows when any observability service is enabled
   // Usage: {{#hasGrafana}}...{{/hasGrafana}}
   Handlebars.registerHelper('hasGrafana', function(options) {
-    if (!this.enableObservability) {
-      return options.inverse(this);
-    }
-
     const { stack, getStackValue } = this;
     const stackValue = getStackValue || createStackAccessor(stack);
 
@@ -257,20 +253,11 @@ function collectTemplates(dir) {
 }
 
 function shouldSkipFileByPath(filePath, context) {
-  const { stack, enableObservability, getStackValue } = context;
+  const { stack, getStackValue } = context;
   const stackValue = getStackValue || createStackAccessor(stack);
   
   // Normalize path separators
   const normalizedPath = filePath.replace(/\\/g, '/');
-  
-  // Skip observability configs if observability is disabled
-  if (!enableObservability) {
-    if (normalizedPath.includes('/config/grafana/')) return true;
-    if (normalizedPath.includes('/config/prometheus/')) return true;
-    if (normalizedPath.includes('/config/promtail/')) return true;
-    if (normalizedPath.includes('/config/loki/')) return true;
-    if (normalizedPath.includes('/config/zipkin/')) return true;
-  }
   
   // Skip specific service configs based on stack
   const datasource = stackValue('datasource');
@@ -315,9 +302,18 @@ function shouldSkipFileByPath(filePath, context) {
   }
 
   let stack = {};
+  let dotenv = {};
+  
+  // Load .env file from generator directory
+  const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+  const envPath = path.resolve(scriptDir, '.env');
+  if (fs.existsSync(envPath)) {
+    dotenv = parseEnv(fs.readFileSync(envPath, 'utf8'));
+    console.log(`Loaded ${Object.keys(dotenv).length} variable(s) from .env`);
+  }
+  
   if (args['app-stack']) {
     const appStackName = args['app-stack'];
-    const scriptDir = path.dirname(fileURLToPath(import.meta.url));
     const configPath = path.resolve(scriptDir, '..', 'config', `app-stack.${appStackName}.yml`);
     if (fs.existsSync(configPath)) {
       stack = { ...stack, ...parseYaml(fs.readFileSync(configPath, 'utf8')) };
@@ -335,10 +331,6 @@ function shouldSkipFileByPath(filePath, context) {
 
   // Parse additional flags for template context
   const infraOnly = args['infra-only'] === 'true' ? true : false;
-  
-  // Observability is infrastructure only - force to false if infra-only is false
-  let enableObservability = args['enable-observability'] === 'false' ? false : 
-                            args['enable-observability'] === 'true' ? true : true;
 
   // App stack name (e.g., dev, local.compose, local.k8s.native)
   const appStack = args['app-stack'] || '';
@@ -348,7 +340,7 @@ function shouldSkipFileByPath(filePath, context) {
   const templateContext = {
     stack,
     env: process.env,
-    enableObservability,
+    dotenv,
     infraOnly,
     appStack,
     getStackValue

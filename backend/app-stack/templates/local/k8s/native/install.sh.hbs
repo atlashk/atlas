@@ -7,20 +7,18 @@ SECONDS=0
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../../" && pwd)"
-NAMESPACE="atlas"
+NAMESPACE="{{dotenv.PROJECT_NAME}}"
 MANIFESTS_DIR="$SCRIPT_DIR/manifests"
 
 SKIP_BUILD=false
 INFRA_ONLY=false
-ENABLE_OBSERVABILITY=true
 
 show_help() {
-  echo "Usage: $0 [--skip-build] [--infra-only] [--enable-observability <true|false>]"
+  echo "Usage: $0 [--skip-build] [--infra-only]"
   echo ""
   echo "Simplified Atlas Kubernetes deploy script"
   echo "  --skip-build        Skip backend and Docker image builds"
   echo "  --infra-only        Apply only infrastructure manifests"
-  echo "  --enable-observability <true|false>"
 }
 
 parse_arguments() {
@@ -32,31 +30,12 @@ parse_arguments() {
         SKIP_BUILD=true; shift;;
       --infra-only)
         INFRA_ONLY=true; SKIP_BUILD=true; shift;;
-      --enable-observability)
-        shift
-        if [[ $# -eq 0 || "$1" == -* ]]; then
-          echo "Missing value for --enable-observability" >&2
-          exit 1
-        fi
-        ENABLE_OBSERVABILITY="$1"; shift;;
-      --enable-observability=*)
-        ENABLE_OBSERVABILITY="${1#--enable-observability=}"
-        if [[ -z "$ENABLE_OBSERVABILITY" ]]; then
-          echo "Missing value for --enable-observability" >&2
-          exit 1
-        fi
-        shift;;
       *)
         echo "Unknown option: $1" >&2
         echo "Use --help for usage information" >&2
         exit 1;;
     esac
   done
-  ENABLE_OBSERVABILITY="$(echo "$ENABLE_OBSERVABILITY" | tr '[:upper:]' '[:lower:]')"
-  if [[ "$ENABLE_OBSERVABILITY" != "true" && "$ENABLE_OBSERVABILITY" != "false" ]]; then
-    echo "Invalid value for --enable-observability: $ENABLE_OBSERVABILITY" >&2
-    exit 1
-  fi
 }
 
 check_prerequisites() {
@@ -228,15 +207,17 @@ install_ingress_controller() {
 
 apply_manifests() {
   echo "Applying Kubernetes manifests in namespace '$NAMESPACE'..."
+
+  # First apply infrastructure manifests and wait for them to be ready before applying application manifests
   apply_and_wait "$MANIFESTS_DIR/infrastructure" "infrastructure"
-  if [[ "$ENABLE_OBSERVABILITY" == "true" ]]; then
-    apply_and_wait "$MANIFESTS_DIR/observability" "observability"
-  fi
   if [[ "$INFRA_ONLY" == "true" ]]; then
     return 0
   fi
 
+  # Then apply application manifests
   apply_and_wait "$MANIFESTS_DIR/application" "application"
+
+  # Ingress resources may depend on the ingress controller, so we need to ensure it's installed before applying them
   install_ingress_controller
   apply_and_wait "$MANIFESTS_DIR/ingress" "ingress"
 }

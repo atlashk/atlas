@@ -1,10 +1,10 @@
-{{#hasObservability "logging.stack" "loki"}}
+{{#hasService "observability.logging.stack" "loki"}}
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: promtail-sa
-  namespace: atlas
+  namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: promtail
     tier: backend
@@ -40,13 +40,13 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: promtail-sa
-    namespace: atlas
+    namespace: {{dotenv.PROJECT_NAME}}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: promtail-config-cm
-  namespace: atlas
+  namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: promtail
     tier: backend
@@ -96,7 +96,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: promtail-ds
-  namespace: atlas
+  namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: promtail
     tier: backend
@@ -161,4 +161,4 @@ spec:
         - name: varlogcontainers
           hostPath:
             path: /var/log/containers
-{{/hasObservability}}
+{{/hasService}}

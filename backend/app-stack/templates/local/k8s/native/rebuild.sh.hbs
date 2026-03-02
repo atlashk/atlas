@@ -36,14 +36,13 @@ if [[ -z "$SERVICE_NAME" ]]; then
   exit 1
 fi
 
-PROJECT_NAME="atlas"
+PROJECT_NAME="{{dotenv.PROJECT_NAME}}"
 APP_STACK="{{#if appStack}}{{appStack}}{{/if}}"
-NAMESPACE="atlas"
+NAMESPACE="{{dotenv.PROJECT_NAME}}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../../" && pwd)"
 
-echo "==> Rebuilding service: $SERVICE_NAME"
-echo "==> Using app-stack config: $APP_STACK"
+echo "Rebuilding service: $SERVICE_NAME"
 
 # Check prerequisites
 if ! command -v kubectl >/dev/null 2>&1; then

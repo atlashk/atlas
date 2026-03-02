@@ -21,7 +21,7 @@ services:
       retries: 10
       start_period: 60s
     networks:
-      - atlas-network
+      - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
 
 {{#hasService "datasource" "postgres"}}
@@ -43,7 +43,7 @@ services:
       retries: 5
       start_period: 10s
     networks:
-      - atlas-network
+      - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
 
 {{#hasService "kv-store" "redis"}}
@@ -61,7 +61,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - atlas-network
+      - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
 
 {{#hasService "messaging" "kafka"}}
@@ -91,7 +91,7 @@ services:
       retries: 5
       start_period: 30s
     networks:
-      - atlas-network
+      - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
 
 {{#hasService "messaging" "rabbitmq"}}
@@ -112,7 +112,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - atlas-network
+      - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
 
 {{#hasService "identity" "keycloak"}}
@@ -147,7 +147,7 @@ services:
         condition: service_healthy
       {{/hasService}}
     networks:
-      - atlas-network
+      - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
 
 {{#hasService "full-text-search" "elasticsearch"}}
@@ -170,7 +170,7 @@ services:
       retries: 10
       start_period: 60s
     networks:
-      - atlas-network
+      - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
 
 {{#hasService "storage" "minio"}}
@@ -192,7 +192,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - atlas-network
+      - {{dotenv.PROJECT_NAME}}-network
 
   minio-init:
     container_name: minio-init
@@ -210,7 +210,7 @@ services:
       minio:
         condition: service_healthy
     networks:
-      - atlas-network
+      - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
 
 {{#hasService "notification.email" "spring"}}
@@ -223,10 +223,10 @@ services:
     environment:
       - ServerOptions__HostName=smtp4dev
     networks:
-      - atlas-network
+      - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
 
-{{#hasObservability "metrics" "prometheus"}}
+{{#hasService "observability.metrics" "prometheus"}}
   prometheus:
     container_name: prometheus
     image: prom/prometheus:main
@@ -247,10 +247,10 @@ services:
       retries: 5
       start_period: 30s
     networks:
-      - atlas-network
-{{/hasObservability}}
+      - {{dotenv.PROJECT_NAME}}-network
+{{/hasService}}
 
-{{#hasObservability "logging.stack" "loki"}}
+{{#hasService "observability.logging.stack" "loki"}}
   loki:
     container_name: loki
     image: grafana/loki:main
@@ -266,7 +266,7 @@ services:
       retries: 5
       start_period: 30s
     networks:
-      - atlas-network
+      - {{dotenv.PROJECT_NAME}}-network
 
   promtail:
     container_name: promtail
@@ -290,10 +290,10 @@ services:
       retries: 5
       start_period: 30s
     networks:
-      - atlas-network
-{{/hasObservability}}
+      - {{dotenv.PROJECT_NAME}}-network
+{{/hasService}}
 
-{{#hasObservability "tracing" "zipkin"}}
+{{#hasService "observability.tracing" "zipkin"}}
   zipkin:
     container_name: zipkin
     image: openzipkin/zipkin:latest
@@ -302,8 +302,8 @@ services:
     environment:
       - STORAGE_TYPE=mem
     networks:
-      - atlas-network
-{{/hasObservability}}
+      - {{dotenv.PROJECT_NAME}}-network
+{{/hasService}}
 
 {{#hasGrafana}}
   grafana:
@@ -326,14 +326,14 @@ services:
       retries: 5
       start_period: 60s
     depends_on:
-      {{#hasObservability "metrics" "prometheus"}}
+      {{#hasService "observability.metrics" "prometheus"}}
       - prometheus
-      {{/hasObservability}}
-      {{#hasObservability "logging.stack" "loki"}}
+      {{/hasService}}
+      {{#hasService "observability.logging.stack" "loki"}}
       - loki
-      {{/hasObservability}}
+      {{/hasService}}
     networks:
-      - atlas-network
+      - {{dotenv.PROJECT_NAME}}-network
 {{/hasGrafana}}
 
 {{#hasService "reverse-proxy" "nginx"}}
@@ -347,13 +347,13 @@ services:
       - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./config/nginx/conf.d:/etc/nginx/conf.d:ro
     networks:
-      - atlas-network
+      - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
 
 {{#unless infraOnly}}
   eureka-server:
     container_name: eureka-server
-    image: atlas/eureka-server:latest
+    image: {{dotenv.PROJECT_NAME}}/eureka-server:latest
     build:
       context: ../../platform/discovery-server/eureka-server
       dockerfile: Dockerfile
@@ -370,11 +370,11 @@ services:
       retries: 15
       start_period: 180s
     networks:
-      - atlas-network
+      - {{dotenv.PROJECT_NAME}}-network
 
   identity-service:
     container_name: identity-service
-    image: atlas/identity-service:latest
+    image: {{dotenv.PROJECT_NAME}}/identity-service:latest
     build:
       context: ../../services/identity-service/identity-bootstrap
       dockerfile: Dockerfile
@@ -405,9 +405,9 @@ services:
       - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER:-atlas}
       - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-secret123456}
       {{/hasService}}
-      {{#hasObservability "tracing" "zipkin"}}
+      {{#hasService "observability.tracing" "zipkin"}}
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
-      {{/hasObservability}}
+      {{/hasService}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
     volumes:
       - identity-service-log:/var/log/identity-service
@@ -429,11 +429,11 @@ services:
         condition: service_healthy
       {{/hasService}}
     networks:
-      - atlas-network
+      - {{dotenv.PROJECT_NAME}}-network
 
   catalog-service:
     container_name: catalog-service
-    image: atlas/catalog-service:latest
+    image: {{dotenv.PROJECT_NAME}}/catalog-service:latest
     build:
       context: ../../services/catalog-service/catalog-bootstrap
       dockerfile: Dockerfile
@@ -475,9 +475,9 @@ services:
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-secret123456}
       {{/hasService}}
-      {{#hasObservability "tracing" "zipkin"}}
+      {{#hasService "observability.tracing" "zipkin"}}
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
-      {{/hasObservability}}
+      {{/hasService}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
     volumes:
       - catalog-service-log:/var/log/catalog-service
@@ -503,11 +503,11 @@ services:
         condition: service_healthy
       {{/hasService}}
     networks:
-      - atlas-network
+      - {{dotenv.PROJECT_NAME}}-network
 
   inventory-service:
     container_name: inventory-service
-    image: atlas/inventory-service:latest
+    image: {{dotenv.PROJECT_NAME}}/inventory-service:latest
     build:
       context: ../../services/inventory-service/inventory-bootstrap
       dockerfile: Dockerfile
@@ -538,9 +538,9 @@ services:
       - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER:-atlas}
       - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-secret123456}
       {{/hasService}}
-      {{#hasObservability "tracing" "zipkin"}}
+      {{#hasService "observability.tracing" "zipkin"}}
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
-      {{/hasObservability}}
+      {{/hasService}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
     volumes:
       - inventory-service-log:/var/log/inventory-service
@@ -562,11 +562,11 @@ services:
         condition: service_healthy
       {{/hasService}}
     networks:
-      - atlas-network
+      - {{dotenv.PROJECT_NAME}}-network
 
   order-service:
     container_name: order-service
-    image: atlas/order-service:latest
+    image: {{dotenv.PROJECT_NAME}}/order-service:latest
     build:
       context: ../../services/order-service/order-bootstrap
       dockerfile: Dockerfile
@@ -597,9 +597,9 @@ services:
       - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER:-atlas}
       - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-secret123456}
       {{/hasService}}
-      {{#hasObservability "tracing" "zipkin"}}
+      {{#hasService "observability.tracing" "zipkin"}}
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
-      {{/hasObservability}}
+      {{/hasService}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
       {{#hasService "internal" "grpc"}}
       - API_CLIENT_GRPC_IDENTITY_SERVICE_ADDRESS=static://identity-service:50051
@@ -629,11 +629,11 @@ services:
         condition: service_healthy
       {{/hasService}}
     networks:
-      - atlas-network
+      - {{dotenv.PROJECT_NAME}}-network
 
   payment-service:
     container_name: payment-service
-    image: atlas/payment-service:latest
+    image: {{dotenv.PROJECT_NAME}}/payment-service:latest
     build:
       context: ../../services/payment-service/payment-bootstrap
       dockerfile: Dockerfile
@@ -664,9 +664,9 @@ services:
       - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER:-atlas}
       - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-secret123456}
       {{/hasService}}
-      {{#hasObservability "tracing" "zipkin"}}
+      {{#hasService "observability.tracing" "zipkin"}}
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
-      {{/hasObservability}}
+      {{/hasService}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
       - PAYMENT_SIMULATOR_WEBHOOK_URL=http://api-gateway:8080/services/payment/api/webhook/simulator
     volumes:
@@ -689,11 +689,11 @@ services:
         condition: service_healthy
       {{/hasService}}
     networks:
-      - atlas-network
+      - {{dotenv.PROJECT_NAME}}-network
 
   api-gateway:
     container_name: api-gateway
-    image: atlas/api-gateway:latest
+    image: {{dotenv.PROJECT_NAME}}/api-gateway:latest
     build:
       context: ../../services/api-gateway/spring-cloud-gateway/spring-cloud-gateway-server
       dockerfile: Dockerfile
@@ -705,9 +705,9 @@ services:
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
       {{/hasService}}
-      {{#hasObservability "tracing" "zipkin"}}
+      {{#hasService "observability.tracing" "zipkin"}}
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
-      {{/hasObservability}}
+      {{/hasService}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
       {{#hasService "identity" "jwt"}}
       - IDENTITY_SERVICE_URI=http://identity-service:8081
@@ -727,11 +727,11 @@ services:
       eureka-server:
         condition: service_healthy
     networks:
-      - atlas-network
+      - {{dotenv.PROJECT_NAME}}-network
 {{/unless}}
 
 networks:
-  atlas-network:
+  {{dotenv.PROJECT_NAME}}-network:
     driver: bridge
 
 volumes:
@@ -756,13 +756,13 @@ volumes:
 {{#hasService "storage" "minio"}}
   minio-data:
 {{/hasService}}
-{{#hasObservability "metrics" "prometheus"}}
+{{#hasService "observability.metrics" "prometheus"}}
   prometheus-data:
-{{/hasObservability}}
-{{#hasObservability "logging.stack" "loki"}}
+{{/hasService}}
+{{#hasService "observability.logging.stack" "loki"}}
   loki-data:
   promtail-data:
-{{/hasObservability}}
+{{/hasService}}
 {{#hasGrafana}}
   grafana-data:
 {{/hasGrafana}}
