@@ -2,11 +2,11 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: kafka
+  name: kafka-sts
   namespace: atlas
   labels:
     app: kafka
-    tier: infrastructure
+    tier: backend
 spec:
   replicas: 1
   serviceName: kafka
@@ -17,7 +17,7 @@ spec:
     metadata:
       labels:
         app: kafka
-        tier: infrastructure
+        tier: backend
     spec:
       containers:
         - name: kafka
@@ -112,13 +112,12 @@ spec:
           volumeMounts:
             - name: kafka-data
               mountPath: /var/lib/kafka/data
-      terminationGracePeriodSeconds: 60
   volumeClaimTemplates:
     - metadata:
         name: kafka-data
         labels:
           app: kafka
-          tier: infrastructure
+          tier: backend
       spec:
         accessModes:
           - ReadWriteOnce
@@ -133,7 +132,7 @@ metadata:
   namespace: atlas
   labels:
     app: kafka
-    tier: infrastructure
+    tier: backend
 spec:
   clusterIP: None
   selector:

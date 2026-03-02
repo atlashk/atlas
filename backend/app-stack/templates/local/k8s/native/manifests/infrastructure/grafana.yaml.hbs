@@ -1,113 +1,12 @@
 {{#hasGrafana}}
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: grafana
-  namespace: atlas
-  labels:
-    app: grafana
-    tier: infrastructure
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: grafana
-  template:
-    metadata:
-      labels:
-        app: grafana
-        tier: infrastructure
-    spec:
-      containers:
-        - name: grafana
-          image: grafana/grafana-oss:main
-          imagePullPolicy: IfNotPresent
-          env:
-            - name: GF_SECURITY_ADMIN_USER
-              value: "atlas"
-            - name: GF_SECURITY_ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: grafana-admin-secret
-                  key: admin-password
-            - name: GF_PATHS_PROVISIONING
-              value: "/etc/grafana/provisioning"
-          ports:
-            - containerPort: 3000
-              name: http
-          livenessProbe:
-            httpGet:
-              path: /api/health
-              port: 3000
-            initialDelaySeconds: 60
-            periodSeconds: 30
-            timeoutSeconds: 10
-            failureThreshold: 3
-          readinessProbe:
-            httpGet:
-              path: /api/health
-              port: 3000
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            timeoutSeconds: 5
-          resources:
-            requests:
-              cpu: "100m"
-              memory: "256Mi"
-            limits:
-              cpu: "500m"
-              memory: "512Mi"
-          volumeMounts:
-            - name: grafana-storage
-              mountPath: /var/lib/grafana
-            - name: grafana-datasources
-              mountPath: /etc/grafana/provisioning/datasources
-              readOnly: true
-            - name: grafana-dashboards-config
-              mountPath: /etc/grafana/provisioning/dashboards
-              readOnly: true
-            - name: grafana-dashboards
-              mountPath: /etc/grafana/dashboards
-              readOnly: true
-      volumes:
-        - name: grafana-storage
-          persistentVolumeClaim:
-            claimName: grafana-storage
-        - name: grafana-datasources
-          configMap:
-            name: grafana-datasources
-        - name: grafana-dashboards-config
-          configMap:
-            name: grafana-dashboards-config
-        - name: grafana-dashboards
-          configMap:
-            name: grafana-dashboards
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: grafana
-  namespace: atlas
-  labels:
-    app: grafana
-    tier: infrastructure
-spec:
-  selector:
-    app: grafana
-  ports:
-    - port: 3000
-      targetPort: 3000
-      name: http
-  type: ClusterIP
----
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: grafana-storage
+  name: grafana-pvc
   namespace: atlas
   labels:
     app: grafana
-    tier: infrastructure
+    tier: backend
 spec:
   accessModes:
     - ReadWriteOnce
@@ -118,11 +17,11 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: grafana-admin-secret
+  name: grafana-secret
   namespace: atlas
   labels:
     app: grafana
-    tier: infrastructure
+    tier: backend
 type: Opaque
 data:
   admin-password: c2VjcmV0MTIzNDU2
@@ -130,11 +29,11 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-datasources
+  name: grafana-provisioning-cm
   namespace: atlas
   labels:
     app: grafana
-    tier: infrastructure
+    tier: backend
 data:
   datasources.yml: |
     apiVersion: 1
@@ -165,23 +64,14 @@ data:
           maxLines: 1000
         secureJsonData: { }
     {{/hasObservability}}
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: grafana-dashboards-config
-  namespace: atlas
-  labels:
-    app: grafana
-    tier: infrastructure
-data:
+  
   dashboards.yml: |
     apiVersion: 1
 
     providers:
-      - name: 'Atlas Dashboards'
+      - name: 'Dashboards'
         orgId: 1
-        folder: 'Atlas'
+        folder: 'Dashboards'
         type: file
         disableDeletion: false
         updateIntervalSeconds: 10
@@ -192,11 +82,11 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-dashboards
+  name: grafana-dashboards-cm
   namespace: atlas
   labels:
     app: grafana
-    tier: infrastructure
+    tier: backend
 data:
   observability.json: |
     {
@@ -2682,4 +2572,99 @@ data:
       "version": 1,
       "weekStart": ""
     }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-dp
+  namespace: atlas
+  labels:
+    app: grafana
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+        tier: backend
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana-oss:main
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: GF_SECURITY_ADMIN_USER
+              value: "atlas"
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-admin-secret
+                  key: admin-password
+            - name: GF_PATHS_PROVISIONING
+              value: "/etc/grafana/provisioning"
+          ports:
+            - containerPort: 3000
+              name: http
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          volumeMounts:
+            - name: grafana-data
+              mountPath: /var/lib/grafana
+            - name: grafana-provisioning
+              mountPath: /etc/grafana/provisioning
+              readOnly: true
+            - name: grafana-dashboards
+              mountPath: /etc/grafana/dashboards
+              readOnly: true
+      volumes:
+        - name: grafana-data
+          persistentVolumeClaim:
+            claimName: grafana-pvc
+        - name: grafana-provisioning
+          configMap:
+            name: grafana-provisioning-cm
+        - name: grafana-dashboards
+          configMap:
+            name: grafana-dashboards-cm
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: atlas
+  labels:
+    app: grafana
+    tier: backend
+spec:
+  selector:
+    app: grafana
+  ports:
+    - port: 3000
+      targetPort: 3000
+      name: http
+  type: ClusterIP
 {{/hasGrafana}}

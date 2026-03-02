@@ -6,7 +6,7 @@ metadata:
   namespace: atlas
   labels:
     app: mysql
-    tier: infrastructure
+    tier: backend
 type: Opaque
 data:
   mysql-root-password: c2VjcmV0MTIzNDU2
@@ -15,11 +15,11 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: mysql-init
+  name: mysql-init-cm
   namespace: atlas
   labels:
     app: mysql
-    tier: infrastructure
+    tier: backend
 data:
   initdb.sh: |
     #!/bin/bash
@@ -58,11 +58,11 @@ data:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: mysql
+  name: mysql-sts
   namespace: atlas
   labels:
     app: mysql
-    tier: infrastructure
+    tier: backend
 spec:
   replicas: 1
   serviceName: mysql
@@ -73,7 +73,7 @@ spec:
     metadata:
       labels:
         app: mysql
-        tier: infrastructure
+        tier: backend
     spec:
       containers:
         - name: mysql
@@ -138,20 +138,20 @@ spec:
       volumes:
         - name: mysql-init
           configMap:
-            name: mysql-init
+            name: mysql-init-cm
             defaultMode: 0755
   volumeClaimTemplates:
     - metadata:
         name: mysql-data
         labels:
           app: mysql
-          tier: infrastructure
+          tier: backend
       spec:
         accessModes:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 5Gi
+            storage: 2Gi
 ---
 apiVersion: v1
 kind: Service
@@ -160,7 +160,7 @@ metadata:
   namespace: atlas
   labels:
     app: mysql
-    tier: infrastructure
+    tier: backend
 spec:
   clusterIP: None
   selector:

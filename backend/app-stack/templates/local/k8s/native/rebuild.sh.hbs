@@ -1,0 +1,135 @@
+{{! filepath: c:\andy\atlas\backend\app-stack\templates\local\k8s\native\rebuild.sh.hbs }}
+#!/usr/bin/env bash
+
+# Ensures that the script exits immediately if any command fails, or if you try to use an undefined variable.
+set -euo pipefail
+
+show_usage() {
+  echo "Usage: $0 <service-name>"
+  echo ""
+  echo "Arguments:"
+  echo "  <service-name>     Service name to rebuild (required)"
+  echo ""
+  echo "Available services:"
+  {{#each services}}
+  echo "  - {{this.name}}"
+  {{/each}}
+  echo ""
+  echo "Examples:"
+  echo "  $0 identity-service"
+  echo "  $0 api-gateway"
+}
+
+# Check for help flag
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  show_usage
+  exit 0
+fi
+
+# Get service name from first positional argument
+SERVICE_NAME="${1:-}"
+
+if [[ -z "$SERVICE_NAME" ]]; then
+  echo "Error: Missing required argument <service-name>" >&2
+  echo ""
+  show_usage
+  exit 1
+fi
+
+PROJECT_NAME="atlas"
+APP_STACK="{{#if appStack}}{{appStack}}{{/if}}"
+NAMESPACE="atlas"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../../" && pwd)"
+
+echo "==> Rebuilding service: $SERVICE_NAME"
+echo "==> Using app-stack config: $APP_STACK"
+
+# Check prerequisites
+if ! command -v kubectl >/dev/null 2>&1; then
+  echo "kubectl is not installed" >&2
+  exit 1
+fi
+
+if ! kubectl cluster-info >/dev/null 2>&1; then
+  echo "Cannot connect to Kubernetes cluster" >&2
+  exit 1
+fi
+
+if ! command -v docker >/dev/null 2>&1; then
+  echo "Docker is not installed" >&2
+  exit 1
+fi
+
+# Determine module path and image name based on service type
+if [[ "$SERVICE_NAME" == "api-gateway" ]]; then
+  MODULE_PATH="backend/services/api-gateway/spring-cloud-gateway/spring-cloud-gateway-server"
+  IMAGE_NAME="${PROJECT_NAME}/api-gateway"
+  GRADLE_TASK=":services:api-gateway:spring-cloud-gateway:spring-cloud-gateway-server:bootJar"
+else
+  # Remove -service suffix to get base name (e.g., identity-service -> identity)
+  BASE_NAME="${SERVICE_NAME%-service}"
+  MODULE_PATH="backend/services/${SERVICE_NAME}/${BASE_NAME}-bootstrap"
+  IMAGE_NAME="${PROJECT_NAME}/${SERVICE_NAME}"
+  GRADLE_TASK=":services:${SERVICE_NAME}:${BASE_NAME}-bootstrap:bootJar"
+fi
+
+# Build JAR
+echo "==> Building JAR for $SERVICE_NAME..."
+cd "$PROJECT_ROOT/backend"
+chmod +x gradlew
+./gradlew "$GRADLE_TASK" -x test -PappStack="$APP_STACK"
+
+# Build Docker image
+echo "==> Building Docker image..."
+cd "$PROJECT_ROOT/$MODULE_PATH"
+docker build -t "${IMAGE_NAME}:latest" .
+
+# Detect cluster type and load image
+detect_cluster_and_load() {
+  local current_context
+  current_context="$(kubectl config current-context 2>/dev/null || true)"
+  
+  case "$current_context" in
+    minikube)
+      if command -v minikube >/dev/null 2>&1; then
+        echo "==> Loading image into Minikube..."
+        minikube image load "${IMAGE_NAME}:latest"
+        return 0
+      fi
+      ;;
+    kind-*)
+      if command -v kind >/dev/null 2>&1; then
+        local cluster_name="${current_context#kind-}"
+        echo "==> Loading image into Kind cluster '$cluster_name'..."
+        kind load docker-image "${IMAGE_NAME}:latest" --name "$cluster_name"
+        return 0
+      fi
+      ;;
+  esac
+  
+  echo "==> Image built locally (cluster auto-load not available for this context)"
+}
+
+detect_cluster_and_load
+
+# Restart deployment
+echo "==> Restarting deployment..."
+if kubectl get deployment "$SERVICE_NAME" -n "$NAMESPACE" >/dev/null 2>&1; then
+  kubectl rollout restart deployment "$SERVICE_NAME" -n "$NAMESPACE"
+  
+  echo "==> Waiting for rollout to complete..."
+  kubectl rollout status deployment "$SERVICE_NAME" -n "$NAMESPACE" --timeout=120s
+
+  echo ""
+  echo "==> Deployment status:"
+  kubectl get pods -n "$NAMESPACE" -l "app=$SERVICE_NAME"
+else
+  echo "Deployment '$SERVICE_NAME' not found in namespace '$NAMESPACE'" >&2
+  echo "Available deployments:"
+  kubectl get deployments -n "$NAMESPACE" --no-headers | awk '{print "  - " $1}'
+  exit 1
+fi
+
+echo ""
+echo "Successfully rebuilt and restarted $SERVICE_NAME"

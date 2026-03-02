@@ -6,7 +6,7 @@ metadata:
   namespace: atlas
   labels:
     app: keycloak
-    tier: infrastructure
+    tier: backend
 type: Opaque
 data:
   keycloak-admin: YWRtaW4=
@@ -15,11 +15,11 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: keycloak
+  name: keycloak-dp
   namespace: atlas
   labels:
     app: keycloak
-    tier: infrastructure
+    tier: backend
 spec:
   replicas: 1
   selector:
@@ -29,7 +29,7 @@ spec:
     metadata:
       labels:
         app: keycloak
-        tier: infrastructure
+        tier: backend
     spec:
       containers:
         - name: keycloak
@@ -48,16 +48,6 @@ spec:
                 secretKeyRef:
                   name: keycloak-secret
                   key: keycloak-admin-password
-            - name: KC_HEALTH_ENABLED
-              value: "true"
-            - name: KC_METRICS_ENABLED
-              value: "true"
-            - name: KC_PROXY_HEADERS
-              value: "xforwarded"
-            - name: KC_HOSTNAME_STRICT
-              value: "false"
-            - name: KC_HOSTNAME_STRICT_HTTPS
-              value: "false"
             {{#hasService "datasource" "postgres"}}
             - name: KC_DB
               value: "postgres"
@@ -121,7 +111,7 @@ metadata:
   namespace: atlas
   labels:
     app: keycloak
-    tier: infrastructure
+    tier: backend
 spec:
   selector:
     app: keycloak

@@ -2,11 +2,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: zipkin
+  name: zipkin-dp
   namespace: atlas
   labels:
     app: zipkin
-    tier: infrastructure
+    tier: backend
 spec:
   replicas: 1
   selector:
@@ -16,7 +16,7 @@ spec:
     metadata:
       labels:
         app: zipkin
-        tier: infrastructure
+        tier: backend
     spec:
       containers:
         - name: zipkin
@@ -59,7 +59,7 @@ metadata:
   namespace: atlas
   labels:
     app: zipkin
-    tier: infrastructure
+    tier: backend
 spec:
   selector:
     app: zipkin

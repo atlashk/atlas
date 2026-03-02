@@ -1,13 +1,14 @@
 {{#hasObservability "logging.stack" "loki"}}
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: loki
+  name: loki-sts
   namespace: atlas
   labels:
     app: loki
-    tier: infrastructure
+    tier: backend
 spec:
+  serviceName: loki
   replicas: 1
   selector:
     matchLabels:
@@ -16,7 +17,7 @@ spec:
     metadata:
       labels:
         app: loki
-        tier: infrastructure
+        tier: backend
     spec:
       containers:
         - name: loki
@@ -58,6 +59,20 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
+          volumeMounts:
+            - name: loki-data
+              mountPath: /loki
+  volumeClaimTemplates:
+    - metadata:
+        name: loki-data
+        labels:
+          app: loki
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
 ---
 apiVersion: v1
 kind: Service
@@ -66,13 +81,13 @@ metadata:
   namespace: atlas
   labels:
     app: loki
-    tier: infrastructure
+    tier: backend
 spec:
+  clusterIP: None
   selector:
     app: loki
   ports:
     - port: 3100
       targetPort: 3100
       name: http
-  type: ClusterIP
 {{/hasObservability}}

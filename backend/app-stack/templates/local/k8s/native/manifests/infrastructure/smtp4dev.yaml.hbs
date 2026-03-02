@@ -1,15 +1,14 @@
 {{#hasService "notification.email" "spring"}}
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
-  name: smtp4dev
+  name: smtp4dev-dp
   namespace: atlas
   labels:
     app: smtp4dev
-    tier: infrastructure
+    tier: backend
 spec:
   replicas: 1
-  serviceName: smtp4dev
   selector:
     matchLabels:
       app: smtp4dev
@@ -17,7 +16,7 @@ spec:
     metadata:
       labels:
         app: smtp4dev
-        tier: infrastructure
+        tier: backend
     spec:
       containers:
         - name: smtp4dev
@@ -31,9 +30,6 @@ spec:
               name: http
             - containerPort: 25
               name: smtp
-          volumeMounts:
-            - name: smtp4dev-data
-              mountPath: /smtp4dev
           livenessProbe:
             httpGet:
               path: /
@@ -56,18 +52,6 @@ spec:
             limits:
               cpu: "200m"
               memory: "256Mi"
-  volumeClaimTemplates:
-    - metadata:
-        name: smtp4dev-data
-        labels:
-          app: smtp4dev
-          tier: infrastructure
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 1Gi
 ---
 apiVersion: v1
 kind: Service
@@ -76,9 +60,8 @@ metadata:
   namespace: atlas
   labels:
     app: smtp4dev
-    tier: infrastructure
+    tier: backend
 spec:
-  clusterIP: None
   selector:
     app: smtp4dev
   ports:

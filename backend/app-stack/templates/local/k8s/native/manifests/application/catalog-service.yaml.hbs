@@ -7,7 +7,7 @@ metadata:
   namespace: atlas
   labels:
     app: catalog-service
-    tier: application
+    tier: backend
 spec:
   replicas: 1
   selector:
@@ -17,7 +17,7 @@ spec:
     metadata:
       labels:
         app: catalog-service
-        tier: application
+        tier: backend
     spec:
       containers:
         - name: catalog-service
@@ -163,7 +163,7 @@ metadata:
   namespace: atlas
   labels:
     app: catalog-service
-    tier: application
+    tier: backend
 spec:
   selector:
     app: catalog-service

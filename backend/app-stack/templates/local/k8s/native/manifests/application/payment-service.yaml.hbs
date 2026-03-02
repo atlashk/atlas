@@ -7,7 +7,7 @@ metadata:
   namespace: atlas
   labels:
     app: payment-service
-    tier: application
+    tier: backend
 spec:
   replicas: 1
   selector:
@@ -17,7 +17,7 @@ spec:
     metadata:
       labels:
         app: payment-service
-        tier: application
+        tier: backend
     spec:
       containers:
         - name: payment-service
@@ -76,6 +76,8 @@ spec:
             - name: ZIPKIN_ENDPOINT
               value: "http://zipkin:9411/api/v2/spans"
             {{/hasObservability}}
+            - name: PAYMENT_SIMULATOR_WEBHOOK_URL
+              value: "http://api-gateway:8080/services/payment/api/webhook/simulator"
           # startupProbe gives the Spring Boot app up to 5 min (30 × 10 s) to finish starting
           # before liveness/readiness probes are allowed to run. This prevents premature restarts.
           startupProbe:
@@ -132,7 +134,7 @@ metadata:
   namespace: atlas
   labels:
     app: payment-service
-    tier: application
+    tier: backend
 spec:
   selector:
     app: payment-service

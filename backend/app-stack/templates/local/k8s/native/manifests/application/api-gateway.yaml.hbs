@@ -7,7 +7,7 @@ metadata:
   namespace: atlas
   labels:
     app: api-gateway
-    tier: application
+    tier: backend
 spec:
   replicas: 1
   selector:
@@ -17,7 +17,7 @@ spec:
     metadata:
       labels:
         app: api-gateway
-        tier: application
+        tier: backend
     spec:
       containers:
         - name: api-gateway
@@ -101,7 +101,7 @@ metadata:
   namespace: atlas
   labels:
     app: api-gateway
-    tier: application
+    tier: backend
 spec:
   selector:
     app: api-gateway

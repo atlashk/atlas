@@ -2,11 +2,11 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: redis
+  name: redis-sts
   namespace: atlas
   labels:
     app: redis
-    tier: infrastructure
+    tier: backend
 spec:
   replicas: 1
   serviceName: redis
@@ -17,7 +17,7 @@ spec:
     metadata:
       labels:
         app: redis
-        tier: infrastructure
+        tier: backend
     spec:
       containers:
         - name: redis
@@ -60,7 +60,7 @@ spec:
         name: redis-data
         labels:
           app: redis
-          tier: infrastructure
+          tier: backend
       spec:
         accessModes:
           - ReadWriteOnce
@@ -75,7 +75,7 @@ metadata:
   namespace: atlas
   labels:
     app: redis
-    tier: infrastructure
+    tier: backend
 spec:
   clusterIP: None
   selector:

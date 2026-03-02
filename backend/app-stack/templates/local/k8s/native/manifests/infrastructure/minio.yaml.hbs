@@ -6,7 +6,7 @@ metadata:
   namespace: atlas
   labels:
     app: minio
-    tier: infrastructure
+    tier: backend
 type: Opaque
 data:
   minio-root-user: bWluaW9hZG1pbg==
@@ -17,11 +17,11 @@ data:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: minio
+  name: minio-sss
   namespace: atlas
   labels:
     app: minio
-    tier: infrastructure
+    tier: backend
 spec:
   replicas: 1
   serviceName: minio
@@ -32,7 +32,7 @@ spec:
     metadata:
       labels:
         app: minio
-        tier: infrastructure
+        tier: backend
     spec:
       initContainers:
         - name: minio-init
@@ -130,7 +130,7 @@ spec:
         name: minio-data
         labels:
           app: minio
-          tier: infrastructure
+          tier: backend
       spec:
         accessModes:
           - ReadWriteOnce
@@ -145,7 +145,7 @@ metadata:
   namespace: atlas
   labels:
     app: minio
-    tier: infrastructure
+    tier: backend
 spec:
   clusterIP: None
   selector:

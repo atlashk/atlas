@@ -6,7 +6,7 @@ metadata:
   namespace: atlas
   labels:
     app: rabbitmq
-    tier: infrastructure
+    tier: backend
 type: Opaque
 data:
   rabbitmq-password: c2VjcmV0MTIzNDU2
@@ -14,11 +14,11 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: rabbitmq-config
+  name: rabbitmq-config-cm
   namespace: atlas
   labels:
     app: rabbitmq
-    tier: infrastructure
+    tier: backend
 data:
   enabled_plugins: |
     [rabbitmq_management,rabbitmq_delayed_message_exchange].
@@ -26,11 +26,11 @@ data:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: rabbitmq
+  name: rabbitmq-sts
   namespace: atlas
   labels:
     app: rabbitmq
-    tier: infrastructure
+    tier: backend
 spec:
   replicas: 1
   serviceName: rabbitmq
@@ -41,7 +41,7 @@ spec:
     metadata:
       labels:
         app: rabbitmq
-        tier: infrastructure
+        tier: backend
     spec:
       containers:
         - name: rabbitmq
@@ -113,13 +113,13 @@ spec:
         name: rabbitmq-data
         labels:
           app: rabbitmq
-          tier: infrastructure
+          tier: backend
       spec:
         accessModes:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 2Gi
+            storage: 1Gi
 ---
 apiVersion: v1
 kind: Service
@@ -128,7 +128,7 @@ metadata:
   namespace: atlas
   labels:
     app: rabbitmq
-    tier: infrastructure
+    tier: backend
 spec:
   clusterIP: None
   selector:

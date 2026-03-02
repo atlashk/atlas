@@ -1,25 +1,23 @@
 {{#hasObservability "logging.stack" "loki"}}
 ---
-# Promtail Service Account
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: promtail
+  name: promtail-sa
   namespace: atlas
   labels:
     app: promtail
-    tier: infrastructure
+    tier: backend
   annotations:
     description: "Service account for Promtail log collection"
 ---
-# Promtail RBAC
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: promtail
+  name: promtail-cs
   labels:
     app: promtail
-    tier: infrastructure
+    tier: backend
 rules:
   - apiGroups: [""]
     resources: ["pods", "namespaces"]
@@ -31,27 +29,27 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: promtail
+  name: promtail-csr
   labels:
     app: promtail
-    tier: infrastructure
+    tier: backend
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: promtail
+  name: promtail-cs
 subjects:
   - kind: ServiceAccount
-    name: promtail
+    name: promtail-sa
     namespace: atlas
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: promtail-config
+  name: promtail-config-cm
   namespace: atlas
   labels:
     app: promtail
-    tier: infrastructure
+    tier: backend
 data:
   promtail.yml: |
     server:
@@ -97,11 +95,11 @@ data:
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: promtail
+  name: promtail-ds
   namespace: atlas
   labels:
     app: promtail
-    tier: infrastructure
+    tier: backend
 spec:
   selector:
     matchLabels:
@@ -112,7 +110,7 @@ spec:
     metadata:
       labels:
         app: promtail
-        tier: infrastructure
+        tier: backend
     spec:
       serviceAccountName: promtail
       tolerations:

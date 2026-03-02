@@ -6,7 +6,7 @@ metadata:
   namespace: atlas
   labels:
     app: elasticsearch
-    tier: infrastructure
+    tier: backend
 type: Opaque
 data:
   elasticsearch-password: c2VjcmV0MTIzNDU2
@@ -14,11 +14,11 @@ data:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: elasticsearch
+  name: elasticsearch-sts
   namespace: atlas
   labels:
     app: elasticsearch
-    tier: infrastructure
+    tier: backend
 spec:
   replicas: 1
   serviceName: elasticsearch
@@ -29,7 +29,7 @@ spec:
     metadata:
       labels:
         app: elasticsearch
-        tier: infrastructure
+        tier: backend
     spec:
       containers:
         - name: elasticsearch
@@ -45,6 +45,8 @@ spec:
               value: "single-node"
             - name: xpack.security.enabled
               value: "true"
+            - name: ES_JAVA_OPTS
+              value: "-Xms512m -Xmx1Gi"
           ports:
             - containerPort: 9200
               name: http
@@ -93,19 +95,18 @@ spec:
             limits:
               cpu: "1500m"
               memory: "2Gi"
-      terminationGracePeriodSeconds: 60
   volumeClaimTemplates:
     - metadata:
         name: elasticsearch-data
         labels:
           app: elasticsearch
-          tier: infrastructure
+          tier: backend
       spec:
         accessModes:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 10Gi
+            storage: 2Gi
 ---
 apiVersion: v1
 kind: Service
@@ -114,7 +115,7 @@ metadata:
   namespace: atlas
   labels:
     app: elasticsearch
-    tier: infrastructure
+    tier: backend
 spec:
   clusterIP: None
   selector:

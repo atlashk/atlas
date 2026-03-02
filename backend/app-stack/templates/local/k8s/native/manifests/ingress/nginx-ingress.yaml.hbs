@@ -2,11 +2,11 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: atlas-ingress
+  name: nginx-ingress
   namespace: atlas
   labels:
-    app: atlas-ingress
-    tier: ingress
+    app: nginx-ingress
+    tier: frontend
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
@@ -62,15 +62,51 @@ spec:
                 port:
                   number: 80
 {{/hasService}}
+{{#hasService "identity" "keycloak"}}
+    - host: keycloak.atlas.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8080
+{{/hasService}}
+{{#hasService "storage" "minio"}}
+    - host: minio.atlas.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: minio
+                port:
+                  number: 9001
+{{/hasService}}
+{{#hasObservability "metrics" "prometheus"}}
+    - host: prometheus.atlas.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prometheus
+                port:
+                  number: 9090
+{{/hasObservability}}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: atlas-proxy-headers
+  name: nginx-ingress-config
   namespace: atlas
   labels:
-    app: atlas-ingress
-    tier: ingress
+    app: nginx-ingress
+    tier: frontend
 data:
   X-Forwarded-Host: $http_host
   X-Forwarded-Proto: $scheme
