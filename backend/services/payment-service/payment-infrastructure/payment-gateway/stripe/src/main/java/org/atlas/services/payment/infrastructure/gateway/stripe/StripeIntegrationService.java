@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.currency.CurrencyUtil;
 import org.atlas.libs.framework.domain.shared.payment.PaymentStatus;
 import org.atlas.libs.framework.http.HttpStatusCode;
-import org.atlas.libs.framework.json.JsonUtil;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.libs.framework.util.ExceptionUtil;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.payment.domain.entity.nextaction.UsePaymentElement;
@@ -96,7 +96,7 @@ public class StripeIntegrationService implements PaymentGatewayIntegrationServic
     HandleWebhookResponse.Result result = new Result();
 
     // Skip unsupported event types
-    String eventType = JsonUtil.getInstance().getAsString(request.getRawPayload(), "type");
+    String eventType = JsonUtil.getAsString(request.getRawPayload(), "type");
     if (!SUPPORTED_EVENT_TYPE.contains(eventType)) {
       response.setResponseStatus(HttpStatusCode.BAD_REQUEST.getCode());
       response.setResponseBody(Map.of(BODY_FIELD_ERROR, "Unsupported event type"));
@@ -126,18 +126,18 @@ public class StripeIntegrationService implements PaymentGatewayIntegrationServic
     String rawPaymentIntentJson = event.getDataObjectDeserializer().getRawJson();
 
     // Extract payment ID from event metadata
-    String metadata = JsonUtil.getInstance().getAsString(rawPaymentIntentJson, "metadata");
+    String metadata = JsonUtil.getAsString(rawPaymentIntentJson, "metadata");
     if (StringUtil.isBlank(metadata)) {
       response.setResponseStatus(HttpStatusCode.BAD_REQUEST.getCode());
       response.setResponseBody(
           Map.of(BODY_FIELD_ERROR, "Invalid webhook event data: Missing metadata"));
       return response;
     }
-    String paymentId = JsonUtil.getInstance().getAsString(metadata, "paymentId");
+    String paymentId = JsonUtil.getAsString(metadata, "paymentId");
     result.setPaymentId(paymentId);
 
     // Extract payment method
-    String paymentMethod = JsonUtil.getInstance().getAsString(metadata, "payment_method");
+    String paymentMethod = JsonUtil.getAsString(metadata, "payment_method");
     if (StringUtil.isBlank(paymentMethod)) {
       response.setResponseStatus(HttpStatusCode.BAD_REQUEST.getCode());
       response.setResponseBody(
@@ -164,18 +164,18 @@ public class StripeIntegrationService implements PaymentGatewayIntegrationServic
       case StripeEventType.PAYMENT_INTENT_SUCCEEDED -> result.setStatus(PaymentStatus.SUCCEEDED);
       case StripeEventType.PAYMENT_INTENT_PAYMENT_FAILED -> {
         result.setStatus(PaymentStatus.FAILED);
-        String lastPaymentError = JsonUtil.getInstance()
+        String lastPaymentError = JsonUtil
             .getAsString(metadata, "last_payment_error");
         if (StringUtil.isNotBlank(lastPaymentError)) {
-          String errorCode = JsonUtil.getInstance().getAsString(lastPaymentError, "error_code");
-          String errorMessage = JsonUtil.getInstance().getAsString(lastPaymentError, "message");
+          String errorCode = JsonUtil.getAsString(lastPaymentError, "error_code");
+          String errorMessage = JsonUtil.getAsString(lastPaymentError, "message");
           result.setError(ExceptionUtil.buildErrorMessage(errorCode, errorMessage));
         }
       }
       case StripeEventType.PAYMENT_INTENT_CANCELED -> {
         result.setStatus(PaymentStatus.CANCELED);
         result.setCancellationReason(
-            JsonUtil.getInstance().getAsString(rawPaymentIntentJson, "cancellation_reason"));
+            JsonUtil.getAsString(rawPaymentIntentJson, "cancellation_reason"));
       }
       default -> {
         log.info("Unknown webhook event type: {}", event.getType());

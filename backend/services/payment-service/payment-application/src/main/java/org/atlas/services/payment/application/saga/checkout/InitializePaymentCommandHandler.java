@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.constant.CommonConstant;
 import org.atlas.libs.framework.domain.shared.payment.PaymentStatus;
-import org.atlas.libs.framework.json.jackson.JacksonService;
 import org.atlas.libs.framework.saga.checkout.CheckoutCommand;
 import org.atlas.libs.framework.saga.checkout.CheckoutSagaData;
 import org.atlas.libs.framework.saga.checkout.InitializePaymentCommandMetadata;
@@ -13,6 +12,7 @@ import org.atlas.libs.framework.saga.core.command.SagaCommandResult;
 import org.atlas.libs.framework.saga.core.context.SagaContext;
 import org.atlas.libs.framework.saga.core.messaging.payload.SagaCommand;
 import org.atlas.libs.framework.util.ExceptionUtil;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.services.payment.domain.entity.PaymentGatewayEntity;
 import org.atlas.services.payment.port.in.model.CreatePaymentInput;
 import org.atlas.services.payment.port.in.model.RetrievePaymentGatewayInput;
@@ -35,7 +35,7 @@ public class InitializePaymentCommandHandler {
   @SagaCommandHandler(command = CheckoutCommand.INITIALIZE_PAYMENT)
   public SagaCommandResult initializePayment(SagaCommand sagaCommand) {
     SagaContext sagaContext = SagaContext.deserialize(sagaCommand.getSagaContext());
-    CheckoutSagaData checkoutSagaData = JacksonService.OBJECT_MAPPER.convertValue(
+    CheckoutSagaData checkoutSagaData = JsonUtil.OBJECT_MAPPER.convertValue(
         sagaContext.get("data"), CheckoutSagaData.class);
     if (checkoutSagaData == null) {
       throw new IllegalArgumentException("Checkout data is required in the saga context");

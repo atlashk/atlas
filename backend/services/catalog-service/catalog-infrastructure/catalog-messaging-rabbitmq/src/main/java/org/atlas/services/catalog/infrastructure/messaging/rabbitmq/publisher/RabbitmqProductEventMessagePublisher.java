@@ -4,7 +4,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.event.contract.catalog.ProductCreatedEvent;
-import org.atlas.libs.framework.json.JsonUtil;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.libs.framework.messaging.publisher.Message;
 import org.atlas.libs.framework.messaging.publisher.MessagePublisher;
 import org.atlas.services.catalog.port.out.messaging.ProductEventMessagePublisher;
@@ -24,7 +24,7 @@ public class RabbitmqProductEventMessagePublisher implements ProductEventMessage
     Message message = Message.builder()
         .destination(exchange)
         .routingAttributes(Map.of("routingKey", routingKey))
-        .payload(JsonUtil.getInstance().toJson(event))
+        .payload(JsonUtil.toJson(event))
         .build();
     messagePublisher.publish(message);
   }

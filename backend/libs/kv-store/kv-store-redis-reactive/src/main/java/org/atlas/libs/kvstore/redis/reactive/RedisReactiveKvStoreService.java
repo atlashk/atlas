@@ -2,8 +2,8 @@ package org.atlas.libs.kvstore.redis.reactive;
 
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.json.jackson.JacksonService;
 import org.atlas.libs.framework.kvstore.ReactiveKvStoreService;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -52,7 +52,7 @@ public class RedisReactiveKvStoreService implements ReactiveKvStoreService {
     String finalKey = buildKey(storeName, key);
     return reactiveRedisTemplate.opsForValue()
         .get(finalKey)
-        .map(value -> JacksonService.OBJECT_MAPPER.convertValue(value, clazz));
+        .map(value -> JsonUtil.OBJECT_MAPPER.convertValue(value, clazz));
   }
 
   @Override

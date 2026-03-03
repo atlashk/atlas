@@ -2,13 +2,13 @@ package org.atlas.services.inventory.application.saga.checkout;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.json.jackson.JacksonService;
 import org.atlas.libs.framework.saga.checkout.CheckoutCommand;
 import org.atlas.libs.framework.saga.checkout.CheckoutSagaData;
 import org.atlas.libs.framework.saga.core.annotation.SagaCommandHandler;
 import org.atlas.libs.framework.saga.core.command.SagaCommandResult;
 import org.atlas.libs.framework.saga.core.context.SagaContext;
 import org.atlas.libs.framework.saga.core.messaging.payload.SagaCommand;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.services.inventory.domain.entity.ReservationStatus;
 import org.atlas.services.inventory.port.out.repository.ReservationRepository;
 import org.springframework.stereotype.Component;
@@ -23,7 +23,7 @@ public class ConfirmStockReservationCommandHandler {
   @SagaCommandHandler(command = CheckoutCommand.CONFIRM_STOCK_RESERVATION)
   public SagaCommandResult confirmStockReservation(SagaCommand sagaCommand) {
     SagaContext sagaContext = SagaContext.deserialize(sagaCommand.getSagaContext());
-    CheckoutSagaData checkoutSagaData = JacksonService.OBJECT_MAPPER.convertValue(
+    CheckoutSagaData checkoutSagaData = JsonUtil.OBJECT_MAPPER.convertValue(
         sagaContext.get("data"), CheckoutSagaData.class);
     if (checkoutSagaData == null) {
       throw new IllegalArgumentException("Checkout data is required in the saga context");

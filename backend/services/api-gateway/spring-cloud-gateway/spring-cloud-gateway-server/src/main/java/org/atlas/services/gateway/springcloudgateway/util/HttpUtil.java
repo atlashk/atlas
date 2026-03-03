@@ -3,7 +3,7 @@ package org.atlas.services.gateway.springcloudgateway.util;
 import java.nio.charset.StandardCharsets;
 import lombok.experimental.UtilityClass;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
-import org.atlas.libs.framework.json.JsonUtil;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,7 +24,7 @@ public class HttpUtil {
     response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
     // ApiResponseWrapper body
-    String responseBodyJson = JsonUtil.getInstance().toJson(apiResponseWrapperBody);
+    String responseBodyJson = JsonUtil.toJson(apiResponseWrapperBody);
     byte[] responseBodyJsonBytes = responseBodyJson.getBytes(StandardCharsets.UTF_8);
 
     // Convert response body to DataBuffer

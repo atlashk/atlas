@@ -3,7 +3,7 @@ package org.atlas.libs.messaging.rabbitmq.publisher;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.json.JsonUtil;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.libs.framework.messaging.publisher.Message;
 import org.atlas.libs.framework.messaging.publisher.MessagePublisher;
 import org.atlas.libs.framework.saga.core.messaging.SagaMessagePublisher;
@@ -31,7 +31,7 @@ public class RabbitmqSagaMessagePublisher implements SagaMessagePublisher {
     Message message = Message.builder()
         .destination(exchange)
         .routingAttributes(Map.of("routingKey", routingKey))
-        .payload(JsonUtil.getInstance().toJson(sagaCommand))
+        .payload(JsonUtil.toJson(sagaCommand))
         .build();
     messagePublisher.publish(message);
   }
@@ -45,7 +45,7 @@ public class RabbitmqSagaMessagePublisher implements SagaMessagePublisher {
     Message message = Message.builder()
         .destination(exchange)
         .routingAttributes(Map.of("routingKey", routingKey))
-        .payload(JsonUtil.getInstance().toJson(sagaCommandReply))
+        .payload(JsonUtil.toJson(sagaCommandReply))
         .build();
     messagePublisher.publish(message);
   }
@@ -61,7 +61,7 @@ public class RabbitmqSagaMessagePublisher implements SagaMessagePublisher {
     Message message = Message.builder()
         .destination(exchange)
         .routingAttributes(Map.of("routingKey", routingKey))
-        .payload(JsonUtil.getInstance().toJson(sagaCompensation))
+        .payload(JsonUtil.toJson(sagaCompensation))
         .build();
     messagePublisher.publish(message);
   }
@@ -77,7 +77,7 @@ public class RabbitmqSagaMessagePublisher implements SagaMessagePublisher {
     Message message = Message.builder()
         .destination(exchange)
         .routingAttributes(Map.of("routingKey", routingKey))
-        .payload(JsonUtil.getInstance().toJson(sagaCompensationReply))
+        .payload(JsonUtil.toJson(sagaCompensationReply))
         .build();
     messagePublisher.publish(message);
   }

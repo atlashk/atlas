@@ -1,4 +1,4 @@
-package org.atlas.libs.framework.image;
+package org.atlas.libs.framework.util;
 
 import lombok.experimental.UtilityClass;
 import org.atlas.libs.framework.cryptography.Base64Util;

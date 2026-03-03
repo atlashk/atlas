@@ -2,7 +2,7 @@ package org.atlas.libs.messaging.rabbitmq.publisher;
 
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.json.jackson.JacksonService;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -40,7 +40,7 @@ public class RabbitmqMessagePublisherConfig {
 
   @Bean
   public MessageConverter messageConverter() {
-    return new Jackson2JsonMessageConverter(JacksonService.OBJECT_MAPPER);
+    return new Jackson2JsonMessageConverter(JsonUtil.OBJECT_MAPPER);
   }
 
   private String getCorrelationId(CorrelationData correlationData) {

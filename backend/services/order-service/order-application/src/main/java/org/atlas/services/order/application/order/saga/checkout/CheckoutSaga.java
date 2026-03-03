@@ -15,7 +15,6 @@ import org.atlas.libs.framework.context.Contexts;
 import org.atlas.libs.framework.domain.shared.order.OrderStatus;
 import org.atlas.libs.framework.file.FileUtil;
 import org.atlas.libs.framework.i18n.I18nService;
-import org.atlas.libs.framework.json.jackson.JacksonService;
 import org.atlas.libs.framework.notification.email.Attachment;
 import org.atlas.libs.framework.notification.email.EmailService;
 import org.atlas.libs.framework.notification.email.SendEmailRequest;
@@ -30,6 +29,7 @@ import org.atlas.libs.framework.saga.core.entity.SagaEntity;
 import org.atlas.libs.framework.saga.core.orchestrator.SagaOrchestrator;
 import org.atlas.libs.framework.template.ResolveTemplateException;
 import org.atlas.libs.framework.template.TemplateService;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.order.domain.entity.OrderEntity;
 import org.atlas.services.order.domain.entity.OrderEntity.CancellationReason;
@@ -91,7 +91,7 @@ public class CheckoutSaga {
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
 
     if (sagaCommandResult.isSuccess()) {
-      InitializePaymentCommandMetadata metadata = JacksonService.OBJECT_MAPPER.convertValue(
+      InitializePaymentCommandMetadata metadata = JsonUtil.OBJECT_MAPPER.convertValue(
           sagaCommandResult.getMetadata(), InitializePaymentCommandMetadata.class);
 
       // Update order status
@@ -126,7 +126,7 @@ public class CheckoutSaga {
     OrderEntity order = orderRepository.findBySagaId(saga.getId())
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
 
-    ProcessPaymentCommandMetadata metadata = JacksonService.OBJECT_MAPPER.convertValue(
+    ProcessPaymentCommandMetadata metadata = JsonUtil.OBJECT_MAPPER.convertValue(
         sagaCommandResult.getMetadata(), ProcessPaymentCommandMetadata.class);
 
     if (sagaCommandResult.isSuccess()) {

@@ -19,7 +19,7 @@ import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
-import org.atlas.libs.framework.json.JsonUtil;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.libs.framework.util.MapUtil;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Service;
@@ -116,7 +116,7 @@ public class HttpClientService implements DisposableBean {
     if (requestBody == null) {
       return;
     }
-    String requestBodyJson = JsonUtil.getInstance()
+    String requestBodyJson = JsonUtil
         .toJson(requestBody);
     StringEntity httpEntity = new StringEntity(requestBodyJson, StandardCharsets.UTF_8);
     httpRequest.setEntity(httpEntity);
@@ -138,7 +138,7 @@ public class HttpClientService implements DisposableBean {
       return httpClient.execute(httpRequest, response -> {
         HttpEntity httpEntity = response.getEntity();
         String responseBody = EntityUtils.toString(httpEntity);
-        return JsonUtil.getInstance().toObject(responseBody, responseClass);
+        return JsonUtil.toObject(responseBody, responseClass);
       });
     } catch (IOException e) {
       log.error("Failed to make request: {}", httpRequest.getRequestUri(), e);

@@ -1,7 +1,7 @@
 package org.atlas.libs.api.server.rest.serialization;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.atlas.libs.framework.json.jackson.JacksonService;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -10,6 +10,6 @@ public class JacksonConfig {
 
   @Bean
   public ObjectMapper objectMapper() {
-    return JacksonService.OBJECT_MAPPER;
+    return JsonUtil.OBJECT_MAPPER;
   }
 }

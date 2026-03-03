@@ -1,6 +1,6 @@
 package org.atlas.libs.kvstore.redis;
 
-import org.atlas.libs.framework.json.jackson.JacksonService;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -13,7 +13,7 @@ public class RedisTemplateConfig {
 
   private static final StringRedisSerializer keySerializer = new StringRedisSerializer();
   private static final GenericJackson2JsonRedisSerializer valueSerializer =
-      new GenericJackson2JsonRedisSerializer(JacksonService.OBJECT_MAPPER);
+      new GenericJackson2JsonRedisSerializer(JsonUtil.OBJECT_MAPPER);
 
   @Bean
   public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {

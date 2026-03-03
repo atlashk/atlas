@@ -3,7 +3,7 @@ package org.atlas.services.catalog.application.product.service;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.image.ImageUtil;
+import org.atlas.libs.framework.util.ImageUtil;
 import org.atlas.libs.framework.storage.StorageConstant;
 import org.atlas.libs.framework.storage.StorageService;
 import org.atlas.libs.framework.storage.model.CheckExistRequest;

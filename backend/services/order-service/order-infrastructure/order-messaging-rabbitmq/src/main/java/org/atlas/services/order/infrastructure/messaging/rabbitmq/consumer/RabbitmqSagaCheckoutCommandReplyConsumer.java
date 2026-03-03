@@ -3,7 +3,7 @@ package org.atlas.services.order.infrastructure.messaging.rabbitmq.consumer;
 import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.json.JsonUtil;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.libs.framework.saga.core.messaging.payload.SagaCommandReply;
 import org.atlas.libs.framework.saga.core.orchestrator.SagaOrchestrator;
 import org.atlas.libs.messaging.rabbitmq.consumer.BaseRabbitmqMessageConsumer;
@@ -35,7 +35,7 @@ public class RabbitmqSagaCheckoutCommandReplyConsumer extends BaseRabbitmqMessag
   @Override
   protected void handleMessage(Object payload) {
     SagaCommandReply sagaCommandReply =
-        JsonUtil.getInstance().toObject((String) payload, SagaCommandReply.class);
+        JsonUtil.toObject((String) payload, SagaCommandReply.class);
     sagaOrchestrator.handleSagaCommandReply(sagaCommandReply);
   }
 }

@@ -2,7 +2,7 @@ package org.atlas.libs.framework.messaging.outbox;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.json.JsonUtil;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.libs.framework.messaging.publisher.Message;
 import org.atlas.libs.framework.messaging.publisher.MessageGateway;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -21,7 +21,7 @@ public class OutboxMessageGateway implements MessageGateway {
   @Override
   public void sendMessage(Message message) {
     OutboxMessageEntity outboxMessage = OutboxMessageEntity.builder()
-        .message(JsonUtil.getInstance().toJson(message))
+        .message(JsonUtil.toJson(message))
         .status(OutboxMessageStatus.PENDING)
         .retries(0)
         .build();

@@ -4,7 +4,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.event.contract.inventory.StockStatusChangedEvent;
-import org.atlas.libs.framework.json.JsonUtil;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.libs.framework.messaging.publisher.Message;
 import org.atlas.libs.framework.messaging.publisher.MessagePublisher;
 import org.atlas.services.inventory.port.out.messaging.StockEventMessagePublisher;
@@ -24,7 +24,7 @@ public class RabbitmqStockEventMessagePublisher implements StockEventMessagePubl
     Message message = Message.builder()
         .destination(exchange)
         .routingAttributes(Map.of("routingKey", routingKey))
-        .payload(JsonUtil.getInstance().toJson(event))
+        .payload(JsonUtil.toJson(event))
         .build();
     messagePublisher.publish(message);
   }

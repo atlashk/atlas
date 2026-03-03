@@ -1,4 +1,4 @@
-package org.atlas.libs.framework.json.jackson;
+package org.atlas.libs.framework.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -10,12 +10,15 @@ import com.fasterxml.jackson.databind.type.MapType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.List;
 import java.util.Map;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.json.JsonService;
-import org.atlas.libs.framework.util.StringUtil;
 
+/**
+ * Implement Singleton pattern with Bill Pugh solution
+ */
+@UtilityClass
 @Slf4j
-public class JacksonService implements JsonService {
+public class JsonUtil {
 
   public static final ObjectMapper OBJECT_MAPPER;
 
@@ -31,8 +34,7 @@ public class JacksonService implements JsonService {
     OBJECT_MAPPER.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); // Use ISO-8601 format
   }
 
-  @Override
-  public Object toObject(String json) {
+  public static Object toObject(String json) {
     try {
       return OBJECT_MAPPER.readValue(json, Object.class);
     } catch (JsonProcessingException e) {
@@ -40,8 +42,7 @@ public class JacksonService implements JsonService {
     }
   }
 
-  @Override
-  public <T> T toObject(String json, Class<T> type) {
+  public static <T> T toObject(String json, Class<T> type) {
     try {
       return OBJECT_MAPPER.readValue(json, type);
     } catch (JsonProcessingException e) {
@@ -49,8 +50,7 @@ public class JacksonService implements JsonService {
     }
   }
 
-  @Override
-  public <T> List<T> toList(String json, Class<T> type) {
+  public static <T> List<T> toList(String json, Class<T> type) {
     try {
       return OBJECT_MAPPER.readValue(json,
           OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, type));
@@ -59,8 +59,7 @@ public class JacksonService implements JsonService {
     }
   }
 
-  @Override
-  public Map<String, Object> toMap(String json) {
+  public static Map<String, Object> toMap(String json) {
     try {
       MapType mapType = OBJECT_MAPPER.getTypeFactory()
           .constructMapType(Map.class, String.class, Object.class);
@@ -70,8 +69,7 @@ public class JacksonService implements JsonService {
     }
   }
 
-  @Override
-  public String getAsString(String json, String key) {
+  public static String getAsString(String json, String key) {
     try {
       JsonNode tree = OBJECT_MAPPER.readTree(json);
       JsonNode valueNode = tree.get(key);
@@ -98,8 +96,7 @@ public class JacksonService implements JsonService {
     }
   }
 
-  @Override
-  public Integer getAsInt(String json, String key) {
+  public static Integer getAsInt(String json, String key) {
     String plainStr = getAsString(json, key);
     if (StringUtil.isBlank(plainStr)) {
       return null;
@@ -107,8 +104,7 @@ public class JacksonService implements JsonService {
     return Integer.parseInt(plainStr);
   }
 
-  @Override
-  public String compact(String json) {
+  public static String compact(String json) {
     try {
       // Parse the JSON string to validate it and then write it back compactly
       JsonNode jsonNode = OBJECT_MAPPER.readTree(json);
@@ -119,8 +115,7 @@ public class JacksonService implements JsonService {
     }
   }
 
-  @Override
-  public String toJson(Object source) {
+  public static String toJson(Object source) {
     try {
       return OBJECT_MAPPER.writer().writeValueAsString(source);
     } catch (JsonProcessingException e) {

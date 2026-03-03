@@ -31,6 +31,7 @@ dependencies {
 
     // Spring
     api 'org.springframework.boot:spring-boot-starter-aop'
+    api 'org.springframework.boot:spring-boot-starter-json'
     api 'org.springframework.boot:spring-boot-starter-validation'
     api "org.springframework:spring-tx:${springFrameworkVersion}"
 
@@ -43,15 +44,6 @@ dependencies {
 
     // Reactor
     api "io.projectreactor:reactor-core:${ioProjectReactorVersion}"
-
-    // JSON
-
-    // JSON::Jackson
-    api 'com.fasterxml.jackson.core:jackson-databind:2.18.1'
-    api 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.1'
-
-    // JSON::Gson
-    api 'com.google.code.gson:gson:2.12.1'
 
     // QR generator
     api 'com.google.zxing:core:3.5.3'

@@ -1,4 +1,4 @@
-package org.atlas.libs.framework.qrcode.zxing;
+package org.atlas.libs.framework.util;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
@@ -10,21 +10,20 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.atlas.libs.framework.qrcode.QRCodeGenerator;
+import lombok.experimental.UtilityClass;
 
-public class ZxingQRCodeGenerator implements QRCodeGenerator {
+@UtilityClass
+public class QRCodeUtil {
 
   private static final int DEFAULT_WIDTH = 200;
   private static final int DEFAULT_HEIGHT = 200;
   private static final String DEFAULT_IMAGE_FORMAT = "png";
-
-  @Override
-  public byte[] generate(String text) throws IOException, WriterException {
+  
+  public static byte[] generate(String text) throws IOException, WriterException {
     return generate(text, DEFAULT_WIDTH, DEFAULT_HEIGHT);
   }
 
-  @Override
-  public byte[] generate(String text, int width, int height) throws WriterException, IOException {
+  public static byte[] generate(String text, int width, int height) throws WriterException, IOException {
     Map<EncodeHintType, Object> hints = new HashMap<>();
     hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
     BitMatrix bitMatrix = new MultiFormatWriter().encode(text, BarcodeFormat.QR_CODE, width, height,

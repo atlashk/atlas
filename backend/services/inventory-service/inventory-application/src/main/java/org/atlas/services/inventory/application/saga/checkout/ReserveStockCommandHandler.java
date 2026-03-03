@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.config.ApplicationConfigService;
 import org.atlas.libs.framework.domain.event.contract.inventory.StockStatusChangedEvent;
 import org.atlas.libs.framework.domain.shared.inventory.InsufficientStockException;
-import org.atlas.libs.framework.json.jackson.JacksonService;
 import org.atlas.libs.framework.lock.LockAcquisitionException;
 import org.atlas.libs.framework.lock.LockService;
 import org.atlas.libs.framework.saga.checkout.CheckoutCommand;
@@ -20,6 +19,7 @@ import org.atlas.libs.framework.saga.core.messaging.payload.SagaCommand;
 import org.atlas.libs.framework.saga.core.messaging.payload.SagaCompensation;
 import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.libs.framework.sequencegenerator.SequenceType;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.services.inventory.domain.entity.ReservationEntity;
 import org.atlas.services.inventory.domain.entity.ReservationStatus;
 import org.atlas.services.inventory.domain.entity.ReserveStockStrategy;
@@ -46,7 +46,7 @@ public class ReserveStockCommandHandler {
   @SagaCommandHandler(command = CheckoutCommand.RESERVE_STOCK)
   public SagaCommandResult reserveStock(SagaCommand sagaCommand) {
     SagaContext sagaContext = SagaContext.deserialize(sagaCommand.getSagaContext());
-    CheckoutSagaData checkoutSagaData = JacksonService.OBJECT_MAPPER.convertValue(
+    CheckoutSagaData checkoutSagaData = JsonUtil.OBJECT_MAPPER.convertValue(
         sagaContext.get("data"), CheckoutSagaData.class);
     if (checkoutSagaData == null) {
       throw new IllegalArgumentException("Checkout data is required in the saga context");
@@ -152,7 +152,7 @@ public class ReserveStockCommandHandler {
   @SagaCompensationHandler(command = CheckoutCommand.RESERVE_STOCK)
   public SagaCompensationResult compensateReserveStock(SagaCompensation sagaCompensation) {
     SagaContext sagaContext = SagaContext.deserialize(sagaCompensation.getSagaContext());
-    CheckoutSagaData checkoutSagaData = JacksonService.OBJECT_MAPPER.convertValue(
+    CheckoutSagaData checkoutSagaData = JsonUtil.OBJECT_MAPPER.convertValue(
         sagaContext.get("data"), CheckoutSagaData.class);
     if (checkoutSagaData == null) {
       throw new IllegalArgumentException("Checkout data is required in the saga context");

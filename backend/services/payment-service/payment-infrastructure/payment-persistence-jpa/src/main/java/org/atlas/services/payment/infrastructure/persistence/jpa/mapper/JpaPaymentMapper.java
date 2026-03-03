@@ -1,6 +1,6 @@
 package org.atlas.services.payment.infrastructure.persistence.jpa.mapper;
 
-import org.atlas.libs.framework.json.JsonUtil;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.payment.domain.entity.PaymentEntity;
 import org.atlas.services.payment.domain.entity.nextaction.DeepLink;
@@ -37,16 +37,16 @@ public interface JpaPaymentMapper {
     String nextActionJson = jpaPayment.getNextAction();
     if (StringUtil.isNotBlank(nextActionJson)) {
       NextActionType nextActionType = NextActionType.valueOf(
-          JsonUtil.getInstance().getAsString(nextActionJson, "type"));
+          JsonUtil.getAsString(nextActionJson, "type"));
       NextAction nextAction;
       switch (nextActionType) {
         case REDIRECT_URL ->
-            nextAction = JsonUtil.getInstance().toObject(nextActionJson, RedirectUrl.class);
+            nextAction = JsonUtil.toObject(nextActionJson, RedirectUrl.class);
         case DEEPLINK ->
-            nextAction = JsonUtil.getInstance().toObject(nextActionJson, DeepLink.class);
-        case QR_CODE -> nextAction = JsonUtil.getInstance().toObject(nextActionJson, QRCode.class);
+            nextAction = JsonUtil.toObject(nextActionJson, DeepLink.class);
+        case QR_CODE -> nextAction = JsonUtil.toObject(nextActionJson, QRCode.class);
         case USE_PAYMENT_ELEMENT ->
-            nextAction = JsonUtil.getInstance().toObject(nextActionJson, UsePaymentElement.class);
+            nextAction = JsonUtil.toObject(nextActionJson, UsePaymentElement.class);
         default ->
             throw new IllegalStateException("Unexpected next action type: " + nextActionType);
       }
@@ -63,7 +63,7 @@ public interface JpaPaymentMapper {
   @AfterMapping
   default void afterToJpaPayment(@MappingTarget JpaPaymentEntity jpaPayment, PaymentEntity payment) {
     if (payment.getNextAction() != null) {
-      jpaPayment.setNextAction(JsonUtil.getInstance().toJson(payment.getNextAction()));
+      jpaPayment.setNextAction(JsonUtil.toJson(payment.getNextAction()));
     }
   }
 }

@@ -3,7 +3,7 @@ package org.atlas.libs.kvstore.redis;
 import java.time.Duration;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.json.jackson.JacksonService;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.libs.framework.kvstore.KvStoreService;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -47,7 +47,7 @@ public class RedisKvStoreService implements KvStoreService {
     String finalKey = buildKey(storeName, key);
     Object value = redisTemplate.opsForValue()
         .get(finalKey);
-    return Optional.ofNullable(JacksonService.OBJECT_MAPPER.convertValue(value, clazz));
+    return Optional.ofNullable(JsonUtil.OBJECT_MAPPER.convertValue(value, clazz));
   }
 
   @Override

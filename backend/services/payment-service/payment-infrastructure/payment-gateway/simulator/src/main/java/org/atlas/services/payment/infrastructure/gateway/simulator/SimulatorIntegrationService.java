@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.shared.payment.PaymentStatus;
 import org.atlas.libs.framework.http.HttpStatusCode;
-import org.atlas.libs.framework.json.JsonUtil;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.libs.framework.random.RandomUtil;
 import org.atlas.services.payment.domain.entity.nextaction.UsePaymentElement;
 import org.atlas.services.payment.port.out.gateway.exception.PaymentGatewayException;
@@ -99,14 +99,14 @@ public class SimulatorIntegrationService implements PaymentGatewayIntegrationSer
     log.info("Webhook signature verified successfully");
 
     // Parse the simulated webhook payload
-    SimulatorWebhookPayload payload = JsonUtil.getInstance()
+    SimulatorWebhookPayload payload = JsonUtil
         .toObject(request.getRawPayload(), SimulatorWebhookPayload.class);
 
     Result result = Result.builder()
         .paymentId(payload.getPaymentId())
         .paymentMethod(payload.getPaymentMethod())
         .paymentMethodDetails(
-            JsonUtil.getInstance().toObject(payload.getPaymentMethodDetails(), Card.class))
+            JsonUtil.toObject(payload.getPaymentMethodDetails(), Card.class))
         .status(payload.getStatus())
         .error(payload.getError())
         .cancellationReason(payload.getCancellationReason())
@@ -140,7 +140,7 @@ public class SimulatorIntegrationService implements PaymentGatewayIntegrationSer
     log.info("Sending simulated webhook to: {} for paymentId={}",
         simulatorProps.getWebhookUrl(), paymentId);
 
-    String payloadJson = JsonUtil.getInstance().toJson(payload);
+    String payloadJson = JsonUtil.toJson(payload);
 
     ResponseEntity<?> response = restClient.post()
         .uri(simulatorProps.getWebhookUrl())

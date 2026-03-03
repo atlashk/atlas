@@ -2,7 +2,7 @@ package org.atlas.libs.framework.saga.core.context;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.atlas.libs.framework.json.JsonUtil;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.libs.framework.saga.core.exception.SagaExecutionException;
 
 public class SagaContext {
@@ -32,12 +32,12 @@ public class SagaContext {
   }
 
   public String serialize() {
-    return JsonUtil.getInstance().toJson(data);
+    return JsonUtil.toJson(data);
   }
 
   public static SagaContext deserialize(String serializedContext) {
     try {
-      Map<String, Object> data = JsonUtil.getInstance().toMap(serializedContext);
+      Map<String, Object> data = JsonUtil.toMap(serializedContext);
       SagaContext sagaContext = new SagaContext();
       data.forEach(sagaContext::put);
       return sagaContext;

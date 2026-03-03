@@ -1,6 +1,7 @@
 package org.atlas.libs.framework.currency;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Currency;
 import lombok.experimental.UtilityClass;
 
@@ -14,7 +15,8 @@ public class CurrencyUtil {
 
     // If the currency uses 2 decimal places, multiply by 100
     if (decimalPlaces == 2) {
-      return amount.multiply(BigDecimal.valueOf(100)).longValue();
+      return amount.multiply(BigDecimal.valueOf(100))
+          .longValue();
     }
     // If the currency uses 0 decimal places, no multiplication needed
     else if (decimalPlaces == 0) {
@@ -31,7 +33,8 @@ public class CurrencyUtil {
 
     // If the currency uses 2 decimal places, divide by 100
     if (decimalPlaces == 2) {
-      return BigDecimal.valueOf(smallestUnitAmount).divide(BigDecimal.valueOf(100));
+      return BigDecimal.valueOf(smallestUnitAmount)
+          .divide(BigDecimal.valueOf(100), decimalPlaces, RoundingMode.HALF_UP);
     }
     // If the currency uses 0 decimal places, return as is
     else if (decimalPlaces == 0) {

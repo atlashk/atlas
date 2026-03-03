@@ -2,7 +2,7 @@ package org.atlas.libs.framework.messaging.outbox;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.json.JsonUtil;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.libs.framework.messaging.publisher.Message;
 import org.atlas.libs.framework.messaging.publisher.MessagePublisher;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -24,7 +24,7 @@ public class OutboxMessageService {
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void processOutboxMessage(OutboxMessageEntity outboxMessage) {
     try {
-      Message message = JsonUtil.getInstance()
+      Message message = JsonUtil
           .toObject(outboxMessage.getMessage(), Message.class);
       messagePublisher.publish(message);
 

@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.async.AsyncUtil;
 import org.atlas.libs.framework.domain.shared.payment.PaymentStatus;
 import org.atlas.libs.framework.http.HttpStatusCode;
-import org.atlas.libs.framework.json.JsonUtil;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.libs.framework.saga.checkout.CheckoutCommand;
 import org.atlas.libs.framework.saga.checkout.ProcessPaymentCommandMetadata;
 import org.atlas.libs.framework.saga.core.command.SagaCommandResult;
@@ -60,8 +60,8 @@ public class PaymentWebhookServiceImpl implements PaymentWebhookService {
     // Create new payment event
     CreatePaymentEventInput createPaymentEventInput = CreatePaymentEventInput.builder()
         .paymentGatewayId(paymentGateway.getId())
-        .payload(JsonUtil.getInstance().compact(rawPayload))
-        .headers(JsonUtil.getInstance().toJson(headers))
+        .payload(JsonUtil.compact(rawPayload))
+        .headers(JsonUtil.toJson(headers))
         .status(PaymentEventStatus.PROCESSING)
         .build();
     Integer paymentEventId = paymentEventService.createPaymentEvent(createPaymentEventInput);
@@ -107,7 +107,7 @@ public class PaymentWebhookServiceImpl implements PaymentWebhookService {
           case SUCCEEDED -> {
             updatePaymentInput.setPaymentMethod(handleResult.getPaymentMethod());
             updatePaymentInput.setPaymentMethodDetails(
-                JsonUtil.getInstance().toJson(handleResult.getPaymentMethodDetails()));
+                JsonUtil.toJson(handleResult.getPaymentMethodDetails()));
             updatePaymentInput.setStatus(PaymentStatus.SUCCEEDED);
           }
           case FAILED -> {

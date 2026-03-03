@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
-import org.atlas.libs.framework.json.JsonUtil;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
@@ -27,7 +27,7 @@ public class HttpUtil {
     response.setStatus(httpStatus.value());
 
     PrintWriter out = response.getWriter();
-    out.print(JsonUtil.getInstance().toJson(payload));
+    out.print(JsonUtil.toJson(payload));
     out.flush();
   }
 }
