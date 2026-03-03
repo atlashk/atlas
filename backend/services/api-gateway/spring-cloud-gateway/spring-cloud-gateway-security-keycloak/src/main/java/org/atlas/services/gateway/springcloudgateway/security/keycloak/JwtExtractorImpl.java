@@ -13,10 +13,11 @@ public class JwtExtractorImpl implements JwtExtractor {
 
   @Override
   public String extractUserId(Jwt jwt) {
-    return jwt.getClaim("user_id").toString();
+    return jwt.getSubject();
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public UserRole extractUserRole(Jwt jwt) {
     Map<String, Object> realmAccess = jwt.getClaim("realm_access");
     List<String> roles =

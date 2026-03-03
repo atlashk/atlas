@@ -49,6 +49,15 @@
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>
   </logger>
+  <!-- Spring Cloud Gateway -->
+  <logger additivity="false" level="INFO" name="org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+  </logger>
+  <logger additivity="false" level="INFO" name="org.springframework.security.web.server.util.matcher">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+  </logger>
 
   <root level="INFO">
     <appender-ref ref="CONSOLE"/>

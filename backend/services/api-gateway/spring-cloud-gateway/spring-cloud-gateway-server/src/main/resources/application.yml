@@ -139,7 +139,7 @@ spring:
               enabled: true
               lower-case-service-id: true
   reactor:
-    context-propagation: auto # Enable tracing
+    context-propagation: auto # Enable tracing context propagation for WebFlux
 
 springdoc:
   api-docs:
