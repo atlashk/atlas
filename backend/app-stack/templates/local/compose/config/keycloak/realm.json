@@ -1,10 +1,10 @@
 {
-  "realm": "atlas",
+  "realm": "dev",
   "enabled": true,
   "clients": [
     {
-      "clientId": "atlas-auth",
-      "name": "atlas-auth",
+      "clientId": "default-auth",
+      "name": "default-auth",
       "enabled": true,
       "protocol": "openid-connect",
       "publicClient": false,

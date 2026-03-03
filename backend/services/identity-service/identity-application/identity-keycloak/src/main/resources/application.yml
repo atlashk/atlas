@@ -6,6 +6,6 @@ app:
     admin-client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:}
     admin-username: ${KC_BOOTSTRAP_ADMIN_USERNAME:atlas}
     admin-password: ${KC_BOOTSTRAP_ADMIN_PASSWORD:secret123456}
-    realm: ${KEYCLOAK_REALM:atlas}
-    client-id: ${KEYCLOAK_CLIENT_ID:atlas-auth}
+    realm: ${KEYCLOAK_REALM:dev}
+    client-id: ${KEYCLOAK_CLIENT_ID:default-auth}
     client-secret: ${KEYCLOAK_CLIENT_SECRET:9cvF5MPJnwfhEOCwNnQ79RmlkckAsDCj}

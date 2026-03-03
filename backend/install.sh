@@ -40,10 +40,10 @@ Options:
   -h, --help            Show this help message
 
 Examples:
-  $0                              # Deploy with local.compose config
-  $0 --app-stack=local.k8s        # Deploy with local.k8s config
-  $0 --skip-build                 # Deploy without rebuilding
-  $0 --debug-template             # Generate templates only
+  $0                                # Deploy with local.compose config
+  $0 --app-stack=local.k8s.native   # Deploy with local.k8s.native config
+  $0 --skip-build                   # Deploy without rebuilding
+  $0 --debug-template               # Generate templates only
 EOF
   exit "${1:-0}"
 }
@@ -63,21 +63,12 @@ ensure_generator_deps() {
   warn "Missing Node package 'handlebars' required by generator.mjs."
   command_exists npm || die "npm is required to install dependencies. Please install npm."
 
-  printf "Install 'handlebars' in generator directory now? [Y/n] "
-  read -r answer
-  case "${answer:-Y}" in
-    [Yy]|[Yy]es)
-      (
-        cd "$GENERATOR_DIR" || exit 1
-        [[ -f package.json ]] || { info "Initializing npm in $GENERATOR_DIR"; npm init -y &>/dev/null || true; }
-        info "Installing handlebars..."
-        npm install handlebars --save || die "Failed to install 'handlebars'"
-      )
-      ;;
-    *)
-      die "Cannot proceed without 'handlebars'. Aborting."
-      ;;
-  esac
+  info "Installing 'handlebars' in generator directory..."
+  (
+    cd "$GENERATOR_DIR" || exit 1
+    [[ -f package.json ]] || { info "Initializing npm in $GENERATOR_DIR"; npm init -y &>/dev/null || true; }
+    npm install handlebars --save || die "Failed to install 'handlebars'"
+  )
 }
 
 # =============================================================================

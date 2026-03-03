@@ -435,8 +435,8 @@ services:
       - KC_BOOTSTRAP_ADMIN_USERNAME=${KC_BOOTSTRAP_ADMIN_USERNAME:-atlas}
       - KC_BOOTSTRAP_ADMIN_PASSWORD=${KC_BOOTSTRAP_ADMIN_PASSWORD:-secret123456}
       # Refer config/keycloak/realm.json file
-      - KEYCLOAK_REALM=${KEYCLOAK_REALM:-atlas}
-      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-atlas-auth}
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM:-dev}
+      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-default-auth}
       - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET:-9cvF5MPJnwfhEOCwNnQ79RmlkckAsDCj}
       {{/hasService}}
     volumes:
