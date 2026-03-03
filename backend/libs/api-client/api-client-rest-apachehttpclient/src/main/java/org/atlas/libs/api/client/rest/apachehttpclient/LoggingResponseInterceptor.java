@@ -23,8 +23,7 @@ public class LoggingResponseInterceptor implements HttpResponseInterceptor {
     int statusCode = response.getCode();
     String body = getBody(response);
 
-    log.info("ApiResponseWrapper: HTTP status code = {}, ApiResponseWrapper body = {}", statusCode,
-        body);
+    log.info("Response: HTTP status code = {}, Body = {}", statusCode, body);
   }
 
   private String getBody(HttpResponse response) throws IOException {

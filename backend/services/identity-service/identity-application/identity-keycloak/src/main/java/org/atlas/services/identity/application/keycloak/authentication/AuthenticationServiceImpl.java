@@ -1,6 +1,7 @@
 package org.atlas.services.identity.application.keycloak.authentication;
 
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.context.Contexts;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
 
   private final KeycloakAuthenticationClient keycloakAuthenticationClient;
@@ -37,6 +39,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   public LoginOutput login(LoginInput input) throws Exception {
     TokenResponse tokenResponse = keycloakAuthenticationClient.login(input.getUsername(),
         input.getPassword());
+    log.info("Token response for user {}: accessToken={}, refreshToken={}", input.getUsername(),
+        tokenResponse.getAccessToken(), tokenResponse.getRefreshToken());
     return new LoginOutput(tokenResponse.getAccessToken(), tokenResponse.getRefreshToken());
   }
 
