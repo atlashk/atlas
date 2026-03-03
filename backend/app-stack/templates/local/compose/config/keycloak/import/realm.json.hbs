@@ -14,6 +14,36 @@
       }
     ]
   },
+  "clientScopes": [
+    {
+      "name": "phoneNumber",
+      "description": "Phone number scope",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      },
+      "protocolMappers": [
+        {
+          "name": "phone number",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "phoneNumber",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "phone_number",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    }
+  ],
+  "defaultDefaultClientScopes": [
+    "phoneNumber"
+  ],
   "clients": [
     {
       "clientId": "default-auth",
@@ -25,92 +55,10 @@
       "secret": "9cvF5MPJnwfhEOCwNnQ79RmlkckAsDCj",
       "serviceAccountsEnabled": true,
       "directAccessGrantsEnabled": true,
-      "standardFlowEnabled": false
+      "standardFlowEnabled": false,
+      "defaultClientScopes": [
+        "phoneNumber"
+      ]
     }
-  ],
-  "attributes": {
-    "userProfileEnabled": "true"
-  },
-  "userProfile": {
-    "attributes": [
-      {
-        "name": "username",
-        "displayName": "${username}",
-        "validations": {
-          "length": {
-            "min": 3,
-            "max": 255
-          },
-          "username-prohibited-characters": {},
-          "up-username-not-idn-homograph": {}
-        },
-        "permissions": {
-          "view": ["admin", "user"],
-          "edit": ["admin"]
-        }
-      },
-      {
-        "name": "email",
-        "displayName": "${email}",
-        "validations": {
-          "email": {},
-          "length": {
-            "max": 255
-          }
-        },
-        "permissions": {
-          "view": ["admin", "user"],
-          "edit": ["admin", "user"]
-        }
-      },
-      {
-        "name": "firstName",
-        "displayName": "${firstName}",
-        "validations": {
-          "length": {
-            "max": 255
-          },
-          "person-name-prohibited-characters": {}
-        },
-        "permissions": {
-          "view": ["admin", "user"],
-          "edit": ["admin", "user"]
-        }
-      },
-      {
-        "name": "lastName",
-        "displayName": "${lastName}",
-        "validations": {
-          "length": {
-            "max": 255
-          },
-          "person-name-prohibited-characters": {}
-        },
-        "permissions": {
-          "view": ["admin", "user"],
-          "edit": ["admin", "user"]
-        }
-      },
-      {
-        "name": "phoneNumber",
-        "displayName": "${phoneNumber}",
-        "validations": {
-          "length": {
-            "max": 20
-          }
-        },
-        "permissions": {
-          "view": ["admin", "user"],
-          "edit": ["admin", "user"]
-        }
-      }
-    ],
-    "groups": [
-      {
-        "name": "user-metadata",
-        "displayHeader": "User metadata",
-        "displayDescription": "Attributes, which refer to user metadata"
-      }
-    ]
-  }
+  ]
 }
