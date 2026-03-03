@@ -9,6 +9,15 @@ management:
   endpoint:
     gateway:
       access: unrestricted
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
 
 server:
   port: 8080

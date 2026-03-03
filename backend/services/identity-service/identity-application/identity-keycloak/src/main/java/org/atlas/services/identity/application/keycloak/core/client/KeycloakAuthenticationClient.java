@@ -23,7 +23,7 @@ import org.springframework.web.client.RestClient;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
+@Slf4j(topic = "keycloak.client.authentication")
 public class KeycloakAuthenticationClient {
 
   private final Keycloak keycloak;

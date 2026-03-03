@@ -1,6 +1,8 @@
 package org.atlas.services.identity.application.keycloak.core.client;
 
+import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.shared.identity.UserRole;
 import org.atlas.services.identity.application.keycloak.core.config.KeycloakProps;
 import org.keycloak.admin.client.Keycloak;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j(topic = "keycloak.client.realm-role")
 public class KeycloakRealmRoleClient {
 
   private final Keycloak keycloak;

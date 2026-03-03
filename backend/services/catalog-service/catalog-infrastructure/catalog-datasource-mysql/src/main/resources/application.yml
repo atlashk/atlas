@@ -3,4 +3,4 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${DB_URL:jdbc:mysql://localhost:3306/db_catalog?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false}
     username: ${DB_USERNAME:atlas}
-    password: ${DB_PASSWORD:secret123456}
+    password: ${DB_PASSWORD:Atlas@123456}

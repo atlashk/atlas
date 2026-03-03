@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j(topic = "keycloak")
+@Slf4j(topic = "keycloak.client.user")
 public class KeycloakUserClient {
 
   private final Keycloak keycloak;

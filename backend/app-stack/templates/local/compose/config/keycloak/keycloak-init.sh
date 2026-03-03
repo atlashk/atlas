@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# Disable SSL requirement for Keycloak master realm
+/opt/keycloak/bin/kcadm.sh config credentials \
+    --server http://keycloak:8080 \
+    --realm master \
+    --user "$${KC_BOOTSTRAP_ADMIN_USERNAME}" \
+    --password "$${KC_BOOTSTRAP_ADMIN_PASSWORD}"
+/opt/keycloak/bin/kcadm.sh update realms/master -s sslRequired=NONE
+echo "SSL disabled for master realm"

@@ -3,7 +3,7 @@ spring:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USERNAME:admin}
-    password: ${RABBITMQ_PASSWORD:-secret123456}
+    password: ${RABBITMQ_PASSWORD:-Atlas@123456}
 
 app:
   messaging:

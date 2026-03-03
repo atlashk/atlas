@@ -2,6 +2,18 @@
   "realm": "dev",
   "enabled": true,
   "sslRequired": "none",
+  "roles": {
+    "realm": [
+      {
+        "name": "admin",
+        "description": "Administrator role"
+      },
+      {
+        "name": "user",
+        "description": "User role"
+      }
+    ]
+  },
   "clients": [
     {
       "clientId": "default-auth",

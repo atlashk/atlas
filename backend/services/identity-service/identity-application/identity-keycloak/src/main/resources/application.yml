@@ -5,7 +5,7 @@ app:
     admin-client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:admin-cli}
     admin-client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:}
     admin-username: ${KC_BOOTSTRAP_ADMIN_USERNAME:atlas}
-    admin-password: ${KC_BOOTSTRAP_ADMIN_PASSWORD:secret123456}
+    admin-password: ${KC_BOOTSTRAP_ADMIN_PASSWORD:Atlas@123456}
     realm: ${KEYCLOAK_REALM:dev}
     client-id: ${KEYCLOAK_CLIENT_ID:default-auth}
     client-secret: ${KEYCLOAK_CLIENT_SECRET:9cvF5MPJnwfhEOCwNnQ79RmlkckAsDCj}
