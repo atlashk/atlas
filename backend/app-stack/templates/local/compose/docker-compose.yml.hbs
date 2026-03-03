@@ -142,7 +142,7 @@ services:
       - KC_DB_PASSWORD=${MYSQL_PASSWORD:-Atlas@123456}
       {{/hasService}}
     volumes:
-      - ./config/keycloak:/opt/keycloak/data/import:ro
+      - ./config/keycloak/import:/opt/keycloak/data/import:ro
     command:
       - start-dev
       - --import-realm
