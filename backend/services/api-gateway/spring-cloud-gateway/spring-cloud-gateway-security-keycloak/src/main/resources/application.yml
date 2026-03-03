@@ -3,4 +3,4 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_BASE_URL:http://localhost:8443}/realms/${KEYCLOAK_REALM:atlas}
+          issuer-uri: ${KEYCLOAK_BASE_URL:http://localhost:8443}/realms/${KEYCLOAK_REALM:dev}

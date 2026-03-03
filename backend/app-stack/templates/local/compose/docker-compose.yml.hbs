@@ -766,6 +766,7 @@ services:
       {{/hasService}}
       {{#hasService "identity" "keycloak"}}
       - KEYCLOAK_BASE_URL=http://keycloak:8080
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM:-dev}
       {{/hasService}}
     volumes:
       - api-gateway-log:/var/log/api-gateway
