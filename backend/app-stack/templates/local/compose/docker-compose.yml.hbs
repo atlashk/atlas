@@ -124,6 +124,8 @@ services:
     environment:
       - KC_BOOTSTRAP_ADMIN_USERNAME=${KC_BOOTSTRAP_ADMIN_USERNAME:-atlas}
       - KC_BOOTSTRAP_ADMIN_PASSWORD=${KC_BOOTSTRAP_ADMIN_PASSWORD:-secret123456}
+      - KC_HOSTNAME_STRICT=false
+      - KC_HOSTNAME_STRICT_HTTPS=false
       - KC_HEALTH_ENABLED=true
       - KC_HTTP_MANAGEMENT_PORT=9000
       {{#hasService "datasource" "postgres"}}
