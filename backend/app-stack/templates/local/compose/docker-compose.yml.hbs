@@ -125,6 +125,7 @@ services:
       - KC_BOOTSTRAP_ADMIN_USERNAME=${KC_BOOTSTRAP_ADMIN_USERNAME:-atlas}
       - KC_BOOTSTRAP_ADMIN_PASSWORD=${KC_BOOTSTRAP_ADMIN_PASSWORD:-secret123456}
       - KC_HTTP_ENABLED=true
+      - KC_HOSTNAME_STRICT=false
       - KC_PROXY_HEADERS=xforwarded
       - KC_HEALTH_ENABLED=true
       - KC_HTTP_MANAGEMENT_PORT=9000
@@ -169,6 +170,30 @@ services:
       mysql:
         condition: service_healthy
       {{/hasService}}
+    networks:
+      - {{dotenv.PROJECT_NAME}}-network
+
+  keycloak-init:
+    container_name: keycloak-init
+    image: quay.io/keycloak/keycloak:26.5.4
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=${KC_BOOTSTRAP_ADMIN_USERNAME:-atlas}
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=${KC_BOOTSTRAP_ADMIN_PASSWORD:-secret123456}
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        echo "Waiting for Keycloak..."
+        sleep 30
+        /opt/keycloak/bin/kcadm.sh config credentials \
+          --server http://keycloak:8080 \
+          --realm master \
+          --user "$${KC_BOOTSTRAP_ADMIN_USERNAME}" \
+          --password "$${KC_BOOTSTRAP_ADMIN_PASSWORD}"
+        /opt/keycloak/bin/kcadm.sh update realms/master -s sslRequired=NONE
+        echo "SSL disabled for master realm"
+    depends_on:
+      keycloak:
+        condition: service_healthy
     networks:
       - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}

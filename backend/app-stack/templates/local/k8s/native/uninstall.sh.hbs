@@ -10,6 +10,8 @@ readonly PROJECT_NAME="{{dotenv.PROJECT_NAME}}"
 readonly NAMESPACE="{{dotenv.PROJECT_NAME}}"
 readonly NAMESPACE_TIMEOUT=120
 
+REMOVE_APPLICATION_IMAGES=false
+
 # =============================================================================
 # UTILITIES
 # =============================================================================
@@ -19,6 +21,38 @@ info() { echo "$1"; }
 warn() { echo "Warning: $1" >&2; }
 
 command_exists() { command -v "$1" >/dev/null 2>&1; }
+
+usage() {
+  cat <<EOF
+Usage: $(basename "$0") [OPTIONS]
+
+Options:
+    --remove-application-images    Remove application Docker images (default: false)
+    -h, --help                     Show this help message
+
+Examples:
+    $(basename "$0")                              # Uninstall without removing images
+    $(basename "$0") --remove-application-images  # Uninstall and remove application images
+EOF
+  exit 0
+}
+
+parse_args() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --remove-application-images)
+        REMOVE_APPLICATION_IMAGES=true
+        shift
+        ;;
+      -h|--help)
+        usage
+        ;;
+      *)
+        die "Unknown option: $1"
+        ;;
+    esac
+  done
+}
 
 # =============================================================================
 # PREREQUISITES
@@ -75,10 +109,16 @@ remove_application_images() {
 # =============================================================================
 
 main() {
+  parse_args "$@"
+  info "Remove application images: $REMOVE_APPLICATION_IMAGES"
+
   check_prerequisites
-  info "Namespace: $NAMESPACE"
+
   remove_namespace
-  remove_application_images
+
+  if [[ "$REMOVE_APPLICATION_IMAGES" == "true" ]]; then
+    remove_application_images
+  fi
 }
 
 main "$@"

@@ -10,6 +10,7 @@ readonly COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
 readonly PROJECT_NAME="{{dotenv.PROJECT_NAME}}"
 
 DOCKER_COMPOSE_CMD=""
+REMOVE_APPLICATION_IMAGES=false
 
 # =============================================================================
 # UTILITIES
@@ -17,6 +18,38 @@ DOCKER_COMPOSE_CMD=""
 
 die() { echo "Error: $1" >&2; exit 1; }
 info() { echo "$1"; }
+
+usage() {
+  cat <<EOF
+Usage: $(basename "$0") [OPTIONS]
+
+Options:
+    --remove-application-images    Remove application Docker images (default: false)
+    -h, --help                     Show this help message
+
+Examples:
+    $(basename "$0")                              # Uninstall without removing images
+    $(basename "$0") --remove-application-images  # Uninstall and remove application images
+EOF
+  exit 0
+}
+
+parse_args() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --remove-application-images)
+        REMOVE_APPLICATION_IMAGES=true
+        shift
+        ;;
+      -h|--help)
+        usage
+        ;;
+      *)
+        die "Unknown option: $1"
+        ;;
+    esac
+  done
+}
 
 # =============================================================================
 # PREREQUISITES
@@ -38,8 +71,8 @@ check_docker_compose() {
 # CLEANUP
 # =============================================================================
 
-stop_containers() {
-  info "Stopping and removing containers..."
+down_containers() {
+  info "Stopping and removing containers and volumes..."
   $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" -p "$PROJECT_NAME" down -v
 }
 
@@ -63,9 +96,16 @@ remove_application_images() {
 # =============================================================================
 
 main() {
+  parse_args "$@"  
+  info "Remove application images: $REMOVE_APPLICATION_IMAGES"
+  
   check_docker_compose
-  stop_containers
-  remove_application_images
+
+  down_containers
+
+  if [[ "$REMOVE_APPLICATION_IMAGES" == "true" ]]; then
+    remove_application_images
+  fi
 }
 
 main "$@"
