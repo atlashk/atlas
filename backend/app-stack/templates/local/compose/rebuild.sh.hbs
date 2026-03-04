@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 set -euo pipefail
 
 # =============================================================================
@@ -55,14 +55,48 @@ parse_arguments() {
 # PREREQUISITES
 # =============================================================================
 
+check_java() {
+  command -v java &>/dev/null || die "Java is not installed or not in PATH"
+
+  local version
+  version=$(java -version 2>&1 | head -n 1)
+
+  local major
+  if [[ "$version" =~ \"1\.([0-9]+) ]]; then
+    major="${BASH_REMATCH[1]}"
+  elif [[ "$version" =~ \"([0-9]+) ]]; then
+    major="${BASH_REMATCH[1]}"
+  else
+    major=0
+  fi
+
+  [[ $major -ge 17 ]] || die "Java 17 or later is required (found: $version)"
+  info "Java found: $version"
+}
+
+check_docker() {
+  docker info &>/dev/null || die "Docker is not running"
+  info "Docker found and running"
+}
+
 check_docker_compose() {
   if command -v docker-compose &>/dev/null; then
     DOCKER_COMPOSE_CMD="docker-compose"
+    info "Docker Compose (standalone) found"
   elif docker compose version &>/dev/null; then
     DOCKER_COMPOSE_CMD="docker compose"
+    info "Docker Compose (plugin) found"
   else
-    die "Docker Compose is not installed"
+    die "Docker Compose is not installed. Please install Docker Compose or ensure Docker Desktop is running"
   fi
+}
+
+check_prerequisites() {
+  info "Checking prerequisites..."
+  check_java
+  check_docker
+  check_docker_compose
+  info "Prerequisites check passed"
 }
 
 # =============================================================================
@@ -122,7 +156,8 @@ restart_service() {
 
 main() {
   parse_arguments "$@"
-  check_docker_compose
+
+  check_prerequisites
 
   echo "Rebuilding service: $SERVICE_NAME..."
 

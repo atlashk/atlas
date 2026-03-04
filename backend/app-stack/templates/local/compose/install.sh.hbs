@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 set -euo pipefail
 
 # =============================================================================
@@ -89,6 +89,7 @@ check_docker_compose() {
 
 check_prerequisites() {
   info "Checking prerequisites..."
+  check_java
   check_docker
   check_docker_compose
   info "Prerequisites check passed"
@@ -141,7 +142,10 @@ trap print_total_time EXIT
 
 main() {
   parse_arguments "$@"
+
   check_prerequisites
+
+  info "Installing services for project: $PROJECT_NAME, app stack: $APP_STACK"
 
   if [[ "$SKIP_BUILD" == true ]]; then
     info "Skipping build step"

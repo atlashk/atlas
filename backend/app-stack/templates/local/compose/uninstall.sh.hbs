@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 set -euo pipefail
 
 # =============================================================================
@@ -55,6 +55,11 @@ parse_args() {
 # PREREQUISITES
 # =============================================================================
 
+check_docker() {
+  docker info &>/dev/null || die "Docker is not running"
+  info "Docker found and running"
+}
+
 check_docker_compose() {
   if command -v docker-compose &>/dev/null; then
     DOCKER_COMPOSE_CMD="docker-compose"
@@ -65,6 +70,13 @@ check_docker_compose() {
   else
     die "Docker Compose is not installed. Please install Docker Compose or ensure Docker Desktop is running"
   fi
+}
+
+check_prerequisites() {
+  info "Checking prerequisites..."
+  check_docker
+  check_docker_compose
+  info "Prerequisites check passed"
 }
 
 # =============================================================================
@@ -96,10 +108,11 @@ remove_application_images() {
 # =============================================================================
 
 main() {
-  parse_args "$@"  
-  info "Remove application images: $REMOVE_APPLICATION_IMAGES"
+  parse_args "$@"
   
-  check_docker_compose
+  check_prerequisites
+
+  info "Uninstalling services for project: $PROJECT_NAME, app stack: $APP_STACK"
 
   down_containers
 
