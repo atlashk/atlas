@@ -369,7 +369,8 @@ services:
       - "443:443"
     volumes:
       - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./config/nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - api-gateway
     networks:
       - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
