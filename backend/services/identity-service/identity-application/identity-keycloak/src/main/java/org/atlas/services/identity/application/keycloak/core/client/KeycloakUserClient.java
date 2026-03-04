@@ -38,6 +38,9 @@ public class KeycloakUserClient {
   private final KeycloakRealmRoleClient keycloakRealmRoleClient;
 
   public List<UserEntity> retrieveUserList(RetrieveUserListRequest request) {
+    log.debug("Retrieving Keycloak user list with criteria: userId={}, username={}, firstName={}, lastName={}, email={}",
+        request.getUserId(), request.getUsername(), request.getFirstName(),
+        request.getLastName(), request.getEmail());
     UsersResource usersResource = getUsersResource();
 
     if (StringUtil.isNotBlank(request.getUserId())) {
