@@ -49,12 +49,10 @@ public class KeycloakUserClient {
 
       // Verify other criteria match
       UserEntity user = userOpt.get();
-      if ((StringUtil.isNotBlank(request.getUsername()) && !request.getUsername()
-          .equals(user.getUsername())) || (StringUtil.isNotBlank(request.getFirstName())
-          && !request.getFirstName().equals(user.getFirstName())) || (
-          StringUtil.isNotBlank(request.getLastName()) && !request.getLastName()
-              .equals(user.getLastName())) || (StringUtil.isNotBlank(request.getEmail())
-          && !request.getEmail().equals(user.getEmail()))) {
+      if ((StringUtil.isNotBlank(request.getUsername()) && !request.getUsername().equals(user.getUsername())) || 
+        (StringUtil.isNotBlank(request.getFirstName()) && !request.getFirstName().equals(user.getFirstName())) || 
+        (StringUtil.isNotBlank(request.getLastName()) && !request.getLastName().equals(user.getLastName())) || 
+        (StringUtil.isNotBlank(request.getEmail()) && !request.getEmail().equals(user.getEmail()))) {
         return CollectionUtil.emptyList();
       }
 
@@ -65,6 +63,7 @@ public class KeycloakUserClient {
         // Paging parameters
         int first = request.getPagingRequest() == null ? 0 : request.getPagingRequest().getOffset();
         int max = request.getPagingRequest() == null ? 1 : request.getPagingRequest().getLimit();
+        log.debug("Retrieving Keycloak user list with paging: first={}, max={}", first, max);
 
         List<UserRepresentation> kcUsers = usersResource.search(
             StringUtil.trim(request.getUsername()),

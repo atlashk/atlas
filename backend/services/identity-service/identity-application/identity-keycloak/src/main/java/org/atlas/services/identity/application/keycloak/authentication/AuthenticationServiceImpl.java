@@ -39,8 +39,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   public LoginOutput login(LoginInput input) throws Exception {
     TokenResponse tokenResponse = keycloakAuthenticationClient.login(input.getUsername(),
         input.getPassword());
-    log.info("Token response for user {}: accessToken={}, refreshToken={}", input.getUsername(),
-        tokenResponse.getAccessToken(), tokenResponse.getRefreshToken());
     return new LoginOutput(tokenResponse.getAccessToken(), tokenResponse.getRefreshToken());
   }
 
