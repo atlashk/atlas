@@ -82,6 +82,52 @@ spec:
             - name: REDIS_PORT
               value: "6379"
             {{/hasService}}
+            {{#hasService "messaging" "kafka"}}
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka:29092"
+            {{/hasService}}
+            {{#hasService "messaging" "rabbitmq"}}
+            - name: RABBITMQ_HOST
+              value: "rabbitmq"
+            - name: RABBITMQ_PORT
+              value: "5672"
+            - name: RABBITMQ_USERNAME
+              value: "atlas"
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret
+                  key: rabbitmq-password
+            {{/hasService}}
+            {{#hasService "identity" "keycloak"}}
+            - name: KEYCLOAK_BASE_URL
+              value: "http://keycloak:8080"
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: kc-bootstrap-admin-username
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: kc-bootstrap-admin-password
+            - name: KEYCLOAK_REALM
+              valueFrom:
+                configMapKeyRef:
+                  name: keycloak-config-cm
+                  key: keycloak-realm
+            - name: KEYCLOAK_CLIENT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: keycloak-config-cm
+                  key: keycloak-client-id
+            - name: KEYCLOAK_CLIENT_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  name: keycloak-config-cm
+                  key: keycloak-client-secret
+            {{/hasService}}
             {{#hasService "observability.tracing" "zipkin"}}
             - name: ZIPKIN_ENDPOINT
               value: "http://zipkin:9411/api/v2/spans"

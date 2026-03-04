@@ -16,7 +16,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: api.{{dotenv.PROJECT_NAME}}.local
+    - host: api.{{dotenv.SERVER_NAME}}
       http:
         paths:
           - path: /
@@ -26,20 +26,8 @@ spec:
                 name: api-gateway
                 port:
                   number: 8080
-{{#hasService "storage" "minio"}}
-    - host: minio.{{dotenv.PROJECT_NAME}}.local
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: minio
-                port:
-                  number: 9001
-{{/hasService}}
 {{#hasService "identity" "keycloak"}}
-    - host: keycloak.{{dotenv.PROJECT_NAME}}.local
+    - host: keycloak.{{dotenv.SERVER_NAME}}
       http:
         paths:
           - path: /
@@ -50,32 +38,8 @@ spec:
                 port:
                   number: 8080
 {{/hasService}}
-{{#hasService "observability.metrics" "prometheus"}}
-    - host: prometheus.{{dotenv.PROJECT_NAME}}.local
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: prometheus
-                port:
-                  number: 9090
-{{/hasService}}
-{{#hasService "observability.tracing" "zipkin"}}
-    - host: zipkin.{{dotenv.PROJECT_NAME}}.local
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: zipkin
-                port:
-                  number: 9411
-{{/hasService}}
 {{#hasGrafana}}
-    - host: grafana.{{dotenv.PROJECT_NAME}}.local
+    - host: grafana.{{dotenv.SERVER_NAME}}
       http:
         paths:
           - path: /
@@ -86,8 +50,32 @@ spec:
                 port:
                   number: 3000
 {{/hasGrafana}}
+{{#hasService "observability.tracing" "zipkin"}}
+    - host: zipkin.{{dotenv.SERVER_NAME}}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: zipkin
+                port:
+                  number: 9411
+{{/hasService}}
+{{#hasService "storage" "minio"}}
+    - host: minio.{{dotenv.SERVER_NAME}}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: minio
+                port:
+                  number: 9001
+{{/hasService}}
 {{#hasService "notification.email" "spring"}}
-    - host: smtp4dev.{{dotenv.PROJECT_NAME}}.local
+    - host: smtp4dev.{{dotenv.SERVER_NAME}}
       http:
         paths:
           - path: /

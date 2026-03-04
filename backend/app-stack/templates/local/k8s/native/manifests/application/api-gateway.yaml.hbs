@@ -39,8 +39,13 @@ spec:
               value: "http://identity-service:8081"
             {{/hasService}}
             {{#hasService "identity" "keycloak"}}
-              - name: KEYCLOAK_BASE_URL
-              value: "http://keycloak:8443"
+            - name: KEYCLOAK_BASE_URL
+              value: "http://keycloak:8080"
+            - name: KEYCLOAK_REALM
+              valueFrom:
+                configMapKeyRef:
+                  name: keycloak-config-cm
+                  key: keycloak-realm
             {{/hasService}}
             {{#hasService "observability.tracing" "zipkin"}}
             - name: ZIPKIN_ENDPOINT
