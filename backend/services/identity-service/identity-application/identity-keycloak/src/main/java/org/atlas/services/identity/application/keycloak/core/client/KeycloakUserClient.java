@@ -56,23 +56,24 @@ public class KeycloakUserClient {
       return Collections.singletonList(user);
     } else {
       // Search by username, first name, last name, and email
+      int first = request.getPagingRequest() == null ? 0 : request.getPagingRequest().getOffset();
+      int max = request.getPagingRequest() == null ? 100 : request.getPagingRequest().getLimit();
+
+      String url = buildSearchUsersUrl(request.getUsername(), request.getFirstName(),
+          request.getLastName(), request.getEmail(), first, max);
       try {
-        int first = request.getPagingRequest() == null ? 0 : request.getPagingRequest().getOffset();
-        int max = request.getPagingRequest() == null ? 1 : request.getPagingRequest().getLimit();
-
-        String url = buildSearchUsersUrl(request.getUsername(), request.getFirstName(),
-            request.getLastName(), request.getEmail(), first, max);
-
         List<Map<String, Object>> kcUsers = restClient.get()
             .uri(url)
             .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
             .retrieve()
             .body(USER_LIST_TYPE);
 
+        log.debug("Retrieved {} users from Keycloak, url={}", kcUsers == null ? 0 : kcUsers.size(), url);
+
         return kcUsers == null ? Collections.emptyList() :
             kcUsers.stream().map(this::toUserEntity).toList();
       } catch (Exception e) {
-        log.error("Failed to retrieve Keycloak user list: reason={}", e.getMessage());
+        log.error("Failed to retrieve Keycloak user list: url={}, reason={}", url, e.getMessage(), e);
         return Collections.emptyList();
       }
     }
