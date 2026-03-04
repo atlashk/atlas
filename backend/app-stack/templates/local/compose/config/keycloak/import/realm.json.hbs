@@ -1,5 +1,5 @@
 {
-  "realm": "dev",
+  "realm": "default",
   "enabled": true,
   "sslRequired": "none",
   "attributes": {
@@ -29,39 +29,6 @@
       }
     ]
   },
-  "clientScopes": [
-    {
-      "name": "phoneNumber",
-      "description": "Phone number scope",
-      "protocol": "openid-connect",
-      "attributes": {
-        "include.in.token.scope": "true",
-        "display.on.consent.screen": "true"
-      },
-      "protocolMappers": [
-        {
-          "name": "phoneNumber",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-attribute-mapper",
-          "consentRequired": false,
-          "config": {
-            "userinfo.token.claim": "true",
-            "user.attribute": "phoneNumber",
-            "id.token.claim": "true",
-            "access.token.claim": "true",
-            "claim.name": "phone_number",
-            "jsonType.label": "String"
-          }
-        }
-      ]
-    }
-  ],
-  "defaultDefaultClientScopes": [
-    "profile",
-    "email",
-    "roles",
-    "phoneNumber"
-  ],
   "clients": [
     {
       "clientId": "default-auth",
@@ -75,10 +42,11 @@
       "directAccessGrantsEnabled": true,
       "standardFlowEnabled": false,
       "defaultClientScopes": [
+        "basic",
         "profile",
         "email",
-        "roles",
-        "phoneNumber"
+        "phone",
+        "roles"
       ]
     }
   ]

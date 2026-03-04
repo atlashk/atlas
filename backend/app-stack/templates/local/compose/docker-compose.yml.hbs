@@ -173,7 +173,7 @@ services:
     networks:
       - {{dotenv.PROJECT_NAME}}-network
 
-  keycloak-init:
+  {{!-- keycloak-init:
     container_name: keycloak-init
     image: quay.io/keycloak/keycloak:26.5.4
     environment:
@@ -186,7 +186,7 @@ services:
       keycloak:
         condition: service_healthy
     networks:
-      - {{dotenv.PROJECT_NAME}}-network
+      - {{dotenv.PROJECT_NAME}}-network --}}
 {{/hasService}}
 
 {{#hasService "full-text-search" "elasticsearch"}}
@@ -453,7 +453,7 @@ services:
       - KC_BOOTSTRAP_ADMIN_USERNAME=${KC_BOOTSTRAP_ADMIN_USERNAME:-atlas}
       - KC_BOOTSTRAP_ADMIN_PASSWORD=${KC_BOOTSTRAP_ADMIN_PASSWORD:-Atlas@123456}
       # Refer config/keycloak/realm.json file
-      - KEYCLOAK_REALM=${KEYCLOAK_REALM:-dev}
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM:-default}
       - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-default-auth}
       - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET:-9cvF5MPJnwfhEOCwNnQ79RmlkckAsDCj}
       {{/hasService}}
@@ -766,7 +766,7 @@ services:
       {{/hasService}}
       {{#hasService "identity" "keycloak"}}
       - KEYCLOAK_BASE_URL=http://keycloak:8080
-      - KEYCLOAK_REALM=${KEYCLOAK_REALM:-dev}
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM:-default}
       {{/hasService}}
     volumes:
       - api-gateway-log:/var/log/api-gateway
