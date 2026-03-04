@@ -42,8 +42,10 @@ public class KeycloakUserClient {
         request.getUserId(), request.getUsername(), request.getFirstName(),
         request.getLastName(), request.getEmail());
     UsersResource usersResource = getUsersResource();
+    log.info("Obtained Keycloak users resource: {}", usersResource);
 
     if (StringUtil.isNotBlank(request.getUserId())) {
+      log.info("Searching Keycloak user by exact user ID: {}", request.getUserId());
       // Search by exact user ID
       Optional<UserEntity> userOpt = retrieveUser(request.getUserId());
       if (userOpt.isEmpty()) {
@@ -62,11 +64,13 @@ public class KeycloakUserClient {
       return Collections.singletonList(user);
     } else {
       // Search by username, first name, last name, and email
+      log.info("Searching Keycloak user list by criteria: username={}, firstName={}, lastName={}, email={}",
+          request.getUsername(), request.getFirstName(), request.getLastName(), request.getEmail());
       try {
         // Paging parameters
         int first = request.getPagingRequest() == null ? 0 : request.getPagingRequest().getOffset();
         int max = request.getPagingRequest() == null ? 1 : request.getPagingRequest().getLimit();
-        log.debug("Retrieving Keycloak user list with paging: first={}, max={}", first, max);
+        log.info("Retrieving Keycloak user list with paging: first={}, max={}", first, max);
 
         List<UserRepresentation> kcUsers = usersResource.search(
             StringUtil.trim(request.getUsername()),
@@ -209,6 +213,7 @@ public class KeycloakUserClient {
 
   private UsersResource getUsersResource() {
     RealmResource realm = keycloak.realm(keycloakProps.getRealm());
+    log.info("Obtained Keycloak realm resource for realm '{}'", keycloakProps.getRealm());
     return realm.users();
   }
 
