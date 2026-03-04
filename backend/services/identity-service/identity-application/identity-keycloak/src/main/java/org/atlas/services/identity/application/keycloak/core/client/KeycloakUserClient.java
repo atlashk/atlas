@@ -44,7 +44,7 @@ public class KeycloakUserClient {
     UsersResource usersResource = getUsersResource();
     log.info("Obtained Keycloak users resource: {}", usersResource);
     log.info("Total users in Keycloak realm '{}': {}", keycloakProps.getRealm(), usersResource.count());
-    List<UserRepresentation> kcUsers = usersResource.list();
+    List<UserRepresentation> kcUsers = usersResource.list(0, Integer.MAX_VALUE);
     return MapperUtil.mapList(kcUsers, KeycloakUtil::toUserEntity);
 
 //    if (StringUtil.isNotBlank(request.getUserId())) {
