@@ -72,9 +72,9 @@ public class KeycloakUserClient {
         int max = request.getPagingRequest() == null ? 1 : request.getPagingRequest().getLimit();
         log.info("Retrieving Keycloak user list with paging: first={}, max={}", first, max);
 
-        List<UserRepresentation> kcUsers = usersResource.search(
-            request.getUsername(), request.getFirstName(), 
-            request.getLastName(), request.getEmail(), 
+        List<UserRepresentation> kcUsers = usersResource.list(
+//            request.getUsername(), request.getFirstName(), 
+//            request.getLastName(), request.getEmail(), 
             first, max);
         return MapperUtil.mapList(kcUsers, KeycloakUtil::toUserEntity);
       } catch (Exception e) {

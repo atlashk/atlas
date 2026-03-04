@@ -57,7 +57,11 @@ const AdminUserListPage: React.FC = () => {
   const [isLoadingUserRoles, setIsLoadingUserRoles] = useState(false);
   const [filters, setFilters] = useState<ListUserFilters>({
     id: undefined,
-    keyword: undefined,
+    username: undefined,
+    firstName: undefined,
+    lastName: undefined,
+    email: undefined,
+    phoneNumber: undefined,
     role: undefined,
     page: 1,
     size: 20,
@@ -148,7 +152,11 @@ const AdminUserListPage: React.FC = () => {
   const resetFilters = useCallback(() => {
     const resetFiltersData: ListUserFilters = {
       id: undefined,
-      keyword: undefined,
+      username: undefined,
+      firstName: undefined,
+      lastName: undefined,
+      email: undefined,
+      phoneNumber: undefined,
       role: undefined,
       page: 1,
       size: 20,
@@ -263,14 +271,62 @@ const AdminUserListPage: React.FC = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="keyword">Keyword</Label>
+                <Label htmlFor="username">Username</Label>
                 <Input
                   type="text"
-                  id="keyword"
-                  placeholder="Enter username, first name, last name, email, or phone number"
-                  value={filters.keyword || ""}
+                  id="username"
+                  placeholder="Enter username"
+                  value={filters.username || ""}
                   onChange={(e) =>
-                    handleFilterChange("keyword", e.target.value || undefined)
+                    handleFilterChange("username", e.target.value || undefined)
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name</Label>
+                <Input
+                  type="text"
+                  id="firstName"
+                  placeholder="Enter first name"
+                  value={filters.firstName || ""}
+                  onChange={(e) =>
+                    handleFilterChange("firstName", e.target.value || undefined)
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input
+                  type="text"
+                  id="lastName"
+                  placeholder="Enter last name"
+                  value={filters.lastName || ""}
+                  onChange={(e) =>
+                    handleFilterChange("lastName", e.target.value || undefined)
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  type="text"
+                  id="email"
+                  placeholder="Enter email"
+                  value={filters.email || ""}
+                  onChange={(e) =>
+                    handleFilterChange("email", e.target.value || undefined)
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber">Phone Number</Label>
+                <Input
+                  type="text"
+                  id="phoneNumber"
+                  placeholder="Enter phone number"
+                  value={filters.phoneNumber || ""}
+                  onChange={(e) =>
+                    handleFilterChange("phoneNumber", e.target.value || undefined)
                   }
                 />
               </div>
