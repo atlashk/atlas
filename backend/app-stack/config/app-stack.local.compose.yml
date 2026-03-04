@@ -21,7 +21,7 @@ observability:
   tracing: zipkin
 persistence: jpa
 redis: standalone
-reverse-proxy: none
+reverse-proxy: nginx
 scheduler: quartz
 service-discovery: eureka
 storage: minio
