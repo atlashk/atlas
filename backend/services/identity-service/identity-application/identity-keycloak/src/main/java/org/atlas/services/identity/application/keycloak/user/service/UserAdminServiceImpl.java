@@ -2,6 +2,7 @@ package org.atlas.services.identity.application.keycloak.user.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.services.identity.application.keycloak.core.client.KeycloakUserClient;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserAdminServiceImpl implements UserAdminService {
 
   private final KeycloakUserClient keycloakUserClient;
