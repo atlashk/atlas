@@ -30,7 +30,6 @@ import org.springframework.web.client.RestClient;
 public class KeycloakUserClient {
 
   private final KeycloakProps keycloakProps;
-  private final KeycloakRealmRoleClient keycloakRealmRoleClient;
   private final KeycloakAdminTokenProvider adminTokenProvider;
   private final RestClient restClient;
 
@@ -335,6 +334,8 @@ public class KeycloakUserClient {
   }
 
   private void assignUserRole(String userId, UserRole userRole) {
+    String roleName = userRole.name().toLowerCase();
+    
     // Get current roles
     String getRolesUrl = String.format("%s/admin/realms/%s/users/%s/role-mappings/realm",
         keycloakProps.getBaseUrl(), keycloakProps.getRealm(), userId);
@@ -345,13 +346,43 @@ public class KeycloakUserClient {
         .retrieve()
         .body(new ParameterizedTypeReference<>() {});
 
-    Map<String, Object> targetRole = keycloakRealmRoleClient.getRealmRoleAsMap(userRole);
-    String targetRoleName = (String) targetRole.get("name");
+    // Check if already has the target role
+    boolean alreadyHasRole = assignedRoles != null && assignedRoles.stream()
+        .anyMatch(role -> roleName.equals(role.get("name")));
 
-    // Remove other roles
+    if (alreadyHasRole) {
+      log.debug("User {} already has role {}", userId, roleName);
+      return;
+    }
+
+    // Get available roles for user (this API only requires manage-users permission)
+    String availableRolesUrl = String.format("%s/admin/realms/%s/users/%s/role-mappings/realm/available",
+        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), userId);
+
+    List<Map<String, Object>> availableRoles = restClient.get()
+        .uri(availableRolesUrl)
+        .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+        .retrieve()
+        .body(new ParameterizedTypeReference<>() {});
+
+    // Find target role from available roles
+    Map<String, Object> targetRole = availableRoles == null ? null : availableRoles.stream()
+        .filter(role -> roleName.equals(role.get("name")))
+        .findFirst()
+        .orElse(null);
+
+    if (targetRole == null) {
+      log.warn("Role {} not found in available roles for user {}", roleName, userId);
+      return;
+    }
+
+    // Remove other custom roles (not default-roles)
     if (assignedRoles != null && !assignedRoles.isEmpty()) {
       List<Map<String, Object>> rolesToRemove = assignedRoles.stream()
-          .filter(role -> !targetRoleName.equals(role.get("name")))
+          .filter(role -> {
+            String name = (String) role.get("name");
+            return !roleName.equals(name) && !name.startsWith("default-roles");
+          })
           .toList();
 
       if (!rolesToRemove.isEmpty()) {
@@ -365,18 +396,15 @@ public class KeycloakUserClient {
       }
     }
 
-    // Assign target role if not already assigned
-    boolean alreadyHasRole = assignedRoles != null && assignedRoles.stream()
-        .anyMatch(role -> targetRoleName.equals(role.get("name")));
+    // Assign target role
+    restClient.post()
+        .uri(getRolesUrl)
+        .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(List.of(targetRole))
+        .retrieve()
+        .toBodilessEntity();
 
-    if (!alreadyHasRole) {
-      restClient.post()
-          .uri(getRolesUrl)
-          .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
-          .contentType(MediaType.APPLICATION_JSON)
-          .body(List.of(targetRole))
-          .retrieve()
-          .toBodilessEntity();
-    }
+    log.debug("Assigned role {} to user {}", roleName, userId);
   }
 }
