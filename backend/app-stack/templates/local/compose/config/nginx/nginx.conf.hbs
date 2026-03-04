@@ -59,8 +59,8 @@ http {
         server_name api.{{dotenv.SERVER_NAME}};
 
         # SSL Certificate
-        ssl_certificate /etc/nginx/ssl/cert.pem;
-        ssl_certificate_key /etc/nginx/ssl/key.pem;
+        ssl_certificate /etc/letsencrypt/live/atlastest.store/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/atlastest.store/privkey.pem;
 
         # Resolver for Docker DNS (allows nginx to start even if upstream is not ready)
         resolver 127.0.0.11 valid=30s;
@@ -95,8 +95,8 @@ http {
         server_name keycloak.{{dotenv.SERVER_NAME}};
 
         # SSL Certificate
-        ssl_certificate /etc/nginx/ssl/cert.pem;
-        ssl_certificate_key /etc/nginx/ssl/key.pem;
+        ssl_certificate /etc/letsencrypt/live/atlastest.store/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/atlastest.store/privkey.pem;
 
         # Resolver for Docker DNS (allows nginx to start even if upstream is not ready)
         resolver 127.0.0.11 valid=30s;
