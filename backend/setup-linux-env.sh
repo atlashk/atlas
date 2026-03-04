@@ -1,5 +1,4 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
 set -euo pipefail
 
 # Development Environment Setup Script for Linux
