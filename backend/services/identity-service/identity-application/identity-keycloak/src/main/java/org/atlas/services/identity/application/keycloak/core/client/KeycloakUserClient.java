@@ -73,10 +73,9 @@ public class KeycloakUserClient {
         log.info("Retrieving Keycloak user list with paging: first={}, max={}", first, max);
 
         List<UserRepresentation> kcUsers = usersResource.search(
-            StringUtil.trim(request.getUsername()),
-            StringUtil.trim(request.getFirstName()),
-            StringUtil.trim(request.getLastName()),
-            StringUtil.trim(request.getEmail()), first, max);
+            request.getUsername(), request.getFirstName(), 
+            request.getLastName(), request.getEmail(), 
+            first, max);
         return MapperUtil.mapList(kcUsers, KeycloakUtil::toUserEntity);
       } catch (Exception e) {
         log.error("Failed to retrieve Keycloak user list: reason={}", e.getMessage());

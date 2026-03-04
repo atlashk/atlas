@@ -32,7 +32,7 @@ public interface ProductReadRowMapper {
         .filter(StringUtil::isNotBlank)
         .map(categoryIdStr -> {
           CategoryEntity category = new CategoryEntity();
-          category.setId(StringUtil.trim(categoryIdStr));
+          category.setId(categoryIdStr);
           return category;
         })
         .toList();

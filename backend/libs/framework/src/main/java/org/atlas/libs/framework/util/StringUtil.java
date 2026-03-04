@@ -64,10 +64,6 @@ public class StringUtil {
     return str.chars().allMatch(Character::isLetterOrDigit);
   }
 
-  public static String trim(String str) {
-    return StringUtils.trimToEmpty(str);
-  }
-
   /**
    * Limits the length of a string to the specified maximum length. If the string exceeds the
    * maximum length, it is truncated.
