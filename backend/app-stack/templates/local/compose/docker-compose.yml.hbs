@@ -172,21 +172,6 @@ services:
       {{/hasService}}
     networks:
       - {{dotenv.PROJECT_NAME}}-network
-
-  {{!-- keycloak-init:
-    container_name: keycloak-init
-    image: quay.io/keycloak/keycloak:26.5.4
-    environment:
-      - KC_BOOTSTRAP_ADMIN_USERNAME=${KC_BOOTSTRAP_ADMIN_USERNAME:-atlas}
-      - KC_BOOTSTRAP_ADMIN_PASSWORD=${KC_BOOTSTRAP_ADMIN_PASSWORD:-Atlas@123456}
-    volumes:
-      - ./config/keycloak/keycloak-init.sh:/keycloak-init.sh:ro
-    entrypoint: ["/bin/sh", "/keycloak-init.sh"]
-    depends_on:
-      keycloak:
-        condition: service_healthy
-    networks:
-      - {{dotenv.PROJECT_NAME}}-network --}}
 {{/hasService}}
 
 {{#hasService "full-text-search" "elasticsearch"}}
