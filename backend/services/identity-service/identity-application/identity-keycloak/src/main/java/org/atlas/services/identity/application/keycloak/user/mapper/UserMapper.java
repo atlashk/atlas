@@ -22,5 +22,6 @@ public interface UserMapper {
   // Entity --> Output
   // -----------------------------------------------------------------------------------------------
 
+  @Mapping(source = "id", target = "userId")
   ProfileOutput toProfileOutput(UserEntity user);
 }

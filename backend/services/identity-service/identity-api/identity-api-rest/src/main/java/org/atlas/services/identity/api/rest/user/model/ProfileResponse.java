@@ -21,9 +21,6 @@ public class ProfileResponse {
   @Schema(description = "Unique identifier of the user", example = "1")
   private String userId;
 
-  @Schema(description = "Username of the user", example = "john_doe")
-  private String username;
-
   @Schema(description = "First name of the user", example = "John")
   private String firstName;
 

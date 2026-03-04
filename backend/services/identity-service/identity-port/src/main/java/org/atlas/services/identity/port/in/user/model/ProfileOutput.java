@@ -16,8 +16,6 @@ public class ProfileOutput {
 
   private String userId;
 
-  private String username;
-
   private String firstName;
 
   private String lastName;

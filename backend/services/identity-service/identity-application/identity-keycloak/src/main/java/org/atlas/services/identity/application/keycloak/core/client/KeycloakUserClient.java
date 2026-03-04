@@ -43,45 +43,48 @@ public class KeycloakUserClient {
         request.getLastName(), request.getEmail());
     UsersResource usersResource = getUsersResource();
     log.info("Obtained Keycloak users resource: {}", usersResource);
+    log.info("Total users in Keycloak realm '{}': {}", keycloakProps.getRealm(), usersResource.count());
+    List<UserRepresentation> kcUsers = usersResource.list();
+    return MapperUtil.mapList(kcUsers, KeycloakUtil::toUserEntity);
 
-    if (StringUtil.isNotBlank(request.getUserId())) {
-      log.info("Searching Keycloak user by exact user ID: {}", request.getUserId());
-      // Search by exact user ID
-      Optional<UserEntity> userOpt = retrieveUser(request.getUserId());
-      if (userOpt.isEmpty()) {
-        return CollectionUtil.emptyList();
-      }
-
-      // Verify other criteria match
-      UserEntity user = userOpt.get();
-      if ((StringUtil.isNotBlank(request.getUsername()) && !request.getUsername().equals(user.getUsername())) || 
-        (StringUtil.isNotBlank(request.getFirstName()) && !request.getFirstName().equals(user.getFirstName())) || 
-        (StringUtil.isNotBlank(request.getLastName()) && !request.getLastName().equals(user.getLastName())) || 
-        (StringUtil.isNotBlank(request.getEmail()) && !request.getEmail().equals(user.getEmail()))) {
-        return CollectionUtil.emptyList();
-      }
-
-      return Collections.singletonList(user);
-    } else {
-      // Search by username, first name, last name, and email
-      log.info("Searching Keycloak user list by criteria: username={}, firstName={}, lastName={}, email={}",
-          request.getUsername(), request.getFirstName(), request.getLastName(), request.getEmail());
-      try {
-        // Paging parameters
-        int first = request.getPagingRequest() == null ? 0 : request.getPagingRequest().getOffset();
-        int max = request.getPagingRequest() == null ? 1 : request.getPagingRequest().getLimit();
-        log.info("Retrieving Keycloak user list with paging: first={}, max={}", first, max);
-
-        List<UserRepresentation> kcUsers = usersResource.list(
+//    if (StringUtil.isNotBlank(request.getUserId())) {
+//      log.info("Searching Keycloak user by exact user ID: {}", request.getUserId());
+//      // Search by exact user ID
+//      Optional<UserEntity> userOpt = retrieveUser(request.getUserId());
+//      if (userOpt.isEmpty()) {
+//        return CollectionUtil.emptyList();
+//      }
+//
+//      // Verify other criteria match
+//      UserEntity user = userOpt.get();
+//      if ((StringUtil.isNotBlank(request.getUsername()) && !request.getUsername().equals(user.getUsername())) || 
+//        (StringUtil.isNotBlank(request.getFirstName()) && !request.getFirstName().equals(user.getFirstName())) || 
+//        (StringUtil.isNotBlank(request.getLastName()) && !request.getLastName().equals(user.getLastName())) || 
+//        (StringUtil.isNotBlank(request.getEmail()) && !request.getEmail().equals(user.getEmail()))) {
+//        return CollectionUtil.emptyList();
+//      }
+//
+//      return Collections.singletonList(user);
+//    } else {
+//      // Search by username, first name, last name, and email
+//      log.info("Searching Keycloak user list by criteria: username={}, firstName={}, lastName={}, email={}",
+//          request.getUsername(), request.getFirstName(), request.getLastName(), request.getEmail());
+//      try {
+//        // Paging parameters
+//        int first = request.getPagingRequest() == null ? 0 : request.getPagingRequest().getOffset();
+//        int max = request.getPagingRequest() == null ? 1 : request.getPagingRequest().getLimit();
+//        log.info("Retrieving Keycloak user list with paging: first={}, max={}", first, max);
+//
+//        List<UserRepresentation> kcUsers = usersResource.search(
 //            request.getUsername(), request.getFirstName(), 
 //            request.getLastName(), request.getEmail(), 
-            first, max);
-        return MapperUtil.mapList(kcUsers, KeycloakUtil::toUserEntity);
-      } catch (Exception e) {
-        log.error("Failed to retrieve Keycloak user list: reason={}", e.getMessage());
-        return Collections.emptyList();
-      }
-    }
+//            first, max);
+//        return MapperUtil.mapList(kcUsers, KeycloakUtil::toUserEntity);
+//      } catch (Exception e) {
+//        log.error("Failed to retrieve Keycloak user list: reason={}", e.getMessage());
+//        return Collections.emptyList();
+//      }
+//    }
   }
 
   public List<UserEntity> retrieveUserList(List<String> userIds) {
