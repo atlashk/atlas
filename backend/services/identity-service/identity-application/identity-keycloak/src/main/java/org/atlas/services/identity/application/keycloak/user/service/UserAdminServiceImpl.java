@@ -34,9 +34,6 @@ public class UserAdminServiceImpl implements UserAdminService {
     PagingRequest pagingRequest = PagingRequest.of(first,
         max + 1); // Fetch one extra to determine if there's a next page
     kcRequest.setPagingRequest(pagingRequest);
-    log.info("Retrieving user list with criteria: userId={}, username={}, firstName={}, lastName={}, email={}, offset={}, limit={}",
-        kcRequest.getUserId(), kcRequest.getUsername(), kcRequest.getFirstName(),
-        kcRequest.getLastName(), kcRequest.getEmail(), first, max);
     List<UserEntity> userList = keycloakUserClient.retrieveUserList(kcRequest);
 
     // Process paging

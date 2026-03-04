@@ -1,19 +1,15 @@
 package org.atlas.services.identity.application.keycloak.core.client;
 
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.domain.exception.BaseDomainException;
+import org.atlas.libs.framework.security.OAuth2Constant;
 import org.atlas.libs.jwt.JwtUtil;
 import org.atlas.services.identity.application.keycloak.core.config.KeycloakProps;
 import org.atlas.services.identity.application.keycloak.core.exception.KeycloakClientException;
 import org.atlas.services.identity.application.keycloak.core.model.TokenResponse;
-import org.keycloak.OAuth2Constants;
-import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.resource.RealmResource;
-import org.keycloak.admin.client.resource.UserResource;
-import org.keycloak.admin.client.resource.UsersResource;
-import org.keycloak.representations.idm.CredentialRepresentation;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -26,15 +22,15 @@ import org.springframework.web.client.RestClient;
 @Slf4j(topic = "keycloak.client.authentication")
 public class KeycloakAuthenticationClient {
 
-  private final Keycloak keycloak;
   private final KeycloakProps keycloakProps;
+  private final KeycloakAdminTokenProvider adminTokenProvider;
   private final RestClient restClient;
 
   public TokenResponse login(String username, String password) {
     String url = String.format("%s/realms/%s/protocol/openid-connect/token",
         keycloakProps.getBaseUrl(), keycloakProps.getRealm());
     MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
-    form.add("grant_type", OAuth2Constants.PASSWORD);
+    form.add("grant_type", OAuth2Constant.GRANT_TYPE_PASSWORD);
     form.add("client_id", keycloakProps.getClientId());
     form.add("client_secret", keycloakProps.getClientSecret());
     form.add("username", username);
@@ -54,7 +50,7 @@ public class KeycloakAuthenticationClient {
     String url = String.format("%s/realms/%s/protocol/openid-connect/token",
         keycloakProps.getBaseUrl(), keycloakProps.getRealm());
     MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
-    form.add("grant_type", OAuth2Constants.REFRESH_TOKEN);
+    form.add("grant_type", OAuth2Constant.GRANT_TYPE_REFRESH_TOKEN);
     form.add("client_id", keycloakProps.getClientId());
     form.add("client_secret", keycloakProps.getClientSecret());
     form.add("refresh_token", refreshToken);
@@ -63,42 +59,69 @@ public class KeycloakAuthenticationClient {
         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
         .body(form)
         .retrieve()
-        .toEntity(TokenResponse.class)
-        .getBody();
+        .onStatus(HttpStatusCode::isError, (request, response) -> {
+          throw new BaseDomainException(CommonDomainError.UNAUTHORIZED);
+        })
+        .body(TokenResponse.class);
   }
 
-  public void logout(String accessToken) throws Exception {
-    String userId = JwtUtil.extractSubject(accessToken);
-    UsersResource usersResource = getUsersResource();
-    UserResource userResource = usersResource.get(userId);
-    userResource.logout();
+  public void logout(String accessToken) {
+    try {
+      String userId = JwtUtil.extractSubject(accessToken);
+      String url = String.format("%s/admin/realms/%s/users/%s/logout",
+          keycloakProps.getBaseUrl(), keycloakProps.getRealm(), userId);
+
+      restClient.post()
+          .uri(url)
+          .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+          .retrieve()
+          .onStatus(HttpStatusCode::isError, (request, response) -> {
+            throw new KeycloakClientException(
+                String.format("Failed to logout user: userId=%s, status=%d",
+                    userId, response.getStatusCode().value()));
+          })
+          .toBodilessEntity();
+
+      log.info("Logged out Keycloak user successfully: userId={}", userId);
+    } catch (KeycloakClientException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new KeycloakClientException("Failed to logout user: " + e.getMessage());
+    }
   }
 
   public void changePassword(String userId, String newPassword) {
-    UsersResource usersResource = getUsersResource();
+    String url = String.format("%s/admin/realms/%s/users/%s/reset-password",
+        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), userId);
+
+    Map<String, Object> credential = Map.of(
+        "type", "password",
+        "value", newPassword,
+        "temporary", false
+    );
+
     try {
-      UserResource userResource = usersResource.get(userId);
-      CredentialRepresentation kcCredential = toCredentialRepresentation(newPassword);
-      userResource.resetPassword(kcCredential);
+      restClient.put()
+          .uri(url)
+          .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+          .contentType(MediaType.APPLICATION_JSON)
+          .body(credential)
+          .retrieve()
+          .onStatus(HttpStatusCode::isError, (request, response) -> {
+            throw new KeycloakClientException(
+                String.format("Failed to change password: userId=%s, status=%d",
+                    userId, response.getStatusCode().value()));
+          })
+          .toBodilessEntity();
+
       log.info("Changed Keycloak user password successfully: userId={}", userId);
+    } catch (KeycloakClientException e) {
+      throw e;
     } catch (Exception e) {
       throw new KeycloakClientException(
           String.format("Failed to change Keycloak user password: id=%s, reason=%s",
               userId, e.getMessage()));
     }
-  }
-
-  private UsersResource getUsersResource() {
-    RealmResource realm = keycloak.realm(keycloakProps.getRealm());
-    return realm.users();
-  }
-
-  private CredentialRepresentation toCredentialRepresentation(String password) {
-    CredentialRepresentation kcCredential = new CredentialRepresentation();
-    kcCredential.setType(CredentialRepresentation.PASSWORD);
-    kcCredential.setValue(password);
-    kcCredential.setTemporary(Boolean.FALSE);
-    return kcCredential;
   }
 }
 

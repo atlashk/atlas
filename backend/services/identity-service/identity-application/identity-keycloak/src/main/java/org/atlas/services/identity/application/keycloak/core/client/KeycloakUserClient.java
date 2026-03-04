@@ -1,90 +1,82 @@
 package org.atlas.services.identity.application.keycloak.core.client;
 
-import jakarta.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.shared.identity.UserRole;
 import org.atlas.libs.framework.util.CollectionUtil;
-import org.atlas.libs.framework.util.ExceptionUtil;
-import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.identity.application.keycloak.core.config.KeycloakProps;
 import org.atlas.services.identity.application.keycloak.core.enums.KeycloakUserAttribute;
 import org.atlas.services.identity.application.keycloak.core.exception.KeycloakClientException;
 import org.atlas.services.identity.application.keycloak.core.model.RetrieveUserListRequest;
-import org.atlas.services.identity.application.keycloak.core.util.KeycloakUtil;
 import org.atlas.services.identity.domain.entity.UserEntity;
-import org.keycloak.admin.client.CreatedResponseUtil;
-import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.resource.RealmResource;
-import org.keycloak.admin.client.resource.UserResource;
-import org.keycloak.admin.client.resource.UsersResource;
-import org.keycloak.representations.idm.CredentialRepresentation;
-import org.keycloak.representations.idm.RoleRepresentation;
-import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClient;
 
 @Component
+@SuppressWarnings("unchecked")
 @RequiredArgsConstructor
 @Slf4j(topic = "keycloak.client.user")
 public class KeycloakUserClient {
 
-  private final Keycloak keycloak;
   private final KeycloakProps keycloakProps;
   private final KeycloakRealmRoleClient keycloakRealmRoleClient;
+  private final KeycloakAdminTokenProvider adminTokenProvider;
+  private final RestClient restClient;
+
+  private static final ParameterizedTypeReference<List<Map<String, Object>>> USER_LIST_TYPE =
+      new ParameterizedTypeReference<>() {};
 
   public List<UserEntity> retrieveUserList(RetrieveUserListRequest request) {
-    log.info("Retrieving Keycloak user list with criteria: userId={}, username={}, firstName={}, lastName={}, email={}",
-        request.getUserId(), request.getUsername(), request.getFirstName(),
-        request.getLastName(), request.getEmail());
-    UsersResource usersResource = getUsersResource();
-    log.info("Obtained Keycloak users resource: {}", usersResource);
-    log.info("Total users in Keycloak realm '{}': {}", keycloakProps.getRealm(), usersResource.count());
-    List<UserRepresentation> kcUsers = usersResource.list(0, Integer.MAX_VALUE);
-    return MapperUtil.mapList(kcUsers, KeycloakUtil::toUserEntity);
+    if (StringUtil.isNotBlank(request.getUserId())) {
+      // Search by exact user ID
+      Optional<UserEntity> userOpt = retrieveUser(request.getUserId());
+      if (userOpt.isEmpty()) {
+        return CollectionUtil.emptyList();
+      }
 
-//    if (StringUtil.isNotBlank(request.getUserId())) {
-//      log.info("Searching Keycloak user by exact user ID: {}", request.getUserId());
-//      // Search by exact user ID
-//      Optional<UserEntity> userOpt = retrieveUser(request.getUserId());
-//      if (userOpt.isEmpty()) {
-//        return CollectionUtil.emptyList();
-//      }
-//
-//      // Verify other criteria match
-//      UserEntity user = userOpt.get();
-//      if ((StringUtil.isNotBlank(request.getUsername()) && !request.getUsername().equals(user.getUsername())) || 
-//        (StringUtil.isNotBlank(request.getFirstName()) && !request.getFirstName().equals(user.getFirstName())) || 
-//        (StringUtil.isNotBlank(request.getLastName()) && !request.getLastName().equals(user.getLastName())) || 
-//        (StringUtil.isNotBlank(request.getEmail()) && !request.getEmail().equals(user.getEmail()))) {
-//        return CollectionUtil.emptyList();
-//      }
-//
-//      return Collections.singletonList(user);
-//    } else {
-//      // Search by username, first name, last name, and email
-//      log.info("Searching Keycloak user list by criteria: username={}, firstName={}, lastName={}, email={}",
-//          request.getUsername(), request.getFirstName(), request.getLastName(), request.getEmail());
-//      try {
-//        // Paging parameters
-//        int first = request.getPagingRequest() == null ? 0 : request.getPagingRequest().getOffset();
-//        int max = request.getPagingRequest() == null ? 1 : request.getPagingRequest().getLimit();
-//        log.info("Retrieving Keycloak user list with paging: first={}, max={}", first, max);
-//
-//        List<UserRepresentation> kcUsers = usersResource.search(
-//            request.getUsername(), request.getFirstName(), 
-//            request.getLastName(), request.getEmail(), 
-//            first, max);
-//        return MapperUtil.mapList(kcUsers, KeycloakUtil::toUserEntity);
-//      } catch (Exception e) {
-//        log.error("Failed to retrieve Keycloak user list: reason={}", e.getMessage());
-//        return Collections.emptyList();
-//      }
-//    }
+      // Verify other criteria match
+      UserEntity user = userOpt.get();
+      if ((StringUtil.isNotBlank(request.getUsername()) && !request.getUsername().equals(user.getUsername())) ||
+          (StringUtil.isNotBlank(request.getFirstName()) && !request.getFirstName().equals(user.getFirstName())) ||
+          (StringUtil.isNotBlank(request.getLastName()) && !request.getLastName().equals(user.getLastName())) ||
+          (StringUtil.isNotBlank(request.getEmail()) && !request.getEmail().equals(user.getEmail()))) {
+        return CollectionUtil.emptyList();
+      }
+
+      return Collections.singletonList(user);
+    } else {
+      // Search by username, first name, last name, and email
+      try {
+        int first = request.getPagingRequest() == null ? 0 : request.getPagingRequest().getOffset();
+        int max = request.getPagingRequest() == null ? 1 : request.getPagingRequest().getLimit();
+
+        String url = buildSearchUsersUrl(request.getUsername(), request.getFirstName(),
+            request.getLastName(), request.getEmail(), first, max);
+
+        List<Map<String, Object>> kcUsers = restClient.get()
+            .uri(url)
+            .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+            .retrieve()
+            .body(USER_LIST_TYPE);
+
+        return kcUsers == null ? Collections.emptyList() :
+            kcUsers.stream().map(this::toUserEntity).toList();
+      } catch (Exception e) {
+        log.error("Failed to retrieve Keycloak user list: reason={}", e.getMessage());
+        return Collections.emptyList();
+      }
+    }
   }
 
   public List<UserEntity> retrieveUserList(List<String> userIds) {
@@ -92,56 +84,75 @@ public class KeycloakUserClient {
       return CollectionUtil.emptyList();
     }
 
-    UsersResource usersResource = getUsersResource();
     List<UserEntity> userList = new ArrayList<>();
     for (String userId : userIds) {
-      try {
-        UserRepresentation kcUser = usersResource.get(userId).toRepresentation();
-        UserEntity user = KeycloakUtil.toUserEntity(kcUser);
-        userList.add(user);
-      } catch (Exception e) {
-        log.debug("Keycloak user {} not found: {}", userId, ExceptionUtil.getStacktrace(e));
-      }
+      retrieveUser(userId).ifPresent(userList::add);
     }
     return userList;
   }
 
   public Optional<UserEntity> retrieveUser(String userId) {
-    UsersResource usersResource = getUsersResource();
+    String url = String.format("%s/admin/realms/%s/users/%s",
+        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), userId);
     try {
-      UserRepresentation kcUser = usersResource.get(userId).toRepresentation();
-      return Optional.of(KeycloakUtil.toUserEntity(kcUser));
+      Map<String, Object> kcUser = restClient.get()
+          .uri(url)
+          .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+          .retrieve()
+          .onStatus(HttpStatusCode::is4xxClientError, (request, response) -> {
+            throw new KeycloakClientException("User not found: " + userId);
+          })
+          .body(Map.class);
+      return Optional.ofNullable(kcUser).map(this::toUserEntity);
     } catch (Exception e) {
-      log.debug("Keycloak user {} not found: {}", userId, ExceptionUtil.getStacktrace(e));
+      log.debug("Keycloak user {} not found: {}", userId, e.getMessage());
       return Optional.empty();
     }
   }
 
   public Long retrieveTotalUserCount() {
-    UsersResource usersResource = getUsersResource();
-    return (long) usersResource.count();
+    String url = String.format("%s/admin/realms/%s/users/count",
+        keycloakProps.getBaseUrl(), keycloakProps.getRealm());
+    try {
+      Integer count = restClient.get()
+          .uri(url)
+          .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+          .retrieve()
+          .body(Integer.class);
+      return count == null ? 0L : count.longValue();
+    } catch (Exception e) {
+      log.error("Failed to retrieve user count: {}", e.getMessage());
+      return 0L;
+    }
   }
 
   public boolean existsByUsername(String username) {
-    RetrieveUserListRequest retrieveUserListRequest = RetrieveUserListRequest.builder()
+    RetrieveUserListRequest request = RetrieveUserListRequest.builder()
         .username(username)
         .build();
-    return CollectionUtil.isNotEmpty(retrieveUserList(retrieveUserListRequest));
+    return CollectionUtil.isNotEmpty(retrieveUserList(request));
   }
 
   public boolean existsByEmail(String email) {
-    RetrieveUserListRequest retrieveUserListRequest = RetrieveUserListRequest.builder()
+    RetrieveUserListRequest request = RetrieveUserListRequest.builder()
         .email(email)
         .build();
-    return CollectionUtil.isNotEmpty(retrieveUserList(retrieveUserListRequest));
+    return CollectionUtil.isNotEmpty(retrieveUserList(request));
   }
 
   public boolean existsByAttribute(KeycloakUserAttribute attribute, String value) {
     try {
-      RealmResource realm = keycloak.realm(keycloakProps.getRealm());
-      UsersResource users = realm.users();
-      String query = String.format("attribute:%s", value);
-      return CollectionUtil.isNotEmpty(users.searchByAttributes(query));
+      String url = String.format("%s/admin/realms/%s/users?q=%s:%s",
+          keycloakProps.getBaseUrl(), keycloakProps.getRealm(),
+          attribute.getName(), value);
+
+      List<Map<String, Object>> users = restClient.get()
+          .uri(url)
+          .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+          .retrieve()
+          .body(USER_LIST_TYPE);
+
+      return CollectionUtil.isNotEmpty(users);
     } catch (Exception e) {
       log.error("Failed to check exists by attribute: attribute={}, reason={}",
           attribute, e.getMessage());
@@ -153,25 +164,38 @@ public class KeycloakUserClient {
    * @return Keycloak created user ID
    */
   public String createUser(UserEntity user, String password) {
-    RealmResource realm = keycloak.realm(keycloakProps.getRealm());
-    UsersResource usersResource = realm.users();
-    UserRepresentation kcUser = toUserRepresentation(user, password);
-    try (Response response = usersResource.create(kcUser)) {
-      if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
-        throw new KeycloakClientException(
-            String.format("Failed to create Keycloak user: username=%s, status=%d, reason=%s",
-                user.getUsername(), response.getStatus(),
-                response.getStatusInfo().getReasonPhrase()));
-      }
+    String url = String.format("%s/admin/realms/%s/users",
+        keycloakProps.getBaseUrl(), keycloakProps.getRealm());
+
+    Map<String, Object> userPayload = buildUserPayload(user, password);
+
+    try {
+      String locationHeader = restClient.post()
+          .uri(url)
+          .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+          .contentType(MediaType.APPLICATION_JSON)
+          .body(userPayload)
+          .retrieve()
+          .onStatus(HttpStatusCode::isError, (request, response) -> {
+            throw new KeycloakClientException(
+                String.format("Failed to create Keycloak user: username=%s, status=%d",
+                    user.getUsername(), response.getStatusCode().value()));
+          })
+          .toBodilessEntity()
+          .getHeaders()
+          .getFirst("Location");
+
+      // Extract user ID from Location header
+      String kcCreatedId = extractUserIdFromLocation(locationHeader);
 
       // Assign role
-      String kcCreatedId = CreatedResponseUtil.getCreatedId(response);
-      UserResource userResource = usersResource.get(kcCreatedId);
-      assignUserRole(userResource, user.getRole());
+      assignUserRole(kcCreatedId, user.getRole());
 
       log.info("Created Keycloak user successfully: username={}, keycloakUserId={}",
           user.getUsername(), kcCreatedId);
       return kcCreatedId;
+    } catch (KeycloakClientException e) {
+      throw e;
     } catch (Exception e) {
       throw new KeycloakClientException(
           String.format("Failed to create Keycloak user: username=%s, reason=%s",
@@ -180,17 +204,31 @@ public class KeycloakUserClient {
   }
 
   public void updateUser(UserEntity user) {
-    UsersResource usersResource = getUsersResource();
+    String url = String.format("%s/admin/realms/%s/users/%s",
+        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), user.getId());
+
+    Map<String, Object> userPayload = buildUserPayload(user);
+
     try {
-      // Update user info
-      UserResource userResource = usersResource.get(user.getId());
-      UserRepresentation kcUser = toUserRepresentation(user);
-      userResource.update(kcUser);
+      restClient.put()
+          .uri(url)
+          .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+          .contentType(MediaType.APPLICATION_JSON)
+          .body(userPayload)
+          .retrieve()
+          .onStatus(HttpStatusCode::isError, (request, response) -> {
+            throw new KeycloakClientException(
+                String.format("Failed to update Keycloak user: username=%s, status=%d",
+                    user.getUsername(), response.getStatusCode().value()));
+          })
+          .toBodilessEntity();
 
       // Assign role
-      assignUserRole(userResource, user.getRole());
+      assignUserRole(user.getId(), user.getRole());
 
       log.info("Updated Keycloak user successfully: id={}", user.getId());
+    } catch (KeycloakClientException e) {
+      throw e;
     } catch (Exception e) {
       throw new KeycloakClientException(
           String.format("Failed to update Keycloak user: username=%s, reason=%s",
@@ -199,13 +237,24 @@ public class KeycloakUserClient {
   }
 
   public void deleteUser(String userId) {
-    UsersResource usersResource = getUsersResource();
-    try (Response response = usersResource.delete(userId)) {
-      if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
-        throw new KeycloakClientException(
-            String.format("Failed to delete Keycloak user: userId=%s, status=%d, reason=%s",
-                userId, response.getStatus(), response.getStatusInfo().getReasonPhrase()));
-      }
+    String url = String.format("%s/admin/realms/%s/users/%s",
+        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), userId);
+
+    try {
+      restClient.delete()
+          .uri(url)
+          .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+          .retrieve()
+          .onStatus(HttpStatusCode::isError, (request, response) -> {
+            throw new KeycloakClientException(
+                String.format("Failed to delete Keycloak user: userId=%s, status=%d",
+                    userId, response.getStatusCode().value()));
+          })
+          .toBodilessEntity();
+
+      log.info("Deleted Keycloak user successfully: userId={}", userId);
+    } catch (KeycloakClientException e) {
+      throw e;
     } catch (Exception e) {
       throw new KeycloakClientException(
           String.format("Failed to delete Keycloak user: userId=%s, reason=%s",
@@ -213,67 +262,121 @@ public class KeycloakUserClient {
     }
   }
 
-  private UsersResource getUsersResource() {
-    RealmResource realm = keycloak.realm(keycloakProps.getRealm());
-    log.info("Obtained Keycloak realm resource for realm '{}'", keycloakProps.getRealm());
-    return realm.users();
+  private String buildSearchUsersUrl(String username, String firstName, String lastName,
+                                      String email, int first, int max) {
+    StringBuilder url = new StringBuilder(String.format("%s/admin/realms/%s/users?first=%d&max=%d",
+        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), first, max));
+
+    if (StringUtil.isNotBlank(username)) {
+      url.append("&username=").append(username);
+    }
+    if (StringUtil.isNotBlank(firstName)) {
+      url.append("&firstName=").append(firstName);
+    }
+    if (StringUtil.isNotBlank(lastName)) {
+      url.append("&lastName=").append(lastName);
+    }
+    if (StringUtil.isNotBlank(email)) {
+      url.append("&email=").append(email);
+    }
+
+    return url.toString();
   }
 
-  private UserRepresentation toUserRepresentation(UserEntity user, String password) {
-    // Basic info
-    UserRepresentation kcUser = new UserRepresentation();
-    kcUser.setUsername(user.getUsername());
-    kcUser.setFirstName(user.getFirstName());
-    kcUser.setLastName(user.getLastName());
-    kcUser.setEmail(user.getEmail());
-    kcUser.setEnabled(true);
+  private UserEntity toUserEntity(Map<String, Object> kcUser) {
+    UserEntity user = new UserEntity();
+    user.setId((String) kcUser.get("id"));
+    user.setUsername((String) kcUser.get("username"));
+    user.setFirstName((String) kcUser.get("firstName"));
+    user.setLastName((String) kcUser.get("lastName"));
+    user.setEmail((String) kcUser.get("email"));
 
-    // Password
-    CredentialRepresentation kcCredential = toCredentialRepresentation(password);
-    kcUser.setCredentials(Collections.singletonList(kcCredential));
+    // Extract phone number from attributes
+    Map<String, List<String>> attributes = (Map<String, List<String>>) kcUser.get("attributes");
+    if (attributes != null) {
+      List<String> phoneNumbers = attributes.get(KeycloakUserAttribute.PHONE_NUMBER.getName());
+      if (phoneNumbers != null && !phoneNumbers.isEmpty()) {
+        user.setPhoneNumber(phoneNumbers.get(0));
+      }
+    }
 
-    // Attributes
-    kcUser.singleAttribute(KeycloakUserAttribute.PHONE_NUMBER.getName(), user.getPhoneNumber());
-
-    return kcUser;
+    return user;
   }
 
-  private UserRepresentation toUserRepresentation(UserEntity user) {
-    UserRepresentation kcUser = new UserRepresentation();
-    kcUser.setUsername(user.getUsername());
-    kcUser.setFirstName(user.getFirstName());
-    kcUser.setLastName(user.getLastName());
-    kcUser.setEmail(user.getEmail());
-    kcUser.setEnabled(true);
-    kcUser.singleAttribute(KeycloakUserAttribute.PHONE_NUMBER.getName(), user.getPhoneNumber());
-    return kcUser;
+  private Map<String, Object> buildUserPayload(UserEntity user, String password) {
+    Map<String, Object> userPayload = new HashMap<>(buildUserPayload(user));
+    userPayload.put("credentials", List.of(Map.of(
+        "type", "password",
+        "value", password,
+        "temporary", false
+    )));
+    return userPayload;
   }
 
-  private CredentialRepresentation toCredentialRepresentation(String password) {
-    CredentialRepresentation kcCredential = new CredentialRepresentation();
-    kcCredential.setType(CredentialRepresentation.PASSWORD);
-    kcCredential.setValue(password);
-    kcCredential.setTemporary(Boolean.FALSE);
-    return kcCredential;
+  private Map<String, Object> buildUserPayload(UserEntity user) {
+    return Map.of(
+        "username", user.getUsername(),
+        "firstName", user.getFirstName() != null ? user.getFirstName() : "",
+        "lastName", user.getLastName() != null ? user.getLastName() : "",
+        "email", user.getEmail() != null ? user.getEmail() : "",
+        "enabled", true,
+        "attributes", Map.of(
+            KeycloakUserAttribute.PHONE_NUMBER.getName(),
+            List.of(user.getPhoneNumber() != null ? user.getPhoneNumber() : "")
+        )
+    );
   }
 
-  private void assignUserRole(UserResource userResource, UserRole userRole) {
-    List<RoleRepresentation> assignedKcRoles = userResource.roles().realmLevel().listAll();
+  private String extractUserIdFromLocation(String locationHeader) {
+    if (locationHeader == null) {
+      throw new KeycloakClientException("Location header is missing");
+    }
+    return locationHeader.substring(locationHeader.lastIndexOf("/") + 1);
+  }
 
-    RoleRepresentation targetKcRole = keycloakRealmRoleClient.getRealmRole(userRole);
+  private void assignUserRole(String userId, UserRole userRole) {
+    // Get current roles
+    String getRolesUrl = String.format("%s/admin/realms/%s/users/%s/role-mappings/realm",
+        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), userId);
+
+    List<Map<String, Object>> assignedRoles = restClient.get()
+        .uri(getRolesUrl)
+        .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+        .retrieve()
+        .body(new ParameterizedTypeReference<>() {});
+
+    Map<String, Object> targetRole = keycloakRealmRoleClient.getRealmRoleAsMap(userRole);
+    String targetRoleName = (String) targetRole.get("name");
 
     // Remove other roles
-    List<RoleRepresentation> kcRolesToRemove = assignedKcRoles.stream()
-        .filter(kcRole -> !kcRole.getName().equals(targetKcRole.getName())).toList();
-    if (!kcRolesToRemove.isEmpty()) {
-      userResource.roles().realmLevel().remove(kcRolesToRemove);
+    if (assignedRoles != null && !assignedRoles.isEmpty()) {
+      List<Map<String, Object>> rolesToRemove = assignedRoles.stream()
+          .filter(role -> !targetRoleName.equals(role.get("name")))
+          .toList();
+
+      if (!rolesToRemove.isEmpty()) {
+        restClient.method(HttpMethod.DELETE)
+            .uri(getRolesUrl)
+            .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(rolesToRemove)
+            .retrieve()
+            .toBodilessEntity();
+      }
     }
 
     // Assign target role if not already assigned
-    boolean alreadyHasRole = assignedKcRoles.stream()
-        .anyMatch(r -> r.getName().equals(targetKcRole.getName()));
+    boolean alreadyHasRole = assignedRoles != null && assignedRoles.stream()
+        .anyMatch(role -> targetRoleName.equals(role.get("name")));
+
     if (!alreadyHasRole) {
-      userResource.roles().realmLevel().add(List.of(targetKcRole));
+      restClient.post()
+          .uri(getRolesUrl)
+          .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+          .contentType(MediaType.APPLICATION_JSON)
+          .body(List.of(targetRole))
+          .retrieve()
+          .toBodilessEntity();
     }
   }
 }

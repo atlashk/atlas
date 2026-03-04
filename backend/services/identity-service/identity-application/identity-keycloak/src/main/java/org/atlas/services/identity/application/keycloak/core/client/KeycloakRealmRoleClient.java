@@ -1,35 +1,32 @@
 package org.atlas.services.identity.application.keycloak.core.client;
 
-import jakarta.ws.rs.NotFoundException;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.shared.identity.UserRole;
 import org.atlas.services.identity.application.keycloak.core.config.KeycloakProps;
-import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.resource.RealmResource;
-import org.keycloak.admin.client.resource.RolesResource;
-import org.keycloak.representations.idm.RoleRepresentation;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClient;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j(topic = "keycloak.client.realm-role")
+@Slf4j(topic = "keycloak.client.realm_role")
 public class KeycloakRealmRoleClient {
 
-  private final Keycloak keycloak;
   private final KeycloakProps keycloakProps;
+  private final KeycloakAdminTokenProvider adminTokenProvider;
+  private final RestClient restClient;
 
-  public RoleRepresentation getRealmRole(UserRole role) {
-    RolesResource realmRoles = getRolesResource();
-    return realmRoles.get(getRealmRoleName(role)).toRepresentation();
-  }
+  @SuppressWarnings("unchecked")
+  public Map<String, Object> getRealmRoleAsMap(UserRole userRole) {
+    String roleName = userRole.name().toLowerCase();
+    String url = String.format("%s/admin/realms/%s/roles/%s",
+        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), roleName);
 
-  private RolesResource getRolesResource() {
-    RealmResource realm = keycloak.realm(keycloakProps.getRealm());
-    return realm.roles();
-  }
-
-  private String getRealmRoleName(UserRole role) {
-    return role.name().toLowerCase();
+    return restClient.get()
+        .uri(url)
+        .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+        .retrieve()
+        .body(Map.class);
   }
 }
