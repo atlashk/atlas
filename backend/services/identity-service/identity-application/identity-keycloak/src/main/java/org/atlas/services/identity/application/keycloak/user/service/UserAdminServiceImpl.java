@@ -58,8 +58,8 @@ public class UserAdminServiceImpl implements UserAdminService {
     try {
       kcUserId = keycloakUserClient.createUser(user, input.getPassword());
     } catch (Exception e) {
-      log.error("Failed to sync user to Keycloak: userId={}, error={}", 
-          user.getId(), e.getMessage(), e);
+      log.error("Failed to sync user to Keycloak: username={}, error={}", 
+          user.getUsername(), e.getMessage(), e);
       throw new DomainException(DomainError.USER_REGISTRATION_FAILED, e);
     }
 

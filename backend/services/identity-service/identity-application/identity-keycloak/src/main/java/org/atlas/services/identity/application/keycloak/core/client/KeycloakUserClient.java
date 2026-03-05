@@ -44,7 +44,7 @@ public class KeycloakUserClient {
           .onStatus(HttpStatusCode::isError, (request, response) -> {
             throw new KeycloakClientException(
                 String.format("Failed to create Keycloak user: username=%s, status=%d",
-                    user.getId(), response.getStatusCode().value()));
+                    user.getUsername(), response.getStatusCode().value()));
           })
           .toBodilessEntity()
           .getHeaders()
