@@ -750,7 +750,7 @@ services:
       {{/hasService}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
       {{#hasService "identity" "jwt"}}
-      - IDENTITY_SERVICE_URI=http://identity-service:8081
+      - JWK_SET_URI=http://identity-service:8081/.well-known/jwks.json
       {{/hasService}}
       {{#hasService "identity" "keycloak"}}
       - KEYCLOAK_BASE_URL=http://keycloak:8080

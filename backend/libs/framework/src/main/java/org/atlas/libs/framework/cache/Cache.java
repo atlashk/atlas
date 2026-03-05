@@ -18,13 +18,13 @@ public @interface Cache {
 
   String cacheName();
 
-  String key();
+  String key() default "__default__";
 
   /**
    * Time-to-live (TTL) for the cached value in seconds. After this duration, the cached value will
-   * expire and be removed. Default value is 300 seconds (5 minutes).
+   * expire and be removed. Default value is not set.
    *
    * @return the TTL in seconds
    */
-  long ttl() default 300;
+  long ttl() default 0L;
 }

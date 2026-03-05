@@ -31,6 +31,9 @@ dependencies {
     // REST server
     api project(':libs.api.server.rest')
 
+    // JWT
+    api project(':libs.jwt')
+    
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

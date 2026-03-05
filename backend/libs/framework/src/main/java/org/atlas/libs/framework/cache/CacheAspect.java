@@ -57,7 +57,11 @@ public class CacheAspect {
     Object result = joinPoint.proceed();
 
     if (result != null) {
-      cacheService.put(applicationCache, cacheKey, result, cache.ttl());
+      if (cache.ttl() == 0L) {
+        cacheService.put(applicationCache, cacheKey, result);
+      } else {
+        cacheService.put(applicationCache, cacheKey, result, cache.ttl());
+      }
     }
 
     return result;

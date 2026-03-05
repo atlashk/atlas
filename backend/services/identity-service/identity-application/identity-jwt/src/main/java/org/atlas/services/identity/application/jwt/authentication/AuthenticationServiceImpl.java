@@ -2,7 +2,6 @@ package org.atlas.services.identity.application.jwt.authentication;
 
 import java.time.Duration;
 import java.util.Date;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.context.Contexts;
@@ -49,11 +48,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final OneTimeTokenService oneTimeTokenService;
   private final PasswordEncoder passwordEncoder;
   private final KvStoreService kvStoreService;
-
-  @Override
-  public Map<String, Object> jwkSet() throws Exception {
-    return JwtUtil.jwkSet();
-  }
 
   @Override
   @Transactional(readOnly = true)

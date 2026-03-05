@@ -1,6 +1,5 @@
 package org.atlas.services.identity.port.in.authentication.service;
 
-import java.util.Map;
 import org.atlas.services.identity.port.in.authentication.model.ChangePasswordInput;
 import org.atlas.services.identity.port.in.authentication.model.GenerateOneTimeTokenInput;
 import org.atlas.services.identity.port.in.authentication.model.GenerateOneTimeTokenOutput;
@@ -11,8 +10,6 @@ import org.atlas.services.identity.port.in.authentication.model.RefreshTokenInpu
 import org.atlas.services.identity.port.in.authentication.model.RefreshTokenOutput;
 
 public interface AuthenticationService {
-
-  Map<String, Object> jwkSet() throws Exception;
 
   LoginOutput login(LoginInput input) throws Exception;
 

@@ -21,7 +21,11 @@ public class CacheService {
   }
 
   public void put(ApplicationCache cache, String key, Object value) {
-    put(cache, key, value, cache.getTtl());
+    if (cache.getTtl() <= 0L) {
+      kvStoreService.put(cache.getName(), key, value);
+    } else {
+       put(cache, key, value, cache.getTtl());
+    }
   }
 
   public <T> Optional<T> get(ApplicationCache cache, String key, Class<T> clazz) {

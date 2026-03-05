@@ -45,12 +45,6 @@ public class AuthenticationController {
 
   private final AuthenticationService authenticationService;
 
-  @GetMapping(value = "/.well-known/jwks.json")
-  @Operation(summary = "JwkSet endpoint")
-  public Map<String, Object> jwkSet() throws Exception {
-    return authenticationService.jwkSet();
-  }
-
   @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "User login")
   public ApiResponseWrapper<LoginResponse> login(

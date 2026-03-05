@@ -1,12 +1,10 @@
 package org.atlas.services.identity.application.keycloak.authentication;
 
-import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.context.Contexts;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.services.identity.application.keycloak.core.client.KeycloakAuthenticationClient;
-import org.atlas.services.identity.application.keycloak.core.client.KeycloakUserClient;
 import org.atlas.services.identity.application.keycloak.core.model.TokenResponse;
 import org.atlas.services.identity.domain.entity.UserEntity;
 import org.atlas.services.identity.domain.error.DomainError;
@@ -31,11 +29,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   private final UserRepository userRepository;
   private final KeycloakAuthenticationClient keycloakAuthenticationClient;
-
-  @Override
-  public Map<String, Object> jwkSet() {
-    throw new UnsupportedOperationException();
-  }
 
   @Override
   public LoginOutput login(LoginInput input) throws Exception {

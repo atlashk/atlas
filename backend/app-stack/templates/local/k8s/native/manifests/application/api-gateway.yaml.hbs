@@ -35,8 +35,8 @@ spec:
               value: "6379"
             {{/hasService}}
             {{#hasService "identity" "jwt"}}
-            - name: IDENTITY_SERVICE_URI
-              value: "http://identity-service:8081"
+            - name: JWK_SET_URI
+              value: "http://identity-service:8081/.well-known/jwks.json"
             {{/hasService}}
             {{#hasService "identity" "keycloak"}}
             - name: KEYCLOAK_BASE_URL
