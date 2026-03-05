@@ -10,10 +10,27 @@ readonly APP_STACK="{{appStack}}"
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 readonly COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
+readonly GRADLEW="$PROJECT_ROOT/backend/gradlew"
+
+readonly SERVICES=(
+  "identity-service:$PROJECT_ROOT/backend/services/identity-service/identity-bootstrap"
+  "catalog-service:$PROJECT_ROOT/backend/services/catalog-service/catalog-bootstrap"
+  "inventory-service:$PROJECT_ROOT/backend/services/inventory-service/inventory-bootstrap"
+  "order-service:$PROJECT_ROOT/backend/services/order-service/order-bootstrap"
+  "payment-service:$PROJECT_ROOT/backend/services/payment-service/payment-bootstrap"
+  "api-gateway:$PROJECT_ROOT/backend/services/api-gateway/spring-cloud-gateway/spring-cloud-gateway-server"
+{{#hasService "service-discovery" "eureka"}}
+  "eureka-server:$PROJECT_ROOT/backend/platform/discovery-server/eureka-server"
+{{/hasService}}
+)
 
 SECONDS=0
 SKIP_BUILD=false
 DOCKER_COMPOSE_CMD=""
+
+SKIP_TESTS=true
+BUILD_JAR=true
+BUILD_DOCKER=true
 
 # =============================================================================
 # UTILITIES
@@ -33,17 +50,23 @@ Usage: $0 [OPTIONS]
 Deploy services using Docker Compose
 
 Options:
-  --skip-build      Skip service build step
-  -h, --help        Show this help message
+  --skip-build            Skip all build steps
+  --skip-tests=BOOL       Skip tests during JAR build (default: true)
+  --build-jar=BOOL        Build JAR files (default: true)
+  --build-docker=BOOL     Build Docker images (default: true)
+  -h, --help              Show this help message
 EOF
 }
 
 parse_arguments() {
-  while [[ $# -gt 0 ]]; do
-    case $1 in
-      --skip-build) SKIP_BUILD=true; shift ;;
-      -h|--help)    show_usage; exit 0 ;;
-      *)            shift ;;
+  for arg in "$@"; do
+    case $arg in
+      --skip-build)      SKIP_BUILD=true ;;
+      --skip-tests=*)    SKIP_TESTS="${arg#*=}" ;;
+      --build-jar=*)     BUILD_JAR="${arg#*=}" ;;
+      --build-docker=*)  BUILD_DOCKER="${arg#*=}" ;;
+      -h|--help)         show_usage; exit 0 ;;
+      *)                 die "Unknown parameter: $arg" ;;
     esac
   done
 }
@@ -90,7 +113,9 @@ check_docker_compose() {
 
 check_prerequisites() {
   info "Checking prerequisites..."
-  check_java
+  if [[ "$SKIP_BUILD" == false && "$BUILD_JAR" == "true" ]]; then
+    check_java
+  fi
   check_docker
   check_docker_compose
   info "Prerequisites check passed"
@@ -100,16 +125,53 @@ check_prerequisites() {
 # BUILD
 # =============================================================================
 
-build_services() {
-  info "Building services..."
+build_jars() {
+  [[ "$BUILD_JAR" == "true" ]] || return 0
 
-  local build_script="$SCRIPT_DIR/build.sh"
-  [[ -f "$build_script" ]] || die "Build script not found: $build_script"
+  info "Starting JAR build process..."
+  chmod +x "$GRADLEW"
 
-  chmod +x "$SCRIPT_DIR/"*.sh
-  "$build_script" || die "Build failed"
+  local gradle_args=("clean" "build")
+  [[ "$SKIP_TESTS" == "true" ]] && gradle_args+=("-x" "test")
+  [[ -n "$APP_STACK" ]] && gradle_args+=("-PappStack=$APP_STACK")
 
-  info "Build completed successfully"
+  (cd "$PROJECT_ROOT/backend" && "$GRADLEW" "${gradle_args[@]}") || die "Gradle build failed"
+
+  info "JAR build completed successfully."
+  echo
+}
+
+cleanup_dangling_images() {
+  info "Cleaning up dangling images..."
+
+  local dangling
+  dangling=$(docker images -f "dangling=true" -q 2>/dev/null || true)
+
+  if [[ -n "$dangling" ]]; then
+    docker rmi $dangling 2>/dev/null || info "Some dangling images could not be removed (possibly in use)"
+  else
+    info "No dangling images to clean up."
+  fi
+}
+
+build_docker_images() {
+  [[ "$BUILD_DOCKER" == "true" ]] || return 0
+
+  info "Starting Docker build process..."
+  [[ ${#SERVICES[@]} -eq 0 ]] && die "No services specified to build"
+
+  for entry in "${SERVICES[@]}"; do
+    local name="${entry%%:*}"
+    local context="${entry#*:}"
+    local image="$PROJECT_NAME/$name"
+
+    info "Building Docker image for $image..."
+    docker build -t "$image:latest" -t "$image" "$context" || die "Failed to build Docker image for $image"
+    info "Built Docker image for $image successfully."
+  done
+
+  info "Docker images build process completed successfully."
+  cleanup_dangling_images
   echo
 }
 
@@ -143,17 +205,18 @@ trap print_total_time EXIT
 
 main() {
   parse_arguments "$@"
-
   check_prerequisites
 
+  # Build services
   info "Installing services for project: $PROJECT_NAME, app stack: $APP_STACK"
-
   if [[ "$SKIP_BUILD" == true ]]; then
     info "Skipping build step"
   else
-    build_services
+    build_jars
+    build_docker_images
   fi
 
+  # Deploy services
   deploy_services
 }
 

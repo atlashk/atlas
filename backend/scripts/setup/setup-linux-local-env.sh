@@ -100,58 +100,6 @@ install_minikube() {
     fi
 }
 
-# Install Portainer (Docker management UI)
-install_portainer() {
-    echo "INFO: Installing Portainer..."
-
-    # Check if Portainer container already exists
-    if docker ps -a --format '{{.Names}}' | grep -q '^portainer$'; then
-        if docker ps --format '{{.Names}}' | grep -q '^portainer$'; then
-            echo "SUCCESS: Portainer is already running"
-            echo "INFO: Access Portainer at https://localhost:9443"
-            return 0
-        else
-            echo "INFO: Portainer container exists but is not running. Starting..."
-            docker start portainer
-            if docker ps --format '{{.Names}}' | grep -q '^portainer$'; then
-                echo "SUCCESS: Portainer started successfully"
-                echo "INFO: Access Portainer at https://localhost:9443"
-                return 0
-            else
-                echo "ERROR: Failed to start Portainer"
-                return 1
-            fi
-        fi
-    fi
-
-    # Create Portainer data volume
-    echo "INFO: Creating Portainer data volume..."
-    docker volume create portainer_data
-
-    # Run Portainer container
-    echo "INFO: Starting Portainer container..."
-    docker run -d \
-        --name portainer \
-        --restart=always \
-        -p 9100:9000 \
-        -p 9443:9443 \
-        -v /var/run/docker.sock:/var/run/docker.sock \
-        -v portainer_data:/data \
-        portainer/portainer-ce:latest
-
-    # Verify Portainer is running
-    sleep 3
-    if docker ps --format '{{.Names}}' | grep -q '^portainer$'; then
-        echo "SUCCESS: Portainer installed and running successfully"
-        echo "INFO: Access Portainer at https://localhost:9443"
-        echo "INFO: On first access, you will be prompted to create an admin user"
-        return 0
-    else
-        echo "ERROR: Portainer installation failed"
-        return 1
-    fi
-}
-
 # Detect Linux distribution
 detect_distro() {
     if [[ -f /etc/os-release ]]; then
@@ -471,16 +419,6 @@ verify_installations() {
         all_good=false
     fi
 
-    # Check Portainer
-    if docker ps --format '{{.Names}}' | grep -q '^portainer$'; then
-        echo "SUCCESS: ✓ Portainer: Running (https://localhost:9443)"
-    elif docker ps -a --format '{{.Names}}' | grep -q '^portainer$'; then
-        echo "WARNING: ⚠ Portainer: Container exists but not running"
-    else
-        echo "ERROR: ✗ Portainer: Not installed"
-        all_good=false
-    fi
-
     if $all_good; then
         echo "SUCCESS: All tools installed successfully!"
     else
@@ -512,8 +450,6 @@ main() {
     install_kubectl
     echo
     install_minikube
-    echo
-    install_portainer
     echo
 
     # Reload shell environment

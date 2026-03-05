@@ -31,36 +31,28 @@ die() { echo "Error: $1" >&2; exit 1; }
 info() { echo "$1"; }
 warn() { echo "Warning: $1" >&2; }
 
-command_exists() { command -v "$1" >/dev/null 2>&1; }
+# =============================================================================
+# USAGE
+# =============================================================================
 
-usage() {
+show_usage() {
   cat <<EOF
-Usage: $(basename "$0") [OPTIONS]
+Usage: $0 [OPTIONS]
+
+Uninstall services using Docker Compose
 
 Options:
-    --remove-application-images    Remove application Docker images (default: false)
-    -h, --help                     Show this help message
-
-Examples:
-    $(basename "$0")                              # Uninstall without removing images
-    $(basename "$0") --remove-application-images  # Uninstall and remove application images
+  --remove-application-images  Remove application Docker images (default: false)
+  -h, --help                   Show this help message
 EOF
-  exit 0
 }
 
-parse_args() {
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --remove-application-images)
-        REMOVE_APPLICATION_IMAGES=true
-        shift
-        ;;
-      -h|--help)
-        usage
-        ;;
-      *)
-        die "Unknown option: $1"
-        ;;
+parse_arguments() {
+  for arg in "$@"; do
+    case $arg in
+      --remove-application-images) REMOVE_APPLICATION_IMAGES=true ;;
+      -h|--help)                   show_usage; exit 0 ;;
+      *)                           die "Unknown parameter: $arg" ;;
     esac
   done
 }
@@ -69,46 +61,36 @@ parse_args() {
 # PREREQUISITES
 # =============================================================================
 
+check_cluster() {
+  command -v kubectl >/dev/null 2>&1 \
+    || die "kubectl not found."
+
+  CLUSTER_NAME="$(kubectl config current-context 2>/dev/null || true)"
+  [[ -n "$CLUSTER_NAME" ]] \
+    || die "No active Kubernetes context."
+
+  case "$CLUSTER_NAME" in
+    minikube*)
+      CLUSTER_TYPE="minikube"
+      command -v minikube >/dev/null 2>&1 \
+        || die "minikube binary not found."
+      ;;
+    *)
+      die "Unsupported Kubernetes context: $CLUSTER_NAME"
+      ;;
+  esac
+
+  kubectl get nodes >/dev/null 2>&1 \
+    || die "Cluster not reachable."
+
+  kubectl get nodes --no-headers | grep -q ' Ready' \
+    || die "No Ready nodes."
+}
+
 check_prerequisites() {
   info "Checking prerequisites..."
-  command_exists kubectl || die "kubectl is not installed"
-  kubectl cluster-info >/dev/null 2>&1 || die "Cannot connect to Kubernetes cluster"
+  check_cluster
   info "Prerequisites check passed"
-}
-
-# =============================================================================
-# CLUSTER DETECTION
-# =============================================================================
-
-detect_cluster() {
-  command -v kubectl >/dev/null 2>&1 || return 0
-
-  local context
-  context="$(kubectl config current-context 2>/dev/null || true)"
-
-  case "$context" in
-    minikube)
-      command -v minikube >/dev/null 2>&1 && { CLUSTER_TYPE="minikube"; CLUSTER_NAME="minikube"; }
-      ;;
-    kind-*)
-      command -v kind >/dev/null 2>&1 && { CLUSTER_TYPE="kind"; CLUSTER_NAME="${context#kind-}"; }
-      ;;
-  esac
-}
-
-remove_image_from_cluster() {
-  local image="$1"
-
-  case "$CLUSTER_TYPE" in
-    minikube)
-      info "Removing image $image from Minikube..."
-      minikube image rm "$image" 2>/dev/null || true
-      ;;
-    kind)
-      info "Removing image $image from Kind cluster '$CLUSTER_NAME'..."
-      docker exec "${CLUSTER_NAME}-control-plane" crictl rmi "$image" 2>/dev/null || true
-      ;;
-  esac
 }
 
 # =============================================================================
@@ -135,13 +117,23 @@ remove_namespace() {
   wait_for_namespace_deletion
 }
 
+remove_image_from_cluster() {
+  local image="$1"
+
+  case "$CLUSTER_TYPE" in
+    minikube)
+      info "Removing image $image from Minikube..."
+      minikube image rm "$image" 2>/dev/null || true
+      ;;
+    kind)
+      info "Removing image $image from Kind cluster '$CLUSTER_NAME'..."
+      docker exec "${CLUSTER_NAME}-control-plane" crictl rmi "$image" 2>/dev/null || true
+      ;;
+  esac
+}
+
 remove_application_images() {
   info "Removing ${PROJECT_NAME} application images..."
-
-  detect_cluster
-  if [[ -n "$CLUSTER_TYPE" ]]; then
-    info "Detected Kubernetes context: $CLUSTER_TYPE ($CLUSTER_NAME). Images will be removed from cluster."
-  fi
 
   # Remove images from cluster
   for service in "${SERVICES[@]}"; do
@@ -168,11 +160,12 @@ remove_application_images() {
 
 main() {
   parse_args "$@"
-
   check_prerequisites
 
+  # Remove namespace and its resources
   remove_namespace
 
+  # Remove application images if requested
   if [[ "$REMOVE_APPLICATION_IMAGES" == "true" ]]; then
     remove_application_images
   fi

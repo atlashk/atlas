@@ -5,14 +5,32 @@ set -euo pipefail
 # CONFIGURATION
 # =============================================================================
 
+readonly PROJECT_NAME="{{dotenv.PROJECT_NAME}}"
+readonly APP_STACK="{{appStack}}"
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../" && pwd)"
-readonly NAMESPACE="{{dotenv.PROJECT_NAME}}"
+readonly PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+readonly NAMESPACE="$PROJECT_NAME"
 readonly MANIFESTS_DIR="$SCRIPT_DIR/manifests"
+readonly GRADLEW="$PROJECT_ROOT/backend/gradlew"
+
+readonly SERVICES=(
+  "identity-service:$PROJECT_ROOT/backend/services/identity-service/identity-bootstrap"
+  "catalog-service:$PROJECT_ROOT/backend/services/catalog-service/catalog-bootstrap"
+  "inventory-service:$PROJECT_ROOT/backend/services/inventory-service/inventory-bootstrap"
+  "order-service:$PROJECT_ROOT/backend/services/order-service/order-bootstrap"
+  "payment-service:$PROJECT_ROOT/backend/services/payment-service/payment-bootstrap"
+  "api-gateway:$PROJECT_ROOT/backend/services/api-gateway/spring-cloud-gateway/spring-cloud-gateway-server"
+)
 
 SECONDS=0
 SKIP_BUILD=false
 INFRA_ONLY=false
+
+SKIP_TESTS=true
+BUILD_JAR=true
+BUILD_DOCKER=true
+CLUSTER_TYPE=""
+CLUSTER_NAME=""
 
 # =============================================================================
 # UTILITIES
@@ -25,29 +43,35 @@ warn() { echo "Warning: $1" >&2; }
 command_exists() { command -v "$1" >/dev/null 2>&1; }
 
 # =============================================================================
-# ARGUMENT PARSING
+# USAGE
 # =============================================================================
 
-show_help() {
+show_usage() {
   cat <<EOF
 Usage: $0 [OPTIONS]
 
 Atlas Kubernetes deployment script
 
 Options:
-  -h, --help        Show this help message
-  --skip-build      Skip backend and Docker image builds
-  --infra-only      Apply only infrastructure manifests (implies --skip-build)
+  -h, --help              Show this help message
+  --skip-build            Skip all build steps
+  --infra-only            Apply only infrastructure manifests (implies --skip-build)
+  --skip-tests=BOOL       Skip tests during JAR build (default: true)
+  --build-jar=BOOL        Build JAR files (default: true)
+  --build-docker=BOOL     Build Docker images (default: true)
 EOF
 }
 
 parse_arguments() {
   while [[ $# -gt 0 ]]; do
     case $1 in
-      -h|--help)     show_help; exit 0 ;;
+      -h|--help)     show_usage; exit 0 ;;
       --skip-build)  SKIP_BUILD=true; shift ;;
       --infra-only)  INFRA_ONLY=true; SKIP_BUILD=true; shift ;;
-      *)             die "Unknown option: $1. Use --help for usage information" ;;
+      --skip-tests=*)   SKIP_TESTS="${1#*=}"; shift ;;
+      --build-jar=*)    BUILD_JAR="${1#*=}"; shift ;;
+      --build-docker=*) BUILD_DOCKER="${1#*=}"; shift ;;
+      *)                die "Unknown option: $1. Use --help for usage information" ;;
     esac
   done
 }
@@ -56,17 +80,63 @@ parse_arguments() {
 # PREREQUISITES
 # =============================================================================
 
-check_prerequisites() {
-  info "Checking prerequisites..."
+check_java() {
+  command -v java &>/dev/null || die "Java is not installed or not in PATH"
 
-  command_exists kubectl || die "kubectl is not installed"
-  kubectl cluster-info >/dev/null 2>&1 || die "Cannot connect to Kubernetes cluster"
+  local version
+  version=$(java -version 2>&1 | head -n 1)
 
-  if [[ "$SKIP_BUILD" == false ]]; then
-    command_exists java || die "Java is not installed. Please install Java 17 or later."
-    docker info >/dev/null 2>&1 || die "Docker is not running. Please start Docker."
+  local major
+  if [[ "$version" =~ \"1\.([0-9]+) ]]; then
+    major="${BASH_REMATCH[1]}"
+  elif [[ "$version" =~ \"([0-9]+) ]]; then
+    major="${BASH_REMATCH[1]}"
+  else
+    major=0
   fi
 
+  [[ $major -ge 17 ]] || die "Java 17 or later is required (found: $version)"
+  info "Java found: $version"
+}
+
+check_docker() {
+  docker info &>/dev/null || die "Docker is not running"
+  info "Docker found and running"
+}
+
+check_cluster() {
+  command -v kubectl >/dev/null 2>&1 \
+    || die "kubectl not found."
+
+  CLUSTER_NAME="$(kubectl config current-context 2>/dev/null || true)"
+  [[ -n "$CLUSTER_NAME" ]] \
+    || die "No active Kubernetes context."
+
+  case "$CLUSTER_NAME" in
+    minikube*)
+      CLUSTER_TYPE="minikube"
+      command -v minikube >/dev/null 2>&1 \
+        || die "minikube binary not found."
+      ;;
+    *)
+      die "Unsupported Kubernetes context: $CLUSTER_NAME"
+      ;;
+  esac
+
+  kubectl get nodes >/dev/null 2>&1 \
+    || die "Cluster not reachable."
+
+  kubectl get nodes --no-headers | grep -q ' Ready' \
+    || die "No Ready nodes."
+}
+
+check_prerequisites() {
+  info "Checking prerequisites..."
+  if [[ "$SKIP_BUILD" == false && "$BUILD_JAR" == "true" ]]; then
+    check_java
+  fi
+  check_docker
+  check_cluster
   info "Prerequisites check passed"
 }
 
@@ -74,16 +144,81 @@ check_prerequisites() {
 # BUILD
 # =============================================================================
 
-build_services() {
-  info "Building services..."
+build_jars() {
+  [[ "$BUILD_JAR" == "true" ]] || return 0
 
-  local build_script="$SCRIPT_DIR/build.sh"
-  [[ -f "$build_script" ]] || die "Build script not found: $build_script"
+  info "Starting JAR build process..."
+  chmod +x "$GRADLEW"
 
-  chmod +x "$SCRIPT_DIR/"*.sh
-  "$build_script" || die "Build failed"
+  local gradle_args=("clean" "build")
+  [[ "$SKIP_TESTS" == "true" ]] && gradle_args+=("-x" "test")
+  [[ -n "$APP_STACK" ]] && gradle_args+=("-PappStack=$APP_STACK")
 
-  info "Build completed successfully"
+  (cd "$PROJECT_ROOT/backend" && "$GRADLEW" "${gradle_args[@]}") || die "Gradle build failed"
+
+  info "JAR build completed successfully."
+  echo
+}
+
+load_image_to_cluster() {
+  local image="$1"
+
+  case "$CLUSTER_TYPE" in
+    minikube)
+      info "Loading image $image into Minikube..."
+      minikube image load "$image"
+      ;;
+  esac
+}
+
+cleanup_dangling_images() {
+  info "Cleaning up dangling images..."
+
+  local dangling
+  dangling=$(docker images -f "dangling=true" -q 2>/dev/null || true)
+
+  if [[ -n "$dangling" ]]; then
+    docker rmi $dangling 2>/dev/null || info "Some dangling images could not be removed (possibly in use)"
+  else
+    info "No dangling images to clean up."
+  fi
+}
+
+build_docker_images() {
+  [[ "$BUILD_DOCKER" == "true" ]] || return 0
+
+  info "Starting Docker build process..."
+
+  CLUSTER_NAME="$(kubectl config current-context 2>/dev/null || true)"
+  [[ -n "$CLUSTER_NAME" ]] || die "No active Kubernetes context."
+
+  case "$CLUSTER_NAME" in
+    minikube*)
+      CLUSTER_TYPE="minikube"
+      command -v minikube >/dev/null 2>&1 || die "minikube binary not found."
+      ;;
+    *)
+      die "Unsupported Kubernetes context: $CLUSTER_NAME"
+      ;;
+  esac
+
+  info "Detected Kubernetes context: $CLUSTER_TYPE ($CLUSTER_NAME). Images will be loaded into cluster."
+
+  [[ ${#SERVICES[@]} -eq 0 ]] && die "No services specified to build"
+
+  for entry in "${SERVICES[@]}"; do
+    local name="${entry%%:*}"
+    local context="${entry#*:}"
+    local image="$PROJECT_NAME/$name"
+
+    info "Building Docker image for $image..."
+    docker build -t "$image:latest" -t "$image" "$context" || die "Failed to build Docker image for $image"
+    load_image_to_cluster "$image:latest"
+    info "Built Docker image for $image successfully."
+  done
+
+  info "Docker images build process completed successfully."
+  cleanup_dangling_images
   echo
 }
 
@@ -196,12 +331,16 @@ main() {
   parse_arguments "$@"
   check_prerequisites
 
+  # Build services
+  info "Installing services for project: $PROJECT_NAME, app stack: $APP_STACK"
   if [[ "$SKIP_BUILD" == true ]]; then
     info "Skipping build step"
   else
-    build_services
+    build_jars
+    build_docker_images
   fi
 
+  # Deploy services
   create_namespace
   apply_manifests
 }

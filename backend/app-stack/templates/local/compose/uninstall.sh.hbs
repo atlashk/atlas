@@ -20,34 +20,28 @@ REMOVE_APPLICATION_IMAGES=false
 die() { echo "Error: $1" >&2; exit 1; }
 info() { echo "$1"; }
 
-usage() {
+# =============================================================================
+# USAGE
+# =============================================================================
+
+show_usage() {
   cat <<EOF
-Usage: $(basename "$0") [OPTIONS]
+Usage: $0 [OPTIONS]
+
+Uninstall services using Docker Compose
 
 Options:
-    --remove-application-images    Remove application Docker images (default: false)
-    -h, --help                     Show this help message
-
-Examples:
-    $(basename "$0")                              # Uninstall without removing images
-    $(basename "$0") --remove-application-images  # Uninstall and remove application images
+  --remove-application-images  Remove application Docker images (default: false)
+  -h, --help                   Show this help message
 EOF
-  exit 0
 }
 
-parse_args() {
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --remove-application-images)
-        REMOVE_APPLICATION_IMAGES=true
-        shift
-        ;;
-      -h|--help)
-        usage
-        ;;
-      *)
-        die "Unknown option: $1"
-        ;;
+parse_arguments() {
+  for arg in "$@"; do
+    case $arg in
+      --remove-application-images) REMOVE_APPLICATION_IMAGES=true ;;
+      -h|--help)                   show_usage; exit 0 ;;
+      *)                           die "Unknown parameter: $arg" ;;
     esac
   done
 }
@@ -84,7 +78,7 @@ check_prerequisites() {
 # CLEANUP
 # =============================================================================
 
-down_containers() {
+remove_containers() {
   info "Stopping and removing containers and volumes..."
   $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" -p "$PROJECT_NAME" down -v
 }
@@ -109,14 +103,15 @@ remove_application_images() {
 # =============================================================================
 
 main() {
-  parse_args "$@"
-  
+  parse_arguments "$@"
   check_prerequisites
 
   info "Uninstalling services for project: $PROJECT_NAME, app stack: $APP_STACK"
 
-  down_containers
+  # Remove containers and their volumes
+  remove_containers
 
+  # Remove application images if requested
   if [[ "$REMOVE_APPLICATION_IMAGES" == "true" ]]; then
     remove_application_images
   fi
