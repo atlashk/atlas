@@ -113,7 +113,7 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   name: keycloak-config
-                  key: keycloak-client
+                  key: keycloak-client-secret
             {{/hasService}}
             {{#hasService "observability.tracing" "zipkin"}}
             - name: ZIPKIN_ENDPOINT

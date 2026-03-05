@@ -23,7 +23,7 @@ metadata:
 data:
   keycloak-realm: "default"
   keycloak-client-id: "default-auth"
-  keycloak-client: "9cvF5MPJnwfhEOCwNnQ79RmlkckAsDCj"
+  keycloak-client-secret: "9cvF5MPJnwfhEOCwNnQ79RmlkckAsDCj"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -73,19 +73,6 @@ data:
             "phone",
             "roles"
           ]
-        }
-      ],
-      "users": [
-        {
-          "username": "service-account-default-auth",
-          "enabled": true,
-          "serviceAccountClientId": "default-auth",
-          "clientRoles": {
-            "realm-management": [
-              "view-users",
-              "manage-users"
-            ]
-          }
         }
       ]
     }
