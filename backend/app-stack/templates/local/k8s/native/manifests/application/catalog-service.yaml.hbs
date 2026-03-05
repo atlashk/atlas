@@ -106,12 +106,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: minio
-                  key: access-key
+                  key: minio-access-key
             - name: MINIO_SECRET_KEY
               valueFrom:
                 secretKeyRef:
                   name: minio
-                  key: secret-key
+                  key: minio-secret-key
             {{/hasService}}
             {{#hasService "observability.tracing" "zipkin"}}
             - name: ZIPKIN_ENDPOINT
