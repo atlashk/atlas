@@ -25,6 +25,45 @@ repositories {
 }
 
 dependencies {
+    // Datasource
+    switch (rootProject.ext.appStack['datasource']) {
+        case 'mysql':
+            api project(':services.identity.datasource.mysql')
+            break
+        case 'postgres':
+            api project(':services.identity.datasource.postgres')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported datasource: ${rootProject.ext.appStack['datasource']}")
+    }
+
+    // KV store
+    switch (rootProject.ext.appStack['kv-store']) {
+        case 'redis':
+            api project(':libs.kv-store.redis')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported kv-store: ${rootProject.ext.appStack['kv-store']}")
+    }
+
+    // Migration
+    switch (rootProject.ext.appStack['migration']) {
+        case 'flyway':
+            switch (rootProject.ext.appStack['datasource']) {
+                case 'mysql':
+                    api project(':services.identity.migration.flyway.mysql')
+                    break
+                case 'postgres':
+                    api project(':services.identity.migration.flyway.postgres')
+                    break
+                default:
+                    throw new IllegalArgumentException("Unsupported datasource: ${rootProject.ext.appStack['datasource']}")
+            }
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported migration: ${rootProject.ext.appStack['migration']}")
+    }
+    
     // Observability
     api project(':libs.observability.actuator')
     switch (rootProject.ext.appStack['observability.logging.framework']) {
@@ -53,6 +92,18 @@ dependencies {
             throw new IllegalArgumentException("Unsupported observability.tracing: ${rootProject.ext.appStack['observability.tracing']}")
     }
 
+    // Persistence
+    switch (rootProject.ext.appStack.persistence) {
+        case 'jpa':
+            api project(':services.identity.persistence.jpa')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported persistence: ${rootProject.ext.appStack.persistence}")
+    }
+    
+    // Sequence generator
+    api project(':libs.sequence-generator')
+    
     // Service discovery
     switch (rootProject.ext.appStack['service-discovery']) {
         case 'none':
@@ -65,59 +116,6 @@ dependencies {
             break
         default:
             throw new IllegalArgumentException("Unsupported service-discovery: ${rootProject.ext.appStack['service-discovery']}")
-    }
-
-    if (rootProject.ext.appStack['identity'] == 'jwt') {
-        // Datasource
-        switch (rootProject.ext.appStack['datasource']) {
-            case 'mysql':
-                api project(':services.identity.datasource.mysql')
-                break
-            case 'postgres':
-                api project(':services.identity.datasource.postgres')
-                break
-            default:
-                throw new IllegalArgumentException("Unsupported datasource: ${rootProject.ext.appStack['datasource']}")
-        }
-
-        // KV store
-        switch (rootProject.ext.appStack['kv-store']) {
-            case 'redis':
-                api project(':libs.kv-store.redis')
-                break
-            default:
-                throw new IllegalArgumentException("Unsupported kv-store: ${rootProject.ext.appStack['kv-store']}")
-        }
-
-        // Migration
-        switch (rootProject.ext.appStack['migration']) {
-            case 'flyway':
-                switch (rootProject.ext.appStack['datasource']) {
-                    case 'mysql':
-                        api project(':services.identity.migration.flyway.mysql')
-                        break
-                    case 'postgres':
-                        api project(':services.identity.migration.flyway.postgres')
-                        break
-                    default:
-                        throw new IllegalArgumentException("Unsupported datasource: ${rootProject.ext.appStack['datasource']}")
-                }
-                break
-            default:
-                throw new IllegalArgumentException("Unsupported migration: ${rootProject.ext.appStack['migration']}")
-        }
-
-        // Persistence
-        switch (rootProject.ext.appStack.persistence) {
-            case 'jpa':
-                api project(':services.identity.persistence.jpa')
-                break
-            default:
-                throw new IllegalArgumentException("Unsupported persistence: ${rootProject.ext.appStack.persistence}")
-        }
-
-        // Sequence generator
-        api project(':libs.sequence-generator')
     }
 }
 

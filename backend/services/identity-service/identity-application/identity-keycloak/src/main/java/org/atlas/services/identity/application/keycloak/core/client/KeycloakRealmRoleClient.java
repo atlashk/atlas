@@ -3,10 +3,8 @@ package org.atlas.services.identity.application.keycloak.core.client;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.domain.shared.identity.UserRole;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.services.identity.application.keycloak.core.config.KeycloakProps;
 import org.springframework.core.ParameterizedTypeReference;
@@ -26,19 +24,6 @@ public class KeycloakRealmRoleClient {
 
   private static final ParameterizedTypeReference<List<Map<String, Object>>> ROLE_LIST_TYPE =
       new ParameterizedTypeReference<>() {};
-
-  @SuppressWarnings("unchecked")
-  public Map<String, Object> getRealmRoleAsMap(UserRole userRole) {
-    String roleName = userRole.name().toLowerCase();
-    String url = String.format("%s/admin/realms/%s/roles/%s",
-        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), roleName);
-
-    return restClient.get()
-        .uri(url)
-        .headers(keycloakClientHelper.buildHeaders())
-        .retrieve()
-        .body(Map.class);
-  }
 
   public List<Map<String, Object>> getUserAssignedRealmRoles(String userId) {
     String url = String.format("%s/admin/realms/%s/users/%s/role-mappings/realm",
@@ -98,26 +83,5 @@ public class KeycloakRealmRoleClient {
         .body(rolesToAdd)
         .retrieve()
         .toBodilessEntity();
-  }
-
-  public Optional<UserRole> resolveUserRole(String userId) {
-    List<Map<String, Object>> assignedRoles = getUserAssignedRealmRoles(userId);
-    if (CollectionUtil.isEmpty(assignedRoles)) {
-      return Optional.empty();
-    }
-
-    for (Map<String, Object> role : assignedRoles) {
-      String name = role == null ? null : (String) role.get("name");
-      if (name == null || name.startsWith("default-roles")) {
-        continue;
-      }
-      for (UserRole userRole : UserRole.values()) {
-        if (userRole.name().equalsIgnoreCase(name)) {
-          return Optional.of(userRole);
-        }
-      }
-    }
-
-    return Optional.empty();
   }
 }

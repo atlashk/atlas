@@ -1,11 +1,11 @@
 package org.atlas.services.identity.application.keycloak.user.mapper;
 
-import org.atlas.services.identity.application.keycloak.core.model.RetrieveUserListRequest;
 import org.atlas.services.identity.domain.entity.UserEntity;
 import org.atlas.services.identity.port.in.user.model.admin.CreateUserInput;
 import org.atlas.services.identity.port.in.user.model.admin.RetrieveUserListInput;
 import org.atlas.services.identity.port.in.user.model.admin.UpdateUserInput;
 import org.atlas.services.identity.port.in.user.model.admin.UserOutput;
+import org.atlas.services.identity.port.out.repository.UserRepository.FindUserCriteria;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
@@ -19,14 +19,11 @@ public interface UserAdminMapper {
   // Input --> Entity
   // -----------------------------------------------------------------------------------------------
 
+  FindUserCriteria toFindUserCriteria(RetrieveUserListInput input);
+
   UserEntity toUser(CreateUserInput input);
 
   void merge(UpdateUserInput input, @MappingTarget UserEntity user);
-
-  // Input --> Request
-  // -----------------------------------------------------------------------------------------------
-
-  RetrieveUserListRequest toRetrieveUserListRequest(RetrieveUserListInput input);
 
   // Entity --> Output
   // -----------------------------------------------------------------------------------------------
