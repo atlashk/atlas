@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.context.Contexts;
 import org.atlas.libs.framework.domain.shared.identity.UserRole;
-import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
-import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.services.identity.application.keycloak.core.client.KeycloakUserClient;
-import org.atlas.services.identity.application.keycloak.user.mapper.UserAdminMapper;
 import org.atlas.services.identity.application.keycloak.user.mapper.UserMapper;
 import org.atlas.services.identity.domain.entity.UserEntity;
 import org.atlas.services.identity.domain.error.DomainError;
@@ -25,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
 
   private final UserRepository userRepository;
-  private final SequenceGenerator sequenceGenerator;
   private final KeycloakUserClient keycloakUserClient;
 
   @Override
@@ -33,31 +29,28 @@ public class UserServiceImpl implements UserService {
   public void register(RegisterInput input) {
     checkValidity(input);
 
-    // 1. Save to DB first (without password - Keycloak handles password)
     UserEntity user = UserMapper.INSTANCE.toUser(input);
-    user.setId(sequenceGenerator.generate(SequenceType.USER));
     user.setRole(UserRole.USER);
-    userRepository.insert(user);
 
-    // 2. Sync to Keycloak
+    // 1. Create Keycloak user
+    String kcUserId;
     try {
-      String kcUserId = keycloakUserClient.createUser(user, input.getPassword());
-      
-      // Update DB with Keycloak user ID for future reference
-      user.setExternalId(kcUserId);
-      userRepository.update(user);
+      kcUserId = keycloakUserClient.createUser(user, input.getPassword());
     } catch (Exception e) {
       log.error("Failed to sync user to Keycloak: userId={}, error={}", 
           user.getId(), e.getMessage(), e);
       throw new DomainException(DomainError.USER_REGISTRATION_FAILED, e);
     }
+
+    // 2. Save to DB (without password - Keycloak handles password)
+    user.setId(kcUserId);
+    userRepository.insert(user);
   }
 
   @Override
   @Transactional(readOnly = true)
   public ProfileOutput retrieveProfile() {
     String userId = Contexts.getUserId();
-    // Query from DB for better performance
     return userRepository.findById(userId)
         .map(UserMapper.INSTANCE::toProfileOutput)
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));

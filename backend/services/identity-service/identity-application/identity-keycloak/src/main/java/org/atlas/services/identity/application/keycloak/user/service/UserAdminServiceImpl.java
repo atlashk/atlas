@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.security.authorization.RequiredAdmin;
-import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
-import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.identity.application.keycloak.core.client.KeycloakUserClient;
 import org.atlas.services.identity.application.keycloak.user.mapper.UserAdminMapper;
@@ -29,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserAdminServiceImpl implements UserAdminService {
 
   private final UserRepository userRepository;
-  private final SequenceGenerator sequenceGenerator;
   private final KeycloakUserClient keycloakUserClient;
 
   @Override
@@ -54,45 +51,43 @@ public class UserAdminServiceImpl implements UserAdminService {
   public String createUser(CreateUserInput input) {
     checkValidity(input);
 
-    // 1. Save to DB first (without password - Keycloak handles password)
     UserEntity user = UserAdminMapper.INSTANCE.toUser(input);
-    user.setId(sequenceGenerator.generate(SequenceType.USER));
-    userRepository.insert(user);
 
-    // 2. Sync to Keycloak
+    // 1. Create Keycloak user
+    String kcUserId;
     try {
-      String kcUserId = keycloakUserClient.createUser(user, input.getPassword());
-      
-      // Update DB with Keycloak user ID for future reference
-      user.setExternalId(kcUserId);
-      userRepository.update(user);
+      kcUserId = keycloakUserClient.createUser(user, input.getPassword());
     } catch (Exception e) {
       log.error("Failed to sync user to Keycloak: userId={}, error={}", 
           user.getId(), e.getMessage(), e);
       throw new DomainException(DomainError.USER_REGISTRATION_FAILED, e);
     }
 
-    return user.getId();
+    // 2. Save to DB (without password - Keycloak handles password)
+    user.setId(kcUserId);
+    userRepository.insert(user);
+
+    return kcUserId;
   }
 
   @Override
   @Transactional
   public void updateUser(UpdateUserInput input) {
-    // 1. Update DB first
     UserEntity user = userRepository.findById(input.getId())
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
-
     UserAdminMapper.INSTANCE.merge(input, user);
-    userRepository.update(user);
 
-    // 2. Sync to Keycloak
+    // 1. Sync to Keycloak
     try {
       keycloakUserClient.updateUser(user);
     } catch (Exception e) {
-      log.error("Failed to sync user update to Keycloak: userId={}, kcUserId={}, error={}", 
-          user.getId(), user.getExternalId(), e.getMessage(), e);
+      log.error("Failed to sync user update to Keycloak: userId={}, error={}", 
+          user.getId(), e.getMessage(), e);
       throw new DomainException(DomainError.USER_UPDATE_FAILED, e);
     }
+
+    // Save to DB
+    userRepository.update(user);
   }
 
   @Override
@@ -101,17 +96,17 @@ public class UserAdminServiceImpl implements UserAdminService {
     UserEntity user = userRepository.findById(id)
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
     
-    // 1. Delete from DB first
-    userRepository.deleteById(id);
-
-    // 2. Delete from Keycloak
+    // 1. Delete from Keycloak
     try {
-      keycloakUserClient.deleteUser(user.getExternalId());
+      keycloakUserClient.deleteUser(user.getId());
     } catch (Exception e) {
-      log.error("Failed to delete user from Keycloak: userId={}, kcUserId={}, error={}", 
-          user.getId(), user.getExternalId(), e.getMessage(), e);
+      log.error("Failed to delete user from Keycloak: userId={}, error={}", 
+          user.getId(), e.getMessage(), e);
       throw new DomainException(DomainError.USER_DELETE_FAILED, e);
     }
+    
+    // 2. Delete from DB
+    userRepository.deleteById(id);
   }
 
   @Override

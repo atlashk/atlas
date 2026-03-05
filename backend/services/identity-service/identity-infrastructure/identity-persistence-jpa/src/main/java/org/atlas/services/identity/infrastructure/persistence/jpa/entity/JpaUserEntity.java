@@ -31,9 +31,6 @@ public class JpaUserEntity extends JpaBaseEntity {
   @Column(name = "id")
   private String id;
 
-  @Column(name = "external_id")
-  private String externalId;
-
   @Column(name = "username")
   private String username;
 

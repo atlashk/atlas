@@ -6,7 +6,6 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.shared.identity.UserRole;
-import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.identity.application.keycloak.core.config.KeycloakProps;
 import org.atlas.services.identity.application.keycloak.core.enums.KeycloakUserAttribute;
 import org.atlas.services.identity.application.keycloak.core.exception.KeycloakClientException;
@@ -44,7 +43,7 @@ public class KeycloakUserClient {
           .retrieve()
           .onStatus(HttpStatusCode::isError, (request, response) -> {
             throw new KeycloakClientException(
-                String.format("Failed to create Keycloak user: userId=%s, status=%d",
+                String.format("Failed to create Keycloak user: username=%s, status=%d",
                     user.getId(), response.getStatusCode().value()));
           })
           .toBodilessEntity()
@@ -57,21 +56,21 @@ public class KeycloakUserClient {
       // Assign role
       assignUserRole(kcUserId, user.getRole());
 
-      log.info("Created Keycloak user successfully: userId={}, kcUserId={}", 
-          user.getId(), kcUserId);
+      log.info("Created Keycloak user successfully: username={}, userId={}", 
+          user.getUsername(), kcUserId);
       return kcUserId;
     } catch (KeycloakClientException e) {
       throw e;
     } catch (Exception e) {
       throw new KeycloakClientException(
-          String.format("Failed to create Keycloak user: userId=%s, reason=%s", 
-              user.getId(), e.getMessage()));
+          String.format("Failed to create Keycloak user: username=%s, reason=%s", 
+              user.getUsername(), e.getMessage()));
     }
   }
 
   public void updateUser(UserEntity user) {
     String url = String.format("%s/admin/realms/%s/users/%s",
-        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), user.getExternalId());
+        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), user.getId());
 
     Map<String, Object> userPayload = buildUserPayload(user);
 
@@ -84,28 +83,27 @@ public class KeycloakUserClient {
           .retrieve()
           .onStatus(HttpStatusCode::isError, (request, response) -> {
             throw new KeycloakClientException(
-                String.format("Failed to update Keycloak user: userId=%s, kcUserId=%s, status=%d",
-                    user.getId(), user.getExternalId(), response.getStatusCode().value()));
+                String.format("Failed to update Keycloak user: userId=%s, status=%d",
+                    user.getId(), response.getStatusCode().value()));
           })
           .toBodilessEntity();
 
       // Assign role
-      assignUserRole(user.getExternalId(), user.getRole());
+      assignUserRole(user.getId(), user.getRole());
 
-      log.info("Updated Keycloak user successfully: userId={}, kcUserId={}", 
-          user.getId(), user.getExternalId());
+      log.info("Updated Keycloak user successfully: userId={}", user.getId());
     } catch (KeycloakClientException e) {
       throw e;
     } catch (Exception e) {
       throw new KeycloakClientException(
-          String.format("Failed to update Keycloak user: userId=%s, kcUserId=%s, reason=%s",
-              user.getId(), user.getExternalId(), e.getMessage()));
+          String.format("Failed to update Keycloak user: userId=%s, reason=%s",
+              user.getId(), e.getMessage()));
     }
   }
 
-  public void deleteUser(String kcUserId) {
+  public void deleteUser(String userId) {
     String url = String.format("%s/admin/realms/%s/users/%s",
-        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), kcUserId);
+        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), userId);
 
     try {
       restClient.delete()
@@ -115,17 +113,17 @@ public class KeycloakUserClient {
           .onStatus(HttpStatusCode::isError, (request, response) -> {
             throw new KeycloakClientException(
                 String.format("Failed to delete Keycloak user: userId=%s, status=%d",
-                    kcUserId, response.getStatusCode().value()));
+                    userId, response.getStatusCode().value()));
           })
           .toBodilessEntity();
 
-      log.info("Deleted Keycloak user successfully: userId={}", kcUserId);
+      log.info("Deleted Keycloak user successfully: userId={}", userId);
     } catch (KeycloakClientException e) {
       throw e;
     } catch (Exception e) {
       throw new KeycloakClientException(
-          String.format("Failed to delete Keycloak user: kcUserId=%s, reason=%s",
-              kcUserId, e.getMessage()));
+          String.format("Failed to delete Keycloak user: userId=%s, reason=%s",
+              userId, e.getMessage()));
     }
   }
 
@@ -163,22 +161,22 @@ public class KeycloakUserClient {
     return locationHeader.substring(locationHeader.lastIndexOf("/") + 1);
   }
 
-  private void assignUserRole(String kcUserId, UserRole userRole) {
+  private void assignUserRole(String userId, UserRole userRole) {
     String roleName = userRole.name().toLowerCase();
     List<Map<String, Object>> assignedRoles = 
-        keycloakRealmRoleClient.getUserAssignedRealmRoles(kcUserId);
+        keycloakRealmRoleClient.getUserAssignedRealmRoles(userId);
 
     // Check if already has the target role
     boolean alreadyHasRole = assignedRoles != null && assignedRoles.stream()
         .anyMatch(role -> roleName.equals(role.get("name")));
 
     if (alreadyHasRole) {
-      log.info("Keycloak user {} already has role {}", kcUserId, roleName);
+      log.info("Keycloak user {} already has role {}", userId, roleName);
       return;
     }
 
-    List<Map<String, Object>> availableRoles = keycloakRealmRoleClient.getUserAvailableRealmRoles(
-        kcUserId);
+    List<Map<String, Object>> availableRoles = 
+        keycloakRealmRoleClient.getUserAvailableRealmRoles(userId);
 
     // Find target role from available roles
     Map<String, Object> targetRole = availableRoles == null ? null : availableRoles.stream()
@@ -187,7 +185,7 @@ public class KeycloakUserClient {
         .orElse(null);
 
     if (targetRole == null) {
-      log.warn("Role {} not found in available roles for keycloak user {}", roleName, kcUserId);
+      log.warn("Role {} not found in available roles for keycloak user {}", roleName, userId);
       return;
     }
 
@@ -201,13 +199,13 @@ public class KeycloakUserClient {
           .toList();
 
       if (!rolesToRemove.isEmpty()) {
-        keycloakRealmRoleClient.removeUserRealmRoles(kcUserId, rolesToRemove);
+        keycloakRealmRoleClient.removeUserRealmRoles(userId, rolesToRemove);
       }
     }
 
     // Assign target role
-    keycloakRealmRoleClient.addUserRealmRoles(kcUserId, List.of(targetRole));
+    keycloakRealmRoleClient.addUserRealmRoles(userId, List.of(targetRole));
 
-    log.info("Assigned role {} to keycloak user {}", roleName, kcUserId);
+    log.info("Assigned role {} to keycloak user {}", roleName, userId);
   }
 }

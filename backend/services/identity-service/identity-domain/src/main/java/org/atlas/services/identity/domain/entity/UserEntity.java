@@ -20,8 +20,6 @@ public class UserEntity extends DomainEntity {
   @EqualsAndHashCode.Include
   private String id;
 
-  private String externalId;
-  
   private String username;
 
   // Hashed password

@@ -1,7 +1,6 @@
 CREATE TABLE IF NOT EXISTS users
 (
     id           VARCHAR(64)  NOT NULL PRIMARY KEY,
-    external_id  VARCHAR(255), -- For users authenticated via external providers
     username     VARCHAR(255) NOT NULL,
     password     VARCHAR(255), -- Password can be NULL for users authenticated via external providers
     first_name   VARCHAR(255) NOT NULL,
