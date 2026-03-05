@@ -17,27 +17,9 @@ REMOVE_IMAGES=false
 # UTILITIES
 # =============================================================================
 
-supports_color() {
-  [[ -t 1 ]] && [[ "${TERM:-}" != "dumb" ]] && [[ -z "${NO_COLOR:-}" ]]
-}
-
-if supports_color; then
-  readonly RED=$'\033[31m'
-  readonly GREEN=$'\033[32m'
-  readonly YELLOW=$'\033[33m'
-  readonly BLUE=$'\033[34m'
-  readonly RESET=$'\033[0m'
-else
-  readonly RED=""
-  readonly GREEN=""
-  readonly YELLOW=""
-  readonly BLUE=""
-  readonly RESET=""
-fi
-
-info()  { printf "%b\n" "${BLUE}INFO${RESET} $1"; }
-warn()  { printf "%b\n" "${YELLOW}WARN${RESET} $1"; }
-error() { printf "%b\n" "${RED}ERROR${RESET} $1" >&2; exit 1; }
+info()  { printf "%b\n" "[INFO] $1"; }
+warn()  { printf "%b\n" "[WARN] $1"; }
+error() { printf "%b\n" "[ERROR] $1" >&2; exit 1; }
 
 # =============================================================================
 # USAGE
@@ -115,7 +97,7 @@ remove_networks() {
 
   docker network ls \
     --filter "name=${PROJECT_NAME}" \
-    --format "{{.Name}}" \
+    --format "{{"{{"}}.Name{{"}}"}}" \
     | xargs -r docker network rm >/dev/null 2>&1 || true
 }
 
@@ -124,7 +106,7 @@ remove_images() {
 
   local images
   images=$(docker images "${PROJECT_NAME}/*" \
-    --format "{{.Repository}}:{{.Tag}}" \
+    --format "{{"{{"}}.Repository{{"}}"}}:{{"{{"}}.Tag{{"}}"}}" \
     | grep -v "<none>" || true)
 
   if [[ -z "$images" ]]; then

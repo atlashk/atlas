@@ -36,7 +36,7 @@ export class CatalogApi extends BaseApi {
     return this.post<Product[], RetrieveProductListFilter>("/products/list", payload);
   }
 
-  async retrieveProduct(productId: number): Promise<ApiResponse<Product>> {
+  async retrieveProduct(productId: string): Promise<ApiResponse<Product>> {
     return this.get<Product>(`/products/${productId}`);
   }
 }

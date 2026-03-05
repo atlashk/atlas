@@ -25,13 +25,13 @@ async retrieveCart(): Promise<ApiResponse<CartResponse>> {
   }
 
   async updateCartItem(
-    productId: number,
+    productId: string,
     request: UpdateCartItemRequest
   ): Promise<ApiResponse<CartResponse>> {
     return this.post<CartResponse>(`/carts/items/${productId}/update`, request);
   }
 
-  async removeCartItem(productId: number): Promise<ApiResponse<CartResponse>> {
+  async removeCartItem(productId: string): Promise<ApiResponse<CartResponse>> {
     return this.post<CartResponse>(`/carts/items/${productId}/remove`);
   }
 

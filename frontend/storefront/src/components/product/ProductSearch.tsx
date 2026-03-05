@@ -43,7 +43,7 @@ interface SearchFilters {
   minPrice?: number;
   maxPrice?: number;
   brandId?: string;
-  categoryIds?: number[];
+  categoryIds?: string[];
   mode?: "DATABASE" | "FULL_TEXT_SEARCH";
 }
 
@@ -114,7 +114,7 @@ const ProductSearch: React.FC = () => {
     [updateFilter]
   );
 
-  const changeCategory = useCallback((categoryId: number) => {
+  const changeCategory = useCallback((categoryId: string) => {
     setFormFilters((prev) => ({
       ...prev,
       categoryIds: prev.categoryIds?.includes(categoryId)
@@ -235,7 +235,7 @@ const ProductSearch: React.FC = () => {
   };
 
   // Load product details
-  const loadProductDetails = useCallback(async (productId: number) => {
+  const loadProductDetails = useCallback(async (productId: string) => {
     try {
       setIsLoadingProductDetails(true);
       const response = await catalogApi.retrieveProduct(productId);

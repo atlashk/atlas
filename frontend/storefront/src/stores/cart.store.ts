@@ -13,15 +13,15 @@ interface CartState {
 interface CartActions {
   // Core cart operations
   loadCart: () => Promise<void>;
-  addToCart: (productId: number, quantity?: number) => Promise<boolean>;
-  removeFromCart: (productId: number) => Promise<boolean>;
-  updateQuantity: (productId: number, quantity: number) => Promise<boolean>;
+  addToCart: (productId: string, quantity?: number) => Promise<boolean>;
+  removeFromCart: (productId: string) => Promise<boolean>;
+  updateQuantity: (productId: string, quantity: number) => Promise<boolean>;
   clearCart: () => Promise<boolean>;
   
   // Computed values
   getCartItemCount: () => number;
   getCartTotal: () => number;
-  getItemTotal: (productId: number) => number;
+  getItemTotal: (productId: string) => number;
   
   // Internal state management
   setCart: (cart: CartResponse | null) => void;
@@ -86,7 +86,7 @@ export const useCartStore = create<CartStore>()((set, get) => ({
     }
   },
 
-  addToCart: async (productId: number, quantity = 1) => {
+  addToCart: async (productId: string, quantity = 1) => {
     if (!isUserAuthenticated()) {
       set({ error: "Please login to add items to cart" });
       return false;
@@ -112,7 +112,7 @@ export const useCartStore = create<CartStore>()((set, get) => ({
     }
   },
 
-  removeFromCart: async (productId: number) => {
+  removeFromCart: async (productId: string) => {
     if (!isUserAuthenticated()) {
       set({ error: "Please login to manage cart items" });
       return false;
@@ -138,7 +138,7 @@ export const useCartStore = create<CartStore>()((set, get) => ({
     }
   },
 
-  updateQuantity: async (productId: number, newQuantity: number) => {
+  updateQuantity: async (productId: string, newQuantity: number) => {
     if (!isUserAuthenticated()) {
       set({ error: "Please login to manage cart items" });
       return false;
@@ -210,7 +210,7 @@ export const useCartStore = create<CartStore>()((set, get) => ({
     return cart.totalAmount;
   },
 
-  getItemTotal: (productId: number) => {
+  getItemTotal: (productId: string) => {
     const { cart } = get();
     if (!cart) return 0;
     const item = cart.cartItems.find((cartItem) => cartItem.product.id === productId);

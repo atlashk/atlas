@@ -2650,6 +2650,11 @@ spec:
         - name: grafana-provisioning
           configMap:
             name: grafana-provisioning
+            items:
+              - key: datasources.yml
+                path: datasources/datasources.yml
+              - key: dashboards.yml
+                path: dashboards/dashboards.yml
         - name: grafana-dashboards
           configMap:
             name: grafana-dashboards

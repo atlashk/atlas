@@ -25,27 +25,9 @@ CLUSTER_NAME=""
 # UTILITIES
 # =============================================================================
 
-supports_color() {
-  [[ -t 1 ]] && [[ "${TERM:-}" != "dumb" ]] && [[ -z "${NO_COLOR:-}" ]]
-}
-
-if supports_color; then
-  readonly RED=$'\033[31m'
-  readonly GREEN=$'\033[32m'
-  readonly YELLOW=$'\033[33m'
-  readonly BLUE=$'\033[34m'
-  readonly RESET=$'\033[0m'
-else
-  readonly RED=""
-  readonly GREEN=""
-  readonly YELLOW=""
-  readonly BLUE=""
-  readonly RESET=""
-fi
-
-info()  { printf "%b\n" "${BLUE}INFO${RESET} $1"; }
-warn()  { printf "%b\n" "${YELLOW}WARN${RESET} $1"; }
-error() { printf "%b\n" "${RED}ERROR${RESET} $1" >&2; exit 1; }
+info()  { printf "%b\n" "[INFO] $1"; }
+warn()  { printf "%b\n" "[WARN] $1"; }
+error() { printf "%b\n" "[ERROR] $1" >&2; exit 1; }
 
 # =============================================================================
 # ARGUMENTS
@@ -81,29 +63,48 @@ parse_args() {
 }
 
 # =============================================================================
-# CLUSTER DETECTION
+# PREREQUISITES
 # =============================================================================
 
-detect_cluster() {
-  command -v kubectl >/dev/null || error "kubectl not found"
+check_docker() {
+  docker info &>/dev/null || error "Docker is not running"
+  info "Docker found and running"
+}
+
+check_cluster() {
+  command -v kubectl >/dev/null 2>&1 \
+    || error "kubectl not found."
 
   CLUSTER_NAME="$(kubectl config current-context 2>/dev/null || true)"
-
-  [[ -n "$CLUSTER_NAME" ]] || error "No active Kubernetes context"
+  [[ -n "$CLUSTER_NAME" ]] \
+    || error "No active Kubernetes context."
 
   case "$CLUSTER_NAME" in
     minikube*)
       CLUSTER_TYPE="minikube"
+      command -v minikube >/dev/null 2>&1 \
+        || error "minikube binary not found."
       ;;
     docker-desktop*)
       CLUSTER_TYPE="docker-desktop"
       ;;
     *)
-      warn "Unknown cluster type ($CLUSTER_NAME)"
+      error "Unsupported Kubernetes context: $CLUSTER_NAME"
       ;;
   esac
 
-  info "Cluster: $CLUSTER_NAME ($CLUSTER_TYPE)"
+  kubectl get nodes >/dev/null 2>&1 \
+    || error "Cluster not reachable."
+
+  kubectl get nodes --no-headers | grep -q ' Ready' \
+    || error "No Ready nodes."
+}
+
+check_prerequisites() {
+  info "Checking prerequisites..."
+  check_docker
+  check_cluster
+  info "Prerequisites check passed"
 }
 
 # =============================================================================
@@ -155,7 +156,7 @@ remove_cluster_images() {
 remove_local_images() {
   info "Searching local images for ${PROJECT_NAME}..."
   images=$(docker images "${PROJECT_NAME}/*" \
-    --format "{{.Repository}}:{{.Tag}}" \
+    --format "{{"{{"}}.Repository{{"}}"}}:{{"{{"}}.Tag{{"}}"}}" \
     | grep -v "<none>" || true)
   if [[ -z "$images" ]]; then
     info "No local images found"
@@ -195,7 +196,6 @@ main() {
   parse_args "$@"
   check_prerequisites
 
-  detect_cluster
   delete_namespace
   if [[ "$REMOVE_IMAGES" == true ]]; then
     remove_cluster_images

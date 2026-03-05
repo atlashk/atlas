@@ -36,27 +36,9 @@ CLUSTER_NAME=""
 # UTILITIES
 # =============================================================================
 
-supports_color() {
-  [[ -t 1 ]] && [[ "${TERM:-}" != "dumb" ]] && [[ -z "${NO_COLOR:-}" ]]
-}
-
-if supports_color; then
-  readonly RED=$'\033[31m'
-  readonly GREEN=$'\033[32m'
-  readonly YELLOW=$'\033[33m'
-  readonly BLUE=$'\033[34m'
-  readonly RESET=$'\033[0m'
-else
-  readonly RED=""
-  readonly GREEN=""
-  readonly YELLOW=""
-  readonly BLUE=""
-  readonly RESET=""
-fi
-
-info()  { printf "%b\n" "${BLUE}INFO${RESET} $1"; }
-warn()  { printf "%b\n" "${YELLOW}WARN${RESET} $1"; }
-error() { printf "%b\n" "${RED}ERROR${RESET} $1" >&2; exit 1; }
+info()  { printf "%b\n" "[INFO] $1"; }
+warn()  { printf "%b\n" "[WARN] $1"; }
+error() { printf "%b\n" "[ERROR] $1" >&2; exit 1; }
 
 # =============================================================================
 # USAGE
@@ -87,7 +69,7 @@ parse_args() {
       --skip-tests=*)   SKIP_TESTS="${1#*=}"; shift ;;
       --build-jar=*)    BUILD_JAR="${1#*=}"; shift ;;
       --build-docker=*) BUILD_DOCKER="${1#*=}"; shift ;;
-      *)                die "Unknown option: $1. Use --help for usage information" ;;
+      *)                error "Unknown option: $1. Use --help for usage information" ;;
     esac
   done
 }
@@ -97,7 +79,7 @@ parse_args() {
 # =============================================================================
 
 check_java() {
-  command -v java &>/dev/null || die "Java is not installed or not in PATH"
+  command -v java &>/dev/null || error "Java is not installed or not in PATH"
 
   local version
   version=$(java -version 2>&1 | head -n 1)
@@ -111,42 +93,42 @@ check_java() {
     major=0
   fi
 
-  [[ $major -ge 17 ]] || die "Java 17 or later is required (found: $version)"
+  [[ $major -ge 17 ]] || error "Java 17 or later is required (found: $version)"
   info "Java found: $version"
 }
 
 check_docker() {
-  docker info &>/dev/null || die "Docker is not running"
+  docker info &>/dev/null || error "Docker is not running"
   info "Docker found and running"
 }
 
 check_cluster() {
   command -v kubectl >/dev/null 2>&1 \
-    || die "kubectl not found."
+    || error "kubectl not found."
 
   CLUSTER_NAME="$(kubectl config current-context 2>/dev/null || true)"
   [[ -n "$CLUSTER_NAME" ]] \
-    || die "No active Kubernetes context."
+    || error "No active Kubernetes context."
 
   case "$CLUSTER_NAME" in
     minikube*)
       CLUSTER_TYPE="minikube"
       command -v minikube >/dev/null 2>&1 \
-        || die "minikube binary not found."
+        || error "minikube binary not found."
       ;;
     docker-desktop*)
       CLUSTER_TYPE="docker-desktop"
       ;;
     *)
-      die "Unsupported Kubernetes context: $CLUSTER_NAME"
+      error "Unsupported Kubernetes context: $CLUSTER_NAME"
       ;;
   esac
 
   kubectl get nodes >/dev/null 2>&1 \
-    || die "Cluster not reachable."
+    || error "Cluster not reachable."
 
   kubectl get nodes --no-headers | grep -q ' Ready' \
-    || die "No Ready nodes."
+    || error "No Ready nodes."
 }
 
 check_prerequisites() {
@@ -173,7 +155,7 @@ build_jars() {
   [[ "$SKIP_TESTS" == "true" ]] && gradle_args+=("-x" "test")
   [[ -n "$APP_STACK" ]] && gradle_args+=("-PappStack=$APP_STACK")
 
-  (cd "$PROJECT_ROOT/backend" && "$GRADLEW" "${gradle_args[@]}") || die "Gradle build failed"
+  (cd "$PROJECT_ROOT/backend" && "$GRADLEW" "${gradle_args[@]}") || error "Gradle build failed"
 
   info "JAR build completed successfully."
   echo
@@ -212,24 +194,24 @@ build_docker_images() {
   info "Starting Docker build process..."
 
   CLUSTER_NAME="$(kubectl config current-context 2>/dev/null || true)"
-  [[ -n "$CLUSTER_NAME" ]] || die "No active Kubernetes context."
+  [[ -n "$CLUSTER_NAME" ]] || error "No active Kubernetes context."
 
   case "$CLUSTER_NAME" in
     minikube*)
       CLUSTER_TYPE="minikube"
-      command -v minikube >/dev/null 2>&1 || die "minikube binary not found."
+      command -v minikube >/dev/null 2>&1 || error "minikube binary not found."
       ;;
     docker-desktop*)
       CLUSTER_TYPE="docker-desktop"
       ;;
     *)
-      die "Unsupported Kubernetes context: $CLUSTER_NAME"
+      error "Unsupported Kubernetes context: $CLUSTER_NAME"
       ;;
   esac
 
   info "Detected Kubernetes context: $CLUSTER_TYPE ($CLUSTER_NAME). Images will be loaded into cluster."
 
-  [[ ${#SERVICES[@]} -eq 0 ]] && die "No services specified to build"
+  [[ ${#SERVICES[@]} -eq 0 ]] && error "No services specified to build"
 
   for entry in "${SERVICES[@]}"; do
     local name="${entry%%:*}"
@@ -237,7 +219,7 @@ build_docker_images() {
     local image="$PROJECT_NAME/$name"
 
     info "Building Docker image for $image..."
-    docker build -t "$image:latest" -t "$image" "$context" || die "Failed to build Docker image for $image"
+    docker build -t "$image:latest" -t "$image" "$context" || error "Failed to build Docker image for $image"
     load_image_to_cluster "$image:latest"
     info "Built Docker image for $image successfully."
   done
@@ -331,6 +313,8 @@ apply_and_wait() {
 
 apply_manifests() {
   info "Applying Kubernetes manifests to namespace '$NAMESPACE'..."
+
+  apply_and_wait "$MANIFESTS_DIR/security"
 
   apply_and_wait "$MANIFESTS_DIR/infrastructure"
 

@@ -13,18 +13,15 @@ interface UseAuthRedirectOptions {
 
 /**
  * Centralized hook for handling authentication-based redirects
- * Simplifies role-based routing logic across the application
  */
 export function useAuthRedirect(options: UseAuthRedirectOptions = {}) {
   const {
     requireAuth = false,
-    redirectUnauthenticated = '/login',
-    redirectUnauthorized = '/',
-    allowedRoles = []
+    redirectUnauthenticated = '/login'
   } = options;
 
   const router = useRouter();
-  const { isAuthenticated, profile, loading, profileLoading } = useUserStore();
+  const { isAuthenticated, loading, profileLoading } = useUserStore();
 
   useEffect(() => {
     // Wait for both auth state and profile to load
@@ -34,11 +31,9 @@ export function useAuthRedirect(options: UseAuthRedirectOptions = {}) {
     }
 
     const isUserAuthenticated = isAuthenticated();
-    const userRole = profile?.role;
 
     console.log('[useAuthRedirect] Checking access:', { 
       isUserAuthenticated, 
-      userRole, 
       requireAuth
     });
 
@@ -50,29 +45,17 @@ export function useAuthRedirect(options: UseAuthRedirectOptions = {}) {
       router.push(redirectUrl);
       return;
     }
-
-    // Handle authenticated users - role-based redirects
-    if (isUserAuthenticated && userRole) {
-      if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
-        console.log('[useAuthRedirect] User role not in allowed roles, redirecting');
-        router.push(redirectUnauthorized);
-        return;
-      }
-    }
-  }, [loading, profileLoading, isAuthenticated, profile?.role, router, requireAuth, redirectUnauthenticated, redirectUnauthorized, allowedRoles]);
+  }, [loading, profileLoading, isAuthenticated, router, requireAuth, redirectUnauthenticated]);
 
   return {
     isLoading: loading || profileLoading,
     isAuthenticated: isAuthenticated(),
-    userRole: profile?.role,
     canAccess: () => {
       if (loading || profileLoading) return false;
       
       const isUserAuthenticated = isAuthenticated();
-      const userRole = profile?.role;
 
       if (requireAuth && !isUserAuthenticated) return false;
-      if (allowedRoles.length > 0 && userRole && !allowedRoles.includes(userRole)) return false;
 
       return true;
     }
@@ -80,7 +63,7 @@ export function useAuthRedirect(options: UseAuthRedirectOptions = {}) {
 }
 
 /**
- * Hook for pages that should redirect authenticated users based on their role
+ * Hook for pages that should redirect authenticated users
  * Useful for login/register pages
  */
 export function useGuestRedirect() {

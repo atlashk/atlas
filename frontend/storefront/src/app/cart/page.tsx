@@ -28,7 +28,7 @@ function CartPage() {
     }
   }, [cart, cartLoading, loadCart, resetIntentionallyCleared]);
 
-  const handleUpdateQuantity = async (productId: number, newQuantity: number) => {
+  const handleUpdateQuantity = async (productId: string, newQuantity: number) => {
     try {
       setUpdating(true);
       await updateQuantity(productId, newQuantity);
@@ -39,7 +39,7 @@ function CartPage() {
     }
   };
 
-  const handleRemoveItem = async (productId: number) => {
+  const handleRemoveItem = async (productId: string) => {
     try {
       setUpdating(true);
       await removeFromCart(productId);
