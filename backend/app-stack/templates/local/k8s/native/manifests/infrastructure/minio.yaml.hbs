@@ -60,7 +60,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: minio
-                  key: minio-key
+                  key: minio-secret-key
           command:
             - /bin/sh
             - -c
