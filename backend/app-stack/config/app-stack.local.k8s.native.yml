@@ -12,7 +12,6 @@ messaging: kafka
 migration: flyway
 notification:
   email: spring
-  in-app: sse
 observability:
   logging:
     stack: loki

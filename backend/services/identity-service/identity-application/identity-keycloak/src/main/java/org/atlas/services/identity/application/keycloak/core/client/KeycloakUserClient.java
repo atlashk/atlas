@@ -9,6 +9,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.shared.identity.UserRole;
+import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.identity.application.keycloak.core.config.KeycloakProps;
@@ -17,7 +18,6 @@ import org.atlas.services.identity.application.keycloak.core.exception.KeycloakC
 import org.atlas.services.identity.application.keycloak.core.model.RetrieveUserListRequest;
 import org.atlas.services.identity.domain.entity.UserEntity;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -30,7 +30,8 @@ import org.springframework.web.client.RestClient;
 public class KeycloakUserClient {
 
   private final KeycloakProps keycloakProps;
-  private final KeycloakAdminTokenProvider adminTokenProvider;
+  private final KeycloakClientHelper keycloakClientHelper;
+  private final KeycloakRealmRoleClient keycloakRealmRoleClient;
   private final RestClient restClient;
 
   private static final ParameterizedTypeReference<List<Map<String, Object>>> USER_LIST_TYPE =
@@ -56,22 +57,25 @@ public class KeycloakUserClient {
       return Collections.singletonList(user);
     } else {
       // Search by username, first name, last name, and email
-      int first = request.getPagingRequest() == null ? 0 : request.getPagingRequest().getOffset();
-      int max = request.getPagingRequest() == null ? 100 : request.getPagingRequest().getLimit();
+      int first = request.getPagingRequest().getOffset();
+      int max = request.getPagingRequest().getLimit();
 
       String url = buildSearchUsersUrl(request.getUsername(), request.getFirstName(),
           request.getLastName(), request.getEmail(), first, max);
       try {
         List<Map<String, Object>> kcUsers = restClient.get()
             .uri(url)
-            .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+            .headers(keycloakClientHelper.buildHeaders())
             .retrieve()
             .body(USER_LIST_TYPE);
 
         log.debug("Retrieved {} users from Keycloak, url={}", kcUsers == null ? 0 : kcUsers.size(), url);
 
         return kcUsers == null ? Collections.emptyList() :
-            kcUsers.stream().map(this::toUserEntity).toList();
+            kcUsers.stream()
+                .map(this::toUserEntity)
+                .map(this::enrichUserRole)
+                .toList();
       } catch (Exception e) {
         log.error("Failed to retrieve Keycloak user list: url={}, reason={}", url, e.getMessage(), e);
         return Collections.emptyList();
@@ -97,13 +101,15 @@ public class KeycloakUserClient {
     try {
       Map<String, Object> kcUser = restClient.get()
           .uri(url)
-          .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+          .headers(keycloakClientHelper.buildHeaders())
           .retrieve()
           .onStatus(HttpStatusCode::is4xxClientError, (request, response) -> {
             throw new KeycloakClientException("User not found: " + userId);
           })
           .body(Map.class);
-      return Optional.ofNullable(kcUser).map(this::toUserEntity);
+      return Optional.ofNullable(kcUser)
+          .map(this::toUserEntity)
+          .map(this::enrichUserRole);
     } catch (Exception e) {
       log.debug("Keycloak user {} not found: {}", userId, e.getMessage());
       return Optional.empty();
@@ -116,7 +122,7 @@ public class KeycloakUserClient {
     try {
       Integer count = restClient.get()
           .uri(url)
-          .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+          .headers(keycloakClientHelper.buildHeaders())
           .retrieve()
           .body(Integer.class);
       return count == null ? 0L : count.longValue();
@@ -129,6 +135,7 @@ public class KeycloakUserClient {
   public boolean existsByUsername(String username) {
     RetrieveUserListRequest request = RetrieveUserListRequest.builder()
         .username(username)
+        .pagingRequest(PagingRequest.of(0, 1))
         .build();
     return CollectionUtil.isNotEmpty(retrieveUserList(request));
   }
@@ -136,19 +143,19 @@ public class KeycloakUserClient {
   public boolean existsByEmail(String email) {
     RetrieveUserListRequest request = RetrieveUserListRequest.builder()
         .email(email)
+        .pagingRequest(PagingRequest.of(0, 1))
         .build();
     return CollectionUtil.isNotEmpty(retrieveUserList(request));
   }
 
   public boolean existsByAttribute(KeycloakUserAttribute attribute, String value) {
     try {
-      String url = String.format("%s/admin/realms/%s/users?q=%s:%s",
-          keycloakProps.getBaseUrl(), keycloakProps.getRealm(),
-          attribute.getName(), value);
+      String url = String.format("%s/admin/realms/%s/users?q=%s:%s&first=%d&max=%d",
+          keycloakProps.getBaseUrl(), keycloakProps.getRealm(), attribute.getName(), value, 0, 1);
 
       List<Map<String, Object>> users = restClient.get()
           .uri(url)
-          .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+          .headers(keycloakClientHelper.buildHeaders())
           .retrieve()
           .body(USER_LIST_TYPE);
 
@@ -172,7 +179,7 @@ public class KeycloakUserClient {
     try {
       String locationHeader = restClient.post()
           .uri(url)
-          .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+          .headers(keycloakClientHelper.buildHeaders())
           .contentType(MediaType.APPLICATION_JSON)
           .body(userPayload)
           .retrieve()
@@ -212,7 +219,7 @@ public class KeycloakUserClient {
     try {
       restClient.put()
           .uri(url)
-          .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+          .headers(keycloakClientHelper.buildHeaders())
           .contentType(MediaType.APPLICATION_JSON)
           .body(userPayload)
           .retrieve()
@@ -243,7 +250,7 @@ public class KeycloakUserClient {
     try {
       restClient.delete()
           .uri(url)
-          .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+          .headers(keycloakClientHelper.buildHeaders())
           .retrieve()
           .onStatus(HttpStatusCode::isError, (request, response) -> {
             throw new KeycloakClientException(
@@ -303,6 +310,14 @@ public class KeycloakUserClient {
     return user;
   }
 
+  private UserEntity enrichUserRole(UserEntity user) {
+    if (user == null || user.getId() == null) {
+      return user;
+    }
+    user.setRole(keycloakRealmRoleClient.resolveUserRole(user.getId()).orElse(null));
+    return user;
+  }
+
   private Map<String, Object> buildUserPayload(UserEntity user, String password) {
     Map<String, Object> userPayload = new HashMap<>(buildUserPayload(user));
     userPayload.put("credentials", List.of(Map.of(
@@ -336,16 +351,7 @@ public class KeycloakUserClient {
 
   private void assignUserRole(String userId, UserRole userRole) {
     String roleName = userRole.name().toLowerCase();
-    
-    // Get current roles
-    String getRolesUrl = String.format("%s/admin/realms/%s/users/%s/role-mappings/realm",
-        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), userId);
-
-    List<Map<String, Object>> assignedRoles = restClient.get()
-        .uri(getRolesUrl)
-        .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
-        .retrieve()
-        .body(new ParameterizedTypeReference<>() {});
+    List<Map<String, Object>> assignedRoles = keycloakRealmRoleClient.getUserAssignedRealmRoles(userId);
 
     // Check if already has the target role
     boolean alreadyHasRole = assignedRoles != null && assignedRoles.stream()
@@ -356,15 +362,7 @@ public class KeycloakUserClient {
       return;
     }
 
-    // Get available roles for user (this API only requires manage-users permission)
-    String availableRolesUrl = String.format("%s/admin/realms/%s/users/%s/role-mappings/realm/available",
-        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), userId);
-
-    List<Map<String, Object>> availableRoles = restClient.get()
-        .uri(availableRolesUrl)
-        .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
-        .retrieve()
-        .body(new ParameterizedTypeReference<>() {});
+    List<Map<String, Object>> availableRoles = keycloakRealmRoleClient.getUserAvailableRealmRoles(userId);
 
     // Find target role from available roles
     Map<String, Object> targetRole = availableRoles == null ? null : availableRoles.stream()
@@ -387,24 +385,12 @@ public class KeycloakUserClient {
           .toList();
 
       if (!rolesToRemove.isEmpty()) {
-        restClient.method(HttpMethod.DELETE)
-            .uri(getRolesUrl)
-            .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(rolesToRemove)
-            .retrieve()
-            .toBodilessEntity();
+        keycloakRealmRoleClient.removeUserRealmRoles(userId, rolesToRemove);
       }
     }
 
     // Assign target role
-    restClient.post()
-        .uri(getRolesUrl)
-        .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(List.of(targetRole))
-        .retrieve()
-        .toBodilessEntity();
+    keycloakRealmRoleClient.addUserRealmRoles(userId, List.of(targetRole));
 
     log.debug("Assigned role {} to user {}", roleName, userId);
   }

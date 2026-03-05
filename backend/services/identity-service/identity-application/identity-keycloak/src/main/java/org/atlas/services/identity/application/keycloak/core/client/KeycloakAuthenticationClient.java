@@ -23,7 +23,7 @@ import org.springframework.web.client.RestClient;
 public class KeycloakAuthenticationClient {
 
   private final KeycloakProps keycloakProps;
-  private final KeycloakAdminTokenProvider adminTokenProvider;
+  private final KeycloakClientHelper keycloakClientHelper;
   private final RestClient restClient;
 
   public TokenResponse login(String username, String password) {
@@ -73,7 +73,7 @@ public class KeycloakAuthenticationClient {
 
       restClient.post()
           .uri(url)
-          .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+          .headers(keycloakClientHelper.buildHeaders())
           .retrieve()
           .onStatus(HttpStatusCode::isError, (request, response) -> {
             throw new KeycloakClientException(
@@ -103,7 +103,7 @@ public class KeycloakAuthenticationClient {
     try {
       restClient.put()
           .uri(url)
-          .header("Authorization", "Bearer " + adminTokenProvider.getAccessToken())
+          .headers(keycloakClientHelper.buildHeaders())
           .contentType(MediaType.APPLICATION_JSON)
           .body(credential)
           .retrieve()

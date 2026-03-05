@@ -48,7 +48,7 @@ public class PagingResult<T> {
   }
 
   public boolean checkEmpty() {
-    return CollectionUtil.isEmpty(data) || pagination.getTotalRecords() == 0L;
+    return CollectionUtil.isEmpty(data);
   }
 
   public <U> PagingResult<U> map(Function<? super T, ? extends U> mapper) {

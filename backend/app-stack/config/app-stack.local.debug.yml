@@ -12,15 +12,9 @@ messaging: kafka
 migration: flyway
 notification:
   email: spring
-observability:
-  logging:
-    stack: loki
-    framework: logback
-  metrics: prometheus
-  tracing: zipkin
 persistence: jpa
 redis: standalone
-reverse-proxy: nginx
+reverse-proxy: none
 scheduler: quartz
 service-discovery: eureka
 storage: minio

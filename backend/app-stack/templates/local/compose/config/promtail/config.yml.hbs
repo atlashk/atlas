@@ -9,6 +9,7 @@ clients:
   - url: http://loki:3100/loki/api/v1/push
 
 scrape_configs:
+  {{#hasService "service-discovery" "eureka" }}
   - job_name: eureka-server
     static_configs:
       - targets:
@@ -16,6 +17,7 @@ scrape_configs:
         labels:
           service_name: eureka-server
           __path__: /var/log/eureka-server/*.log
+  {{/hasService}}
   - job_name: identity-service
     static_configs:
       - targets:
