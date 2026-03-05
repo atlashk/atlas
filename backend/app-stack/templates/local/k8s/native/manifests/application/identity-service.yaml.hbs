@@ -40,7 +40,7 @@ spec:
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mysql-secret
+                  name: mysql
                   key: mysql-password
             {{#hasService "identity" "keycloak"}}
             - name: KEYCLOAK_DB_URL
@@ -50,7 +50,7 @@ spec:
             - name: KEYCLOAK_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mysql-secret
+                  name: mysql
                   key: mysql-password
             {{/hasService}}
             {{/hasService}}
@@ -62,7 +62,7 @@ spec:
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-secret
+                  name: postgres
                   key: postgres-password
             {{#hasService "identity" "keycloak"}}
             - name: KEYCLOAK_DB_URL
@@ -72,7 +72,7 @@ spec:
             - name: KEYCLOAK_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-secret
+                  name: postgres
                   key: postgres-password
             {{/hasService}}
             {{/hasService}}
@@ -96,7 +96,7 @@ spec:
             - name: RABBITMQ_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: rabbitmq-secret
+                  name: rabbitmq
                   key: rabbitmq-password
             {{/hasService}}
             {{#hasService "identity" "keycloak"}}
@@ -105,28 +105,28 @@ spec:
             - name: KC_BOOTSTRAP_ADMIN_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: keycloak-secret
+                  name: keycloak
                   key: kc-bootstrap-admin-username
             - name: KC_BOOTSTRAP_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: keycloak-secret
+                  name: keycloak
                   key: kc-bootstrap-admin-password
             - name: KEYCLOAK_REALM
               valueFrom:
                 configMapKeyRef:
-                  name: keycloak-config-cm
+                  name: keycloak-config
                   key: keycloak-realm
             - name: KEYCLOAK_CLIENT_ID
               valueFrom:
                 configMapKeyRef:
-                  name: keycloak-config-cm
+                  name: keycloak-config
                   key: keycloak-client-id
             - name: KEYCLOAK_CLIENT_SECRET
               valueFrom:
                 configMapKeyRef:
-                  name: keycloak-config-cm
-                  key: keycloak-client-secret
+                  name: keycloak-config
+                  key: keycloak-client
             {{/hasService}}
             {{#hasService "observability.tracing" "zipkin"}}
             - name: ZIPKIN_ENDPOINT

@@ -34,7 +34,7 @@ spec:
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mysql-secret
+                  name: mysql
                   key: mysql-password
             {{/hasService}}{{#hasService "datasource" "postgres"}}
             - name: DB_URL
@@ -44,7 +44,7 @@ spec:
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-secret
+                  name: postgres
                   key: postgres-password
             {{/hasService}}
             {{#hasService "kv-store" "redis"}}
@@ -66,7 +66,7 @@ spec:
             - name: RABBITMQ_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: rabbitmq-secret
+                  name: rabbitmq
                   key: rabbitmq-password
             {{/hasService}}
             {{#hasService "internal" "grpc"}}

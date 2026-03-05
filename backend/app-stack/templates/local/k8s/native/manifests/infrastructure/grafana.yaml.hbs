@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: grafana-pvc
+  name: grafana-data
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: grafana
@@ -17,7 +17,7 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: grafana-secret
+  name: grafana
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: grafana
@@ -29,7 +29,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-provisioning-cm
+  name: grafana-provisioning
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: grafana
@@ -82,7 +82,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-dashboards-cm
+  name: grafana-dashboards
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: grafana
@@ -2576,7 +2576,7 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: grafana-dp
+  name: grafana
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: grafana
@@ -2602,7 +2602,7 @@ spec:
             - name: GF_SECURITY_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: grafana-secret
+                  name: grafana
                   key: admin-password
             - name: GF_PATHS_PROVISIONING
               value: "/etc/grafana/provisioning"
@@ -2646,13 +2646,13 @@ spec:
       volumes:
         - name: grafana-data
           persistentVolumeClaim:
-            claimName: grafana-pvc
+            claimName: grafana-data
         - name: grafana-provisioning
           configMap:
-            name: grafana-provisioning-cm
+            name: grafana-provisioning
         - name: grafana-dashboards
           configMap:
-            name: grafana-dashboards-cm
+            name: grafana-dashboards
 ---
 apiVersion: v1
 kind: Service

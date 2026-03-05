@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: elasticsearch-secret
+  name: elasticsearch
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: elasticsearch
@@ -14,7 +14,7 @@ data:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: elasticsearch-sts
+  name: elasticsearch
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: elasticsearch
@@ -39,7 +39,7 @@ spec:
             - name: ELASTIC_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: elasticsearch-secret
+                  name: elasticsearch
                   key: elasticsearch-password
             - name: discovery.type
               value: "single-node"

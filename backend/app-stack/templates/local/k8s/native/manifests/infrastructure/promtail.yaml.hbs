@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: promtail-sa
+  name: promtail
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: promtail
@@ -14,7 +14,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: promtail-cs
+  name: promtail
   labels:
     app: promtail
     tier: backend
@@ -29,23 +29,23 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: promtail-csr
+  name: promtail
   labels:
     app: promtail
     tier: backend
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: promtail-cs
+  name: promtail
 subjects:
   - kind: ServiceAccount
-    name: promtail-sa
+    name: promtail
     namespace: {{dotenv.PROJECT_NAME}}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: promtail-config-cm
+  name: promtail
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: promtail
@@ -95,7 +95,7 @@ data:
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: promtail-ds
+  name: promtail
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: promtail
@@ -150,7 +150,7 @@ spec:
       volumes:
         - name: promtail-config
           configMap:
-            name: promtail-config
+            name: promtail
         - name: promtail-run
           hostPath:
             path: /run/promtail

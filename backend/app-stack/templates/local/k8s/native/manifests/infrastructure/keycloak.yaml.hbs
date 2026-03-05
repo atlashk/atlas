@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: keycloak-secret
+  name: keycloak
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: keycloak
@@ -15,7 +15,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: keycloak-config-cm
+  name: keycloak-config
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: keycloak
@@ -23,12 +23,12 @@ metadata:
 data:
   keycloak-realm: "default"
   keycloak-client-id: "default-auth"
-  keycloak-client-secret: "9cvF5MPJnwfhEOCwNnQ79RmlkckAsDCj"
+  keycloak-client: "9cvF5MPJnwfhEOCwNnQ79RmlkckAsDCj"
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: keycloak-import-cm
+  name: keycloak-import
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: keycloak
@@ -61,7 +61,7 @@ data:
           "enabled": true,
           "protocol": "openid-connect",
           "publicClient": false,
-          "clientAuthenticatorType": "client-secret",
+          "clientAuthenticatorType": "client",
           "secret": "9cvF5MPJnwfhEOCwNnQ79RmlkckAsDCj",
           "serviceAccountsEnabled": true,
           "directAccessGrantsEnabled": true,
@@ -93,7 +93,7 @@ data:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: keycloak-sts
+  name: keycloak
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: keycloak
@@ -125,12 +125,12 @@ spec:
             - name: KC_BOOTSTRAP_ADMIN_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: keycloak-secret
+                  name: keycloak
                   key: kc-bootstrap-admin-username
             - name: KC_BOOTSTRAP_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: keycloak-secret
+                  name: keycloak
                   key: kc-bootstrap-admin-password
             {{#hasService "datasource" "postgres"}}
             - name: KC_DB
@@ -140,12 +140,12 @@ spec:
             - name: KC_DB_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: postgres-secret
+                  name: postgres
                   key: postgres-user
             - name: KC_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-secret
+                  name: postgres
                   key: postgres-password
             {{/hasService}}
             {{#hasService "datasource" "mysql"}}
@@ -158,7 +158,7 @@ spec:
             - name: KC_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mysql-secret
+                  name: mysql
                   key: mysql-password
             {{/hasService}}
             - name: KC_HEALTH_ENABLED
@@ -213,7 +213,7 @@ spec:
       volumes:
         - name: keycloak-import
           configMap:
-            name: keycloak-import-cm
+            name: keycloak-import
 ---
 apiVersion: v1
 kind: Service
