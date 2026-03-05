@@ -36,11 +36,27 @@ CLUSTER_NAME=""
 # UTILITIES
 # =============================================================================
 
-die() { echo "Error: $1" >&2; exit 1; }
-info() { echo "$1"; }
-warn() { echo "Warning: $1" >&2; }
+supports_color() {
+  [[ -t 1 ]] && [[ "${TERM:-}" != "dumb" ]] && [[ -z "${NO_COLOR:-}" ]]
+}
 
-command_exists() { command -v "$1" >/dev/null 2>&1; }
+if supports_color; then
+  readonly RED=$'\033[31m'
+  readonly GREEN=$'\033[32m'
+  readonly YELLOW=$'\033[33m'
+  readonly BLUE=$'\033[34m'
+  readonly RESET=$'\033[0m'
+else
+  readonly RED=""
+  readonly GREEN=""
+  readonly YELLOW=""
+  readonly BLUE=""
+  readonly RESET=""
+fi
+
+info()  { printf "%b\n" "${BLUE}INFO${RESET} $1"; }
+warn()  { printf "%b\n" "${YELLOW}WARN${RESET} $1"; }
+error() { printf "%b\n" "${RED}ERROR${RESET} $1" >&2; exit 1; }
 
 # =============================================================================
 # USAGE
@@ -62,7 +78,7 @@ Options:
 EOF
 }
 
-parse_arguments() {
+parse_args() {
   while [[ $# -gt 0 ]]; do
     case $1 in
       -h|--help)     show_usage; exit 0 ;;
@@ -118,6 +134,9 @@ check_cluster() {
       command -v minikube >/dev/null 2>&1 \
         || die "minikube binary not found."
       ;;
+    docker-desktop*)
+      CLUSTER_TYPE="docker-desktop"
+      ;;
     *)
       die "Unsupported Kubernetes context: $CLUSTER_NAME"
       ;;
@@ -168,6 +187,9 @@ load_image_to_cluster() {
       info "Loading image $image into Minikube..."
       minikube image load "$image"
       ;;
+    docker-desktop)
+      # Docker Desktop cluster detected; skipping image load for $image
+      ;;
   esac
 }
 
@@ -196,6 +218,9 @@ build_docker_images() {
     minikube*)
       CLUSTER_TYPE="minikube"
       command -v minikube >/dev/null 2>&1 || die "minikube binary not found."
+      ;;
+    docker-desktop*)
+      CLUSTER_TYPE="docker-desktop"
       ;;
     *)
       die "Unsupported Kubernetes context: $CLUSTER_NAME"
@@ -328,11 +353,10 @@ trap print_total_time EXIT
 # =============================================================================
 
 main() {
-  parse_arguments "$@"
+  parse_args "$@"
   check_prerequisites
 
   # Build services
-  info "Installing services for project: $PROJECT_NAME, app stack: $APP_STACK"
   if [[ "$SKIP_BUILD" == true ]]; then
     info "Skipping build step"
   else

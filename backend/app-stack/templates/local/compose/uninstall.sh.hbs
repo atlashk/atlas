@@ -11,37 +11,63 @@ readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
 
 DOCKER_COMPOSE_CMD=""
-REMOVE_APPLICATION_IMAGES=false
+REMOVE_IMAGES=false
 
 # =============================================================================
 # UTILITIES
 # =============================================================================
 
-die() { echo "Error: $1" >&2; exit 1; }
-info() { echo "$1"; }
+supports_color() {
+  [[ -t 1 ]] && [[ "${TERM:-}" != "dumb" ]] && [[ -z "${NO_COLOR:-}" ]]
+}
+
+if supports_color; then
+  readonly RED=$'\033[31m'
+  readonly GREEN=$'\033[32m'
+  readonly YELLOW=$'\033[33m'
+  readonly BLUE=$'\033[34m'
+  readonly RESET=$'\033[0m'
+else
+  readonly RED=""
+  readonly GREEN=""
+  readonly YELLOW=""
+  readonly BLUE=""
+  readonly RESET=""
+fi
+
+info()  { printf "%b\n" "${BLUE}INFO${RESET} $1"; }
+warn()  { printf "%b\n" "${YELLOW}WARN${RESET} $1"; }
+error() { printf "%b\n" "${RED}ERROR${RESET} $1" >&2; exit 1; }
 
 # =============================================================================
 # USAGE
 # =============================================================================
 
 show_usage() {
-  cat <<EOF
+cat <<EOF
 Usage: $0 [OPTIONS]
 
-Uninstall services using Docker Compose
+Clean Docker Compose stack
 
 Options:
-  --remove-application-images  Remove application Docker images (default: false)
-  -h, --help                   Show this help message
+  --remove-images   Remove Docker images
+  -h, --help        Show this help message
 EOF
 }
 
-parse_arguments() {
+parse_args() {
   for arg in "$@"; do
-    case $arg in
-      --remove-application-images) REMOVE_APPLICATION_IMAGES=true ;;
-      -h|--help)                   show_usage; exit 0 ;;
-      *)                           die "Unknown parameter: $arg" ;;
+    case "$arg" in
+      --remove-images)
+        REMOVE_IMAGES=true
+        ;;
+      -h|--help)
+        show_usage
+        exit 0
+        ;;
+      *)
+        die "Unknown parameter: $arg"
+        ;;
     esac
   done
 }
@@ -51,27 +77,27 @@ parse_arguments() {
 # =============================================================================
 
 check_docker() {
-  docker info &>/dev/null || die "Docker is not running"
-  info "Docker found and running"
+  docker info >/dev/null 2>&1 || die "Docker is not running"
+  info "Docker is running"
 }
 
-check_docker_compose() {
-  if command -v docker-compose &>/dev/null; then
+detect_docker_compose() {
+
+  if command -v docker-compose >/dev/null 2>&1; then
     DOCKER_COMPOSE_CMD="docker-compose"
-    info "Docker Compose (standalone) found"
-  elif docker compose version &>/dev/null; then
+  elif docker compose version >/dev/null 2>&1; then
     DOCKER_COMPOSE_CMD="docker compose"
-    info "Docker Compose (plugin) found"
   else
-    die "Docker Compose is not installed. Please install Docker Compose or ensure Docker Desktop is running"
+    die "Docker Compose not found"
   fi
+
+  info "Using: $DOCKER_COMPOSE_CMD"
 }
 
 check_prerequisites() {
   info "Checking prerequisites..."
   check_docker
-  check_docker_compose
-  info "Prerequisites check passed"
+  detect_docker_compose
 }
 
 # =============================================================================
@@ -79,23 +105,48 @@ check_prerequisites() {
 # =============================================================================
 
 remove_containers() {
-  info "Stopping and removing containers and volumes..."
-  $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" -p "$PROJECT_NAME" down -v
+  info "Stopping and removing containers..."
+
+  $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" -p "$PROJECT_NAME" down --remove-orphans -v
 }
 
-remove_application_images() {
-  info "Removing ${PROJECT_NAME} application images..."
+remove_networks() {
+  info "Removing unused project networks..."
+
+  docker network ls \
+    --filter "name=${PROJECT_NAME}" \
+    --format "{{.Name}}" \
+    | xargs -r docker network rm >/dev/null 2>&1 || true
+}
+
+remove_images() {
+  info "Removing ${PROJECT_NAME} images..."
 
   local images
-  images=$(docker images --format "\{{.Repository}}:\{{.Tag}}" | grep "^${PROJECT_NAME}/" || true)
+  images=$(docker images "${PROJECT_NAME}/*" \
+    --format "{{.Repository}}:{{.Tag}}" \
+    | grep -v "<none>" || true)
 
   if [[ -z "$images" ]]; then
-    info "No ${PROJECT_NAME} images found"
-    return 0
+    info "No images found"
+    return
   fi
 
-  echo "$images" | xargs docker rmi -f 2>/dev/null || true
-  info "${PROJECT_NAME} images removed"
+  echo "$images" | xargs -r docker rmi -f
+
+  info "Images removed"
+}
+
+remove_dangling_images() {
+  info "Removing dangling images..."
+
+  docker image prune -f >/dev/null
+}
+
+remove_build_cache() {
+  info "Removing Docker build cache..."
+
+  docker builder prune -f >/dev/null
 }
 
 # =============================================================================
@@ -103,18 +154,16 @@ remove_application_images() {
 # =============================================================================
 
 main() {
-  parse_arguments "$@"
+  parse_args "$@"
   check_prerequisites
 
-  info "Uninstalling services for project: $PROJECT_NAME, app stack: $APP_STACK"
-
-  # Remove containers and their volumes
   remove_containers
-
-  # Remove application images if requested
-  if [[ "$REMOVE_APPLICATION_IMAGES" == "true" ]]; then
-    remove_application_images
+  remove_networks
+  if [[ "$REMOVE_IMAGES" == true ]]; then
+    remove_images
   fi
+  remove_dangling_images
+  remove_build_cache
 }
 
 main "$@"
