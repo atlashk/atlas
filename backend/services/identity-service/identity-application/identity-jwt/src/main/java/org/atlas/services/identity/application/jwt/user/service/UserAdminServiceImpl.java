@@ -77,6 +77,7 @@ public class UserAdminServiceImpl implements UserAdminService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public boolean existsUser(String username) {
     return userRepository.existsByUsername(username);
   }

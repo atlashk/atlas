@@ -20,15 +20,17 @@ import org.atlas.services.identity.port.in.authentication.model.OneTimeTokenLogi
 import org.atlas.services.identity.port.in.authentication.model.RefreshTokenInput;
 import org.atlas.services.identity.port.in.authentication.model.RefreshTokenOutput;
 import org.atlas.services.identity.port.in.authentication.service.AuthenticationService;
+import org.atlas.services.identity.port.out.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
 
+  private final UserRepository userRepository;
   private final KeycloakAuthenticationClient keycloakAuthenticationClient;
-  private final KeycloakUserClient keycloakUserClient;
 
   @Override
   public Map<String, Object> jwkSet() {
@@ -55,9 +57,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public void changePassword(ChangePasswordInput input) {
     String userId = Contexts.getUserId();
-    UserEntity user = keycloakUserClient.retrieveUser(userId)
+    UserEntity user = userRepository.findById(userId)
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
 
     // Verify the current password

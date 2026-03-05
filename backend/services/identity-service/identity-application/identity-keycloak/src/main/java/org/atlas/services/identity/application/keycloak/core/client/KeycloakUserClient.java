@@ -6,6 +6,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.shared.identity.UserRole;
+import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.identity.application.keycloak.core.config.KeycloakProps;
 import org.atlas.services.identity.application.keycloak.core.enums.KeycloakUserAttribute;
 import org.atlas.services.identity.application.keycloak.core.exception.KeycloakClientException;
@@ -28,11 +29,11 @@ public class KeycloakUserClient {
   /**
    * @return Keycloak created user ID
    */
-  public String createUser(UserEntity user, String password) {
+  public String createUser(UserEntity user, String password, boolean syncId) {
     String url = String.format("%s/admin/realms/%s/users",
         keycloakProps.getBaseUrl(), keycloakProps.getRealm());
 
-    Map<String, Object> userPayload = buildUserPayload(user, password);
+    Map<String, Object> userPayload = buildUserPayload(user, password, syncId);
 
     try {
       String locationHeader = restClient.post()
@@ -68,11 +69,11 @@ public class KeycloakUserClient {
     }
   }
 
-  public void updateUser(UserEntity user) {
+  public void updateUser(UserEntity user, boolean syncId) {
     String url = String.format("%s/admin/realms/%s/users/%s",
         keycloakProps.getBaseUrl(), keycloakProps.getRealm(), user.getId());
 
-    Map<String, Object> userPayload = buildUserPayload(user);
+    Map<String, Object> userPayload = buildUserPayload(user, syncId);
 
     try {
       restClient.put()
@@ -127,28 +128,34 @@ public class KeycloakUserClient {
     }
   }
 
-  private Map<String, Object> buildUserPayload(UserEntity user, String password) {
-    Map<String, Object> userPayload = new HashMap<>(buildUserPayload(user));
-    userPayload.put("credentials", List.of(Map.of(
+  private Map<String, Object> buildUserPayload(UserEntity user, String password, boolean syncId) {
+    Map<String, Object> payload = new HashMap<>(buildUserPayload(user, syncId));
+    
+    // Password
+    payload.put("credentials", List.of(Map.of(
         "type", "password",
         "value", password,
         "temporary", false
     )));
-    return userPayload;
+
+    return payload;
   }
 
-  private Map<String, Object> buildUserPayload(UserEntity user) {
-    return Map.of(
-        "username", user.getUsername(),
-        "firstName", user.getFirstName() != null ? user.getFirstName() : "",
-        "lastName", user.getLastName() != null ? user.getLastName() : "",
-        "email", user.getEmail() != null ? user.getEmail() : "",
-        "enabled", true,
-        "attributes", Map.of(
-            KeycloakUserAttribute.PHONE_NUMBER.getName(),
-            List.of(user.getPhoneNumber() != null ? user.getPhoneNumber() : "")
-        )
-    );
+  private Map<String, Object> buildUserPayload(UserEntity user, boolean syncId) {
+    Map<String, Object> payload = new HashMap<>();
+    if (syncId && StringUtil.isNotBlank(user.getId())) {
+      payload.put("id", user.getId());
+    }
+    payload.put("username", user.getUsername());
+    payload.put("firstName", user.getFirstName() != null ? user.getFirstName() : "");
+    payload.put("lastName", user.getLastName() != null ? user.getLastName() : "");
+    payload.put("email", user.getEmail() != null ? user.getEmail() : "");
+    payload.put("enabled", true);
+    payload.put("attributes", Map.of(
+        KeycloakUserAttribute.PHONE_NUMBER.getName(),
+        List.of(user.getPhoneNumber() != null ? user.getPhoneNumber() : "")
+    ));
+    return payload;
   }
 
   private String extractUserIdFromLocation(String locationHeader) {

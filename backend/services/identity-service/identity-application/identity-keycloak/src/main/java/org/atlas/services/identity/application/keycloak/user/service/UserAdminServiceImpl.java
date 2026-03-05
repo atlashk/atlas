@@ -61,7 +61,7 @@ public class UserAdminServiceImpl implements UserAdminService {
 
     // 2. Sync to Keycloak
     try {
-      keycloakUserClient.createUser(user, input.getPassword());
+      keycloakUserClient.createUser(user, input.getPassword(), true);
     } catch (Exception e) {
       log.error("Failed to sync user to Keycloak: userId={}", user.getId(), e);
       throw new DomainException(DomainError.USER_REGISTRATION_FAILED, e);
@@ -82,7 +82,7 @@ public class UserAdminServiceImpl implements UserAdminService {
 
     // 2. Sync to Keycloak
     try {
-      keycloakUserClient.updateUser(user);
+      keycloakUserClient.updateUser(user, true);
     } catch (Exception e) {
       log.error("Failed to sync user update to Keycloak: userId={}", user.getId(), e);
       throw new DomainException(DomainError.USER_UPDATE_FAILED, e);
@@ -105,6 +105,7 @@ public class UserAdminServiceImpl implements UserAdminService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public boolean existsUser(String username) {
     return userRepository.existsByUsername(username);
   }
