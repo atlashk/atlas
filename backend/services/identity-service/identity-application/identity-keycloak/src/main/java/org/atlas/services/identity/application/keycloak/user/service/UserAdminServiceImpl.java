@@ -57,6 +57,8 @@ public class UserAdminServiceImpl implements UserAdminService {
     // 1. Save to DB first (without password - Keycloak handles password)
     UserEntity user = UserAdminMapper.INSTANCE.toUser(input);
     user.setId(sequenceGenerator.generate(SequenceType.USER));
+    log.info("User info before saving to DB: id={}, username={}, email={}, phoneNumber={}",
+        user.getId(), user.getUsername(), user.getEmail(), user.getPhoneNumber());
     userRepository.insert(user);
 
     // 2. Sync to Keycloak
