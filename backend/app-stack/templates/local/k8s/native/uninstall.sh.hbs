@@ -10,7 +10,18 @@ readonly PROJECT_NAME="{{dotenv.PROJECT_NAME}}"
 readonly NAMESPACE="{{dotenv.PROJECT_NAME}}"
 readonly NAMESPACE_TIMEOUT=120
 
+readonly SERVICES=(
+  "identity-service"
+  "catalog-service"
+  "inventory-service"
+  "order-service"
+  "payment-service"
+  "api-gateway"
+)
+
 REMOVE_APPLICATION_IMAGES=false
+CLUSTER_TYPE=""
+CLUSTER_NAME=""
 
 # =============================================================================
 # UTILITIES
@@ -66,6 +77,41 @@ check_prerequisites() {
 }
 
 # =============================================================================
+# CLUSTER DETECTION
+# =============================================================================
+
+detect_cluster() {
+  command -v kubectl >/dev/null 2>&1 || return 0
+
+  local context
+  context="$(kubectl config current-context 2>/dev/null || true)"
+
+  case "$context" in
+    minikube)
+      command -v minikube >/dev/null 2>&1 && { CLUSTER_TYPE="minikube"; CLUSTER_NAME="minikube"; }
+      ;;
+    kind-*)
+      command -v kind >/dev/null 2>&1 && { CLUSTER_TYPE="kind"; CLUSTER_NAME="${context#kind-}"; }
+      ;;
+  esac
+}
+
+remove_image_from_cluster() {
+  local image="$1"
+
+  case "$CLUSTER_TYPE" in
+    minikube)
+      info "Removing image $image from Minikube..."
+      minikube image rm "$image" 2>/dev/null || true
+      ;;
+    kind)
+      info "Removing image $image from Kind cluster '$CLUSTER_NAME'..."
+      docker exec "${CLUSTER_NAME}-control-plane" crictl rmi "$image" 2>/dev/null || true
+      ;;
+  esac
+}
+
+# =============================================================================
 # CLEANUP
 # =============================================================================
 
@@ -92,11 +138,23 @@ remove_namespace() {
 remove_application_images() {
   info "Removing ${PROJECT_NAME} application images..."
 
+  detect_cluster
+  if [[ -n "$CLUSTER_TYPE" ]]; then
+    info "Detected Kubernetes context: $CLUSTER_TYPE ($CLUSTER_NAME). Images will be removed from cluster."
+  fi
+
+  # Remove images from cluster
+  for service in "${SERVICES[@]}"; do
+    local image="$PROJECT_NAME/$service:latest"
+    remove_image_from_cluster "$image"
+  done
+
+  # Remove local Docker images
   local images
   images=$(docker images --format "\{{.Repository}}:\{{.Tag}}" | grep "^${PROJECT_NAME}/" || true)
 
   if [[ -z "$images" ]]; then
-    info "No ${PROJECT_NAME} images found"
+    info "No ${PROJECT_NAME} images found locally"
     return 0
   fi
 
