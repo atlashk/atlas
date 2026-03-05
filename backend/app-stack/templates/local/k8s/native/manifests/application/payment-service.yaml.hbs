@@ -17,7 +17,7 @@ spec:
         app: payment-service
         tier: backend
     spec:
-      serviceAccountName: cluster-sa
+      serviceAccountName: cluster-mgmt
       containers:
         - name: payment-service
           image: {{dotenv.PROJECT_NAME}}/payment-service:latest

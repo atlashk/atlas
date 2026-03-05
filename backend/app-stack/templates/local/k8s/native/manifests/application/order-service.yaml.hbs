@@ -17,7 +17,7 @@ spec:
         app: order-service
         tier: backend
     spec:
-      serviceAccountName: cluster-sa
+      serviceAccountName: cluster-mgmt
       containers:
         - name: order-service
           image: {{dotenv.PROJECT_NAME}}/order-service:latest

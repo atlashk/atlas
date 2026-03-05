@@ -17,7 +17,7 @@ spec:
         app: inventory-service
         tier: backend
     spec:
-      serviceAccountName: cluster-sa
+      serviceAccountName: cluster-mgmt
       containers:
         - name: inventory-service
           image: {{dotenv.PROJECT_NAME}}/inventory-service:latest

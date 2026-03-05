@@ -19,7 +19,7 @@ spec:
         app: api-gateway
         tier: backend
     spec:
-      serviceAccountName: cluster-sa
+      serviceAccountName: cluster-mgmt
       containers:
         - name: api-gateway
           image: {{dotenv.PROJECT_NAME}}/api-gateway:latest
