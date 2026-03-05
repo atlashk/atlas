@@ -25,9 +25,9 @@ public class KeycloakRealmRoleClient {
   private static final ParameterizedTypeReference<List<Map<String, Object>>> ROLE_LIST_TYPE =
       new ParameterizedTypeReference<>() {};
 
-  public List<Map<String, Object>> getUserAssignedRealmRoles(String userId) {
+  public List<Map<String, Object>> getUserAssignedRealmRoles(String kcUserId) {
     String url = String.format("%s/admin/realms/%s/users/%s/role-mappings/realm",
-        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), userId);
+        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), kcUserId);
 
     List<Map<String, Object>> roles = restClient.get()
         .uri(url)
@@ -38,9 +38,9 @@ public class KeycloakRealmRoleClient {
     return roles == null ? Collections.emptyList() : roles;
   }
 
-  public List<Map<String, Object>> getUserAvailableRealmRoles(String userId) {
+  public List<Map<String, Object>> getUserAvailableRealmRoles(String kcUserId) {
     String url = String.format("%s/admin/realms/%s/users/%s/role-mappings/realm/available",
-        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), userId);
+        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), kcUserId);
 
     List<Map<String, Object>> roles = restClient.get()
         .uri(url)
@@ -51,13 +51,13 @@ public class KeycloakRealmRoleClient {
     return roles == null ? Collections.emptyList() : roles;
   }
 
-  public void removeUserRealmRoles(String userId, List<Map<String, Object>> rolesToRemove) {
+  public void removeUserRealmRoles(String kcUserId, List<Map<String, Object>> rolesToRemove) {
     if (CollectionUtil.isEmpty(rolesToRemove)) {
       return;
     }
 
     String url = String.format("%s/admin/realms/%s/users/%s/role-mappings/realm",
-        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), userId);
+        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), kcUserId);
 
     restClient.method(HttpMethod.DELETE)
         .uri(url)
@@ -68,13 +68,13 @@ public class KeycloakRealmRoleClient {
         .toBodilessEntity();
   }
 
-  public void addUserRealmRoles(String userId, List<Map<String, Object>> rolesToAdd) {
+  public void addUserRealmRoles(String kcUserId, List<Map<String, Object>> rolesToAdd) {
     if (CollectionUtil.isEmpty(rolesToAdd)) {
       return;
     }
 
     String url = String.format("%s/admin/realms/%s/users/%s/role-mappings/realm",
-        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), userId);
+        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), kcUserId);
 
     restClient.post()
         .uri(url)

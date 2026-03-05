@@ -57,15 +57,18 @@ public class UserAdminServiceImpl implements UserAdminService {
     // 1. Save to DB first (without password - Keycloak handles password)
     UserEntity user = UserAdminMapper.INSTANCE.toUser(input);
     user.setId(sequenceGenerator.generate(SequenceType.USER));
-    log.info("User info before saving to DB: id={}, username={}, email={}, phoneNumber={}",
-        user.getId(), user.getUsername(), user.getEmail(), user.getPhoneNumber());
     userRepository.insert(user);
 
     // 2. Sync to Keycloak
     try {
-      keycloakUserClient.createUser(user, input.getPassword(), true);
+      String kcUserId = keycloakUserClient.createUser(user, input.getPassword());
+      
+      // Update DB with Keycloak user ID for future reference
+      user.setExternalUserId(kcUserId);
+      userRepository.update(user);
     } catch (Exception e) {
-      log.error("Failed to sync user to Keycloak: userId={}", user.getId(), e);
+      log.error("Failed to sync user to Keycloak: userId={}, error={}", 
+          user.getId(), e.getMessage(), e);
       throw new DomainException(DomainError.USER_REGISTRATION_FAILED, e);
     }
 
@@ -84,9 +87,10 @@ public class UserAdminServiceImpl implements UserAdminService {
 
     // 2. Sync to Keycloak
     try {
-      keycloakUserClient.updateUser(user, true);
+      keycloakUserClient.updateUser(user);
     } catch (Exception e) {
-      log.error("Failed to sync user update to Keycloak: userId={}", user.getId(), e);
+      log.error("Failed to sync user update to Keycloak: userId={}, kcUserId={}, error={}", 
+          user.getId(), user.getExternalId(), e.getMessage(), e);
       throw new DomainException(DomainError.USER_UPDATE_FAILED, e);
     }
   }
@@ -94,14 +98,18 @@ public class UserAdminServiceImpl implements UserAdminService {
   @Override
   @Transactional
   public void deleteUser(String id) {
+    UserEntity user = userRepository.findById(id)
+        .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
+    
     // 1. Delete from DB first
     userRepository.deleteById(id);
 
     // 2. Delete from Keycloak
     try {
-      keycloakUserClient.deleteUser(id);
+      keycloakUserClient.deleteUser(user.getExternalId());
     } catch (Exception e) {
-      log.error("Failed to delete user from Keycloak: userId={}", id, e);
+      log.error("Failed to delete user from Keycloak: userId={}, kcUserId={}, error={}", 
+          user.getId(), user.getExternalId(), e.getMessage(), e);
       throw new DomainException(DomainError.USER_DELETE_FAILED, e);
     }
   }

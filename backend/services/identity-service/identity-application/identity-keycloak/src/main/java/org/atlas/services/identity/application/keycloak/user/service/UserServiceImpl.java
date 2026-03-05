@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
 
     // 2. Sync to Keycloak
     try {
-      keycloakUserClient.createUser(user, input.getPassword(), true);
+      keycloakUserClient.createUser(user, input.getPassword());
     } catch (Exception e) {
       log.error("Failed to sync user to Keycloak: userId={}", user.getId(), e);
       // Transaction will roll back DB changes if Keycloak sync fails

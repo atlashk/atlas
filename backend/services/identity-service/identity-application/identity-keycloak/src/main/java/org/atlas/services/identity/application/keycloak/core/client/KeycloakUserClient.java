@@ -29,11 +29,11 @@ public class KeycloakUserClient {
   /**
    * @return Keycloak created user ID
    */
-  public String createUser(UserEntity user, String password, boolean syncId) {
+  public String createUser(UserEntity user, String password) {
     String url = String.format("%s/admin/realms/%s/users",
         keycloakProps.getBaseUrl(), keycloakProps.getRealm());
 
-    Map<String, Object> userPayload = buildUserPayload(user, password, syncId);
+    Map<String, Object> userPayload = buildUserPayload(user, password);
 
     try {
       String locationHeader = restClient.post()
@@ -44,36 +44,36 @@ public class KeycloakUserClient {
           .retrieve()
           .onStatus(HttpStatusCode::isError, (request, response) -> {
             throw new KeycloakClientException(
-                String.format("Failed to create Keycloak user: username=%s, status=%d",
-                    user.getUsername(), response.getStatusCode().value()));
+                String.format("Failed to create Keycloak user: userId=%s, status=%d",
+                    user.getId(), response.getStatusCode().value()));
           })
           .toBodilessEntity()
           .getHeaders()
           .getFirst("Location");
 
       // Extract user ID from Location header
-      String kcCreatedId = extractUserIdFromLocation(locationHeader);
+      String kcUserId = extractKcUserIdFromLocation(locationHeader);
 
       // Assign role
-      assignUserRole(kcCreatedId, user.getRole());
+      assignUserRole(kcUserId, user.getRole());
 
-      log.info("Created Keycloak user successfully: username={}, keycloakUserId={}",
-          user.getUsername(), kcCreatedId);
-      return kcCreatedId;
+      log.info("Created Keycloak user successfully: userId={}, kcUserId={}", 
+          user.getId(), kcUserId);
+      return kcUserId;
     } catch (KeycloakClientException e) {
       throw e;
     } catch (Exception e) {
       throw new KeycloakClientException(
-          String.format("Failed to create Keycloak user: username=%s, reason=%s",
-              user.getUsername(), e.getMessage()));
+          String.format("Failed to create Keycloak user: userId=%s, reason=%s", 
+              user.getId(), e.getMessage()));
     }
   }
 
-  public void updateUser(UserEntity user, boolean syncId) {
+  public void updateUser(UserEntity user) {
     String url = String.format("%s/admin/realms/%s/users/%s",
-        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), user.getId());
+        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), user.getExternalId());
 
-    Map<String, Object> userPayload = buildUserPayload(user, syncId);
+    Map<String, Object> userPayload = buildUserPayload(user);
 
     try {
       restClient.put()
@@ -84,27 +84,28 @@ public class KeycloakUserClient {
           .retrieve()
           .onStatus(HttpStatusCode::isError, (request, response) -> {
             throw new KeycloakClientException(
-                String.format("Failed to update Keycloak user: username=%s, status=%d",
-                    user.getUsername(), response.getStatusCode().value()));
+                String.format("Failed to update Keycloak user: userId=%s, kcUserId=%s, status=%d",
+                    user.getId(), user.getExternalId(), response.getStatusCode().value()));
           })
           .toBodilessEntity();
 
       // Assign role
-      assignUserRole(user.getId(), user.getRole());
+      assignUserRole(user.getExternalId(), user.getRole());
 
-      log.info("Updated Keycloak user successfully: id={}", user.getId());
+      log.info("Updated Keycloak user successfully: userId={}, kcUserId={}", 
+          user.getId(), user.getExternalId());
     } catch (KeycloakClientException e) {
       throw e;
     } catch (Exception e) {
       throw new KeycloakClientException(
-          String.format("Failed to update Keycloak user: username=%s, reason=%s",
-              user.getUsername(), e.getMessage()));
+          String.format("Failed to update Keycloak user: userId=%s, kcUserId=%s, reason=%s",
+              user.getId(), user.getExternalId(), e.getMessage()));
     }
   }
 
-  public void deleteUser(String userId) {
+  public void deleteUser(String kcUserId) {
     String url = String.format("%s/admin/realms/%s/users/%s",
-        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), userId);
+        keycloakProps.getBaseUrl(), keycloakProps.getRealm(), kcUserId);
 
     try {
       restClient.delete()
@@ -114,22 +115,22 @@ public class KeycloakUserClient {
           .onStatus(HttpStatusCode::isError, (request, response) -> {
             throw new KeycloakClientException(
                 String.format("Failed to delete Keycloak user: userId=%s, status=%d",
-                    userId, response.getStatusCode().value()));
+                    kcUserId, response.getStatusCode().value()));
           })
           .toBodilessEntity();
 
-      log.info("Deleted Keycloak user successfully: userId={}", userId);
+      log.info("Deleted Keycloak user successfully: userId={}", kcUserId);
     } catch (KeycloakClientException e) {
       throw e;
     } catch (Exception e) {
       throw new KeycloakClientException(
-          String.format("Failed to delete Keycloak user: userId=%s, reason=%s",
-              userId, e.getMessage()));
+          String.format("Failed to delete Keycloak user: kcUserId=%s, reason=%s",
+              kcUserId, e.getMessage()));
     }
   }
 
-  private Map<String, Object> buildUserPayload(UserEntity user, String password, boolean syncId) {
-    Map<String, Object> payload = new HashMap<>(buildUserPayload(user, syncId));
+  private Map<String, Object> buildUserPayload(UserEntity user, String password) {
+    Map<String, Object> payload = new HashMap<>(buildUserPayload(user));
     
     // Password
     payload.put("credentials", List.of(Map.of(
@@ -141,11 +142,8 @@ public class KeycloakUserClient {
     return payload;
   }
 
-  private Map<String, Object> buildUserPayload(UserEntity user, boolean syncId) {
+  private Map<String, Object> buildUserPayload(UserEntity user) {
     Map<String, Object> payload = new HashMap<>();
-    if (syncId && StringUtil.isNotBlank(user.getId())) {
-      payload.put("id", user.getId());
-    }
     payload.put("username", user.getUsername());
     payload.put("firstName", user.getFirstName() != null ? user.getFirstName() : "");
     payload.put("lastName", user.getLastName() != null ? user.getLastName() : "");
@@ -158,29 +156,29 @@ public class KeycloakUserClient {
     return payload;
   }
 
-  private String extractUserIdFromLocation(String locationHeader) {
+  private String extractKcUserIdFromLocation(String locationHeader) {
     if (locationHeader == null) {
       throw new KeycloakClientException("Location header is missing");
     }
     return locationHeader.substring(locationHeader.lastIndexOf("/") + 1);
   }
 
-  private void assignUserRole(String userId, UserRole userRole) {
+  private void assignUserRole(String kcUserId, UserRole userRole) {
     String roleName = userRole.name().toLowerCase();
-    List<Map<String, Object>> assignedRoles = keycloakRealmRoleClient.getUserAssignedRealmRoles(
-        userId);
+    List<Map<String, Object>> assignedRoles = 
+        keycloakRealmRoleClient.getUserAssignedRealmRoles(kcUserId);
 
     // Check if already has the target role
     boolean alreadyHasRole = assignedRoles != null && assignedRoles.stream()
         .anyMatch(role -> roleName.equals(role.get("name")));
 
     if (alreadyHasRole) {
-      log.debug("User {} already has role {}", userId, roleName);
+      log.info("Keycloak user {} already has role {}", kcUserId, roleName);
       return;
     }
 
     List<Map<String, Object>> availableRoles = keycloakRealmRoleClient.getUserAvailableRealmRoles(
-        userId);
+        kcUserId);
 
     // Find target role from available roles
     Map<String, Object> targetRole = availableRoles == null ? null : availableRoles.stream()
@@ -189,7 +187,7 @@ public class KeycloakUserClient {
         .orElse(null);
 
     if (targetRole == null) {
-      log.warn("Role {} not found in available roles for user {}", roleName, userId);
+      log.warn("Role {} not found in available roles for keycloak user {}", roleName, kcUserId);
       return;
     }
 
@@ -203,13 +201,13 @@ public class KeycloakUserClient {
           .toList();
 
       if (!rolesToRemove.isEmpty()) {
-        keycloakRealmRoleClient.removeUserRealmRoles(userId, rolesToRemove);
+        keycloakRealmRoleClient.removeUserRealmRoles(kcUserId, rolesToRemove);
       }
     }
 
     // Assign target role
-    keycloakRealmRoleClient.addUserRealmRoles(userId, List.of(targetRole));
+    keycloakRealmRoleClient.addUserRealmRoles(kcUserId, List.of(targetRole));
 
-    log.debug("Assigned role {} to user {}", roleName, userId);
+    log.info("Assigned role {} to keycloak user {}", roleName, kcUserId);
   }
 }

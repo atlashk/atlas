@@ -30,6 +30,7 @@ public class RestExceptionHandler {
 
   @ExceptionHandler(BaseDomainException.class)
   public ResponseEntity<ApiResponseWrapper<Void>> handle(BaseDomainException e) {
+    log.error("Domain exception: {}", e.getMessage(), e);
     // Extract error message
     String i18nMessage = i18nService.getMessage(e.getMessage());
     String errorMessage = StringUtil.isNotBlank(i18nMessage) ? i18nMessage : e.getMessage();
