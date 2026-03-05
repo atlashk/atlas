@@ -14,7 +14,6 @@ notification:
   email: spring
 persistence: jpa
 redis: standalone
-reverse-proxy: none
 scheduler: quartz
 service-discovery: eureka
 storage: minio

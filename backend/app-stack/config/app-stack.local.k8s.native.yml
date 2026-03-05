@@ -20,7 +20,6 @@ observability:
   tracing: zipkin
 persistence: jpa
 redis: standalone
-reverse-proxy: nginx
 scheduler: quartz
 service-discovery: kubernetes
 storage: minio

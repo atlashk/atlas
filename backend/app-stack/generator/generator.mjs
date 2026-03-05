@@ -277,9 +277,6 @@ function shouldSkipFileByPath(filePath, context) {
   const fullTextSearch = stackValue('full-text-search');
   if (normalizedPath.includes('/config/elasticsearch/') && fullTextSearch !== 'elasticsearch') return true;
   
-  const reverseProxy = stackValue('reverse-proxy');
-  if (normalizedPath.includes('/config/nginx/') && reverseProxy !== 'nginx') return true;
-  
   const identity = stackValue('identity');
   if (normalizedPath.includes('/config/keycloak/') && identity !== 'keycloak') return true;
 

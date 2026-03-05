@@ -88,48 +88,6 @@ build_services() {
 }
 
 # =============================================================================
-# INGRESS CONTROLLER
-# =============================================================================
-
-detect_cluster_provider() {
-  if kubectl get nodes -o jsonpath='{.items[0].metadata.labels}' 2>/dev/null | grep -q 'ingress-ready=true'; then
-    echo "kind"
-  else
-    echo "cloud"
-  fi
-}
-
-install_ingress_controller() {
-  {{#hasService "reverse-proxy" "nginx"}}
-  info "Ensuring NGINX Ingress Controller is installed..."
-
-  # Check if already deployed
-  if kubectl get deployment ingress-nginx-controller -n ingress-nginx >/dev/null 2>&1; then
-    info "NGINX Ingress Controller already deployed"
-    return 0
-  fi
-
-  local provider
-  provider=$(detect_cluster_provider)
-  info "Installing NGINX Ingress Controller ($provider provider)..."
-
-  local manifest_url="https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/${provider}/deploy.yaml"
-  kubectl apply -f "$manifest_url" || die "Failed to install NGINX Ingress Controller"
-
-  info "Waiting for NGINX Ingress Controller readiness..."
-  kubectl wait \
-    --namespace ingress-nginx \
-    --for=condition=ready pod \
-    --selector=app.kubernetes.io/component=controller \
-    --timeout=0s || die "NGINX Ingress Controller did not become ready. Check status with: kubectl get pods -n ingress-nginx"
-
-  info "NGINX Ingress Controller is ready"
-  {{else}}
-  info "Reverse proxy not set to NGINX; skipping ingress controller install"
-  {{/hasService}}
-}
-
-# =============================================================================
 # DEPLOYMENT
 # =============================================================================
 
@@ -219,9 +177,6 @@ apply_manifests() {
   [[ "$INFRA_ONLY" == true ]] && return 0
 
   apply_and_wait "$MANIFESTS_DIR/application"
-
-  install_ingress_controller
-  apply_and_wait "$MANIFESTS_DIR/ingress"
 }
 
 # =============================================================================
