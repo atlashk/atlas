@@ -30,17 +30,24 @@ spec:
             - name: DB_URL
               value: "jdbc:mysql://mysql:3306/db_order?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
             - name: DB_USERNAME
-              value: "atlas"
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: mysql-user
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: mysql
                   key: mysql-password
-            {{/hasService}}{{#hasService "datasource" "postgres"}}
+            {{/hasService}}
+            {{#hasService "datasource" "postgres"}}
             - name: DB_URL
               value: "jdbc:postgresql://postgres:5432/db_order"
             - name: DB_USERNAME
-              value: "atlas"
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: postgres-user
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -56,13 +63,17 @@ spec:
             {{#hasService "messaging" "kafka"}}
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: "kafka:29092"
-            {{/hasService}}{{#hasService "messaging" "rabbitmq"}}
+            {{/hasService}}
+            {{#hasService "messaging" "rabbitmq"}}
             - name: RABBITMQ_HOST
               value: "rabbitmq"
             - name: RABBITMQ_PORT
               value: "5672"
             - name: RABBITMQ_USERNAME
-              value: "atlas"
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq
+                  key: rabbitmq-user
             - name: RABBITMQ_PASSWORD
               valueFrom:
                 secretKeyRef:

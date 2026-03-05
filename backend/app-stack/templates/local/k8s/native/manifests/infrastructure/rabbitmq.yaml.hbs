@@ -9,6 +9,7 @@ metadata:
     tier: backend
 type: Opaque
 data:
+  rabbitmq-user: YXRsYXM=
   rabbitmq-password: QXRsYXNAMTIzNDU2
 ---
 apiVersion: v1
@@ -49,7 +50,10 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: RABBITMQ_DEFAULT_USER
-              value: "atlas"
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq
+                  key: rabbitmq-user
             - name: RABBITMQ_DEFAULT_PASS
               valueFrom:
                 secretKeyRef:

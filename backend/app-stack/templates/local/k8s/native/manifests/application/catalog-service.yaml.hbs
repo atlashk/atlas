@@ -36,7 +36,10 @@ spec:
             - name: DB_URL
               value: "jdbc:mysql://mysql:3306/db_catalog?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
             - name: DB_USERNAME
-              value: "atlas"
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: mysql-user
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -47,7 +50,10 @@ spec:
             - name: DB_URL
               value: "jdbc:postgresql://postgres:5432/db_catalog"
             - name: DB_USERNAME
-              value: "atlas"
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: postgres-user
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -70,7 +76,10 @@ spec:
             - name: RABBITMQ_PORT
               value: "5672"
             - name: RABBITMQ_USERNAME
-              value: "atlas"
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq
+                  key: rabbitmq-user
             - name: RABBITMQ_PASSWORD
               valueFrom:
                 secretKeyRef:

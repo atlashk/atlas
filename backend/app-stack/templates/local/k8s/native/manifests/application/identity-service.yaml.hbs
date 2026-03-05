@@ -36,45 +36,29 @@ spec:
             - name: DB_URL
               value: "jdbc:mysql://mysql:3306/db_identity?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
             - name: DB_USERNAME
-              value: "atlas"
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: mysql-user
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: mysql
                   key: mysql-password
-            {{#hasService "identity" "keycloak"}}
-            - name: KEYCLOAK_DB_URL
-              value: "jdbc:mysql://mysql:3306/db_keycloak?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
-            - name: KEYCLOAK_DB_USERNAME
-              value: "atlas"
-            - name: KEYCLOAK_DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mysql
-                  key: mysql-password
-            {{/hasService}}
             {{/hasService}}
             {{#hasService "datasource" "postgres"}}
             - name: DB_URL
               value: "jdbc:postgresql://postgres:5432/db_identity"
             - name: DB_USERNAME
-              value: "atlas"
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: postgres-user
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: postgres
                   key: postgres-password
-            {{#hasService "identity" "keycloak"}}
-            - name: KEYCLOAK_DB_URL
-              value: "jdbc:postgresql://postgres:5432/db_keycloak"
-            - name: KEYCLOAK_DB_USERNAME
-              value: "atlas"
-            - name: KEYCLOAK_DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: postgres
-                  key: postgres-password
-            {{/hasService}}
             {{/hasService}}
             {{#hasService "kv-store" "redis"}}
             - name: REDIS_HOST
@@ -92,7 +76,10 @@ spec:
             - name: RABBITMQ_PORT
               value: "5672"
             - name: RABBITMQ_USERNAME
-              value: "atlas"
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq
+                  key: rabbitmq-user
             - name: RABBITMQ_PASSWORD
               valueFrom:
                 secretKeyRef:
