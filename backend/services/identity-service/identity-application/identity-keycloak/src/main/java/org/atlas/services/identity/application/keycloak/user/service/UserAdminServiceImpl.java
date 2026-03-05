@@ -64,7 +64,7 @@ public class UserAdminServiceImpl implements UserAdminService {
       String kcUserId = keycloakUserClient.createUser(user, input.getPassword());
       
       // Update DB with Keycloak user ID for future reference
-      user.setExternalUserId(kcUserId);
+      user.setExternalId(kcUserId);
       userRepository.update(user);
     } catch (Exception e) {
       log.error("Failed to sync user to Keycloak: userId={}, error={}", 
