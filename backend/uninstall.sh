@@ -6,7 +6,7 @@ readonly DIST_DIR="$SCRIPT_DIR/dist"
 readonly UNINSTALL_SCRIPT="$DIST_DIR/uninstall.sh"
 
 # Default options
-REMOVE_APPLICATION_IMAGES=false
+REMOVE_IMAGES=false
 
 info() { printf "[INFO] %s\n" "$*"; }
 die()  { printf "[ERROR] %s\n" "$*" >&2; exit 1; }
@@ -16,12 +16,12 @@ usage() {
 Usage: $(basename "$0") [OPTIONS]
 
 Options:
-    --remove-application-images    Remove Docker application images (default: false)
-    -h, --help                     Show this help message
+    --remove-images    Remove Docker application images (default: false)
+    -h, --help         Show this help message
 
 Examples:
-    $(basename "$0")                              # Uninstall without removing Docker application images
-    $(basename "$0") --remove-application-images  # Uninstall and remove Docker application images
+    $(basename "$0")                    # Uninstall without removing Docker application images
+    $(basename "$0") --remove-images    # Uninstall and remove Docker application images
 EOF
     exit 0
 }
@@ -30,8 +30,8 @@ EOF
 PASSTHROUGH_ARGS=()
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --remove-application-images)
-            REMOVE_APPLICATION_IMAGES=true
+        --remove-images)
+            REMOVE_IMAGES=true
             shift
             ;;
         -h|--help)
@@ -47,12 +47,12 @@ done
 [[ -f "$UNINSTALL_SCRIPT" ]] || die "Uninstall script not found: $UNINSTALL_SCRIPT\nPlease run ./install.sh first to generate deployment scripts"
 
 info "Executing uninstall script: $UNINSTALL_SCRIPT"
-info "Remove application images: $REMOVE_APPLICATION_IMAGES"
+info "Remove application images: $REMOVE_IMAGES"
 chmod +x "$UNINSTALL_SCRIPT"
 
-# Pass remove-application-images option to uninstall script
-if [[ "$REMOVE_APPLICATION_IMAGES" == "true" ]]; then
-    "$UNINSTALL_SCRIPT" --remove-application-images "${PASSTHROUGH_ARGS[@]}"
+# Pass remove-images option to uninstall script
+if [[ "$REMOVE_IMAGES" == "true" ]]; then
+    "$UNINSTALL_SCRIPT" --remove-images "${PASSTHROUGH_ARGS[@]}"
 else
     "$UNINSTALL_SCRIPT" "${PASSTHROUGH_ARGS[@]}"
 fi
