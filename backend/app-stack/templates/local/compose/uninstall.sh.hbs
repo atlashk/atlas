@@ -106,8 +106,8 @@ remove_images() {
   info "Removing local images..."
 
   images=$(docker images "${PROJECT_NAME}/*" \
-    --format '{{"{{"}}.Repository{{"}}"}}:{{"{{"}}.Tag{{"}}"}}' \
-    | grep -v "<none>" || true)
+    --format '{{.Repository}}:{{.Tag}}' \
+    | grep -v "<none>" | grep -E '^[a-z0-9./_-]+:[a-zA-Z0-9._-]+' || true)
   if [[ -z "$images" ]]; then
     info "No local images found"
     return

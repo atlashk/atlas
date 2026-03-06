@@ -4,15 +4,15 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.util.ImageUtil;
-import org.atlas.libs.framework.storage.StorageConstant;
 import org.atlas.libs.framework.storage.StorageService;
-import org.atlas.libs.framework.storage.model.CheckExistRequest;
+import org.atlas.libs.framework.storage.model.CheckFileExistsRequest;
 import org.atlas.libs.framework.storage.model.DeleteFileRequest;
 import org.atlas.libs.framework.storage.model.GetFileRequest;
 import org.atlas.libs.framework.storage.model.UploadFileRequest;
 import org.atlas.libs.framework.util.ArrayUtil;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.catalog.port.in.product.service.ProductImageService;
+import org.atlas.services.catalog.port.out.storage.ProductStorageConstant;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,7 +25,7 @@ public class ProductImageServiceImpl implements ProductImageService {
   @Override
   public void uploadImage(String productId, byte[] imageBytes, String imageContentType)
       throws IOException {
-    String bucket = StorageConstant.PRODUCT_IMAGE_BUCKET;
+    String bucket = ProductStorageConstant.PRODUCT_IMAGE_BUCKET;
     String objectKey = getObjectKey(productId);
     UploadFileRequest storageRequest = UploadFileRequest.builder()
         .bucket(bucket)
@@ -39,10 +39,10 @@ public class ProductImageServiceImpl implements ProductImageService {
 
   @Override
   public String getImage(String productId) {
-    String bucket = StorageConstant.PRODUCT_IMAGE_BUCKET;
+    String bucket = ProductStorageConstant.PRODUCT_IMAGE_BUCKET;
     String objectKey = getObjectKey(productId);
 
-    if (!checkExist(bucket, objectKey)) {
+    if (!checkImageExists(bucket, objectKey)) {
       return StringUtil.EMPTY;
     }
 
@@ -65,7 +65,7 @@ public class ProductImageServiceImpl implements ProductImageService {
 
   @Override
   public void deleteImage(String productId) {
-    String bucket = StorageConstant.PRODUCT_IMAGE_BUCKET;
+    String bucket = ProductStorageConstant.PRODUCT_IMAGE_BUCKET;
     String objectKey = getObjectKey(productId);
     DeleteFileRequest storageRequest = DeleteFileRequest.builder()
         .bucket(bucket)
@@ -83,11 +83,11 @@ public class ProductImageServiceImpl implements ProductImageService {
     return String.format("%s.jpg", productId);
   }
 
-  private boolean checkExist(String bucket, String objectKey) {
-    CheckExistRequest checkExistRequest = CheckExistRequest.builder()
+  private boolean checkImageExists(String bucket, String objectKey) {
+    CheckFileExistsRequest checkFileExistsRequest = CheckFileExistsRequest.builder()
         .bucket(bucket)
         .objectKey(objectKey)
         .build();
-    return storageService.checkExist(checkExistRequest);
+    return storageService.checkFileExists(checkFileExistsRequest);
   }
 }

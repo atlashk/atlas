@@ -9,6 +9,6 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
-public class CheckExistRequest extends BaseRequest {
+public class CheckFileExistsRequest extends BaseRequest {
 
 }

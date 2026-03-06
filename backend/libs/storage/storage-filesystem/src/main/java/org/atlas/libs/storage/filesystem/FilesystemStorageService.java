@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.storage.StorageService;
 import org.atlas.libs.framework.storage.model.BaseRequest;
-import org.atlas.libs.framework.storage.model.CheckExistRequest;
+import org.atlas.libs.framework.storage.model.CheckFileExistsRequest;
 import org.atlas.libs.framework.storage.model.DeleteFileRequest;
 import org.atlas.libs.framework.storage.model.GetDownloadUrlRequest;
 import org.atlas.libs.framework.storage.model.GetFileRequest;
@@ -26,11 +26,21 @@ public class FilesystemStorageService implements StorageService {
   private final FilesystemProps props;
 
   @Override
+  public void createBucket(String bucketName) throws IOException {
+      Path bucketPath = Paths.get(props.getRoot(), bucketName);
+  
+      if (Files.exists(bucketPath)) {
+          log.info("Bucket '{}' already exists at {}", bucketName, bucketPath);
+          return;
+      }
+  
+      Files.createDirectories(bucketPath);
+      log.info("Bucket '{}' created at {}", bucketName, bucketPath);
+  }
+
+  @Override
   public void uploadFile(UploadFileRequest request) throws IOException {
     Path filePath = toFilePath(request);
-
-    // Ensure parent directories exist
-    Files.createDirectories(filePath.getParent());
 
     // Write file content
     try (OutputStream outputStream = Files.newOutputStream(filePath)) {
@@ -40,7 +50,7 @@ public class FilesystemStorageService implements StorageService {
   }
 
   @Override
-  public boolean checkExist(CheckExistRequest request) {
+  public boolean checkFileExists(CheckFileExistsRequest request) {
     Path filePath = toFilePath(request);
     return Files.exists(filePath);
   }

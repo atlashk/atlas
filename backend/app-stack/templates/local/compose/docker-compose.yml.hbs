@@ -217,24 +217,6 @@ services:
       retries: 5
     networks:
       - {{dotenv.PROJECT_NAME}}-network
-
-  minio-init:
-    container_name: minio-init
-    image: minio/mc:latest
-    environment:
-      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-http://minio:9000}
-      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
-      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-Atlas@123456}
-      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-atlas}
-      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-Atlas@123456}
-    volumes:
-      - ./config/minio/minio-init.sh:/minio-init.sh:ro
-    entrypoint: ["/bin/sh", "/minio-init.sh"]
-    depends_on:
-      minio:
-        condition: service_healthy
-    networks:
-      - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
 
 {{#hasService "notification.email" "spring"}}
@@ -495,8 +477,8 @@ services:
       {{/hasService}}
       {{#hasService "storage" "minio"}}
       - MINIO_ENDPOINT=http://minio:9000
-      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
-      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-Atlas@123456}
+      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER:-atlas}
+      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD:-Atlas@123456}
       {{/hasService}}
       {{#hasService "observability.tracing" "zipkin"}}
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
