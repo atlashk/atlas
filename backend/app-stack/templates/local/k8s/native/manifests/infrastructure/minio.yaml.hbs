@@ -65,11 +65,16 @@ spec:
             - /bin/sh
             - -c
             - |
-              # Wait for MinIO to be ready using mc
-              until mc alias set local "$MINIO_ENDPOINT" "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD" && mc ready local; do
+              # Wait for MinIO DNS and readiness
+              until mc alias set local "$MINIO_ENDPOINT" "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"; do
+                echo "Waiting for MinIO DNS and service to be ready..."
+                sleep 10
+              done
+              until mc ready local; do
                 echo "Waiting for MinIO to be ready..."
                 sleep 5
               done
+
               mc mb local/product-image
               mc admin user add local "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
               mc admin policy attach local readwrite --user "$MINIO_ACCESS_KEY"
