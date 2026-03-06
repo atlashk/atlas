@@ -76,8 +76,13 @@ public class ProductAdminServiceImpl implements ProductAdminService {
   @Override
   @Transactional(readOnly = true)
   public ProductEntity retrieveProduct(String id) {
-    return productRepository.findById(id)
+    ProductEntity product = productRepository.findById(id)
         .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
+
+    // Set image
+    product.setImage(productImageService.getImage(product.getId()));
+
+    return product;
   }
 
   @Override
