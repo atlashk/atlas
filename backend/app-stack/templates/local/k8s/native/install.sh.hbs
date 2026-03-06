@@ -175,19 +175,6 @@ load_image_to_cluster() {
   esac
 }
 
-cleanup_dangling_images() {
-  info "Cleaning up dangling images..."
-
-  local dangling
-  dangling=$(docker images -f "dangling=true" -q 2>/dev/null || true)
-
-  if [[ -n "$dangling" ]]; then
-    docker rmi $dangling 2>/dev/null || info "Some dangling images could not be removed (possibly in use)"
-  else
-    info "No dangling images to clean up."
-  fi
-}
-
 build_docker_images() {
   [[ "$BUILD_DOCKER" == "true" ]] || return 0
 
@@ -225,7 +212,6 @@ build_docker_images() {
   done
 
   info "Docker images build process completed successfully."
-  cleanup_dangling_images
   echo
 }
 

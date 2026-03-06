@@ -63,7 +63,7 @@ check_docker() {
   info "Docker is running"
 }
 
-detect_docker_compose() {
+check_docker_compose() {
 
   if command -v docker-compose >/dev/null 2>&1; then
     DOCKER_COMPOSE_CMD="docker-compose"
@@ -79,11 +79,12 @@ detect_docker_compose() {
 check_prerequisites() {
   info "Checking prerequisites..."
   check_docker
-  detect_docker_compose
+  check_docker_compose
+  info "Prerequisites check passed"
 }
 
 # =============================================================================
-# CLEANUP
+# DOCKER CLEANUP
 # =============================================================================
 
 remove_containers() {
@@ -102,21 +103,17 @@ remove_networks() {
 }
 
 remove_images() {
-  info "Removing ${PROJECT_NAME} images..."
+  info "Removing local images..."
 
-  local images
   images=$(docker images "${PROJECT_NAME}/*" \
-    --format "{{"{{"}}.Repository{{"}}"}}:{{"{{"}}.Tag{{"}}"}}" \
+    --format '{{"{{"}}.Repository{{"}}"}}:{{"{{"}}.Tag{{"}}"}}' \
     | grep -v "<none>" || true)
-
   if [[ -z "$images" ]]; then
-    info "No images found"
+    info "No local images found"
     return
   fi
 
   echo "$images" | xargs -r docker rmi -f
-
-  info "Images removed"
 }
 
 remove_dangling_images() {

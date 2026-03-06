@@ -118,14 +118,13 @@ delete_namespace() {
   fi
 
   info "Deleting namespace $NAMESPACE"
+
   kubectl delete namespace "$NAMESPACE" --ignore-not-found
 
   info "Waiting for namespace deletion..."
   while kubectl get namespace "$NAMESPACE" >/dev/null 2>&1; do
     sleep 2
   done
-
-  info "Namespace removed"
 }
 
 # =============================================================================
@@ -154,7 +153,8 @@ remove_cluster_images() {
 # =============================================================================
 
 remove_local_images() {
-  info "Searching local images for ${PROJECT_NAME}..."
+  info "Removing local images..."
+
   images=$(docker images "${PROJECT_NAME}/*" \
     --format '{{"{{"}}.Repository{{"}}"}}:{{"{{"}}.Tag{{"}}"}}' \
     | grep -v "<none>" || true)
@@ -163,9 +163,7 @@ remove_local_images() {
     return
   fi
 
-  info "Removing local images..."
   echo "$images" | xargs -r docker rmi -f
-  info "Local images removed"
 }
 
 # =============================================================================
@@ -176,16 +174,12 @@ clean_dangling_images() {
   info "Removing dangling images..."
 
   docker image prune -f >/dev/null
-
-  info "Dangling images removed"
 }
 
 clean_build_cache() {
   info "Cleaning Docker build cache..."
 
   docker builder prune -f >/dev/null
-
-  info "Docker build cache cleaned"
 }
 
 # =============================================================================
