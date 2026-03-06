@@ -78,12 +78,22 @@ data:
           "serviceAccountsEnabled": true,
           "directAccessGrantsEnabled": true,
           "standardFlowEnabled": false,
+          "implicitFlowEnabled": false,
+          "bearerOnly": false,
+          "consentRequired": false,
+          "fullScopeAllowed": true,
           "defaultClientScopes": [
-            "basic",
+            "web-origins",
+            "acr",
             "profile",
             "email",
-            "phone",
             "roles"
+          ],
+          "optionalClientScopes": [
+            "address",
+            "phone",
+            "offline_access",
+            "microprofile-jwt"
           ]
         }
       ],
