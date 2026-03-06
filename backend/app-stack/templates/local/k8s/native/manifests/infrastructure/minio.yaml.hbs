@@ -65,6 +65,11 @@ spec:
             - /bin/sh
             - -c
             - |
+              # Wait for MinIO to be ready
+              until curl -s http://minio:9000/minio/health/ready; do
+                echo "Waiting for MinIO to be ready..."
+                sleep 5
+              done
               mc alias set local "$MINIO_ENDPOINT" "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"
               mc mb local/product-image
               mc admin user add local "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
