@@ -1,6 +1,5 @@
 # Application Security Configuration
 # RBAC for applications to access Kubernetes namespace resources
-
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -8,13 +7,16 @@ metadata:
   name: cluster-mgmt
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
-    app: atlas
+    app: security
     tier: backend
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: namespace-reader
+  labels:
+    app: security
+    tier: backend
 rules:
   - apiGroups: [""]
     resources:
@@ -32,6 +34,9 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: namespace-reader
+  labels:
+    app: security
+    tier: backend
 subjects:
   - kind: ServiceAccount
     name: cluster-mgmt
