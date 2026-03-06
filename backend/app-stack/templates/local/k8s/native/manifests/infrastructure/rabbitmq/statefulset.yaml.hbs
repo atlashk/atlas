@@ -6,7 +6,6 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: rabbitmq
-    tier: backend
 spec:
   replicas: 1
   serviceName: rabbitmq
@@ -17,7 +16,6 @@ spec:
     metadata:
       labels:
         app: rabbitmq
-        tier: backend
     spec:
       containers:
         - name: rabbitmq
@@ -94,7 +92,6 @@ spec:
         name: rabbitmq-data
         labels:
           app: rabbitmq
-          tier: backend
       spec:
         accessModes:
           - ReadWriteOnce

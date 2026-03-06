@@ -6,7 +6,6 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: kafka
-    tier: backend
 spec:
   clusterIP: None
   selector:
@@ -24,5 +23,4 @@ spec:
     - port: 9101
       targetPort: 9101
       name: jmx
-  type: ClusterIP
 {{/hasService}}

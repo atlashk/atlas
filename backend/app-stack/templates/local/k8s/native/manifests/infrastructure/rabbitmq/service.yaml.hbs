@@ -6,7 +6,6 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: rabbitmq
-    tier: backend
 spec:
   clusterIP: None
   selector:
@@ -18,5 +17,4 @@ spec:
     - port: 15672
       targetPort: 15672
       name: management
-  type: ClusterIP
 {{/hasService}}

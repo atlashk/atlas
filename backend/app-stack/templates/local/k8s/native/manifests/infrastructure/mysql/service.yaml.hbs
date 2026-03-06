@@ -6,7 +6,6 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: mysql
-    tier: backend
 spec:
   clusterIP: None
   selector:
@@ -15,5 +14,4 @@ spec:
     - port: 3306
       targetPort: 3306
       name: mysql
-  type: ClusterIP
 {{/hasService}}

@@ -6,7 +6,6 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: loki
-    tier: backend
 spec:
   serviceName: loki
   replicas: 1
@@ -17,7 +16,6 @@ spec:
     metadata:
       labels:
         app: loki
-        tier: backend
     spec:
       containers:
         - name: loki

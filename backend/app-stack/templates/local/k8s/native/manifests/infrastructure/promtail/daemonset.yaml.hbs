@@ -8,7 +8,6 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: promtail
-    tier: backend
 spec:
   selector:
     matchLabels:
@@ -17,7 +16,6 @@ spec:
     metadata:
       labels:
         app: promtail
-        tier: backend
     spec:
       # Service account with permissions to read pod metadata
       serviceAccount: promtail

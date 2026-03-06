@@ -286,7 +286,7 @@ apply_and_wait() {
 
   info "Applying manifests from $dir..."
   local output
-  output=$(kubectl apply -n "$NAMESPACE" -f "$dir")
+  output=$(kubectl apply -n "$NAMESPACE" -f "$dir" --recursive)
   echo "$output"
 
   local resources
@@ -300,7 +300,7 @@ apply_and_wait() {
 apply_manifests() {
   info "Applying Kubernetes manifests to namespace '$NAMESPACE'..."
 
-  apply_and_wait "$MANIFESTS_DIR/security"
+  apply_and_wait "$MANIFESTS_DIR/common"
 
   apply_and_wait "$MANIFESTS_DIR/infrastructure"
 

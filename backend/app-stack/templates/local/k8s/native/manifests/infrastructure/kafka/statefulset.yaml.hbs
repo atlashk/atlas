@@ -6,7 +6,6 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: kafka
-    tier: backend
 spec:
   replicas: 1
   serviceName: kafka
@@ -17,7 +16,6 @@ spec:
     metadata:
       labels:
         app: kafka
-        tier: backend
     spec:
       containers:
         - name: kafka
@@ -117,7 +115,6 @@ spec:
         name: kafka-data
         labels:
           app: kafka
-          tier: backend
       spec:
         accessModes:
           - ReadWriteOnce

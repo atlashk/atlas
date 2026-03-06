@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.catalog.fullName }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.catalog.fullName }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  type: {{ .Values.global.service.type }}
+  selector:
+    app.kubernetes.io/name: {{ .Values.catalog.fullName }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - port: {{ .Values.catalog.service.rest.port }}
+      targetPort: {{ .Values.catalog.service.rest.targetPort }}
+      name: http
+    {{- if eq .Values.appStack.internal "grpc" }}
+    - port: {{ .Values.catalog.service.grpc.port }}
+      targetPort: {{ .Values.catalog.service.grpc.targetPort }}
+      name: grpc
+    {{- end }}

@@ -6,7 +6,6 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: postgres
-    tier: backend
 spec:
   replicas: 1
   serviceName: postgres
@@ -17,7 +16,6 @@ spec:
     metadata:
       labels:
         app: postgres
-        tier: backend
     spec:
       containers:
         - name: postgres
@@ -82,7 +80,6 @@ spec:
         name: postgres-data
         labels:
           app: postgres
-          tier: backend
       spec:
         accessModes:
           - ReadWriteOnce

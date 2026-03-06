@@ -6,7 +6,6 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: redis
-    tier: backend
 spec:
   replicas: 1
   serviceName: redis
@@ -17,7 +16,6 @@ spec:
     metadata:
       labels:
         app: redis
-        tier: backend
     spec:
       containers:
         - name: redis
@@ -61,7 +59,6 @@ spec:
         name: redis-data
         labels:
           app: redis
-          tier: backend
       spec:
         accessModes:
           - ReadWriteOnce

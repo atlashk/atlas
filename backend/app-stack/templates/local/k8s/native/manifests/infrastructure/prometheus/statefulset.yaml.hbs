@@ -6,7 +6,6 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: prometheus
-    tier: backend
 spec:
   serviceName: prometheus
   replicas: 1
@@ -17,7 +16,6 @@ spec:
     metadata:
       labels:
         app: prometheus
-        tier: backend
     spec:
       containers:
         - name: prometheus

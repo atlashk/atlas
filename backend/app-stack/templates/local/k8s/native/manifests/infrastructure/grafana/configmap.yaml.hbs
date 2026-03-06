@@ -6,7 +6,6 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: grafana
-    tier: backend
 data:
   datasources.yml: |
     apiVersion: 1
@@ -59,7 +58,6 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: grafana
-    tier: backend
 data:
   monitoring.json: |
     {
@@ -2553,7 +2551,6 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: grafana
-    tier: backend
 spec:
   replicas: 1
   selector:
@@ -2563,7 +2560,6 @@ spec:
     metadata:
       labels:
         app: grafana
-        tier: backend
     spec:
       containers:
         - name: grafana

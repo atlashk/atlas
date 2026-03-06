@@ -8,7 +8,6 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: promtail
-    tier: backend
 ---
 # ClusterRole: Defines permissions that can be applied cluster-wide
 # This role grants read-only access to essential Kubernetes resources needed for service discovery and log collection
@@ -19,7 +18,6 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: promtail
-    tier: backend
 rules:
   # Allow read access to core Kubernetes resources across all namespaces
   - apiGroups: [""] # Core API group (pods, services, etc.)
@@ -42,7 +40,6 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: promtail
-    tier: backend
 subjects:
   # Grant permissions to all ServiceAccounts in the namespace.
   - kind: Group

@@ -6,7 +6,6 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: minio
-    tier: backend
 spec:
   clusterIP: None
   selector:
@@ -18,5 +17,4 @@ spec:
     - port: 9001
       targetPort: 9001
       name: console
-  type: ClusterIP
 {{/hasService}}

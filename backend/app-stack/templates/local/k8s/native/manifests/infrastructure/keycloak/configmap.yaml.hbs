@@ -6,7 +6,6 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: keycloak
-    tier: backend
 data:
   keycloak-realm: "default"
   keycloak-client-id: "default-auth"
@@ -19,7 +18,6 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: keycloak
-    tier: backend
 data:
   realm.json: |
     {

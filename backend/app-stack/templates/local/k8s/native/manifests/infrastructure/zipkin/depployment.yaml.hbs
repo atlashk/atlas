@@ -6,7 +6,6 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: zipkin
-    tier: backend
 spec:
   replicas: 1
   selector:
@@ -16,7 +15,6 @@ spec:
     metadata:
       labels:
         app: zipkin
-        tier: backend
     spec:
       containers:
         - name: zipkin

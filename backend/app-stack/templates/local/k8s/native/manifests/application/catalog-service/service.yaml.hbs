@@ -5,10 +5,10 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: catalog-service
-    tier: backend
 spec:
   selector:
     app: catalog-service
+  type: ClusterIP
   ports:
     - port: 8082
       targetPort: 8082
@@ -18,4 +18,3 @@ spec:
       targetPort: 50052
       name: grpc
     {{/hasService}}
-  type: ClusterIP

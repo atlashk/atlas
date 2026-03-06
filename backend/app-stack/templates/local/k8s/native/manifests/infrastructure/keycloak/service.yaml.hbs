@@ -6,13 +6,12 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: keycloak
-    tier: backend
 spec:
+  type: ClusterIP
   selector:
     app: keycloak
   ports:
     - port: 8080
       targetPort: 8080
       name: http
-  type: ClusterIP
 {{/hasService}}

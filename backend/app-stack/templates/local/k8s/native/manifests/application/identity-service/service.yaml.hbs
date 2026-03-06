@@ -5,10 +5,10 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: identity-service
-    tier: backend
 spec:
   selector:
     app: identity-service
+  type: ClusterIP
   ports:
     - port: 8081
       targetPort: 8081
@@ -18,4 +18,3 @@ spec:
       targetPort: 50051
       name: grpc
     {{/hasService}}
-  type: ClusterIP

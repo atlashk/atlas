@@ -1,0 +1,26 @@
+deployment: local-k8s-helm
+datasource: mysql
+file:
+  csv: opencsv
+  excel: poi
+  pdf: pdfbox
+full-text-search: elasticsearch
+identity: keycloak
+internal: rest
+kv-store: redis
+messaging: kafka
+migration: flyway
+notification:
+  email: spring
+observability:
+  logging:
+    stack: loki
+    framework: logback
+  metrics: prometheus
+  tracing: zipkin
+persistence: jpa
+redis: standalone
+scheduler: quartz
+service-discovery: kubernetes
+storage: minio
+template: freemarker

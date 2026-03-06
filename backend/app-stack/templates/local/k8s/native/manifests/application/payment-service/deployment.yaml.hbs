@@ -5,7 +5,6 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: payment-service
-    tier: backend
 spec:
   replicas: 1
   selector:
@@ -15,9 +14,8 @@ spec:
     metadata:
       labels:
         app: payment-service
-        tier: backend
     spec:
-      serviceAccountName: cluster-mgmt
+      serviceAccountName: namespace-reader
       containers:
         - name: payment-service
           image: {{dotenv.PROJECT_NAME}}/payment-service:latest

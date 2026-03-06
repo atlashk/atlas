@@ -5,7 +5,6 @@ metadata:
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: order-service
-    tier: backend
 spec:
   replicas: 1
   selector:
@@ -15,9 +14,8 @@ spec:
     metadata:
       labels:
         app: order-service
-        tier: backend
     spec:
-      serviceAccountName: cluster-mgmt
+      serviceAccountName: namespace-reader
       containers:
         - name: order-service
           image: {{dotenv.PROJECT_NAME}}/order-service:latest
