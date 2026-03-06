@@ -1,0 +1,18 @@
+{{#hasService "observability.metrics" "prometheus"}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: {{dotenv.PROJECT_NAME}}
+  labels:
+    app: prometheus
+    tier: backend
+spec:
+  clusterIP: None
+  selector:
+    app: prometheus
+  ports:
+    - port: 9090
+      targetPort: 9090
+      name: http
+{{/hasService}}

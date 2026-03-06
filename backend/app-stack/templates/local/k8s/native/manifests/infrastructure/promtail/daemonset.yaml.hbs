@@ -1,0 +1,99 @@
+{{#hasService "observability.logging.stack" "loki"}}
+# DaemonSet ensures Promtail runs on every node in the cluster
+# This is necessary because logs are stored locally on each node
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: promtail
+  namespace: {{dotenv.PROJECT_NAME}}
+  labels:
+    app: promtail
+    tier: backend
+spec:
+  selector:
+    matchLabels:
+      app: promtail
+  template:
+    metadata:
+      labels:
+        app: promtail
+        tier: backend
+    spec:
+      # Service account with permissions to read pod metadata
+      serviceAccount: promtail
+      containers:
+        - name: promtail
+          # Using the main branch image for latest features
+          image: grafana/promtail:main
+          args:
+            - -config.file=/etc/promtail/config.yml
+          env:
+            # Make node name available as environment variable
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          ports:
+            # Expose metrics port for Prometheus scraping
+            - containerPort: 9080
+              name: http-metrics
+          
+          # Health check: Promtail is ready to accept requests
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: 9080
+            initialDelaySeconds: 30  # Wait 30s before first check
+            periodSeconds: 10        # Check every 10s
+            timeoutSeconds: 5        # 5s timeout per check
+            failureThreshold: 5      # Restart after 5 failures
+          
+          # Readiness check: Promtail is serving metrics
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: 9080
+            initialDelaySeconds: 10  # Wait 10s before first check
+            periodSeconds: 15        # Check every 15s
+            timeoutSeconds: 5        # 5s timeout per check
+            successThreshold: 1      # Ready after 1 success
+            failureThreshold: 5      # Not ready after 5 failures
+          
+          # Resource limits to prevent Promtail from consuming too many resources
+          resources:
+            requests:
+              cpu: "50m"      # Minimum CPU: 0.05 cores
+              memory: "64Mi"  # Minimum memory: 64 MiB
+            limits:
+              cpu: "100m"     # Maximum CPU: 0.1 cores
+              memory: "128Mi" # Maximum memory: 128 MiB
+          
+          volumeMounts:
+            # Mount configuration from ConfigMap
+            - name: config
+              mountPath: /etc/promtail
+            # Mount host's /var/log to read container logs
+            - name: varlog
+              mountPath: /var/log
+              readOnly: true  # Read-only access for security
+            # Mount Docker container directory (if using Docker runtime)
+            - name: varlibdockercontainers
+              mountPath: /var/lib/docker/containers
+              readOnly: true  # Read-only access for security
+      
+      volumes:
+        # Configuration volume from ConfigMap
+        - name: config
+          configMap:
+            name: promtail
+        # Host path volumes to access log files
+        - name: varlog
+          hostPath:
+            path: /var/log
+        - name: varlibdockercontainers
+          hostPath:
+            path: /var/lib/docker/containers
+      
+      # Grace period for clean shutdown
+      terminationGracePeriodSeconds: 10
+{{/hasService}}

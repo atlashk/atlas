@@ -1,0 +1,18 @@
+{{#hasService "identity" "keycloak"}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: {{dotenv.PROJECT_NAME}}
+  labels:
+    app: keycloak
+    tier: backend
+spec:
+  selector:
+    app: keycloak
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http
+  type: ClusterIP
+{{/hasService}}

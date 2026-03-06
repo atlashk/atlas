@@ -1,0 +1,22 @@
+{{#hasService "storage" "minio"}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+  namespace: {{dotenv.PROJECT_NAME}}
+  labels:
+    app: minio
+    tier: backend
+spec:
+  clusterIP: None
+  selector:
+    app: minio
+  ports:
+    - port: 9000
+      targetPort: 9000
+      name: s3
+    - port: 9001
+      targetPort: 9001
+      name: console
+  type: ClusterIP
+{{/hasService}}

@@ -1,0 +1,22 @@
+{{#hasService "full-text-search" "elasticsearch"}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+  namespace: {{dotenv.PROJECT_NAME}}
+  labels:
+    app: elasticsearch
+    tier: backend
+spec:
+  clusterIP: None
+  selector:
+    app: elasticsearch
+  ports:
+    - port: 9200
+      targetPort: 9200
+      name: http
+    - port: 9300
+      targetPort: 9300
+      name: transport
+  type: ClusterIP
+{{/hasService}}

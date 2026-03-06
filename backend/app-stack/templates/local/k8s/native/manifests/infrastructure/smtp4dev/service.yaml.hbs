@@ -1,0 +1,21 @@
+{{#hasService "notification.email" "spring"}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: smtp4dev
+  namespace: {{dotenv.PROJECT_NAME}}
+  labels:
+    app: smtp4dev
+    tier: backend
+spec:
+  selector:
+    app: smtp4dev
+  ports:
+    - port: 80
+      targetPort: 80
+      name: http
+    - port: 25
+      targetPort: 25
+      name: smtp
+  type: ClusterIP
+{{/hasService}}

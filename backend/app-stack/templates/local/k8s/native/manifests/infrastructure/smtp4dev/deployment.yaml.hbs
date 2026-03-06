@@ -1,0 +1,58 @@
+{{#hasService "notification.email" "spring"}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smtp4dev
+  namespace: {{dotenv.PROJECT_NAME}}
+  labels:
+    app: smtp4dev
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: smtp4dev
+  template:
+    metadata:
+      labels:
+        app: smtp4dev
+        tier: backend
+    spec:
+      containers:
+        - name: smtp4dev
+          image: rnwood/smtp4dev:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: ServerOptions__HostName
+              value: "smtp4dev"
+          ports:
+            - containerPort: 80
+              name: http
+            - containerPort: 25
+              name: smtp
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+{{/hasService}}

@@ -1,0 +1,19 @@
+{{#hasService "kv-store" "redis"}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: {{dotenv.PROJECT_NAME}}
+  labels:
+    app: redis
+    tier: backend
+spec:
+  clusterIP: None
+  selector:
+    app: redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+      name: redis
+  type: ClusterIP
+{{/hasService}}

@@ -122,6 +122,7 @@ resolve_template_path() {
   local deployment="$1"
 
   case "$deployment" in
+    local-debug)      echo "local/compose" ;;
     local-compose)    echo "local/compose" ;;
     local-k8s-native) echo "local/k8s/native" ;;
     *)                die "Unsupported deployment type: $deployment" ;;

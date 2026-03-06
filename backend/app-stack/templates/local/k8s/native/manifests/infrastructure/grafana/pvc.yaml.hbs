@@ -1,0 +1,16 @@
+{{#hasGrafana}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-data
+  namespace: {{dotenv.PROJECT_NAME}}
+  labels:
+    app: grafana
+    tier: backend
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+{{/hasGrafana}}

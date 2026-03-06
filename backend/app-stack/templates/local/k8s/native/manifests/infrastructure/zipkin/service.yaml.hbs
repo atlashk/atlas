@@ -1,0 +1,18 @@
+{{#hasService "observability.tracing" "zipkin"}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: zipkin
+  namespace: {{dotenv.PROJECT_NAME}}
+  labels:
+    app: zipkin
+    tier: backend
+spec:
+  selector:
+    app: zipkin
+  ports:
+    - port: 9411
+      targetPort: 9411
+      name: http
+  type: ClusterIP
+{{/hasService}}

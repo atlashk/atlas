@@ -1,0 +1,131 @@
+{{#hasService "observability.logging.stack" "loki"}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: promtail
+  namespace: {{dotenv.PROJECT_NAME}}
+  labels:
+    app: promtail
+    tier: backend
+data:
+  config.yml: |
+    # Server configuration for Promtail
+    server:
+      http_listen_port: 9080  # HTTP port for metrics and health checks
+      grpc_listen_port: 0     # Disable gRPC server (not needed for this setup)
+
+    # Position file tracks the last read position in log files
+    # This prevents re-reading logs after Promtail restarts
+    positions:
+      filename: /tmp/positions.yaml
+
+    # Loki client configuration - where to send the collected logs
+    clients:
+      - url: http://loki:3100/loki/api/v1/push  # Loki service endpoint
+
+    # Scrape configurations define how to collect logs
+    scrape_configs:
+      # Primary job: Collect logs from Kubernetes pods using service discovery
+      - job_name: kubernetes-pods
+        # Use Kubernetes service discovery to find pods automatically
+        kubernetes_sd_configs:
+          - role: pod  # Discover all pods in the cluster
+        
+        # Relabel configs transform Kubernetes metadata into Promtail labels
+        relabel_configs:
+          # Extract controller name (deployment, statefulset, etc.)
+          - source_labels:
+              - __meta_kubernetes_pod_controller_name
+            regex: .*
+            action: replace
+            target_label: __tmp_controller_name
+          
+          # Extract app label from pod metadata
+          - source_labels:
+              - __meta_kubernetes_pod_label_app
+            action: replace
+            target_label: __tmp_app
+          
+          # Extract pod name
+          - source_labels:
+              - __meta_kubernetes_pod_name
+            action: replace
+            target_label: __tmp_pod
+          
+          # Extract namespace
+          - source_labels:
+              - __meta_kubernetes_namespace
+            action: replace
+            target_label: __tmp_namespace
+          
+          # Set final 'app' label from controller name
+          - source_labels:
+              - __tmp_controller_name
+            regex: .*
+            action: replace
+            target_label: app
+          
+          # Override 'app' label with pod's app label if available
+          - source_labels:
+              - __tmp_app
+            regex: .*
+            action: replace
+            target_label: app
+          
+          # Set 'pod' label
+          - source_labels:
+              - __tmp_pod
+            regex: .*
+            action: replace
+            target_label: pod
+          
+          # Set 'namespace' label
+          - source_labels:
+              - __tmp_namespace
+            regex: .*
+            action: replace
+            target_label: namespace
+          
+          # Construct the log file path for each container
+          # Kubernetes stores container logs in /var/log/pods/<pod_uid>/<container_name>/*.log
+          - replacement: /var/log/pods/*$1/*.log
+            separator: /
+            source_labels:
+              - __meta_kubernetes_pod_uid
+              - __meta_kubernetes_pod_container_name
+            target_label: __path__
+        
+        # Pipeline stages process the log content
+        pipeline_stages:
+          # Parse CRI (Container Runtime Interface) format logs
+          # This handles Docker/containerd log formats with timestamps and stream info
+          - cri: {}
+          # Remove the 'filename' label to reduce cardinality
+          - labeldrop:
+              - filename
+
+      # Fallback job: Collect any logs not caught by the primary job
+      # This is a safety net for containers that might not be discovered properly
+      - job_name: containers-fallback
+        static_configs:
+          - targets:
+              - localhost
+            labels:
+              job: containerlogs
+              # Wildcard path to catch all container logs
+              __path__: /var/log/pods/*/*/*.log
+        
+        pipeline_stages:
+          # Parse CRI format logs
+          - cri: {}
+          # Extract metadata from the log file path using regex
+          # Path format: /var/log/pods/<namespace>_<pod>_<uid>/<container>/<sequence>.log
+          - regex:
+              source: filename
+              expression: \/var\/log\/pods\/(?P<namespace>[^_]+)_(?P<pod>[^_]+)_(?P<uid>[^\/]+)\/(?P<container>[^\/]+)\/.*\.log
+          # Create labels from the extracted metadata
+          - labels:
+              namespace:
+              pod:
+              container:
+{{/hasService}}

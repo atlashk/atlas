@@ -1,0 +1,18 @@
+{{#hasGrafana}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: {{dotenv.PROJECT_NAME}}
+  labels:
+    app: grafana
+    tier: backend
+spec:
+  selector:
+    app: grafana
+  ports:
+    - port: 3000
+      targetPort: 3000
+      name: http
+  type: ClusterIP
+{{/hasGrafana}}

@@ -1,0 +1,19 @@
+{{#hasService "datasource" "postgres"}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: {{dotenv.PROJECT_NAME}}
+  labels:
+    app: postgres
+    tier: backend
+spec:
+  clusterIP: None
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+      name: postgres
+  type: ClusterIP
+{{/hasService}}

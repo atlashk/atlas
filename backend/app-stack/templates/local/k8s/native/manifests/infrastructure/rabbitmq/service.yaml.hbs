@@ -1,0 +1,22 @@
+{{#hasService "messaging" "rabbitmq"}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+  namespace: {{dotenv.PROJECT_NAME}}
+  labels:
+    app: rabbitmq
+    tier: backend
+spec:
+  clusterIP: None
+  selector:
+    app: rabbitmq
+  ports:
+    - port: 5672
+      targetPort: 5672
+      name: amqp
+    - port: 15672
+      targetPort: 15672
+      name: management
+  type: ClusterIP
+{{/hasService}}
