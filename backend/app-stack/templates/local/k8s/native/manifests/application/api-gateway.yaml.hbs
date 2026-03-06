@@ -51,16 +51,17 @@ spec:
             - name: ZIPKIN_ENDPOINT
               value: "http://zipkin:9411/api/v2/spans"
             {{/hasService}}
-          # startupProbe gives the Spring Boot app up to 5 min (30 × 10 s) to finish starting
+          # startupProbe gives the Spring Boot app up to 4 min (20 × 12 s) to finish starting
           # before liveness/readiness probes are allowed to run. This prevents premature restarts.
+          # Optimized for 2-3 min average startup time with ~1 min buffer.
           startupProbe:
             httpGet:
               path: /actuator/health/liveness
               port: 8080
               scheme: HTTP
-            periodSeconds: 10
-            timeoutSeconds: 3
-            failureThreshold: 30
+            periodSeconds: 12
+            timeoutSeconds: 5
+            failureThreshold: 20
           # livenessProbe restarts the container if the app becomes unresponsive after startup.
           # Quick failure detection (3 × 30 s) without being overly aggressive.
           livenessProbe:
@@ -74,17 +75,17 @@ spec:
             failureThreshold: 3
             successThreshold: 1
           # readinessProbe removes the pod from service endpoints while it is still starting
-          # or if it becomes temporarily unavailable. Checks every 10 s for fast traffic routing.
+          # or if it becomes temporarily unavailable. Slightly relaxed to handle GC pauses.
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 0
-            periodSeconds: 10
-            timeoutSeconds: 3
+            periodSeconds: 15
+            timeoutSeconds: 5
             successThreshold: 1
-            failureThreshold: 3
+            failureThreshold: 4
           resources:
             requests:
               cpu: "200m"
