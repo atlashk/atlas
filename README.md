@@ -23,7 +23,7 @@
 [![Axios](https://img.shields.io/badge/Axios-5A29E4?logo=axios&logoColor=white)](https://axios-http.com/)
 [![Stripe](https://img.shields.io/badge/Stripe-635BFF?logo=stripe&logoColor=white)](https://stripe.com/)
 
-# Table of Contents
+## Table of Contents
 
 - Project Overview
 - Quick Start (Local)
@@ -38,7 +38,7 @@
 
 ---
 
-# Project Overview
+## Project Overview
 
 Atlas is a microservices-based e-commerce platform showcasing **DDD + Hexagonal Architecture** and a configurable infrastructure stack for local and containerized environments.
 
@@ -55,9 +55,9 @@ Shared backend building blocks live under `backend/libs/` and are consumed by mu
 
 ---
 
-# Technology Stack
+## Technology Stack
 
-## Backend
+### Backend
 
 - Language & Build
   - Java 17
@@ -102,7 +102,7 @@ Shared backend building blocks live under `backend/libs/` and are consumed by mu
     - Kubernetes native manifests
     - Helm chart templates
 
-## Frontend
+### Frontend
 
 - Framework
   - Next.js 16.x (React 19.x)
@@ -116,7 +116,7 @@ Shared backend building blocks live under `backend/libs/` and are consumed by mu
 
 ---
 
-# Project Structure
+## Project Structure
 
 ```
 .
@@ -149,9 +149,9 @@ Shared backend building blocks live under `backend/libs/` and are consumed by mu
 
 ---
 
-# Quick Start (Local)
+## Quick Start (Local)
 
-## Prerequisites
+### Prerequisites
 
 - Java 17+
 - Node.js (for frontend and deployment generator)
@@ -160,7 +160,7 @@ Shared backend building blocks live under `backend/libs/` and are consumed by mu
 Notes:
 - On Windows, use Git Bash or WSL to run `./install.sh` in `backend/`.
 
-## Backend
+### Backend
 
 ```bash
 cd backend
@@ -183,11 +183,11 @@ cd backend
 ./uninstall.sh --remove-images
 ```
 
-## Frontend
+### Frontend
 
 Both frontends default to talking to the gateway at `http://localhost:8080` as default. You can override this by setting `NEXT_PUBLIC_API_BASE_URL` in `.env`.
 
-### Storefront
+#### Storefront
 
 ```bash
 cd frontend/storefront
@@ -199,7 +199,7 @@ Open: http://localhost:8000
 
 Login credentials: `demo` / `Atlas@123456`
 
-### Admin
+#### Admin
 
 ```bash
 cd frontend/admin
@@ -211,7 +211,7 @@ Open: http://localhost:8001
 
 Login credentials: `admin` / `Atlas@123456`
 
-## Useful URLs
+### Useful URLs
 
 | Name | URL |
 | --- | --- |
@@ -227,9 +227,9 @@ Login credentials: `admin` / `Atlas@123456`
 
 ---
 
-# Architecture
+## Architecture
 
-## System Components
+### System Components
 
 ```mermaid
 flowchart LR
@@ -277,7 +277,7 @@ flowchart LR
 | Payment Service | Payment processing and simulation/webhooks | http://localhost:8085 |
 | Eureka Server | Service discovery | http://localhost:8761 |
 
-## Checkout Flow
+### Checkout Flow
 
 ```mermaid
 sequenceDiagram
@@ -303,7 +303,7 @@ sequenceDiagram
   ORD-->>FE: 201 Created (orderId)
 ```
 
-## App Stack
+### App Stack
 
 Atlas supports multiple deployment targets via app-stack configs.
 
