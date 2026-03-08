@@ -66,10 +66,9 @@ flowchart LR
         INFRA["**infrastructure** module<br/>JPA, messaging, external APIs"]
         LIBS["**libs** modules<br/>Shared building blocks"]
 
-        API --> APP
         PORTS --> DOMAIN
-        APP --> DOMAIN
         APP --> PORTS
+        API --> PORTS
         INFRA --> PORTS
 
     end
