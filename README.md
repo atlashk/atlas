@@ -79,6 +79,7 @@ Shared backend building blocks live under `backend/libs/` and are consumed by mu
   - Messaging: Kafka or RabbitMQ
   - Storage: filesystem or MinIO
   - IAM: Spring Security (JWT) / Keycloak
+  - Full-text search: Elasticsearch
   - Scheduler: Spring `@Scheduled` / Quartz
   - Email: Spring Mail / Sendgrid
 - Microservices Patterns:
