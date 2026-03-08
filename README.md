@@ -25,18 +25,18 @@
 
 ## Project Overview
 
-Atlas is a microservices-based e-commerce platform showcasing **DDD + Hexagonal Architecture** and a configurable infrastructure stack for local and containerized environments.
+Atlas is a microservices e-commerce system built to demonstrate **DDD + Hexagonal Architecture**, with an **app-stack** mechanism that lets you switch infrastructure technologies gracefully.
 
-Each backend service follows a consistent module layout:
+In detail, each backend service follows a consistent module layout:
 
-- `domain`: Entities, errors, exceptions
+- `domain`: Core business logic as entities, errors, exceptions, etc.
 - `port`: Inbound and outbound contracts
 - `application`: Use cases and Saga orchestration
 - `api`: Transport layer (REST & gRPC)
 - `infrastructure`: Adapters (JPA, messaging, external APIs, etc.)
 - `bootstrap`: Spring Boot runtime wiring
 
-Shared backend building blocks live under `backend/libs/` and are consumed by multiple services.
+The architecture also offers building blocks which are shared by backend services.
 
 ```mermaid
 flowchart LR
@@ -246,11 +246,11 @@ Default credentials: `atlas` / `Atlas@123456`
 
 ### App Stack
 
-Atlas provides an **app-stack configuration mechanism**: a named configuration profile that controls:
+Atlas provides an **app-stack** mechanism. Each app stack is a named profile that controls:
 
-1. Which **application and infrastructure technologies** are used (datasource, messaging, storage, observability, CSV library, etc.). It is defined in an YAML configuration file under `backend/app-stack/config/` (for example: `app-stack.local.compose.yml`).
+1. Which options are selected for **backend capabilities** (datasource, messaging, storage, observability, etc.), via a YAML configuration file under `backend/app-stack/config/` (for example: `app-stack.local.compose.yml`).
 
-List of options:
+List of options for each capability:
 
 | Capability | Options |
 |---|---|
@@ -276,9 +276,9 @@ List of options:
 | `storage` | `minio` \| `filesystem` |
 | `template` | `freemarker` \| `thymeleaf` |
 
-2. Which **deployment type** is targeted (Docker Compose, Kubernetes, Helm, etc.). This is driven by [Handlebars](https://handlebarsjs.com/) templates under `backend/app-stack/deployment/templates/` (for example: `backend/app-stack/deployment/templates/local/compose/`).
+2. Which **deployment type** is targeted (Docker Compose, Kubernetes, Helm, etc.). This is driven by [Handlebars](https://handlebarsjs.com/) **templates** under `backend/app-stack/deployment/templates/` (for example: `backend/app-stack/deployment/templates/local/compose/`).
 
-Built-in app stacks:
+The followings are built-in app stacks:
 
 | App stack | Deployment Type | How to run |
 | --- | --- | --- |
@@ -287,7 +287,7 @@ Built-in app stacks:
 | `local.k8s.native` | Kubernetes native manifests | `./install.sh --app-stack=local.k8s.native` |
 | `local.k8s.helm` | Kubernetes using Helm chart | `./install.sh --app-stack=local.k8s.helm` |
 
-How it works:
+So, how does it work?
 
 ```mermaid
 flowchart TB
