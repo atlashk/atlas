@@ -55,69 +55,6 @@ Shared backend building blocks live under `backend/libs/` and are consumed by mu
 
 ---
 
-## Technology Stack
-
-### Backend
-
-- Language & Build
-  - Java 17
-  - Gradle (multi-module)
-- Spring Platform
-  - Spring Boot 3.5.x
-  - Spring Framework 6.2.x
-  - Spring Cloud 2025.0.x
-- Service-to-service & Edge
-  - Spring Cloud Gateway (API Gateway, WebFlux)
-  - REST (Spring MVC) | gRPC
-  - OpenAPI (springdoc)
-  - Service discovery: Eureka Server
-  - Config server: Spring Cloud Config
-- Infrastructure (app-stack driven)
-  - Database: MySQL | PostgreSQL
-  - Migration: Flyway
-  - Key-value store: Redis
-  - Messaging: Kafka | RabbitMQ
-  - Storage: Filesystem | MinIO
-  - IAM: Spring Security (JWT) | Keycloak
-  - Full-text search: Elasticsearch
-  - Scheduler: Spring `@Scheduled` | Quartz
-  - Payment gateway integration: Simulator | Stripe
-  - Email: Spring Mail | Sendgrid
-- Microservices Patterns:
-  - Saga orchestration
-  - Outbox pattern
-  - Reliability (Resilience4j)
-- Observability (optional, app-stack driven)
-  - Spring Boot Actuator
-  - Logging:
-    - Framework: Logback
-    - Stack: Loki + Promtail
-  - Metrics: Prometheus
-  - Tracing: Zipkin
-  - Visualization: Grafana
-- Productivity
-  - Lombok
-  - MapStruct
-- Deployment
-  - Docker Compose
-  - Kubernetes
-    - Native manifests, or
-    - Helm chart templates
-
-### Frontend
-
-- Framework
-  - Next.js 16.x (React 19.x)
-  - TypeScript
-- UI & Styling
-  - Tailwind CSS
-  - shadcn/ui and Radix UI primitives
-- State & Forms
-  - Zustand
-  - React Hook Form + Zod
-
----
-
 ## Project Structure
 
 ```
@@ -312,6 +249,69 @@ sequenceDiagram
   PAY->>MQ: PROCESS_PAYMENT reply
   ORD-->>FE: 201 Created (orderId)
 ```
+
+---
+
+## Technology Stack
+
+### Backend
+
+- Language & Build
+  - Java 17
+  - Gradle (multi-module)
+- Spring Platform
+  - Spring Boot 3.5.x
+  - Spring Framework 6.2.x
+  - Spring Cloud 2025.0.x
+- Service-to-service & Edge
+  - Spring Cloud Gateway (API Gateway, WebFlux)
+  - REST (Spring MVC) | gRPC
+  - OpenAPI (springdoc)
+  - Service discovery: Eureka Server
+  - Config server: Spring Cloud Config
+- Infrastructure (app-stack driven)
+  - Database: MySQL | PostgreSQL
+  - Migration: Flyway
+  - Key-value store: Redis
+  - Messaging: Kafka | RabbitMQ
+  - Storage: Filesystem | MinIO
+  - IAM: Spring Security (JWT) | Keycloak
+  - Full-text search: Elasticsearch
+  - Scheduler: Spring `@Scheduled` | Quartz
+  - Payment gateway integration: Simulator | Stripe
+  - Email: Spring Mail | Sendgrid
+- Microservices Patterns:
+  - Saga orchestration
+  - Outbox pattern
+  - Reliability (Resilience4j)
+- Observability (optional, app-stack driven)
+  - Spring Boot Actuator
+  - Logging:
+    - Framework: Logback
+    - Stack: Loki + Promtail
+  - Metrics: Prometheus
+  - Tracing: Zipkin
+  - Visualization: Grafana
+- Productivity
+  - Lombok
+  - MapStruct
+- Deployment
+  - Docker Compose
+  - Kubernetes
+    - Native manifests, or
+    - Helm chart templates
+
+### Frontend
+
+- Framework
+  - Next.js 16.x (React 19.x)
+  - TypeScript
+- UI & Styling
+  - Tailwind CSS
+  - shadcn/ui and Radix UI primitives
+- State & Forms
+  - Zustand
+  - React Hook Form + Zod
 
 ---
 
