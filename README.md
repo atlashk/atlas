@@ -3,46 +3,233 @@
 [![Java 17](https://img.shields.io/badge/Java-17-ED8B00?logo=openjdk&logoColor=white)](https://openjdk.org/)
 [![Spring Boot 3.5.4](https://img.shields.io/badge/Spring%20Boot-3.5.4-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![Spring Cloud 2025.0.0](https://img.shields.io/badge/Spring%20Cloud-2025.0.0-6DB33F?logo=spring&logoColor=white)](https://spring.io/projects/spring-cloud)
-[![Next.js 16](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org/)
-[![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Gradle](https://img.shields.io/badge/Gradle-02303A?logo=gradle&logoColor=white)](https://gradle.org/)
 [![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/compose/)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-Templates-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io/)
+[![MySQL](https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Redis](https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=white)](https://redis.io/)
+[![Kafka](https://img.shields.io/badge/Kafka-231F20?logo=apachekafka&logoColor=white)](https://kafka.apache.org/)
+[![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?logo=rabbitmq&logoColor=white)](https://www.rabbitmq.com/)
+[![Flyway](https://img.shields.io/badge/Flyway-CC0200?logo=flyway&logoColor=white)](https://flywaydb.org/)
+[![Resilience4j](https://img.shields.io/badge/Resilience4j-2C3E50?logoColor=white)](https://resilience4j.readme.io/)
+[![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?logo=prometheus&logoColor=white)](https://prometheus.io/)
+[![Grafana](https://img.shields.io/badge/Grafana-F46800?logo=grafana&logoColor=white)](https://grafana.com/)
+[![Zipkin](https://img.shields.io/badge/Zipkin-000000?logoColor=white)](https://zipkin.io/)
+[![Next.js 16](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-38B2AC?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Axios](https://img.shields.io/badge/Axios-5A29E4?logo=axios&logoColor=white)](https://axios-http.com/)
+[![Stripe](https://img.shields.io/badge/Stripe-635BFF?logo=stripe&logoColor=white)](https://stripe.com/)
 
-## Table of Contents
+# Table of Contents
 
 - Project Overview
-- Architecture Diagram
-- API Gateway Routing
-- Technology Stack
+- Quick Start (Local)
+- Architecture
+- Services
+- App Stack
 - Project Structure
-- Getting Started
-- Documentation
+- Technology Stack
+- Troubleshooting
 - Contributing
 - License
 
-## Project Overview
+---
 
-Atlas is a microservices-based e-commerce platform showcasing DDD, Hexagonal architecture, and a
-configurable infrastructure stack for local and containerized environments.
+# Project Overview
 
-### Hexagonal Architecture
+Atlas is a microservices-based e-commerce platform showcasing **DDD + Hexagonal Architecture** and a configurable infrastructure stack for local and containerized environments.
 
 Each backend service follows a consistent module layout:
 
-- `domain`: aggregates, entities, value objects
+- `domain`: entities, errors, exceptions
 - `port`: inbound and outbound contracts
 - `application`: use cases and orchestration
+- `api`: transport layer (REST/gRPC models + controllers/services)
 - `infrastructure`: adapters (JPA, messaging, files, external APIs)
 - `bootstrap`: Spring Boot runtime wiring
 
-### App Stack
+Shared backend building blocks live under `backend/libs/` and are consumed by multiple services.
 
-The app-stack configuration allows swapping infrastructure components (database, cache, messaging,
-auth, storage, observability) with minimal code changes. App-stack selection drives both Gradle
-module wiring and deployment generation. See `backend/app-stack/config/app-stack.*.yml` and
-`backend/app-stack/templates/`.
+---
 
-### Architecture Diagram
+# Technology Stack
+
+## Backend
+
+- Language & Build
+  - Java 17
+  - Gradle (multi-module)
+- Spring Platform
+  - Spring Boot 3.5.x
+  - Spring Framework 6.2.x
+  - Spring Cloud 2025.0.x
+- Service-to-service & Edge
+  - Spring Cloud Gateway (API Gateway, WebFlux)
+  - REST (Spring MVC) / gRPC
+  - OpenAPI (springdoc)
+  - Service discovery: Eureka Server
+  - Config server: Spring Cloud Config
+- Infrastructure (App Stack selectable)
+  - Database: MySQL / PostgreSQL
+  - Migration: Flyway
+  - Key-value store/cache: Redis
+  - Messaging: Kafka or RabbitMQ
+  - Storage: filesystem or MinIO
+  - IAM: Spring Security (JWT) / Keycloak
+  - Scheduler: Spring `@Scheduled` / Quartz
+  - Email: Spring Mail / Sendgrid
+- Microservices Patterns:
+  - Saga orchestration
+  - Outbox
+  - Reliability (Resilience4j)
+- Observability (optional, app-stack driven)
+  - Spring Boot Actuator
+  - Logging:
+    - Framework: Logback
+    - Stack: Loki + Promtail
+  - Metrics: Prometheus
+  - Tracing: Zipkin
+  - Visualization: Grafana
+- Productivity
+  - Lombok
+  - MapStruct
+- Deployment
+  - Docker Compose
+  - Kubernetes
+    - Kubernetes native manifests
+    - Helm chart templates
+
+## Frontend
+
+- Framework
+  - Next.js 16.x (React 19.x)
+  - TypeScript
+- UI & Styling
+  - Tailwind CSS
+  - shadcn/ui and Radix UI primitives
+- State & Forms
+  - Zustand
+  - React Hook Form + Zod
+
+---
+
+# Project Structure
+
+```
+.
+├── backend/
+│   ├── app-stack/
+│   │   ├── config/             # app-stack YAML definitions (drives build + deploy)
+│   │   ├── generator/          # Node.js template renderer (Handlebars)
+│   │   └── templates/          # Compose/Kubernetes templates per app-stack
+│   ├── libs/
+│   │   ├── framework/          # shared foundation used by all backend services
+│   │   └── cross-cutting/      # shared adapters (api-client/server, persistence, messaging, observability, saga/outbox, etc.)
+│   ├── platform/
+│   │   ├── discovery-server/   # Eureka Server
+│   │   └── config-server/      # Spring Cloud Config Server
+│   ├── scripts/                # helper scripts (setup, local tooling)
+│   ├── services/
+│   │   ├── api-gateway/        # Spring Cloud Gateway edge service
+│   │   ├── identity-service/   # authentication and user management
+│   │   ├── catalog-service/    # product catalog
+│   │   ├── inventory-service/  # stock management
+│   │   ├── order-service/      # checkout + saga orchestration
+│   │   └── payment-service/    # payments + webhooks/simulator
+│   ├── build.gradle
+│   ├── install.sh
+│   └── uninstall.sh
+├── frontend/
+│   ├── admin/                 # Next.js admin dashboard
+│   └── storefront/            # Next.js customer-facing storefront
+```
+
+---
+
+# Quick Start (Local)
+
+## Prerequisites
+
+- Java 17+
+- Node.js (for frontend and deployment generator)
+- Docker Desktop with Docker Compose
+
+Notes:
+- On Windows, use Git Bash or WSL to run `./install.sh` in `backend/`.
+
+## Backend
+
+```bash
+cd backend
+./install.sh
+```
+
+This generates `backend/dist/` from templates and then runs the generated install script.
+
+To uninstall:
+
+```bash
+cd backend
+./uninstall.sh
+```
+
+To uninstall and remove application Docker images:
+
+```bash
+cd backend
+./uninstall.sh --remove-images
+```
+
+## Frontend
+
+Both frontends default to talking to the gateway at `http://localhost:8080` as default. You can override this by setting `NEXT_PUBLIC_API_BASE_URL` in `.env`.
+
+### Storefront
+
+```bash
+cd frontend/storefront
+npm install
+npm run dev
+```
+
+Open: http://localhost:8000
+
+Login credentials: `demo` / `Atlas@123456`
+
+### Admin
+
+```bash
+cd frontend/admin
+npm install
+npm run dev
+```
+
+Open: http://localhost:8001
+
+Login credentials: `admin` / `Atlas@123456`
+
+## Useful URLs
+
+| Name | URL |
+| --- | --- |
+| Storefront | http://localhost:8000 |
+| Admin | http://localhost:8001 |
+| API Gateway | http://localhost:8080 |
+| Swagger UI (Gateway) | http://localhost:8080/swagger-ui.html |
+| Eureka | http://localhost:8761 |
+| Config Server | http://localhost:8888 |
+| Grafana (optional) | http://localhost:3000 |
+| Prometheus (optional) | http://localhost:9090 |
+| Zipkin (optional) | http://localhost:9411 |
+
+---
+
+# Architecture
+
+## System Components
 
 ```mermaid
 flowchart LR
@@ -50,11 +237,11 @@ flowchart LR
   FE -->|HTTP| GW["API Gateway (Spring Cloud Gateway :8080)"]
 
   GW --> DS[Eureka Server :8761]
-  GW --> IDENTITY[IDENTITY Service :8081]
-  GW --> PRD[Product Service :8082]
-  GW --> ORD[Order Service :8083]
-  GW --> PAY[Payment Service :8084]
-  GW --> NOTIF[Notification Service :8085]
+  GW --> IDENTITY[Identity Service :8081]
+  GW --> CATALOG[Catalog Service :8082]
+  GW --> INVENTORY[Inventory Service :8083]
+  GW --> ORDER[Order Service :8084]
+  GW --> PAYMENT[Payment Service :8085]
 
   subgraph Data
     DB[(MySQL 8 / Postgres 14)]
@@ -63,22 +250,34 @@ flowchart LR
   end
 
   IDENTITY --> DB
-  PRD --> DB
-  ORD --> DB
-  PAY --> DB
-  NOTIF --> DB
+  CATALOG --> DB
+  INVENTORY --> DB
+  ORDER --> DB
+  PAYMENT --> DB
 
   IDENTITY --> CACHE
-  PRD --> CACHE
-  ORD --> CACHE
-  PAY --> CACHE
-  NOTIF --> CACHE
+  CATALOG --> CACHE
+  INVENTORY --> CACHE
+  ORDER --> CACHE
+  PAYMENT --> CACHE
 
-  PRD --> MQ
-  ORD --> MQ
-  PAY --> MQ
-  NOTIF --> MQ
+  CATALOG --> MQ
+  INVENTORY --> MQ
+  ORDER --> MQ
+  PAYMENT --> MQ
 ```
+
+| Component | Responsibility | Default URL |
+| --- | --- | --- |
+| API Gateway | Routing, security, aggregated OpenAPI docs | http://localhost:8080 |
+| Identity Service | Authentication and user management | http://localhost:8081 |
+| Catalog Service | Product catalog and admin operations | http://localhost:8082 |
+| Inventory Service | Stock management | http://localhost:8083 |
+| Order Service | Checkout and saga orchestration | http://localhost:8084 |
+| Payment Service | Payment processing and simulation/webhooks | http://localhost:8085 |
+| Eureka Server | Service discovery | http://localhost:8761 |
+
+## Checkout Flow
 
 ```mermaid
 sequenceDiagram
@@ -86,152 +285,76 @@ sequenceDiagram
   participant GW as API Gateway
   participant ORD as Order Service (Saga orchestrator)
   participant MQ as Messaging (Kafka/RabbitMQ)
-  participant PRD as Product Service
+  participant INV as Inventory Service
   participant PAY as Payment Service
-  participant NOT as Notification Service
+  participant EXT as External Payment Gateway
 
   FE->>GW: POST /services/order/api/front/checkout
   GW->>ORD: POST /api/front/checkout
-  ORD->>MQ: RESERVE_PRODUCT command
-  MQ->>PRD: RESERVE_PRODUCT command
-  PRD->>MQ: RESERVE_PRODUCT reply
+  ORD->>MQ: RESERVE_STOCK command
+  MQ->>INV: RESERVE_STOCK command
+  INV->>MQ: RESERVE_STOCK reply
   ORD->>MQ: INITIALIZE_PAYMENT command
   MQ->>PAY: INITIALIZE_PAYMENT command
   PAY->>MQ: INITIALIZE_PAYMENT reply
-  ORD->>MQ: NOTIFY_ORDER_FULFILLED command
-  MQ->>NOT: NOTIFY_ORDER_FULFILLED command
-  NOT->>MQ: NOTIFY_ORDER_FULFILLED reply
+  PAY->>EXT: Create/confirm payment (redirect/QR/webhook)
+  EXT-->>PAY: Webhook payment result
+  PAY->>MQ: PROCESS_PAYMENT reply
   ORD-->>FE: 201 Created (orderId)
 ```
 
-### Microservices Overview
+## App Stack
 
-| Service | Responsibility | Default Port |
+Atlas supports multiple deployment targets via app-stack configs.
+
+| App stack | Target | How to run |
 | --- | --- | --- |
-| API Gateway | Routing, security, aggregated API docs | 8080 |
-| IDENTITY Service | Authentication and user management | 8081 |
-| Product Service | Product catalog and admin | 8082 |
-| Order Service | Checkout and saga orchestration | 8083 |
-| Payment Service | Payment processing and simulation | 8084 |
-| Notification Service | Notifications and email | 8085 |
-| Eureka Server | Service discovery | 8761 |
-| Config Server | Externalized configuration | 8888 |
+| `local.compose` | Docker Compose (default) | `./install.sh` |
+| `local.debug` | Docker Compose (debug-friendly templates) | `./install.sh --app-stack=local.debug` |
+| `local.k8s.native` | Kubernetes manifests | `./install.sh --app-stack=local.k8s.native` |
+| `local.k8s.helm` | Helm chart templates | `./install.sh --app-stack=local.k8s.helm` |
 
-### API Gateway Routing
+How it works:
 
-The API Gateway exposes service endpoints using a consistent prefix and aggregates OpenAPI docs:
+- Build-time wiring (Gradle): `backend/build.gradle` loads the selected YAML into `ext.appStack`,
+  and sub-modules use it to pick concrete implementations (for example: mysql vs postgres, kafka
+  vs rabbitmq, redis connector variants, observability on/off).
+- Deploy-time generation (Templates): `backend/install.sh` renders the matching templates into
+  `backend/dist/` (Compose / K8s), then runs the generated `install.sh` to bring the stack up.
 
-- Service APIs: `/services/{service}/api/{front|admin|authentication|webhook}/**`
-- Notification channels: `/services/notification/sse/**` and `/services/notification/ws/**`
-- OpenAPI aggregation: `/api-docs/{service}` and Gateway UI at `/swagger-ui.html`
+```mermaid
+flowchart TB
+  A[Pick app-stack<br/>./backend/install.sh --app-stack=local.compose] --> B[app-stack config YAML<br/>backend/app-stack/config/app-stack.*.yml]
 
-## Technology Stack
+  subgraph Build["Build-time (Gradle)"]
+    B --> C[Load YAML into ext.appStack<br/>backend/build.gradle]
+    C --> D[Select adapters via switches<br/>subproject build.gradle]
+    D --> E[Build artifacts & images]
+  end
 
-### Backend
+  subgraph Deploy["Deploy-time (Templates)"]
+    B --> F[Render templates<br/>backend/app-stack/generator/generator.mjs]
+    F --> G[Generated output<br/>backend/dist/]
+    G --> H[Deploy target<br/>docker compose / k8s manifests]
+  end
 
-- Java 17
-- Spring Boot 3.5.4
-- Spring Framework 6.2.9
-- Spring Cloud 2025.0.0
-- Gradle (multi-module)
-- MySQL 8 / Postgres 14 (configurable)
-- Redis 7 (configurable)
-- Kafka 7.9.0 or RabbitMQ (configurable)
-
-### Frontend
-
-- Next.js 16.0.1 (React 19.2.0)
-- TypeScript
-- Tailwind CSS
-- Axios
-
-### Deployment & Observability
-
-- Docker & Docker Compose (primary local stack)
-- Kubernetes templates (optional)
-- Loki / Promtail, Prometheus, Zipkin, Grafana (optional, configurable)
-
-## Project Structure
-
-```
-.
-├── backend/
-│   ├── app-stack/          # config + generator + templates
-│   ├── libs/              # shared adapters (messaging, storage, observability, etc.)
-│   ├── platform/          # config-server, discovery-server
-│   ├── services/          # api-gateway, identity, product, order, payment, notification
-│   ├── build.gradle
-│   └── install.sh
-├── frontend/
-└── docs/
+  E --> H
 ```
 
-## Getting Started
+Common flags:
+- `--skip-build`: skips backend and Docker image builds.
+- `--debug-template`: generates `backend/dist/` only, does not execute install.
 
-### Prerequisites
-
-- Java 17+
-- Node.js (for frontend and deployment generator)
-- Docker Desktop with Docker Compose
-
-### Backend
+Examples:
 
 ```bash
 cd backend
-./install.sh
+./install.sh --app-stack=local.compose
+./install.sh --app-stack=local.k8s.native --debug-template
+./install.sh --skip-build
 ```
 
-Supported app-stacks:
-- dev (default)
-- local.compose
-- local.k8s.native
-
-Flags:
-- `--app-stack <name>` select the app-stack config (default: `dev`).
-- `--skip-build` skip building application services and use existing artifacts.
-- `--infra-only` deploy only infrastructure components and skip application services.
-- `--enable-observability <true|false>` toggle observability stacks in generated deployments.
-- Special case: `--app-stack dev` defaults `infra-only` to `true` unless explicitly set.
-
-Notes:
-- Requires Node.js to render Handlebars templates
-- If `handlebars` is missing, install in `backend/app-stack/generator/` via `npm install handlebars --save`
-- On Windows, use Git Bash or WSL to run `install.sh`
-- Re-running `install.sh` regenerates `backend/dist/`
-
-### Frontend
-
-```bash
-cd frontend/storefront
-npm install
-npm run dev
-```
-
-```bash
-cd ../admin
-npm install
-npm run dev
-```
-
-Open:
-- Storefront: http://localhost:8000
-- Admin: http://localhost:8001
-
-### Access URLs
-
-- Storefront: http://localhost:8000
-- Admin: http://localhost:8001
-- API Gateway: http://localhost:8080
-- Swagger UI (Gateway): http://localhost:8080/swagger-ui.html
-- Eureka: http://localhost:8761
-- Grafana: http://localhost:3000
-- Prometheus: http://localhost:9090
-- Zipkin: http://localhost:9411
-
-### Default Credentials (dev)
-
-- Admin: `admin` / `Atlas@123456`
-- Storefront: `demo` / `Atlas@123456`
+---
 
 ## Contributing
 
