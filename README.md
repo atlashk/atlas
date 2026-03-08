@@ -321,7 +321,7 @@ flowchart TB
 
   subgraph Build["Gradle build"]
     GRADLE["Load config into ext.appStack variable"]
-    SELECT["Select implementations based on ext.appStack value"]
+    SELECT["Select Gradle module based on ext.appStack value"]
     ARTIFACTS["Build artifacts"]
 
     GRADLE --> SELECT
