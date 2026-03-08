@@ -8,8 +8,8 @@ set -euo pipefail
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly BACKEND_DIR="$SCRIPT_DIR"
 readonly CONFIG_DIR="$BACKEND_DIR/app-stack/config"
-readonly GENERATOR_DIR="$BACKEND_DIR/app-stack/generator"
-readonly TEMPLATES_DIR="$BACKEND_DIR/app-stack/templates"
+readonly GENERATOR_DIR="$BACKEND_DIR/app-stack/deployment/generator"
+readonly TEMPLATES_DIR="$BACKEND_DIR/app-stack/deployment/templates"
 readonly DIST_DIR="$BACKEND_DIR/dist"
 
 APP_STACK="local.compose"
@@ -104,7 +104,7 @@ normalize_line_endings() {
 
 resolve_template_path() {
   case "$APP_STACK" in
-    local.debug)      echo "local/compose" ;;
+    local.dev)        echo "local/compose" ;;
     local.compose)    echo "local/compose" ;;
     local.k8s.native) echo "local/k8s/native" ;;
     local.k8s.helm)   echo "local/k8s/helm" ;;

@@ -291,14 +291,14 @@ List of options:
 | `storage` | `minio` \| `filesystem` |
 | `template` | `freemarker` \| `thymeleaf` |
 
-2. Which **deployment type** (Docker Compose, Kubernetes, Helm, etc.). It is defined in a folder under `backend/app-stack/templates/` (for example: `local/compose`).
+2. Which **deployment type** is targeted (Docker Compose, Kubernetes, Helm, etc.). This is driven by [Handlebars](https://handlebarsjs.com/) templates under `backend/app-stack/deployment/templates/` (for example: `backend/app-stack/deployment/templates/local/compose/`).
 
 Built-in app stacks:
 
 | App stack | Deployment Type | How to run |
 | --- | --- | --- |
 | `local.compose` | Docker Compose (default) | `./install.sh` |
-| `local.debug` | Docker Compose (debug-friendly templates) | `./install.sh --app-stack=local.debug` |
+| `local.dev` | Docker Compose (without microservices, useful for development in IDE) | `./install.sh --app-stack=local.dev` |
 | `local.k8s.native` | Kubernetes native manifests | `./install.sh --app-stack=local.k8s.native` |
 | `local.k8s.helm` | Kubernetes using Helm chart | `./install.sh --app-stack=local.k8s.helm` |
 

@@ -328,7 +328,7 @@ function shouldSkipFileByPath(filePath, context) {
 
   // App stack name
   const appStack = args['app-stack'] || '';
-  const infraOnly = appStack === 'local.debug';
+  const infraOnly = appStack === 'local.dev';
 
   // Build template context with stack config + flags
   const getStackValue = createStackAccessor(stack);
