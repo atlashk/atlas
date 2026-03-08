@@ -201,26 +201,53 @@ Login credentials: `admin` / `Atlas@123456`
 
 ### System Components
 
+**Microservices**
+
 | Component | Responsibility | Default URL |
 | --- | --- | --- |
 | API Gateway | Routing, security, aggregated OpenAPI docs | http://localhost:8080 |
-| Eureka Server | Service discovery for microservices (not used in Kubernetes) | http://localhost:8761 |
 | Identity Service | Authentication and user management | http://localhost:8081 |
 | Catalog Service | Product catalog and admin operations | http://localhost:8082 |
 | Inventory Service | Stock management | http://localhost:8083 |
 | Order Service | Checkout and saga orchestration | http://localhost:8084 |
 | Payment Service | Payment processing | http://localhost:8085 |
-| Keycloak | Identity provider (OIDC) for authentication | http://localhost:8443 |
-| Elasticsearch | Search and analytics engine | http://localhost:9200 |
-| MinIO | S3-compatible object storage (assets/uploads) | http://localhost:9000 |
-| Loki | Log aggregation backend | http://localhost:3100 |
-| Prometheus | Metrics scraping and storage | http://localhost:9090 |
-| Zipkin | Distributed tracing backend | http://localhost:9411 |
-| Grafana | Observability visualization dashboards | http://localhost:3000 |
+
+**Platform**
+
+| Component | Responsibility | Default URL |
+| --- | --- | --- |
+| Eureka Server | Service discovery for microservices (not used in Kubernetes) | http://localhost:8761 |
+
+**Infrastructure**
+
+| Component | Responsibility | Exposed Ports |
+| --- | --- | --- |
+| MySQL | Database | 3306 |
+| PostgreSQL | Database | 5432 |
+| Redis | Key-value store | 6379 |
+| Elasticsearch | Full-text search engine | 9200 |
+| MinIO | S3-compatible object storage | 9000 |
+| Kafka | Messaging platform | 9092 |
+| RabbitMQ | Messaging platform | 5672 & 15672 (management UI) |
+| Keycloak | Identity provider | 8443 |
+| Loki | Log aggregation backend | 3100 |
+| Promtail | Log shipping agent | 9080 |
+| Prometheus | Metrics scraping and storage | 9090 |
+| Zipkin | Distributed tracing backend | 9411 |
+| Grafana | Observability visualization dashboards | 3000 |
+
+Default credentials: `atlas` / `Atlas@123456`
+
+**Frontend**
+
+| Component | Responsibility | Exposed Ports |
+| --- | --- | --- |
+| Storefront | Customer-facing web store | 8000 |
+| Admin | Product catalog and order management | 8001 |
 
 ### App Stack
 
-Atlas provides an **app-stack configuration mechanism** that enables infrastructure technologies to be switched by changing values in a YAML configuration file.
+Atlas provides an **app-stack configuration mechanism** that enables application and infrastructure technologies to be switched by simply changing values in a YAML configuration file.
 
 | App stack | Target | How to run |
 | --- | --- | --- |
@@ -239,21 +266,23 @@ How it works:
 
 ```mermaid
 flowchart TB
-  A[Pick app-stack<br/>./backend/install.sh --app-stack=local.compose] --> B[app-stack config YAML<br/>backend/app-stack/config/app-stack.*.yml]
+  CLI["Run installer<br/>cd backend && ./install.sh --app-stack=..."] --> CFG["app-stack YAML<br/>backend/app-stack/config/app-stack.*.yml"]
 
-  subgraph Build["Build-time (Gradle)"]
-    B --> C[Load YAML into ext.appStack<br/>backend/build.gradle]
-    C --> D[Select adapters via switches<br/>subproject build.gradle]
-    D --> E[Build artifacts & images]
+  subgraph Build["Build (Gradle)"]
+    CFG --> GRADLE["Load config into ext.appStack variable"]
+    GRADLE --> SELECT["Select implementations based on ext.appStack value"]
+    SELECT --> ARTIFACTS["Build artifacts + Docker images"]
   end
 
-  subgraph Deploy["Deploy-time (Templates)"]
-    B --> F[Render templates<br/>backend/app-stack/generator/generator.mjs]
-    F --> G[Generated output<br/>backend/dist/]
-    G --> H[Deploy target<br/>docker compose / k8s manifests]
+  subgraph Deploy["Deploy"]
+    CFG --> GEN["Render Handlebars templates"]
+    GEN --> DIST["Generate manifests into backend/dist directory"]
+    DIST --> TARGET["Deploy using generated manifests"]
   end
 
-  E --> H
+  CLI --> GRADLE
+  CLI --> GEN
+  ARTIFACTS --> TARGET
 ```
 
 Common flags:
