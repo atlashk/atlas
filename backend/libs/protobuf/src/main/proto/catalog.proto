@@ -3,8 +3,6 @@ syntax = "proto3";
 option java_multiple_files = true;
 option java_package = "org.atlas.libs.protobuf.catalog";
 
-import "google/protobuf/empty.proto";
-
 package catalog;
 
 service ProductService {

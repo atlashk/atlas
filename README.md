@@ -68,23 +68,24 @@ Shared backend building blocks live under `backend/libs/` and are consumed by mu
   - Spring Cloud 2025.0.x
 - Service-to-service & Edge
   - Spring Cloud Gateway (API Gateway, WebFlux)
-  - REST (Spring MVC) / gRPC
+  - REST (Spring MVC) | gRPC
   - OpenAPI (springdoc)
   - Service discovery: Eureka Server
   - Config server: Spring Cloud Config
-- Infrastructure (App Stack selectable)
-  - Database: MySQL / PostgreSQL
+- Infrastructure (app-stack driven)
+  - Database: MySQL | PostgreSQL
   - Migration: Flyway
-  - Key-value store/cache: Redis
-  - Messaging: Kafka or RabbitMQ
-  - Storage: filesystem or MinIO
-  - IAM: Spring Security (JWT) / Keycloak
+  - Key-value store: Redis
+  - Messaging: Kafka | RabbitMQ
+  - Storage: Filesystem | MinIO
+  - IAM: Spring Security (JWT) | Keycloak
   - Full-text search: Elasticsearch
-  - Scheduler: Spring `@Scheduled` / Quartz
-  - Email: Spring Mail / Sendgrid
+  - Scheduler: Spring `@Scheduled` | Quartz
+  - Payment gateway integration: Simulator | Stripe
+  - Email: Spring Mail | Sendgrid
 - Microservices Patterns:
   - Saga orchestration
-  - Outbox
+  - Outbox pattern
   - Reliability (Resilience4j)
 - Observability (optional, app-stack driven)
   - Spring Boot Actuator
@@ -100,7 +101,7 @@ Shared backend building blocks live under `backend/libs/` and are consumed by mu
 - Deployment
   - Docker Compose
   - Kubernetes
-    - Kubernetes native manifests
+    - Native manifests, or
     - Helm chart templates
 
 ### Frontend
@@ -212,97 +213,28 @@ Open: http://localhost:8001
 
 Login credentials: `admin` / `Atlas@123456`
 
-### Useful URLs
-
-| Name | URL |
-| --- | --- |
-| Storefront | http://localhost:8000 |
-| Admin | http://localhost:8001 |
-| API Gateway | http://localhost:8080 |
-| Swagger UI (Gateway) | http://localhost:8080/swagger-ui.html |
-| Eureka | http://localhost:8761 |
-| Config Server | http://localhost:8888 |
-| Grafana (optional) | http://localhost:3000 |
-| Prometheus (optional) | http://localhost:9090 |
-| Zipkin (optional) | http://localhost:9411 |
-
 ---
 
 ## Architecture
 
 ### System Components
 
-```mermaid
-flowchart LR
-  U[Browser] --> FE["Frontend (Next.js)"]
-  FE -->|HTTP| GW["API Gateway (Spring Cloud Gateway :8080)"]
-
-  GW --> DS[Eureka Server :8761]
-  GW --> IDENTITY[Identity Service :8081]
-  GW --> CATALOG[Catalog Service :8082]
-  GW --> INVENTORY[Inventory Service :8083]
-  GW --> ORDER[Order Service :8084]
-  GW --> PAYMENT[Payment Service :8085]
-
-  subgraph Data
-    DB[(MySQL 8 / Postgres 14)]
-    CACHE[(Redis 7)]
-    MQ[(Kafka 7.9.0 / RabbitMQ)]
-  end
-
-  IDENTITY --> DB
-  CATALOG --> DB
-  INVENTORY --> DB
-  ORDER --> DB
-  PAYMENT --> DB
-
-  IDENTITY --> CACHE
-  CATALOG --> CACHE
-  INVENTORY --> CACHE
-  ORDER --> CACHE
-  PAYMENT --> CACHE
-
-  CATALOG --> MQ
-  INVENTORY --> MQ
-  ORDER --> MQ
-  PAYMENT --> MQ
-```
-
 | Component | Responsibility | Default URL |
 | --- | --- | --- |
 | API Gateway | Routing, security, aggregated OpenAPI docs | http://localhost:8080 |
+| Eureka Server | Service discovery for microservices (not used in Kubernetes) | http://localhost:8761 |
 | Identity Service | Authentication and user management | http://localhost:8081 |
 | Catalog Service | Product catalog and admin operations | http://localhost:8082 |
 | Inventory Service | Stock management | http://localhost:8083 |
 | Order Service | Checkout and saga orchestration | http://localhost:8084 |
 | Payment Service | Payment processing and simulation/webhooks | http://localhost:8085 |
-| Eureka Server | Service discovery | http://localhost:8761 |
-
-### Checkout Flow
-
-```mermaid
-sequenceDiagram
-  participant FE as Frontend
-  participant GW as API Gateway
-  participant ORD as Order Service (Saga orchestrator)
-  participant MQ as Messaging (Kafka/RabbitMQ)
-  participant INV as Inventory Service
-  participant PAY as Payment Service
-  participant EXT as External Payment Gateway
-
-  FE->>GW: POST /services/order/api/front/checkout
-  GW->>ORD: POST /api/front/checkout
-  ORD->>MQ: RESERVE_STOCK command
-  MQ->>INV: RESERVE_STOCK command
-  INV->>MQ: RESERVE_STOCK reply
-  ORD->>MQ: INITIALIZE_PAYMENT command
-  MQ->>PAY: INITIALIZE_PAYMENT command
-  PAY->>MQ: INITIALIZE_PAYMENT reply
-  PAY->>EXT: Create/confirm payment (redirect/QR/webhook)
-  EXT-->>PAY: Webhook payment result
-  PAY->>MQ: PROCESS_PAYMENT reply
-  ORD-->>FE: 201 Created (orderId)
-```
+| Keycloak | Identity provider (OIDC) for authentication | http://localhost:8180 |
+| Elasticsearch | Search and analytics engine | http://localhost:9200 |
+| MinIO | S3-compatible object storage (assets/uploads) | http://localhost:9000 |
+| Loki | Log aggregation backend | http://localhost:3100 |
+| Prometheus | Metrics scraping and storage | http://localhost:9090 |
+| Zipkin | Distributed tracing backend | http://localhost:9411 |
+| Grafana | Observability visualization dashboards | http://localhost:3000 |
 
 ### App Stack
 
@@ -353,6 +285,32 @@ cd backend
 ./install.sh --app-stack=local.compose
 ./install.sh --app-stack=local.k8s.native --debug-template
 ./install.sh --skip-build
+```
+
+### Checkout Flow
+
+```mermaid
+sequenceDiagram
+  participant FE as Frontend
+  participant GW as API Gateway
+  participant ORD as Order Service (Saga orchestrator)
+  participant MQ as Messaging (Kafka/RabbitMQ)
+  participant INV as Inventory Service
+  participant PAY as Payment Service
+  participant EXT as External Payment Gateway
+
+  FE->>GW: POST /services/order/api/front/checkout
+  GW->>ORD: POST /api/front/checkout
+  ORD->>MQ: RESERVE_STOCK command
+  MQ->>INV: RESERVE_STOCK command
+  INV->>MQ: RESERVE_STOCK reply
+  ORD->>MQ: INITIALIZE_PAYMENT command
+  MQ->>PAY: INITIALIZE_PAYMENT command
+  PAY->>MQ: INITIALIZE_PAYMENT reply
+  PAY->>EXT: Create/confirm payment (redirect/QR/webhook)
+  EXT-->>PAY: Webhook payment result
+  PAY->>MQ: PROCESS_PAYMENT reply
+  ORD-->>FE: 201 Created (orderId)
 ```
 
 ---
