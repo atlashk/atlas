@@ -63,7 +63,7 @@ flowchart LR
         APP["**application** module<br/>Application use cases"]
         DOMAIN["**domain** module<br/>Core business logic"]
         PORTS["**port** module<br/>inbound & outbound interfaces"]
-        INFRA["**infrastructure** module<br/>JPA, messaging, external APIs"]
+        INFRA["**infrastructure** module<br/>JPA, messaging, external APIs, etc."]
         LIBS["**libs** modules<br/>Shared building blocks"]
 
         PORTS --> DOMAIN
@@ -111,7 +111,7 @@ flowchart LR
 │   │   └── templates/          # Compose/Kubernetes templates per app-stack
 │   ├── libs/
 │   │   ├── framework/          # shared foundation used by all backend services
-│   │   └── cross-cutting/      # shared adapters (api-client/server, persistence, messaging, observability, saga/outbox, etc.)
+│   │   └── building-blocks/    # shared building blocks (API server/client, persistence, messaging, observability, saga, outbox, etc.)
 │   ├── platform/
 │   │   ├── discovery-server/   # Eureka Server
 │   │   └── config-server/      # Spring Cloud Config Server
