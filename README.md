@@ -153,6 +153,19 @@ cd backend
 
 This generates `backend/dist/` from templates and then runs the generated install script.
 
+Common flags:
+- `--skip-build`: skips backend and Docker image builds.
+- `--debug-template`: generates `backend/dist/` only, does not execute install.
+
+Other examples:
+
+```bash
+cd backend
+./install.sh --app-stack=local.compose
+./install.sh --app-stack=local.k8s.native --debug-template
+./install.sh --skip-build
+```
+
 To uninstall:
 
 ```bash
@@ -258,44 +271,33 @@ Atlas provides an **app-stack configuration mechanism** that enables application
 
 How it works:
 
-- Build-time wiring (Gradle): `backend/build.gradle` loads the selected YAML into `ext.appStack`,
-  and sub-modules use it to pick concrete implementations (for example: mysql vs postgres, kafka
-  vs rabbitmq, redis connector variants, observability on/off).
-- Deploy-time generation (Templates): `backend/install.sh` renders the matching templates into
-  `backend/dist/` (Compose / K8s), then runs the generated `install.sh` to bring the stack up.
-
 ```mermaid
 flowchart TB
-  CLI["Run installer<br/>cd backend && ./install.sh --app-stack=..."] --> CFG["app-stack YAML<br/>backend/app-stack/config/app-stack.*.yml"]
+  CFG["app-stack config YAML<br/>backend/app-stack/config/app-stack.*.yml"]
 
-  subgraph Build["Build (Gradle)"]
-    CFG --> GRADLE["Load config into ext.appStack variable"]
-    GRADLE --> SELECT["Select implementations based on ext.appStack value"]
-    SELECT --> ARTIFACTS["Build artifacts + Docker images"]
+  subgraph Installation["Installation"]
+    INST_TPL["Find Handlebars templates"]
+    INST_GEN["Generate manifests into backend/dist directory"]
+    INST_BUILD["Build artifacts and Docker images"]
+    INST_DEPLOY["Deploy (Docker compose, Kubernetes, etc.)"]
+
+    INST_TPL --> INST_GEN
+    INST_GEN --> INST_BUILD
+    INST_BUILD --> INST_DEPLOY
   end
 
-  subgraph Deploy["Deploy"]
-    CFG --> GEN["Render Handlebars templates"]
-    GEN --> DIST["Generate manifests into backend/dist directory"]
-    DIST --> TARGET["Deploy using generated manifests"]
+  subgraph Build["Gradle build"]
+    GRADLE["Load config into ext.appStack variable"]
+    SELECT["Select implementations based on ext.appStack value"]
+    ARTIFACTS["Build artifacts"]
+
+    GRADLE --> SELECT
+    SELECT --> ARTIFACTS
   end
 
-  CLI --> GRADLE
-  CLI --> GEN
-  ARTIFACTS --> TARGET
-```
-
-Common flags:
-- `--skip-build`: skips backend and Docker image builds.
-- `--debug-template`: generates `backend/dist/` only, does not execute install.
-
-Examples:
-
-```bash
-cd backend
-./install.sh --app-stack=local.compose
-./install.sh --app-stack=local.k8s.native --debug-template
-./install.sh --skip-build
+  CFG --> GRADLE
+  CFG --> INST_TPL
+  INST_BUILD --> GRADLE
 ```
 
 #### App-Stack Infrastructure Options
