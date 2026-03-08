@@ -6,9 +6,10 @@ set -euo pipefail
 # =============================================================================
 
 readonly PROJECT_NAME="{{dotenv.PROJECT_NAME}}"
+readonly RELEASE_NAME="$PROJECT_NAME"
 readonly NAMESPACE="{{dotenv.PROJECT_NAME}}"
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly CHART_DIR="$SCRIPT_DIR/atlas"
+readonly CHART_DIR="$SCRIPT_DIR/chart"
 
 readonly SERVICES=(
   identity-service
@@ -118,12 +119,12 @@ check_prerequisites() {
 # HELM CLEANUP
 # =============================================================================
 
-uninstall_release() {
-  if helm status "$PROJECT_NAME" -n "$NAMESPACE" >/dev/null 2>&1; then
-    info "Uninstalling Helm release '$PROJECT_NAME' from namespace '$NAMESPACE'"
-    helm uninstall "$PROJECT_NAME" -n "$NAMESPACE" --wait
+uninstall_helm_release() {
+  if helm status "$RELEASE_NAME" -n "$NAMESPACE" >/dev/null 2>&1; then
+    info "Uninstalling Helm release '$RELEASE_NAME' from namespace '$NAMESPACE'"
+    helm uninstall "$RELEASE_NAME" -n "$NAMESPACE" --wait
   else
-    info "Helm release '$PROJECT_NAME' not found in namespace '$NAMESPACE'"
+    info "Helm release '$RELEASE_NAME' not found in namespace '$NAMESPACE'"
   fi
 }
 
@@ -216,7 +217,8 @@ main() {
   parse_args "$@"
   check_prerequisites
 
-  uninstall_release
+  uninstall_helm_release
+
   delete_namespace
 
   if [[ "$REMOVE_IMAGES" == true ]]; then

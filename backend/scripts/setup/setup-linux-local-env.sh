@@ -78,6 +78,31 @@ install_kubectl() {
     fi
 }
 
+# Install Helm v3
+install_helm() {
+    echo "INFO: Installing Helm..."
+
+    if command -v helm &> /dev/null; then
+        echo "SUCCESS: Helm is already installed: $(helm version --short 2>/dev/null || helm version 2>/dev/null | head -n 1)"
+        return 0
+    fi
+
+    if curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash; then
+        :
+    else
+        echo "ERROR: Helm installation failed"
+        return 1
+    fi
+
+    if command -v helm &> /dev/null; then
+        echo "SUCCESS: Helm installed successfully: $(helm version --short 2>/dev/null || helm version 2>/dev/null | head -n 1)"
+        return 0
+    else
+        echo "ERROR: Helm installation failed"
+        return 1
+    fi
+}
+
 # Install Minikube (amd64)
 install_minikube() {
     echo "INFO: Installing Minikube..."
@@ -411,6 +436,13 @@ verify_installations() {
         all_good=false
     fi
 
+    if command -v helm &> /dev/null; then
+        echo "SUCCESS: ✓ Helm: $(helm version --short 2>/dev/null || helm version 2>/dev/null | head -n 1)"
+    else
+        echo "ERROR: ✗ Helm: Not found"
+        all_good=false
+    fi
+
     # Check Minikube
     if command -v minikube &> /dev/null; then
         echo "SUCCESS: ✓ Minikube: $(minikube version | head -n 1)"
@@ -448,6 +480,8 @@ main() {
     install_docker_compose
     echo
     install_kubectl
+    echo
+    install_helm
     echo
     install_minikube
     echo

@@ -224,7 +224,7 @@ build_docker_images() {
 # DEPLOYMENT
 # =============================================================================
 
-deploy_chart() {
+deploy_helm_chart() {
   [[ -d "$CHART_DIR" ]] || error "Helm chart directory not found: $CHART_DIR"
 
   info "Deploying Helm chart into namespace '$NAMESPACE'..."
@@ -258,7 +258,7 @@ main() {
     build_docker_images
   fi
 
-  deploy_chart
+  deploy_helm_chart
 }
 
 main "$@"
