@@ -44,11 +44,11 @@ Atlas is a microservices-based e-commerce platform showcasing **DDD + Hexagonal 
 
 Each backend service follows a consistent module layout:
 
-- `domain`: entities, errors, exceptions
-- `port`: inbound and outbound contracts
-- `application`: use cases and orchestration
-- `api`: transport layer (REST/gRPC models + controllers/services)
-- `infrastructure`: adapters (JPA, messaging, files, external APIs)
+- `domain`: Entities, errors, exceptions
+- `port`: Inbound and outbound contracts
+- `application`: Use cases and Saga orchestration
+- `api`: Transport layer (REST & gRPC)
+- `infrastructure`: Adapters (JPA, messaging, external APIs, etc.)
 - `bootstrap`: Spring Boot runtime wiring
 
 Shared backend building blocks live under `backend/libs/` and are consumed by multiple services.
