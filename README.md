@@ -27,7 +27,7 @@
 
 Atlas is a microservices e-commerce system built to demonstrate **DDD + Hexagonal Architecture**, with an **app-stack** mechanism that lets you switch infrastructure technologies gracefully.
 
-In detail, each backend service follows a consistent module layout:
+In detail, each microservice follows a consistent module layout:
 
 - `domain`: Core business logic as entities, errors, exceptions, etc.
 - `port`: Inbound and outbound contracts
@@ -36,7 +36,7 @@ In detail, each backend service follows a consistent module layout:
 - `infrastructure`: Adapters (JPA, messaging, external APIs, etc.)
 - `bootstrap`: Spring Boot runtime wiring
 
-The architecture also offers building blocks which are shared by backend services.
+The architecture also offers building blocks which are shared by microservices.
 
 ```mermaid
 flowchart LR
@@ -213,9 +213,10 @@ Login credentials: `admin` / `Atlas@123456`
 
 **Platform**
 
-| Component | Responsibility | Default URL |
+| Component | Responsibility | Exposed Ports |
 | --- | --- | --- |
-| Eureka Server | Service discovery for microservices (not used in Kubernetes) | http://localhost:8761 |
+| Eureka Server | Service discovery for microservices (not used in Kubernetes) | 8761 |
+| Config Server | Centralized configuration (unused now) | 8888 |
 
 **Infrastructure**
 
