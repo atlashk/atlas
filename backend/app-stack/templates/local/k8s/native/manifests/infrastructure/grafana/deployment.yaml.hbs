@@ -22,7 +22,10 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: GF_SECURITY_ADMIN_USER
-              value: "atlas"
+              valueFrom:
+                secretKeyRef:
+                  name: grafana
+                  key: admin-user
             - name: GF_SECURITY_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -33,24 +36,26 @@ spec:
           ports:
             - containerPort: 3000
               name: http
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 30
           livenessProbe:
             httpGet:
               path: /api/health
-              port: 3000
-            initialDelaySeconds: 60
+              port: http
             periodSeconds: 30
-            timeoutSeconds: 30
-            successThreshold: 1
             failureThreshold: 3
+            timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /api/health
-              port: 3000
-            initialDelaySeconds: 30
+              port: http
             periodSeconds: 10
-            timeoutSeconds: 30
-            successThreshold: 1
             failureThreshold: 3
+            timeoutSeconds: 5
           resources:
             requests:
               cpu: 100m

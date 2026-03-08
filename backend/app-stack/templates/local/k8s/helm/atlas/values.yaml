@@ -156,11 +156,21 @@ global:
     #   mountPath: "/etc/foo"
     #   readOnly: true
 
+  persistence:
+    storageClass: ""
+
   nodeSelector: {}
 
   tolerations: []
 
   affinity: {}
+
+  secret:
+    username: &defaultUsername YXRsYXM=
+    password: &defaultPassword QXRsYXNAMTIzNDU2
+
+# App stack config
+# --------------------------------------------------------------------------------------------------
 
 appStack:
   datasource: mysql
@@ -168,10 +178,10 @@ appStack:
     csv: opencsv
     excel: poi
     pdf: pdfbox
-  full-text-search: elasticsearch
+  fullTextSearch: elasticsearch
   identity: keycloak
   internal: rest
-  kv-store: redis
+  kvStore: redis
   messaging: kafka
   migration: flyway
   notification:
@@ -185,43 +195,189 @@ appStack:
   persistence: jpa
   redis: standalone
   scheduler: quartz
-  service-discovery: kubernetes
+  serviceDiscovery: kubernetes
   storage: minio
   template: freemarker
 
-identity:
-  fullName: identity-service
-  ports:
-    http: 8081
-    grpc: 50051
+# Infrastructure
+# --------------------------------------------------------------------------------------------------
 
-catalog:
-  fullName: catalog-service
+elasticsearch:
+  image:
+    repository: docker.elastic.co/elasticsearch/elasticsearch
+    tag: 8.19.11
   service:
-    rest:
-      port: 8082
-      targetPort: 8082
-    grpc:
-      port: 50052
-      targetPort: 50052
+    ports:
+      http: 9200
+      transport: 9300
+  secrets:
+    password: *defaultPassword
 
-inventory:
-  fullName: inventory-service
+grafana:
+  image:
+    repository: grafana/grafana-oss
+    tag: main
   service:
-    rest:
-      port: 8083
-      targetPort: 8083
+    ports:
+      http: 3000
+  secrets:
+    adminUser: *defaultUsername
+    adminPassword: *defaultPassword
 
-order:
-  fullName: order-service
+kafka:
+  image:
+    repository: confluentinc/cp-kafka
+    tag: 7.9.0
   service:
-    rest:
-      port: 8084
-      targetPort: 8084
+    ports:
+      kafka: 9092
+      kafkaInternal: 29092
+      controller: 29093
+      jmx: 9101
 
-payment:
-  fullName: payment-service
+keycloak:
+  image:
+    repository: quay.io/keycloak/keycloak
+    tag: 26.5.4
   service:
-    rest:
-      port: 8085
-      targetPort: 8085
+    ports:
+      http: 8080
+  secret:
+    adminUsername: *defaultUsername
+    adminPassword: *defaultPassword
+  config:
+    realm: default
+    clientId: default-auth
+    clientSecret: 9cvF5MPJnwfhEOCwNnQ79RmlkckAsDCj
+
+loki:
+  image:
+    repository: grafana/loki
+    tag: main
+  service:
+    ports:
+      http: 3100
+
+minio:
+  image:
+    repository: minio/minio
+    tag: latest
+  service:
+    ports:
+      s3: 9000
+      console: 9001
+  secrets:
+    rootUser: *defaultUsername
+    rootPassword: *defaultPassword
+
+mysql:
+  image:
+    repository: mysql
+    tag: 8.0
+  service:
+    ports:
+      mysql: 3306
+  secrets:
+    rootPassword: *defaultPassword
+    user: *defaultUsername
+    password: *defaultPassword
+
+postgres:
+  image:
+    repository: postgres
+    tag: 14
+  service:
+    ports:
+      postgres: 5432
+  secrets:
+    user: *defaultUsername
+    password: *defaultPassword
+
+prometheus:
+  image:
+    repository: prom/prometheus
+    tag: main
+  service:
+    ports:
+      http: 9090
+
+promtail:
+  image:
+    repository: grafana/promtail
+    tag: main
+  serviceAccount: promtail
+
+rabbitmq:
+  image:
+    repository: rabbitmq
+    tag: 3.13-management-alpine
+  service:
+    ports:
+      amqp: 5672
+      management: 15672
+  secrets:
+    user: *defaultUsername
+    password: *defaultPassword
+
+redis:
+  image:
+    repository: redis
+    tag: 7
+  service:
+    ports:
+      redis: 6379
+
+smtp4dev:
+  image:
+    repository: rnwood/smtp4dev
+    tag: latest
+  service:
+    ports:
+      http: 80
+      smtp: 25
+
+zipkin:
+  image:
+    repository: openzipkin/zipkin
+    tag: latest
+  service:
+    ports:
+      http: 9411
+
+# Application
+# --------------------------------------------------------------------------------------------------
+
+identitySvc:
+  service:
+    ports:
+      http: 8081
+      grpc: 50051
+
+catalogSvc:
+  service:
+    ports:
+      http: 8082
+      grpc: 50052
+
+inventorySvc:
+  service:
+    ports:
+      http: 8083
+
+orderSvc:
+  service:
+    ports:
+      http: 8084
+
+paymentSvc:
+  service:
+    ports:
+      http: 8085
+
+apiGateway:
+  image:
+    repository: api-gateway
+    tag: latest
+  service:
+    ports:
+      http: 8080

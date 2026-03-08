@@ -7,15 +7,16 @@ import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.domain.exception.BaseDomainException;
 import org.atlas.libs.framework.i18n.I18nService;
 import org.atlas.libs.framework.util.StringUtil;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 @Order
 @RestControllerAdvice(basePackages = {
@@ -54,14 +55,24 @@ public class RestExceptionHandler {
   }
 
   /**
-   * Missing a required request parameter
+   * Validation failed for controller method parameters
    */
-  @ExceptionHandler(MissingServletRequestParameterException.class)
+  @ExceptionHandler(HandlerMethodValidationException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ApiResponseWrapper<Void> handle(MissingServletRequestParameterException e) {
+  public ApiResponseWrapper<Void> handle(HandlerMethodValidationException e) {
     log.error("Invalid request", e);
-    return ApiResponseWrapper.error(CommonDomainError.BAD_REQUEST.getErrorCode(),
-        "Missing " + e.getParameterName());
+
+    String errorMessage = e.getParameterValidationResults().stream()
+        .flatMap(r -> r.getResolvableErrors().stream())
+        .map(MessageSourceResolvable::getDefaultMessage)
+        .filter(StringUtil::isNotBlank)
+        .findFirst()
+        .orElse("Invalid request");
+
+    return ApiResponseWrapper.error(
+        CommonDomainError.BAD_REQUEST.getErrorCode(),
+        errorMessage
+    );
   }
 
   @ExceptionHandler(Exception.class)

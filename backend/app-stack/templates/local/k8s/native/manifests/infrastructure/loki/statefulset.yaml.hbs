@@ -24,35 +24,29 @@ spec:
           args:
             - -config.file=/etc/loki/local-config.yaml
           ports:
-            - containerPort: 3100
-              name: http
+            - name: http
+              containerPort: 3100
+          startupProbe:
+            httpGet:
+              path: /ready
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 60
           livenessProbe:
             httpGet:
               path: /ready
-              port: 3100
-            initialDelaySeconds: 30
+              port: http
             periodSeconds: 30
-            timeoutSeconds: 10
-            successThreshold: 1
+            timeoutSeconds: 5
             failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /ready
-              port: 3100
-            initialDelaySeconds: 10
+              port: http
             periodSeconds: 10
             timeoutSeconds: 5
-            successThreshold: 1
             failureThreshold: 3
-          startupProbe:
-            httpGet:
-              path: /ready
-              port: 3100
-            initialDelaySeconds: 20
-            periodSeconds: 10
-            timeoutSeconds: 5
-            successThreshold: 1
-            failureThreshold: 60
           resources:
             requests:
               cpu: 200m

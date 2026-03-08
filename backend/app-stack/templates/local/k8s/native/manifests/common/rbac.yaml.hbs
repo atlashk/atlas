@@ -7,14 +7,14 @@ metadata:
   name: namespace-reader
   namespace: {{dotenv.PROJECT_NAME}}
   labels:
-    app: security
+    app: common
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: namespace-reader
   labels:
-    app: security
+    app: common
 rules:
   - apiGroups: [""]
     resources:
@@ -33,7 +33,7 @@ kind: ClusterRoleBinding
 metadata:
   name: namespace-reader
   labels:
-    app: security
+    app: common
 subjects:
   - kind: ServiceAccount
     name: namespace-reader

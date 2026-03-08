@@ -27,46 +27,40 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: minio
-                  key: minio-root-user
+                  key: root-user
             - name: MINIO_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: minio
-                  key: minio-root-password
+                  key: root-password
           ports:
-            - containerPort: 9000
-              name: s3
-            - containerPort: 9001
-              name: console
+            - name: s3
+              containerPort: 9000
+            - name: console
+              containerPort: 9001
           volumeMounts:
             - name: minio-data
               mountPath: /data
           startupProbe:
             httpGet:
               path: /minio/health/live
-              port: 9000
-            initialDelaySeconds: 20
+              port: s3
             periodSeconds: 10
             timeoutSeconds: 5
-            successThreshold: 1
             failureThreshold: 30
           livenessProbe:
             httpGet:
               path: /minio/health/live
-              port: 9000
-            initialDelaySeconds: 30
+              port: s3
             periodSeconds: 10
             timeoutSeconds: 5
-            successThreshold: 1
-            failureThreshold: 3
+            failureThreshold: 6
           readinessProbe:
             httpGet:
               path: /minio/health/ready
-              port: 9000
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            timeoutSeconds: 5
-            successThreshold: 1
+              port: s3
+            periodSeconds: 5
+            timeoutSeconds: 3
             failureThreshold: 3
           resources:
             requests:

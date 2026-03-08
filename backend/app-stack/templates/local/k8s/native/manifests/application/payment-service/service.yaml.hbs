@@ -10,6 +10,6 @@ spec:
     app: payment-service
   type: ClusterIP
   ports:
-    - port: 8085
-      targetPort: 8085
-      name: http
+    - name: http
+      port: 8085
+      targetPort: http

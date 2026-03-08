@@ -1,0 +1,56 @@
+{{- if eq .Values.appStack.observability.logging.stack "loki" }}
+# ServiceAccount: Creates an identity for Promtail to use
+# This account will be used by Promtail pods to authenticate with Kubernetes API
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.promtail.serviceAccount }}
+  labels:
+    app.kubernetes.io/name: promtail
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+---
+# ClusterRole: Defines permissions that can be applied cluster-wide
+# This role grants read-only access to essential Kubernetes resources needed for service discovery and log collection
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: promtail
+  labels:
+    app.kubernetes.io/name: promtail
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+rules:
+  # Allow read access to core Kubernetes resources across all namespaces
+  - apiGroups: [""] # Core API group (pods, services, etc.)
+    resources:
+      - "nodes"        # Read node information
+      - "nodes/proxy"  # Access node proxy
+      - "services"     # Service endpoints for load balancing
+      - "endpoints"    # Backend pods for services
+      - "pods"         # Container instances (most important for log collection)
+    verbs:
+      - "get"    # Retrieve individual resources
+      - "list"   # List multiple resources
+      - "watch"  # Watch for resource changes (real-time updates)
+---
+# ClusterRoleBinding: Binds the ClusterRole to subjects (users/groups/service accounts)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: promtail
+  labels:
+    app.kubernetes.io/name: promtail
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.promtail.serviceAccount }}
+roleRef:
+  kind: ClusterRole
+  name: promtail
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}

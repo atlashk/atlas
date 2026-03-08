@@ -26,23 +26,33 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: rabbitmq
-                  key: rabbitmq-user
+                  key: user
             - name: RABBITMQ_DEFAULT_PASS
               valueFrom:
                 secretKeyRef:
                   name: rabbitmq
-                  key: rabbitmq-password
+                  key: password
           ports:
-            - containerPort: 5672
-              name: amqp
-            - containerPort: 15672
-              name: management
+            - name: amqp
+              containerPort: 5672
+            - name: management
+              containerPort: 15672
           volumeMounts:
             - name: rabbitmq-data
               mountPath: /var/lib/rabbitmq
             - name: rabbitmq-config
               mountPath: /etc/rabbitmq/enabled_plugins
               subPath: enabled_plugins
+          startupProbe:
+            exec:
+              command:
+                - rabbitmq-diagnostics
+                - -q
+                - ping
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 10
           livenessProbe:
             exec:
               command:
@@ -52,7 +62,6 @@ spec:
             initialDelaySeconds: 60
             periodSeconds: 30
             timeoutSeconds: 10
-            successThreshold: 1
             failureThreshold: 3
           readinessProbe:
             exec:
@@ -63,19 +72,7 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
-            successThreshold: 1
             failureThreshold: 3
-          startupProbe:
-            exec:
-              command:
-                - rabbitmq-diagnostics
-                - -q
-                - ping
-            initialDelaySeconds: 20
-            periodSeconds: 10
-            timeoutSeconds: 5
-            successThreshold: 1
-            failureThreshold: 10
           resources:
             requests:
               cpu: 200m

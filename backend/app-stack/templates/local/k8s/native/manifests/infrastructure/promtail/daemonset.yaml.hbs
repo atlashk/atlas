@@ -17,11 +17,9 @@ spec:
       labels:
         app: promtail
     spec:
-      # Service account with permissions to read pod metadata
-      serviceAccount: promtail
+      serviceAccountName: promtail
       containers:
         - name: promtail
-          # Using the main branch image for latest features
           image: grafana/promtail:main
           args:
             - -config.file=/etc/promtail/config.yml
@@ -32,40 +30,30 @@ spec:
                 fieldRef:
                   fieldPath: spec.nodeName
           ports:
-            # Expose metrics port for Prometheus scraping
-            - containerPort: 9080
-              name: http-metrics
-          
-          # Health check: Promtail is ready to accept requests
+            - name: http-metrics
+              containerPort: 9080
+          # No need startupProbe because Promtail is fast to start
           livenessProbe:
             httpGet:
               path: /ready
-              port: 9080
-            initialDelaySeconds: 30  # Wait 30s before first check
-            periodSeconds: 10        # Check every 10s
-            timeoutSeconds: 5        # 5s timeout per check
-            failureThreshold: 5      # Restart after 5 failures
-          
-          # Readiness check: Promtail is serving metrics
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /metrics
-              port: 9080
-            initialDelaySeconds: 10  # Wait 10s before first check
-            periodSeconds: 15        # Check every 15s
-            timeoutSeconds: 5        # 5s timeout per check
-            successThreshold: 1      # Ready after 1 success
-            failureThreshold: 5      # Not ready after 5 failures
-          
-          # Resource limits to prevent Promtail from consuming too many resources
+              path: /ready
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
           resources:
             requests:
-              cpu: "50m"      # Minimum CPU: 0.05 cores
-              memory: "64Mi"  # Minimum memory: 64 MiB
+              cpu: "50m"
+              memory: "64Mi"
             limits:
-              cpu: "100m"     # Maximum CPU: 0.1 cores
-              memory: "128Mi" # Maximum memory: 128 MiB
-          
+              cpu: "100m"
+              memory: "128Mi"
           volumeMounts:
             # Mount configuration from ConfigMap
             - name: config
@@ -78,7 +66,6 @@ spec:
             - name: varlibdockercontainers
               mountPath: /var/lib/docker/containers
               readOnly: true  # Read-only access for security
-      
       volumes:
         # Configuration volume from ConfigMap
         - name: config
@@ -91,7 +78,5 @@ spec:
         - name: varlibdockercontainers
           hostPath:
             path: /var/lib/docker/containers
-      
-      # Grace period for clean shutdown
       terminationGracePeriodSeconds: 10
 {{/hasService}}

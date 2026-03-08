@@ -21,8 +21,8 @@ spec:
           image: {{dotenv.PROJECT_NAME}}/payment-service:latest
           imagePullPolicy: Never
           ports:
-            - containerPort: 8085
-              name: http
+            - name: http
+              containerPort: 8085
           env:
             {{#hasService "datasource" "mysql"}}
             - name: DB_URL
@@ -31,12 +31,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: mysql
-                  key: mysql-user
+                  key: user
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: mysql
-                  key: mysql-password
+                  key: password
             {{/hasService}}
             {{#hasService "datasource" "postgres"}}
             - name: DB_URL
@@ -45,12 +45,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: postgres
-                  key: postgres-user
+                  key: user
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: postgres
-                  key: postgres-password
+                  key: password
             {{/hasService}}
             {{#hasService "kv-store" "redis"}}
             - name: REDIS_HOST
@@ -71,12 +71,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: rabbitmq
-                  key: rabbitmq-user
+                  key: user
             - name: RABBITMQ_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: rabbitmq
-                  key: rabbitmq-password
+                  key: password
             {{/hasService}}
             {{#hasService "observability.tracing" "zipkin"}}
             - name: ZIPKIN_ENDPOINT
@@ -84,41 +84,27 @@ spec:
             {{/hasService}}
             - name: PAYMENT_SIMULATOR_WEBHOOK_URL
               value: "http://api-gateway:8080/services/payment/api/webhook/simulator"
-          # startupProbe gives the Spring Boot app up to 4 min (20 × 12 s) to finish starting
-          # before liveness/readiness probes are allowed to run. This prevents premature restarts.
-          # Optimized for 2-3 min average startup time with ~1 min buffer.
           startupProbe:
             httpGet:
               path: /actuator/health/liveness
-              port: 8085
-              scheme: HTTP
-            periodSeconds: 12
+              port: http
+            periodSeconds: 10
             timeoutSeconds: 5
-            failureThreshold: 20
-          # livenessProbe restarts the container if the app becomes unresponsive after startup.
-          # Quick failure detection (3 × 30 s) without being overly aggressive.
+            failureThreshold: 30
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
-              port: 8085
-              scheme: HTTP
-            initialDelaySeconds: 0
+              port: http
             periodSeconds: 30
             timeoutSeconds: 5
             failureThreshold: 3
-            successThreshold: 1
-          # readinessProbe removes the pod from service endpoints while it is still starting
-          # or if it becomes temporarily unavailable. Slightly relaxed to handle GC pauses.
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
-              port: 8085
-              scheme: HTTP
-            initialDelaySeconds: 0
+              port: http
             periodSeconds: 15
             timeoutSeconds: 5
-            successThreshold: 1
-            failureThreshold: 4
+            failureThreshold: 3
           resources:
             requests:
               cpu: "200m"

@@ -24,27 +24,30 @@ spec:
             - name: ServerOptions__HostName
               value: "smtp4dev"
           ports:
-            - containerPort: 80
-              name: http
-            - containerPort: 25
-              name: smtp
+            - name: http
+              containerPort: 80
+            - name: smtp
+              containerPort: 25
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
           livenessProbe:
             httpGet:
               path: /
-              port: 80
-            initialDelaySeconds: 30
+              port: http
             periodSeconds: 30
-            timeoutSeconds: 10
-            successThreshold: 1
+            timeoutSeconds: 5
             failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /
-              port: 80
-            initialDelaySeconds: 15
+              port: http
             periodSeconds: 10
             timeoutSeconds: 5
-            successThreshold: 1
             failureThreshold: 3
           resources:
             requests:

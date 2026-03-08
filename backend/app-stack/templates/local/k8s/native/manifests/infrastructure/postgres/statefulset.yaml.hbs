@@ -26,42 +26,47 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: postgres
-                  key: postgres-user
+                  key: user
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: postgres
-                  key: postgres-password
+                  key: password
           ports:
-            - containerPort: 5432
-              name: postgres
+            - name: postgres
+              containerPort: 5432
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
             - name: postgres-init
               mountPath: /docker-entrypoint-initdb.d
               readOnly: true
+          startupProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - 'pg_isready -U "$POSTGRES_USER" -h 127.0.0.1'
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
           livenessProbe:
             exec:
               command:
                 - /bin/sh
                 - -c
                 - 'pg_isready -U "$POSTGRES_USER" -h 127.0.0.1'
-            initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
-            successThreshold: 1
-            failureThreshold: 3
+            failureThreshold: 6
           readinessProbe:
             exec:
               command:
                 - /bin/sh
                 - -c
                 - 'pg_isready -U "$POSTGRES_USER" -h 127.0.0.1'
-            initialDelaySeconds: 5
             periodSeconds: 5
-            timeoutSeconds: 2
-            successThreshold: 1
+            timeoutSeconds: 3
             failureThreshold: 3
           resources:
             requests:

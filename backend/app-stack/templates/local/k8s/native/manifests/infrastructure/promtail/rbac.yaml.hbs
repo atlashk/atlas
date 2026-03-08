@@ -37,16 +37,13 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: promtail
-  namespace: {{dotenv.PROJECT_NAME}}
   labels:
     app: promtail
 subjects:
-  # Grant permissions to all ServiceAccounts in the namespace.
-  - kind: Group
-    name: system:serviceaccounts:{{dotenv.PROJECT_NAME}}
-    apiGroup: rbac.authorization.k8s.io
+  - kind: ServiceAccount
+    name: promtail
+    namespace: {{dotenv.PROJECT_NAME}}
 roleRef:
-  # Reference to the ClusterRole defined above
   kind: ClusterRole
   name: promtail
   apiGroup: rbac.authorization.k8s.io

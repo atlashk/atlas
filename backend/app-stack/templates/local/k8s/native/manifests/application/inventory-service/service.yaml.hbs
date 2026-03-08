@@ -10,6 +10,6 @@ spec:
     app: inventory-service
   type: ClusterIP
   ports:
-    - port: 8083
-      targetPort: 8083
-      name: http
+    - name: http
+      port: 8083
+      targetPort: http

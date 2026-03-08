@@ -24,25 +24,29 @@ spec:
             - name: STORAGE_TYPE
               value: "mem"
           ports:
-            - containerPort: 9411
-              name: http
+            - name: http
+              containerPort: 9411
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
           livenessProbe:
             httpGet:
               path: /health
-              port: 9411
+              port: http
             initialDelaySeconds: 30
             periodSeconds: 30
-            timeoutSeconds: 10
-            successThreshold: 1
+            timeoutSeconds: 5
             failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /health
-              port: 9411
-            initialDelaySeconds: 10
+              port: http
             periodSeconds: 10
             timeoutSeconds: 5
-            successThreshold: 1
             failureThreshold: 3
           resources:
             requests:

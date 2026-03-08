@@ -1,0 +1,14 @@
+{{- if eq .Values.appStack.messaging "rabbitmq" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rabbitmq
+  labels:
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+data:
+  enabled_plugins: |
+    [rabbitmq_management,rabbitmq_delayed_message_exchange].
+{{- end }}

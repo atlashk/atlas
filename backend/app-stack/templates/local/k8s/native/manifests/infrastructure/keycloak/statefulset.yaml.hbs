@@ -33,12 +33,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: keycloak
-                  key: kc-bootstrap-admin-username
+                  key: admin-username
             - name: KC_BOOTSTRAP_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: keycloak
-                  key: kc-bootstrap-admin-password
+                  key: admin-password
             {{#hasService "datasource" "postgres"}}
             - name: KC_DB
               value: "postgres"
@@ -48,12 +48,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: postgres
-                  key: postgres-user
+                  key: user
             - name: KC_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: postgres
-                  key: postgres-password
+                  key: password
             {{/hasService}}
             {{#hasService "datasource" "mysql"}}
             - name: KC_DB
@@ -61,12 +61,15 @@ spec:
             - name: KC_DB_URL
               value: "jdbc:mysql://mysql:3306/db_keycloak?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
             - name: KC_DB_USERNAME
-              value: "atlas"
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: user
             - name: KC_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: mysql
-                  key: mysql-password
+                  key: password
             {{/hasService}}
             - name: KC_HEALTH_ENABLED
               value: "true"
@@ -79,36 +82,30 @@ spec:
               mountPath: /opt/keycloak/data/import
               readOnly: true
           ports:
-            - containerPort: 8080
-              name: http
-            - containerPort: 9000
-              name: management
+            - name: http
+              containerPort: 8080
+            - name: management
+              containerPort: 9000
           startupProbe:
             httpGet:
               path: /health/started
               port: 9000
-            initialDelaySeconds: 120
             periodSeconds: 10
-            timeoutSeconds: 30
-            successThreshold: 1
+            timeoutSeconds: 5
             failureThreshold: 60
           livenessProbe:
             httpGet:
               path: /health/live
               port: 9000
-            initialDelaySeconds: 60
             periodSeconds: 30
-            timeoutSeconds: 30
-            successThreshold: 1
+            timeoutSeconds: 5
             failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /health/ready
               port: 9000
-            initialDelaySeconds: 30
             periodSeconds: 10
-            timeoutSeconds: 30
-            successThreshold: 1
+            timeoutSeconds: 5
             failureThreshold: 3
           resources:
             limits:

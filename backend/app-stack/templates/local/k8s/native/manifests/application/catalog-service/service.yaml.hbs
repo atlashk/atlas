@@ -10,11 +10,11 @@ spec:
     app: catalog-service
   type: ClusterIP
   ports:
-    - port: 8082
-      targetPort: 8082
-      name: http
+    - name: http
+      port: 8082
+      targetPort: http
     {{#hasService "internal" "grpc"}}
-    - port: 50052
-      targetPort: 50052
-      name: grpc
+    - name: grpc
+      port: 50052
+      targetPort: grpc
     {{/hasService}}

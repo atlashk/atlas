@@ -55,7 +55,7 @@ spec:
             - name: CLUSTER_ID
               value: "MkU3OEVBNTcwNTJENDM2Qk"
             - name: KAFKA_HEAP_OPTS
-              value: "-Xmx512M -Xms512M"
+              value: "-Xmx1g -Xms512m"
             - name: KAFKA_JVM_PERFORMANCE_OPTS
               value: "-server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -XX:MaxInlineLevel=15 -Djava.awt.headless=true"
           ports:
@@ -72,33 +72,27 @@ spec:
               command:
                 - sh
                 - -c
-                - "kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1"
-            initialDelaySeconds: 30
+                - kafka-broker-api-versions --bootstrap-server localhost:9092
             periodSeconds: 10
-            timeoutSeconds: 30
-            successThreshold: 1
+            timeoutSeconds: 5
             failureThreshold: 30
           livenessProbe:
             exec:
               command:
                 - sh
                 - -c
-                - "kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1"
-            initialDelaySeconds: 60
-            periodSeconds: 30
-            timeoutSeconds: 30
-            successThreshold: 1
+                - kafka-broker-api-versions --bootstrap-server localhost:9092
+            periodSeconds: 20
+            timeoutSeconds: 5
             failureThreshold: 3
           readinessProbe:
             exec:
               command:
                 - sh
                 - -c
-                - "kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1"
-            initialDelaySeconds: 30
+                - kafka-broker-api-versions --bootstrap-server localhost:9092
             periodSeconds: 10
-            timeoutSeconds: 30
-            successThreshold: 1
+            timeoutSeconds: 5
             failureThreshold: 3
           resources:
             requests:

@@ -11,15 +11,15 @@ services:
       - MYSQL_USER=${MYSQL_USER:-atlas}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD:-Atlas@123456}
     volumes:
-      - ./config/mysql/initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
+      - ./files/mysql/initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
       - mysql-data:/var/lib/mysql
     command: --default-authentication-plugin=mysql_native_password
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p\"$MYSQL_ROOT_PASSWORD\" || exit 1"]
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$MYSQL_ROOT_PASSWORD\" mysqladmin ping -h 127.0.0.1 -P 3306 -u root || exit 1"]
       interval: 10s
-      timeout: 10s
-      retries: 10
-      start_period: 60s
+      timeout: 5s
+      retries: 6
+      start_period: 300s
     networks:
       - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
@@ -34,14 +34,14 @@ services:
       - POSTGRES_USER=${POSTGRES_USER:-atlas}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-Atlas@123456}
     volumes:
-      - ./config/postgres/initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
+      - ./files/postgres/initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
+      test: ["CMD-SHELL", "pg_isready -U \"$POSTGRES_USER\" -h 127.0.0.1 -d postgres"]
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 10s
+      retries: 6
+      start_period: 300s
     networks:
       - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
@@ -56,10 +56,11 @@ services:
       - redis-data:/data
     command: redis-server --appendonly yes
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
       interval: 10s
-      timeout: 5s
-      retries: 5
+      timeout: 3s
+      retries: 3
+      start_period: 30s
     networks:
       - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
@@ -85,11 +86,11 @@ services:
     volumes:
       - kafka-data:/var/lib/kafka/data
     healthcheck:
-      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1"]
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092"]
       interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
+      timeout: 5s
+      retries: 6
+      start_period: 300s
     networks:
       - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
@@ -107,10 +108,11 @@ services:
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 100s
     networks:
       - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
@@ -142,25 +144,16 @@ services:
       - KC_DB_PASSWORD=${MYSQL_PASSWORD:-Atlas@123456}
       {{/hasService}}
     volumes:
-      - ./config/keycloak/import:/opt/keycloak/data/import:ro
+      - ./files/keycloak/import:/opt/keycloak/data/import:ro
     command:
       - start-dev
       - --import-realm
     healthcheck:
-      test:
-        - "CMD-SHELL"
-        - |
-          exec 3<>/dev/tcp/127.0.0.1/9000 || exit 1;
-          echo -e "GET /health/ready HTTP/1.0\r\nHost: localhost\r\n\r\n" >&3;
-          if timeout 3 cat <&3 | grep -q "\"status\": \"UP\""; then
-            exit 0
-          else
-            exit 1
-          fi
-      interval: 10s
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9000/health/ready || exit 1"]
+      interval: 30s
       timeout: 5s
-      retries: 30
-      start_period: 120s
+      retries: 3
+      start_period: 600s
     depends_on:
       {{#hasService "datasource" "postgres"}}
       postgres:
@@ -188,10 +181,10 @@ services:
     volumes:
       - elasticsearch-data:/usr/share/elasticsearch/data
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS --max-time 5 -u elastic:${ELASTIC_PASSWORD} http://127.0.0.1:9200/_cluster/health?wait_for_status=yellow&timeout=1s > /dev/null || exit 1]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 9
       start_period: 60s
     networks:
       - {{dotenv.PROJECT_NAME}}-network
@@ -211,10 +204,11 @@ services:
       - minio-data:/data
     command: server /data --console-address ":9001"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9000/minio/health/live"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 6
+      start_period: 300s
     networks:
       - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
@@ -228,6 +222,12 @@ services:
       - "25:25"
     environment:
       - ServerOptions__HostName=smtp4dev
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:80/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 300s
     networks:
       - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
@@ -239,7 +239,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./config/prometheus/config.yml:/etc/prometheus/config.yml:ro
+      - ./files/prometheus/config.yml:/etc/prometheus/config.yml:ro
       - prometheus-data:/prometheus
     command:
       - '--config.file=/etc/prometheus/config.yml'
@@ -247,11 +247,11 @@ services:
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9090/-/healthy || exit 1"]
-      interval: 10s
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9090/-/healthy"]
+      interval: 15s
       timeout: 5s
-      retries: 5
-      start_period: 30s
+      retries: 3
+      start_period: 300s
     networks:
       - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
@@ -266,11 +266,11 @@ services:
       - loki-data:/loki
     command: -config.file=/etc/loki/local-config.yaml
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1"]
-      interval: 10s
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:3100/ready"]
+      interval: 30s
       timeout: 5s
-      retries: 5
-      start_period: 30s
+      retries: 3
+      start_period: 600s
     networks:
       - {{dotenv.PROJECT_NAME}}-network
 
@@ -279,7 +279,7 @@ services:
     image: grafana/promtail:main
     command: -config.file=/etc/promtail/config.yml
     volumes:
-      - ./config/promtail/config.yml:/etc/promtail/config.yml
+      - ./files/promtail/config.yml:/etc/promtail/config.yml
       - eureka-server-log:/var/log/eureka-server
       - identity-service-log:/var/log/identity-service
       - catalog-service-log:/var/log/catalog-service
@@ -290,11 +290,11 @@ services:
     depends_on:
       - loki
     healthcheck:
-      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9080/metrics || exit 1" ]
-      interval: 10s
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9080/ready"]
+      interval: 30s
       timeout: 5s
-      retries: 5
-      start_period: 30s
+      retries: 3
+      start_period: 10s
     networks:
       - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
@@ -307,6 +307,12 @@ services:
       - "9411:9411"
     environment:
       - STORAGE_TYPE=mem
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9411/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 300s
     networks:
       - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
@@ -323,14 +329,14 @@ services:
       - GF_PLUGIN_CATALOG_SKIP_TLS_VERIFY=true
     volumes:
       - grafana-data:/var/lib/grafana
-      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./config/grafana/dashboards:/etc/grafana/dashboards:ro
+      - ./files/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./files/grafana/dashboards:/etc/grafana/dashboards:ro
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1"]
+      test: ["CMD", "curl", "-fsS", "http://localhost:3000/api/health"]
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 60s
+      retries: 9
+      start_period: 300s
     depends_on:
       {{#hasService "observability.metrics" "prometheus"}}
       - prometheus
@@ -356,10 +362,10 @@ services:
     volumes:
       - eureka-server-log:/var/log/eureka-server
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health/readiness"]
-      interval: 10s
-      timeout: 10s
-      retries: 15
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8761/actuator/health/liveness"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
       start_period: 180s
     networks:
       - {{dotenv.PROJECT_NAME}}-network
@@ -405,7 +411,7 @@ services:
       - KEYCLOAK_BASE_URL=http://keycloak:8080
       - KC_BOOTSTRAP_ADMIN_USERNAME=${KC_BOOTSTRAP_ADMIN_USERNAME:-atlas}
       - KC_BOOTSTRAP_ADMIN_PASSWORD=${KC_BOOTSTRAP_ADMIN_PASSWORD:-Atlas@123456}
-      # Refer config/keycloak/realm.json file
+      # Refer files/keycloak/realm.json file
       - KEYCLOAK_REALM=${KEYCLOAK_REALM:-default}
       - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-default-auth}
       - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET:-9cvF5MPJnwfhEOCwNnQ79RmlkckAsDCj}
@@ -413,11 +419,11 @@ services:
     volumes:
       - identity-service-log:/var/log/identity-service
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health/readiness"]
-      interval: 10s
-      timeout: 10s
-      retries: 15
-      start_period: 180s
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8081/actuator/health/readiness"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 300s
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -487,11 +493,11 @@ services:
     volumes:
       - catalog-service-log:/var/log/catalog-service
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health/readiness"]
-      interval: 10s
-      timeout: 10s
-      retries: 15
-      start_period: 180s
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8082/actuator/health/readiness"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 300s
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -550,11 +556,11 @@ services:
     volumes:
       - inventory-service-log:/var/log/inventory-service
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health/readiness"]
-      interval: 10s
-      timeout: 10s
-      retries: 15
-      start_period: 180s
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8083/actuator/health/readiness"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 300s
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -617,11 +623,11 @@ services:
     volumes:
       - order-service-log:/var/log/order-service
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health/readiness"]
-      interval: 10s
-      timeout: 10s
-      retries: 15
-      start_period: 180s
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8084/actuator/health/readiness"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 300s
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -677,11 +683,11 @@ services:
     volumes:
       - payment-service-log:/var/log/payment-service
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health/readiness"]
-      interval: 10s
-      timeout: 10s
-      retries: 15
-      start_period: 180s
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8085/actuator/health/readiness"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 300s
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -724,11 +730,11 @@ services:
     volumes:
       - api-gateway-log:/var/log/api-gateway
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health/readiness"]
-      interval: 10s
-      timeout: 10s
-      retries: 15
-      start_period: 180s
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/actuator/health/readiness"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 300s
     depends_on:
       eureka-server:
         condition: service_healthy

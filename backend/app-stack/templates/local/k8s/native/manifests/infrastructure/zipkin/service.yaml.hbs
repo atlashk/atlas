@@ -11,7 +11,7 @@ spec:
   selector:
     app: zipkin
   ports:
-    - port: 9411
-      targetPort: 9411
-      name: http
+    - name: http
+      port: 9411
+      targetPort: http
 {{/hasService}}

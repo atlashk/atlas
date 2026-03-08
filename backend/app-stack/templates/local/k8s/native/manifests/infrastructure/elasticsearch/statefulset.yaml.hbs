@@ -26,7 +26,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: elasticsearch
-                  key: elasticsearch-password
+                  key: password
             - name: discovery.type
               value: "single-node"
             - name: xpack.security.enabled
@@ -46,33 +46,27 @@ spec:
               command:
                 - sh
                 - -c
-                - 'curl -fsS --max-time 5 -u "elastic:${ELASTIC_PASSWORD}" http://127.0.0.1:9200/ >/dev/null'
-            initialDelaySeconds: 30
+                - curl -fsS --max-time 5 -u "elastic:${ELASTIC_PASSWORD}" http://127.0.0.1:9200/ >/dev/null
             periodSeconds: 10
-            timeoutSeconds: 10
-            successThreshold: 1
+            timeoutSeconds: 5
             failureThreshold: 30
           livenessProbe:
             exec:
               command:
                 - sh
                 - -c
-                - 'curl -fsS --max-time 5 -u "elastic:${ELASTIC_PASSWORD}" "http://127.0.0.1:9200/_cluster/health?local=true" >/dev/null'
-            initialDelaySeconds: 60
+                - curl -fsS --max-time 5 -u "elastic:${ELASTIC_PASSWORD}" "http://127.0.0.1:9200/_cluster/health?local=true" >/dev/null
             periodSeconds: 20
-            timeoutSeconds: 10
-            successThreshold: 1
+            timeoutSeconds: 5
             failureThreshold: 3
           readinessProbe:
             exec:
               command:
                 - sh
                 - -c
-                - 'curl -fsS --max-time 5 -u "elastic:${ELASTIC_PASSWORD}" "http://127.0.0.1:9200/_cluster/health?wait_for_status=yellow&timeout=1s" >/dev/null'
-            initialDelaySeconds: 20
+                - curl -fsS --max-time 5 -u "elastic:${ELASTIC_PASSWORD}" "http://127.0.0.1:9200/_cluster/health?wait_for_status=yellow&timeout=1s" >/dev/null
             periodSeconds: 10
             timeoutSeconds: 5
-            successThreshold: 1
             failureThreshold: 3
           resources:
             requests:

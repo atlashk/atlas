@@ -261,27 +261,27 @@ function shouldSkipFileByPath(filePath, context) {
   
   // Skip specific service configs based on stack
   const datasource = stackValue('datasource');
-  if (normalizedPath.includes('/config/mysql/') && datasource !== 'mysql') return true;
-  if (normalizedPath.includes('/config/postgres/') && datasource !== 'postgres' && datasource !== 'postgresql') return true;
+  if (normalizedPath.includes('/files/mysql/') && datasource !== 'mysql') return true;
+  if (normalizedPath.includes('/files/postgres/') && datasource !== 'postgres' && datasource !== 'postgresql') return true;
   
   const kvStore = stackValue('kv-store');
-  if (normalizedPath.includes('/config/redis/') && kvStore !== 'redis') return true;
+  if (normalizedPath.includes('/files/redis/') && kvStore !== 'redis') return true;
   
   const messaging = stackValue('messaging');
-  if (normalizedPath.includes('/config/kafka/') && messaging !== 'kafka') return true;
-  if (normalizedPath.includes('/config/rabbitmq/') && messaging !== 'rabbitmq') return true;
+  if (normalizedPath.includes('/files/kafka/') && messaging !== 'kafka') return true;
+  if (normalizedPath.includes('/files/rabbitmq/') && messaging !== 'rabbitmq') return true;
   
   const storage = stackValue('storage');
-  if (normalizedPath.includes('/config/minio/') && storage !== 'minio') return true;
+  if (normalizedPath.includes('/files/minio/') && storage !== 'minio') return true;
   
   const fullTextSearch = stackValue('full-text-search');
-  if (normalizedPath.includes('/config/elasticsearch/') && fullTextSearch !== 'elasticsearch') return true;
+  if (normalizedPath.includes('/files/elasticsearch/') && fullTextSearch !== 'elasticsearch') return true;
   
   const identity = stackValue('identity');
-  if (normalizedPath.includes('/config/keycloak/') && identity !== 'keycloak') return true;
+  if (normalizedPath.includes('/files/keycloak/') && identity !== 'keycloak') return true;
 
   const notificationEmail = stackValue('notification.email');
-  if (normalizedPath.includes('/config/smtp4dev/') && notificationEmail !== 'spring') return true;
+  if (normalizedPath.includes('/files/smtp4dev/') && notificationEmail !== 'spring') return true;
   
   return false;
 }
