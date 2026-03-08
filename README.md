@@ -53,6 +53,52 @@ Each backend service follows a consistent module layout:
 
 Shared backend building blocks live under `backend/libs/` and are consumed by multiple services.
 
+```mermaid
+flowchart LR
+    Client["Client / External Systems"]
+
+    subgraph Bootstrap["**bootstrap** module"]
+
+        API["**api** module<br/>REST / gRPC controllers"]
+        APP["**application** module<br/>Application use cases"]
+        DOMAIN["**domain** module<br/>Core business logic"]
+        PORTS["**port** module<br/>inbound & outbound interfaces"]
+        INFRA["**infrastructure** module<br/>JPA, messaging, external APIs"]
+        LIBS["**libs** modules<br/>Shared building blocks"]
+
+        API --> APP
+        PORTS --> DOMAIN
+        APP --> DOMAIN
+        APP --> PORTS
+        INFRA --> PORTS
+
+    end
+
+    Client --> API
+```
+
+---
+
+## Technology Stack
+
+### Backend
+
+- **Core**: Java 17, Spring Boot 3.5, Spring Cloud 2025, Gradle (multi-module)
+- **API & Communication**: Spring Cloud Gateway, REST (Spring MVC), OpenAPI (springdoc), gRPC
+- **Service Platform**: Eureka Server (service discovery), Spring Cloud Config
+- **Data & Infrastructure**: MySQL, PostgreSQL, Redis, Kafka, RabbitMQ, Elasticsearch, MinIO, Quartz
+- **Security & Integration**: Spring Security (JWT), Keycloak, Stripe, Sendgrid
+- **Microservices Patterns**: Saga orchestration, Outbox pattern, Resilience4j
+- **Observability**: Actuator, Logback, Loki + Promtail, Prometheus, Zipkin, Grafana
+- **Productivity**: Lombok, MapStruct
+- **Deployment**: Docker Compose, Kubernetes (native manifests or Helm)
+
+### Frontend
+
+- **Framework**: Next.js 16 (React 19), TypeScript
+- **UI**: Tailwind CSS, shadcn/ui, Radix UI
+- **State & Forms**: Zustand, React Hook Form, Zod
+
 ---
 
 ## Project Structure
@@ -165,7 +211,7 @@ Login credentials: `admin` / `Atlas@123456`
 | Inventory Service | Stock management | http://localhost:8083 |
 | Order Service | Checkout and saga orchestration | http://localhost:8084 |
 | Payment Service | Payment processing | http://localhost:8085 |
-| Keycloak | Identity provider (OIDC) for authentication | http://localhost:8180 |
+| Keycloak | Identity provider (OIDC) for authentication | http://localhost:8443 |
 | Elasticsearch | Search and analytics engine | http://localhost:9200 |
 | MinIO | S3-compatible object storage (assets/uploads) | http://localhost:9000 |
 | Loki | Log aggregation backend | http://localhost:3100 |
@@ -175,7 +221,7 @@ Login credentials: `admin` / `Atlas@123456`
 
 ### App Stack
 
-Atlas supports multiple deployment targets via app-stack configs.
+Atlas provides an **app-stack configuration mechanism** that enables infrastructure technologies to be switched by changing values in a YAML configuration file.
 
 | App stack | Target | How to run |
 | --- | --- | --- |
@@ -224,6 +270,32 @@ cd backend
 ./install.sh --skip-build
 ```
 
+#### App-Stack Infrastructure Options
+
+| Capability | Options |
+|---|---|
+| `datasource` | `mysql` \| `postgres` |
+| `file.csv` | `opencsv` |
+| `file.excel` | `poi` \| `easyexcel` |
+| `file.pdf` | `pdfbox` |
+| `full-text-search` | `elasticsearch` |
+| `identity` | `jwt` \| `keycloak` |
+| `internal` | `rest` \| `grpc` |
+| `kv-store` | `redis` |
+| `messaging` | `kafka` \| `rabbitmq` |
+| `migration` | `flyway` |
+| `notification.email` | `spring` \| `sendgrid` |
+| `observability.logging.framework` | `logback` |
+| `observability.logging.stack` | `none` \| `loki` |
+| `observability.metrics` | `none` \| `prometheus` |
+| `observability.tracing` | `none` \| `zipkin` |
+| `persistence` | `jpa` |
+| `redis` | `standalone` \| `cluster` |
+| `scheduler` | `spring` \| `quartz` |
+| `service-discovery` | `eureka` \| `kubernetes` |
+| `storage` | `minio` \| `filesystem` |
+| `template` | `freemarker` \| `thymeleaf` |
+
 ### Checkout Flow
 
 ```mermaid
@@ -249,69 +321,6 @@ sequenceDiagram
   PAY->>MQ: PROCESS_PAYMENT reply
   ORD-->>FE: 201 Created (orderId)
 ```
-
----
-
-## Technology Stack
-
-### Backend
-
-- Language & Build
-  - Java 17
-  - Gradle (multi-module)
-- Spring Platform
-  - Spring Boot 3.5.x
-  - Spring Framework 6.2.x
-  - Spring Cloud 2025.0.x
-- Service-to-service & Edge
-  - Spring Cloud Gateway (API Gateway, WebFlux)
-  - REST (Spring MVC) | gRPC
-  - OpenAPI (springdoc)
-  - Service discovery: Eureka Server
-  - Config server: Spring Cloud Config
-- Infrastructure (app-stack driven)
-  - Database: MySQL | PostgreSQL
-  - Migration: Flyway
-  - Key-value store: Redis
-  - Messaging: Kafka | RabbitMQ
-  - Storage: Filesystem | MinIO
-  - IAM: Spring Security (JWT) | Keycloak
-  - Full-text search: Elasticsearch
-  - Scheduler: Spring `@Scheduled` | Quartz
-  - Payment gateway integration: Simulator | Stripe
-  - Email: Spring Mail | Sendgrid
-- Microservices Patterns:
-  - Saga orchestration
-  - Outbox pattern
-  - Reliability (Resilience4j)
-- Observability (optional, app-stack driven)
-  - Spring Boot Actuator
-  - Logging:
-    - Framework: Logback
-    - Stack: Loki + Promtail
-  - Metrics: Prometheus
-  - Tracing: Zipkin
-  - Visualization: Grafana
-- Productivity
-  - Lombok
-  - MapStruct
-- Deployment
-  - Docker Compose
-  - Kubernetes
-    - Native manifests, or
-    - Helm chart templates
-
-### Frontend
-
-- Framework
-  - Next.js 16.x (React 19.x)
-  - TypeScript
-- UI & Styling
-  - Tailwind CSS
-  - shadcn/ui and Radix UI primitives
-- State & Forms
-  - Zustand
-  - React Hook Form + Zod
 
 ---
 
