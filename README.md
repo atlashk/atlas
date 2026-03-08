@@ -23,21 +23,6 @@
 [![Axios](https://img.shields.io/badge/Axios-5A29E4?logo=axios&logoColor=white)](https://axios-http.com/)
 [![Stripe](https://img.shields.io/badge/Stripe-635BFF?logo=stripe&logoColor=white)](https://stripe.com/)
 
-## Table of Contents
-
-- Project Overview
-- Quick Start (Local)
-- Architecture
-- Services
-- App Stack
-- Project Structure
-- Technology Stack
-- Troubleshooting
-- Contributing
-- License
-
----
-
 ## Project Overview
 
 Atlas is a microservices-based e-commerce platform showcasing **DDD + Hexagonal Architecture** and a configurable infrastructure stack for local and containerized environments.
