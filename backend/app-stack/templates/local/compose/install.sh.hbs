@@ -192,6 +192,9 @@ trap print_total_time EXIT
 
 main() {
   parse_args "$@"
+  if [[ "$APP_STACK" == "local.debug" ]]; then
+    SKIP_BUILD=true
+  fi
   check_prerequisites
 
   # Build services

@@ -11,6 +11,12 @@ messaging: kafka
 migration: flyway
 notification:
   email: spring
+observability:
+  logging:
+    stack: none
+    framework: logback
+  metrics: none
+  tracing: none
 persistence: jpa
 redis: standalone
 scheduler: quartz
