@@ -227,7 +227,7 @@ Login credentials: `admin` / `Atlas@123456`
 | Catalog Service | Product catalog and admin operations | http://localhost:8082 |
 | Inventory Service | Stock management | http://localhost:8083 |
 | Order Service | Checkout and saga orchestration | http://localhost:8084 |
-| Payment Service | Payment processing and simulation/webhooks | http://localhost:8085 |
+| Payment Service | Payment processing | http://localhost:8085 |
 | Keycloak | Identity provider (OIDC) for authentication | http://localhost:8180 |
 | Elasticsearch | Search and analytics engine | http://localhost:9200 |
 | MinIO | S3-compatible object storage (assets/uploads) | http://localhost:9000 |
