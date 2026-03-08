@@ -154,8 +154,9 @@ cd backend
 This generates `backend/dist/` from templates and then runs the generated install script.
 
 Common flags:
-- `--skip-build`: skips backend and Docker image builds.
-- `--debug-template`: generates `backend/dist/` only, does not execute install.
+- `--app-stack=...`: app stack name (default: `local.compose`). See **App Stack** section for details.
+- `--skip-build`: skips building artifacts and Docker images.
+- `--debug-template`: generates `backend/dist/` only, does not execute installation.
 
 Other examples:
 
@@ -260,47 +261,11 @@ Default credentials: `atlas` / `Atlas@123456`
 
 ### App Stack
 
-Atlas provides an **app-stack configuration mechanism** that enables application and infrastructure technologies to be switched by simply changing values in a YAML configuration file.
+Atlas provides an **app-stack configuration mechanism**: a named configuration profile that controls:
 
-| App stack | Target | How to run |
-| --- | --- | --- |
-| `local.compose` | Docker Compose (default) | `./install.sh` |
-| `local.debug` | Docker Compose (debug-friendly templates) | `./install.sh --app-stack=local.debug` |
-| `local.k8s.native` | Kubernetes manifests | `./install.sh --app-stack=local.k8s.native` |
-| `local.k8s.helm` | Helm chart templates | `./install.sh --app-stack=local.k8s.helm` |
+1. Which **application and infrastructure technologies** are used (datasource, messaging, storage, observability, CSV library, etc.). It is defined in an YAML configuration file under `backend/app-stack/config/` (for example: `app-stack.local.compose.yml`).
 
-How it works:
-
-```mermaid
-flowchart TB
-  CFG["app-stack config YAML<br/>backend/app-stack/config/app-stack.*.yml"]
-
-  subgraph Installation["Installation"]
-    INST_TPL["Find Handlebars templates"]
-    INST_GEN["Generate manifests into backend/dist directory"]
-    INST_BUILD["Build artifacts and Docker images"]
-    INST_DEPLOY["Deploy (Docker compose, Kubernetes, etc.)"]
-
-    INST_TPL --> INST_GEN
-    INST_GEN --> INST_BUILD
-    INST_BUILD --> INST_DEPLOY
-  end
-
-  subgraph Build["Gradle build"]
-    GRADLE["Load config into ext.appStack variable"]
-    SELECT["Select implementations based on ext.appStack value"]
-    ARTIFACTS["Build artifacts"]
-
-    GRADLE --> SELECT
-    SELECT --> ARTIFACTS
-  end
-
-  CFG --> GRADLE
-  CFG --> INST_TPL
-  INST_BUILD --> GRADLE
-```
-
-#### App-Stack Infrastructure Options
+List of options:
 
 | Capability | Options |
 |---|---|
@@ -325,6 +290,48 @@ flowchart TB
 | `service-discovery` | `eureka` \| `kubernetes` |
 | `storage` | `minio` \| `filesystem` |
 | `template` | `freemarker` \| `thymeleaf` |
+
+2. Which **deployment type** (Docker Compose, Kubernetes, Helm, etc.). It is defined in a folder under `backend/app-stack/templates/` (for example: `local/compose`).
+
+Built-in app stacks:
+
+| App stack | Deployment Type | How to run |
+| --- | --- | --- |
+| `local.compose` | Docker Compose (default) | `./install.sh` |
+| `local.debug` | Docker Compose (debug-friendly templates) | `./install.sh --app-stack=local.debug` |
+| `local.k8s.native` | Kubernetes native manifests | `./install.sh --app-stack=local.k8s.native` |
+| `local.k8s.helm` | Kubernetes using Helm chart | `./install.sh --app-stack=local.k8s.helm` |
+
+How it works:
+
+```mermaid
+flowchart TB
+  CFG["app-stack config YAML<br/>backend/app-stack/config/app-stack.*.yml"]
+
+  subgraph Installation["Installation"]
+    INST_TPL["Find Handlebars templates"]
+    INST_GEN["Generate manifests into backend/dist folder"]
+    INST_BUILD["Build artifacts and Docker images"]
+    INST_DEPLOY["Deploy (Docker compose, Kubernetes, etc.)"]
+
+    INST_TPL --> INST_GEN
+    INST_GEN --> INST_BUILD
+    INST_BUILD --> INST_DEPLOY
+  end
+
+  subgraph Build["Gradle build"]
+    GRADLE["Load config into ext.appStack variable"]
+    SELECT["Select implementations based on ext.appStack value"]
+    ARTIFACTS["Build artifacts"]
+
+    GRADLE --> SELECT
+    SELECT --> ARTIFACTS
+  end
+
+  CFG --> GRADLE
+  CFG --> INST_TPL
+  INST_BUILD --> GRADLE
+```
 
 ### Checkout Flow
 
