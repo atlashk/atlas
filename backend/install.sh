@@ -12,13 +12,17 @@ readonly GENERATOR_DIR="$BACKEND_DIR/app-stack/generator"
 readonly TEMPLATES_DIR="$BACKEND_DIR/app-stack/templates"
 readonly DIST_DIR="$BACKEND_DIR/dist"
 
+APP_STACK="local.compose"
+SKIP_BUILD=false
+DEBUG_TEMPLATE=false
+
 # =============================================================================
 # UTILITIES
 # =============================================================================
 
 info() { printf "[INFO] %s\n" "$*"; }
 warn() { printf "[WARN] %s\n" "$*" >&2; }
-die()  { printf "[ERROR] %s\n" "$*" >&2; exit 1; }
+error()  { printf "[ERROR] %s\n" "$*" >&2; exit 1; }
 
 command_exists() { command -v "$1" >/dev/null 2>&1; }
 
@@ -30,12 +34,11 @@ show_usage() {
   cat <<EOF
 Usage: $0 [OPTIONS]
 
-Atlas deployment orchestrator - generates and executes deployment scripts
+Atlas installation orchestrator - generates and executes installation scripts
 
 Options:
   --app-stack=<name>    Pick config/app-stack.<name>.yml (default: local.compose)
   --skip-build          Skip backend and Docker image builds
-  --infra-only          Deploy only infrastructure (implies --skip-build)
   --debug-template      Generate templates only, skip install execution
   -h, --help            Show this help message
 
@@ -53,7 +56,7 @@ EOF
 # =============================================================================
 
 ensure_generator_deps() {
-  command_exists node || die "Node.js is required to render templates. Please install Node.js."
+  command_exists node || error "Node.js is required to render templates. Please install Node.js."
 
   # Check if handlebars is available
   if (cd "$GENERATOR_DIR" && node -e "require('handlebars')" &>/dev/null); then
@@ -61,33 +64,14 @@ ensure_generator_deps() {
   fi
 
   warn "Missing Node package 'handlebars' required by generator.mjs."
-  command_exists npm || die "npm is required to install dependencies. Please install npm."
+  command_exists npm || error "npm is required to install dependencies. Please install npm."
 
   info "Installing 'handlebars' in generator directory..."
   (
     cd "$GENERATOR_DIR" || exit 1
     [[ -f package.json ]] || { info "Initializing npm in $GENERATOR_DIR"; npm init -y &>/dev/null || true; }
-    npm install handlebars --save || die "Failed to install 'handlebars'"
+    npm install handlebars --save || error "Failed to install 'handlebars'"
   )
-}
-
-# =============================================================================
-# CONFIG PARSING
-# =============================================================================
-
-read_deployment_from_config() {
-  local config_file="$1"
-  [[ -f "$config_file" ]] || die "Config file not found: $config_file"
-
-  local deployment
-  deployment=$(grep '^deployment:' "$config_file" | sed 's/deployment:[[:space:]]*//' | tr -d '[:space:]')
-
-  if [[ -n "$deployment" ]]; then
-    echo "$deployment"
-  else
-    warn "No deployment field found in $config_file, defaulting to local.compose"
-    echo "local.compose"
-  fi
 }
 
 # =============================================================================
@@ -119,28 +103,23 @@ normalize_line_endings() {
 # =============================================================================
 
 resolve_template_path() {
-  local deployment="$1"
-
-  case "$deployment" in
-    local-debug)      echo "local/compose" ;;
-    local-compose)    echo "local/compose" ;;
-    local-k8s-native) echo "local/k8s/native" ;;
-    *)                die "Unsupported deployment type: $deployment" ;;
+  case "$APP_STACK" in
+    local.debug)      echo "local/compose" ;;
+    local.compose)    echo "local/compose" ;;
+    local.k8s.native) echo "local/k8s/native" ;;
+    local.k8s.helm)   echo "local/k8s/helm" ;;
+    *)                error "Could not resolve template path for app stack: $APP_STACK" ;;
   esac
 }
 
 generate_templates() {
-  local deployment="$1"
-  local infra_only="$2"
-  local app_stack="$3"
-
   ensure_generator_deps
 
   local template_rel_path
-  template_rel_path=$(resolve_template_path "$deployment")
+  template_rel_path=$(resolve_template_path)
   local template_dir="$TEMPLATES_DIR/$template_rel_path"
 
-  [[ -d "$template_dir" ]] || die "Templates directory not found: $template_dir"
+  [[ -d "$template_dir" ]] || error "Templates directory not found: $template_dir"
 
   info "Generating dist files from templates..."
   (
@@ -148,13 +127,12 @@ generate_templates() {
     node generator.mjs \
       --dir "../templates/$template_rel_path" \
       --out-dir "../../dist" \
-      --app-stack "$app_stack" \
-      --infra-only "$infra_only"
+      --app-stack "$APP_STACK"
   )
 }
 
 # =============================================================================
-# DEPLOYMENT
+# Installation
 # =============================================================================
 
 execute_install_script() {
@@ -175,11 +153,6 @@ execute_install_script() {
 # =============================================================================
 
 parse_arguments() {
-  APP_STACK="local.compose"
-  SKIP_BUILD=false
-  INFRA_ONLY=false
-  DEBUG_TEMPLATE=false
-
   while [[ $# -gt 0 ]]; do
     case "$1" in
       -h|--help)
@@ -187,16 +160,11 @@ parse_arguments() {
         ;;
       --app-stack=*)
         APP_STACK="${1#--app-stack=}"
-        [[ -n "$APP_STACK" ]] || die "Missing value for --app-stack"
+        [[ -n "$APP_STACK" ]] || error "Missing value for --app-stack"
         shift
         ;;
       --app-stack)
-        die "Invalid usage: use --app-stack=<stack-name>"
-        ;;
-      --infra-only)
-        INFRA_ONLY=true
-        SKIP_BUILD=true
-        shift
+        error "Invalid usage: use --app-stack=<stack-name>"
         ;;
       --skip-build)
         SKIP_BUILD=true
@@ -207,10 +175,10 @@ parse_arguments() {
         shift
         ;;
       -*)
-        die "Unsupported option: $1"
+        error "Unsupported option: $1"
         ;;
       *)
-        die "Unsupported argument: $1"
+        error "Unsupported argument: $1"
         ;;
     esac
   done
@@ -232,23 +200,18 @@ main() {
 
   local config_file="$CONFIG_DIR/app-stack.${APP_STACK}.yml"
 
-  info "Starting Atlas deployment for app-stack: $APP_STACK"
-
   # Validate config file
   if [[ ! -f "$config_file" ]]; then
-    die "Configuration file not found: $config_file$(echo; list_available_configs)"
+    error "Configuration file not found: $config_file$(echo; list_available_configs)"
   fi
+
+  info "Starting Atlas installation for app-stack: $APP_STACK"
 
   info "Reading configuration from: $config_file"
 
-  # Read deployment type
-  local deployment
-  deployment=$(read_deployment_from_config "$config_file")
-  info "Deployment type: $deployment"
-
   # Generate templates
   reset_dist_dir
-  generate_templates "$deployment" "$INFRA_ONLY" "$APP_STACK"
+  generate_templates
   info "Generated files are available in: $DIST_DIR"
 
   # Normalize line endings

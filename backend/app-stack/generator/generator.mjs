@@ -326,11 +326,9 @@ function shouldSkipFileByPath(filePath, context) {
     }
   }
 
-  // Parse additional flags for template context
-  const infraOnly = args['infra-only'] === 'true' ? true : false;
-
-  // App stack name (e.g., dev, local.compose, local.k8s.native)
+  // App stack name
   const appStack = args['app-stack'] || '';
+  const infraOnly = appStack === 'local.debug';
 
   // Build template context with stack config + flags
   const getStackValue = createStackAccessor(stack);
@@ -338,8 +336,8 @@ function shouldSkipFileByPath(filePath, context) {
     stack,
     env: process.env,
     dotenv,
-    infraOnly,
     appStack,
+    infraOnly,
     getStackValue
   };
 

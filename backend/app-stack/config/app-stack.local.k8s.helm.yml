@@ -1,4 +1,3 @@
-deployment: local-k8s-helm
 datasource: mysql
 file:
   csv: opencsv

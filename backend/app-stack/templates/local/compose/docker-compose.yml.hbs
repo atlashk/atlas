@@ -280,6 +280,7 @@ services:
     command: -config.file=/etc/promtail/config.yml
     volumes:
       - ./files/promtail/config.yml:/etc/promtail/config.yml
+      {{#unless infraOnly}}
       - eureka-server-log:/var/log/eureka-server
       - identity-service-log:/var/log/identity-service
       - catalog-service-log:/var/log/catalog-service
@@ -287,6 +288,7 @@ services:
       - order-service-log:/var/log/order-service
       - payment-service-log:/var/log/payment-service
       - api-gateway-log:/var/log/api-gateway
+      {{/unless}}
     depends_on:
       - loki
     healthcheck:

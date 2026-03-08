@@ -1,4 +1,3 @@
-deployment: local-k8s-native
 datasource: mysql
 file:
   csv: opencsv

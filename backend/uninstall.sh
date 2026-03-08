@@ -9,7 +9,7 @@ readonly UNINSTALL_SCRIPT="$DIST_DIR/uninstall.sh"
 REMOVE_IMAGES=false
 
 info() { printf "[INFO] %s\n" "$*"; }
-die()  { printf "[ERROR] %s\n" "$*" >&2; exit 1; }
+error() { printf "[ERROR] %s\n" "$*" >&2; exit 1; }
 
 usage() {
     cat <<EOF
@@ -44,7 +44,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-[[ -f "$UNINSTALL_SCRIPT" ]] || die "Uninstall script not found: $UNINSTALL_SCRIPT\nPlease run ./install.sh first to generate deployment scripts"
+[[ -f "$UNINSTALL_SCRIPT" ]] || error "Uninstall script not found: $UNINSTALL_SCRIPT\nPlease run ./install.sh first."
 
 info "Executing uninstall script: $UNINSTALL_SCRIPT"
 info "Remove application images: $REMOVE_IMAGES"

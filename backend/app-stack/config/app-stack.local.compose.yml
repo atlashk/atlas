@@ -1,4 +1,3 @@
-deployment: local-compose
 datasource: mysql
 file:
   csv: opencsv

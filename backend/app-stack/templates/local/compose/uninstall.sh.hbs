@@ -48,7 +48,7 @@ parse_args() {
         exit 0
         ;;
       *)
-        die "Unknown parameter: $arg"
+        error "Unknown parameter: $arg"
         ;;
     esac
   done
@@ -59,7 +59,7 @@ parse_args() {
 # =============================================================================
 
 check_docker() {
-  docker info >/dev/null 2>&1 || die "Docker is not running"
+  docker info >/dev/null 2>&1 || error "Docker is not running"
   info "Docker is running"
 }
 
@@ -70,7 +70,7 @@ check_docker_compose() {
   elif docker compose version >/dev/null 2>&1; then
     DOCKER_COMPOSE_CMD="docker compose"
   else
-    die "Docker Compose not found"
+    error "Docker Compose not found"
   fi
 
   info "Using: $DOCKER_COMPOSE_CMD"
