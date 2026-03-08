@@ -149,7 +149,16 @@ services:
       - start-dev
       - --import-realm
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9000/health/ready || exit 1"]
+      test:
+        - "CMD-SHELL"
+        - |
+          exec 3<>/dev/tcp/127.0.0.1/9000 || exit 1;
+          echo -e "GET /health/ready HTTP/1.0\r\nHost: localhost\r\n\r\n" >&3;
+          if timeout 3 cat <&3 | grep -q "\"status\": \"UP\""; then
+            exit 0
+          else
+            exit 1
+          fi
       interval: 30s
       timeout: 5s
       retries: 3
@@ -181,7 +190,7 @@ services:
     volumes:
       - elasticsearch-data:/usr/share/elasticsearch/data
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS --max-time 5 -u elastic:${ELASTIC_PASSWORD} http://127.0.0.1:9200/_cluster/health?wait_for_status=yellow&timeout=1s > /dev/null || exit 1]
+      test: ["CMD-SHELL", "curl -fsS --max-time 5 -u elastic:${ELASTIC_PASSWORD} http://127.0.0.1:9200/_cluster/health?wait_for_status=yellow&timeout=1s > /dev/null || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 9
@@ -198,7 +207,7 @@ services:
       - "9000:9000"
       - "9001:9001"
     environment:
-      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-atlas}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-Atlas@123456}
     volumes:
       - minio-data:/data

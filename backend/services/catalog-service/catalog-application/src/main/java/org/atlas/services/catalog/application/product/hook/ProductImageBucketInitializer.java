@@ -20,6 +20,7 @@ public class ProductImageBucketInitializer {
   public void initialize(ApplicationReadyEvent event) {
     try {
       storageService.createBucket(ProductStorageConstant.PRODUCT_IMAGE_BUCKET);
+      log.info("The bucket of product image has been created.");
     } catch (Exception e) {
       // Fail-fast
       log.error("Failed to create the bucket of product image: {}", e.getMessage(), e);
