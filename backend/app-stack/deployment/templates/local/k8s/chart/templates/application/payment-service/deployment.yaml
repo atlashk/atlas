@@ -22,7 +22,7 @@ spec:
       serviceAccountName: {{ .Values.global.serviceAccount.name }}
       containers:
         - name: payment-service
-          image: "{{- if .Values.global.image.registry -}}{{ .Values.global.image.registry }}/{{- end -}}{{ .Values.paymentSvc.image.repository }}:{{ .Values.paymentSvc.image.tag }}"
+          image: "{{ if .Values.global.image.registry -}}{{ .Values.global.image.registry }}/{{ end -}}{{ .Values.paymentSvc.image.repository }}:{{ .Values.paymentSvc.image.tag }}"
           imagePullPolicy: {{ .Values.global.image.pullPolicy }}
           ports:
             - name: http

@@ -22,7 +22,7 @@ spec:
       serviceAccountName: {{ .Values.global.serviceAccount.name }}
       containers:
         - name: api-gateway
-          image: "{{- if .Values.global.image.registry -}}{{ .Values.global.image.registry }}/{{- end -}}{{ .Values.apiGateway.image.repository }}:{{ .Values.apiGateway.image.tag }}"
+          image: "{{ if .Values.global.image.registry -}}{{ .Values.global.image.registry }}/{{ end -}}{{ .Values.apiGateway.image.repository }}:{{ .Values.apiGateway.image.tag }}"
           imagePullPolicy: Never
           ports:
             - name: http
