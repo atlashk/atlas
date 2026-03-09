@@ -34,7 +34,7 @@ spec:
                 fieldRef:
                   fieldPath: spec.nodeName
           ports:
-            - name: http-metrics
+            - name: http
               containerPort: 9080
           # No need startupProbe because Promtail is fast to start
           livenessProbe:

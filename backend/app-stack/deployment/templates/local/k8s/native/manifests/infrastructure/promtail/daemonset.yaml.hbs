@@ -24,13 +24,13 @@ spec:
           args:
             - -config.file=/etc/promtail/config.yml
           env:
-            # Make node name available as environment variable
+            # Make node name available as environment variable for labeling logs with the node they came from
             - name: HOSTNAME
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
           ports:
-            - name: http-metrics
+            - name: http
               containerPort: 9080
           # No need startupProbe because Promtail is fast to start
           livenessProbe:
@@ -58,6 +58,8 @@ spec:
             # Mount configuration from ConfigMap
             - name: config
               mountPath: /etc/promtail
+            - name: positions
+              mountPath: /run/promtail
             # Mount host's /var/log to read container logs
             - name: varlog
               mountPath: /var/log
@@ -71,6 +73,8 @@ spec:
         - name: config
           configMap:
             name: promtail
+        - name: positions
+          emptyDir: {}
         # Host path volumes to access log files
         - name: varlog
           hostPath:
