@@ -44,7 +44,7 @@ Options:
 
 Examples:
   $0                                # Deploy with local.compose config
-  $0 --app-stack=local.k8s.native   # Deploy with local.k8s.native config
+  $0 --app-stack=local.k8s          # Deploy with local.k8s config
   $0 --skip-build                   # Deploy without rebuilding
   $0 --debug-template               # Generate templates only
 EOF
@@ -104,10 +104,9 @@ normalize_line_endings() {
 
 resolve_template_path() {
   case "$APP_STACK" in
-    local.dev)        echo "local/compose" ;;
     local.compose)    echo "local/compose" ;;
-    local.k8s.native) echo "local/k8s/native" ;;
-    local.k8s.helm)   echo "local/k8s/helm" ;;
+    local.dev)        echo "local/compose" ;;
+    local.k8s)        echo "local/k8s" ;;
     *)                error "Could not resolve template path for app stack: $APP_STACK" ;;
   esac
 }
@@ -137,8 +136,6 @@ generate_templates() {
 
 execute_install_script() {
   local install_script="$DIST_DIR/install.sh"
-  [[ -f "$install_script" ]] || install_script="$DIST_DIR/native/install.sh"
-
   if [[ -f "$install_script" ]]; then
     info "Executing install script: $install_script"
     chmod +x "$install_script"

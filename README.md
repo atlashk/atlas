@@ -75,7 +75,7 @@ flowchart LR
 - **Microservices Patterns**: Saga orchestration, Outbox pattern, Resilience4j
 - **Observability**: Actuator, Logback, Loki + Promtail, Prometheus, Zipkin, Grafana
 - **Productivity**: Lombok, MapStruct
-- **Deployment**: Docker Compose, Kubernetes (native manifests or Helm)
+- **Deployment**: Docker Compose, Kubernetes
 
 ### Frontend
 
@@ -149,7 +149,7 @@ Other examples:
 ```bash
 cd backend
 ./install.sh --app-stack=local.compose
-./install.sh --app-stack=local.k8s.native --debug-template
+./install.sh --app-stack=local.k8s --debug-template
 ./install.sh --skip-build
 ```
 
@@ -278,7 +278,7 @@ List of options for each capability:
 | `storage` | `minio` \| `filesystem` |
 | `template` | `freemarker` \| `thymeleaf` |
 
-2. Which **deployment type** is targeted (Docker Compose, Kubernetes, Helm, etc.). This is driven by [Handlebars](https://handlebarsjs.com/) **templates** under `backend/app-stack/deployment/templates/` (for example: `backend/app-stack/deployment/templates/local/compose/`).
+2. Which **deployment type** is targeted (Docker Compose, Kubernetes, etc.). This is driven by [Handlebars](https://handlebarsjs.com/) **templates** under `backend/app-stack/deployment/templates/` (for example: `backend/app-stack/deployment/templates/local/compose/`).
 
 The followings are built-in app stacks:
 
@@ -286,8 +286,7 @@ The followings are built-in app stacks:
 | --- | --- | --- |
 | `local.compose` | Docker Compose (default) | `./install.sh` |
 | `local.dev` | Docker Compose (without microservices, useful for development in IDE) | `./install.sh --app-stack=local.dev` |
-| `local.k8s.native` | Kubernetes native manifests | `./install.sh --app-stack=local.k8s.native` |
-| `local.k8s.helm` | Kubernetes using Helm chart | `./install.sh --app-stack=local.k8s.helm` |
+| `local.k8s` | Kubernetes using Helm chart | `./install.sh --app-stack=local.k8s` |
 
 So, how does it work?
 

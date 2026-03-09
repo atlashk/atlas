@@ -1,0 +1,19 @@
+{{- if eq .Values.appStack.datasource "postgres" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ lower $.Release.Name }}-postgres
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/instance: {{ lower $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  clusterIP: None
+  selector:
+    app: postgres
+  ports:
+    - name: postgres
+      port: {{ .Values.postgres.service.ports.postgres }}
+      targetPort: postgres
+{{- end }}

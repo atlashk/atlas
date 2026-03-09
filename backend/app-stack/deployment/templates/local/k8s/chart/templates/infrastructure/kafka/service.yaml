@@ -1,0 +1,29 @@
+{{- if eq .Values.appStack.messaging "kafka" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ lower $.Release.Name }}-kafka
+  labels:
+    app.kubernetes.io/name: kafka
+    app.kubernetes.io/instance: {{ lower $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: kafka
+    app.kubernetes.io/instance: {{ lower $.Release.Name }}
+  ports:
+    - name: kafka
+      port: {{ .Values.kafka.service.ports.kafka }}
+      targetPort: kafka
+    - name: kafka-internal
+      port: {{ .Values.kafka.service.ports.kafkaInternal }}
+      targetPort: kafka-internal
+    - name: controller
+      port: {{ .Values.kafka.service.ports.controller }}
+      targetPort: controller
+    - name: jmx
+      port: {{ .Values.kafka.service.ports.jmx }}
+      targetPort: jmx
+{{- end }}

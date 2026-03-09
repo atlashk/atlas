@@ -1,0 +1,32 @@
+{{- if eq (include "hasGrafana" .) "true" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ lower $.Release.Name }}-grafana-provisioning
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: {{ lower $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+data:
+  datasources.yml: |
+{{ tpl (.Files.Get "files/grafana/provisioning/datasources/datasources.yml.tpl") . | indent 4 }}
+
+  dashboards.yml: |
+{{ .Files.Get "files/grafana/provisioning/dashboards/dashboards.yml" | indent 4 }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: {{ lower $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+data:
+{{- range $path, $_ := .Files.Glob "files/grafana/dashboards/*.json" }}
+    {{ base $path }}: |
+    {{ $.Files.Get $path | indent 4 }}
+{{- end }}
+{{- end }}

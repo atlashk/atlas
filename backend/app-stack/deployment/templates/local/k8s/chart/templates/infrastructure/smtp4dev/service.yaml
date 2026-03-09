@@ -1,0 +1,23 @@
+{{- if eq .Values.appStack.notification.email "spring" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ lower $.Release.Name }}-smtp4dev
+  labels:
+    app.kubernetes.io/name: smtp4dev
+    app.kubernetes.io/instance: {{ lower $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  type: {{ .Values.global.service.type }}
+  selector:
+    app.kubernetes.io/name: smtp4dev
+    app.kubernetes.io/instance: {{ lower $.Release.Name }}
+  ports:
+    - name: http
+      port: {{ .Values.smtp4dev.service.ports.http }}
+      targetPort: http
+    - name: smtp
+      port: {{ .Values.smtp4dev.service.ports.smtp }}
+      targetPort: smtp
+{{- end }}

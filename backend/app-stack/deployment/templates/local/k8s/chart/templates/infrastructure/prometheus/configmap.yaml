@@ -1,0 +1,14 @@
+{{- if eq .Values.appStack.observability.metrics "prometheus" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ lower $.Release.Name }}-prometheus
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/instance: {{ lower $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+data:
+  config.yml: |
+{{ .Files.Get "files/prometheus/config.yml" | indent 4 }}
+{{- end }}

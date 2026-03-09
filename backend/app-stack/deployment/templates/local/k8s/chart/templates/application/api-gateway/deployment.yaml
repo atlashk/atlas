@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ lower $.Release.Name }}-api-gateway
+  labels:
+    app.kubernetes.io/name: api-gateway
+    app.kubernetes.io/instance: {{ lower $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  replicas: {{ .Values.global.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: api-gateway
+      app.kubernetes.io/instance: {{ lower $.Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: api-gateway
+        app.kubernetes.io/instance: {{ lower $.Release.Name }}
+    spec:
+      serviceAccountName: {{ .Values.global.serviceAccount.name }}
+      containers:
+        - name: api-gateway
+          image: "{{ .Values.global.image.registry }}/{{ .Values.apiGateway.image.repository }}:{{ .Values.apiGateway.image.tag }}"
+          imagePullPolicy: Never
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            {{- if eq .Values.appStack.kvStore "redis" }}
+            - name: REDIS_HOST
+              value: "redis"
+            - name: REDIS_PORT
+              value: {{ .Values.redis.service.ports.redis }}
+            {{- end }}
+            {{- if eq .Values.appStack.identity "jwt" }}
+            - name: JWK_SET_URI
+              value: "http://identity-service:{{ .Values.identitySvc.service.ports.http }}/.well-known/jwks.json"
+            {{- end }}
+            {{- if eq .Values.appStack.identity "keycloak" }}
+            - name: KEYCLOAK_BASE_URL
+              value: "http://keycloak:{{ .Values.keycloak.service.ports.http }}"
+            - name: KEYCLOAK_REALM
+              valueFrom:
+                configMapKeyRef:
+                  name: keycloak-config
+                  key: keycloak-realm
+            {{- end }}
+            {{- if eq .Values.appStack.observability.tracing "zipkin" }}
+            - name: ZIPKIN_ENDPOINT
+              value: "http://zipkin:{{ .Values.zipkin.service.ports.http }}/api/v2/spans"
+            {{- end }}
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            {{ toYaml .Values.apiGateway.resources | nindent 12 }}
+          volumeMounts:
+            - name: api-gateway-logs
+              mountPath: /var/log/api-gateway
+      volumes:
+        - name: api-gateway-logs
+          emptyDir: {} # Log volume changed to emptyDir for Promtail compatibility
+      terminationGracePeriodSeconds: 30
