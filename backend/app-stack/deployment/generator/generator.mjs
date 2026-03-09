@@ -311,7 +311,7 @@ function shouldSkipFileByPath(filePath, context) {
   
   if (args['app-stack']) {
     const appStackName = args['app-stack'];
-    const configPath = path.resolve(scriptDir, '..', 'config', `app-stack.${appStackName}.yml`);
+    const configPath = path.resolve(scriptDir, '../..', 'config', `app-stack.${appStackName}.yml`);
     if (fs.existsSync(configPath)) {
       stack = { ...stack, ...parseYaml(fs.readFileSync(configPath, 'utf8')) };
     } else {
