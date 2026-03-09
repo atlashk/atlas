@@ -38,12 +38,12 @@ spec:
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: mysql
+                  name: {{ lower $.Release.Name }}-mysql
                   key: user
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mysql
+                  name: {{ lower $.Release.Name }}-mysql
                   key: password
             {{- end }}
             {{- if eq .Values.appStack.datasource "postgres" }}
@@ -52,12 +52,12 @@ spec:
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: postgres
+                  name: {{ lower $.Release.Name }}-postgres
                   key: user
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres
+                  name: {{ lower $.Release.Name }}-postgres
                   key: password
             {{- end }}
             {{- if eq .Values.appStack.kvStore "redis" }}
@@ -78,12 +78,12 @@ spec:
             - name: RABBITMQ_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: rabbitmq
+                  name: {{ lower $.Release.Name }}-rabbitmq
                   key: user
             - name: RABBITMQ_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: rabbitmq
+                  name: {{ lower $.Release.Name }}-rabbitmq
                   key: password
             {{- end }}
             {{- if eq .Values.appStack.identity "keycloak" }}
@@ -92,27 +92,27 @@ spec:
             - name: KC_BOOTSTRAP_ADMIN_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: keycloak
+                  name: {{ lower $.Release.Name }}-keycloak
                   key: admin-username
             - name: KC_BOOTSTRAP_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: keycloak
+                  name: {{ lower $.Release.Name }}-keycloak
                   key: admin-password
             - name: KEYCLOAK_REALM
               valueFrom:
                 configMapKeyRef:
-                  name: keycloak-config
+                  name: {{ lower $.Release.Name }}-keycloak-config
                   key: keycloak-realm
             - name: KEYCLOAK_CLIENT_ID
               valueFrom:
                 configMapKeyRef:
-                  name: keycloak-config
+                  name: {{ lower $.Release.Name }}-keycloak-config
                   key: keycloak-client-id
             - name: KEYCLOAK_CLIENT_SECRET
               valueFrom:
                 configMapKeyRef:
-                  name: keycloak-config
+                  name: {{ lower $.Release.Name }}-keycloak-config
                   key: keycloak-client-secret
             {{- end }}
             {{- if eq .Values.appStack.observability.tracing "zipkin" }}

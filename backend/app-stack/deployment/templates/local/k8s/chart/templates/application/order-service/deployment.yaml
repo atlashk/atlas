@@ -34,12 +34,12 @@ spec:
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: mysql
+                  name: {{ lower $.Release.Name }}-mysql
                   key: user
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mysql
+                  name: {{ lower $.Release.Name }}-mysql
                   key: password
             {{- end }}
             {{- if eq .Values.appStack.datasource "postgres" }}
@@ -48,12 +48,12 @@ spec:
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: postgres
+                  name: {{ lower $.Release.Name }}-postgres
                   key: user
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres
+                  name: {{ lower $.Release.Name }}-postgres
                   key: password
             {{- end }}
             {{- if eq .Values.appStack.kvStore "redis" }}
@@ -74,12 +74,12 @@ spec:
             - name: RABBITMQ_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: rabbitmq
+                  name: {{ lower $.Release.Name }}-rabbitmq
                   key: user
             - name: RABBITMQ_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: rabbitmq
+                  name: {{ lower $.Release.Name }}-rabbitmq
                   key: password
             {{- end }}
             {{- if eq .Values.appStack.internal "grpc" }}

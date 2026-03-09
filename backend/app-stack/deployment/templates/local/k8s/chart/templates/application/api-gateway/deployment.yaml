@@ -44,7 +44,7 @@ spec:
             - name: KEYCLOAK_REALM
               valueFrom:
                 configMapKeyRef:
-                  name: keycloak-config
+                  name: {{ lower $.Release.Name }}-keycloak-config
                   key: keycloak-realm
             {{- end }}
             {{- if eq .Values.appStack.observability.tracing "zipkin" }}

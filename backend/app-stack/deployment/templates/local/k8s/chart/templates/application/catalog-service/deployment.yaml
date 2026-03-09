@@ -38,12 +38,12 @@ spec:
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: mysql
+                  name: {{ lower $.Release.Name }}-mysql
                   key: user
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mysql
+                  name: {{ lower $.Release.Name }}-mysql
                   key: password
             {{- end }}
             {{- if eq .Values.appStack.datasource "postgres" }}
@@ -52,12 +52,12 @@ spec:
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: postgres
+                  name: {{ lower $.Release.Name }}-postgres
                   key: user
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres
+                  name: {{ lower $.Release.Name }}-postgres
                   key: password
             {{- end }}
             {{- if eq .Values.appStack.kvStore "redis" }}
@@ -78,12 +78,12 @@ spec:
             - name: RABBITMQ_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: rabbitmq
+                  name: {{ lower $.Release.Name }}-rabbitmq
                   key: user
             - name: RABBITMQ_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: rabbitmq
+                  name: {{ lower $.Release.Name }}-rabbitmq
                   key: password
             {{- end }}
             {{- if eq .Values.appStack.fullTextSearch "elasticsearch" }}
@@ -96,7 +96,7 @@ spec:
             - name: ELASTICSEARCH_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: elasticsearch
+                  name: {{ lower $.Release.Name }}-elasticsearch
                   key: password
             {{- end }}
             {{- if eq .Values.appStack.storage "minio" }}
@@ -105,12 +105,12 @@ spec:
             - name: MINIO_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: minio
+                  name: {{ lower $.Release.Name }}-minio
                   key: root-user
             - name: MINIO_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: minio
+                  name: {{ lower $.Release.Name }}-minio
                   key: root-password
             {{- end }}
             {{- if eq .Values.appStack.observability.tracing "zipkin" }}

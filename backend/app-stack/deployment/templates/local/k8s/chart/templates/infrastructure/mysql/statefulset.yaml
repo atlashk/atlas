@@ -29,17 +29,17 @@ spec:
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mysql
+                  name: {{ lower $.Release.Name }}-mysql
                   key: root-password
             - name: MYSQL_USER
               valueFrom:
                 secretKeyRef:
-                  name: mysql
+                  name: {{ lower $.Release.Name }}-mysql
                   key: user
             - name: MYSQL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mysql
+                  name: {{ lower $.Release.Name }}-mysql
                   key: password
           args:
             - --default-authentication-plugin=mysql_native_password

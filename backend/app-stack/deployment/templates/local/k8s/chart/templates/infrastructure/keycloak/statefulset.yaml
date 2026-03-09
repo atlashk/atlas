@@ -36,12 +36,12 @@ spec:
             - name: KC_BOOTSTRAP_ADMIN_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: keycloak
+                  name: {{ lower $.Release.Name }}-keycloak
                   key: admin-username
             - name: KC_BOOTSTRAP_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: keycloak
+                  name: {{ lower $.Release.Name }}-keycloak
                   key: admin-password
             {{- if eq .Values.appStack.datasource "postgres" }}
             - name: KC_DB
@@ -51,12 +51,12 @@ spec:
             - name: KC_DB_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: postgres
+                  name: {{ lower $.Release.Name }}-postgres
                   key: user
             - name: KC_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres
+                  name: {{ lower $.Release.Name }}-postgres
                   key: password
             {{- end }}
             {{- if eq .Values.appStack.datasource "mysql" }}
@@ -67,12 +67,12 @@ spec:
             - name: KC_DB_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: mysql
+                  name: {{ lower $.Release.Name }}-mysql
                   key: user
             - name: KC_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mysql
+                  name: {{ lower $.Release.Name }}-mysql
                   key: password
             {{- end }}
             - name: KC_HEALTH_ENABLED

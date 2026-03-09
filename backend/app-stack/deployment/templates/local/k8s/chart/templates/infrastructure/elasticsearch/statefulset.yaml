@@ -29,7 +29,7 @@ spec:
             - name: ELASTIC_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: elasticsearch
+                  name: {{ lower $.Release.Name }}-elasticsearch
                   key: password
             - name: discovery.type
               value: "single-node"
