@@ -184,7 +184,8 @@ parse_arguments() {
 list_available_configs() {
   if [[ -d "$CONFIG_DIR" ]]; then
     info "Available configurations:"
-    find "$CONFIG_DIR" -name "app-stack.*.yml" -exec basename {} \; | sed 's/app-stack\.\(.*\)\.yml/  - \1/'
+    find "$CONFIG_DIR" -name "app-stack.*.yml" -exec basename {} \; | \
+      sed 's/app-stack\.\(.*\)\.yml/  - \1/' | sort
   fi
 }
 
