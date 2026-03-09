@@ -59,9 +59,10 @@ spec:
               cpu: "100m"
               memory: "128Mi"
           volumeMounts:
-            # Mount configuration from ConfigMap
             - name: config
               mountPath: /etc/promtail
+            - name: positions
+              mountPath: /run/promtail
             # Mount host's /var/log to read container logs
             - name: varlog
               mountPath: /var/log
@@ -71,11 +72,11 @@ spec:
               mountPath: /var/lib/docker/containers
               readOnly: true  # Read-only access for security
       volumes:
-        # Configuration volume from ConfigMap
         - name: config
           configMap:
             name: promtail
-        # Host path volumes to access log files
+        - name: positions
+          emptyDir: {}
         - name: varlog
           hostPath:
             path: /var/log

@@ -122,6 +122,7 @@ flowchart LR
 
 ### Prerequisites
 
+- Recommended resources: RAM 16GB, CPU 8 cores
 - Java 17+
 - Node.js (for frontend and deployment generator)
 - Docker Desktop with Docker Compose
