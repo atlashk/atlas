@@ -208,11 +208,11 @@ elasticsearch:
     tag: 8.19.11
   resources:
     requests:
-      cpu: "500m"
-      memory: "1Gi"
+      cpu: 500m
+      memory: 1Gi
     limits:
-      cpu: "1500m"
-      memory: "2Gi"
+      cpu: 1500m
+      memory: 2Gi
   secrets:
     password: *defaultPassword
   service:
