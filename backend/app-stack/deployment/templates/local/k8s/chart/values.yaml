@@ -451,11 +451,11 @@ identitySvc:
     tag: latest
   resources:
     requests:
-      cpu: "200m"
-      memory: "512Mi"
+      cpu: 200m
+      memory: 512Mi
     limits:
-      cpu: "500m"
-      memory: "1Gi"
+      cpu: 500m
+      memory: 1Gi
   service:
     ports:
       http: 8081
@@ -467,11 +467,11 @@ catalogSvc:
     tag: latest
   resources:
     requests:
-      cpu: "200m"
-      memory: "512Mi"
+      cpu: 200m
+      memory: 512Mi
     limits:
-      cpu: "500m"
-      memory: "1Gi"
+      cpu: 500m
+      memory: 1Gi
   service:
     ports:
       http: 8082
@@ -483,11 +483,11 @@ inventorySvc:
     tag: latest
   resources:
     requests:
-      cpu: "200m"
-      memory: "512Mi"
+      cpu: 200m
+      memory: 512Mi
     limits:
-      cpu: "500m"
-      memory: "1Gi"
+      cpu: 500m
+      memory: 1Gi
   service:
     ports:
       http: 8083
@@ -498,11 +498,11 @@ orderSvc:
     tag: latest
   resources:
     requests:
-      cpu: "200m"
-      memory: "512Mi"
+      cpu: 200m
+      memory: 512Mi
     limits:
-      cpu: "500m"
-      memory: "1Gi"
+      cpu: 500m
+      memory: 1Gi
   service:
     ports:
       http: 8084
@@ -513,11 +513,11 @@ paymentSvc:
     tag: latest
   resources:
     requests:
-      cpu: "200m"
-      memory: "512Mi"
+      cpu: 200m
+      memory: 512Mi
     limits:
-      cpu: "500m"
-      memory: "1Gi"
+      cpu: 500m
+      memory: 1Gi
   service:
     ports:
       http: 8085
@@ -528,11 +528,11 @@ apiGateway:
     tag: latest
   resources:
     requests:
-      cpu: "200m"
-      memory: "512Mi"
+      cpu: 200m
+      memory: 512Mi
     limits:
-      cpu: "500m"
-      memory: "1Gi"
+      cpu: 500m
+      memory: 1Gi
   service:
     ports:
       http: 8080
