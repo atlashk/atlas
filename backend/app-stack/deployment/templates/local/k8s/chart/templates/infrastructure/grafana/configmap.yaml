@@ -18,7 +18,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-dashboards
+  name: {{ lower $.Release.Name }}-grafana-dashboards
   labels:
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: {{ lower $.Release.Name }}

@@ -77,7 +77,7 @@ spec:
       volumes:
         - name: postgres-init
           configMap:
-            name: postgres
+            name: {{ lower $.Release.Name }}-postgres
             defaultMode: 0755
   volumeClaimTemplates:
     - metadata:

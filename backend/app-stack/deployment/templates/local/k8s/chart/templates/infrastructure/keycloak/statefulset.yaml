@@ -116,5 +116,5 @@ spec:
       volumes:
         - name: keycloak-import
           configMap:
-            name: keycloak-import
+            name: {{ lower $.Release.Name }}-keycloak-import
 {{- end }}

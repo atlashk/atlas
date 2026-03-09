@@ -66,7 +66,7 @@ spec:
       volumes:
         - name: prometheus-config
           configMap:
-            name: prometheus
+            name: {{ lower $.Release.Name }}-prometheus
   volumeClaimTemplates:
     - metadata:
         name: prometheus-data

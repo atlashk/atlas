@@ -82,7 +82,7 @@ spec:
       volumes:
         - name: rabbitmq-config
           configMap:
-            name: rabbitmq
+            name: {{ lower $.Release.Name }}-rabbitmq
   volumeClaimTemplates:
     - metadata:
         name: rabbitmq-data

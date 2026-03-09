@@ -77,7 +77,7 @@ spec:
             claimName: grafana-data
         - name: grafana-provisioning
           configMap:
-            name: grafana-provisioning
+            name: {{ lower $.Release.Name }}-grafana-provisioning
             items:
               - key: datasources.yml
                 path: datasources/datasources.yml
@@ -85,5 +85,5 @@ spec:
                 path: dashboards/dashboards.yml
         - name: grafana-dashboards
           configMap:
-            name: grafana-dashboards
+            name: {{ lower $.Release.Name }}-grafana-dashboards
 {{- end }}

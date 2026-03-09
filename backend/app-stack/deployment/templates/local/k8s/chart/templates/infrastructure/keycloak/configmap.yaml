@@ -16,7 +16,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: keycloak-import
+  name: {{ lower $.Release.Name }}-keycloak-import
   labels:
     app.kubernetes.io/name: keycloak
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
