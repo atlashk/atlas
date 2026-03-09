@@ -22,7 +22,7 @@ spec:
       serviceAccountName: {{ .Values.global.serviceAccount.name }}
       containers:
         - name: inventory-service
-          image: "{{ .Values.global.image.registry }}/{{ .Values.inventorySvc.image.repository }}:{{ .Values.inventorySvc.image.tag }}"
+          image: "{{- if .Values.global.image.registry -}}{{ .Values.global.image.registry }}/{{- end -}}{{ .Values.inventorySvc.image.repository }}:{{ .Values.inventorySvc.image.tag }}"
           imagePullPolicy: {{ .Values.global.image.pullPolicy }}
           ports:
             - name: http

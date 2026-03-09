@@ -22,7 +22,7 @@ spec:
       serviceAccountName: {{ .Values.global.serviceAccount.name }}
       containers:
         - name: identity-service
-          image: "{{ .Values.global.image.registry }}/{{ .Values.identitySvc.image.repository }}:{{ .Values.identitySvc.image.tag }}"
+          image: "{{- if .Values.global.image.registry -}}{{ .Values.global.image.registry }}/{{- end -}}{{ .Values.identitySvc.image.repository }}:{{ .Values.identitySvc.image.tag }}"
           imagePullPolicy: {{ .Values.global.image.pullPolicy }}
           ports:
             - name: http

@@ -22,7 +22,7 @@ spec:
       serviceAccountName: {{ .Values.global.serviceAccount.name }}
       containers:
         - name: order-service
-          image: "{{ .Values.global.image.registry }}/{{ .Values.orderSvc.image.repository }}:{{ .Values.orderSvc.image.tag }}"
+          image: "{{- if .Values.global.image.registry -}}{{ .Values.global.image.registry }}/{{- end -}}{{ .Values.orderSvc.image.repository }}:{{ .Values.orderSvc.image.tag }}"
           imagePullPolicy: {{ .Values.global.image.pullPolicy }}
           ports:
             - name: http
