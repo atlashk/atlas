@@ -49,6 +49,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: {{ .Values.promtail.serviceAccount }}
+    namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
   name: promtail
