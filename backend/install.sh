@@ -126,7 +126,7 @@ generate_templates() {
     cd "$GENERATOR_DIR" || exit 1
     node generator.mjs \
       --dir "../templates/$template_rel_path" \
-      --out-dir "../../../dist" \
+      --out-dir "$DIST_DIR" \
       --app-stack "$APP_STACK"
   )
 }
