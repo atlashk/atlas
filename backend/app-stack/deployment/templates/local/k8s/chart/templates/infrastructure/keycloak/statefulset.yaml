@@ -47,7 +47,7 @@ spec:
             - name: KC_DB
               value: "postgres"
             - name: KC_DB_URL
-              value: "jdbc:postgresql://postgres:{{ .Values.postgres.service.ports.postgres }}/db_keycloak"
+              value: "jdbc:postgresql://{{ lower $.Release.Name }}-postgres:{{ .Values.postgres.service.ports.postgres }}/db_keycloak"
             - name: KC_DB_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -63,7 +63,7 @@ spec:
             - name: KC_DB
               value: "mysql"
             - name: KC_DB_URL
-              value: "jdbc:mysql://mysql:{{ .Values.mysql.service.ports.mysql }}/db_keycloak?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
+              value: "jdbc:mysql://{{ lower $.Release.Name }}-mysql:{{ .Values.mysql.service.ports.mysql }}/db_keycloak?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
             - name: KC_DB_USERNAME
               valueFrom:
                 secretKeyRef:

@@ -34,7 +34,7 @@ spec:
           env:
             {{- if eq .Values.appStack.datasource "mysql" }}
             - name: DB_URL
-              value: "jdbc:mysql://mysql:{{ .Values.mysql.service.ports.mysql }}/db_catalog?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
+              value: "jdbc:mysql://{{ lower $.Release.Name }}-mysql:{{ .Values.mysql.service.ports.mysql }}/db_catalog?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -48,7 +48,7 @@ spec:
             {{- end }}
             {{- if eq .Values.appStack.datasource "postgres" }}
             - name: DB_URL
-              value: "jdbc:postgresql://postgres:{{ .Values.postgres.service.ports.postgres }}/db_catalog"
+              value: "jdbc:postgresql://{{ lower $.Release.Name }}-postgres:{{ .Values.postgres.service.ports.postgres }}/db_catalog"
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -62,17 +62,17 @@ spec:
             {{- end }}
             {{- if eq .Values.appStack.kvStore "redis" }}
             - name: REDIS_HOST
-              value: "redis"
+              value: "{{ lower $.Release.Name }}-redis"
             - name: REDIS_PORT
               value: {{ .Values.redis.service.ports.redis | quote }}
             {{- end }}
             {{- if eq .Values.appStack.messaging "kafka" }}
             - name: KAFKA_BOOTSTRAP_SERVERS
-              value: "kafka:{{ .Values.kafka.service.ports.kafkaInternal }}"
+              value: "{{ lower $.Release.Name }}-kafka:{{ .Values.kafka.service.ports.kafkaInternal }}"
             {{- end }}
             {{- if eq .Values.appStack.messaging "rabbitmq" }}
             - name: RABBITMQ_HOST
-              value: "rabbitmq"
+              value: "{{ lower $.Release.Name }}-rabbitmq"
             - name: RABBITMQ_PORT
               value: {{ .Values.rabbitmq.service.ports.amqp | quote }}
             - name: RABBITMQ_USERNAME
@@ -88,7 +88,7 @@ spec:
             {{- end }}
             {{- if eq .Values.appStack.fullTextSearch "elasticsearch" }}
             - name: ELASTICSEARCH_HOST
-              value: "elasticsearch"
+              value: "{{ lower $.Release.Name }}-elasticsearch"
             - name: ELASTICSEARCH_PORT
               value: {{ .Values.elasticsearch.service.ports.http | quote }}
             - name: ELASTICSEARCH_USERNAME
@@ -101,7 +101,7 @@ spec:
             {{- end }}
             {{- if eq .Values.appStack.storage "minio" }}
             - name: MINIO_ENDPOINT
-              value: "http://minio:{{ .Values.minio.service.ports.s3 }}"
+              value: "http://{{ lower $.Release.Name }}-minio:{{ .Values.minio.service.ports.s3 }}"
             - name: MINIO_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
@@ -115,7 +115,7 @@ spec:
             {{- end }}
             {{- if eq .Values.appStack.observability.tracing "zipkin" }}
             - name: ZIPKIN_ENDPOINT
-              value: "http://zipkin:{{ .Values.zipkin.service.ports.http }}/api/v2/spans"
+              value: "http://{{ lower $.Release.Name }}-zipkin:{{ .Values.zipkin.service.ports.http }}/api/v2/spans"
             {{- end }}
           startupProbe:
             httpGet:

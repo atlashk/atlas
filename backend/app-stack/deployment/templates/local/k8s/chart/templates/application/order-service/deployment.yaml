@@ -30,7 +30,7 @@ spec:
           env:
             {{- if eq .Values.appStack.datasource "mysql" }}
             - name: DB_URL
-              value: "jdbc:mysql://mysql:{{ .Values.mysql.service.ports.mysql }}/db_order?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
+              value: "jdbc:mysql://{{ lower $.Release.Name }}-mysql:{{ .Values.mysql.service.ports.mysql }}/db_order?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -44,7 +44,7 @@ spec:
             {{- end }}
             {{- if eq .Values.appStack.datasource "postgres" }}
             - name: DB_URL
-              value: "jdbc:postgresql://postgres:{{ .Values.postgres.service.ports.postgres }}/db_order"
+              value: "jdbc:postgresql://{{ lower $.Release.Name }}-postgres:{{ .Values.postgres.service.ports.postgres }}/db_order"
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -58,7 +58,7 @@ spec:
             {{- end }}
             {{- if eq .Values.appStack.kvStore "redis" }}
             - name: REDIS_HOST
-              value: "redis"
+              value: "{{ lower $.Release.Name }}-redis"
             - name: REDIS_PORT
               value: {{ .Values.redis.service.ports.redis | quote }}
             {{- end }}
@@ -68,7 +68,7 @@ spec:
             {{- end }}
             {{- if eq .Values.appStack.messaging "rabbitmq" }}
             - name: RABBITMQ_HOST
-              value: "rabbitmq"
+              value: "{{ lower $.Release.Name }}-rabbitmq"
             - name: RABBITMQ_PORT
               value: {{ .Values.rabbitmq.service.ports.amqp | quote }}
             - name: RABBITMQ_USERNAME
@@ -84,19 +84,19 @@ spec:
             {{- end }}
             {{- if eq .Values.appStack.internal "grpc" }}
             - name: API_CLIENT_GRPC_IDENTITY_SERVICE_ADDRESS
-              value: "static://identity-service:{{ .Values.identitySvc.service.ports.grpc }}"
+              value: "static://{{ lower $.Release.Name }}-identity-service:{{ .Values.identitySvc.service.ports.grpc }}"
             - name: API_CLIENT_GRPC_CATALOG_SERVICE_ADDRESS
-              value: "static://catalog-service:{{ .Values.catalogSvc.service.ports.grpc }}"
+              value: "static://{{ lower $.Release.Name }}-catalog-service:{{ .Values.catalogSvc.service.ports.grpc }}"
             {{- end }}
             {{- if eq .Values.appStack.internal "rest" }}
             - name: API_CLIENT_REST_IDENTITY_SERVICE_BASE_URL
-              value: "http://identity-service:{{ .Values.identitySvc.service.ports.http }}"
+              value: "http://{{ lower $.Release.Name }}-identity-service:{{ .Values.identitySvc.service.ports.http }}"
             - name: API_CLIENT_REST_CATALOG_SERVICE_BASE_URL
-              value: "http://catalog-service:{{ .Values.catalogSvc.service.ports.http }}"
+              value: "http://{{ lower $.Release.Name }}-catalog-service:{{ .Values.catalogSvc.service.ports.http }}"
             {{- end }}
             {{- if eq .Values.appStack.observability.tracing "zipkin" }}
             - name: ZIPKIN_ENDPOINT
-              value: "http://zipkin:{{ .Values.zipkin.service.ports.http }}/api/v2/spans"
+              value: "http://{{ lower $.Release.Name }}-zipkin:{{ .Values.zipkin.service.ports.http }}/api/v2/spans"
             {{- end }}
           startupProbe:
             httpGet:

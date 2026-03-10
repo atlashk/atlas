@@ -5,7 +5,7 @@ datasources:
   - name: Loki
     type: loki
     access: proxy
-    url: http://loki:3100
+    url: http://{{ lower $.Release.Name }}-loki:3100
     uid: DS_LOKI
     isDefault: true
     editable: true
@@ -17,7 +17,7 @@ datasources:
   - name: Prometheus
     type: prometheus
     access: proxy
-    url: http://prometheus:9090
+    url: http://{{ lower $.Release.Name }}-prometheus:9090
     uid: DS_PROMETHEUS
     editable: true
     jsonData:

@@ -10,5 +10,5 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 data:
   config.yml: |
-{{ .Files.Get "files/promtail/config.yml" | indent 4 }}
+{{ .Files.Get "files/promtail/config.yml.tpl" | indent 4 }}
 {{- end }}

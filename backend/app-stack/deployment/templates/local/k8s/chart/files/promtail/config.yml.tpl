@@ -10,7 +10,7 @@ positions:
 
 # Loki client configuration - where to send the collected logs
 clients:
-  - url: http://loki:3100/loki/api/v1/push
+  - url: http://{{ lower $.Release.Name }}-loki:3100/loki/api/v1/push
     external_labels:
       cluster: kubernetes
 

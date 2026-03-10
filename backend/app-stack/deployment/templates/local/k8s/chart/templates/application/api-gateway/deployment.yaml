@@ -30,17 +30,17 @@ spec:
           env:
             {{- if eq .Values.appStack.kvStore "redis" }}
             - name: REDIS_HOST
-              value: "redis"
+              value: "{{ lower $.Release.Name }}-redis"
             - name: REDIS_PORT
               value: {{ .Values.redis.service.ports.redis | quote }}
             {{- end }}
             {{- if eq .Values.appStack.identity "jwt" }}
             - name: JWK_SET_URI
-              value: "http://identity-service:{{ .Values.identitySvc.service.ports.http }}/.well-known/jwks.json"
+              value: "http://{{ lower $.Release.Name }}-identity-service:{{ .Values.identitySvc.service.ports.http }}/.well-known/jwks.json"
             {{- end }}
             {{- if eq .Values.appStack.identity "keycloak" }}
             - name: KEYCLOAK_BASE_URL
-              value: "http://keycloak:{{ .Values.keycloak.service.ports.http }}"
+              value: "http://{{ lower $.Release.Name }}-keycloak:{{ .Values.keycloak.service.ports.http }}"
             - name: KEYCLOAK_REALM
               valueFrom:
                 configMapKeyRef:
@@ -49,7 +49,7 @@ spec:
             {{- end }}
             {{- if eq .Values.appStack.observability.tracing "zipkin" }}
             - name: ZIPKIN_ENDPOINT
-              value: "http://zipkin:{{ .Values.zipkin.service.ports.http }}/api/v2/spans"
+              value: "http://{{ lower $.Release.Name }}-zipkin:{{ .Values.zipkin.service.ports.http }}/api/v2/spans"
             {{- end }}
           startupProbe:
             httpGet:
