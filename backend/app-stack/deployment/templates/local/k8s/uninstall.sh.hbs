@@ -6,8 +6,8 @@ set -euo pipefail
 # =============================================================================
 
 readonly PROJECT_NAME="{{dotenv.PROJECT_NAME}}"
-readonly RELEASE_NAME="$PROJECT_NAME"
-readonly NAMESPACE="{{dotenv.PROJECT_NAME}}"
+readonly NAMESPACE="$PROJECT_NAME"
+readonly RELEASE_NAME="{{dotenv.ENV_NAME}}"
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly CHART_DIR="$SCRIPT_DIR/chart"
 

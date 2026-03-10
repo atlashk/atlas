@@ -21,7 +21,7 @@ spec:
         app.kubernetes.io/name: promtail
         app.kubernetes.io/instance: {{ lower $.Release.Name }}
     spec:
-      serviceAccountName: promtail
+      serviceAccountName: {{ lower $.Release.Name }}-{{ .Values.promtail.serviceAccount }}
       containers:
         - name: promtail
           image: "{{ .Values.promtail.image.repository }}:{{ .Values.promtail.image.tag }}"

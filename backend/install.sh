@@ -8,9 +8,8 @@ set -euo pipefail
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly BACKEND_DIR="$SCRIPT_DIR"
 readonly CONFIG_DIR="$BACKEND_DIR/app-stack/config"
-readonly GENERATOR_DIR="$BACKEND_DIR/app-stack/deployment/generator"
-readonly TEMPLATES_DIR="$BACKEND_DIR/app-stack/deployment/templates"
 readonly DIST_DIR="$BACKEND_DIR/dist"
+readonly GENERATE_TEMPLATES_SCRIPT="$BACKEND_DIR/generate-templates.sh"
 
 APP_STACK="local.compose"
 SKIP_BUILD=false
@@ -52,86 +51,17 @@ EOF
 }
 
 # =============================================================================
-# PREREQUISITES
-# =============================================================================
-
-ensure_generator_deps() {
-  command_exists node || error "Node.js is required to render templates. Please install Node.js."
-
-  # Check if handlebars is available
-  if (cd "$GENERATOR_DIR" && node -e "require('handlebars')" &>/dev/null); then
-    return 0
-  fi
-
-  warn "Missing Node package 'handlebars' required by generator.mjs."
-  command_exists npm || error "npm is required to install dependencies. Please install npm."
-
-  info "Installing 'handlebars' in generator directory..."
-  (
-    cd "$GENERATOR_DIR" || exit 1
-    [[ -f package.json ]] || { info "Initializing npm in $GENERATOR_DIR"; npm init -y &>/dev/null || true; }
-    npm install handlebars --save || error "Failed to install 'handlebars'"
-  )
-}
-
-# =============================================================================
-# FILE OPERATIONS
-# =============================================================================
-
-reset_dist_dir() {
-  rm -rf "$DIST_DIR"
-  mkdir -p "$DIST_DIR"
-}
-
-normalize_line_endings() {
-  local dir="$1"
-  [[ -d "$dir" ]] || return 0
-
-  if command_exists dos2unix; then
-    find "$dir" -type f \( -name "*.sh" -o -name "*.sql" \) -exec dos2unix -q {} \;
-  else
-    while IFS= read -r -d '' f; do
-      awk '{ sub(/\r$/, ""); print }' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
-    done < <(find "$dir" -type f \( -name "*.sh" -o -name "*.sql" \) -print0)
-  fi
-
-  find "$dir" -type f -name "*.sh" -exec chmod +x {} \;
-}
-
-# =============================================================================
 # TEMPLATE GENERATION
 # =============================================================================
 
-resolve_template_path() {
-  case "$APP_STACK" in
-    local.compose)    echo "local/compose" ;;
-    local.dev)        echo "local/compose" ;;
-    local.k8s)        echo "local/k8s" ;;
-    *)                error "Could not resolve template path for app stack: $APP_STACK" ;;
-  esac
-}
-
 generate_templates() {
-  ensure_generator_deps
-
-  local template_rel_path
-  template_rel_path=$(resolve_template_path)
-  local template_dir="$TEMPLATES_DIR/$template_rel_path"
-
-  [[ -d "$template_dir" ]] || error "Templates directory not found: $template_dir"
-
-  info "Generating dist files from templates..."
-  (
-    cd "$GENERATOR_DIR" || exit 1
-    node generator.mjs \
-      --dir "../templates/$template_rel_path" \
-      --out-dir "$DIST_DIR" \
-      --app-stack "$APP_STACK"
-  )
+  [[ -f "$GENERATE_TEMPLATES_SCRIPT" ]] || error "Template generator script not found: $GENERATE_TEMPLATES_SCRIPT"
+  chmod +x "$GENERATE_TEMPLATES_SCRIPT" 2>/dev/null || true
+  "$GENERATE_TEMPLATES_SCRIPT" --app-stack="$APP_STACK" --out-dir="$DIST_DIR"
 }
 
 # =============================================================================
-# Installation
+# INSTALLATION
 # =============================================================================
 
 execute_install_script() {
@@ -208,12 +138,8 @@ main() {
   info "Reading configuration from: $config_file"
 
   # Generate templates
-  reset_dist_dir
   generate_templates
   info "Generated files are available in: $DIST_DIR"
-
-  # Normalize line endings
-  normalize_line_endings "$DIST_DIR"
 
   # Execute install script
   if [[ "$DEBUG_TEMPLATE" == true ]]; then
