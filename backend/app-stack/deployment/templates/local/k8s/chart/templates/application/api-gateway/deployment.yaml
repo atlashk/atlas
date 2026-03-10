@@ -19,7 +19,7 @@ spec:
         app.kubernetes.io/name: api-gateway
         app.kubernetes.io/instance: {{ lower $.Release.Name }}
     spec:
-      serviceAccountName: {{ .Values.global.serviceAccount.name }}
+      serviceAccountName: {{ lower $.Release.Name }}-{{ .Values.global.serviceAccount.name }}
       containers:
         - name: api-gateway
           image: "{{ if .Values.global.image.registry -}}{{ .Values.global.image.registry }}/{{ end -}}{{ .Release.Namespace }}/{{ .Values.apiGateway.image.repository }}:{{ .Values.apiGateway.image.tag }}"
@@ -28,6 +28,16 @@ spec:
             - name: http
               containerPort: 8080
           env:
+            - name: IDENTITY_SERVICE_URI
+              value: "http://{{ lower $.Release.Name }}-identity-service:{{ .Values.identitySvc.service.ports.http }}"
+            - name: CATALOG_SERVICE_URI
+              value: "http://{{ lower $.Release.Name }}-catalog-service:{{ .Values.catalogSvc.service.ports.http }}"
+            - name: INVENTORY_SERVICE_URI
+              value: "http://{{ lower $.Release.Name }}-inventory-service:{{ .Values.inventorySvc.service.ports.http }}"
+            - name: ORDER_SERVICE_URI
+              value: "http://{{ lower $.Release.Name }}-order-service:{{ .Values.orderSvc.service.ports.http }}"
+            - name: PAYMENT_SERVICE_URI
+              value: "http://{{ lower $.Release.Name }}-payment-service:{{ .Values.paymentSvc.service.ports.http }}"
             {{- if eq .Values.appStack.kvStore "redis" }}
             - name: REDIS_HOST
               value: "{{ lower $.Release.Name }}-redis"

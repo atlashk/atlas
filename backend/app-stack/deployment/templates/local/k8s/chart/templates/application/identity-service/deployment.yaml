@@ -19,7 +19,18 @@ spec:
         app.kubernetes.io/name: identity-service
         app.kubernetes.io/instance: {{ lower $.Release.Name }}
     spec:
-      serviceAccountName: {{ .Values.global.serviceAccount.name }}
+      serviceAccountName: {{ lower $.Release.Name }}-{{ .Values.global.serviceAccount.name }}
+      {{- $deps := list -}}
+      {{- if eq .Values.appStack.datasource "mysql" -}}
+      {{- $deps = append $deps (dict "name" "mysql" "host" (printf "%s-mysql" (lower $.Release.Name)) "port" .Values.mysql.service.ports.mysql) -}}
+      {{- end -}}
+      {{- if eq .Values.appStack.datasource "postgres" -}}
+      {{- $deps = append $deps (dict "name" "postgres" "host" (printf "%s-postgres" (lower $.Release.Name)) "port" .Values.postgres.service.ports.postgres) -}}
+      {{- end -}}
+      {{- if eq .Values.appStack.identity "keycloak" -}}
+      {{- $deps = append $deps (dict "name" "keycloak" "host" (printf "%s-keycloak" (lower $.Release.Name)) "port" .Values.keycloak.service.ports.http) -}}
+      {{- end -}}
+      {{- include "atlas.waitFor.initContainers" (dict "deps" $deps) | nindent 6 }}
       containers:
         - name: identity-service
           image: "{{ if .Values.global.image.registry -}}{{ .Values.global.image.registry }}/{{ end -}}{{ .Release.Namespace }}/{{ .Values.identitySvc.image.repository }}:{{ .Values.identitySvc.image.tag }}"

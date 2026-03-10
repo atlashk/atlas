@@ -153,11 +153,8 @@ delete_namespace() {
 # =============================================================================
 
 remove_cluster_images() {
-  local chart_name
-  chart_name="$(basename "$CHART_DIR")"
-
   for service in "${SERVICES[@]}"; do
-    image="${chart_name}/${service}:latest"
+    image="${PROJECT_NAME}/${service}:latest"
 
     case "$CLUSTER_TYPE" in
       minikube)
@@ -177,20 +174,25 @@ remove_cluster_images() {
 # =============================================================================
 
 remove_local_images() {
-  local chart_name
-  chart_name="$(basename "$CHART_DIR")"
-
   info "Removing local images..."
 
-  images=$(docker images "${chart_name}/*" \
-    --format '{{'{{'}}.Repository{{'}}'}}:{{'{{'}}.Tag{{'}}'}}' \
+  format="$(printf '%s%s.Repository%s%s:%s%s.Tag%s%s' '{' '{' '}' '}' '{' '{' '}' '}')"
+  images=$(docker images "${PROJECT_NAME}/*" \
+    --format "$format" \
     | grep -v "<none>" | grep -E '^[a-z0-9./_-]+:[a-zA-Z0-9._-]+' || true)
   if [[ -z "$images" ]]; then
     info "No local images found"
     return
   fi
 
-  echo "$images" | xargs -r docker rmi -f
+  while IFS= read -r image; do
+    [[ -z "$image" ]] && continue
+    containers="$(docker ps -aq --filter "ancestor=$image" 2>/dev/null || true)"
+    if [[ -n "$containers" ]]; then
+      docker rm -f $containers >/dev/null 2>&1 || true
+    fi
+    docker rmi -f "$image" >/dev/null 2>&1 || warn "Failed to remove image: $image"
+  done <<< "$images"
 }
 
 # =============================================================================

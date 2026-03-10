@@ -1,5 +1,5 @@
 {
-  "realm": "{{ .Values.keycloak.config.default }}",
+  "realm": "{{ .Values.keycloak.config.realm }}",
   "enabled": true,
   "sslRequired": "none",
   "attributes": {

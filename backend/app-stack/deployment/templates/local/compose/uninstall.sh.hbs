@@ -105,15 +105,23 @@ remove_networks() {
 remove_images() {
   info "Removing images..."
 
+  format="$(printf '%s%s.Repository%s%s:%s%s.Tag%s%s' '{' '{' '}' '}' '{' '{' '}' '}')"
   images=$(docker images "${PROJECT_NAME}/*" \
-    --format '{{'{{'}}.Repository{{'}}'}}:{{'{{'}}.Tag{{'}}'}}' \
+    --format "$format" \
     | grep -v "<none>" | grep -E '^[a-z0-9./_-]+:[a-zA-Z0-9._-]+' || true)
   if [[ -z "$images" ]]; then
     info "No images found"
     return
   fi
 
-  echo "$images" | xargs -r docker rmi -f
+  while IFS= read -r image; do
+    [[ -z "$image" ]] && continue
+    containers="$(docker ps -aq --filter "ancestor=$image" 2>/dev/null || true)"
+    if [[ -n "$containers" ]]; then
+      docker rm -f $containers >/dev/null 2>&1 || true
+    fi
+    docker rmi -f "$image" >/dev/null 2>&1 || warn "Failed to remove image: $image"
+  done <<< "$images"
 }
 
 remove_dangling_images() {

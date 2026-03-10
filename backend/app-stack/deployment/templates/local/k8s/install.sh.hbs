@@ -182,9 +182,6 @@ build_docker_images() {
 
   info "Starting Docker build process..."
 
-  local chart_name
-  chart_name="$(basename "$CHART_DIR")"
-
   CLUSTER_NAME="$(kubectl config current-context 2>/dev/null || true)"
   [[ -n "$CLUSTER_NAME" ]] || error "No active Kubernetes context."
 
@@ -208,7 +205,7 @@ build_docker_images() {
   for entry in "${SERVICES[@]}"; do
     local name="${entry%%:*}"
     local context="${entry#*:}"
-    local image="$chart_name/$name"
+    local image="${PROJECT_NAME}/$name"
 
     info "Building Docker image for $image..."
     docker build -t "$image:latest" -t "$image" "$context" || error "Failed to build Docker image for $image"

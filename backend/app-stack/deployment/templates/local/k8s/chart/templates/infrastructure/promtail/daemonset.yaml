@@ -22,6 +22,9 @@ spec:
         app.kubernetes.io/instance: {{ lower $.Release.Name }}
     spec:
       serviceAccountName: {{ lower $.Release.Name }}-{{ .Values.promtail.serviceAccount }}
+      {{- $deps := list -}}
+      {{- $deps = append $deps (dict "name" "loki" "host" (printf "%s-loki" (lower $.Release.Name)) "port" .Values.loki.service.ports.http) -}}
+      {{- include "atlas.waitFor.initContainers" (dict "deps" $deps) | nindent 6 }}
       containers:
         - name: promtail
           image: "{{ .Values.promtail.image.repository }}:{{ .Values.promtail.image.tag }}"

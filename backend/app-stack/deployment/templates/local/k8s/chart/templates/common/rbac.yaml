@@ -44,9 +44,9 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 subjects:
   - kind: ServiceAccount
-    name: {{ .Values.global.serviceAccount.name }}
+    name: {{ lower $.Release.Name }}-{{ .Values.global.serviceAccount.name }}
     namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
-  name: {{ .Values.global.serviceAccount.name }}
+  name: {{ lower $.Release.Name }}-{{ .Values.global.serviceAccount.name }}
   apiGroup: rbac.authorization.k8s.io

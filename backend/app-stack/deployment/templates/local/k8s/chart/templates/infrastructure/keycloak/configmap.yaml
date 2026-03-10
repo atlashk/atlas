@@ -24,7 +24,7 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 data:
 {{ range $path, $_ := .Files.Glob "files/keycloak/import/*.tpl" }}
-  {{ base $path }}: |
+  {{ trimSuffix ".tpl" (base $path) }}: |
 {{ tpl ($.Files.Get $path) $ | nindent 4 }}
 {{- end }}
 {{- end }}
