@@ -2,6 +2,7 @@ plugins {
     id 'java-library'
     id 'org.springframework.boot' version "${springBootPluginVersion}"
     id 'io.spring.dependency-management' version "${springDependencyManagementPluginVersion}"
+    id 'com.google.protobuf' version "${protobufPluginVersion}"
     id 'idea'
 }
 
@@ -29,11 +30,36 @@ dependencies {
     api project(':libs.framework')
 
     // gRPC server
-    api 'net.devh:grpc-server-spring-boot-starter:3.1.0.RELEASE'
+    api 'io.grpc:grpc-services'
+    api 'org.springframework.grpc:spring-grpc-server-spring-boot-starter'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+}
+
+dependencyManagement {
+  imports {
+    mavenBom "org.springframework.grpc:spring-grpc-dependencies:${springGrpcVersion}"
+  }
+}
+
+protobuf {
+  protoc {
+    artifact = 'com.google.protobuf:protoc'
+  }
+  plugins {
+    grpc {
+      artifact = 'io.grpc:protoc-gen-grpc-java'
+    }
+  }
+  generateProtoTasks {
+    all()*.plugins {
+      grpc {
+        option '@generated=omit'
+      }
+    }
+  }
 }
 
 bootJar {

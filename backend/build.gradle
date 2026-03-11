@@ -61,12 +61,13 @@ static Map<String, Object> flattenMap(Map<?, ?> map, String prefix = '') {
 
 ext {
     // Plugins
-    set('springBootPluginVersion', '3.5.10')
+    set('springBootPluginVersion', '4.0.3')
     set('springDependencyManagementPluginVersion', '1.1.7')
+    set('protobufPluginVersion', '0.9.5')
 
-    set('springFrameworkVersion', '6.2.15')
-    set('springCloudVersion', '2025.0.1')
-    set('ioProjectReactorVersion', '3.7.8')
+    set('springCloudVersion', '2025.1.0')
+    set('springGrpcVersion', "1.0.2")
+
     set('lombokVersion', '1.18.38')
     set('mapstructVersion', '1.6.3')
     set('junitVersion', '5.10.0')

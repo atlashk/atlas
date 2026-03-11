@@ -29,10 +29,10 @@ dependencies {
     api project(':libs.framework')
 
     // REST server
-    api 'org.springframework.boot:spring-boot-starter-web'
+    api 'org.springframework.boot:spring-boot-starter-webmvc'
 
     // OpenAPI UI
-    api 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
+    api 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
