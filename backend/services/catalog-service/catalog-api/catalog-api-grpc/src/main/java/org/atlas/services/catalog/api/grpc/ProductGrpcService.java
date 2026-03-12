@@ -3,7 +3,6 @@ package org.atlas.services.catalog.api.grpc;
 import io.grpc.stub.StreamObserver;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import net.devh.boot.grpc.server.service.GrpcService;
 import org.atlas.libs.framework.internal.catalog.model.ProductOutput;
 import org.atlas.libs.framework.internal.catalog.model.RetrieveProductListInput;
 import org.atlas.libs.framework.util.CollectionUtil;
@@ -12,8 +11,9 @@ import org.atlas.libs.protobuf.catalog.ProductServiceGrpc;
 import org.atlas.libs.protobuf.catalog.RetrieveProductListRequestProto;
 import org.atlas.libs.protobuf.catalog.RetrieveProductListResponseProto;
 import org.atlas.services.catalog.port.in.product.service.ProductInternalService;
+import org.springframework.stereotype.Service;
 
-@GrpcService
+@Service
 @RequiredArgsConstructor
 public class ProductGrpcService extends ProductServiceGrpc.ProductServiceImplBase {
 

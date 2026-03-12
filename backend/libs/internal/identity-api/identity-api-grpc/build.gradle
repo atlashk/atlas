@@ -30,9 +30,6 @@ dependencies {
 
     // Protobuf
     api project(':libs.protobuf')
-    
-    // Resilience
-    api project(':libs.resilience.resilience4j')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
@@ -43,6 +40,12 @@ dependencies {
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 }
 
+dependencyManagement {
+  imports {
+    mavenBom "org.springframework.grpc:spring-grpc-dependencies:${springGrpcVersion}"
+  }
+}
+
 bootJar {
     enabled = false
 }
@@ -50,7 +53,6 @@ bootJar {
 jar {
     enabled = true
 }
-
 
 idea {
     module {

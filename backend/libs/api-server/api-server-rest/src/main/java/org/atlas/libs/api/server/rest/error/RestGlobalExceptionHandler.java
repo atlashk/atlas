@@ -25,7 +25,7 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 })
 @RequiredArgsConstructor
 @Slf4j
-public class RestExceptionHandler {
+public class RestGlobalExceptionHandler {
 
   private final I18nService i18nService;
 

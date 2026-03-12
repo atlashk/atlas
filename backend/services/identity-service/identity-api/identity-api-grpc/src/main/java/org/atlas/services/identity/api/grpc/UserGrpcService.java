@@ -3,7 +3,6 @@ package org.atlas.services.identity.api.grpc;
 import io.grpc.stub.StreamObserver;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import net.devh.boot.grpc.server.service.GrpcService;
 import org.atlas.libs.framework.internal.identity.model.RetrieveUserListInput;
 import org.atlas.libs.framework.internal.identity.model.UserOutput;
 import org.atlas.libs.framework.util.CollectionUtil;
@@ -12,8 +11,9 @@ import org.atlas.libs.protobuf.identity.ListUserResponseProto;
 import org.atlas.libs.protobuf.identity.UserProto;
 import org.atlas.libs.protobuf.identity.UserServiceGrpc;
 import org.atlas.services.identity.port.in.user.service.UserInternalService;
+import org.springframework.stereotype.Service;
 
-@GrpcService
+@Service
 @RequiredArgsConstructor
 public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
 

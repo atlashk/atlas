@@ -9,16 +9,8 @@ project(':libs.framework').projectDir = file('libs/framework')
 // API Client
 include(':libs.api.client.grpc')
 project(':libs.api.client.grpc').projectDir = file('libs/api-client/api-client-grpc')
-include(':libs.api.client.rest.apachehttpclient')
-project(':libs.api.client.rest.apachehttpclient').projectDir = file('libs/api-client/api-client-rest-apachehttpclient')
-include(':libs.api.client.rest.feign')
-project(':libs.api.client.rest.feign').projectDir = file('libs/api-client/api-client-rest-feign')
-include(':libs.api.client.rest.model')
-project(':libs.api.client.rest.model').projectDir = file('libs/api-client/api-client-rest-model')
 include(':libs.api.client.rest.restclient')
 project(':libs.api.client.rest.restclient').projectDir = file('libs/api-client/api-client-rest-restclient')
-include(':libs.api.client.rest.resttemplate')
-project(':libs.api.client.rest.resttemplate').projectDir = file('libs/api-client/api-client-rest-resttemplate')
 
 // API Server
 include(':libs.api.server.rest')
@@ -149,10 +141,6 @@ project(':libs.persistence.jpa').projectDir = file('libs/persistence/persistence
 // Protobuf
 include(':libs.protobuf')
 project(':libs.protobuf').projectDir = file('libs/protobuf')
-
-// Resilience
-include(':libs.resilience.resilience4j')
-project(':libs.resilience.resilience4j').projectDir = file('libs/resilience/resilience-resilience4j')
 
 // Saga
 include(':libs.saga')

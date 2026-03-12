@@ -1,4 +1,4 @@
-package org.atlas.libs.api.client.grpc;
+package org.atlas.libs.api.client.grpc.logging;
 
 import io.grpc.CallOptions;
 import io.grpc.Channel;
@@ -10,12 +10,14 @@ import io.grpc.Metadata;
 import io.grpc.MethodDescriptor;
 import io.grpc.Status;
 import lombok.extern.slf4j.Slf4j;
-import net.devh.boot.grpc.client.interceptor.GrpcGlobalClientInterceptor;
 import org.atlas.libs.framework.measurement.StopWatch;
+import org.springframework.grpc.client.GlobalClientInterceptor;
+import org.springframework.stereotype.Component;
 
-@GrpcGlobalClientInterceptor
+@Component
+@GlobalClientInterceptor
 @Slf4j
-public class GrpcClientLoggingInterceptor implements ClientInterceptor {
+public class LoggingClientInterceptor implements ClientInterceptor {
 
   @Override
   public <ReqT, RespT> ClientCall<ReqT, RespT> interceptCall(MethodDescriptor<ReqT, RespT> method,

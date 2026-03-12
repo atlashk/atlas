@@ -1,7 +1,9 @@
-grpc:
-  client:
-    identity-service:
-      enableKeepAlive: 'true'
-      negotiationType: plaintext
-      keepAliveWithoutCalls: 'true'
-      address: ${API_CLIENT_GRPC_IDENTITY_SERVICE_ADDRESS:'static://127.0.0.1:50051'}
+spring:
+  grpc:
+    client:
+      channels:
+        identity-service:
+          address: "${API_CLIENT_GRPC_IDENTITY_SERVICE_ADDRESS:static://127.0.0.1:50051}"
+          negotiation-type: plaintext
+          enable-keep-alive: true
+          keep-alive-without-calls: true

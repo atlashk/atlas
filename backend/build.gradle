@@ -63,7 +63,6 @@ ext {
     // Plugins
     set('springBootPluginVersion', '4.0.3')
     set('springDependencyManagementPluginVersion', '1.1.7')
-    set('protobufPluginVersion', '0.9.5')
 
     set('springCloudVersion', '2025.1.0')
     set('springGrpcVersion', "1.0.2")

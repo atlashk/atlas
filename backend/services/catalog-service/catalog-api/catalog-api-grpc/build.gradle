@@ -39,6 +39,12 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
 }
 
+dependencyManagement {
+  imports {
+    mavenBom "org.springframework.grpc:spring-grpc-dependencies:${springGrpcVersion}"
+  }
+}
+
 bootJar {
     enabled = false
 }

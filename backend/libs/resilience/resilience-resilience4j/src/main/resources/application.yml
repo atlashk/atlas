@@ -1,4 +1,0 @@
-resilience4j.circuitbreaker:
-  configs:
-    default:
-      register-health-indicator: true

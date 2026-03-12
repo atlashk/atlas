@@ -2,7 +2,6 @@ plugins {
     id 'java-library'
     id 'org.springframework.boot' version "${springBootPluginVersion}"
     id 'io.spring.dependency-management' version "${springDependencyManagementPluginVersion}"
-    id 'com.google.protobuf' version "${protobufPluginVersion}"
     id 'idea'
 }
 
@@ -31,6 +30,12 @@ dependencies {
 
     // gRPC server
     api 'io.grpc:grpc-services'
+    api 'io.grpc:grpc-netty-shaded'
+	modules {
+		module("io.grpc:grpc-netty") {
+			replacedBy("io.grpc:grpc-netty-shaded", "Use Netty shaded instead of regular Netty")
+		}
+	}
     api 'org.springframework.grpc:spring-grpc-server-spring-boot-starter'
 
     // Lombok
@@ -44,24 +49,6 @@ dependencyManagement {
   }
 }
 
-protobuf {
-  protoc {
-    artifact = 'com.google.protobuf:protoc'
-  }
-  plugins {
-    grpc {
-      artifact = 'io.grpc:protoc-gen-grpc-java'
-    }
-  }
-  generateProtoTasks {
-    all()*.plugins {
-      grpc {
-        option '@generated=omit'
-      }
-    }
-  }
-}
-
 bootJar {
     enabled = false
 }
@@ -69,7 +56,6 @@ bootJar {
 jar {
     enabled = true
 }
-
 
 idea {
     module {

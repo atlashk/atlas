@@ -28,9 +28,6 @@ dependencies {
     // REST client
     api project(':libs.api.client.rest.restclient')
     
-    // Resilience
-    api project(':libs.resilience.resilience4j')
-
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

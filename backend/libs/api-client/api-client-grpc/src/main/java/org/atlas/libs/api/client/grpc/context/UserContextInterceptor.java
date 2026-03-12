@@ -1,4 +1,4 @@
-package org.atlas.libs.api.client.grpc;
+package org.atlas.libs.api.client.grpc.context;
 
 import io.grpc.CallOptions;
 import io.grpc.Channel;
@@ -7,12 +7,14 @@ import io.grpc.ClientInterceptor;
 import io.grpc.ForwardingClientCall;
 import io.grpc.Metadata;
 import io.grpc.MethodDescriptor;
-import net.devh.boot.grpc.client.interceptor.GrpcGlobalClientInterceptor;
 import org.atlas.libs.framework.context.ContextInfo;
 import org.atlas.libs.framework.context.Contexts;
 import org.atlas.libs.framework.security.CustomClaim;
+import org.springframework.grpc.client.GlobalClientInterceptor;
+import org.springframework.stereotype.Component;
 
-@GrpcGlobalClientInterceptor
+@Component
+@GlobalClientInterceptor
 public class UserContextInterceptor implements ClientInterceptor {
 
   private static final Metadata.Key<String> USER_ID_HEADER =

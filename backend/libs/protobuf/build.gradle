@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
     id 'io.spring.dependency-management' version "${springDependencyManagementPluginVersion}"
-    id 'com.google.protobuf' version '0.9.4'
+    id 'com.google.protobuf' version '0.9.5'
 }
 
 java {
@@ -15,11 +15,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.google.protobuf:protobuf-java:3.25.1'
-    implementation 'io.grpc:grpc-all:1.64.0'
-
-    // Necessary for Java 9+
-    compileOnly 'org.apache.tomcat:annotations-api:6.0.53'
+    implementation 'io.grpc:grpc-services'
 }
 
 sourceSets {
@@ -31,22 +27,28 @@ sourceSets {
     }
 }
 
+dependencyManagement {
+  imports {
+    mavenBom "org.springframework.grpc:spring-grpc-dependencies:${springGrpcVersion}"
+  }
+}
+
 protobuf {
-    protoc {
-        artifact = 'com.google.protobuf:protoc:3.25.1'
+  protoc {
+    artifact = 'com.google.protobuf:protoc'
+  }
+  plugins {
+    grpc {
+      artifact = 'io.grpc:protoc-gen-grpc-java'
     }
-
-    plugins {
-        grpc {
-            artifact = 'io.grpc:protoc-gen-grpc-java:1.64.0'
-        }
+  }
+  generateProtoTasks {
+    all()*.plugins {
+      grpc {
+        option '@generated=omit'
+      }
     }
-
-    generateProtoTasks {
-        all()*.plugins {
-            grpc {}
-        }
-    }
+  }
 }
 
 dependencyManagement {

@@ -45,6 +45,12 @@ dependencyManagement {
     }
 }
 
+dependencyManagement {
+  imports {
+    mavenBom "org.springframework.grpc:spring-grpc-dependencies:${springGrpcVersion}"
+  }
+}
+
 tasks.withType(JavaExec).configureEach {
     appStack.each { k, v ->
         systemProperty "appStack.${k}", v.toString()
