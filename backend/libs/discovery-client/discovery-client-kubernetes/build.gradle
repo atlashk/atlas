@@ -25,12 +25,18 @@ repositories {
 }
 
 dependencies {
-    // Spring Cloud Kubernetes Client
-    api 'org.springframework.cloud:spring-cloud-starter-kubernetes-client-all:3.2.0'
+    // Kubernetes Discovery Client
+    api 'org.springframework.cloud:spring-cloud-starter-kubernetes-client'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
 }
 
 bootJar {
@@ -40,7 +46,6 @@ bootJar {
 jar {
     enabled = true
 }
-
 
 idea {
     module {

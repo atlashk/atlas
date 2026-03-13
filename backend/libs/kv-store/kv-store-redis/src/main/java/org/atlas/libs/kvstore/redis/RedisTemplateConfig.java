@@ -5,15 +5,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 public class RedisTemplateConfig {
 
   private static final StringRedisSerializer keySerializer = new StringRedisSerializer();
-  private static final GenericJackson2JsonRedisSerializer valueSerializer =
-      new GenericJackson2JsonRedisSerializer(JsonUtil.OBJECT_MAPPER);
+  private static final GenericJacksonJsonRedisSerializer valueSerializer =
+      new GenericJacksonJsonRedisSerializer(JsonUtil.JSON_MAPPER);
 
   @Bean
   public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {

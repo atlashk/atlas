@@ -52,7 +52,7 @@ public class RedisReactiveKvStoreService implements ReactiveKvStoreService {
     String finalKey = buildKey(storeName, key);
     return reactiveRedisTemplate.opsForValue()
         .get(finalKey)
-        .map(value -> JsonUtil.OBJECT_MAPPER.convertValue(value, clazz));
+        .map(value -> JsonUtil.JSON_MAPPER.convertValue(value, clazz));
   }
 
   @Override

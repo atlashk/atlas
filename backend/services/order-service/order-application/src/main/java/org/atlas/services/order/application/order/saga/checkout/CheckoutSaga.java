@@ -91,7 +91,7 @@ public class CheckoutSaga {
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
 
     if (sagaCommandResult.isSuccess()) {
-      InitializePaymentCommandMetadata metadata = JsonUtil.OBJECT_MAPPER.convertValue(
+      InitializePaymentCommandMetadata metadata = JsonUtil.JSON_MAPPER.convertValue(
           sagaCommandResult.getMetadata(), InitializePaymentCommandMetadata.class);
 
       // Update order status
@@ -126,7 +126,7 @@ public class CheckoutSaga {
     OrderEntity order = orderRepository.findBySagaId(saga.getId())
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
 
-    ProcessPaymentCommandMetadata metadata = JsonUtil.OBJECT_MAPPER.convertValue(
+    ProcessPaymentCommandMetadata metadata = JsonUtil.JSON_MAPPER.convertValue(
         sagaCommandResult.getMetadata(), ProcessPaymentCommandMetadata.class);
 
     if (sagaCommandResult.isSuccess()) {

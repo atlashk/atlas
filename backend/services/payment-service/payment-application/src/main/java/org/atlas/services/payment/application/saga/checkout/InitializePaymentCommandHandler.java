@@ -35,7 +35,7 @@ public class InitializePaymentCommandHandler {
   @SagaCommandHandler(command = CheckoutCommand.INITIALIZE_PAYMENT)
   public SagaCommandResult initializePayment(SagaCommand sagaCommand) {
     SagaContext sagaContext = SagaContext.deserialize(sagaCommand.getSagaContext());
-    CheckoutSagaData checkoutSagaData = JsonUtil.OBJECT_MAPPER.convertValue(
+    CheckoutSagaData checkoutSagaData = JsonUtil.JSON_MAPPER.convertValue(
         sagaContext.get("data"), CheckoutSagaData.class);
     if (checkoutSagaData == null) {
       throw new IllegalArgumentException("Checkout data is required in the saga context");

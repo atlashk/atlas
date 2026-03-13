@@ -47,7 +47,7 @@ public class RedisKvStoreService implements KvStoreService {
     String finalKey = buildKey(storeName, key);
     Object value = redisTemplate.opsForValue()
         .get(finalKey);
-    return Optional.ofNullable(JsonUtil.OBJECT_MAPPER.convertValue(value, clazz));
+    return Optional.ofNullable(JsonUtil.JSON_MAPPER.convertValue(value, clazz));
   }
 
   @Override

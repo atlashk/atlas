@@ -1,97 +1,73 @@
 package org.atlas.libs.framework.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.type.MapType;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.List;
 import java.util.Map;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.type.MapType;
 
-/**
- * Implement Singleton pattern with Bill Pugh solution
- */
 @UtilityClass
 @Slf4j
 public class JsonUtil {
 
-  public static final ObjectMapper OBJECT_MAPPER;
+  public static final JsonMapper JSON_MAPPER;
 
   static {
-    OBJECT_MAPPER = new ObjectMapper();
-
-    // Basics
-    OBJECT_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    OBJECT_MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-
-    // Date-time
-    OBJECT_MAPPER.registerModule(new JavaTimeModule());
-    OBJECT_MAPPER.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); // Use ISO-8601 format
+    // Dates and times are serialized as ISO‑8601 strings by default, so you don’t need to turn off WRITE_DATES_AS_TIMESTAMPS.
+    JSON_MAPPER = JsonMapper.builder()
+        .changeDefaultPropertyInclusion(
+            include -> include.withValueInclusion(JsonInclude.Include.NON_NULL))
+        .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+        .disable(
+            DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+            DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES
+        )
+        .findAndAddModules()
+        .build();
   }
 
   public static Object toObject(String json) {
-    try {
-      return OBJECT_MAPPER.readValue(json, Object.class);
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
-    }
+    return JSON_MAPPER.readValue(json, Object.class);
   }
 
   public static <T> T toObject(String json, Class<T> type) {
-    try {
-      return OBJECT_MAPPER.readValue(json, type);
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
-    }
+    return JSON_MAPPER.readValue(json, type);
   }
 
   public static <T> List<T> toList(String json, Class<T> type) {
-    try {
-      return OBJECT_MAPPER.readValue(json,
-          OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, type));
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
-    }
+    return JSON_MAPPER.readValue(json,
+        JSON_MAPPER.getTypeFactory().constructCollectionType(List.class, type));
   }
 
   public static Map<String, Object> toMap(String json) {
-    try {
-      MapType mapType = OBJECT_MAPPER.getTypeFactory()
-          .constructMapType(Map.class, String.class, Object.class);
-      return OBJECT_MAPPER.readValue(json, mapType);
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
-    }
+    MapType mapType = JSON_MAPPER.getTypeFactory()
+        .constructMapType(Map.class, String.class, Object.class);
+    return JSON_MAPPER.readValue(json, mapType);
   }
 
   public static String getAsString(String json, String key) {
-    try {
-      JsonNode tree = OBJECT_MAPPER.readTree(json);
-      JsonNode valueNode = tree.get(key);
-      if (valueNode != null) {
-        // If the node is a text node, use asText()
-        if (valueNode.isTextual()) {
-          return valueNode.asText();
-        }
-        // If the node is an object or array, return the JSON string representation
-        else if (valueNode.isObject() || valueNode.isArray()) {
-          return valueNode.toString();
-        }
-        // For other types (numbers, booleans, null), use asText()
-        else {
-          return valueNode.asText();
-        }
-      } else {
-        log.warn("Key '{}' not found in the JSON", key);
-        return StringUtil.EMPTY;
+    JsonNode tree = JSON_MAPPER.readTree(json);
+    JsonNode valueNode = tree.get(key);
+    if (valueNode != null) {
+      // If the node is a text node, use asText()
+      if (valueNode.isString()) {
+        return valueNode.asString();
       }
-    } catch (JsonProcessingException e) {
-      log.error("Failed to parse JSON", e);
+      // If the node is an object or array, return the JSON string representation
+      else if (valueNode.isObject() || valueNode.isArray()) {
+        return valueNode.toString();
+      }
+      // For other types (numbers, booleans, null), use asText()
+      else {
+        return valueNode.asString();
+      }
+    } else {
+      log.warn("Key '{}' not found in the JSON", key);
       return StringUtil.EMPTY;
     }
   }
@@ -105,21 +81,12 @@ public class JsonUtil {
   }
 
   public static String compact(String json) {
-    try {
-      // Parse the JSON string to validate it and then write it back compactly
-      JsonNode jsonNode = OBJECT_MAPPER.readTree(json);
-      return OBJECT_MAPPER.writeValueAsString(jsonNode);
-    } catch (JsonProcessingException e) {
-      log.error("Failed to compact JSON", e);
-      return json;
-    }
+    // Parse the JSON string to validate it and then write it back compactly
+    JsonNode jsonNode = JSON_MAPPER.readTree(json);
+    return JSON_MAPPER.writeValueAsString(jsonNode);
   }
 
   public static String toJson(Object source) {
-    try {
-      return OBJECT_MAPPER.writer().writeValueAsString(source);
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
-    }
+    return JSON_MAPPER.writer().writeValueAsString(source);
   }
 }

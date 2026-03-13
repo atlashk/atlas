@@ -22,7 +22,7 @@ import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.services.inventory.domain.entity.ReservationEntity;
 import org.atlas.services.inventory.domain.entity.ReservationStatus;
-import org.atlas.services.inventory.domain.entity.ReserveStockStrategy;
+import org.atlas.services.inventory.domain.entity.ReservationStrategy;
 import org.atlas.services.inventory.domain.entity.StockEntity;
 import org.atlas.services.inventory.domain.error.DomainError;
 import org.atlas.services.inventory.domain.exception.DomainException;
@@ -46,7 +46,7 @@ public class ReserveStockCommandHandler {
   @SagaCommandHandler(command = CheckoutCommand.RESERVE_STOCK)
   public SagaCommandResult reserveStock(SagaCommand sagaCommand) {
     SagaContext sagaContext = SagaContext.deserialize(sagaCommand.getSagaContext());
-    CheckoutSagaData checkoutSagaData = JsonUtil.OBJECT_MAPPER.convertValue(
+    CheckoutSagaData checkoutSagaData = JsonUtil.JSON_MAPPER.convertValue(
         sagaContext.get("data"), CheckoutSagaData.class);
     if (checkoutSagaData == null) {
       throw new IllegalArgumentException("Checkout data is required in the saga context");
@@ -86,16 +86,15 @@ public class ReserveStockCommandHandler {
 
   private void doReserveStock(String productId, Integer quantity)
       throws InsufficientStockException {
-    ReserveStockStrategy reserveStockStrategy =
-        applicationConfigService.getConfigAsClass("product.decrease-quantity-strategy",
-            ReserveStockStrategy.class, ReserveStockStrategy.CONSTRAINT);
-    switch (reserveStockStrategy) {
+    ReservationStrategy reservationStrategy = applicationConfigService.getConfigAsClass(
+        "reservation-strategy", ReservationStrategy.class, ReservationStrategy.CONSTRAINT);
+    switch (reservationStrategy) {
       case CONSTRAINT -> reserveStockWithConstraint(productId, quantity);
       case PESSIMISTIC_LOCK -> reserveStockWithPessimisticLock(productId, quantity);
       case OPTIMISTIC_LOCK -> reserveStockWithOptimisticLock(productId, quantity);
       case DISTRIBUTED_LOCK -> reserveStockWithDistributedLock(productId, quantity);
       default -> throw new UnsupportedOperationException(
-          "Unsupported decrease quantity strategy: " + reserveStockStrategy);
+          "Unsupported decrease quantity strategy: " + reservationStrategy);
     }
   }
 
@@ -152,7 +151,7 @@ public class ReserveStockCommandHandler {
   @SagaCompensationHandler(command = CheckoutCommand.RESERVE_STOCK)
   public SagaCompensationResult compensateReserveStock(SagaCompensation sagaCompensation) {
     SagaContext sagaContext = SagaContext.deserialize(sagaCompensation.getSagaContext());
-    CheckoutSagaData checkoutSagaData = JsonUtil.OBJECT_MAPPER.convertValue(
+    CheckoutSagaData checkoutSagaData = JsonUtil.JSON_MAPPER.convertValue(
         sagaContext.get("data"), CheckoutSagaData.class);
     if (checkoutSagaData == null) {
       throw new IllegalArgumentException("Checkout data is required in the saga context");

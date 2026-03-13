@@ -1,16 +1,26 @@
 package org.atlas.libs.api.client.rest.restclient.config;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import javax.net.ssl.SSLContext;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.api.client.rest.restclient.logging.RestClientLoggingInterceptor;
+import org.apache.hc.client5.http.config.ConnectionConfig;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.core5.util.Timeout;
 import org.atlas.libs.api.client.rest.restclient.context.RestClientUserContextInterceptor;
+import org.atlas.libs.api.client.rest.restclient.logging.RestClientLoggingInterceptor;
+import org.atlas.libs.framework.api.client.rest.ApiClientRestProps;
 import org.atlas.libs.framework.api.client.rest.SSLUtil;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
@@ -26,28 +36,58 @@ public class RestClientConfig {
    */
   @Bean
   public RestClient restClient() {
-    SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-
-    if (apiClientRestProps == null || !apiClientRestProps.getSsl().getEnabled()) { // Note: Only for dev/test environments - security risk
-      try {
-        // Create an SSL context that trusts all certificates
-        SSLContext sslContext = SSLUtil.createTrustAllSSLContext();
-
-        // Create a custom HostnameVerifier that trusts all hostnames
-        HostnameVerifier allHostsValid = (hostname, session) -> true;
-
-        // Set default SSLSocketFactory and HostnameVerifier
-        HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
-        HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
-      } catch (Exception e) {
-        throw new RuntimeException("Failed to disable SSL validation", e);
-      }
+    try {
+      return RestClient.builder()
+          .requestFactory(createRequestFactory())
+          .requestInterceptor(new RestClientLoggingInterceptor())
+          .requestInterceptor(new RestClientUserContextInterceptor())
+          .build();
+    } catch (NoSuchAlgorithmException | KeyManagementException e) {
+      throw new RuntimeException("Failed to create request factory", e);
     }
+  }
 
-    return RestClient.builder()
-        .requestFactory(new BufferingClientHttpRequestFactory(requestFactory))
-        .requestInterceptor(new RestClientLoggingInterceptor())
-        .requestInterceptor(new RestClientUserContextInterceptor())
+  private BufferingClientHttpRequestFactory createRequestFactory()
+      throws NoSuchAlgorithmException, KeyManagementException {
+    if (apiClientRestProps.isSslDisabled()) {
+      return new BufferingClientHttpRequestFactory(createNoSslValidationRequestFactory());
+    }
+    return new BufferingClientHttpRequestFactory(createSimpleRequestFactory());
+  }
+
+  private SimpleClientHttpRequestFactory createSimpleRequestFactory() {
+    SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+    requestFactory.setConnectTimeout(apiClientRestProps.getConnectTimeoutMillis());
+    requestFactory.setReadTimeout(apiClientRestProps.getReadTimeoutMillis());
+    return requestFactory;
+  }
+
+  private HttpComponentsClientHttpRequestFactory createNoSslValidationRequestFactory()
+      throws NoSuchAlgorithmException, KeyManagementException {
+    SSLContext sslContext = SSLUtil.createTrustAllSSLContext();
+
+    DefaultClientTlsStrategy tlsStrategy = new DefaultClientTlsStrategy(sslContext,
+        NoopHostnameVerifier.INSTANCE);
+
+    ConnectionConfig connectionConfig = ConnectionConfig.custom()
+        .setConnectTimeout(Timeout.ofSeconds(apiClientRestProps.getConnectTimeout()))
         .build();
+
+    PoolingHttpClientConnectionManager connectionManager =
+        PoolingHttpClientConnectionManagerBuilder.create()
+            .setTlsSocketStrategy(tlsStrategy)
+            .setDefaultConnectionConfig(connectionConfig)
+            .build();
+
+    RequestConfig requestConfig = RequestConfig.custom()
+        .setResponseTimeout(Timeout.ofSeconds(apiClientRestProps.getReadTimeout()))
+        .build();
+
+    CloseableHttpClient httpClient = HttpClients.custom()
+        .setConnectionManager(connectionManager)
+        .setDefaultRequestConfig(requestConfig)
+        .build();
+
+    return new HttpComponentsClientHttpRequestFactory(httpClient);
   }
 }

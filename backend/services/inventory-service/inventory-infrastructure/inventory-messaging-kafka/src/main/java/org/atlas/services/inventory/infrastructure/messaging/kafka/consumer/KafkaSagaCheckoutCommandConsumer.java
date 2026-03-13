@@ -3,15 +3,15 @@ package org.atlas.services.inventory.infrastructure.messaging.kafka.consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.libs.framework.saga.core.command.SagaCommandDispatcher;
 import org.atlas.libs.framework.saga.core.messaging.payload.SagaCommand;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.libs.messaging.kafka.consumer.BaseKafkaMessageConsumer;
+import org.springframework.kafka.annotation.BackOff;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.retrytopic.TopicSuffixingStrategy;
 import org.springframework.kafka.support.Acknowledgment;
-import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -30,7 +30,7 @@ public class KafkaSagaCheckoutCommandConsumer extends BaseKafkaMessageConsumer {
       attempts = "4", // max retries is 3
       exclude = {ClassCastException.class},
       topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE,
-      backoff = @Backoff(delay = 1000, multiplier = 2, random = true)
+      backOff = @BackOff(delay = 1000, multiplier = 2, jitter = 200)
   )
   public void consumeCheckoutCommand(ConsumerRecord<String, Object> record, Acknowledgment ack) {
     super.consumeMessage(record, ack);

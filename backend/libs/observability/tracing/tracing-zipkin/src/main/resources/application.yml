@@ -1,11 +1,11 @@
 management:
-  zipkin:
-    tracing:
-      endpoint: ${ZIPKIN_ENDPOINT:http://localhost:9411/api/v2/spans}
-      connect-timeout: 30s
-      read-timeout: 10s
   tracing:
     sampling:
       probability: 1
     propagation:
       type: b3_multi
+    export:
+      zipkin:
+        endpoint: ${ZIPKIN_ENDPOINT:http://localhost:9411/api/v2/spans}
+        connect-timeout: 30s
+        read-timeout: 30s

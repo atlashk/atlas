@@ -31,6 +31,9 @@ dependencies {
     // Spring Boot RestClient
     api 'org.springframework.boot:spring-boot-starter-restclient'
 
+    // Apache HTTP Client 5
+    api 'org.apache.httpcomponents.client5:httpclient5:5.6'
+
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

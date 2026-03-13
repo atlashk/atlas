@@ -6,11 +6,11 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.atlas.libs.framework.domain.event.handler.DomainEventDispatcher;
 import org.atlas.libs.messaging.kafka.common.KafkaTopics;
 import org.atlas.libs.messaging.kafka.consumer.BaseKafkaMessageConsumer;
+import org.springframework.kafka.annotation.BackOff;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.retrytopic.TopicSuffixingStrategy;
 import org.springframework.kafka.support.Acknowledgment;
-import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -29,7 +29,7 @@ public class KafkaOrderEventConsumer extends BaseKafkaMessageConsumer {
       attempts = "4", // max retries is 3
       exclude = {ClassCastException.class},
       topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE,
-      backoff = @Backoff(delay = 1000, multiplier = 2, random = true)
+      backOff = @BackOff(delay = 1000, multiplier = 2, jitter = 200)
   )
   public void consumeOrderEvents(ConsumerRecord<String, Object> record, Acknowledgment ack) {
     super.consumeMessage(record, ack);

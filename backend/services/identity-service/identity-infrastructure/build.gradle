@@ -63,7 +63,7 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported migration: ${rootProject.ext.appStack['migration']}")
     }
-    
+
     // Observability
     api project(':libs.observability.actuator')
     switch (rootProject.ext.appStack['observability.logging.framework']) {
@@ -100,10 +100,10 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported persistence: ${rootProject.ext.appStack.persistence}")
     }
-    
+
     // Sequence generator
     api project(':libs.sequence-generator')
-    
+
     // Service discovery
     switch (rootProject.ext.appStack['service-discovery']) {
         case 'none':
@@ -116,6 +116,18 @@ dependencies {
             break
         default:
             throw new IllegalArgumentException("Unsupported service-discovery: ${rootProject.ext.appStack['service-discovery']}")
+    }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.grpc:spring-grpc-dependencies:${springGrpcVersion}"
     }
 }
 
