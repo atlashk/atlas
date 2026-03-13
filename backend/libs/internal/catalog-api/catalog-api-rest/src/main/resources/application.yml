@@ -1,5 +1,5 @@
 app:
-  api-client:
+  internal:
     rest:
       catalog-service:
-        base-url: ${API_CLIENT_REST_CATALOG_SERVICE_BASE_URL:http://localhost:8082}
+        base-url: ${INTERNAL_REST_CATALOG_SERVICE_BASE_URL:http://localhost:8082}

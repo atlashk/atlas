@@ -97,9 +97,9 @@ spec:
               value: "static://{{ lower $.Release.Name }}-catalog-service:{{ .Values.catalogSvc.service.ports.grpc }}"
             {{- end }}
             {{- if eq .Values.appStack.internal "rest" }}
-            - name: API_CLIENT_REST_IDENTITY_SERVICE_BASE_URL
+            - name: INTERNAL_REST_IDENTITY_SERVICE_BASE_URL
               value: "http://{{ lower $.Release.Name }}-identity-service:{{ .Values.identitySvc.service.ports.http }}"
-            - name: API_CLIENT_REST_CATALOG_SERVICE_BASE_URL
+            - name: INTERNAL_REST_CATALOG_SERVICE_BASE_URL
               value: "http://{{ lower $.Release.Name }}-catalog-service:{{ .Values.catalogSvc.service.ports.http }}"
             {{- end }}
             {{- if eq .Values.appStack.observability.tracing "zipkin" }}

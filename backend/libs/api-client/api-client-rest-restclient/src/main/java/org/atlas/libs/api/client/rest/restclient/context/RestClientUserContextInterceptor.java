@@ -1,4 +1,4 @@
-package org.atlas.libs.api.client.rest.restclient;
+package org.atlas.libs.api.client.rest.restclient.context;
 
 import java.io.IOException;
 import org.atlas.libs.framework.context.ContextInfo;
@@ -9,7 +9,7 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 
-public class UserContextRequestInterceptor implements ClientHttpRequestInterceptor {
+public class RestClientUserContextInterceptor implements ClientHttpRequestInterceptor {
 
   @Override
   public ClientHttpResponse intercept(HttpRequest request, byte[] body,

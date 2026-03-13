@@ -1,4 +1,4 @@
-package org.atlas.libs.internalapi.catalog.grpc;
+package org.atlas.libs.internal.catalog.grpc;
 
 import java.util.List;
 import org.atlas.libs.framework.internal.catalog.model.ProductOutput;

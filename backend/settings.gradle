@@ -11,6 +11,8 @@ include(':libs.api.client.grpc')
 project(':libs.api.client.grpc').projectDir = file('libs/api-client/api-client-grpc')
 include(':libs.api.client.rest.restclient')
 project(':libs.api.client.rest.restclient').projectDir = file('libs/api-client/api-client-rest-restclient')
+include(':libs.api.client.rest.resttemplate')
+project(':libs.api.client.rest.resttemplate').projectDir = file('libs/api-client/api-client-rest-resttemplate')
 
 // API Server
 include(':libs.api.server.rest')

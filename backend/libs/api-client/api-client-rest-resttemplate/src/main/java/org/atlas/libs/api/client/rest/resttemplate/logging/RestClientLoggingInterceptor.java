@@ -1,4 +1,4 @@
-package org.atlas.libs.api.client.rest.restclient;
+package org.atlas.libs.api.client.rest.resttemplate.logging;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 
 @Slf4j
-public class LoggingRequestInterceptor implements ClientHttpRequestInterceptor {
+public class RestClientLoggingInterceptor implements ClientHttpRequestInterceptor {
 
   private static final int MAX_PAYLOAD_SIZE = 1024 * 1024; // 1 MB in bytes
 
@@ -73,3 +73,4 @@ public class LoggingRequestInterceptor implements ClientHttpRequestInterceptor {
     }
   }
 }
+

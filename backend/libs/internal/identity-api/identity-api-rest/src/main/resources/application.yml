@@ -2,4 +2,4 @@ app:
   internal:
     rest:
       identity-service:
-        base-url: ${API_CLIENT_REST_IDENTITY_SERVICE_BASE_URL:http://localhost:8081}
+        base-url: ${INTERNAL_REST_IDENTITY_SERVICE_BASE_URL:http://localhost:8081}

@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 @GlobalClientInterceptor
 @Slf4j
-public class LoggingClientInterceptor implements ClientInterceptor {
+public class GrpcClientLoggingInterceptor implements ClientInterceptor {
 
   @Override
   public <ReqT, RespT> ClientCall<ReqT, RespT> interceptCall(MethodDescriptor<ReqT, RespT> method,

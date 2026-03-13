@@ -1,8 +1,11 @@
-package org.atlas.libs.api.client.rest.restclient;
+package org.atlas.libs.api.client.rest.restclient.config;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import lombok.RequiredArgsConstructor;
+import org.atlas.libs.api.client.rest.restclient.logging.RestClientLoggingInterceptor;
+import org.atlas.libs.api.client.rest.restclient.context.RestClientUserContextInterceptor;
 import org.atlas.libs.framework.api.client.rest.SSLUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -12,10 +15,10 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
 @Configuration
+@RequiredArgsConstructor
 public class RestClientConfig {
 
-  @Value("${app.api-client.rest.ssl.enabled:false}")
-  private boolean sslEnabled;
+  private final ApiClientRestProps apiClientRestProps;
 
   /**
    * Configures a RestClient with BufferingClientHttpRequestFactory to allow interceptors to read
@@ -25,7 +28,7 @@ public class RestClientConfig {
   public RestClient restClient() {
     SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
 
-    if (!sslEnabled) { // Note: Only for dev/test environments - security risk
+    if (apiClientRestProps == null || !apiClientRestProps.getSsl().getEnabled()) { // Note: Only for dev/test environments - security risk
       try {
         // Create an SSL context that trusts all certificates
         SSLContext sslContext = SSLUtil.createTrustAllSSLContext();
@@ -43,8 +46,8 @@ public class RestClientConfig {
 
     return RestClient.builder()
         .requestFactory(new BufferingClientHttpRequestFactory(requestFactory))
-        .requestInterceptor(new LoggingRequestInterceptor())
-        .requestInterceptor(new UserContextRequestInterceptor())
+        .requestInterceptor(new RestClientLoggingInterceptor())
+        .requestInterceptor(new RestClientUserContextInterceptor())
         .build();
   }
 }

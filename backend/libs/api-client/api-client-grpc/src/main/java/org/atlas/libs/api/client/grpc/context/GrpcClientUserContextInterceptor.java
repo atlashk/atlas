@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @GlobalClientInterceptor
-public class UserContextInterceptor implements ClientInterceptor {
+public class GrpcClientUserContextInterceptor implements ClientInterceptor {
 
   private static final Metadata.Key<String> USER_ID_HEADER =
       Metadata.Key.of(CustomClaim.USER_ID.getHeader(), Metadata.ASCII_STRING_MARSHALLER);
