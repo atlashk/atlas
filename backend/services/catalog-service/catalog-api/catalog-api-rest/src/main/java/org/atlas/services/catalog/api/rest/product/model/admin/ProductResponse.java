@@ -2,7 +2,7 @@ package org.atlas.services.catalog.api.rest.product.model.admin;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,7 +39,7 @@ public class ProductResponse {
   private BigDecimal price;
 
   @Schema(description = "Date and time the product was published in ISO 8601 format", example = "2023-10-01T10:00:00Z")
-  private Date publishedAt;
+  private LocalDateTime publishedAt;
 
   @Schema(description = "Indicates if the product is in stock", example = "true")
   private Boolean inStock;

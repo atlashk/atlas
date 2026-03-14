@@ -9,7 +9,7 @@ import org.atlas.libs.framework.cryptography.HashingUtil;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.kvstore.KvStoreService;
 import org.atlas.libs.framework.security.SecurityConstant;
-import org.atlas.libs.framework.util.DateUtil;
+import org.atlas.libs.framework.util.LegacyDateUtil;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.libs.jwt.IssueTokenInput;
 import org.atlas.libs.jwt.JwtUtil;
@@ -90,7 +90,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     Date expiresAt = JwtUtil.extractExpiresAt(accessToken);
-    long now = DateUtil.timestamp();
+    long now = LegacyDateUtil.timestamp();
     long ttlMs = Math.max(1000L, expiresAt.getTime() - now);
     kvStoreService.put(SecurityConstant.TOKEN_BLACKLISTED_KV_STORE_NAME, hashedAccessToken, "1",
         Duration.ofMillis(ttlMs));

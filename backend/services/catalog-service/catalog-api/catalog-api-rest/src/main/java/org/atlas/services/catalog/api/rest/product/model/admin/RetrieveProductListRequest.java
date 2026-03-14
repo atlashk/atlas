@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -38,10 +40,10 @@ public class RetrieveProductListRequest {
   private BigDecimal maxPrice;
 
   @Schema(description = "Start date for filtering products by published date (ISO 8601 format)", example = "2023-01-01T00:00:00Z")
-  private Date startPublishedAt;
+  private LocalDate startPublishedDate;
 
   @Schema(description = "End date for filtering products by published date (ISO 8601 format)", example = "2023-12-31T23:59:59Z")
-  private Date endPublishedAt;
+  private LocalDate endPublishedDate;
 
   @Schema(description = "Indicates if the product is in stock", example = "true")
   private Boolean inStock;

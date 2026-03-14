@@ -1,4 +1,4 @@
-{{- if eq .Values.appStack.fullTextSearch "elasticsearch" }}
+{{- if eq .Values.appStack.search "elasticsearch" }}
 apiVersion: v1
 kind: Service
 metadata:

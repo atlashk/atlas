@@ -2,8 +2,8 @@ package org.atlas.services.catalog.domain.entity;
 
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,7 +33,7 @@ public class ProductEntity extends DomainEntity {
 
   private String image;
 
-  private Date publishedAt;
+  private LocalDateTime publishedAt;
 
   // Based on inventory-service stock status
   @Builder.Default

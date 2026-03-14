@@ -3,7 +3,7 @@ package org.atlas.services.catalog.infrastructure.file.csv.opencsv;
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvBindByPosition;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -55,7 +55,7 @@ public class OpencsvProductCsvWriter implements ProductCsvWriter {
 
     @CsvBindByName(column = "Publish Date")
     @CsvBindByPosition(position = 4)
-    private Date publishedAt;
+    private LocalDateTime publishedAt;
 
     @CsvBindByName(column = "In Stock")
     @CsvBindByPosition(position = 5)

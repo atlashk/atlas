@@ -178,7 +178,7 @@ appStack:
     csv: opencsv
     excel: poi
     pdf: pdfbox
-  fullTextSearch: elasticsearch
+  search: elasticsearch
   identity: keycloak
   internal: rest
   kvStore: redis
@@ -205,7 +205,7 @@ appStack:
 elasticsearch:
   image:
     repository: docker.elastic.co/elasticsearch/elasticsearch
-    tag: 8.19.11
+    tag: 9.2.5
   resources:
     requests:
       cpu: 500m

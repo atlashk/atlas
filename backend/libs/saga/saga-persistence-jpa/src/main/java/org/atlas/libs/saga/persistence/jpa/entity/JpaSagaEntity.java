@@ -8,7 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.util.Date;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -44,7 +44,7 @@ public class JpaSagaEntity extends JpaBaseEntity {
   private SagaStatus status;
 
   @Column(name = "completed_at")
-  private Date completedAt;
+  private LocalDateTime completedAt;
 
   @Column(name = "error")
   private String error;

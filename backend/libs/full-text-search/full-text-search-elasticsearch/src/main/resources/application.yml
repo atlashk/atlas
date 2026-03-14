@@ -1,7 +1,0 @@
-app:
-  full-text-search:
-    elasticsearch:
-      host: ${ELASTICSEARCH_HOST:localhost}
-      port: ${ELASTICSEARCH_PORT:9200}
-      username: ${ELASTICSEARCH_USERNAME:elastic}
-      password: ${ELASTICSEARCH_PASSWORD:Atlas@123456}

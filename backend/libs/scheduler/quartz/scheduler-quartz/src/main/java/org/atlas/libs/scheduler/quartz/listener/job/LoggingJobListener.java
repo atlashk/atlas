@@ -1,7 +1,7 @@
 package org.atlas.libs.scheduler.quartz.listener.job;
 
+import java.time.LocalDateTime;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.util.DateUtil;
 import org.atlas.libs.scheduler.quartz.QuartzUtil;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -21,7 +21,7 @@ public class LoggingJobListener implements JobListener {
   public void jobToBeExecuted(JobExecutionContext context) {
     log.info("Job {} is about to start execution at {}",
         QuartzUtil.getJobName(context),
-        DateUtil.now());
+        LocalDateTime.now());
   }
 
   @Override
@@ -33,12 +33,12 @@ public class LoggingJobListener implements JobListener {
     if (jobException == null) {
       log.info("Job {} completed execution at {}, next fire time {}",
           QuartzUtil.getJobName(context),
-          DateUtil.now(),
+          LocalDateTime.now(),
           context.getNextFireTime());
     } else {
       log.error("Job {} failed execution at {} with exception {}",
           QuartzUtil.getJobName(context),
-          DateUtil.now(),
+          LocalDateTime.now(),
           jobException.getMessage(),
           jobException);
     }

@@ -3,6 +3,7 @@ package org.atlas.services.catalog.api.rest.product.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
@@ -151,7 +152,7 @@ public class ProductAdminController {
 
     // Exported file info
     String fileName = String.format("export-product-%s.%s",
-        DateUtil.now("yyyyMMddHHmmss"),
+        DateUtil.format(LocalDateTime.now(), "yyyyMMddHHmmss"),
         request.getFileType().getExtension());
     return ResponseEntity.ok()
         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)

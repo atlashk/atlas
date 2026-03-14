@@ -1,7 +1,7 @@
 package org.atlas.services.catalog.port.out.file.model;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,7 +22,7 @@ public class ProductReadRow {
 
   private BigDecimal price;
 
-  private Date publishedAt;
+  private LocalDateTime publishedAt;
 
   private Integer initialQuantity;
 

@@ -8,7 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.util.Date;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -41,7 +41,7 @@ public class JpaOutboxMessageEntity extends JpaBaseEntity {
   private OutboxMessageStatus status;
 
   @Column(name = "processed_at")
-  private Date processedAt;
+  private LocalDateTime processedAt;
 
   @Column(name = "error")
   private String error;

@@ -38,8 +38,8 @@ export interface RetrieveProductListFilters {
   type?: string;
   minPrice?: number;
   maxPrice?: number;
-  startPublishedAt?: string;
-  endPublishedAt?: string;
+  startPublishedDate?: string;
+  endPublishedDate?: string;
   inStock?: boolean;
   brandId?: string;
   categoryIds?: number[];
@@ -88,8 +88,8 @@ export interface ExportProductFilters {
   type?: string;
   minPrice?: number;
   maxPrice?: number;
-  startPublishedAt?: string;
-  endPublishedAt?: string;
+  startPublishedDate?: string;
+  endPublishedDate?: string;
   inStock?: boolean;
   brandId?: string;
   categoryIds?: string[];

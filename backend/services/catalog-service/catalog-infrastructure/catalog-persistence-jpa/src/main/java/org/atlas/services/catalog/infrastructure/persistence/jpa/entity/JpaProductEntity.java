@@ -15,7 +15,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.AllArgsConstructor;
@@ -53,7 +53,7 @@ public class JpaProductEntity extends JpaBaseEntity {
   private BigDecimal price;
 
   @Column(name = "published_at")
-  private Date publishedAt;
+  private LocalDateTime publishedAt;
 
   @Column(name = "in_stock")
   private Boolean inStock;

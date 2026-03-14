@@ -1,6 +1,7 @@
 package org.atlas.libs.framework.saga.core.orchestrator;
 
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,6 @@ import org.atlas.libs.framework.saga.core.messaging.payload.SagaCompensation;
 import org.atlas.libs.framework.saga.core.messaging.payload.SagaCompensationReply;
 import org.atlas.libs.framework.saga.core.repository.SagaCommandRepository;
 import org.atlas.libs.framework.saga.core.repository.SagaRepository;
-import org.atlas.libs.framework.util.DateUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -179,7 +179,7 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
     if (sagaCommandReply.getSagaCommandResult().isSuccess()) {
       // Mark command as COMPLETED
       sagaCommand.setStatus(SagaCommandStatus.COMPLETED);
-      sagaCommand.setCompletedAt(DateUtil.now());
+      sagaCommand.setCompletedAt(LocalDateTime.now());
       sagaCommandRepository.update(sagaCommand);
     } else {
       // Mark command as FAILED
@@ -299,7 +299,7 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
       sagaCommand.setStatus(SagaCommandStatus.COMPENSATION_FAILED);
       sagaCommand.setCompensationError(sagaCompensationReply.getResult().getError());
     }
-    sagaCommand.setCompletedAt(DateUtil.now());
+    sagaCommand.setCompletedAt(LocalDateTime.now());
     sagaCommandRepository.update(sagaCommand);
   }
 

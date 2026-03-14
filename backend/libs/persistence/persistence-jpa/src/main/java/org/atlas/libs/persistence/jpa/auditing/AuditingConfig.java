@@ -1,7 +1,7 @@
 package org.atlas.libs.persistence.jpa.auditing;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
-import org.atlas.libs.framework.util.DateUtil;
 import org.atlas.libs.persistence.jpa.entity.JpaBaseEntity;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +17,6 @@ public class AuditingConfig {
 
   @Bean
   public DateTimeProvider dateTimeProvider() {
-    return () -> Optional.of(DateUtil.now().toInstant());
+    return () -> Optional.of(LocalDateTime.now());
   }
 }

@@ -3,7 +3,6 @@ file:
   csv: opencsv
   excel: poi
   pdf: pdfbox
-full-text-search: elasticsearch
 identity: keycloak
 internal: rest
 kv-store: redis
@@ -20,6 +19,7 @@ observability:
 persistence: jpa
 redis: standalone
 scheduler: quartz
+search: elasticsearch
 service-discovery: kubernetes
 storage: minio
 template: freemarker

@@ -27,7 +27,7 @@ spec:
       {{- if eq .Values.appStack.datasource "postgres" -}}
       {{- $deps = append $deps (dict "name" "postgres" "host" (printf "%s-postgres" (lower $.Release.Name)) "port" .Values.postgres.service.ports.postgres) -}}
       {{- end -}}
-      {{- if eq .Values.appStack.fullTextSearch "elasticsearch" -}}
+      {{- if eq .Values.appStack.search "elasticsearch" -}}
       {{- $deps = append $deps (dict "name" "elasticsearch" "host" (printf "%s-elasticsearch" (lower $.Release.Name)) "port" .Values.elasticsearch.service.ports.http) -}}
       {{- end -}}
       {{- include "atlas.waitFor.initContainers" (dict "deps" $deps) | nindent 6 }}
@@ -97,7 +97,7 @@ spec:
                   name: {{ lower $.Release.Name }}-rabbitmq
                   key: password
             {{- end }}
-            {{- if eq .Values.appStack.fullTextSearch "elasticsearch" }}
+            {{- if eq .Values.appStack.search "elasticsearch" }}
             - name: ELASTICSEARCH_HOST
               value: "{{ lower $.Release.Name }}-elasticsearch"
             - name: ELASTICSEARCH_PORT

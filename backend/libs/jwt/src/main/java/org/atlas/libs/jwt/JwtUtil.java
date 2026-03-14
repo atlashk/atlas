@@ -18,7 +18,7 @@ import lombok.experimental.UtilityClass;
 import org.atlas.libs.framework.cryptography.RsaKeyLoader;
 import org.atlas.libs.framework.security.CustomClaim;
 import org.atlas.libs.framework.security.SecurityConstant;
-import org.atlas.libs.framework.util.DateUtil;
+import org.atlas.libs.framework.util.LegacyDateUtil;
 import org.atlas.libs.framework.uuid.UUIDGenerator;
 
 @UtilityClass
@@ -34,7 +34,7 @@ public class JwtUtil {
 
   public static String issueAccessToken(IssueTokenInput input)
       throws Exception {
-    Date issuedAt = DateUtil.now();
+    Date issuedAt = LegacyDateUtil.now();
     Date expiresAt = new Date(
         issuedAt.getTime() + SecurityConstant.ACCESS_TOKEN_EXPIRATION_TIME * 1000);
 
@@ -58,7 +58,7 @@ public class JwtUtil {
   }
 
   public static String issueRefreshToken(IssueTokenInput input) throws Exception {
-    Date issuedAt = DateUtil.now();
+    Date issuedAt = LegacyDateUtil.now();
     Date expiresAt = new Date(
         issuedAt.getTime() + SecurityConstant.REFRESH_TOKEN_EXPIRATION_TIME * 1000);
 

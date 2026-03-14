@@ -1,6 +1,7 @@
 package org.atlas.libs.framework.saga.checkout;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -26,7 +27,7 @@ public class CheckoutSagaData {
   private List<OrderItem> orderItems;
   private BigDecimal amount;
   private Integer paymentGatewayId;
-  private Date createdAt;
+  private LocalDateTime createdAt;
 
   @NoArgsConstructor
   @AllArgsConstructor

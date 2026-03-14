@@ -274,8 +274,8 @@ function shouldSkipFileByPath(filePath, context) {
   const storage = stackValue('storage');
   if (normalizedPath.includes('/files/minio/') && storage !== 'minio') return true;
   
-  const fullTextSearch = stackValue('full-text-search');
-  if (normalizedPath.includes('/files/elasticsearch/') && fullTextSearch !== 'elasticsearch') return true;
+  const search = stackValue('search');
+  if (normalizedPath.includes('/files/elasticsearch/') && search !== 'elasticsearch') return true;
   
   const identity = stackValue('identity');
   if (normalizedPath.includes('/files/keycloak/') && identity !== 'keycloak') return true;

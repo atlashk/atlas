@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import lombok.Getter;
@@ -35,7 +36,7 @@ public class CreateProductRequest {
 
   @NotNull
   @Schema(description = "Date and time the product was published (ISO 8601 format)", example = "2023-10-01T10:00:00Z", requiredMode = RequiredMode.REQUIRED)
-  private Date publishedAt;
+  private LocalDateTime publishedAt;
 
   @NotNull
   @PositiveOrZero

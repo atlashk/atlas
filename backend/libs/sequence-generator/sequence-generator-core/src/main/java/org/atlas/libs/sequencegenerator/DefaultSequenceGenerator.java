@@ -1,10 +1,9 @@
 package org.atlas.libs.sequencegenerator;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.libs.framework.sequencegenerator.SequenceType;
-import org.atlas.libs.framework.util.DateUtil;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +17,7 @@ public class DefaultSequenceGenerator implements SequenceGenerator {
   @Override
   @Transactional
   public String generate(SequenceType sequenceType) {
-    Date now = DateUtil.now();
+    LocalDateTime now = LocalDateTime.now();
 
     // Step 1: Check if the sequence exists; if not, insert a new one with initial value = 1
     int affectedRows = jdbcTemplate.update(

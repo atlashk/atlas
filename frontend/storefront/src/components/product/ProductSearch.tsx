@@ -44,7 +44,7 @@ interface SearchFilters {
   maxPrice?: number;
   brandId?: string;
   categoryIds?: string[];
-  mode?: "DATABASE" | "FULL_TEXT_SEARCH";
+  mode?: "DATABASE" | "SEARCH";
 }
 
 const ProductSearch: React.FC = () => {
@@ -517,7 +517,7 @@ const ProductSearch: React.FC = () => {
                   <RadioGroup
                     value={formFilters.mode}
                     onValueChange={(val) =>
-                      updateFilter("mode", val as "DATABASE" | "FULL_TEXT_SEARCH")
+                      updateFilter("mode", val as "DATABASE" | "SEARCH")
                     }
                     className="gap-2"
                   >
@@ -526,8 +526,8 @@ const ProductSearch: React.FC = () => {
                       <Label htmlFor="mode-db">Database Search</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem id="mode-fts" value="FULL_TEXT_SEARCH" />
-                      <Label htmlFor="mode-fts">Full Text Search</Label>
+                      <RadioGroupItem id="mode-search" value="SEARCH" />
+                      <Label htmlFor="mode-search">Search</Label>
                     </div>
                   </RadioGroup>
                 </div>

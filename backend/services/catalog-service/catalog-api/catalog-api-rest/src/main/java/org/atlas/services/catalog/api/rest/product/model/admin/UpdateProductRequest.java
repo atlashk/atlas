@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,7 +33,7 @@ public class UpdateProductRequest {
 
   @NotNull
   @Schema(description = "Date and time the product was published (ISO 8601 format)", example = "2023-10-01T10:00:00Z", requiredMode = Schema.RequiredMode.REQUIRED)
-  private Date publishedAt;
+  private LocalDateTime publishedAt;
 
   @NotNull
   @Schema(description = "ID of the brand associated with the product", example = "BRD0001", requiredMode = Schema.RequiredMode.REQUIRED)

@@ -105,8 +105,7 @@ public class PoiProductExcelWriter implements ProductExcelWriter {
       cell.setCellStyle(style);
 
       cell = row.createCell(4);
-      cell.setCellValue(
-          DateUtil.format(productRow.getPublishedAt(), CommonConstant.DATE_TIME_FORMAT));
+      cell.setCellValue(DateUtil.format(productRow.getPublishedAt(), CommonConstant.DATE_TIME_FORMAT));
       cell.setCellStyle(style);
 
       cell = row.createCell(5);

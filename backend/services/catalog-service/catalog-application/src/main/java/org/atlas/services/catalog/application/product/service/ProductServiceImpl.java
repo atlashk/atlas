@@ -14,8 +14,8 @@ import org.atlas.services.catalog.port.in.product.model.RetrieveProductListInput
 import org.atlas.services.catalog.port.in.product.model.RetrieveProductListInput.Mode;
 import org.atlas.services.catalog.port.in.product.service.ProductImageService;
 import org.atlas.services.catalog.port.in.product.service.ProductService;
-import org.atlas.services.catalog.port.out.fulltextsearch.FullTextSearchService;
-import org.atlas.services.catalog.port.out.fulltextsearch.SearchProductCriteria;
+import org.atlas.services.catalog.port.out.search.SearchService;
+import org.atlas.services.catalog.port.out.search.SearchProductCriteria;
 import org.atlas.services.catalog.port.out.repository.ProductRepository;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
@@ -27,27 +27,26 @@ public class ProductServiceImpl implements ProductService {
 
   private final ProductRepository productRepository;
   private final ProductImageService productImageService;
-  private final ObjectProvider<FullTextSearchService> fullTextSearchServiceProvider;
+  private final ObjectProvider<SearchService> searchServiceProvider;
 
   @Override
   public PagingResult<ProductEntity> retrieveProductList(RetrieveProductListInput input) {
-    PagingResult<ProductEntity> productPage = input.getMode() == Mode.FULL_TEXT_SEARCH
-        ? retrieveByFullTextSearch(input)
-        : retrieveByDatabase(input);
+    PagingResult<ProductEntity> productPage = input.getMode() == Mode.SEARCH
+        ? retrieveBySearch(input) : retrieveByDatabase(input);
 
     attachImages(productPage);
 
     return productPage;
   }
 
-  private PagingResult<ProductEntity> retrieveByFullTextSearch(RetrieveProductListInput input) {
-    FullTextSearchService fullTextSearchService = fullTextSearchServiceProvider.getIfAvailable();
-    if (fullTextSearchService == null) {
-      log.warn("Full-text search service is not available, fallback to database query");
+  private PagingResult<ProductEntity> retrieveBySearch(RetrieveProductListInput input) {
+    SearchService searchService = searchServiceProvider.getIfAvailable();
+    if (searchService == null) {
+      log.warn("Search service is not available, fallback to database query");
       return retrieveByDatabase(input);
     }
     SearchProductCriteria criteria = ProductMapper.INSTANCE.toSearchProductCriteria(input);
-    PagingResult<String> matchedProductIdsPage = fullTextSearchService.search(criteria,
+    PagingResult<String> matchedProductIdsPage = searchService.search(criteria,
         input.getPagingRequest());
     if (matchedProductIdsPage.checkEmpty()) {
       return PagingResult.empty();

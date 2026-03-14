@@ -1,6 +1,6 @@
 package org.atlas.services.order.port.in.order.model;
 
-import java.util.Date;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,7 +17,10 @@ import org.atlas.libs.framework.paging.PagingRequest;
 public class RetrieveOrderListInput {
 
   private OrderStatus status;
-  private Date startDate;
-  private Date endDate;
+
+  private LocalDate startDate;
+
+  private LocalDate endDate;
+
   private PagingRequest pagingRequest;
 }

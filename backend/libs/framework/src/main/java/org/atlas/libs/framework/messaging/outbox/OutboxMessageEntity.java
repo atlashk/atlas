@@ -1,6 +1,6 @@
 package org.atlas.libs.framework.messaging.outbox;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -24,7 +24,7 @@ public class OutboxMessageEntity extends DomainEntity {
 
   private OutboxMessageStatus status;
 
-  private Date processedAt;
+  private LocalDateTime processedAt;
 
   private String error;
 
@@ -33,7 +33,7 @@ public class OutboxMessageEntity extends DomainEntity {
 
   public void markAsProcessed() {
     this.status = OutboxMessageStatus.PROCESSED;
-    this.processedAt = new Date();
+    this.processedAt = LocalDateTime.now();
   }
 
   public void incRetries() {

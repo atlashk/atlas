@@ -63,6 +63,15 @@ const shouldSkipAuthRedirect = (requestUrl?: string): boolean => {
   return requestUrl.includes('/services/identity/api/users/profile');
 };
 
+const isUnauthorizedRefreshError = (error: unknown): boolean => {
+  if (!axios.isAxiosError(error)) return false;
+
+  const status = error.response?.status;
+  const apiErrorCode = error.response?.data?.errorCode;
+
+  return status === 401 || apiErrorCode === '401' || apiErrorCode === 401;
+};
+
 apiClient.interceptors.request.use(
   (config) => {
     config.headers = config.headers || {};
@@ -142,6 +151,16 @@ apiClient.interceptors.response.use(
         refreshRetryCount = 0;
         return apiClient(originalRequest);
       } catch (refreshError) {
+        if (isUnauthorizedRefreshError(refreshError)) {
+          processQueue(refreshError as Error, null);
+          clearAuthCookies();
+          if (!shouldSkipAuthRedirect(originalRequest.url)) {
+            redirectToLogin();
+          }
+          refreshRetryCount = 0;
+          return Promise.reject(refreshError);
+        }
+
         refreshRetryCount++;
         processQueue(refreshError as Error, null);
         
@@ -166,7 +185,10 @@ apiClient.interceptors.response.use(
 
 // Helper functions
 function redirectToLogin(): void {
-  // Avoid redirect loops
+  if (typeof window === 'undefined') {
+    return;
+  }
+
   if (window.location.pathname !== '/login') {
     const currentPath = window.location.pathname + window.location.search;
     const loginUrl = `/login?redirect=${encodeURIComponent(currentPath)}`;
@@ -198,6 +220,11 @@ async function performTokenRefresh(refreshToken: string): Promise<string> {
     
     return newAccessToken;
   } catch (error) {
+    if (isUnauthorizedRefreshError(error)) {
+      clearAuthCookies();
+      redirectToLogin();
+    }
+
     console.error('Token refresh failed:', error);
     throw error;
   }

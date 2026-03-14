@@ -30,6 +30,7 @@ dependencies {
 
     // Freemarker
     api 'org.springframework.boot:spring-boot-starter-freemarker'
+    api 'no.api.freemarker:freemarker-java8:3.0.3'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

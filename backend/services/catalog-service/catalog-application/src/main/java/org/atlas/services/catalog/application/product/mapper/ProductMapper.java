@@ -1,7 +1,7 @@
 package org.atlas.services.catalog.application.product.mapper;
 
 import org.atlas.services.catalog.port.in.product.model.RetrieveProductListInput;
-import org.atlas.services.catalog.port.out.fulltextsearch.SearchProductCriteria;
+import org.atlas.services.catalog.port.out.search.SearchProductCriteria;
 import org.atlas.services.catalog.port.out.repository.ProductRepository;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;

@@ -4,7 +4,7 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -53,7 +53,7 @@ public class EasyExcelProductExcelReader implements ProductExcelReader {
 
     @ExcelProperty(value = "Publish Date")
     @DateTimeFormat(value = CommonConstant.DATE_TIME_FORMAT)
-    private Date publishedAt;
+    private LocalDateTime publishedAt;
 
     @ExcelProperty(value = "Quantity")
     private Integer initialQuantity;

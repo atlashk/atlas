@@ -1,1 +1,1 @@
-Your order #${order.orderCode} has been fulfilled successfully!
+Your order #${order.id} has been fulfilled successfully!

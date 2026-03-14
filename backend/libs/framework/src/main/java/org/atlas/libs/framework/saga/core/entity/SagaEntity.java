@@ -1,6 +1,6 @@
 package org.atlas.libs.framework.saga.core.entity;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -22,6 +22,6 @@ public class SagaEntity extends DomainEntity {
   private String name;
   private String context;
   private SagaStatus status;
-  private Date completedAt;
+  private LocalDateTime completedAt;
   private String errorMessage;
 }

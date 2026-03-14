@@ -1,7 +1,7 @@
 package org.atlas.services.order.api.rest.order.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.Date;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,10 +21,10 @@ public class RetrieveOrderListRequest {
   private OrderStatus status;
 
   @Schema(description = "Start date", example = "2024-01-01")
-  private Date startDate;
+  private LocalDate startDate;
 
   @Schema(description = "End date", example = "2024-01-31")
-  private Date endDate;
+  private LocalDate endDate;
 
   @Schema(description = "The page number to retrieve (default is 1).", example = "1")
   private Integer page;

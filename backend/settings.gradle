@@ -48,9 +48,9 @@ project(':libs.file.excel.poi').projectDir = file('libs/file/excel/excel-poi')
 include(':libs.file.pdf.pdfbox')
 project(':libs.file.pdf.pdfbox').projectDir = file('libs/file/pdf/pdf-pdfbox')
 
-// Full-text Search
-include(':libs.full-text-search.elasticsearch')
-project(':libs.full-text-search.elasticsearch').projectDir = file('libs/full-text-search/full-text-search-elasticsearch')
+// Search
+include(':libs.search.elasticsearch')
+project(':libs.search.elasticsearch').projectDir = file('libs/search/search-elasticsearch')
 
 // Internal
 
@@ -272,8 +272,8 @@ include(':services.catalog.file.excel.poi')
 project(':services.catalog.file.excel.poi').projectDir = file('services/catalog-service/catalog-infrastructure/catalog-file-excel-poi')
 include(':services.catalog.file.pdf.pdfbox')
 project(':services.catalog.file.pdf.pdfbox').projectDir = file('services/catalog-service/catalog-infrastructure/catalog-file-pdf-pdfbox')
-include(':services.catalog.full-text-search.elasticsearch')
-project(':services.catalog.full-text-search.elasticsearch').projectDir = file('services/catalog-service/catalog-infrastructure/catalog-full-text-search-elasticsearch')
+include(':services.catalog.search.elasticsearch')
+project(':services.catalog.search.elasticsearch').projectDir = file('services/catalog-service/catalog-infrastructure/catalog-search-elasticsearch')
 include(':services.catalog.messaging.kafka')
 project(':services.catalog.messaging.kafka').projectDir = file('services/catalog-service/catalog-infrastructure/catalog-messaging-kafka')
 include(':services.catalog.messaging.rabbitmq')

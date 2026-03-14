@@ -1,7 +1,7 @@
 package org.atlas.services.order.port.out.repository;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -48,8 +48,8 @@ public interface OrderRepository {
 
     private OrderStatus status;
 
-    private Date startDate;
+    private LocalDate startDate;
 
-    private Date endDate;
+    private LocalDate endDate;
   }
 }

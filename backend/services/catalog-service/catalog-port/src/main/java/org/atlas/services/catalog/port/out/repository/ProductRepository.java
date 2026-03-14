@@ -1,7 +1,7 @@
 package org.atlas.services.catalog.port.out.repository;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -50,9 +50,9 @@ public interface ProductRepository {
 
     private BigDecimal maxPrice;
 
-    private Date startPublishedAt;
+    private LocalDate startPublishedDate;
 
-    private Date endPublishedAt;
+    private LocalDate endPublishedDate;
 
     private Boolean inStock;
 

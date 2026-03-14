@@ -181,10 +181,10 @@ services:
       - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
 
-{{#hasService "full-text-search" "elasticsearch"}}
+{{#hasService "search" "elasticsearch"}}
   elasticsearch:
     container_name: elasticsearch
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.11
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.2.5
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -491,7 +491,7 @@ services:
       - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER:-atlas}
       - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-Atlas@123456}
       {{/hasService}}
-      {{#hasService "full-text-search" "elasticsearch"}}
+      {{#hasService "search" "elasticsearch"}}
       - ELASTICSEARCH_HOST=elasticsearch
       - ELASTICSEARCH_PORT=9200
       - ELASTICSEARCH_USERNAME=elastic
@@ -525,7 +525,7 @@ services:
       postgres:
         condition: service_healthy
       {{/hasService}}
-      {{#hasService "full-text-search" "elasticsearch"}}
+      {{#hasService "search" "elasticsearch"}}
       elasticsearch:
         condition: service_healthy
       {{/hasService}}
@@ -778,7 +778,7 @@ volumes:
 {{#hasService "messaging" "rabbitmq"}}
   rabbitmq-data:
 {{/hasService}}
-{{#hasService "full-text-search" "elasticsearch"}}
+{{#hasService "search" "elasticsearch"}}
   elasticsearch-data:
 {{/hasService}}
 {{#hasService "storage" "minio"}}

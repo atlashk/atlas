@@ -1,1 +1,0 @@
-Your order <span style="color:#2d96dc;">#${order.orderCode}</span> with amount <strong>${order.amount?string("$#,##0.00")}</strong> has been fulfilled successfully!

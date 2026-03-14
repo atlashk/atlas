@@ -67,15 +67,15 @@ dependencies {
             throw new IllegalArgumentException("Unsupported file.pdf: ${rootProject.ext.appStack['file.pdf']}")
     }
 
-    // Full-text search
-    switch (rootProject.ext.appStack['full-text-search']) {
+    // Search
+    switch (rootProject.ext.appStack['search']) {
         case 'none':
             break
         case 'elasticsearch':
-            api project(':services.catalog.full-text-search.elasticsearch')
+            api project(':services.catalog.search.elasticsearch')
             break
         default:
-            throw new IllegalArgumentException("Unsupported full-text-search: ${rootProject.ext.appStack['full-text-search']}")
+            throw new IllegalArgumentException("Unsupported search: ${rootProject.ext.appStack['search']}")
     }
 
     // KV store

@@ -221,20 +221,20 @@ Login credentials: `admin` / `Atlas@123456`
 
 **Infrastructure**
 
-| Component | Responsibility | Exposed Ports |
-| --- | --- | --- |
-| MySQL | Database | 3306 |
-| PostgreSQL | Database | 5432 |
-| Redis | Key-value store | 6379 |
-| Elasticsearch | Full-text search engine | 9200 |
-| MinIO | S3-compatible object storage | 9000 |
-| Kafka | Messaging platform | 9092 |
-| RabbitMQ | Messaging platform | 5672 & 15672 (management UI) |
-| Keycloak | Identity provider | 8443 |
-| Loki | Log aggregation backend | 3100 |
-| Promtail | Log shipping agent | 9080 |
-| Prometheus | Metrics scraping and storage | 9090 |
-| Zipkin | Distributed tracing backend | 9411 |
+| Component | Responsibility                         | Exposed Ports |
+| --- |----------------------------------------| --- |
+| MySQL | Database                               | 3306 |
+| PostgreSQL | Database                               | 5432 |
+| Redis | Key-value store                        | 6379 |
+| Elasticsearch | Search engine                          | 9200 |
+| MinIO | S3-compatible object storage           | 9000 |
+| Kafka | Messaging platform                     | 9092 |
+| RabbitMQ | Messaging platform                     | 5672 & 15672 (management UI) |
+| Keycloak | Identity provider                      | 8443 |
+| Loki | Log aggregation backend                | 3100 |
+| Promtail | Log shipping agent                     | 9080 |
+| Prometheus | Metrics scraping and storage           | 9090 |
+| Zipkin | Distributed tracing backend            | 9411 |
 | Grafana | Observability visualization dashboards | 3000 |
 
 Default credentials: `atlas` / `Atlas@123456`
@@ -260,7 +260,7 @@ List of options for each capability:
 | `file.csv` | `opencsv` |
 | `file.excel` | `poi` \| `easyexcel` |
 | `file.pdf` | `pdfbox` |
-| `full-text-search` | `elasticsearch` |
+| `search` | `elasticsearch` |
 | `identity` | `jwt` \| `keycloak` |
 | `internal` | `rest` \| `grpc` |
 | `kv-store` | `redis` |

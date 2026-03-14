@@ -2,7 +2,7 @@ package org.atlas.services.order.api.rest.order.model.admin;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -44,7 +44,7 @@ public class OrderResponse {
   private String cancellationReason;
 
   @Schema(description = "Date and time when the order was created")
-  private Date createdAt;
+  private LocalDateTime createdAt;
 
   @Getter
   @Setter

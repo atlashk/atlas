@@ -34,7 +34,7 @@ public class RetrieveProductListInput {
 
   public enum Mode {
 
-    DATABASE, // Dynamic search
-    FULL_TEXT_SEARCH,
+    DATABASE, // Database dynamic search
+    SEARCH, // Full-text search
   }
 }

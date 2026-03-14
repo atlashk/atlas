@@ -454,55 +454,6 @@ const OrderList: React.FC = () => {
                                     </div>
                                   </div>
 
-                                  {order.address && (
-                                    <div className="bg-white rounded-lg border p-4 shadow-sm">
-                                      <h6 className="font-semibold mb-2 border-b pb-2 flex items-center gap-2">
-                                        <MapPin className="w-4 h-4" />
-                                        Delivery Address
-                                      </h6>
-                                      <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                                        <span className="text-sm font-medium text-gray-600 min-w-[120px]">
-                                          Street
-                                        </span>
-                                        {order.address.street}
-                                      </div>
-                                      <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                                        <span className="text-sm font-medium text-gray-600 min-w-[120px]">
-                                          City
-                                        </span>
-                                        {order.address.city}
-                                      </div>
-                                      <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                                        <span className="text-sm font-medium text-gray-600 min-w-[120px]">
-                                          Country
-                                        </span>
-                                        {order.address.country}
-                                      </div>
-                                      <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                                        <span className="text-sm font-medium text-gray-600 min-w-[120px]">
-                                          Postal Code
-                                        </span>
-                                        {order.address.postalCode}
-                                      </div>
-                                    </div>
-                                  )}
-
-                                  {order.cancellationReason && (
-                                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 shadow-sm">
-                                      <h6 className="font-semibold mb-2 text-red-800 border-b border-red-200 pb-2 flex items-center gap-2">
-                                        <TriangleAlert className="w-4 h-4" />
-                                        Cancellation Information
-                                      </h6>
-                                      <div className="flex items-start space-x-3">
-                                        <div>
-                                          <p className="text-sm text-red-800 mt-1 leading-relaxed">
-                                            {order.cancellationReason}
-                                          </p>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  )}
-
                                   <div className="bg-white rounded-lg border p-4 shadow-sm">
                                     <h6 className="font-semibold mb-2 border-b pb-2 flex items-center gap-2">
                                       <ShoppingBag className="w-4 h-4" />
@@ -579,6 +530,55 @@ const OrderList: React.FC = () => {
                                       </div>
                                     </div>
                                   </div>
+
+                                  {order.cancellationReason && (
+                                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 shadow-sm">
+                                      <h6 className="font-semibold mb-2 text-red-800 border-b border-red-200 pb-2 flex items-center gap-2">
+                                        <TriangleAlert className="w-4 h-4" />
+                                        Cancellation Information
+                                      </h6>
+                                      <div className="flex items-start space-x-3">
+                                        <div>
+                                          <p className="text-sm text-red-800 mt-1 leading-relaxed">
+                                            {order.cancellationReason}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {order.address && (
+                                    <div className="bg-white rounded-lg border p-4 shadow-sm">
+                                      <h6 className="font-semibold mb-2 border-b pb-2 flex items-center gap-2">
+                                        <MapPin className="w-4 h-4" />
+                                        Delivery Address
+                                      </h6>
+                                      <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                        <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                          Street
+                                        </span>
+                                        {order.address.street}
+                                      </div>
+                                      <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                        <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                          City
+                                        </span>
+                                        {order.address.city}
+                                      </div>
+                                      <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                        <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                          Country
+                                        </span>
+                                        {order.address.country}
+                                      </div>
+                                      <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                        <span className="text-sm font-medium text-gray-600 min-w-[120px]">
+                                          Postal Code
+                                        </span>
+                                        {order.address.postalCode}
+                                      </div>
+                                    </div>
+                                  )}
 
                                   {order.payment && (
                                     <div className="bg-white rounded-lg border p-4 shadow-sm">

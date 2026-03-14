@@ -2,6 +2,7 @@ package org.atlas.services.catalog.infrastructure.file.excel.easyexcel;
 
 import com.alibaba.excel.annotation.ExcelProperty;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -49,7 +50,7 @@ public class EasyExcelProductExcelWriter implements ProductExcelWriter {
     private BigDecimal price;
 
     @ExcelProperty(value = "Publish Date")
-    private Date publishedAt;
+    private LocalDateTime publishedAt;
 
     @ExcelProperty(value = "In Stock")
     private Boolean inStock;

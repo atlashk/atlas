@@ -5,7 +5,7 @@ import com.opencsv.bean.CsvBindByPosition;
 import com.opencsv.bean.CsvDate;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -53,7 +53,7 @@ public class OpencsvProductCsvReader implements ProductCsvReader {
     @CsvBindByName(column = "Publish Date")
     @CsvBindByPosition(position = 3)
     @CsvDate(value = "yyyy-MM-dd HH:mm:ss")
-    private Date publishedAt;
+    private LocalDateTime publishedAt;
 
     @CsvBindByName(column = "Quantity")
     @CsvBindByPosition(position = 4)

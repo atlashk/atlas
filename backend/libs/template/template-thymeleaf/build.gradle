@@ -30,6 +30,7 @@ dependencies {
 
     // Thymeleaf
     api 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    api 'org.thymeleaf.extras:thymeleaf-extras-java8time:3.0.4.RELEASE'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

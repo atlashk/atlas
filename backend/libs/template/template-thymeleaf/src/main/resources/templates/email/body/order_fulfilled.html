@@ -55,10 +55,10 @@
 
   <!-- Order confirmation details -->
   <p>
-    Thank you for your order! Your order <strong><span th:text="${order.orderId}"></span></strong>,
+    Thank you for your order! Your order <strong><span th:text="${order.id}"></span></strong>,
     placed on
     <strong><span
-        th:text="${#dates.format(order.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></span></strong>, was
+        th:text="${order.createdAt != null ? #temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm:ss') : 'N/A'}"></span></strong>, was
     confirmed.
   </p>
 
@@ -78,17 +78,62 @@
     <tr th:each="orderItem : ${order.orderItems}">
       <td th:text="${orderItem.product.id}"></td>
       <td th:text="${orderItem.product.name}"></td>
-      <td th:text="${#numbers.formatDecimal(orderItem.product.price, 2, 'COMMA', 'DOT')}"></td>
+      <td th:text="${#numbers.formatDecimal(orderItem.product.price, 1, 2, 'POINT')}"></td>
       <td th:text="${orderItem.quantity}"></td>
-      <td th:text="${#numbers.formatDecimal(orderItem.product.price * orderItem.quantity, 2, 'COMMA', 'DOT')}"></td>
+      <td th:text="${#numbers.formatDecimal(orderItem.product.price * orderItem.quantity, 1, 2, 'POINT')}"></td>
     </tr>
     </tbody>
     <tfoot>
     <tr>
-      <td class="total" colspan="4">Total Amount</td>
-      <td class="total" th:text="${#numbers.formatDecimal(order.amount, 2, 'COMMA', 'DOT')}"></td>
+      <td colspan="3"></td>
+      <td class="total">Total Amount</td>
+      <td class="total" th:text="${#numbers.formatDecimal(order.amount, 1, 2, 'POINT')}"></td>
     </tr>
     </tfoot>
+  </table>
+
+  <h3 th:if="${order.address != null}">Delivery Address</h3>
+  <table class="order-summary" th:if="${order.address != null}">
+    <tbody>
+    <tr>
+      <td><strong>Street</strong></td>
+      <td th:text="${order.address.street != null ? order.address.street : 'N/A'}"></td>
+    </tr>
+    <tr>
+      <td><strong>City</strong></td>
+      <td th:text="${order.address.city != null ? order.address.city : 'N/A'}"></td>
+    </tr>
+    <tr>
+      <td><strong>Country</strong></td>
+      <td th:text="${order.address.country != null ? order.address.country : 'N/A'}"></td>
+    </tr>
+    <tr>
+      <td><strong>Postal Code</strong></td>
+      <td th:text="${order.address.postalCode != null ? order.address.postalCode : 'N/A'}"></td>
+    </tr>
+    </tbody>
+  </table>
+
+  <h3 th:if="${order.payment != null}">Payment Information</h3>
+  <table class="order-summary" th:if="${order.payment != null}">
+    <tbody>
+    <tr>
+      <td><strong>Payment Gateway</strong></td>
+      <td th:text="${order.payment.paymentGatewayName != null ? order.payment.paymentGatewayName : 'N/A'}"></td>
+    </tr>
+    <tr>
+      <td><strong>Payment Method</strong></td>
+      <td th:text="${order.payment.paymentMethod != null ? order.payment.paymentMethod : 'N/A'}"></td>
+    </tr>
+    <tr>
+      <td><strong>Payment Details</strong></td>
+      <td th:text="${order.payment.paymentMethodDetails != null ? order.payment.paymentMethodDetails : 'N/A'}"></td>
+    </tr>
+    <tr>
+      <td><strong>Transaction ID</strong></td>
+      <td th:text="${order.payment.transactionId != null ? order.payment.transactionId : 'N/A'}"></td>
+    </tr>
+    </tbody>
   </table>
 
   <!-- Closing message -->

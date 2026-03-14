@@ -2,7 +2,7 @@ package org.atlas.libs.framework.domain.event;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.Date;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,7 +16,7 @@ public class DomainEvent implements Serializable {
   private String eventId;
   private DomainEventType eventType;
   private Long timestamp;
-  private Date processedAt;
+  private LocalDateTime processedAt;
   private Long version;
 
   public DomainEvent(DomainEventType eventType) {
@@ -27,7 +27,7 @@ public class DomainEvent implements Serializable {
   }
 
   public void markAsProcessed() {
-    this.processedAt = new Date();
+    this.processedAt = LocalDateTime.now();
   }
 
   public boolean isProcessed() {

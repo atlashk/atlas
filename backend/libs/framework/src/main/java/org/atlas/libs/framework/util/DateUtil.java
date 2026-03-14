@@ -1,114 +1,54 @@
 package org.atlas.libs.framework.util;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import lombok.experimental.UtilityClass;
 
+/**
+ * Utility class for modern java.time.* operations.
+ */
 @UtilityClass
 public class DateUtil {
 
-  private static final ConcurrentMap<String, SimpleDateFormat> simpleDateFormatCache = new ConcurrentHashMap<>();
+  private static final ConcurrentMap<String, DateTimeFormatter> dateTimeFormatterCache =
+      new ConcurrentHashMap<>();
 
-  public static Date parse(String source, String pattern) {
+  public static LocalDateTime parse(String source, String pattern) {
     if (StringUtil.isBlank(source)) {
       return null;
     }
-    SimpleDateFormat simpleDateFormat = simpleDateFormatCache.computeIfAbsent(pattern,
-        SimpleDateFormat::new);
-    try {
-      return simpleDateFormat.parse(source);
-    } catch (ParseException e) {
-      throw new RuntimeException(e);
-    }
+
+    DateTimeFormatter dateTimeFormatter = dateTimeFormatterCache.computeIfAbsent(pattern,
+        DateTimeFormatter::ofPattern);
+    return LocalDateTime.parse(source, dateTimeFormatter);
   }
 
-  public static String format(Date source, String pattern) {
+  public static String format(LocalDateTime source, String pattern) {
     if (source == null) {
       return null;
     }
-    SimpleDateFormat simpleDateFormat = simpleDateFormatCache.computeIfAbsent(pattern,
-        SimpleDateFormat::new);
-    return simpleDateFormat.format(source);
+
+    DateTimeFormatter dateTimeFormatter = dateTimeFormatterCache.computeIfAbsent(pattern,
+        DateTimeFormatter::ofPattern);
+    return dateTimeFormatter.format(source);
   }
 
-  public static Date convertLocalDateTimeToDate(LocalDateTime localDateTime) {
-    return localDateTime != null ? Date.from(localDateTime.atZone(ZoneId.systemDefault())
-        .toInstant()) : null;
+  public static LocalDateTime getMidnight(LocalDate date) {
+    if (date == null) {
+      return null;
+    }
+
+    return date.atStartOfDay();
   }
 
-  public static LocalDateTime convertDateToLocalDateTime(Date date) {
-    return date.toInstant()
-        .atZone(ZoneId.systemDefault())
-        .toLocalDateTime();
-  }
+  public static LocalDateTime getNextMidnight(LocalDate date) {
+    if (date == null) {
+      return null;
+    }
 
-  public static Date now() {
-    return new Date();
-  }
-
-  public static String now(String pattern) {
-    return format(now(), pattern);
-  }
-
-  public static long timestamp() {
-    return now().getTime();
-  }
-
-  public static Date getTodayMidnight() {
-    Calendar calendar = Calendar.getInstance();
-    resetToMidnight(calendar);
-    return calendar.getTime();
-  }
-
-  public static Date getTomorrowMidnight() {
-    return getNextMidnight(now());
-  }
-
-  public static Date getNextMidnight(Date date) {
-    Calendar calendar = Calendar.getInstance();
-    calendar.setTime(date);
-    resetToMidnight(calendar);
-    calendar.add(Calendar.DAY_OF_YEAR, 1);
-    return calendar.getTime();
-  }
-
-  public static Date getYesterdayMidnight() {
-    Calendar calendar = Calendar.getInstance();
-    calendar.setTime(new Date());
-    resetToMidnight(calendar);
-    calendar.add(Calendar.DAY_OF_YEAR, -1);
-    return calendar.getTime();
-  }
-
-  public static LocalDateTime changeTimezone(LocalDateTime source, int offsetInHours) {
-    ZonedDateTime sourceZonedDateTime = source.atZone(ZoneId.systemDefault());
-    ZoneOffset targetZoneOffset = ZoneOffset.ofHours(offsetInHours);
-    ZonedDateTime targetZonedDateTime = sourceZonedDateTime.withZoneSameInstant(targetZoneOffset);
-    return targetZonedDateTime.toLocalDateTime();
-  }
-
-  public static Date changeTimezone(Date source, int offsetInHours) {
-    Instant sourceInstant = source.toInstant();
-    ZonedDateTime sourceZonedDateTime = sourceInstant.atZone(ZoneId.systemDefault());
-    ZoneOffset targetZoneOffset = ZoneOffset.ofHours(offsetInHours);
-    ZonedDateTime targetZonedDateTime = sourceZonedDateTime.withZoneSameInstant(targetZoneOffset);
-    LocalDateTime targetLocalDateTime = targetZonedDateTime.toLocalDateTime();
-    return convertLocalDateTimeToDate(targetLocalDateTime);
-  }
-
-  private static void resetToMidnight(Calendar calendar) {
-    calendar.set(Calendar.HOUR_OF_DAY, 0);
-    calendar.set(Calendar.MINUTE, 0);
-    calendar.set(Calendar.SECOND, 0);
-    calendar.set(Calendar.MILLISECOND, 0);
+    return date.plusDays(1).atStartOfDay();
   }
 }

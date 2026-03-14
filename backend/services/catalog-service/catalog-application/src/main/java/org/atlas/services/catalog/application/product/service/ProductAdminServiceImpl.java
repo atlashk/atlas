@@ -34,7 +34,7 @@ import org.atlas.services.catalog.port.out.file.mapper.ProductWriteRowMapper;
 import org.atlas.services.catalog.port.out.file.model.ProductReadRow;
 import org.atlas.services.catalog.port.out.file.model.ProductWriteRow;
 import org.atlas.services.catalog.port.out.file.pdf.ProductPdfWriter;
-import org.atlas.services.catalog.port.out.fulltextsearch.FullTextSearchService;
+import org.atlas.services.catalog.port.out.search.SearchService;
 import org.atlas.services.catalog.port.out.messaging.ProductEventMessagePublisher;
 import org.atlas.services.catalog.port.out.repository.ProductRepository;
 import org.springframework.beans.factory.ObjectProvider;
@@ -51,7 +51,7 @@ public class ProductAdminServiceImpl implements ProductAdminService {
   private final ProductImageService productImageService;
   private final SequenceGenerator sequenceGenerator;
   private final ProductEventMessagePublisher productEventMessagePublisher;
-  private final ObjectProvider<FullTextSearchService> fullTextSearchServiceProvider;
+  private final ObjectProvider<SearchService> searchServiceProvider;
   private final CacheService cacheService;
   private final ProductCsvReader productCsvReader;
   private final ProductExcelReader productExcelReader;
@@ -107,11 +107,11 @@ public class ProductAdminServiceImpl implements ProductAdminService {
         input.getImageContentType());
     log.debug("Product image uploaded: id={}", product.getId());
 
-    // Create full-text search document (if search service is available)
-    FullTextSearchService fullTextSearchService = fullTextSearchServiceProvider.getIfAvailable();
-    if (fullTextSearchService != null) {
-      fullTextSearchService.save(product);
-      log.debug("Full-text search document created for product: id={}", product.getId());
+    // Create search document (if search service is available)
+    SearchService searchService = searchServiceProvider.getIfAvailable();
+    if (searchService != null) {
+      searchService.save(product);
+      log.debug("Search document created for product: id={}", product.getId());
     }
 
     log.info("Product created successfully: id={}", product.getId());
@@ -138,11 +138,11 @@ public class ProductAdminServiceImpl implements ProductAdminService {
       log.debug("Product image updated: id={}", product.getId());
     }
 
-    // Update full-text search document (if search service is available)
-    FullTextSearchService fullTextSearchService = fullTextSearchServiceProvider.getIfAvailable();
-    if (fullTextSearchService != null) {
-      fullTextSearchService.save(product);
-      log.debug("Full-text search document updated for product: id={}", product.getId());
+    // Update search document (if search service is available)
+    SearchService searchService = searchServiceProvider.getIfAvailable();
+    if (searchService != null) {
+      searchService.save(product);
+      log.debug("Search document updated for product: id={}", product.getId());
     }
 
     // Evict product cache
@@ -173,11 +173,11 @@ public class ProductAdminServiceImpl implements ProductAdminService {
     productImageService.deleteImage(product.getId());
     log.debug("Product image deleted: id={}", product.getId());
 
-    // Delete full-text search document (if search service is available)
-    FullTextSearchService fullTextSearchService = fullTextSearchServiceProvider.getIfAvailable();
-    if (fullTextSearchService != null) {
-      fullTextSearchService.delete(product.getId());
-      log.debug("Full-text search document deleted for product: id={}", product.getId());
+    // Delete search document (if search service is available)
+    SearchService searchService = searchServiceProvider.getIfAvailable();
+    if (searchService != null) {
+      searchService.delete(product.getId());
+      log.debug("Search document deleted for product: id={}", product.getId());
     }
 
     // Evict product cache

@@ -8,7 +8,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.util.DateUtil;
@@ -90,7 +90,8 @@ public class CustomJpaOrderRepositoryUsingCriteria implements CustomJpaOrderRepo
     }
 
     if (criteria.getProductId() != null) {
-      spec.addFilter(QueryFilter.of("orderItems.productId", criteria.getProductId(), QueryOperator.EQUAL));
+      spec.addFilter(
+          QueryFilter.of("orderItems.productId", criteria.getProductId(), QueryOperator.EQUAL));
     }
 
     if (criteria.getStatus() != null) {
@@ -98,12 +99,13 @@ public class CustomJpaOrderRepositoryUsingCriteria implements CustomJpaOrderRepo
     }
 
     if (criteria.getStartDate() != null) {
-      spec.addFilter(QueryFilter.of("createdAt", criteria.getStartDate(), QueryOperator.GREATER_THAN_EQUAL));
+      LocalDateTime midnight = DateUtil.getMidnight(criteria.getStartDate());
+      spec.addFilter(QueryFilter.of("createdAt", midnight, QueryOperator.GREATER_THAN_EQUAL));
     }
 
     if (criteria.getEndDate() != null) {
-      Date nextDateOfEndDate = DateUtil.getNextMidnight(criteria.getEndDate());
-      spec.addFilter(QueryFilter.of("createdAt", nextDateOfEndDate, QueryOperator.LESS_THAN));
+      LocalDateTime nextMidnight = DateUtil.getNextMidnight(criteria.getEndDate());
+      spec.addFilter(QueryFilter.of("createdAt", nextMidnight, QueryOperator.LESS_THAN));
     }
 
     return spec;

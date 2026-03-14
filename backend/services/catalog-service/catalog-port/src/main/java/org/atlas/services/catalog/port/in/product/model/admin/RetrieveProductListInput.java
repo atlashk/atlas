@@ -1,7 +1,7 @@
 package org.atlas.services.catalog.port.in.product.model.admin;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,9 +28,9 @@ public class RetrieveProductListInput {
 
   private BigDecimal maxPrice;
 
-  private Date startPublishedAt;
+  private LocalDate startPublishedDate;
 
-  private Date endPublishedAt;
+  private LocalDate endPublishedDate;
 
   private Boolean inStock;
 

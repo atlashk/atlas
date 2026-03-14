@@ -49,8 +49,8 @@
 <div class="content">
   <p>Dear ${order.user.firstName} ${order.user.lastName},</p>
 
-  <p>Thank you for your order! Your order <strong>${order.orderCode}</strong>, placed on
-    <strong>${order.createdAt?string("yyyy-MM-dd HH:mm:ss")}</strong>, was confirmed.</p>
+  <p>Thank you for your order! Your order <strong>${order.id}</strong>, placed on
+    <strong><#if order.createdAt??>${order.createdAt.format("yyyy-MM-dd HH:mm:ss")}<#else>N/A</#if></strong>, was confirmed.</p>
 
   <table class="order-summary">
     <thead>
@@ -75,11 +75,60 @@
     </tbody>
     <tfoot>
     <tr>
-      <td colspan="4" class="total">Total Amount</td>
+      <td colspan="3"></td>
+      <td class="total">Total Amount</td>
       <td class="total">${order.amount?string("$#,##0.00")}</td>
     </tr>
     </tfoot>
   </table>
+
+  <#if order.address??>
+    <h3>Delivery Address</h3>
+    <table class="order-summary">
+      <tbody>
+      <tr>
+        <td><strong>Street</strong></td>
+        <td>${order.address.street!"N/A"}</td>
+      </tr>
+      <tr>
+        <td><strong>City</strong></td>
+        <td>${order.address.city!"N/A"}</td>
+      </tr>
+      <tr>
+        <td><strong>Country</strong></td>
+        <td>${order.address.country!"N/A"}</td>
+      </tr>
+      <tr>
+        <td><strong>Postal Code</strong></td>
+        <td>${order.address.postalCode!"N/A"}</td>
+      </tr>
+      </tbody>
+    </table>
+  </#if>
+
+  <#if order.payment??>
+    <h3>Payment Information</h3>
+    <table class="order-summary">
+      <tbody>
+      <tr>
+        <td><strong>Payment Gateway</strong></td>
+        <td>${order.payment.paymentGatewayName!"N/A"}</td>
+      </tr>
+      <tr>
+        <td><strong>Payment Method</strong></td>
+        <td>${order.payment.paymentMethod!"N/A"}</td>
+      </tr>
+      <tr>
+        <td><strong>Payment Details</strong></td>
+        <td>${order.payment.paymentMethodDetails!"N/A"}</td>
+      </tr>
+      <tr>
+        <td><strong>Transaction ID</strong></td>
+        <td>${order.payment.transactionId!"N/A"}</td>
+      </tr>
+      </tbody>
+    </table>
+  </#if>
 
   <p>Best regards,</p>
   <p>Atlas</p>
