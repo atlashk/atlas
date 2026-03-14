@@ -2,6 +2,7 @@ package org.atlas.services.order.port.out.repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -32,6 +33,8 @@ public interface OrderRepository {
   void insert(OrderEntity order);
 
   void update(OrderEntity order);
+
+  List<OrderEntity> findExpiredOrders(LocalDateTime createdBefore);
 
   @NoArgsConstructor
   @AllArgsConstructor

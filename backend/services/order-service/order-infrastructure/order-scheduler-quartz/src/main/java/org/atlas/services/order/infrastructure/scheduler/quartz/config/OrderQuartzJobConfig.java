@@ -1,8 +1,8 @@
-package org.atlas.libs.outbox.scheduler.quartz.config;
+package org.atlas.services.order.infrastructure.scheduler.quartz.config;
 
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.config.ApplicationConfigService;
-import org.atlas.libs.outbox.scheduler.quartz.job.RelayOutboxMessageJob;
+import org.atlas.services.order.infrastructure.scheduler.quartz.job.CancelExpiredOrderJob;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
@@ -13,29 +13,28 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @RequiredArgsConstructor
-public class QuartzJobConfig {
+public class OrderQuartzJobConfig {
 
   private final ApplicationConfigService applicationConfigService;
 
   @Bean
-  public JobDetail relayOutboxMessageJobDetail() {
+  public JobDetail cancelExpiredOrderJobDetail() {
     return JobBuilder.newJob()
-        .ofType(RelayOutboxMessageJob.class)
-        .withIdentity(RelayOutboxMessageJob.class.getSimpleName(),
+        .ofType(CancelExpiredOrderJob.class)
+        .withIdentity(CancelExpiredOrderJob.class.getSimpleName(),
             applicationConfigService.getApplicationName())
         .storeDurably()
         .build();
   }
 
   @Bean
-  public Trigger relayOutboxMessageTrigger(JobDetail relayOutboxMessageJobDetail) {
+  public Trigger cancelExpiredOrderTrigger(JobDetail cancelExpiredOrderJobDetail) {
     return TriggerBuilder.newTrigger()
-        .forJob(relayOutboxMessageJobDetail)
-        .withIdentity(RelayOutboxMessageJob.class.getSimpleName(),
+        .forJob(cancelExpiredOrderJobDetail)
+        .withIdentity(CancelExpiredOrderJob.class.getSimpleName(),
             applicationConfigService.getApplicationName())
-        // Run every 5 seconds
-        .withSchedule(CronScheduleBuilder.cronSchedule("*/5 * * * * ?")
-            .withMisfireHandlingInstructionFireAndProceed()) // Handle misfires
+        .withSchedule(CronScheduleBuilder.cronSchedule("0 * * * * ?")
+            .withMisfireHandlingInstructionFireAndProceed())
         .build();
   }
 }

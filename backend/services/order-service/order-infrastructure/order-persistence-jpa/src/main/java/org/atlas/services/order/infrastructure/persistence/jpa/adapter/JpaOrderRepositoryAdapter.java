@@ -1,6 +1,7 @@
 package org.atlas.services.order.infrastructure.persistence.jpa.adapter;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -75,5 +76,11 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
   public void update(OrderEntity order) {
     JpaOrderEntity jpaOrder = JpaOrderMapper.INSTANCE.toJpaOrder(order);
     jpaOrderRepository.save(jpaOrder);
+  }
+
+  @Override
+  public List<OrderEntity> findExpiredOrders(LocalDateTime createdBefore) {
+    List<JpaOrderEntity> jpaOrders = jpaOrderRepository.findExpiredOrders(createdBefore);
+    return MapperUtil.mapList(jpaOrders, JpaOrderMapper.INSTANCE::toOrder);
   }
 }

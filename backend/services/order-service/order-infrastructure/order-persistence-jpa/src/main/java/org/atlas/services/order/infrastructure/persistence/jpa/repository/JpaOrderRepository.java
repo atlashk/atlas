@@ -1,6 +1,7 @@
 package org.atlas.services.order.infrastructure.persistence.jpa.repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.atlas.libs.framework.domain.shared.order.OrderStatus;
@@ -47,4 +48,14 @@ public interface JpaOrderRepository extends JpaBaseRepository<JpaOrderEntity, In
         order by year(o.createdAt), month(o.createdAt)
       """)
   List<MonthlyOrderAggregation> aggregateMonthlyByStatus(@Param("status") OrderStatus status);
+
+  @Query("""
+      select o
+      from JpaOrderEntity o
+      left join fetch o.orderItems
+      where o.status <> org.atlas.libs.framework.domain.shared.order.OrderStatus.FULFILLED
+        and o.status <> org.atlas.libs.framework.domain.shared.order.OrderStatus.CANCELED
+        and o.createdAt <= :createdBefore
+      """)
+  List<JpaOrderEntity> findExpiredOrders(@Param("createdBefore") LocalDateTime createdBefore);
 }
