@@ -34,7 +34,6 @@ export class IdentityApi extends BaseApi {
     };
     if (filters.id) payload.id = filters.id;
     if (filters.role) payload.role = filters.role;
-    if (filters.username) payload.username = filters.username;
     if (filters.firstName) payload.firstName = filters.firstName;
     if (filters.lastName) payload.lastName = filters.lastName;
     if (filters.email) payload.email = filters.email;

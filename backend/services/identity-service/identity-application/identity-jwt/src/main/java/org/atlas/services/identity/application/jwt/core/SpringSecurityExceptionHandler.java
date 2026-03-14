@@ -25,7 +25,7 @@ public class SpringSecurityExceptionHandler {
   @ResponseStatus(HttpStatus.UNAUTHORIZED)
   public ApiResponseWrapper<Void> handle(BadCredentialsException e) {
     return ApiResponseWrapper.error(CommonDomainError.UNAUTHORIZED.getErrorCode(),
-        "Incorrect username or password");
+        "Incorrect email or password");
   }
 
   @ExceptionHandler(AuthenticationException.class)

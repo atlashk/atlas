@@ -21,9 +21,6 @@ public class UserResponse {
   @Schema(description = "Unique identifier of the user", example = "USR0000001")
   private String id;
 
-  @Schema(description = "Username of the user", example = "john_doe")
-  private String username;
-
   @Schema(description = "First name of the user", example = "John")
   private String firstName;
 

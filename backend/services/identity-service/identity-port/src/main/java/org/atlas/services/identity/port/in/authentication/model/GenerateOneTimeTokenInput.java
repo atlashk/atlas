@@ -13,5 +13,5 @@ import lombok.Setter;
 @Setter
 public class GenerateOneTimeTokenInput {
 
-  private String username;
+  private String email;
 }

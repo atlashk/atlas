@@ -57,7 +57,6 @@ const AdminUserListPage: React.FC = () => {
   const [isLoadingUserRoles, setIsLoadingUserRoles] = useState(false);
   const [filters, setFilters] = useState<ListUserFilters>({
     id: undefined,
-    username: undefined,
     firstName: undefined,
     lastName: undefined,
     email: undefined,
@@ -152,7 +151,6 @@ const AdminUserListPage: React.FC = () => {
   const resetFilters = useCallback(() => {
     const resetFiltersData: ListUserFilters = {
       id: undefined,
-      username: undefined,
       firstName: undefined,
       lastName: undefined,
       email: undefined,
@@ -271,18 +269,6 @@ const AdminUserListPage: React.FC = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  type="text"
-                  id="username"
-                  placeholder="Enter username"
-                  value={filters.username || ""}
-                  onChange={(e) =>
-                    handleFilterChange("username", e.target.value || undefined)
-                  }
-                />
-              </div>
-              <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
                 <Input
                   type="text"
@@ -388,7 +374,6 @@ const AdminUserListPage: React.FC = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>ID</TableHead>
-                      <TableHead>Username</TableHead>
                       <TableHead>Name</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Phone</TableHead>
@@ -400,7 +385,7 @@ const AdminUserListPage: React.FC = () => {
                     {users.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={7}
+                          colSpan={6}
                           className="text-center py-8 text-muted-foreground"
                         >
                           No users found
@@ -410,7 +395,6 @@ const AdminUserListPage: React.FC = () => {
                       users.map((user) => (
                         <TableRow key={user.id}>
                           <TableCell>{user.id}</TableCell>
-                          <TableCell>{user.username}</TableCell>
                           <TableCell>
                             {user.firstName && user.lastName
                               ? `${user.firstName} ${user.lastName}`
@@ -467,7 +451,7 @@ const AdminUserListPage: React.FC = () => {
               <AlertDialogTitle>Delete User</AlertDialogTitle>
               <AlertDialogDescription>
                 {deleteTarget
-                  ? `Are you sure you want to delete ${deleteTarget.username}? This action cannot be undone.`
+                  ? `Are you sure you want to delete ${deleteTarget.email}? This action cannot be undone.`
                   : "Are you sure you want to delete this user?"}
               </AlertDialogDescription>
             </AlertDialogHeader>

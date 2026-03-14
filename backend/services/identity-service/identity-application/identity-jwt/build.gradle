@@ -31,6 +31,9 @@ dependencies {
     // Spring Security
     api 'org.springframework.boot:spring-boot-starter-security'
 
+    // OAuth2 Client (Supports SSO login)
+    api 'org.springframework.boot:spring-boot-starter-security-oauth2-client'
+
     // Supports HTTP handling
     api project(':libs.api.server.rest')
 

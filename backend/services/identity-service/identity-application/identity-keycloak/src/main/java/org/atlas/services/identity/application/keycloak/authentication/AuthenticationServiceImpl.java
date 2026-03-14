@@ -32,7 +32,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   @Override
   public LoginOutput login(LoginInput input) throws Exception {
-    TokenResponse tokenResponse = keycloakAuthenticationClient.login(input.getUsername(),
+    TokenResponse tokenResponse = keycloakAuthenticationClient.login(input.getEmail(),
         input.getPassword());
     return new LoginOutput(tokenResponse.getAccessToken(), tokenResponse.getRefreshToken());
   }
@@ -58,7 +58,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     // Verify the current password
     try {
-      keycloakAuthenticationClient.login(user.getUsername(), input.getOldPassword());
+      keycloakAuthenticationClient.login(user.getEmail(), input.getOldPassword());
     } catch (Exception e) {
       throw new DomainException(DomainError.WRONG_PASSWORD);
     }

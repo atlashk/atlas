@@ -78,11 +78,6 @@ public class CustomJpaUserRepositoryUsingCriteria implements CustomJpaUserReposi
       spec.addFilter(QueryFilter.of("id", criteria.getId().trim(), QueryOperator.EQUAL));
     }
 
-    if (StringUtil.isNotBlank(criteria.getUsername())) {
-      spec.addFilter(
-          QueryFilter.of("username", criteria.getUsername().trim(), QueryOperator.LIKE));
-    }
-
     if (StringUtil.isNotBlank(criteria.getFirstName())) {
       spec.addFilter(
           QueryFilter.of("firstName", criteria.getFirstName().trim(), QueryOperator.LIKE));

@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 public class OneTimeTokenLoginInput {
 
-  private String username;
+  private String email;
 
   private String token;
 }

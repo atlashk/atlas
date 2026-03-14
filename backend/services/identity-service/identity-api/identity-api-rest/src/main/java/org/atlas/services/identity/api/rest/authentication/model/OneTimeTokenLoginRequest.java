@@ -18,8 +18,8 @@ import lombok.Setter;
 public class OneTimeTokenLoginRequest {
 
   @NotBlank
-  @Schema(description = "Username, email, or phone number of the user attempting to log in", example = "john_doe", requiredMode = RequiredMode.REQUIRED)
-  private String username;
+  @Schema(description = "Email of the user attempting one-time-token login", example = "john.doe@example.com", requiredMode = RequiredMode.REQUIRED)
+  private String email;
 
   @NotBlank
   @Schema(description = "The provided one-time token", example = "123456", requiredMode = RequiredMode.REQUIRED)

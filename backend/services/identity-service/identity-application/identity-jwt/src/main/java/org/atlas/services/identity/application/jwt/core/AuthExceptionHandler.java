@@ -18,7 +18,7 @@ public class AuthExceptionHandler {
   @ExceptionHandler(BadCredentialsException.class)
   public ResponseEntity<ApiResponseWrapper<Void>> handleBadCredentials(BadCredentialsException e) {
     ApiResponseWrapper<Void> body = ApiResponseWrapper.error(
-        CommonDomainError.UNAUTHORIZED.getErrorCode(), "Incorrect username or password");
+        CommonDomainError.UNAUTHORIZED.getErrorCode(), "Incorrect email or password");
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
   }
 }

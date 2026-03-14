@@ -51,14 +51,9 @@ public class JpaUserRepositoryAdapter implements UserRepository {
   }
 
   @Override
-  public Optional<UserEntity> findByUsername(String email) {
-    return jpaUserRepository.findByUsername(email)
+  public Optional<UserEntity> findByEmail(String email) {
+    return jpaUserRepository.findByEmail(email)
         .map(JpaUserMapper.INSTANCE::toUser);
-  }
-
-  @Override
-  public boolean existsByUsername(String username) {
-    return jpaUserRepository.existsByUsername(username);
   }
 
   @Override

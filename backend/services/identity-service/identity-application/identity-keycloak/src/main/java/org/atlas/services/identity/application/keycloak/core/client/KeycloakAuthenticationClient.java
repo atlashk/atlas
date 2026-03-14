@@ -26,14 +26,14 @@ public class KeycloakAuthenticationClient {
   private final KeycloakClientHelper keycloakClientHelper;
   private final RestClient restClient;
 
-  public TokenResponse login(String username, String password) {
+  public TokenResponse login(String email, String password) {
     String url = String.format("%s/realms/%s/protocol/openid-connect/token",
         keycloakProps.getBaseUrl(), keycloakProps.getRealm());
     MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
     form.add("grant_type", OAuth2Constant.GRANT_TYPE_PASSWORD);
     form.add("client_id", keycloakProps.getClientId());
     form.add("client_secret", keycloakProps.getClientSecret());
-    form.add("username", username);
+    form.add("username", email);
     form.add("password", password);
     return restClient.post()
         .uri(url)

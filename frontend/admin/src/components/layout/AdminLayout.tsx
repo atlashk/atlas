@@ -100,7 +100,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const displayName = useMemo(() => {
     if (!profile) return "Account";
     if (profile.firstName && profile.lastName) return `${profile.firstName} ${profile.lastName}`;
-    return profile.username || profile.email || "Account";
+    return profile.email || "Account";
   }, [profile]);
 
   const handleLogout = async () => {

@@ -1,11 +1,12 @@
-package org.atlas.libs.framework.config;
+package org.atlas.libs.framework.appstack;
 
 import lombok.RequiredArgsConstructor;
+import org.atlas.libs.framework.config.ApplicationConfigService;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class AppStackConfigService {
+public class AppStackService {
 
   private final ApplicationConfigService applicationConfigService;
 

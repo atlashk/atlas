@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.framework.domain.entity.DomainEntity;
-import org.atlas.libs.framework.domain.shared.identity.UserRole;
+import org.atlas.libs.framework.security.FederatedIdentityProvider;
 
 @Getter
 @Setter
@@ -15,21 +15,13 @@ import org.atlas.libs.framework.domain.shared.identity.UserRole;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
-public class UserEntity extends DomainEntity {
+public class FederatedIdentityEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
-  private String id;
+  private String userId;
 
-  private String firstName;
+  @EqualsAndHashCode.Include
+  private FederatedIdentityProvider provider;
 
-  private String lastName;
-
-  private String email;
-
-  private String phoneNumber;
-
-  // Hashed password
-  private String password;
-
-  private UserRole role;
+  private String providerUserId;
 }

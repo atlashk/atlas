@@ -1,6 +1,6 @@
 // Login interfaces
 export interface LoginRequest {
-  username: string;
+  email: string;
   password: string;
 }
 
@@ -26,19 +26,17 @@ export interface ChangePasswordRequest {
 
 export interface User {
   id: number;
-  username: string;
   firstName: string;
   lastName: string;
   email: string;
-  phoneNumber: string;
+  phoneNumber?: string;
   role: string;
 }
 
 export interface RegisterRequest {
-  username: string;
   password: string;
   firstName: string;
   lastName: string;
   email: string;
-  phoneNumber: string;
+  phoneNumber?: string;
 }

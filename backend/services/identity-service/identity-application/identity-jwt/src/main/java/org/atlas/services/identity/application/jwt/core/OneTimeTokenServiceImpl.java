@@ -32,19 +32,19 @@ public class OneTimeTokenServiceImpl implements OneTimeTokenService {
 
   @Override
   public OneTimeToken consume(OneTimeTokenAuthenticationToken authenticationToken) {
-    String username = (String) authenticationToken.getPrincipal();
+    String email = (String) authenticationToken.getPrincipal();
     String presentedTokenValue = (String) authenticationToken.getCredentials();
     if (presentedTokenValue == null) {
       return null;
     }
 
-    OneTimeToken oneTimeToken = kvStoreService.get(STORE_NAME, username, OneTimeToken.class)
+    OneTimeToken oneTimeToken = kvStoreService.get(STORE_NAME, email, OneTimeToken.class)
         .orElse(null);
     if (isInvalid(oneTimeToken) || !presentedTokenValue.equals(oneTimeToken.getTokenValue())) {
       return null;
     }
 
-    kvStoreService.delete(STORE_NAME, username);
+    kvStoreService.delete(STORE_NAME, email);
 
     return oneTimeToken;
   }

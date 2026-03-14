@@ -12,12 +12,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { API_BASE_URL } from "@/config/env.config";
 import { LoginRequest } from "@/interfaces";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Loader2, Lock, User } from "lucide-react";
+import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -25,8 +26,8 @@ import { withGuestOnly } from "../../hoc/withAuth";
 import { useUserStore } from "../../stores/user.store";
 
 const formSchema = z.object({
-  username: z.string().min(1, {
-    message: "Username is required.",
+  email: z.email({
+    message: "Email is required.",
   }),
   password: z
     .string()
@@ -36,23 +37,59 @@ const formSchema = z.object({
 const Login: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isProcessingSso, setIsProcessingSso] = useState(false);
+  const [ssoHandled, setSsoHandled] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const { login } = useUserStore();
+  const { login, loginWithTokens } = useUserStore();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // Get redirect parameter from URL
   const getRedirectUrl = () => {
-    if (typeof window !== "undefined") {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get("redirect") || null;
-    }
-    return null;
+    return searchParams.get("redirect");
   };
+
+  useEffect(() => {
+    const accessToken = searchParams.get("accessToken");
+    const refreshToken = searchParams.get("refreshToken");
+    const ssoError = searchParams.get("ssoError");
+
+    if (ssoError) {
+      setErrorMessage("Google login failed. Please try again.");
+      return;
+    }
+
+    if (!accessToken || !refreshToken || ssoHandled) {
+      return;
+    }
+
+    const completeSsoLogin = async () => {
+      setIsProcessingSso(true);
+      setErrorMessage("");
+
+      const response = await loginWithTokens(accessToken, refreshToken);
+
+      if (response.success) {
+        toast.success("Google login successful!");
+        setSsoHandled(true);
+        const redirectUrl = sessionStorage.getItem("auth_redirect");
+        sessionStorage.removeItem("auth_redirect");
+        router.push(redirectUrl || "/");
+        return;
+      }
+
+      setSsoHandled(true);
+      setErrorMessage(response.errorMessage || "Google login failed.");
+      setIsProcessingSso(false);
+    };
+
+    void completeSsoLogin();
+  }, [loginWithTokens, router, searchParams, ssoHandled]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
     },
   });
@@ -63,7 +100,7 @@ const Login: React.FC = () => {
       setErrorMessage("");
 
       const credentials: LoginRequest = {
-        username: values.username,
+        email: values.email,
         password: values.password,
       };
 
@@ -97,6 +134,14 @@ const Login: React.FC = () => {
     }
   };
 
+  const onGoogleLogin = () => {
+    const redirectUrl = getRedirectUrl();
+    if (redirectUrl) {
+      sessionStorage.setItem("auth_redirect", redirectUrl);
+    }
+    window.location.href = `${API_BASE_URL}/services/identity/oauth2/authorization/google`;
+  };
+
   return (
     <div className="h-screen flex items-start justify-center pt-40">
       <Card className="w-full max-w-md">
@@ -122,18 +167,18 @@ const Login: React.FC = () => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="username"
+                name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Username</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                           {...field}
-                          type="text"
+                          type="email"
                           className={`pl-10 ${errorMessage ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-                          placeholder="Enter your username"
+                          placeholder="Enter your email"
                         />
                       </div>
                     </FormControl>
@@ -188,7 +233,7 @@ const Login: React.FC = () => {
                 type="submit"
                 className="w-full"
                 size="lg"
-                disabled={isLoggingIn}
+                disabled={isLoggingIn || isProcessingSso}
               >
                 {isLoggingIn ? (
                   <>
@@ -197,6 +242,24 @@ const Login: React.FC = () => {
                   </>
                 ) : (
                   "Sign In"
+                )}
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                size="lg"
+                disabled={isLoggingIn || isProcessingSso}
+                onClick={onGoogleLogin}
+              >
+                {isProcessingSso ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing Google Login...
+                  </>
+                ) : (
+                  "Continue with Google"
                 )}
               </Button>
 

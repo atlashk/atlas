@@ -33,7 +33,7 @@ export default function NavBar() {
   const userDisplayName =
     profile?.firstName && profile?.lastName
       ? `${profile.firstName} ${profile.lastName}`
-      : profile?.username || profile?.email || 'User';
+      : profile?.email || 'User';
 
   const handleLogout = async () => {
     await logout();

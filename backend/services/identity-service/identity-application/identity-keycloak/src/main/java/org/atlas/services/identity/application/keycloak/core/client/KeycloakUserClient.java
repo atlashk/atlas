@@ -43,8 +43,8 @@ public class KeycloakUserClient {
           .retrieve()
           .onStatus(HttpStatusCode::isError, (request, response) -> {
             throw new KeycloakClientException(
-                String.format("Failed to create Keycloak user: username=%s, status=%d",
-                    user.getUsername(), response.getStatusCode().value()));
+                String.format("Failed to create Keycloak user: email=%s, status=%d",
+                    user.getEmail(), response.getStatusCode().value()));
           })
           .toBodilessEntity()
           .getHeaders()
@@ -56,15 +56,15 @@ public class KeycloakUserClient {
       // Assign role
       assignUserRole(kcUserId, user.getRole());
 
-      log.info("Created Keycloak user successfully: username={}, userId={}", 
-          user.getUsername(), kcUserId);
+      log.info("Created Keycloak user successfully: email={}, userId={}",
+          user.getEmail(), kcUserId);
       return kcUserId;
     } catch (KeycloakClientException e) {
       throw e;
     } catch (Exception e) {
       throw new KeycloakClientException(
-          String.format("Failed to create Keycloak user: username=%s, reason=%s", 
-              user.getUsername(), e.getMessage()));
+          String.format("Failed to create Keycloak user: email=%s, reason=%s",
+              user.getEmail(), e.getMessage()));
     }
   }
 
@@ -142,7 +142,7 @@ public class KeycloakUserClient {
 
   private Map<String, Object> buildUserPayload(UserEntity user) {
     Map<String, Object> payload = new HashMap<>();
-    payload.put("username", user.getUsername());
+    payload.put("username", user.getEmail());
     payload.put("firstName", user.getFirstName() != null ? user.getFirstName() : "");
     payload.put("lastName", user.getLastName() != null ? user.getLastName() : "");
     payload.put("email", user.getEmail() != null ? user.getEmail() : "");

@@ -16,15 +16,6 @@ import org.atlas.libs.framework.domain.shared.identity.UserRole;
 public class CreateUserRequest {
 
   @NotBlank
-  @Schema(description = "Username for the new user", example = "john_doe", requiredMode = RequiredMode.REQUIRED)
-  private String username;
-
-  @NotBlank
-  @Pattern(regexp = Patterns.PASSWORD, message = "{error.user.invalid_password}")
-  @Schema(description = "Password for the new user, must meet security requirements", example = "P@ssw0rd123", requiredMode = RequiredMode.REQUIRED)
-  private String password;
-
-  @NotBlank
   @Schema(description = "First name of the new user", example = "John", requiredMode = RequiredMode.REQUIRED)
   private String firstName;
 
@@ -37,9 +28,13 @@ public class CreateUserRequest {
   @Schema(description = "Email address of the new user", example = "john.doe@example.com", requiredMode = RequiredMode.REQUIRED)
   private String email;
 
-  @NotBlank
-  @Schema(description = "Phone number of the new user", example = "+1234567890", requiredMode = RequiredMode.REQUIRED)
+  @Schema(description = "Phone number of the new user", example = "+1234567890")
   private String phoneNumber;
+
+  @NotBlank
+  @Pattern(regexp = Patterns.PASSWORD, message = "{error.user.invalid_password}")
+  @Schema(description = "Password for the new user, must meet security requirements", example = "P@ssw0rd123", requiredMode = RequiredMode.REQUIRED)
+  private String password;
 
   @Schema(description = "Role of the new user", example = "USER")
   private UserRole role;

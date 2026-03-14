@@ -64,6 +64,13 @@ public class StringUtil {
     return str.chars().allMatch(Character::isLetterOrDigit);
   }
 
+  public static List<String> split(String str, String delimiter) {
+    if (isBlank(str)) {
+      return CollectionUtil.emptyList();
+    }
+    return Arrays.asList(str.split(delimiter));
+  }
+
   /**
    * Limits the length of a string to the specified maximum length. If the string exceeds the
    * maximum length, it is truncated.
@@ -74,6 +81,13 @@ public class StringUtil {
       return null;
     }
     return str.length() > maxLength ? str.substring(0, maxLength) : str;
+  }
+
+  public static String defaultIfBlank(String str, String defaultValue) {
+    if (isBlank(str)) {
+      return defaultValue;
+    }
+    return str;
   }
 
   /**
@@ -130,12 +144,5 @@ public class StringUtil {
       suffix = "-th";
     }
     return String.format("%d%s", number, suffix);
-  }
-
-  public static List<String> split(String str, String delimiter) {
-    if (isBlank(str)) {
-      return CollectionUtil.emptyList();
-    }
-    return Arrays.asList(str.split(delimiter));
   }
 }

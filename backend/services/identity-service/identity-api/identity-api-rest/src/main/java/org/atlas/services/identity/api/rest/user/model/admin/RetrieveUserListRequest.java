@@ -22,9 +22,6 @@ public class RetrieveUserListRequest {
   @Schema(description = "ID", example = "1")
   private String id;
 
-  @Schema(description = "Username", example = "john.doe")
-  private String username;
-
   @Schema(description = "First name", example = "John")
   private String firstName;
 

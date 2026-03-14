@@ -23,11 +23,11 @@ public class UserDataInitializer {
   @EventListener(ApplicationReadyEvent.class)
   public void initialize(ApplicationReadyEvent event) {
     try {
-      if (!userAdminService.existsUser("admin")) {
+      if (!userAdminService.existsUser("admin@atlas.org")) {
         createAdminUser();
       }
 
-      if (!userAdminService.existsUser("demo")) {
+      if (!userAdminService.existsUser("demo@atlas.org")) {
         createDemoUser();
       }
     } catch (Exception e) {
@@ -39,7 +39,6 @@ public class UserDataInitializer {
 
   private void createAdminUser() throws Exception {
     CreateUserInput input = CreateUserInput.builder()
-        .username("admin")
         .password(getDefaultPassword())
         .firstName("John")
         .lastName("Doe")
@@ -53,7 +52,6 @@ public class UserDataInitializer {
 
   private void createDemoUser() throws Exception {
     CreateUserInput input = CreateUserInput.builder()
-        .username("demo")
         .password(getDefaultPassword())
         .firstName("Demo")
         .lastName("User")

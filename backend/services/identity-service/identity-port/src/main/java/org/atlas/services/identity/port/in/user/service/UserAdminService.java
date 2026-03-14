@@ -18,7 +18,7 @@ public interface UserAdminService {
 
   void deleteUser(String id);
 
-  boolean existsUser(String username);
+  boolean existsUser(String email);
 
   Long retrieveTotalUserCount();
 }

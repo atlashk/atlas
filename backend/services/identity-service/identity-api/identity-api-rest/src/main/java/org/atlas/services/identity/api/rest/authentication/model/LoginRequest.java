@@ -18,8 +18,8 @@ import lombok.Setter;
 public class LoginRequest {
 
   @NotBlank
-  @Schema(description = "Username, email, or phone number of the user attempting to log in", example = "john_doe", requiredMode = RequiredMode.REQUIRED)
-  private String username;
+  @Schema(description = "Email of the user attempting to log in", example = "john.doe@example.com", requiredMode = RequiredMode.REQUIRED)
+  private String email;
 
   @NotBlank
   @Schema(description = "Password of the user attempting to log in", example = "P@ssw0rd", requiredMode = RequiredMode.REQUIRED)

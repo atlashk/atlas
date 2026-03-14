@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.security.authorization.RequiredAdmin;
 import org.atlas.libs.framework.util.MapperUtil;
+import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.identity.application.keycloak.core.client.KeycloakUserClient;
 import org.atlas.services.identity.application.keycloak.user.mapper.UserAdminMapper;
 import org.atlas.services.identity.domain.entity.UserEntity;
@@ -58,8 +59,8 @@ public class UserAdminServiceImpl implements UserAdminService {
     try {
       kcUserId = keycloakUserClient.createUser(user, input.getPassword());
     } catch (Exception e) {
-      log.error("Failed to sync user to Keycloak: username={}, error={}", 
-          user.getUsername(), e.getMessage(), e);
+      log.error("Failed to sync user to Keycloak: email={}, error={}",
+          user.getEmail(), e.getMessage(), e);
       throw new DomainException(DomainError.USER_REGISTRATION_FAILED, e);
     }
 
@@ -111,8 +112,8 @@ public class UserAdminServiceImpl implements UserAdminService {
 
   @Override
   @Transactional(readOnly = true)
-  public boolean existsUser(String username) {
-    return userRepository.existsByUsername(username);
+  public boolean existsUser(String email) {
+    return userRepository.existsByEmail(email);
   }
 
   @Override
@@ -122,13 +123,12 @@ public class UserAdminServiceImpl implements UserAdminService {
   }
 
   private void checkValidity(CreateUserInput input) {
-    if (userRepository.existsByUsername(input.getUsername())) {
-      throw new DomainException(DomainError.USERNAME_ALREADY_EXISTS);
-    }
     if (userRepository.existsByEmail(input.getEmail())) {
       throw new DomainException(DomainError.EMAIL_ALREADY_EXISTS);
     }
-    if (userRepository.existsByPhoneNumber(input.getPhoneNumber())) {
+
+    if (StringUtil.isNotBlank(input.getPhoneNumber()) &&
+        userRepository.existsByPhoneNumber(input.getPhoneNumber())) {
       throw new DomainException(DomainError.PHONE_NUMBER_ALREADY_EXISTS);
     }
   }

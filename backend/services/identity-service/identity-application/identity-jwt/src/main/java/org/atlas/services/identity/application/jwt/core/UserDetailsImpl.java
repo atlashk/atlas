@@ -15,13 +15,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class UserDetailsImpl implements UserDetails {
 
   private String id;
-  private String username;
+  private String email;
   private String password;
   private Collection<? extends GrantedAuthority> authorities;
 
   public UserDetailsImpl(UserEntity user) {
     this.id = user.getId();
-    this.username = user.getUsername();
+    this.email = user.getEmail();
     this.password = user.getPassword();
     this.authorities = Collections.singletonList(
         new SimpleGrantedAuthority(user.getRole().name()));
@@ -39,7 +39,7 @@ public class UserDetailsImpl implements UserDetails {
 
   @Override
   public String getUsername() {
-    return username;
+    return email;
   }
 
   @Override

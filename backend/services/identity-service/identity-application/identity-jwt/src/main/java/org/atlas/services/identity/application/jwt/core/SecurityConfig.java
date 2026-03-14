@@ -30,6 +30,8 @@ public class SecurityConfig {
 
   private final UserDetailsService userDetailsService;
   private final OneTimeTokenService oneTimeTokenService;
+  private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+  private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -37,9 +39,11 @@ public class SecurityConfig {
         .csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(auth ->
             auth.anyRequest().permitAll())
+        .oauth2Login(oauth2 -> oauth2
+            .successHandler(oAuth2AuthenticationSuccessHandler)
+            .failureHandler(oAuth2AuthenticationFailureHandler))
         .sessionManagement((session) ->
-            // No session should be created
-            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
         .exceptionHandling(ex -> {
           // Unauthorized
           ex.authenticationEntryPoint(new CustomAuthenticationEntryPoint());

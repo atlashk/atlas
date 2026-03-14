@@ -6,6 +6,7 @@ import org.atlas.libs.framework.security.authorization.RequiredAdmin;
 import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.libs.framework.util.MapperUtil;
+import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.identity.application.jwt.user.mapper.UserAdminMapper;
 import org.atlas.services.identity.domain.entity.UserEntity;
 import org.atlas.services.identity.domain.error.DomainError;
@@ -78,8 +79,8 @@ public class UserAdminServiceImpl implements UserAdminService {
 
   @Override
   @Transactional(readOnly = true)
-  public boolean existsUser(String username) {
-    return userRepository.existsByUsername(username);
+  public boolean existsUser(String email) {
+    return userRepository.existsByEmail(email);
   }
 
   @Override
@@ -89,13 +90,12 @@ public class UserAdminServiceImpl implements UserAdminService {
   }
 
   private void checkValidity(CreateUserInput input) {
-    if (userRepository.existsByUsername(input.getUsername())) {
-      throw new DomainException(DomainError.USERNAME_ALREADY_EXISTS);
-    }
     if (userRepository.existsByEmail(input.getEmail())) {
       throw new DomainException(DomainError.EMAIL_ALREADY_EXISTS);
     }
-    if (userRepository.existsByPhoneNumber(input.getPhoneNumber())) {
+
+    if (StringUtil.isNotBlank(input.getPhoneNumber()) &&
+        userRepository.existsByPhoneNumber(input.getPhoneNumber())) {
       throw new DomainException(DomainError.PHONE_NUMBER_ALREADY_EXISTS);
     }
   }

@@ -13,10 +13,6 @@ import lombok.Setter;
 @Setter
 public class RegisterInput {
 
-  private String username;
-
-  private String password;
-
   private String firstName;
 
   private String lastName;
@@ -24,4 +20,6 @@ public class RegisterInput {
   private String email;
 
   private String phoneNumber;
+
+  private String password;
 }

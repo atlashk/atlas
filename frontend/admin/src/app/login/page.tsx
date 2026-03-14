@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { LoginRequest } from "@/interfaces/identity.interface";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Loader2, Lock, User } from "lucide-react";
+import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -25,8 +25,8 @@ import { withGuestOnly } from "../../hoc/withAuth";
 import { useUserStore } from "../../stores/user.store";
 
 const formSchema = z.object({
-  username: z.string().min(1, {
-    message: "Username is required.",
+  email: z.email({
+    message: "Email is required.",
   }),
   password: z
     .string()
@@ -52,7 +52,7 @@ const Login: React.FC = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
     },
   });
@@ -63,7 +63,7 @@ const Login: React.FC = () => {
       setErrorMessage("");
 
       const credentials: LoginRequest = {
-        username: values.username,
+        email: values.email,
         password: values.password,
       };
 
@@ -123,18 +123,18 @@ const Login: React.FC = () => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="username"
+                name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Username</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                           {...field}
-                          type="text"
+                          type="email"
                           className="pl-10"
-                          placeholder="Enter your username"
+                          placeholder="Enter your email"
                         />
                       </div>
                     </FormControl>

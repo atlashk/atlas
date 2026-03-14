@@ -31,12 +31,6 @@ public class JpaUserEntity extends JpaBaseEntity {
   @Column(name = "id")
   private String id;
 
-  @Column(name = "username")
-  private String username;
-
-  @Column(name = "password")
-  private String password;
-
   @Column(name = "first_name")
   private String firstName;
 
@@ -50,6 +44,9 @@ public class JpaUserEntity extends JpaBaseEntity {
   @Column(name = "phone_number")
   @Convert(converter = StringCryptoConverter.class)
   private String phoneNumber;
+
+  @Column(name = "password")
+  private String password;
 
   @Column(name = "role")
   @Enumerated(EnumType.STRING)

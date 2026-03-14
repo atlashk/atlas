@@ -186,8 +186,8 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     type: undefined,
     minPrice: undefined,
     maxPrice: undefined,
-    startPublishedAt: undefined,
-    endPublishedAt: undefined,
+    startPublishedDate: undefined,
+    endPublishedDate: undefined,
     inStock: undefined,
     brandId: undefined,
     categoryIds: undefined,
@@ -202,8 +202,8 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     type: undefined,
     minPrice: undefined,
     maxPrice: undefined,
-    startPublishedAt: undefined,
-    endPublishedAt: undefined,
+    startPublishedDate: undefined,
+    endPublishedDate: undefined,
     inStock: undefined,
     brandId: undefined,
     categoryIds: undefined,
@@ -228,8 +228,8 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
       minPrice: undefined,
       maxPrice: undefined,
       type: undefined,
-      startPublishedAt: undefined,
-      endPublishedAt: undefined,
+      startPublishedDate: undefined,
+      endPublishedDate: undefined,
       inStock: undefined,
       brandId: undefined,
       categoryIds: undefined,
@@ -443,8 +443,8 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
           minPrice: appliedFilters.minPrice,
           maxPrice: appliedFilters.maxPrice,
           type: appliedFilters.type,
-          startPublishedAt: appliedFilters.startPublishedAt,
-          endPublishedAt: appliedFilters.endPublishedAt,
+          startPublishedDate: appliedFilters.startPublishedDate,
+          endPublishedDate: appliedFilters.endPublishedDate,
           inStock: appliedFilters.inStock,
           brandId: appliedFilters.brandId,
           categoryIds: appliedFilters.categoryIds?.map(String),
@@ -606,15 +606,15 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="startPublishedAt">Start Publish date</Label>
+              <Label htmlFor="startPublishedDate">Start Publish date</Label>
               <Input
                 type="date"
-                id="startPublishedAt"
+                id="startPublishedDate"
                 placeholder="Start Publish date"
-                value={formFilters.startPublishedAt || ""}
+                value={formFilters.startPublishedDate || ""}
                 onChange={(e) =>
                   handleFilterChange(
-                    "startPublishedAt",
+                    "startPublishedDate",
                     e.target.value || undefined
                   )
                 }
@@ -622,15 +622,15 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="endPublishedAt">End Publish date</Label>
+              <Label htmlFor="endPublishedDate">End Publish date</Label>
               <Input
                 type="date"
-                id="endPublishedAt"
+                id="endPublishedDate"
                 placeholder="End Publish date"
-                value={formFilters.endPublishedAt || ""}
+                value={formFilters.endPublishedDate || ""}
                 onChange={(e) =>
                   handleFilterChange(
-                    "endPublishedAt",
+                    "endPublishedDate",
                     e.target.value || undefined
                   )
                 }

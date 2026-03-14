@@ -41,6 +41,18 @@ spring:
               max-idle-time: 45m # Allow connections to stay idle longer for SSE/WebSocket
           routes:
             # Identity service
+            - id: identity-service-oauth2-authorization
+              uri: ${IDENTITY_SERVICE_URI:lb://identity-service}
+              predicates:
+                - Path=/services/identity/oauth2/**
+              filters:
+                - RewritePath=/services/identity/oauth2/(?<segment>.*), /oauth2/${segment}
+            - id: identity-service-oauth2-callback
+              uri: ${IDENTITY_SERVICE_URI:lb://identity-service}
+              predicates:
+                - Path=/services/identity/login/oauth2/**
+              filters:
+                - RewritePath=/services/identity/login/oauth2/(?<segment>.*), /login/oauth2/${segment}
             - id: identity-service-auth
               uri: ${IDENTITY_SERVICE_URI:lb://identity-service}
               predicates:

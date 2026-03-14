@@ -33,11 +33,10 @@ import { z } from "zod";
 
 const userSchema = z
   .object({
-    username: z.string().min(2, "Username must be at least 2 characters."),
     firstName: z.string().min(1, "First name is required."),
     lastName: z.string().min(1, "Last name is required."),
     email: z.email("Please enter a valid email address."),
-    phoneNumber: z.string().min(1, "Phone number is required."),
+    phoneNumber: z.string().optional(),
     password: z
       .string()
       .min(1, "Password is required.")
@@ -62,7 +61,6 @@ function AdminUserAddPage() {
   const form = useForm<UserCreateFormData>({
     resolver: zodResolver(userSchema),
     defaultValues: {
-      username: "",
       firstName: "",
       lastName: "",
       email: "",
@@ -101,11 +99,10 @@ function AdminUserAddPage() {
 
   const onSubmit = async (values: UserCreateFormData) => {
     const request: RegisterRequest & { role?: string } = {
-      username: values.username,
       firstName: values.firstName,
       lastName: values.lastName,
       email: values.email,
-      phoneNumber: values.phoneNumber,
+      phoneNumber: values.phoneNumber || undefined,
       password: values.password,
       role: values.role,
     };
@@ -141,19 +138,6 @@ function AdminUserAddPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="username"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Username *</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Enter username" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                   <FormField
                     control={form.control}
                     name="role"
@@ -228,7 +212,7 @@ function AdminUserAddPage() {
                     name="phoneNumber"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Phone Number *</FormLabel>
+                        <FormLabel>Phone Number</FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="Enter phone number" />
                         </FormControl>

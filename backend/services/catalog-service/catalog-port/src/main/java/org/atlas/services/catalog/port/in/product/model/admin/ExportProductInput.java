@@ -28,9 +28,9 @@ public class ExportProductInput {
 
   private BigDecimal maxPrice;
 
-  private LocalDateTime startPublishedAt;
+  private LocalDateTime startPublishedDate;
 
-  private LocalDateTime endPublishedAt;
+  private LocalDateTime endPublishedDate;
 
   private Boolean inStock;
 

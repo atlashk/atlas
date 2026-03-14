@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.context.Contexts;
 import org.atlas.libs.framework.domain.shared.identity.UserRole;
+import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.identity.application.keycloak.core.client.KeycloakUserClient;
 import org.atlas.services.identity.application.keycloak.user.mapper.UserMapper;
 import org.atlas.services.identity.domain.entity.UserEntity;
@@ -58,13 +59,12 @@ public class UserServiceImpl implements UserService {
 
   private void checkValidity(RegisterInput input) {
     // Validate against DB (better query performance)
-    if (userRepository.existsByUsername(input.getUsername())) {
-      throw new DomainException(DomainError.USERNAME_ALREADY_EXISTS);
-    }
     if (userRepository.existsByEmail(input.getEmail())) {
       throw new DomainException(DomainError.EMAIL_ALREADY_EXISTS);
     }
-    if (userRepository.existsByPhoneNumber(input.getPhoneNumber())) {
+
+    if (StringUtil.isNotBlank(input.getPhoneNumber()) &&
+        userRepository.existsByPhoneNumber(input.getPhoneNumber())) {
       throw new DomainException(DomainError.PHONE_NUMBER_ALREADY_EXISTS);
     }
   }

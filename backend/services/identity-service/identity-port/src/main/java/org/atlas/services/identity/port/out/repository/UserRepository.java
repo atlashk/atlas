@@ -20,9 +20,7 @@ public interface UserRepository {
 
   Optional<UserEntity> findById(String id);
 
-  Optional<UserEntity> findByUsername(String username);
-
-  boolean existsByUsername(String username);
+  Optional<UserEntity> findByEmail(String email);
 
   boolean existsByEmail(String email);
 
@@ -44,8 +42,6 @@ public interface UserRepository {
   class FindUserCriteria {
 
     private String id;
-
-    private String username;
 
     private String firstName;
 

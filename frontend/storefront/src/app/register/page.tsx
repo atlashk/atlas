@@ -27,9 +27,6 @@ import { z } from "zod";
 
 const formSchema = z
   .object({
-    username: z.string().min(2, {
-      message: "Username must be at least 2 characters.",
-    }),
     firstName: z.string().min(1, {
       message: "First name is required.",
     }),
@@ -39,9 +36,7 @@ const formSchema = z
     email: z.email({
       message: "Please enter a valid email address.",
     }),
-    phoneNumber: z.string().min(1, {
-      message: "Phone number is required.",
-    }),
+    phoneNumber: z.string().optional(),
     password: z
       .string()
       .min(1, { message: "Password is required." })
@@ -63,7 +58,6 @@ const Register: React.FC = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
       firstName: "",
       lastName: "",
       email: "",
@@ -81,11 +75,10 @@ const Register: React.FC = () => {
     setErrorMessage("");
 
     const request: RegisterRequest = {
-      username: values.username,
       firstName: values.firstName,
       lastName: values.lastName,
       email: values.email,
-      phoneNumber: values.phoneNumber,
+      phoneNumber: values.phoneNumber || undefined,
       password: values.password,
     };
 
@@ -170,28 +163,6 @@ const Register: React.FC = () => {
                   )}
                 />
               </div>
-
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          {...field}
-                          type="text"
-                          className="pl-10"
-                          placeholder="Choose a username"
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
               <FormField
                 control={form.control}

@@ -17,8 +17,6 @@ public class RetrieveUserListInput {
 
   private String id;
 
-  private String username;
-
   private String firstName;
 
   private String lastName;

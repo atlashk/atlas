@@ -28,6 +28,10 @@ interface UserActions {
   login: (
     credentials: LoginRequest
   ) => Promise<{ success: boolean; errorMessage?: string }>;
+  loginWithTokens: (
+    accessToken: string,
+    refreshToken: string
+  ) => Promise<{ success: boolean; errorMessage?: string }>;
   fetchProfile: () => Promise<void>;
   changePassword: (
     request: ChangePasswordRequest
@@ -92,6 +96,37 @@ export const useUserStore = create<UserStore>()(
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : "Login failed";
           logger.error('Login failed', error);
+          set({
+            error: errorMessage,
+            loading: false,
+          });
+          return { success: false, errorMessage };
+        }
+      },
+
+      loginWithTokens: async (accessToken: string, refreshToken: string) => {
+        set({ loading: true, error: null });
+
+        try {
+          setCookie(AUTH_STORAGE_KEYS.ACCESS_TOKEN, accessToken);
+          setCookie(AUTH_STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+
+          set({
+            accessToken,
+            profile: null,
+            loading: false,
+          });
+
+          try {
+            await get().fetchProfile();
+            return { success: true };
+          } catch (profileError) {
+            logger.warn('SSO login successful but failed to fetch user profile', profileError);
+            return { success: true };
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : "SSO login failed";
+          logger.error('SSO login failed', error);
           set({
             error: errorMessage,
             loading: false,

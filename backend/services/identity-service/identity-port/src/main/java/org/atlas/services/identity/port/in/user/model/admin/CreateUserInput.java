@@ -14,10 +14,6 @@ import org.atlas.libs.framework.domain.shared.identity.UserRole;
 @Setter
 public class CreateUserInput {
 
-  private String username;
-
-  private String password;
-
   private String firstName;
 
   private String lastName;
@@ -25,6 +21,8 @@ public class CreateUserInput {
   private String email;
 
   private String phoneNumber;
+
+  private String password;
 
   @Builder.Default
   private UserRole role = UserRole.USER;

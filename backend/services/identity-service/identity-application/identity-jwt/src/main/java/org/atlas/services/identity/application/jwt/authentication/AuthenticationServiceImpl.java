@@ -53,7 +53,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   @Transactional(readOnly = true)
   public LoginOutput login(LoginInput input) throws Exception {
     Authentication authenticationToken = new UsernamePasswordAuthenticationToken(
-        input.getUsername(), input.getPassword());
+        input.getEmail(), input.getPassword());
     return doLogin(authenticationToken);
   }
 
@@ -114,14 +114,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   @Override
   public LoginOutput oneTimeTokenLogin(OneTimeTokenLoginInput input) throws Exception {
     Authentication authenticationToken = new OneTimeTokenAuthenticationToken(
-        input.getUsername(), input.getToken());
+        input.getEmail(), input.getToken());
     return doLogin(authenticationToken);
   }
 
   @Override
   public GenerateOneTimeTokenOutput generateOneTimeToken(GenerateOneTimeTokenInput input) {
     OneTimeToken token = oneTimeTokenService.generate(
-        new GenerateOneTimeTokenRequest(input.getUsername()));
+        new GenerateOneTimeTokenRequest(input.getEmail()));
     return new GenerateOneTimeTokenOutput(token.getTokenValue());
   }
 
