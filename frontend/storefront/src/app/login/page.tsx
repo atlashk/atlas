@@ -12,7 +12,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { API_BASE_URL } from "@/config/env.config";
+import { AUTHORIZATION_API_BASE_URL } from "@/config/env.config";
 import { LoginRequest } from "@/interfaces";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
@@ -100,9 +100,9 @@ const Login: React.FC = () => {
     if (redirectUrl) {
       sessionStorage.setItem("auth_redirect", redirectUrl);
     }
-    const oauthGatewayBaseUrl = (() => {
+    const oauthAuthorizationBaseUrl = (() => {
       try {
-        const url = new URL(API_BASE_URL);
+        const url = new URL(AUTHORIZATION_API_BASE_URL);
         if (
           url.protocol === "http:" &&
           (url.hostname === "127.0.0.1" || url.hostname === "0.0.0.0")
@@ -111,10 +111,10 @@ const Login: React.FC = () => {
         }
         return url.toString().replace(/\/$/, "");
       } catch {
-        return API_BASE_URL.replace(/\/$/, "");
+        return AUTHORIZATION_API_BASE_URL.replace(/\/$/, "");
       }
     })();
-    window.location.href = `${oauthGatewayBaseUrl}/services/identity/oauth2/authorization/google`;
+    window.location.href = `${oauthAuthorizationBaseUrl}/oauth2/authorization/google`;
   };
 
   const GoogleLogo = () => (

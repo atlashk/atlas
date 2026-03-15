@@ -10,8 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.async.AsyncUtil;
 import org.atlas.libs.framework.config.ApplicationConfigService;
 import org.atlas.libs.framework.constant.Services;
-import org.atlas.libs.framework.context.ContextInfo;
-import org.atlas.libs.framework.context.Contexts;
+import org.atlas.libs.framework.security.Principal;
+import org.atlas.libs.framework.security.AuthContext;
 import org.atlas.libs.framework.domain.shared.order.OrderStatus;
 import org.atlas.libs.framework.file.FileUtil;
 import org.atlas.libs.framework.i18n.I18nService;
@@ -150,10 +150,10 @@ public class CheckoutSaga {
           () -> {
             // Clear cart
             String userId = order.getUser().getId();
-            ContextInfo contextInfo = ContextInfo.builder()
+            Principal principal = Principal.builder()
                 .userId(userId)
                 .build();
-            Contexts.set(contextInfo);
+            AuthContext.set(principal);
 
             cartService.clearCart();
             log.info("Cleared cart successfully: orderId={}, userId={}", order.getId(), userId);

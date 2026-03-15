@@ -1,6 +1,6 @@
 import { clearAuthCookies, getCookie, isValidToken, setCookie } from '@/utils/cookies';
 import axios, { AxiosError } from "axios";
-import { API_BASE_URL } from '@/config/env.config';
+import { API_BASE_URL, AUTHORIZATION_API_BASE_URL } from '@/config/env.config';
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -60,7 +60,12 @@ const getRefreshTokenFromCookies = (): string | null => {
 
 const shouldSkipAuthRedirect = (requestUrl?: string): boolean => {
   if (!requestUrl) return false;
-  return requestUrl.includes('/services/identity/api/users/profile');
+  try {
+    const pathname = new URL(requestUrl, AUTHORIZATION_API_BASE_URL).pathname;
+    return pathname === '/api/users/profile';
+  } catch {
+    return requestUrl.includes('/api/users/profile');
+  }
 };
 
 const isUnauthorizedRefreshError = (error: unknown): boolean => {
@@ -199,7 +204,7 @@ function redirectToLogin(): void {
 async function performTokenRefresh(refreshToken: string): Promise<string> {
   try {
     const response = await axios.post(
-      `${API_BASE_URL}/services/identity/api/authentication/refresh-token`,
+      `${AUTHORIZATION_API_BASE_URL}/api/authentication/refresh-token`,
       { refreshToken },
       {
         timeout: 10000,

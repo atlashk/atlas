@@ -40,11 +40,9 @@ dependencies {
     // Internal
     switch (rootProject.ext.appStack['internal']) {
         case 'grpc':
-            api project(':libs.internal.identity.grpc')
             api project(':libs.internal.catalog.grpc')
             break
         case 'rest':
-            api project(':libs.internal.identity.rest')
             api project(':libs.internal.catalog.rest')
             break
         default:

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.context.Contexts;
+import org.atlas.libs.framework.security.AuthContext;
 import org.atlas.libs.framework.cryptography.HashingUtil;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.domain.shared.order.OrderStatus;
@@ -54,14 +54,14 @@ public class OrderServiceImpl implements OrderService {
   @Transactional(readOnly = true)
   public PagingResult<OrderEntity> retrieveOrderList(RetrieveOrderListInput input) {
     OrderRepository.FindOrderCriteria criteria = OrderMapper.INSTANCE.toFindOrderCriteria(input);
-    criteria.setUserId(Contexts.getUserId());
+    criteria.setUserId(AuthContext.getUserId());
     return orderRepository.findByCriteria(criteria, input.getPagingRequest());
   }
 
   @Override
   @Transactional(readOnly = true)
   public RetrieveOrderStatusOutput retrieveOrderStatus(String id) {
-    String userId = Contexts.getUserId();
+    String userId = AuthContext.getUserId();
 
     OrderEntity order = orderRepository.findById(id)
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
@@ -77,7 +77,7 @@ public class OrderServiceImpl implements OrderService {
   @Transactional
   public String checkout(CheckoutInput input) {
     // Retrieve user
-    String userId = Contexts.getUserId();
+    String userId = AuthContext.getUserId();
     UserOutput user = retrieveUser(userId);
 
     // Retrieve cart

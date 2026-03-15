@@ -67,7 +67,7 @@ public class OrderResponse {
     private String email;
 
     @Schema(description = "Phone number of the user", example = "+1-555-123-4567")
-    private String phoneNumber;
+    private String phone;
   }
 
   @Schema(description = "Delivery address information for the order")

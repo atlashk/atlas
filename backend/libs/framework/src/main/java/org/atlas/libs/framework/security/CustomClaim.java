@@ -9,11 +9,14 @@ import org.atlas.libs.framework.domain.shared.identity.UserRole;
 @Getter
 public enum CustomClaim {
 
-  USER_ID("user_id", "X-User-Id", String.class),
-  USER_ROLE("user_role", "X-User-Role", UserRole.class),
+  USER_ID("user_id", String.class),
+  FIRST_NAME("first_name", String.class),
+  LAST_NAME("last_name", String.class),
+  EMAIL("email", String.class),
+  PHONE("phone", String.class),
+  USER_ROLE("user_role", UserRole.class),
   ;
 
   private final String claimName;
-  private final String header;
   private final Class<?> clazz;
 }

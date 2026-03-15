@@ -5,8 +5,8 @@ import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.context.ContextInfo;
-import org.atlas.libs.framework.context.Contexts;
+import org.atlas.libs.framework.security.Principal;
+import org.atlas.libs.framework.security.AuthContext;
 import org.atlas.libs.framework.domain.shared.identity.UserRole;
 import org.atlas.libs.framework.security.CustomClaim;
 import org.atlas.libs.framework.util.StringUtil;
@@ -31,17 +31,17 @@ public class UserContextServerInterceptor implements ServerInterceptor {
     final String userRoleHeader = metadata.get(USER_ROLE_HEADER);
     if (StringUtil.isNotBlank(userIdHeader) &&
         StringUtil.isNotBlank(userRoleHeader)) {
-      ContextInfo contextInfo = new ContextInfo();
-      contextInfo.setUserId(userIdHeader);
-      contextInfo.setUserRole(UserRole.valueOf(userRoleHeader));
-      Contexts.set(contextInfo);
+      Principal principal = new Principal();
+      principal.setUserId(userIdHeader);
+      principal.setUserRole(UserRole.valueOf(userRoleHeader));
+      AuthContext.set(principal);
     }
 
     try {
       return serverCallHandler.startCall(serverCall, metadata);
     } finally {
       // Clean up to prevent memory leak
-      Contexts.clear();
+      AuthContext.clear();
     }
   }
 }

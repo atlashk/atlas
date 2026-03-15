@@ -5,10 +5,6 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class SecurityConstant {
 
-  // Relative path to resources folder
-  public static final String RSA_PUBLIC_KEY_PATH = "secret/token.pub";
-  public static final String RSA_PRIVATE_KEY_PATH = "secret/token.key";
-
   // Token
   public static final String TOKEN_ISSUER = "atlas";
   public static final String TOKEN_AUDIENCE = "atlas";

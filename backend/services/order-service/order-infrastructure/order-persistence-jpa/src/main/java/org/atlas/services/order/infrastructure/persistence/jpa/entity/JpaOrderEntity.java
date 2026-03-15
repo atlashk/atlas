@@ -56,9 +56,9 @@ public class JpaOrderEntity extends JpaBaseEntity {
   @Convert(converter = StringCryptoConverter.class)
   private String userEmail;
 
-  @Column(name = "user_phone_number")
+  @Column(name = "user_phone")
   @Convert(converter = StringCryptoConverter.class)
-  private String userPhoneNumber;
+  private String userPhone;
 
   @Column(name = "address_street")
   private String addressStreet;

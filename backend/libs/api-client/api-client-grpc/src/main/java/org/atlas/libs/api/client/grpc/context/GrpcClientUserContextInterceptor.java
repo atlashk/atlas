@@ -7,8 +7,8 @@ import io.grpc.ClientInterceptor;
 import io.grpc.ForwardingClientCall;
 import io.grpc.Metadata;
 import io.grpc.MethodDescriptor;
-import org.atlas.libs.framework.context.ContextInfo;
-import org.atlas.libs.framework.context.Contexts;
+import org.atlas.libs.framework.security.Principal;
+import org.atlas.libs.framework.security.AuthContext;
 import org.atlas.libs.framework.security.CustomClaim;
 import org.springframework.grpc.client.GlobalClientInterceptor;
 import org.springframework.stereotype.Component;
@@ -26,14 +26,14 @@ public class GrpcClientUserContextInterceptor implements ClientInterceptor {
   public <ReqT, RespT> ClientCall<ReqT, RespT> interceptCall(MethodDescriptor<ReqT, RespT> method,
       CallOptions callOptions,
       Channel next) {
-    ContextInfo contextInfo = Contexts.get();
+    Principal principal = AuthContext.get();
     return new ForwardingClientCall.SimpleForwardingClientCall<>(
         next.newCall(method, callOptions)) {
       @Override
       public void start(Listener<RespT> responseListener, Metadata headers) {
-        if (contextInfo != null) {
-          headers.put(USER_ID_HEADER, contextInfo.getUserId());
-          headers.put(USER_ROLE_HEADER, contextInfo.getUserRole().name());
+        if (principal != null) {
+          headers.put(USER_ID_HEADER, principal.getUserId());
+          headers.put(USER_ROLE_HEADER, principal.getUserRole().name());
         }
         super.start(responseListener, headers);
       }

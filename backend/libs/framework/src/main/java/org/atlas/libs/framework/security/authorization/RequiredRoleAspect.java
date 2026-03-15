@@ -6,7 +6,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.atlas.libs.framework.context.Contexts;
+import org.atlas.libs.framework.security.AuthContext;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.domain.exception.BaseDomainException;
 import org.atlas.libs.framework.domain.shared.identity.UserRole;
@@ -24,7 +24,7 @@ public class RequiredRoleAspect {
 
     @Before("execution(public * *(..)) && (classLevel() || methodLevel())")
     public void checkRole(JoinPoint joinPoint) {
-        UserRole currentRole = Contexts.getUserRole();
+        UserRole currentRole = AuthContext.getUserRole();
         if (currentRole == null) {
             throw new BaseDomainException(CommonDomainError.UNAUTHORIZED);
         }

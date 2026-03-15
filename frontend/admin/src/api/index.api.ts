@@ -1,4 +1,4 @@
-export * from './identity.api';
+export * from './authorization.api';
 export * from './catalog.api';
 export * from './order.api';
 export * from './inventory.api';

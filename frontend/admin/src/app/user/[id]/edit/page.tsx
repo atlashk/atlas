@@ -1,6 +1,6 @@
 "use client";
 
-import { identityApi } from "@/api/identity.api";
+import { identityApi } from "@/api/authorization.api";
 import AdminLayout from "@/components/layout/AdminLayout";
 import {
   AlertDialog,

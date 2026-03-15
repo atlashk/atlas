@@ -6,7 +6,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.cache.CacheService;
-import org.atlas.libs.framework.context.Contexts;
+import org.atlas.libs.framework.security.AuthContext;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.services.order.application.cart.aggregator.CartAggregator;
 import org.atlas.services.order.application.cart.constant.CartConstant;
@@ -30,7 +30,7 @@ public class CartServiceImpl implements CartService {
   @Override
   @Transactional(readOnly = true)
   public List<CartItemEntity> retrieveCart() {
-    String userId = Contexts.getUserId();
+    String userId = AuthContext.getUserId();
     Optional<List<CartItemEntity>> cartCache = cacheService.getList(CartConstant.CART_CACHE, userId,
         CartItemEntity.class);
     return cartCache.orElseGet(() -> loadAndCacheCartItems(userId));
@@ -39,7 +39,7 @@ public class CartServiceImpl implements CartService {
   @Override
   @Transactional
   public List<CartItemEntity> addCartItem(String productId, Integer quantity) {
-    String userId = Contexts.getUserId();
+    String userId = AuthContext.getUserId();
     cartRepository.upsertCartItem(userId, productId, quantity);
     return loadAndCacheCartItems(userId);
   }
@@ -47,7 +47,7 @@ public class CartServiceImpl implements CartService {
   @Override
   @Transactional
   public List<CartItemEntity> updateQuantity(String productId, Integer quantity) {
-    String userId = Contexts.getUserId();
+    String userId = AuthContext.getUserId();
     if (quantity > 0) {
       cartRepository.updateQuantity(userId, productId, quantity);
     } else {
@@ -59,7 +59,7 @@ public class CartServiceImpl implements CartService {
   @Override
   @Transactional
   public List<CartItemEntity> removeCartItem(String productId) {
-    String userId = Contexts.getUserId();
+    String userId = AuthContext.getUserId();
     cartRepository.removeCartItem(userId, productId);
     return loadAndCacheCartItems(userId);
   }
@@ -67,7 +67,7 @@ public class CartServiceImpl implements CartService {
   @Override
   @Transactional
   public List<CartItemEntity> clearCart() {
-    String userId = Contexts.getUserId();
+    String userId = AuthContext.getUserId();
     cartRepository.removeAllCartItems(userId);
     cacheService.evict(CartConstant.CART_CACHE, userId);
     return Collections.emptyList();

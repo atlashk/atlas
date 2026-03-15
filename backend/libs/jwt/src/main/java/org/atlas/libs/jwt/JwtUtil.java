@@ -24,8 +24,12 @@ import org.atlas.libs.framework.uuid.UUIDGenerator;
 @UtilityClass
 public class JwtUtil {
 
+  // Relative path to resources folder
+  private static final String RSA_PUBLIC_KEY_PATH = "secret/token.pub";
+  private static final String RSA_PRIVATE_KEY_PATH = "secret/token.key";
+  
   public static Map<String, Object> jwkSet() throws IOException, InvalidKeySpecException {
-    RSAPublicKey rsaPublicKey = RsaKeyLoader.loadPublicKey(SecurityConstant.RSA_PUBLIC_KEY_PATH);
+    RSAPublicKey rsaPublicKey = RsaKeyLoader.loadPublicKey(RSA_PUBLIC_KEY_PATH);
     RSAKey rsaKey = new RSAKey.Builder(rsaPublicKey)
         .keyID(SecurityConstant.JWKS_KEY_ID)
         .build();
@@ -50,9 +54,8 @@ public class JwtUtil {
     builder.withClaim(CustomClaim.USER_ROLE.getClaimName(), input.getRole().name());
 
     // Signing
-    RSAPublicKey rsaPublicKey = RsaKeyLoader.loadPublicKey(SecurityConstant.RSA_PUBLIC_KEY_PATH);
-    RSAPrivateKey rsaPrivateKey = RsaKeyLoader.loadPrivateKey(
-        SecurityConstant.RSA_PRIVATE_KEY_PATH);
+    RSAPublicKey rsaPublicKey = RsaKeyLoader.loadPublicKey(RSA_PUBLIC_KEY_PATH);
+    RSAPrivateKey rsaPrivateKey = RsaKeyLoader.loadPrivateKey(RSA_PRIVATE_KEY_PATH);
     Algorithm algorithm = Algorithm.RSA256(rsaPublicKey, rsaPrivateKey);
     return builder.sign(algorithm);
   }
@@ -71,38 +74,27 @@ public class JwtUtil {
         .withExpiresAt(expiresAt);
 
     // Signing
-    RSAPublicKey rsaPublicKey = RsaKeyLoader.loadPublicKey(SecurityConstant.RSA_PUBLIC_KEY_PATH);
-    RSAPrivateKey rsaPrivateKey = RsaKeyLoader.loadPrivateKey(
-        SecurityConstant.RSA_PRIVATE_KEY_PATH);
+    RSAPublicKey rsaPublicKey = RsaKeyLoader.loadPublicKey(RSA_PUBLIC_KEY_PATH);
+    RSAPrivateKey rsaPrivateKey = RsaKeyLoader.loadPrivateKey(RSA_PRIVATE_KEY_PATH);
     Algorithm algorithm = Algorithm.RSA256(rsaPublicKey, rsaPrivateKey);
     return builder.sign(algorithm);
   }
 
   public static String extractSubject(String token) throws IOException, InvalidKeySpecException {
-    DecodedJWT decodedJWT = decode(token);
+    DecodedJWT decodedJWT = JWT.decode(token);
     return decodedJWT.getSubject();
   }
 
   public static Date extractExpiresAt(String token) throws IOException, InvalidKeySpecException {
-    DecodedJWT decodedJWT = decode(token);
+    DecodedJWT decodedJWT = JWT.decode(token);
     return decodedJWT.getExpiresAt();
   }
 
   @SuppressWarnings("unchecked")
   public static <T> Optional<T> extractClaim(String token, CustomClaim claim)
       throws IOException, InvalidKeySpecException {
-    DecodedJWT decodedJWT = decode(token);
+    DecodedJWT decodedJWT = JWT.decode(token);
     Claim extractedClaim = decodedJWT.getClaim(claim.getClaimName());
     return Optional.ofNullable((T) extractedClaim.as(claim.getClazz()));
-  }
-
-  private static DecodedJWT decode(String token) throws IOException, InvalidKeySpecException {
-    RSAPublicKey rsaPublicKey = RsaKeyLoader.loadPublicKey(SecurityConstant.RSA_PUBLIC_KEY_PATH);
-    Algorithm algorithm = Algorithm.RSA256(rsaPublicKey, null);
-    return JWT.require(algorithm)
-        .withIssuer(SecurityConstant.TOKEN_ISSUER)
-        .withAudience(SecurityConstant.TOKEN_AUDIENCE)
-        .build()
-        .verify(token);
   }
 }

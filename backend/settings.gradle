@@ -54,12 +54,6 @@ project(':libs.search.elasticsearch').projectDir = file('libs/search/search-elas
 
 // Internal
 
-// Internal::Identity
-include(':libs.internal.identity.grpc')
-project(':libs.internal.identity.grpc').projectDir = file('libs/internal/identity-api/identity-api-grpc')
-include(':libs.internal.identity.rest')
-project(':libs.internal.identity.rest').projectDir = file('libs/internal/identity-api/identity-api-rest')
-
 // Internal::Catalog
 include(':libs.internal.catalog.grpc')
 project(':libs.internal.catalog.grpc').projectDir = file('libs/internal/catalog-api/catalog-api-grpc')
@@ -197,44 +191,6 @@ project(':libs.template.thymeleaf').projectDir = file('libs/template/template-th
 // =================================================================================================
 // Services
 // =================================================================================================
-
-// -------------------------------------------------------------------------------------------------
-// Identity Service
-// -------------------------------------------------------------------------------------------------
-
-include(':services.identity.domain')
-project(':services.identity.domain').projectDir = file('services/identity-service/identity-domain')
-
-include(':services.identity.port')
-project(':services.identity.port').projectDir = file('services/identity-service/identity-port')
-
-include(':services.identity.application')
-project(':services.identity.application').projectDir = file('services/identity-service/identity-application')
-include(':services.identity.spring')
-project(':services.identity.spring').projectDir = file('services/identity-service/identity-application/identity-spring')
-
-include(':services.identity.api')
-project(':services.identity.api').projectDir = file('services/identity-service/identity-api')
-include(':services.identity.api.rest')
-project(':services.identity.api.rest').projectDir = file('services/identity-service/identity-api/identity-api-rest')
-include(':services.identity.api.grpc')
-project(':services.identity.api.grpc').projectDir = file('services/identity-service/identity-api/identity-api-grpc')
-
-include(':services.identity.infrastructure')
-project(':services.identity.infrastructure').projectDir = file('services/identity-service/identity-infrastructure')
-include(':services.identity.datasource.mysql')
-project(':services.identity.datasource.mysql').projectDir = file('services/identity-service/identity-infrastructure/identity-datasource-mysql')
-include(':services.identity.datasource.postgres')
-project(':services.identity.datasource.postgres').projectDir = file('services/identity-service/identity-infrastructure/identity-datasource-postgres')
-include(':services.identity.migration.flyway.mysql')
-project(':services.identity.migration.flyway.mysql').projectDir = file('services/identity-service/identity-infrastructure/identity-migration-flyway-mysql')
-include(':services.identity.migration.flyway.postgres')
-project(':services.identity.migration.flyway.postgres').projectDir = file('services/identity-service/identity-infrastructure/identity-migration-flyway-postgres')
-include(':services.identity.persistence.jpa')
-project(':services.identity.persistence.jpa').projectDir = file('services/identity-service/identity-infrastructure/identity-persistence-jpa')
-
-include(':services.identity.bootstrap')
-project(':services.identity.bootstrap').projectDir = file('services/identity-service/identity-bootstrap')
 
 // -------------------------------------------------------------------------------------------------
 // Catalog Service
@@ -414,15 +370,9 @@ project(':services.payment.bootstrap').projectDir = file('services/payment-servi
 // API Gateway
 // -------------------------------------------------------------------------------------------------
 
-// API Gateway::Spring Cloud Gateway
-include(':services.api-gateway.spring-cloud-gateway.server')
-project(':services.api-gateway.spring-cloud-gateway.server').projectDir = file('services/api-gateway/spring-cloud-gateway/spring-cloud-gateway-server')
-include(':services.api-gateway.spring-cloud-gateway.security.core')
-project(':services.api-gateway.spring-cloud-gateway.security.core').projectDir = file('services/api-gateway/spring-cloud-gateway/spring-cloud-gateway-security-core')
-include(':services.api-gateway.spring-cloud-gateway.security.spring')
-project(':services.api-gateway.spring-cloud-gateway.security.spring').projectDir = file('services/api-gateway/spring-cloud-gateway/spring-cloud-gateway-security-spring')
-include(':services.api-gateway.spring-cloud-gateway.security.keycloak')
-project(':services.api-gateway.spring-cloud-gateway.security.keycloak').projectDir = file('services/api-gateway/spring-cloud-gateway/spring-cloud-gateway-security-keycloak')
+// API Gateway::Spring Cloud Reactive Gateway
+include(':services.api-gateway.spring-cloud-reactive-gateway')
+project(':services.api-gateway.spring-cloud-reactive-gateway').projectDir = file('services/api-gateway/spring-cloud-reactive-gateway')
 
 // =================================================================================================
 // Platform
@@ -434,6 +384,38 @@ project(':services.api-gateway.spring-cloud-gateway.security.keycloak').projectD
 
 include(':platform.discovery-server.eureka-server')
 project(':platform.discovery-server.eureka-server').projectDir = file('platform/discovery-server/eureka-server')
+
+// -------------------------------------------------------------------------------------------------
+// Authorization Server::Spring
+// -------------------------------------------------------------------------------------------------
+
+include(':platform.authorization-server.spring.domain')
+project(':platform.authorization-server.spring.domain').projectDir = file('platform/authorization-server/authorization-server-spring/authorization-domain')
+
+include(':platform.authorization-server.spring.port')
+project(':platform.authorization-server.spring.port').projectDir = file('platform/authorization-server/authorization-server-spring/authorization-port')
+
+include(':platform.authorization-server.spring.application')
+project(':platform.authorization-server.spring.application').projectDir = file('platform/authorization-server/authorization-server-spring/authorization-application')
+
+include(':platform.authorization-server.spring.api')
+project(':platform.authorization-server.spring.api').projectDir = file('platform/authorization-server/authorization-server-spring/authorization-api')
+
+include(':platform.authorization-server.spring.infrastructure')
+project(':platform.authorization-server.spring.infrastructure').projectDir = file('platform/authorization-server/authorization-server-spring/authorization-infrastructure')
+include(':platform.authorization-server.spring.datasource.mysql')
+project(':platform.authorization-server.spring.datasource.mysql').projectDir = file('platform/authorization-server/authorization-server-spring/authorization-infrastructure/authorization-datasource-mysql')
+include(':platform.authorization-server.spring.datasource.postgres')
+project(':platform.authorization-server.spring.datasource.postgres').projectDir = file('platform/authorization-server/authorization-server-spring/authorization-infrastructure/authorization-datasource-postgres')
+include(':platform.authorization-server.spring.migration.flyway.mysql')
+project(':platform.authorization-server.spring.migration.flyway.mysql').projectDir = file('platform/authorization-server/authorization-server-spring/authorization-infrastructure/authorization-migration-flyway-mysql')
+include(':platform.authorization-server.spring.migration.flyway.postgres')
+project(':platform.authorization-server.spring.migration.flyway.postgres').projectDir = file('platform/authorization-server/authorization-server-spring/authorization-infrastructure/authorization-migration-flyway-postgres')
+include(':platform.authorization-server.spring.persistence.jpa')
+project(':platform.authorization-server.spring.persistence.jpa').projectDir = file('platform/authorization-server/authorization-server-spring/authorization-infrastructure/authorization-persistence-jpa')
+
+include(':platform.authorization-server.spring.bootstrap')
+project(':platform.authorization-server.spring.bootstrap').projectDir = file('platform/authorization-server/authorization-server-spring/authorization-bootstrap')
 
 // -------------------------------------------------------------------------------------------------
 // Config Server

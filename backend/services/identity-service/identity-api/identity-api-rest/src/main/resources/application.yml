@@ -1,2 +1,0 @@
-springdoc:
-  packages-to-scan: org.atlas.services.identity.api.rest

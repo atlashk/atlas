@@ -3,7 +3,7 @@ import { createLogger } from "@/utils/logger";
 import { clearAuthCookies, getCookie, isValidToken, setCookie } from "@/utils/cookies";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { identityApi } from "@/api/identity.api";
+import { identityApi } from "@/api/authorization.api";
 
 const AUTH_STORAGE_KEYS = {
   USER_STORE: 'user-store',
