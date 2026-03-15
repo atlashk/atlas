@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class JwkSetController {
 
   @GetMapping(value = "/.well-known/jwks.json")
-  @Cache("jwkSet") // Non-expiring cache
+  @Cache(name = "jwkSet") // Non-expiring cache
   @Operation(summary = "JwkSet endpoint")
   public Map<String, Object> jwkSet() throws Exception {
     return JwtUtil.jwkSet();

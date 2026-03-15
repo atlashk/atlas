@@ -1,4 +1,4 @@
-package org.atlas.services.identity.application.spring.core;
+package org.atlas.services.identity.application.spring.core.oauth2;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -29,12 +29,8 @@ public class OAuth2LoginPostService {
 
   @Transactional
   public LoginOutput loginWithFederatedIdentity(FederatedIdentityProvider provider,
-      String providerUserId, String email, String firstName, String lastName) throws Exception {
-    if (provider == null || StringUtil.isBlank(providerUserId) || StringUtil.isBlank(email)) {
-      throw new DomainException(DomainError.USER_REGISTRATION_FAILED);
-    }
-
-    UserEntity user = resolveUser(provider, providerUserId, email, firstName, lastName);
+      OAuth2UserInfo oAuth2UserInfo) throws Exception {
+    UserEntity user = resolveUser(provider, oAuth2UserInfo);
     IssueTokenInput issueTokenInput = IssueTokenInput.builder()
         .userId(user.getId())
         .role(user.getRole())
@@ -46,23 +42,22 @@ public class OAuth2LoginPostService {
     );
   }
 
-  private UserEntity resolveUser(FederatedIdentityProvider provider, String providerUserId,
-      String email, String firstName, String lastName) {
+  private UserEntity resolveUser(FederatedIdentityProvider provider, OAuth2UserInfo oAuth2UserInfo) {
     Optional<FederatedIdentityEntity> federatedIdentity = federatedIdentityRepository
-        .findByProviderAndProviderUserId(provider, providerUserId);
+        .findByProviderAndProviderUserId(provider, oAuth2UserInfo.getProviderUserId());
     if (federatedIdentity.isPresent()) {
       return userRepository.findById(federatedIdentity.get().getUserId())
           .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
     }
 
-    UserEntity user = userRepository.findByEmail(email)
-        .orElseGet(() -> createUserForFederatedIdentity(email, firstName, lastName));
+    UserEntity user = userRepository.findByEmail(oAuth2UserInfo.getEmail())
+        .orElseGet(() -> createUserForFederatedIdentity(oAuth2UserInfo));
 
     if (federatedIdentityRepository.findByUserIdAndProvider(user.getId(), provider).isEmpty()) {
       FederatedIdentityEntity newFederatedIdentity = FederatedIdentityEntity.builder()
           .userId(user.getId())
           .provider(provider)
-          .providerUserId(providerUserId)
+          .providerUserId(oAuth2UserInfo.getProviderUserId())
           .build();
       federatedIdentityRepository.insert(newFederatedIdentity);
     }
@@ -70,18 +65,14 @@ public class OAuth2LoginPostService {
     return user;
   }
 
-  private UserEntity createUserForFederatedIdentity(
-      String email,
-      String firstName,
-      String lastName) {
+  private UserEntity createUserForFederatedIdentity(OAuth2UserInfo oAuth2UserInfo) {
     String userId = sequenceGenerator.generate(SequenceType.USER);
-
     UserEntity user = UserEntity.builder()
         .id(userId)
         .password(null)
-        .firstName(StringUtil.defaultIfBlank(firstName, "Federated"))
-        .lastName(StringUtil.defaultIfBlank(lastName, "User"))
-        .email(email)
+        .firstName(StringUtil.defaultIfBlank(oAuth2UserInfo.getFirstName(), "Federated"))
+        .lastName(StringUtil.defaultIfBlank(oAuth2UserInfo.getLastName(), "User"))
+        .email(oAuth2UserInfo.getEmail())
         .role(UserRole.USER)
         .build();
     userRepository.insert(user);

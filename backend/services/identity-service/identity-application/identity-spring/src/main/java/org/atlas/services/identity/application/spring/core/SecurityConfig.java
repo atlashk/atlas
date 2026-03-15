@@ -1,6 +1,8 @@
 package org.atlas.services.identity.application.spring.core;
 
 import lombok.RequiredArgsConstructor;
+import org.atlas.services.identity.application.spring.core.oauth2.OAuth2AuthenticationFailureHandler;
+import org.atlas.services.identity.application.spring.core.oauth2.OAuth2AuthenticationSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;

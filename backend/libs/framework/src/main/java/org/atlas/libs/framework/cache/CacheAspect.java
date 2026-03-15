@@ -43,7 +43,8 @@ public class CacheAspect {
     // Evaluate SpEL
     MethodSignature signature = (MethodSignature) joinPoint.getSignature();
     Method method = signature.getMethod();
-    String cacheKey = Cache.DEFAULT_KEY.equals(cache.key()) ? Cache.DEFAULT_KEY
+    String cacheKey = Cache.DEFAULT_KEY.equals(cache.key())
+        ? Cache.DEFAULT_KEY
         : spelParser.parse(cache.key(), method, joinPoint.getArgs());
 
     // Cache-aside pattern

@@ -1,4 +1,4 @@
-package org.atlas.services.identity.application.spring.core;
+package org.atlas.services.identity.application.spring.core.cookie;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

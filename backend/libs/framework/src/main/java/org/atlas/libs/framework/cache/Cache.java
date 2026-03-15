@@ -19,11 +19,10 @@ public @interface Cache {
 
   String DEFAULT_KEY = "__default__";
 
-  @AliasFor("name")
-  String value() default "";
-
-  @AliasFor("value")
-  String name() default "";
+  /**
+   * @return cache name
+   */
+  String name();
 
   /**
    * @return cache key

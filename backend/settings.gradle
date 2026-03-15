@@ -212,8 +212,6 @@ include(':services.identity.application')
 project(':services.identity.application').projectDir = file('services/identity-service/identity-application')
 include(':services.identity.spring')
 project(':services.identity.spring').projectDir = file('services/identity-service/identity-application/identity-spring')
-include(':services.identity.keycloak')
-project(':services.identity.keycloak').projectDir = file('services/identity-service/identity-application/identity-keycloak')
 
 include(':services.identity.api')
 project(':services.identity.api').projectDir = file('services/identity-service/identity-api')

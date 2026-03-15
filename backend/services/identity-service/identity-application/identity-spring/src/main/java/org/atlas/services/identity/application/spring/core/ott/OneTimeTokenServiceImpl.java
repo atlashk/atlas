@@ -1,4 +1,4 @@
-package org.atlas.services.identity.application.spring.core;
+package org.atlas.services.identity.application.spring.core.ott;
 
 import java.time.Duration;
 import java.time.Instant;

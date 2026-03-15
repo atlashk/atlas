@@ -13,9 +13,9 @@ public enum DomainError {
   EMAIL_ALREADY_EXISTS(1002, "error.user.email_already_exists"),
   PHONE_NUMBER_ALREADY_EXISTS(1003, "error.user.phone_number_already_exists"),
   WRONG_PASSWORD(1004, "error.user.wrong_password"),
-  USER_REGISTRATION_FAILED(1005, "error.user.registration_failed"),
-  USER_UPDATE_FAILED(1006, "error.user.update_failed"),
-  USER_DELETE_FAILED(1007, "error.user.delete_failed"),
+
+  // OAuth2
+  OAUTH2_USER_INFO_INVALID(2000, "error.oauth2.user_info_invalid"),
   ;
 
   private final int errorCode;

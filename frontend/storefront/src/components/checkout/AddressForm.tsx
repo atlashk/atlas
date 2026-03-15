@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input, Input as UiInput } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SelectItem } from "@/components/ui/select";
 import { ChevronDown } from "lucide-react";
 import React from "react";
 
@@ -260,19 +259,6 @@ export const AddressForm = React.memo<AddressFormProps>(function AddressForm({
       });
     },
     [address, onAddressChange]
-  );
-
-  // Memoize the rendered country items to avoid re-creating on each render
-  const countryItems = React.useMemo(
-    () =>
-      COUNTRIES.map((country) => (
-        <SelectItem key={country.code} value={country.code}>
-          <div className="flex items-center gap-2">
-            <span>{country.name}</span>
-          </div>
-        </SelectItem>
-      )),
-    []
   );
 
   return (

@@ -18,7 +18,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -37,10 +37,8 @@ const formSchema = z.object({
 const Login: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [isProcessingSso, setIsProcessingSso] = useState(false);
-  const [ssoHandled, setSsoHandled] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const { login, loginWithTokens } = useUserStore();
+  const { login } = useUserStore();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -48,43 +46,6 @@ const Login: React.FC = () => {
   const getRedirectUrl = () => {
     return searchParams.get("redirect");
   };
-
-  useEffect(() => {
-    const accessToken = searchParams.get("accessToken");
-    const refreshToken = searchParams.get("refreshToken");
-    const ssoError = searchParams.get("ssoError");
-
-    if (ssoError) {
-      setErrorMessage("Google login failed. Please try again.");
-      return;
-    }
-
-    if (!accessToken || !refreshToken || ssoHandled) {
-      return;
-    }
-
-    const completeSsoLogin = async () => {
-      setIsProcessingSso(true);
-      setErrorMessage("");
-
-      const response = await loginWithTokens(accessToken, refreshToken);
-
-      if (response.success) {
-        toast.success("Google login successful!");
-        setSsoHandled(true);
-        const redirectUrl = sessionStorage.getItem("auth_redirect");
-        sessionStorage.removeItem("auth_redirect");
-        router.push(redirectUrl || "/");
-        return;
-      }
-
-      setSsoHandled(true);
-      setErrorMessage(response.errorMessage || "Google login failed.");
-      setIsProcessingSso(false);
-    };
-
-    void completeSsoLogin();
-  }, [loginWithTokens, router, searchParams, ssoHandled]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -273,7 +234,7 @@ const Login: React.FC = () => {
                 type="submit"
                 className="w-full"
                 size="lg"
-                disabled={isLoggingIn || isProcessingSso}
+                disabled={isLoggingIn}
               >
                 {isLoggingIn ? (
                   <>
@@ -308,20 +269,13 @@ const Login: React.FC = () => {
                 variant="outline"
                 className="w-full"
                 size="lg"
-                disabled={isLoggingIn || isProcessingSso}
+                disabled={isLoggingIn}
                 onClick={onGoogleLogin}
               >
-                {isProcessingSso ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Processing Google Login...
-                  </>
-                ) : (
-                  <>
-                    <GoogleLogo />
-                    Continue with Google
-                  </>
-                )}
+                <>
+                  <GoogleLogo />
+                  Continue with Google
+                </>
               </Button>
             </form>
           </Form>

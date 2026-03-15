@@ -1,4 +1,4 @@
-package org.atlas.services.identity.application.spring.core;
+package org.atlas.services.identity.application.spring.core.oauth2;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,14 +14,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Component
 public class OAuth2AuthenticationFailureHandler implements AuthenticationFailureHandler {
 
-  @Value("${app.oauth2.frontend.failure-url:http://localhost:8000/login}")
-  private String failureUrl;
+  @Value("${app.oauth2.callback-url:http://localhost:8000/login/callback}")
+  private String callbackUrl;
 
   @Override
   public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
       AuthenticationException exception) throws IOException, ServletException {
     String provider = resolveProvider(request);
-    String redirectUrl = UriComponentsBuilder.fromUriString(failureUrl)
+    String redirectUrl = UriComponentsBuilder.fromUriString(callbackUrl)
         .queryParam("ssoError", "federated_authentication_failed")
         .queryParam("provider", provider)
         .build(true)
