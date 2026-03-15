@@ -27,7 +27,7 @@ public class JwtUtil {
   // Relative path to resources folder
   private static final String RSA_PUBLIC_KEY_PATH = "secret/token.pub";
   private static final String RSA_PRIVATE_KEY_PATH = "secret/token.key";
-  
+
   public static Map<String, Object> jwkSet() throws IOException, InvalidKeySpecException {
     RSAPublicKey rsaPublicKey = RsaKeyLoader.loadPublicKey(RSA_PUBLIC_KEY_PATH);
     RSAKey rsaKey = new RSAKey.Builder(rsaPublicKey)
@@ -80,19 +80,18 @@ public class JwtUtil {
     return builder.sign(algorithm);
   }
 
-  public static String extractSubject(String token) throws IOException, InvalidKeySpecException {
+  public static String extractSubject(String token) {
     DecodedJWT decodedJWT = JWT.decode(token);
     return decodedJWT.getSubject();
   }
 
-  public static Date extractExpiresAt(String token) throws IOException, InvalidKeySpecException {
+  public static Date extractExpiresAt(String token) {
     DecodedJWT decodedJWT = JWT.decode(token);
     return decodedJWT.getExpiresAt();
   }
 
   @SuppressWarnings("unchecked")
-  public static <T> Optional<T> extractClaim(String token, CustomClaim claim)
-      throws IOException, InvalidKeySpecException {
+  public static <T> Optional<T> extractClaim(String token, CustomClaim claim) {
     DecodedJWT decodedJWT = JWT.decode(token);
     Claim extractedClaim = decodedJWT.getClaim(claim.getClaimName());
     return Optional.ofNullable((T) extractedClaim.as(claim.getClazz()));
