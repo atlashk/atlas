@@ -1,10 +1,13 @@
 package org.atlas.services.order.infrastructure.persistence.jpa.adapter;
 
-import java.util.Optional;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.atlas.services.order.domain.entity.CartEntity;
-import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaCartEntity;
-import org.atlas.services.order.infrastructure.persistence.jpa.mapper.JpaCartMapper;
+import org.atlas.libs.framework.persistence.DatabaseType;
+import org.atlas.libs.framework.persistence.DatabaseTypeResolver;
+import org.atlas.libs.persistence.jpa.helper.JpaDatabaseTypeResolver;
+import org.atlas.services.order.domain.entity.CartItemEntity;
+import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaCartItemEntity;
+import org.atlas.services.order.infrastructure.persistence.jpa.mapper.JpaCartItemMapper;
 import org.atlas.services.order.infrastructure.persistence.jpa.repository.JpaCartRepository;
 import org.atlas.services.order.port.out.repository.CartRepository;
 import org.springframework.stereotype.Component;
@@ -14,22 +17,36 @@ import org.springframework.stereotype.Component;
 public class JpaCartRepositoryAdapter implements CartRepository {
 
   private final JpaCartRepository jpaCartRepository;
+  private final DatabaseTypeResolver databaseTypeResolver;
 
   @Override
-  public Optional<CartEntity> findByUserId(String userId) {
-    return jpaCartRepository.findByUserIdAndFetch(userId).map(JpaCartMapper.INSTANCE::toCart);
+  public List<CartItemEntity> findByUserId(String userId) {
+    List<JpaCartItemEntity> jpaCartItems = jpaCartRepository.findByUserId(userId);
+    return JpaCartItemMapper.INSTANCE.toCartItems(userId, jpaCartItems);
   }
 
   @Override
-  public void insert(CartEntity cart) {
-    JpaCartEntity jpaCart = JpaCartMapper.INSTANCE.toJpaCart(cart);
-    jpaCartRepository.insert(jpaCart);
-    cart.setId(jpaCart.getId());
+  public void upsertCartItem(String userId, String productId, Integer quantity) {
+    DatabaseType databaseType = databaseTypeResolver.resolve();
+    switch (databaseType) {
+      case MYSQL -> jpaCartRepository.upsertMySql(userId, productId, quantity);
+      case POSTGRES -> jpaCartRepository.upsertPostgres(userId, productId, quantity);
+      default -> throw new IllegalStateException("Unsupported database type: " + databaseType);
+    }
   }
 
   @Override
-  public void update(CartEntity cart) {
-    JpaCartEntity jpaCart = JpaCartMapper.INSTANCE.toJpaCart(cart);
-    JpaCartEntity saved = jpaCartRepository.save(jpaCart);
+  public void updateQuantity(String userId, String productId, Integer quantity) {
+    jpaCartRepository.updateQuantity(userId, productId, quantity);
+  }
+
+  @Override
+  public void removeCartItem(String userId, String productId) {
+    jpaCartRepository.deleteByUserIdAndProductId(userId, productId);
+  }
+
+  @Override
+  public void removeAllCartItems(String userId) {
+    jpaCartRepository.deleteByUserId(userId);
   }
 }

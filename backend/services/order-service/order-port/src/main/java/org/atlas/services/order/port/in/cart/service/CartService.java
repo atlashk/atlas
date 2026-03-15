@@ -1,16 +1,17 @@
 package org.atlas.services.order.port.in.cart.service;
 
-import org.atlas.services.order.domain.entity.CartEntity;
+import java.util.List;
+import org.atlas.services.order.domain.entity.CartItemEntity;
 
 public interface CartService {
 
-  CartEntity retrieveCart();
+  List<CartItemEntity> retrieveCart();
 
-  CartEntity addCartItem(String productId, Integer quantity);
+  List<CartItemEntity> addCartItem(String productId, Integer quantity);
 
-  CartEntity updateQuantity(String productId, Integer quantity);
+  List<CartItemEntity> updateQuantity(String productId, Integer quantity);
 
-  CartEntity removeCartItem(String productId);
+  List<CartItemEntity> removeCartItem(String productId);
 
-  CartEntity clearCart();
+  List<CartItemEntity> clearCart();
 }

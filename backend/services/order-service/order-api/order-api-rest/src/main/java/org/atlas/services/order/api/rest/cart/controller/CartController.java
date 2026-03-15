@@ -9,7 +9,7 @@ import org.atlas.services.order.api.rest.cart.mapper.CartMapper;
 import org.atlas.services.order.api.rest.cart.model.AddCartItemRequest;
 import org.atlas.services.order.api.rest.cart.model.CartResponse;
 import org.atlas.services.order.api.rest.cart.model.UpdateCartItemRequest;
-import org.atlas.services.order.domain.entity.CartEntity;
+import org.atlas.services.order.domain.entity.CartItemEntity;
 import org.atlas.services.order.port.in.cart.service.CartService;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -31,8 +31,8 @@ public class CartController {
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve user cart", description = "Retrieve current user's cart with all items")
   public ApiResponseWrapper<CartResponse> retrieveCart() {
-    CartEntity cart = cartService.retrieveCart();
-    CartResponse response = CartMapper.INSTANCE.toCartResponse(cart);
+    java.util.List<CartItemEntity> cartItems = cartService.retrieveCart();
+    CartResponse response = CartMapper.INSTANCE.toCartResponse(cartItems);
     return ApiResponseWrapper.success(response);
   }
 
@@ -41,8 +41,9 @@ public class CartController {
   public ApiResponseWrapper<CartResponse> addCartItem(
       @Parameter(description = "Request object containing product and quantity", required = true)
       @Valid @RequestBody AddCartItemRequest request) {
-    CartEntity cart = cartService.addCartItem(request.getProductId(), request.getQuantity());
-    CartResponse response = CartMapper.INSTANCE.toCartResponse(cart);
+    java.util.List<CartItemEntity> cartItems = cartService.addCartItem(request.getProductId(),
+        request.getQuantity());
+    CartResponse response = CartMapper.INSTANCE.toCartResponse(cartItems);
     return ApiResponseWrapper.success(response);
   }
 
@@ -53,8 +54,9 @@ public class CartController {
       @PathVariable String productId,
       @Parameter(description = "Request object containing new quantity", required = true)
       @Valid @RequestBody UpdateCartItemRequest request) {
-    CartEntity cart = cartService.updateQuantity(productId, request.getQuantity());
-    CartResponse response = CartMapper.INSTANCE.toCartResponse(cart);
+    java.util.List<CartItemEntity> cartItems = cartService.updateQuantity(productId,
+        request.getQuantity());
+    CartResponse response = CartMapper.INSTANCE.toCartResponse(cartItems);
     return ApiResponseWrapper.success(response);
   }
 
@@ -63,16 +65,16 @@ public class CartController {
   public ApiResponseWrapper<CartResponse> removeCartItem(
       @Parameter(description = "Product ID to remove", required = true)
       @PathVariable String productId) {
-    CartEntity cart = cartService.removeCartItem(productId);
-    CartResponse response = CartMapper.INSTANCE.toCartResponse(cart);
+    java.util.List<CartItemEntity> cartItems = cartService.removeCartItem(productId);
+    CartResponse response = CartMapper.INSTANCE.toCartResponse(cartItems);
     return ApiResponseWrapper.success(response);
   }
 
   @PostMapping(value = "/clear", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Clear cart", description = "Remove all items from the user's cart")
   public ApiResponseWrapper<CartResponse> clearCart() {
-    CartEntity cart = cartService.clearCart();
-    CartResponse response = CartMapper.INSTANCE.toCartResponse(cart);
+    java.util.List<CartItemEntity> cartItems = cartService.clearCart();
+    CartResponse response = CartMapper.INSTANCE.toCartResponse(cartItems);
     return ApiResponseWrapper.success(response);
   }
 }

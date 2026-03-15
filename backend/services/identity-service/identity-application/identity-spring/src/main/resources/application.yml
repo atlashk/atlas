@@ -12,9 +12,3 @@ spring:
               - https://www.googleapis.com/auth/userinfo.profile
               - openid
             redirect-uri: "${OAUTH2_REDIRECT_BASE_URL:http://localhost:8080}/services/identity/login/oauth2/code/google"
-
-app:
-  oauth2:
-    frontend:
-      success-url: ${OAUTH2_FRONTEND_SUCCESS_URL:http://localhost:8000/login}
-      failure-url: ${OAUTH2_FRONTEND_FAILURE_URL:http://localhost:8000/login}

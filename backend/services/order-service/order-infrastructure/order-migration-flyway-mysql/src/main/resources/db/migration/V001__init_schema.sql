@@ -1,21 +1,12 @@
-CREATE TABLE IF NOT EXISTS cart
-(
-    id         INT         NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    user_id    VARCHAR(64) NOT NULL,
-    created_at DATETIME    NOT NULL,
-    updated_at DATETIME,
-    UNIQUE INDEX idx_user_id (user_id)
-) ENGINE = InnoDB;
-
 CREATE TABLE IF NOT EXISTS cart_item
 (
     id         INT         NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    cart_id    INT         NOT NULL,
+    user_id    VARCHAR(64) NOT NULL,
     product_id VARCHAR(64) NOT NULL,
     quantity   INT         NOT NULL,
     created_at DATETIME    NOT NULL,
     updated_at DATETIME,
-    UNIQUE INDEX idx_cart_id_product_id (cart_id, product_id)
+    UNIQUE INDEX idx_user_id_product_id (user_id, product_id)
 ) ENGINE = InnoDB;
 
 CREATE TABLE IF NOT EXISTS orders

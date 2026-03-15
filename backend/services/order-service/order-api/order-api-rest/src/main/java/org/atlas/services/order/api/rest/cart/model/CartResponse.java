@@ -17,9 +17,6 @@ import lombok.Setter;
 @Setter
 public class CartResponse {
 
-  @Schema(description = "Cart ID", example = "1")
-  private Integer id;
-
   @Schema(description = "List of items in the cart")
   private List<CartItem> cartItems;
 

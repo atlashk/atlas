@@ -22,7 +22,7 @@ import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.services.order.application.order.mapper.OrderMapper;
-import org.atlas.services.order.domain.entity.CartEntity;
+import org.atlas.services.order.domain.entity.CartItemEntity;
 import org.atlas.services.order.domain.entity.OrderEntity;
 import org.atlas.services.order.domain.entity.OrderEntity.OrderItem;
 import org.atlas.services.order.domain.entity.OrderEntity.PaymentSnapshot;
@@ -81,13 +81,13 @@ public class OrderServiceImpl implements OrderService {
     UserOutput user = retrieveUser(userId);
 
     // Retrieve cart
-    CartEntity cart = cartService.retrieveCart();
-    if (cart.isEmpty()) {
+    List<CartItemEntity> cartItems = cartService.retrieveCart();
+    if (CollectionUtil.isEmpty(cartItems)) {
       throw new DomainException(DomainError.CART_EMPTY);
     }
 
     // Checkout idempotence guarantee
-    String lockKey = obtainLockKey(cart);
+    String lockKey = obtainLockKey(userId, cartItems);
     Duration waitTime = Duration.ofSeconds(30);
     Duration leaseTime = Duration.ofMinutes(15);
     boolean lockAcquired = lockService.acquireLock(lockKey, waitTime, leaseTime);
@@ -98,7 +98,7 @@ public class OrderServiceImpl implements OrderService {
 
     try {
       // Insert new order into DB
-      OrderEntity order = newOrder(input, user, cart);
+      OrderEntity order = newOrder(input, user, cartItems);
       orderRepository.insert(order);
       log.info("Order created successfully for user {}", userId);
 
@@ -126,19 +126,17 @@ public class OrderServiceImpl implements OrderService {
     return users.get(0);
   }
 
-  private String obtainLockKey(CartEntity cart) {
-    // Create a deterministic signature based on order items
+  private String obtainLockKey(String userId, List<CartItemEntity> cartItems) {
     StringBuilder signature = new StringBuilder();
-    cart.getCartItems().stream().sorted(
+    cartItems.stream().sorted(
             Comparator.comparing(cartItem -> cartItem.getProduct().getId())) // Sort for consistency
         .forEach(cartItem -> signature.append(cartItem.getProduct().getId()).append(":")
             .append(cartItem.getQuantity()).append(";"));
     String hash = HashingUtil.sha256ToHex(signature.toString());
-    return String.format("checkout:%s:%s", cart.getUserId(), hash);
+    return String.format("checkout:%s:%s", userId, hash);
   }
 
-  private OrderEntity newOrder(CheckoutInput input, UserOutput user, CartEntity cart) {
-    // Order
+  private OrderEntity newOrder(CheckoutInput input, UserOutput user, List<CartItemEntity> cartItems) {
     OrderEntity order = new OrderEntity();
     order.setId(sequenceGenerator.generate(SequenceType.ORDER));
     order.setStatus(OrderStatus.AWAITING_STOCK_RESERVATION);
@@ -149,9 +147,7 @@ public class OrderServiceImpl implements OrderService {
     // Address
     order.setAddress(OrderMapper.INSTANCE.toAddress(input.getAddress()));
 
-    // Order items
-    for (CartEntity.CartItem cartItem : cart.getCartItems()) {
-      // Product
+    for (CartItemEntity cartItem : cartItems) {
       ProductSnapshot product = OrderMapper.INSTANCE.toProductSnapshot(cartItem.getProduct());
 
       OrderItem orderItem = OrderItem.builder()
@@ -161,10 +157,8 @@ public class OrderServiceImpl implements OrderService {
       order.getOrderItems().add(orderItem);
     }
 
-    // Amount
     order.calculateOrderAmount();
 
-    // Payment snapshot
     PaymentSnapshot payment = PaymentSnapshot.builder()
         .paymentGatewayId(input.getPaymentGatewayId())
         .build();

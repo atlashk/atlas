@@ -1,5 +1,7 @@
 package org.atlas.services.order.application.cart.service;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +10,7 @@ import org.atlas.libs.framework.context.Contexts;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.services.order.application.cart.aggregator.CartAggregator;
 import org.atlas.services.order.application.cart.constant.CartConstant;
-import org.atlas.services.order.domain.entity.CartEntity;
+import org.atlas.services.order.domain.entity.CartItemEntity;
 import org.atlas.services.order.domain.error.DomainError;
 import org.atlas.services.order.domain.exception.DomainException;
 import org.atlas.services.order.port.in.cart.service.CartService;
@@ -27,129 +29,60 @@ public class CartServiceImpl implements CartService {
 
   @Override
   @Transactional(readOnly = true)
-  public CartEntity retrieveCart() {
+  public List<CartItemEntity> retrieveCart() {
     String userId = Contexts.getUserId();
-    
-    // Apply cache-aside pattern
-    Optional<CartEntity> cartCache = cacheService.get(CartConstant.CART_CACHE, userId, CartEntity.class);
-    if (cartCache.isPresent()) {
-      return cartCache.get();
-    }
-
-    // Get or create cart for user
-    Optional<CartEntity> cartOpt = cartRepository.findByUserId(userId);
-    if (cartOpt.isEmpty()) {
-      return CartEntity.builder()
-          .userId(userId)
-          .build();
-    }
-    CartEntity cart = cartOpt.get();
-
-    // Fetch products
-    if (CollectionUtil.isNotEmpty(cart.getCartItems())) {
-      boolean allProductsAreValid = cartAggregator.aggregate(cart);
-
-      // Update cart if necessary
-      if (!allProductsAreValid) {
-        cartRepository.update(cart);
-      }
-    }
-
-    // Update cache
-    cacheService.put(CartConstant.CART_CACHE, userId, cart);
-
-    return cart;
+    Optional<List<CartItemEntity>> cartCache = cacheService.getList(CartConstant.CART_CACHE, userId,
+        CartItemEntity.class);
+    return cartCache.orElseGet(() -> loadAndCacheCartItems(userId));
   }
 
   @Override
   @Transactional
-  public CartEntity addCartItem(String productId, Integer quantity) {
+  public List<CartItemEntity> addCartItem(String productId, Integer quantity) {
     String userId = Contexts.getUserId();
-
-    // Get or create cart for user
-    CartEntity cart = cartRepository.findByUserId(userId)
-        .orElseGet(() -> {
-          // Create new cart
-          CartEntity newCart = CartEntity.builder()
-              .userId(userId)
-              .build();
-          cartRepository.insert(newCart);
-          return newCart;
-        });
-
-    // Add cart item and update DB
-    cart.addCartItem(productId, quantity);
-    cartRepository.update(cart);
-
-    // Update cache
-    cartAggregator.aggregate(cart);
-    cacheService.put(CartConstant.CART_CACHE, cart.getUserId(), cart);
-
-    return cart;
+    cartRepository.upsertCartItem(userId, productId, quantity);
+    return loadAndCacheCartItems(userId);
   }
 
   @Override
   @Transactional
-  public CartEntity updateQuantity(String productId, Integer quantity) {
+  public List<CartItemEntity> updateQuantity(String productId, Integer quantity) {
     String userId = Contexts.getUserId();
-
-    // Find cart
-    CartEntity cart = cartRepository.findByUserId(userId)
-        .orElseThrow(() -> new DomainException(DomainError.CART_NOT_FOUND));
-
-    // Update DB
     if (quantity > 0) {
-      cart.setCartItemQuantity(productId, quantity);
+      cartRepository.updateQuantity(userId, productId, quantity);
     } else {
-      cart.removeCartItem(productId);
+      cartRepository.removeCartItem(userId, productId);
     }
-    cartRepository.update(cart);
-
-    // Update cache
-    cartAggregator.aggregate(cart);
-    cacheService.put(CartConstant.CART_CACHE, cart.getUserId(), cart);
-
-    return cart;
+    return loadAndCacheCartItems(userId);
   }
 
   @Override
   @Transactional
-  public CartEntity removeCartItem(String productId) {
+  public List<CartItemEntity> removeCartItem(String productId) {
     String userId = Contexts.getUserId();
-
-    // Find cart
-    CartEntity cart = cartRepository.findByUserId(userId)
-        .orElseThrow(() -> new DomainException(DomainError.CART_NOT_FOUND));
-
-    // Update DB
-    cart.removeCartItem(productId);
-    cartRepository.update(cart);
-
-    // Update cache
-    if (CollectionUtil.isNotEmpty(cart.getCartItems())) {
-      cartAggregator.aggregate(cart);
-      cacheService.put(CartConstant.CART_CACHE, cart.getUserId(), cart);
-    }
-
-    return cart;
+    cartRepository.removeCartItem(userId, productId);
+    return loadAndCacheCartItems(userId);
   }
 
   @Override
   @Transactional
-  public CartEntity clearCart() {
+  public List<CartItemEntity> clearCart() {
     String userId = Contexts.getUserId();
+    cartRepository.removeAllCartItems(userId);
+    cacheService.evict(CartConstant.CART_CACHE, userId);
+    return Collections.emptyList();
+  }
 
-    // Find cart
-    CartEntity cart = cartRepository.findByUserId(userId)
-        .orElseThrow(() -> new DomainException(DomainError.CART_NOT_FOUND));
-
-    // Update DB
-    cart.clear();
-    cartRepository.update(cart);
-
-    // Update cache
-    cacheService.put(CartConstant.CART_CACHE, cart.getUserId(), cart);
-
-    return cart;
+  private List<CartItemEntity> loadAndCacheCartItems(String userId) {
+    List<CartItemEntity> cartItems = cartRepository.findByUserId(userId);
+    if (CollectionUtil.isEmpty(cartItems)) {
+      return Collections.emptyList();
+    }
+    boolean allProductsAreValid = cartAggregator.aggregate(cartItems);
+    if (!allProductsAreValid) {
+      throw new DomainException(DomainError.CART_ITEM_NOT_FOUND);
+    }
+    cacheService.put(CartConstant.CART_CACHE, userId, cartItems);
+    return cartItems;
   }
 }

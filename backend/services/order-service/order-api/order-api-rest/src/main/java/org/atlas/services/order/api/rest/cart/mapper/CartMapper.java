@@ -1,7 +1,8 @@
 package org.atlas.services.order.api.rest.cart.mapper;
 
+import java.util.List;
 import org.atlas.services.order.api.rest.cart.model.CartResponse;
-import org.atlas.services.order.domain.entity.CartEntity;
+import org.atlas.services.order.domain.entity.CartItemEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
@@ -14,11 +15,16 @@ public interface CartMapper {
   // Entity/Output -> Response
   // -----------------------------------------------------------------------------------------------
 
-  CartResponse toCartResponse(CartEntity cart);
+  default CartResponse toCartResponse(List<CartItemEntity> cartItems) {
+    return CartResponse.builder()
+        .cartItems(toCartItems(cartItems))
+        .totalAmount(CartItemEntity.totalAmount(cartItems))
+        .build();
+  }
 
-  // Don't remove it
-  CartResponse.CartItem toCartItem(CartEntity.CartItem cartItem);
+  List<CartResponse.CartItem> toCartItems(List<CartItemEntity> cartItems);
 
-  // Don't remove it
-  CartResponse.Product toProduct(CartEntity.Product product);
+  CartResponse.CartItem toCartItem(CartItemEntity cartItem);
+
+  CartResponse.Product toProduct(CartItemEntity.Product product);
 }

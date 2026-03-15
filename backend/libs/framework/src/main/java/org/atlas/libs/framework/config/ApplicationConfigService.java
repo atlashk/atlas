@@ -35,7 +35,7 @@ public class ApplicationConfigService {
   }
 
   public String getConfig(String key, String defaultValue) {
-    return environment.getProperty(obtainFullKey(key), defaultValue);
+    return environment.getProperty(resolveFullKey(key), defaultValue);
   }
 
   @Nullable
@@ -44,7 +44,7 @@ public class ApplicationConfigService {
   }
 
   public Integer getConfigAsInteger(String key, Integer defaultValue) {
-    return environment.getProperty(obtainFullKey(key), Integer.class, defaultValue);
+    return environment.getProperty(resolveFullKey(key), Integer.class, defaultValue);
   }
 
   @Nullable
@@ -53,7 +53,7 @@ public class ApplicationConfigService {
   }
 
   public Long getConfigAsLong(String key, Long defaultValue) {
-    return environment.getProperty(obtainFullKey(key), Long.class, defaultValue);
+    return environment.getProperty(resolveFullKey(key), Long.class, defaultValue);
   }
 
   @Nullable
@@ -62,7 +62,7 @@ public class ApplicationConfigService {
   }
 
   public Double getConfigAsDouble(String key, Double defaultValue) {
-    return environment.getProperty(obtainFullKey(key), Double.class, defaultValue);
+    return environment.getProperty(resolveFullKey(key), Double.class, defaultValue);
   }
 
   @Nullable
@@ -71,7 +71,7 @@ public class ApplicationConfigService {
   }
 
   public BigDecimal getConfigAsBigDecimal(String key, BigDecimal defaultValue) {
-    return environment.getProperty(obtainFullKey(key), BigDecimal.class, defaultValue);
+    return environment.getProperty(resolveFullKey(key), BigDecimal.class, defaultValue);
   }
 
   public boolean getConfigAsBoolean(String key) {
@@ -79,12 +79,12 @@ public class ApplicationConfigService {
   }
 
   public boolean getConfigAsBoolean(String key, boolean defaultValue) {
-    return environment.getProperty(obtainFullKey(key), Boolean.class, defaultValue);
+    return environment.getProperty(resolveFullKey(key), Boolean.class, defaultValue);
   }
 
   public List<String> getConfigAsList(String key) {
     return Binder.get(environment)
-        .bind(obtainFullKey(key), Bindable.listOf(String.class))
+        .bind(resolveFullKey(key), Bindable.listOf(String.class))
         .orElse(Collections.emptyList())
         .stream()
         .map(value -> value.replaceAll("^\\[|]$", "")) // remove leading '[' or trailing ']'
@@ -93,14 +93,14 @@ public class ApplicationConfigService {
 
   @Nullable
   public <T> T getConfigAsClass(String key, Class<T> clazz) {
-    return environment.getProperty(obtainFullKey(key), clazz, null);
+    return environment.getProperty(resolveFullKey(key), clazz, null);
   }
 
   public <T> T getConfigAsClass(String key, Class<T> clazz, T defaultValue) {
-    return environment.getProperty(obtainFullKey(key), clazz, defaultValue);
+    return environment.getProperty(resolveFullKey(key), clazz, defaultValue);
   }
 
-  private String obtainFullKey(String key) {
+  private String resolveFullKey(String key) {
     return String.format("app.%s", key);
   }
 }

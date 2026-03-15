@@ -1,13 +1,17 @@
 package org.atlas.services.order.port.out.repository;
 
-import java.util.Optional;
-import org.atlas.services.order.domain.entity.CartEntity;
+import java.util.List;
+import org.atlas.services.order.domain.entity.CartItemEntity;
 
 public interface CartRepository {
 
-  Optional<CartEntity> findByUserId(String userId);
+  List<CartItemEntity> findByUserId(String userId);
 
-  void insert(CartEntity cart);
+  void upsertCartItem(String userId, String productId, Integer quantity);
 
-  void update(CartEntity cart);
+  void updateQuantity(String userId, String productId, Integer quantity);
+
+  void removeCartItem(String userId, String productId);
+
+  void removeAllCartItems(String userId);
 }
