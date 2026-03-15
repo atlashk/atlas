@@ -1,4 +1,4 @@
-package org.atlas.services.gateway.spring.reactive.filter;
+package org.atlas.services.gateway.spring.reactive.security;
 
 import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.cryptography.HashingUtil;
