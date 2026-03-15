@@ -429,7 +429,7 @@ function AdminProductEditPage() {
                     name="publishedAt"
                     render={({ field }: { field: ControllerRenderProps<ProductFormData, "publishedAt"> }) => (
                       <FormItem>
-                        <FormLabel>Publish Date *</FormLabel>
+                        <FormLabel>Published Date *</FormLabel>
                         <FormControl>
                           <Input {...field} type="datetime-local" />
                         </FormControl>

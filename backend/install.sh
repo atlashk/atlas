@@ -11,7 +11,7 @@ readonly CONFIG_DIR="$BACKEND_DIR/app-stack/config"
 readonly DIST_DIR="$BACKEND_DIR/dist"
 readonly GENERATE_TEMPLATES_SCRIPT="$BACKEND_DIR/generate-templates.sh"
 
-APP_STACK="local.compose"
+APP_STACK="local.dev"
 SKIP_BUILD=false
 DEBUG_TEMPLATE=false
 
@@ -36,7 +36,7 @@ Usage: $0 [OPTIONS]
 Atlas installation orchestrator - generates and executes installation scripts
 
 Options:
-  --app-stack=<name>    Pick config/app-stack.<name>.yml (default: local.compose)
+  --app-stack=<name>    Pick config/app-stack.<name>.yml (default: local.dev)
   --skip-build          Skip backend and Docker image builds
   --debug-template      Generate templates only, skip install execution
   -h, --help            Show this help message

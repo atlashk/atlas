@@ -170,7 +170,7 @@ function AdminProductDetailsPage() {
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Publish Date:</span>
+                    <span className="text-sm font-medium">Published Date:</span>
                     <span className="text-sm">
                       {(product as Product).publishedAt 
                         ? new Date((product as Product).publishedAt!).toLocaleDateString()

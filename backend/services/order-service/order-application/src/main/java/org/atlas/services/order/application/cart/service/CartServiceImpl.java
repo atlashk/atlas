@@ -3,11 +3,11 @@ package org.atlas.services.order.application.cart.service;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.cache.ApplicationCache;
 import org.atlas.libs.framework.cache.CacheService;
 import org.atlas.libs.framework.context.Contexts;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.services.order.application.cart.aggregator.CartAggregator;
+import org.atlas.services.order.application.cart.constant.CartConstant;
 import org.atlas.services.order.domain.entity.CartEntity;
 import org.atlas.services.order.domain.error.DomainError;
 import org.atlas.services.order.domain.exception.DomainException;
@@ -31,7 +31,7 @@ public class CartServiceImpl implements CartService {
     String userId = Contexts.getUserId();
     
     // Apply cache-aside pattern
-    Optional<CartEntity> cartCache = cacheService.get(ApplicationCache.CART, userId, CartEntity.class);
+    Optional<CartEntity> cartCache = cacheService.get(CartConstant.CART_CACHE, userId, CartEntity.class);
     if (cartCache.isPresent()) {
       return cartCache.get();
     }
@@ -56,7 +56,7 @@ public class CartServiceImpl implements CartService {
     }
 
     // Update cache
-    cacheService.put(ApplicationCache.CART, userId, cart);
+    cacheService.put(CartConstant.CART_CACHE, userId, cart);
 
     return cart;
   }
@@ -83,7 +83,7 @@ public class CartServiceImpl implements CartService {
 
     // Update cache
     cartAggregator.aggregate(cart);
-    cacheService.put(ApplicationCache.CART, cart.getUserId(), cart);
+    cacheService.put(CartConstant.CART_CACHE, cart.getUserId(), cart);
 
     return cart;
   }
@@ -107,7 +107,7 @@ public class CartServiceImpl implements CartService {
 
     // Update cache
     cartAggregator.aggregate(cart);
-    cacheService.put(ApplicationCache.CART, cart.getUserId(), cart);
+    cacheService.put(CartConstant.CART_CACHE, cart.getUserId(), cart);
 
     return cart;
   }
@@ -128,7 +128,7 @@ public class CartServiceImpl implements CartService {
     // Update cache
     if (CollectionUtil.isNotEmpty(cart.getCartItems())) {
       cartAggregator.aggregate(cart);
-      cacheService.put(ApplicationCache.CART, cart.getUserId(), cart);
+      cacheService.put(CartConstant.CART_CACHE, cart.getUserId(), cart);
     }
 
     return cart;
@@ -148,7 +148,7 @@ public class CartServiceImpl implements CartService {
     cartRepository.update(cart);
 
     // Update cache
-    cacheService.put(ApplicationCache.CART, cart.getUserId(), cart);
+    cacheService.put(CartConstant.CART_CACHE, cart.getUserId(), cart);
 
     return cart;
   }

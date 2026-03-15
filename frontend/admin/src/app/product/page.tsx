@@ -606,11 +606,11 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="startPublishedDate">Start Publish date</Label>
+              <Label htmlFor="startPublishedDate">Start Published date</Label>
               <Input
                 type="date"
                 id="startPublishedDate"
-                placeholder="Start Publish date"
+                placeholder="Start Published date"
                 value={formFilters.startPublishedDate || ""}
                 onChange={(e) =>
                   handleFilterChange(
@@ -622,11 +622,11 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="endPublishedDate">End Publish date</Label>
+              <Label htmlFor="endPublishedDate">End Published date</Label>
               <Input
                 type="date"
                 id="endPublishedDate"
-                placeholder="End Publish date"
+                placeholder="End Published date"
                 value={formFilters.endPublishedDate || ""}
                 onChange={(e) =>
                   handleFilterChange(

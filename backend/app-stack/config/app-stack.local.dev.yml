@@ -3,7 +3,7 @@ file:
   csv: opencsv
   excel: poi
   pdf: pdfbox
-identity: keycloak
+identity: spring
 internal: rest
 kv-store: redis
 messaging: kafka

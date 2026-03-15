@@ -7,7 +7,7 @@ readonly CONFIG_DIR="$BACKEND_DIR/app-stack/config"
 readonly GENERATOR_DIR="$BACKEND_DIR/app-stack/deployment/generator"
 readonly TEMPLATES_DIR="$BACKEND_DIR/app-stack/deployment/templates"
 
-APP_STACK="local.compose"
+APP_STACK="local.dev"
 OUT_DIR="$BACKEND_DIR/dist"
 NORMALIZE_LINE_ENDINGS=true
 
@@ -77,8 +77,8 @@ normalize_line_endings() {
 
 resolve_template_path() {
   case "$APP_STACK" in
-    local.compose)    echo "local/compose" ;;
     local.dev)        echo "local/compose" ;;
+    local.compose)    echo "local/compose" ;;
     local.k8s)        echo "local/k8s" ;;
     *)                error "Could not resolve template path for app stack: $APP_STACK" ;;
   esac

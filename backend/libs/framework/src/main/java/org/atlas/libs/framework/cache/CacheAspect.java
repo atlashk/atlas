@@ -43,13 +43,12 @@ public class CacheAspect {
     // Evaluate SpEL
     MethodSignature signature = (MethodSignature) joinPoint.getSignature();
     Method method = signature.getMethod();
-    String cacheKey = spelParser.parse(cache.key(), method, joinPoint.getArgs());
-
-    ApplicationCache applicationCache = ApplicationCache.requireByName(cache.cacheName());
+    String cacheKey = Cache.DEFAULT_KEY.equals(cache.key()) ? Cache.DEFAULT_KEY
+        : spelParser.parse(cache.key(), method, joinPoint.getArgs());
 
     // Cache-aside pattern
     Class<?> returnType = signature.getReturnType();
-    Optional<?> cachedValueOpt = cacheService.get(applicationCache, cacheKey, returnType);
+    Optional<?> cachedValueOpt = cacheService.get(cache.name(), cacheKey, returnType);
     if (cachedValueOpt.isPresent()) {
       return cachedValueOpt.get();
     }
@@ -58,9 +57,9 @@ public class CacheAspect {
 
     if (result != null) {
       if (cache.ttl() == 0L) {
-        cacheService.put(applicationCache, cacheKey, result);
+        cacheService.put(cache.name(), cacheKey, result);
       } else {
-        cacheService.put(applicationCache, cacheKey, result, cache.ttl());
+        cacheService.put(cache.name(), cacheKey, result, cache.ttl());
       }
     }
 

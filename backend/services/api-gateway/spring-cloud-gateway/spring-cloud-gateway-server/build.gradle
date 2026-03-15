@@ -69,11 +69,11 @@ dependencies {
     
     // Security
     switch (rootProject.ext.appStack['identity']) {
+        case 'spring':
+            implementation project(':services.api-gateway.spring-cloud-gateway.security.spring')
+            break
         case 'keycloak':
             implementation project(':services.api-gateway.spring-cloud-gateway.security.keycloak')
-            break
-        case 'jwt':
-            implementation project(':services.api-gateway.spring-cloud-gateway.security.jwt')
             break
         default:
             throw new IllegalArgumentException("Unsupported identity: ${rootProject.ext.appStack['identity']}")

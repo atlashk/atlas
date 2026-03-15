@@ -51,7 +51,7 @@ public class EasyExcelProductExcelReader implements ProductExcelReader {
     @ExcelProperty(value = "Quantity")
     private Integer quantity;
 
-    @ExcelProperty(value = "Publish Date")
+    @ExcelProperty(value = "Published Date")
     @DateTimeFormat(value = CommonConstant.DATE_TIME_FORMAT)
     private LocalDateTime publishedAt;
 

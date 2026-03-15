@@ -126,6 +126,8 @@ spec:
                   name: {{ lower $.Release.Name }}-keycloak-config
                   key: keycloak-client-secret
             {{- end }}
+            - name: OAUTH2_REDIRECT_BASE_URL
+              value: {{ .Values.identitySvc.config.oauth2RedirectBaseUrl | quote }}
             {{- if eq .Values.appStack.observability.tracing "zipkin" }}
             - name: ZIPKIN_ENDPOINT
               value: "http://{{ lower $.Release.Name }}-zipkin:{{ .Values.zipkin.service.ports.http }}/api/v2/spans"

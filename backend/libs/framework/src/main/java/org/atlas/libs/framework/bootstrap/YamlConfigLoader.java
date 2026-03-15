@@ -3,6 +3,7 @@ package org.atlas.libs.framework.bootstrap;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -143,14 +144,22 @@ public class YamlConfigLoader implements
     for (Map.Entry<String, Object> entry : source.entrySet()) {
       String key = prefix.isEmpty() ? entry.getKey() : prefix + "." + entry.getKey();
       Object value = entry.getValue();
-      if (value instanceof Map) {
-        @SuppressWarnings("unchecked")
-        Map<String, Object> map = (Map<String, Object>) value;
-        flattenMap(key, map, target);
-      } else {
-        target.put(key, value);
-      }
+      flattenValue(key, value, target);
     }
   }
-}
 
+  @SuppressWarnings("unchecked")
+  private void flattenValue(String key, Object value, Map<String, Object> target) {
+    if (value instanceof Map<?, ?> mapValue) {
+      flattenMap(key, (Map<String, Object>) mapValue, target);
+      return;
+    }
+    if (value instanceof List<?> listValue) {
+      for (int i = 0; i < listValue.size(); i++) {
+        flattenValue(key + "[" + i + "]", listValue.get(i), target);
+      }
+      return;
+    }
+    target.put(key, value);
+  }
+}

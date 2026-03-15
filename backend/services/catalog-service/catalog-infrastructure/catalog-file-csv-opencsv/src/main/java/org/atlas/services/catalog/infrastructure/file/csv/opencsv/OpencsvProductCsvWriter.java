@@ -53,7 +53,7 @@ public class OpencsvProductCsvWriter implements ProductCsvWriter {
     @CsvBindByPosition(position = 3)
     private BigDecimal price;
 
-    @CsvBindByName(column = "Publish Date")
+    @CsvBindByName(column = "Published Date")
     @CsvBindByPosition(position = 4)
     private LocalDateTime publishedAt;
 

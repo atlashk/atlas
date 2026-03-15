@@ -72,7 +72,7 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  @Cache(cacheName = "product", key = "#productId", ttl = 3600)
+  @Cache(name = "product", key = "#productId", ttl = 3600)
   public ProductEntity retrieveProduct(String productId) throws Exception {
     // Get from DB
     ProductEntity product = productRepository.findById(productId)

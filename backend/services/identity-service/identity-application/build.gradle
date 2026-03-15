@@ -26,8 +26,8 @@ repositories {
 
 dependencies {
     switch (rootProject.ext.appStack['identity']) {
-        case 'jwt':
-            implementation project(':services.identity.jwt')
+        case 'spring':
+            implementation project(':services.identity.spring')
             break
         case 'keycloak':
             implementation project(':services.identity.keycloak')

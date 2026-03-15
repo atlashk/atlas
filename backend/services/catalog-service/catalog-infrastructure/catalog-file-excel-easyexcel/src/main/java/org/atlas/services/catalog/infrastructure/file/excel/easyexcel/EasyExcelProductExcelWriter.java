@@ -49,7 +49,7 @@ public class EasyExcelProductExcelWriter implements ProductExcelWriter {
     @ExcelProperty(value = "Price")
     private BigDecimal price;
 
-    @ExcelProperty(value = "Publish Date")
+    @ExcelProperty(value = "Published Date")
     private LocalDateTime publishedAt;
 
     @ExcelProperty(value = "In Stock")

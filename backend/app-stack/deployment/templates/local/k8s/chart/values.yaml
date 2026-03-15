@@ -456,6 +456,8 @@ identitySvc:
     limits:
       cpu: 500m
       memory: 1Gi
+  config:
+    oauth2RedirectBaseUrl: http://localhost:8080
   service:
     ports:
       http: 8081

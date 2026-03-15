@@ -4,6 +4,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.springframework.core.annotation.AliasFor;
 
 /**
  * Cache annotation for method-level caching.
@@ -16,9 +17,18 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Cache {
 
-  String cacheName();
+  String DEFAULT_KEY = "__default__";
 
-  String key() default "__default__";
+  @AliasFor("name")
+  String value() default "";
+
+  @AliasFor("value")
+  String name() default "";
+
+  /**
+   * @return cache key
+   */
+  String key() default DEFAULT_KEY;
 
   /**
    * Time-to-live (TTL) for the cached value in seconds. After this duration, the cached value will

@@ -3,7 +3,6 @@ package org.atlas.services.catalog.application.product.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.cache.ApplicationCache;
 import org.atlas.libs.framework.cache.CacheService;
 import org.atlas.libs.framework.domain.event.contract.catalog.ProductCreatedEvent;
 import org.atlas.libs.framework.paging.PagingRequest;
@@ -14,6 +13,7 @@ import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.libs.framework.util.ArrayUtil;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.util.MapperUtil;
+import org.atlas.services.catalog.application.product.constant.ProductConstant;
 import org.atlas.services.catalog.application.product.mapper.ProductAdminMapper;
 import org.atlas.services.catalog.application.product.mapper.ProductEventMapper;
 import org.atlas.services.catalog.domain.entity.ProductEntity;
@@ -146,7 +146,7 @@ public class ProductAdminServiceImpl implements ProductAdminService {
     }
 
     // Evict product cache
-    cacheService.evict(ApplicationCache.PRODUCT, product.getId());
+    cacheService.evict(ProductConstant.PRODUCT_CACHE, product.getId());
     log.debug("Product cache evicted: id={}", product.getId());
 
     log.info("Product updated successfully: id={}", product.getId());
@@ -181,7 +181,7 @@ public class ProductAdminServiceImpl implements ProductAdminService {
     }
 
     // Evict product cache
-    cacheService.evict(ApplicationCache.PRODUCT, product.getId());
+    cacheService.evict(ProductConstant.PRODUCT_CACHE, product.getId());
     log.debug("Product cache evicted: id={}", product.getId());
 
     log.info("Product deleted successfully: id={}", id);

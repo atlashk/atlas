@@ -1,0 +1,20 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${OAUTH2_GOOGLE_CLIENT_ID}
+            client-secret: ${OAUTH2_GOOGLE_CLIENT_SECRET}
+            scope:
+              # Reference: https://developers.google.com/identity/protocols/oauth2/scopes#oauth2
+              - https://www.googleapis.com/auth/userinfo.email
+              - https://www.googleapis.com/auth/userinfo.profile
+              - openid
+            redirect-uri: "${OAUTH2_REDIRECT_BASE_URL:http://localhost:8080}/services/identity/login/oauth2/code/google"
+
+app:
+  oauth2:
+    frontend:
+      success-url: ${OAUTH2_FRONTEND_SUCCESS_URL:http://localhost:8000/login}
+      failure-url: ${OAUTH2_FRONTEND_FAILURE_URL:http://localhost:8000/login}

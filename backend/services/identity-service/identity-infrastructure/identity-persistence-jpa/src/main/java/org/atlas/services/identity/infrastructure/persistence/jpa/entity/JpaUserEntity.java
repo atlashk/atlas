@@ -1,7 +1,6 @@
 package org.atlas.services.identity.infrastructure.persistence.jpa.entity;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -14,7 +13,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.framework.domain.shared.identity.UserRole;
-import org.atlas.libs.persistence.jpa.converter.StringCryptoConverter;
 import org.atlas.libs.persistence.jpa.entity.JpaBaseEntity;
 
 @Entity
@@ -38,11 +36,9 @@ public class JpaUserEntity extends JpaBaseEntity {
   private String lastName;
 
   @Column(name = "email")
-  @Convert(converter = StringCryptoConverter.class)
   private String email;
 
   @Column(name = "phone_number")
-  @Convert(converter = StringCryptoConverter.class)
   private String phoneNumber;
 
   @Column(name = "password")

@@ -423,6 +423,7 @@ services:
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       {{/hasService}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - OAUTH2_REDIRECT_BASE_URL=http://api-gateway:8080
       {{#hasService "identity" "keycloak"}}
       - KEYCLOAK_BASE_URL=http://keycloak:8080
       - KC_BOOTSTRAP_ADMIN_USERNAME=${KC_BOOTSTRAP_ADMIN_USERNAME:-atlas}

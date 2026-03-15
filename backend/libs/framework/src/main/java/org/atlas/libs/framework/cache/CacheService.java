@@ -16,23 +16,19 @@ public class CacheService {
 
   private final KvStoreService kvStoreService;
 
-  public void put(ApplicationCache cache, String key, Object value, long ttl) {
-    kvStoreService.put(cache.getName(), key, value, Duration.ofSeconds(ttl));
+  public void put(String cache, String key, Object value) {
+    kvStoreService.put(cache, key, value);
   }
 
-  public void put(ApplicationCache cache, String key, Object value) {
-    if (cache.getTtl() <= 0L) {
-      kvStoreService.put(cache.getName(), key, value);
-    } else {
-       put(cache, key, value, cache.getTtl());
-    }
+  public void put(String cache, String key, Object value, long ttl) {
+    kvStoreService.put(cache, key, value, Duration.ofSeconds(ttl));
   }
 
-  public <T> Optional<T> get(ApplicationCache cache, String key, Class<T> clazz) {
-    return kvStoreService.get(cache.getName(), key, clazz);
+  public <T> Optional<T> get(String cache, String key, Class<T> clazz) {
+    return kvStoreService.get(cache, key, clazz);
   }
 
-  public boolean evict(ApplicationCache cache, String key) {
-    return kvStoreService.delete(cache.getName(), key);
+  public boolean evict(String cache, String key) {
+    return kvStoreService.delete(cache, key);
   }
 }

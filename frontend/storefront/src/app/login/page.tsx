@@ -139,13 +139,53 @@ const Login: React.FC = () => {
     if (redirectUrl) {
       sessionStorage.setItem("auth_redirect", redirectUrl);
     }
-    window.location.href = `${API_BASE_URL}/services/identity/oauth2/authorization/google`;
+    const oauthGatewayBaseUrl = (() => {
+      try {
+        const url = new URL(API_BASE_URL);
+        if (
+          url.protocol === "http:" &&
+          (url.hostname === "127.0.0.1" || url.hostname === "0.0.0.0")
+        ) {
+          url.hostname = "localhost";
+        }
+        return url.toString().replace(/\/$/, "");
+      } catch {
+        return API_BASE_URL.replace(/\/$/, "");
+      }
+    })();
+    window.location.href = `${oauthGatewayBaseUrl}/services/identity/oauth2/authorization/google`;
   };
 
+  const GoogleLogo = () => (
+    <svg
+      aria-hidden="true"
+      className="mr-2 h-4 w-4"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M21.35 11.1H12v2.98h5.35a4.58 4.58 0 0 1-1.98 3.01v2.5h3.2c1.87-1.72 2.93-4.25 2.93-7.24 0-.41-.05-.83-.15-1.25Z"
+        fill="#4285F4"
+      />
+      <path
+        d="M12 22a9.76 9.76 0 0 0 6.57-2.41l-3.2-2.5a5.97 5.97 0 0 1-8.88-3.14H3.2v2.58A10 10 0 0 0 12 22Z"
+        fill="#34A853"
+      />
+      <path
+        d="M6.49 13.95a5.98 5.98 0 0 1 0-3.9V7.47H3.2a10 10 0 0 0 0 9.06l3.29-2.58Z"
+        fill="#FBBC05"
+      />
+      <path
+        d="M12 6.03c1.68 0 3.2.58 4.39 1.72l2.74-2.74A9.98 9.98 0 0 0 3.2 7.47l3.29 2.58A5.97 5.97 0 0 1 12 6.03Z"
+        fill="#EA4335"
+      />
+    </svg>
+  );
+
   return (
-    <div className="h-screen flex items-start justify-center pt-40">
+    <div className="h-screen flex items-start justify-center pt-30">
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center space-y-2 pb-4">
+        <CardHeader className="text-center space-y-2">
           <div>
             <CardTitle className="text-2xl font-bold text-primary">
               Welcome Back
@@ -245,6 +285,24 @@ const Login: React.FC = () => {
                 )}
               </Button>
 
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">
+                  Don&apos;t have an account?{" "}
+                  <Link
+                    href="/register"
+                    className="text-primary hover:underline font-medium"
+                  >
+                    Sign up
+                  </Link>
+                </p>
+              </div>
+
+              <div className="relative py-1">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+              </div>
+
               <Button
                 type="button"
                 variant="outline"
@@ -259,21 +317,12 @@ const Login: React.FC = () => {
                     Processing Google Login...
                   </>
                 ) : (
-                  "Continue with Google"
+                  <>
+                    <GoogleLogo />
+                    Continue with Google
+                  </>
                 )}
               </Button>
-
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground">
-                  Don&apos;t have an account?{" "}
-                  <Link
-                    href="/register"
-                    className="text-primary hover:underline font-medium"
-                  >
-                    Sign up
-                  </Link>
-                </p>
-              </div>
             </form>
           </Form>
         </CardContent>

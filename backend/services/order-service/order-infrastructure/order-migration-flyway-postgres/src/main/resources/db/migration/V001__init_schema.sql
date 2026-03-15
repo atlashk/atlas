@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS orders
     user_first_name        VARCHAR(255)   NOT NULL,
     user_last_name         VARCHAR(255)   NOT NULL,
     user_email             VARCHAR(255)   NOT NULL,
-    user_phone_number      VARCHAR(255)   NOT NULL,
+    user_phone_number      VARCHAR(255),
     address_street         VARCHAR(255)   NOT NULL,
     address_city           VARCHAR(100)   NOT NULL,
     address_country        CHAR(2)        NOT NULL,

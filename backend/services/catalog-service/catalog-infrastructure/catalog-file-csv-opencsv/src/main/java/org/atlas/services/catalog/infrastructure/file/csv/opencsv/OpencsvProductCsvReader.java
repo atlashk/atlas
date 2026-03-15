@@ -50,7 +50,7 @@ public class OpencsvProductCsvReader implements ProductCsvReader {
     @CsvBindByPosition(position = 2)
     private BigDecimal price;
 
-    @CsvBindByName(column = "Publish Date")
+    @CsvBindByName(column = "Published Date")
     @CsvBindByPosition(position = 3)
     @CsvDate(value = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime publishedAt;

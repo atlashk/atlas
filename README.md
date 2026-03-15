@@ -140,7 +140,7 @@ cd backend
 This generates `backend/dist/` from templates and then runs the generated install script.
 
 Common flags:
-- `--app-stack=...`: app stack name (default: `local.compose`). See **App Stack** section for details.
+- `--app-stack=...`: app stack name (default: `local.dev`). See **App Stack** section for details.
 - `--skip-build`: skips building artifacts and Docker images.
 - `--debug-template`: generates `backend/dist/` only, does not execute installation.
 
