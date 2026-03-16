@@ -1,4 +1,4 @@
-package org.atlas.libs.framework.security;
+package org.atlas.libs.api.server.rest.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableMethodSecurity(
@@ -16,17 +17,24 @@ import org.springframework.security.web.SecurityFilterChain;
     jsr250Enabled = true,  // Enables @RolesAllowed annotation
     prePostEnabled = true  // Enables @PreAuthorize, @PostAuthorize, @PreFilter, @PostFilter annotations
 )
-public class ServiceSecurityConfig {
+public class SecurityConfig {
+
+  @Bean
+  public JwtAuthenticationFilter jwtAuthenticationFilter() {
+    return new JwtAuthenticationFilter();
+  }
 
   @Bean
   @Order(Ordered.HIGHEST_PRECEDENCE)
-  public SecurityFilterChain serviceFilterChain(HttpSecurity http) throws Exception {
-    http
+  public SecurityFilterChain apiFilterChain(
+      HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+    return http
+        .securityMatcher("/api/**")
         .csrf(AbstractHttpConfigurer::disable)
-        .sessionManagement(session -> 
+        .sessionManagement(session ->
             session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
-
-    return http.build();
+        .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+        .build();
   }
 }

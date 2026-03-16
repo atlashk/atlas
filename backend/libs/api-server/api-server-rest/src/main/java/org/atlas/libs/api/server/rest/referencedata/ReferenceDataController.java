@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
+import org.atlas.libs.framework.api.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.domain.exception.BaseDomainException;
 import org.springframework.http.MediaType;

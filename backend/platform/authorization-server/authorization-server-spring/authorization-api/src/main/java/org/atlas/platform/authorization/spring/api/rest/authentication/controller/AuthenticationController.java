@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
+import org.atlas.libs.framework.api.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.platform.authorization.spring.api.rest.authentication.mapper.AuthenticationMapper;

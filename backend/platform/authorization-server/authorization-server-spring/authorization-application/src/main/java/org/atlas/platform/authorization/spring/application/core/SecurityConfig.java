@@ -45,7 +45,7 @@ public class SecurityConfig {
             .successHandler(oAuth2AuthenticationSuccessHandler)
             .failureHandler(oAuth2AuthenticationFailureHandler))
         .sessionManagement((session) ->
-            session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .exceptionHandling(ex -> {
           // Unauthorized
           ex.authenticationEntryPoint(new CustomAuthenticationEntryPoint());

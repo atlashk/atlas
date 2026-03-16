@@ -3,7 +3,7 @@ package org.atlas.services.payment.api.rest.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
+import org.atlas.libs.framework.api.rest.ApiResponseWrapper;
 import org.atlas.services.payment.api.rest.mapper.PaymentMapper;
 import org.atlas.services.payment.api.rest.model.RetrievePaymentNextActionResponse;
 import org.atlas.services.payment.port.in.model.RetrievePaymentNextActionOutput;

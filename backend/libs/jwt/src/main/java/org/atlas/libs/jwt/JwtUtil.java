@@ -25,6 +25,8 @@ import org.atlas.libs.framework.uuid.UUIDGenerator;
 @UtilityClass
 public class JwtUtil {
 
+  private static final String BEARER_PREFIX = "Bearer ";
+
   // Relative path to resources folder
   private static final String RSA_PUBLIC_KEY_PATH = "secret/token.pub";
   private static final String RSA_PRIVATE_KEY_PATH = "secret/token.key";
@@ -83,7 +85,7 @@ public class JwtUtil {
 
   public static String extractBearerToken(String authorizationHeader) {
     if (StringUtil.isBlank(authorizationHeader)) return null;
-    return authorizationHeader.substring("Bearer ".length()).trim();
+    return authorizationHeader.substring(BEARER_PREFIX.length()).trim();
   }
 
   public static String extractSubject(String token) {

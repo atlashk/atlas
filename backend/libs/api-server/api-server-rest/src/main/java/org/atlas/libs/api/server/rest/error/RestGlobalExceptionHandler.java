@@ -2,7 +2,7 @@ package org.atlas.libs.api.server.rest.error;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
+import org.atlas.libs.framework.api.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.domain.exception.BaseDomainException;
 import org.atlas.libs.framework.i18n.I18nService;

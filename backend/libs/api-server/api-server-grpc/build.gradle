@@ -38,6 +38,9 @@ dependencies {
 	}
     api 'org.springframework.grpc:spring-grpc-server-spring-boot-starter'
 
+    // JWT
+    api project(':libs.jwt')
+
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

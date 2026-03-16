@@ -1,4 +1,4 @@
-package org.atlas.libs.framework.api.client.rest;
+package org.atlas.libs.framework.api.rest;
 
 import java.time.Duration;
 import lombok.Getter;

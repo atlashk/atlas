@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
+import org.atlas.libs.framework.api.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.internal.identity.model.RetrieveUserListInput;
 import org.atlas.libs.framework.internal.identity.model.UserOutput;
 import org.atlas.libs.framework.util.MapperUtil;

@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
+import org.atlas.libs.framework.api.rest.ApiResponseWrapper;
 import org.atlas.services.order.api.rest.cart.mapper.CartMapper;
 import org.atlas.services.order.api.rest.cart.model.AddCartItemRequest;
 import org.atlas.services.order.api.rest.cart.model.CartResponse;

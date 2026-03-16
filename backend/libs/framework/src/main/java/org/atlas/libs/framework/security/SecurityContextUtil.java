@@ -1,5 +1,6 @@
 package org.atlas.libs.framework.security;
 
+import jakarta.annotation.Nullable;
 import java.util.Optional;
 import lombok.experimental.UtilityClass;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
@@ -11,6 +12,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 @UtilityClass
 public class SecurityContextUtil {
+
+  @Nullable
+  public static Principal getPrincipal() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (authentication == null) {
+      return null;
+    }
+    return (Principal) authentication.getPrincipal();
+  }
 
   public static Principal requirePrincipal() {
     return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())

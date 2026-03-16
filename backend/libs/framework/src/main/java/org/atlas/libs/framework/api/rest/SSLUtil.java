@@ -1,4 +1,4 @@
-package org.atlas.libs.framework.api.client.rest;
+package org.atlas.libs.framework.api.rest;
 
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;

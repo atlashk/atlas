@@ -5,27 +5,19 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.regex.Pattern;
 import org.atlas.libs.api.server.rest.util.IpAddressUtil;
 import org.atlas.libs.framework.domain.shared.identity.UserRole;
 import org.atlas.libs.framework.security.CustomClaim;
 import org.atlas.libs.framework.security.Principal;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.libs.jwt.JwtUtil;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-@Component
-@Order(1)
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
-  // Only apply context filter to /api/** routes
-  private static final Pattern FILTERED_PATHS = Pattern.compile("^/api(/.*)?$");
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -59,11 +51,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     filterChain.doFilter(request, response);
-  }
-
-  @Override
-  protected boolean shouldNotFilter(HttpServletRequest request) {
-    // Only apply the filter if the URI matches /api/**
-    return !FILTERED_PATHS.matcher(request.getRequestURI()).matches();
   }
 }

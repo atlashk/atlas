@@ -3,7 +3,7 @@ package org.atlas.services.catalog.api.rest.category.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
+import org.atlas.libs.framework.api.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.catalog.api.rest.category.mapper.CategoryMapper;
 import org.atlas.services.catalog.api.rest.category.model.CategoryResponse;

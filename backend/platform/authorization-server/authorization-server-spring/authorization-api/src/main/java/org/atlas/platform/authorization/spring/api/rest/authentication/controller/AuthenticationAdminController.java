@@ -3,7 +3,7 @@ package org.atlas.platform.authorization.spring.api.rest.authentication.controll
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
+import org.atlas.libs.framework.api.rest.ApiResponseWrapper;
 import org.atlas.platform.authorization.spring.api.rest.authentication.model.ResetPasswordRequest;
 import org.atlas.platform.authorization.port.in.authentication.service.AuthenticationAdminService;
 import org.springframework.http.MediaType;

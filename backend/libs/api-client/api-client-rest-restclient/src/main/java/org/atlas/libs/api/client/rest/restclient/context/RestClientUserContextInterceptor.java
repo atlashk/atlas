@@ -2,8 +2,8 @@ package org.atlas.libs.api.client.rest.restclient.context;
 
 import java.io.IOException;
 import org.atlas.libs.framework.security.Principal;
-import org.atlas.libs.framework.security.SecurityContext;
-import org.atlas.libs.framework.security.CustomClaim;
+import org.atlas.libs.framework.security.SecurityContextUtil;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -14,15 +14,9 @@ public class RestClientUserContextInterceptor implements ClientHttpRequestInterc
   @Override
   public ClientHttpResponse intercept(HttpRequest request, byte[] body,
       ClientHttpRequestExecution execution) throws IOException {
-    Principal principal = SecurityContext.get();
+    Principal principal = SecurityContextUtil.getPrincipal();
     if (principal != null) {
-      if (principal.getUserId() != null) {
-        request.getHeaders().add(CustomClaim.USER_ID.getHeader(), principal.getUserId());
-      }
-      if (principal.getUserRole() != null) {
-        request.getHeaders().add(CustomClaim.USER_ROLE.getHeader(),
-            principal.getUserRole().name());
-      }
+      request.getHeaders().set(HttpHeaders.AUTHORIZATION, "Bearer " + principal.getAccessToken());
     }
     return execution.execute(request, body);
   }

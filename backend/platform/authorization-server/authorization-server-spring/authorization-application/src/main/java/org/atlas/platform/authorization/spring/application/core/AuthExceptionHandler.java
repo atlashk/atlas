@@ -2,7 +2,7 @@ package org.atlas.platform.authorization.spring.application.core;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
+import org.atlas.libs.framework.api.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;

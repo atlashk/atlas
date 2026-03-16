@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
+import org.atlas.libs.framework.api.rest.ApiResponseWrapper;
 import org.atlas.services.inventory.api.rest.mapper.StockAdminMapper;
 import org.atlas.services.inventory.api.rest.model.RetrieveStockResponse;
 import org.atlas.services.inventory.api.rest.model.UpdateAvailableQuantityRequest;

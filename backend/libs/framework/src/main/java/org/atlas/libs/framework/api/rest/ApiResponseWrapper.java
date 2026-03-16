@@ -1,4 +1,4 @@
-package org.atlas.libs.framework.api.server.rest;
+package org.atlas.libs.framework.api.rest;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;

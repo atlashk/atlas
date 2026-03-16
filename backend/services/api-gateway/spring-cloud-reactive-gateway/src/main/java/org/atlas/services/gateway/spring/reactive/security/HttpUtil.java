@@ -2,7 +2,7 @@ package org.atlas.services.gateway.spring.reactive.security;
 
 import java.nio.charset.StandardCharsets;
 import lombok.experimental.UtilityClass;
-import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
+import org.atlas.libs.framework.api.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.util.JsonUtil;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpStatus;

@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
+import org.atlas.libs.framework.api.rest.ApiResponseWrapper;
 import org.atlas.platform.authorization.spring.api.rest.user.mapper.UserMapper;
 import org.atlas.platform.authorization.spring.api.rest.user.model.ProfileResponse;
 import org.atlas.platform.authorization.spring.api.rest.user.model.RegisterRequest;

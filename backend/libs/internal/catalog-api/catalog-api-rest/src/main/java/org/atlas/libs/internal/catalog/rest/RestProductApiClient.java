@@ -2,7 +2,7 @@ package org.atlas.libs.internal.catalog.rest;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.api.server.rest.ApiResponseWrapper;
+import org.atlas.libs.framework.api.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.internal.catalog.client.ProductApiClient;
 import org.atlas.libs.framework.internal.catalog.model.ProductOutput;
 import org.atlas.libs.framework.internal.catalog.model.RetrieveProductListInput;
