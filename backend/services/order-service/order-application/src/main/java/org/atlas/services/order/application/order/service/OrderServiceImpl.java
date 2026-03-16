@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.security.AuthContext;
 import org.atlas.libs.framework.cryptography.HashingUtil;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.domain.shared.order.OrderStatus;
@@ -18,6 +17,7 @@ import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.saga.checkout.CheckoutSagaData;
 import org.atlas.libs.framework.saga.core.context.SagaContext;
 import org.atlas.libs.framework.saga.core.orchestrator.SagaOrchestrator;
+import org.atlas.libs.framework.security.SecurityContextUtil;
 import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.libs.framework.util.CollectionUtil;
@@ -54,14 +54,14 @@ public class OrderServiceImpl implements OrderService {
   @Transactional(readOnly = true)
   public PagingResult<OrderEntity> retrieveOrderList(RetrieveOrderListInput input) {
     OrderRepository.FindOrderCriteria criteria = OrderMapper.INSTANCE.toFindOrderCriteria(input);
-    criteria.setUserId(AuthContext.getUserId());
+    criteria.setUserId(SecurityContextUtil.requirePrincipal().getUserId());
     return orderRepository.findByCriteria(criteria, input.getPagingRequest());
   }
 
   @Override
   @Transactional(readOnly = true)
   public RetrieveOrderStatusOutput retrieveOrderStatus(String id) {
-    String userId = AuthContext.getUserId();
+    String userId = SecurityContextUtil.requirePrincipal().getUserId();
 
     OrderEntity order = orderRepository.findById(id)
         .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
@@ -77,7 +77,7 @@ public class OrderServiceImpl implements OrderService {
   @Transactional
   public String checkout(CheckoutInput input) {
     // Retrieve user
-    String userId = AuthContext.getUserId();
+    String userId = SecurityContextUtil.requirePrincipal().getUserId();
     UserOutput user = retrieveUser(userId);
 
     // Retrieve cart

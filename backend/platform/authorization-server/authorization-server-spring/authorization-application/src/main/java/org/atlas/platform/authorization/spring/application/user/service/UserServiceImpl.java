@@ -2,10 +2,9 @@ package org.atlas.platform.authorization.spring.application.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.security.AuthContext;
 import org.atlas.libs.framework.domain.shared.identity.UserRole;
+import org.atlas.libs.framework.security.SecurityContextUtil;
 import org.atlas.libs.framework.util.StringUtil;
-import org.atlas.platform.authorization.spring.application.user.mapper.UserMapper;
 import org.atlas.platform.authorization.domain.entity.UserEntity;
 import org.atlas.platform.authorization.domain.error.DomainError;
 import org.atlas.platform.authorization.domain.exception.DomainException;
@@ -13,6 +12,7 @@ import org.atlas.platform.authorization.port.in.user.model.ProfileOutput;
 import org.atlas.platform.authorization.port.in.user.model.RegisterInput;
 import org.atlas.platform.authorization.port.in.user.service.UserService;
 import org.atlas.platform.authorization.port.out.repository.UserRepository;
+import org.atlas.platform.authorization.spring.application.user.mapper.UserMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional(readOnly = true)
   public ProfileOutput retrieveProfile() {
-    String userId = AuthContext.getUserId();
+    String userId = SecurityContextUtil.requirePrincipal().getUserId();
     return userRepository.findById(userId)
         .map(UserMapper.INSTANCE::toProfileOutput)
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));

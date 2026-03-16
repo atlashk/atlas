@@ -173,13 +173,13 @@ global:
 # --------------------------------------------------------------------------------------------------
 
 appStack:
+  authorization: keycloak
   datasource: mysql
   file:
     csv: opencsv
     excel: poi
     pdf: pdfbox
   search: elasticsearch
-  identity: keycloak
   internal: rest
   kvStore: redis
   messaging: kafka

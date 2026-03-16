@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.shared.order.OrderStatus;
 import org.atlas.libs.framework.paging.PagingResult;
-import org.atlas.libs.framework.security.authorization.RequiredAdmin;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.services.order.application.order.mapper.OrderAdminMapper;
 import org.atlas.services.order.domain.entity.OrderEntity;
@@ -19,11 +18,12 @@ import org.atlas.services.order.port.in.order.model.admin.MonthlyOrderAggregatio
 import org.atlas.services.order.port.in.order.model.admin.RetrieveOrderListInput;
 import org.atlas.services.order.port.in.order.service.OrderAdminService;
 import org.atlas.services.order.port.out.repository.OrderRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredAdmin
+@PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 @Slf4j
 public class OrderAdminServiceImpl implements OrderAdminService {

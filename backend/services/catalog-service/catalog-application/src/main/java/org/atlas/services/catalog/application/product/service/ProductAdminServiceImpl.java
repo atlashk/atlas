@@ -7,7 +7,6 @@ import org.atlas.libs.framework.cache.CacheService;
 import org.atlas.libs.framework.domain.event.contract.catalog.ProductCreatedEvent;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
-import org.atlas.libs.framework.security.authorization.RequiredAdmin;
 import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.libs.framework.util.ArrayUtil;
@@ -34,15 +33,16 @@ import org.atlas.services.catalog.port.out.file.mapper.ProductWriteRowMapper;
 import org.atlas.services.catalog.port.out.file.model.ProductReadRow;
 import org.atlas.services.catalog.port.out.file.model.ProductWriteRow;
 import org.atlas.services.catalog.port.out.file.pdf.ProductPdfWriter;
-import org.atlas.services.catalog.port.out.search.SearchService;
 import org.atlas.services.catalog.port.out.messaging.ProductEventMessagePublisher;
 import org.atlas.services.catalog.port.out.repository.ProductRepository;
+import org.atlas.services.catalog.port.out.search.SearchService;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredAdmin
+@PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 @Slf4j
 public class ProductAdminServiceImpl implements ProductAdminService {

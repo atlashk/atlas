@@ -122,7 +122,7 @@ services:
       - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
 
-{{#hasService "identity" "keycloak"}}
+{{#hasService "authorization" "keycloak"}}
   keycloak:
     container_name: keycloak
     image: quay.io/keycloak/keycloak:26.5.4
@@ -296,7 +296,7 @@ services:
       - ./files/promtail/config.yml:/etc/promtail/config.yml
       {{#unless infraOnly}}
       - eureka-server-log:/var/log/eureka-server
-      - identity-service-log:/var/log/identity-service
+      - authorization-server-log:/var/log/authorization-server
       - catalog-service-log:/var/log/catalog-service
       - inventory-service-log:/var/log/inventory-service
       - order-service-log:/var/log/order-service
@@ -386,23 +386,24 @@ services:
     networks:
       - {{dotenv.PROJECT_NAME}}-network
 
-  identity-service:
-    container_name: identity-service
-    image: {{dotenv.PROJECT_NAME}}/identity-service:latest
+  {{#hasService "authorization" "spring"}}
+  authorization-server:
+    container_name: authorization-server
+    image: {{dotenv.PROJECT_NAME}}/authorization-server:latest
     build:
-      context: ../../services/identity-service/identity-bootstrap
+      context: ../../platform/authorization-server/authorization-server-spring/authorization-bootstrap
       dockerfile: Dockerfile
     ports:
       - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       {{#hasService "datasource" "mysql"}}
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db_identity?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db_authorization?createDatabaseIfNotExist=true
       - SPRING_DATASOURCE_USERNAME=${MYSQL_USER:-atlas}
       - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD:-Atlas@123456}
       {{/hasService}}
       {{#hasService "datasource" "postgres"}}
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/db_identity
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/db_authorization
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-atlas}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-Atlas@123456}
       {{/hasService}}
@@ -410,31 +411,12 @@ services:
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
       {{/hasService}}
-      {{#hasService "messaging" "kafka"}}
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      {{/hasService}}
-      {{#hasService "messaging" "rabbitmq"}}
-      - SPRING_RABBITMQ_HOST=rabbitmq
-      - SPRING_RABBITMQ_PORT=5672
-      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER:-atlas}
-      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-Atlas@123456}
-      {{/hasService}}
       {{#hasService "observability.tracing" "zipkin"}}
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       {{/hasService}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
-      - OAUTH2_REDIRECT_BASE_URL=http://localhost:8080
-      {{#hasService "identity" "keycloak"}}
-      - KEYCLOAK_BASE_URL=http://keycloak:8080
-      - KC_BOOTSTRAP_ADMIN_USERNAME=${KC_BOOTSTRAP_ADMIN_USERNAME:-atlas}
-      - KC_BOOTSTRAP_ADMIN_PASSWORD=${KC_BOOTSTRAP_ADMIN_PASSWORD:-Atlas@123456}
-      # Refer files/keycloak/realm.json file
-      - KEYCLOAK_REALM=${KEYCLOAK_REALM:-default}
-      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-default-auth}
-      - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET:-9cvF5MPJnwfhEOCwNnQ79RmlkckAsDCj}
-      {{/hasService}}
     volumes:
-      - identity-service-log:/var/log/identity-service
+      - authorization-server-log:/var/log/authorization-server
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8081/actuator/health/readiness"]
       interval: 30s
@@ -452,12 +434,9 @@ services:
       postgres:
         condition: service_healthy
       {{/hasService}}
-      {{#hasService "identity" "keycloak"}}
-      keycloak:
-        condition: service_healthy
-      {{/hasService}}
     networks:
       - {{dotenv.PROJECT_NAME}}-network
+  {{/hasService}}
 
   catalog-service:
     container_name: catalog-service
@@ -630,11 +609,9 @@ services:
       {{/hasService}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
       {{#hasService "internal" "grpc"}}
-      - API_CLIENT_GRPC_IDENTITY_SERVICE_ADDRESS=static://identity-service:50051
       - API_CLIENT_GRPC_CATALOG_SERVICE_ADDRESS=static://catalog-service:50052
       {{/hasService}}
       {{#hasService "internal" "rest"}}
-      - INTERNAL_REST_IDENTITY_SERVICE_BASE_URL=http://identity-service:8081
       - INTERNAL_REST_CATALOG_SERVICE_BASE_URL=http://catalog-service:8082
       {{/hasService}}
     volumes:
@@ -737,10 +714,10 @@ services:
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       {{/hasService}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
-      {{#hasService "identity" "jwt"}}
-      - JWK_SET_URI=http://identity-service:8081/.well-known/jwks.json
+      {{#hasService "authorization" "spring"}}
+      - JWK_SET_URI=http://authorization-server:8081/.well-known/jwks.json
       {{/hasService}}
-      {{#hasService "identity" "keycloak"}}
+      {{#hasService "authorization" "keycloak"}}
       - KEYCLOAK_BASE_URL=http://keycloak:8080
       - KEYCLOAK_REALM=${KEYCLOAK_REALM:-default}
       {{/hasService}}
@@ -797,7 +774,7 @@ volumes:
 {{/hasGrafana}}
 {{#unless infraOnly}}
   eureka-server-log:
-  identity-service-log:
+  authorization-server-log:
   catalog-service-log:
   inventory-service-log:
   order-service-log:

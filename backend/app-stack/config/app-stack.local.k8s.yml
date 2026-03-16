@@ -1,3 +1,4 @@
+authorization: spring
 datasource: mysql
 file:
   csv: opencsv

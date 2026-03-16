@@ -4,11 +4,11 @@ import java.time.Duration;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.security.AuthContext;
 import org.atlas.libs.framework.cryptography.HashingUtil;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.kvstore.KvStoreService;
 import org.atlas.libs.framework.security.SecurityConstant;
+import org.atlas.libs.framework.security.SecurityContextUtil;
 import org.atlas.libs.framework.util.LegacyDateUtil;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.libs.jwt.IssueTokenInput;
@@ -99,7 +99,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   @Override
   @Transactional
   public void changePassword(ChangePasswordInput input) {
-    String userId = AuthContext.getUserId();
+    String userId = SecurityContextUtil.requirePrincipal().getUserId();
     UserEntity user = userRepository.findById(userId)
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
 
@@ -113,8 +113,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   @Override
   public LoginOutput oneTimeTokenLogin(OneTimeTokenLoginInput input) throws Exception {
-    Authentication authenticationToken = new OneTimeTokenAuthenticationToken(
-        input.getEmail(), input.getToken());
+    Authentication authenticationToken = new OneTimeTokenAuthenticationToken(input.getToken());
     return doLogin(authenticationToken);
   }
 

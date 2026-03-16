@@ -45,7 +45,7 @@ spec:
           env:
             {{- if eq .Values.appStack.datasource "mysql" }}
             - name: DB_URL
-              value: "jdbc:mysql://{{ lower $.Release.Name }}-mysql:{{ .Values.mysql.service.ports.mysql }}/db_identity?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
+              value: "jdbc:mysql://{{ lower $.Release.Name }}-mysql:{{ .Values.mysql.service.ports.mysql }}/db_authorization?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -59,7 +59,7 @@ spec:
             {{- end }}
             {{- if eq .Values.appStack.datasource "postgres" }}
             - name: DB_URL
-              value: "jdbc:postgresql://postgres:{{ .Values.postgres.service.ports.postgres }}/db_identity"
+              value: "jdbc:postgresql://postgres:{{ .Values.postgres.service.ports.postgres }}/db_authorization"
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -126,8 +126,6 @@ spec:
                   name: {{ lower $.Release.Name }}-keycloak-config
                   key: keycloak-client-secret
             {{- end }}
-            - name: OAUTH2_REDIRECT_BASE_URL
-              value: {{ .Values.identitySvc.config.oauth2RedirectBaseUrl | quote }}
             {{- if eq .Values.appStack.observability.tracing "zipkin" }}
             - name: ZIPKIN_ENDPOINT
               value: "http://{{ lower $.Release.Name }}-zipkin:{{ .Values.zipkin.service.ports.http }}/api/v2/spans"

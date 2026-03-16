@@ -1,11 +1,15 @@
 package org.atlas.libs.framework.security;
 
+import java.util.Collections;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.framework.domain.shared.identity.UserRole;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,6 +18,7 @@ import org.atlas.libs.framework.domain.shared.identity.UserRole;
 @Setter
 public class Principal {
 
+  private String accessToken;
   private String userId;
   private String firstName;
   private String lastName;
@@ -28,5 +33,9 @@ public class Principal {
 
   public boolean isUser() {
     return UserRole.USER.equals(userRole);
+  }
+
+  public List<GrantedAuthority> getAuthorities() {
+    return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + userRole.name()));
   }
 }

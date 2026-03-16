@@ -3,18 +3,18 @@ package org.atlas.platform.authorization.spring.application.authentication;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.config.ApplicationConfigService;
-import org.atlas.libs.framework.security.authorization.RequiredAdmin;
 import org.atlas.platform.authorization.domain.entity.UserEntity;
 import org.atlas.platform.authorization.domain.error.DomainError;
 import org.atlas.platform.authorization.domain.exception.DomainException;
 import org.atlas.platform.authorization.port.in.authentication.service.AuthenticationAdminService;
 import org.atlas.platform.authorization.port.out.repository.UserRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredAdmin
+@PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 public class AuthenticationAdminServiceImpl implements AuthenticationAdminService {
 

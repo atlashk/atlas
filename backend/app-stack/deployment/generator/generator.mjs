@@ -260,36 +260,36 @@ function shouldSkipFileByPath(filePath, context) {
   const normalizedPath = filePath.replace(/\\/g, '/');
   
   // Skip specific service configs based on stack
+  const authorization = stackValue('authorization');
+  if (normalizedPath.includes('/files/keycloak/') && authorization !== 'keycloak') return true;
+
   const datasource = stackValue('datasource');
   if (normalizedPath.includes('/files/mysql/') && datasource !== 'mysql') return true;
   if (normalizedPath.includes('/files/postgres/') && datasource !== 'postgres' && datasource !== 'postgresql') return true;
-  
+
   const kvStore = stackValue('kv-store');
   if (normalizedPath.includes('/files/redis/') && kvStore !== 'redis') return true;
-  
+
   const messaging = stackValue('messaging');
   if (normalizedPath.includes('/files/kafka/') && messaging !== 'kafka') return true;
   if (normalizedPath.includes('/files/rabbitmq/') && messaging !== 'rabbitmq') return true;
-  
+
   const storage = stackValue('storage');
   if (normalizedPath.includes('/files/minio/') && storage !== 'minio') return true;
-  
+
   const search = stackValue('search');
   if (normalizedPath.includes('/files/elasticsearch/') && search !== 'elasticsearch') return true;
   
-  const identity = stackValue('identity');
-  if (normalizedPath.includes('/files/keycloak/') && identity !== 'keycloak') return true;
-
   const notificationEmail = stackValue('notification.email');
   if (normalizedPath.includes('/files/smtp4dev/') && notificationEmail !== 'spring') return true;
-  
+
   return false;
 }
 
 (async () => {
   // Register all helpers before processing
   registerHelpers();
-  
+
   const args = parseArgs(process.argv.slice(2));
   const cwd = process.cwd();
 
@@ -300,7 +300,7 @@ function shouldSkipFileByPath(filePath, context) {
 
   let stack = {};
   let dotenv = {};
-  
+
   // Load .env file from generator directory
   const scriptDir = path.dirname(fileURLToPath(import.meta.url));
   const envPath = path.resolve(scriptDir, '.env');
@@ -308,7 +308,7 @@ function shouldSkipFileByPath(filePath, context) {
     dotenv = parseEnv(fs.readFileSync(envPath, 'utf8'));
     console.log(`Loaded ${Object.keys(dotenv).length} variable(s) from .env`);
   }
-  
+
   if (args['app-stack']) {
     const appStackName = args['app-stack'];
     const configPath = path.resolve(scriptDir, '../..', 'config', `app-stack.${appStackName}.yml`);
@@ -353,7 +353,7 @@ function shouldSkipFileByPath(filePath, context) {
       skipped++;
       continue;
     }
-    
+
     const relPath = path.relative(templateDir, t);
     const isHandlebarsTemplate = t.endsWith('.hbs') || t.endsWith('.handlebars');
     const outRel = isHandlebarsTemplate ? relPath.replace(/\.(hbs|handlebars)$/, '') : relPath;

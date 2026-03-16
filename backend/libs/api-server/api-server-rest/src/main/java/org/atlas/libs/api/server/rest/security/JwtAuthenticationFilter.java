@@ -6,21 +6,23 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.regex.Pattern;
-import org.atlas.libs.framework.domain.shared.identity.UserRole;
-import org.atlas.libs.framework.security.AuthContext;
-import org.atlas.libs.framework.security.CustomClaim;
 import org.atlas.libs.api.server.rest.util.IpAddressUtil;
+import org.atlas.libs.framework.domain.shared.identity.UserRole;
+import org.atlas.libs.framework.security.CustomClaim;
 import org.atlas.libs.framework.security.Principal;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.libs.jwt.JwtUtil;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
 @Order(1)
-public class TokenFilter extends OncePerRequestFilter {
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   // Only apply context filter to /api/** routes
   private static final Pattern FILTERED_PATHS = Pattern.compile("^/api(/.*)?$");
@@ -33,34 +35,30 @@ public class TokenFilter extends OncePerRequestFilter {
     // Client IP address
     principal.setIpAddress(IpAddressUtil.getIpAddress(request));
 
+    // Handle access token if presents
     String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-    if (StringUtil.isNotBlank(authorization) && authorization.startsWith("Bearer ")) {
-      String accessToken = authorization.substring("Bearer ".length()).trim();
-      if (StringUtil.isNotBlank(accessToken)) {
-        try {
-          principal.setUserId(JwtUtil.extractSubject(accessToken));
-          JwtUtil.<UserRole>extractClaim(accessToken, CustomClaim.USER_ROLE)
-              .ifPresent(principal::setUserRole);
-          JwtUtil.<String>extractClaim(accessToken, CustomClaim.FIRST_NAME)
-              .ifPresent(principal::setFirstName);
-          JwtUtil.<String>extractClaim(accessToken, CustomClaim.LAST_NAME)
-              .ifPresent(principal::setLastName);
-          JwtUtil.<String>extractClaim(accessToken, CustomClaim.EMAIL)
-              .ifPresent(principal::setEmail);
-          JwtUtil.<String>extractClaim(accessToken, CustomClaim.PHONE)
-              .ifPresent(principal::setPhone);
-        } catch (Exception ignored) {
-        }
-      }
+    String accessToken = JwtUtil.extractBearerToken(authorization);
+    if (StringUtil.isNotBlank(accessToken)) {
+      principal.setAccessToken(accessToken);
+      principal.setUserId(JwtUtil.extractSubject(accessToken));
+      JwtUtil.<UserRole>extractClaim(accessToken, CustomClaim.USER_ROLE)
+          .ifPresent(principal::setUserRole);
+      JwtUtil.<String>extractClaim(accessToken, CustomClaim.FIRST_NAME)
+          .ifPresent(principal::setFirstName);
+      JwtUtil.<String>extractClaim(accessToken, CustomClaim.LAST_NAME)
+          .ifPresent(principal::setLastName);
+      JwtUtil.<String>extractClaim(accessToken, CustomClaim.EMAIL)
+          .ifPresent(principal::setEmail);
+      JwtUtil.<String>extractClaim(accessToken, CustomClaim.PHONE)
+          .ifPresent(principal::setPhone);
+
+      // Set Principal into context
+      Authentication authentication = new UsernamePasswordAuthenticationToken(
+          principal, null, principal.getAuthorities());
+      SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
-    try {
-      AuthContext.setPrincipal(principal);
-      filterChain.doFilter(request, response);
-    } finally {
-      // Clean up to prevent memory leak
-      AuthContext.clear();
-    }
+    filterChain.doFilter(request, response);
   }
 
   @Override

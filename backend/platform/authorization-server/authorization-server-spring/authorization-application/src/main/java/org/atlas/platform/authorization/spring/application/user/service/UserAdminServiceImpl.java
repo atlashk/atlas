@@ -2,12 +2,10 @@ package org.atlas.platform.authorization.spring.application.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.paging.PagingResult;
-import org.atlas.libs.framework.security.authorization.RequiredAdmin;
 import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.libs.framework.util.StringUtil;
-import org.atlas.platform.authorization.spring.application.user.mapper.UserAdminMapper;
 import org.atlas.platform.authorization.domain.entity.UserEntity;
 import org.atlas.platform.authorization.domain.error.DomainError;
 import org.atlas.platform.authorization.domain.exception.DomainException;
@@ -18,12 +16,14 @@ import org.atlas.platform.authorization.port.in.user.model.admin.UserOutput;
 import org.atlas.platform.authorization.port.in.user.service.UserAdminService;
 import org.atlas.platform.authorization.port.out.repository.UserRepository;
 import org.atlas.platform.authorization.port.out.repository.UserRepository.FindUserCriteria;
+import org.atlas.platform.authorization.spring.application.user.mapper.UserAdminMapper;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredAdmin
+@PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 public class UserAdminServiceImpl implements UserAdminService {
 

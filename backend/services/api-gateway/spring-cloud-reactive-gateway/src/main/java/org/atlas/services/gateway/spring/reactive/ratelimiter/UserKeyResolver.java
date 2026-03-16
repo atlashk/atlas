@@ -19,8 +19,6 @@ public class UserKeyResolver implements KeyResolver {
 
   private static final String ANONYMOUS_KEY = "anonymous";
 
-  private final JwtExtractor jwtExtractor;
-
   @Override
   public Mono<String> resolve(ServerWebExchange exchange) {
     String ipAddress = IpAddressUtil.getIpAddress(exchange.getRequest());
@@ -28,10 +26,9 @@ public class UserKeyResolver implements KeyResolver {
         .map(SecurityContext::getAuthentication)
         .filter(auth ->
             auth != null && auth.isAuthenticated() && auth.getCredentials() instanceof Jwt)
-        .map(auth ->
-            (Jwt) auth.getCredentials())
+        .map(auth -> (Jwt) auth.getCredentials())
         .map(jwt -> {
-          String userId = jwtExtractor.extractUserId(jwt);
+          String userId = jwt.getSubject();
           if (StringUtil.isNotBlank(userId)) {
             return userId + ":" + ipAddress;
           }

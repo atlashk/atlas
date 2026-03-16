@@ -35,10 +35,10 @@ spring:
                 rate-limiter: "#{@userRateLimiter}"
                 key-resolver: "#{@userKeyResolver}"
           httpclient:
-            connect-timeout: 30000  # Connection timeout in milliseconds
-            response-timeout: 5m # Response timeout in ISO-8601 format or duration
+            connect-timeout: 30000 # Connection timeout in milliseconds
+            response-timeout: 30s  # Response timeout in ISO-8601 format or duration
             pool:
-              max-idle-time: 45m # Allow connections to stay idle longer for SSE/WebSocket
+              max-idle-time: 45m   # Allow connections to stay idle longer for SSE/WebSocket
           routes:
             # Catalog service
             - id: catalog-service
@@ -119,8 +119,6 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     urls:
-      - name: Identity Service
-        url: /api-docs/identity-service
       - name: Catalog Service
         url: /api-docs/catalog-service
       - name: Inventory Service

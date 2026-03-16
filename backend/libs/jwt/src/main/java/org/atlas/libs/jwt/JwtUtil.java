@@ -19,6 +19,7 @@ import org.atlas.libs.framework.cryptography.RsaKeyLoader;
 import org.atlas.libs.framework.security.CustomClaim;
 import org.atlas.libs.framework.security.SecurityConstant;
 import org.atlas.libs.framework.util.LegacyDateUtil;
+import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.libs.framework.uuid.UUIDGenerator;
 
 @UtilityClass
@@ -78,6 +79,11 @@ public class JwtUtil {
     RSAPrivateKey rsaPrivateKey = RsaKeyLoader.loadPrivateKey(RSA_PRIVATE_KEY_PATH);
     Algorithm algorithm = Algorithm.RSA256(rsaPublicKey, rsaPrivateKey);
     return builder.sign(algorithm);
+  }
+
+  public static String extractBearerToken(String authorizationHeader) {
+    if (StringUtil.isBlank(authorizationHeader)) return null;
+    return authorizationHeader.substring("Bearer ".length()).trim();
   }
 
   public static String extractSubject(String token) {

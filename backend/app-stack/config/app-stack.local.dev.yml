@@ -1,9 +1,9 @@
+authorization: spring
 datasource: mysql
 file:
   csv: opencsv
   excel: poi
   pdf: pdfbox
-identity: spring
 internal: rest
 kv-store: redis
 messaging: kafka

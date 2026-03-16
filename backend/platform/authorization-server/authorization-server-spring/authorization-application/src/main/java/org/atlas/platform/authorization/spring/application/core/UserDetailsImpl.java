@@ -23,8 +23,7 @@ public class UserDetailsImpl implements UserDetails {
     this.id = user.getId();
     this.email = user.getEmail();
     this.password = user.getPassword();
-    this.authorities = Collections.singletonList(
-        new SimpleGrantedAuthority(user.getRole().name()));
+    this.authorities = Collections.singletonList(new SimpleGrantedAuthority(user.getRole().name()));
   }
 
   @Override

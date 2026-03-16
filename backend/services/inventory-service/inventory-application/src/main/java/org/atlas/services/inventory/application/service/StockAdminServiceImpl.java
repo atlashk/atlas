@@ -2,7 +2,6 @@ package org.atlas.services.inventory.application.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.security.authorization.RequiredAdmin;
 import org.atlas.services.inventory.application.mapper.StockAdminMapper;
 import org.atlas.services.inventory.domain.entity.StockEntity;
 import org.atlas.services.inventory.domain.error.DomainError;
@@ -10,11 +9,12 @@ import org.atlas.services.inventory.domain.exception.DomainException;
 import org.atlas.services.inventory.port.in.model.StockOutput;
 import org.atlas.services.inventory.port.in.service.StockAdminService;
 import org.atlas.services.inventory.port.out.repository.StockRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredAdmin
+@PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 @Slf4j
 public class StockAdminServiceImpl implements StockAdminService {

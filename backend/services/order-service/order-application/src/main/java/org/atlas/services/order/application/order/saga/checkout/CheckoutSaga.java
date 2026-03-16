@@ -11,7 +11,6 @@ import org.atlas.libs.framework.async.AsyncUtil;
 import org.atlas.libs.framework.config.ApplicationConfigService;
 import org.atlas.libs.framework.constant.Services;
 import org.atlas.libs.framework.security.Principal;
-import org.atlas.libs.framework.security.AuthContext;
 import org.atlas.libs.framework.domain.shared.order.OrderStatus;
 import org.atlas.libs.framework.file.FileUtil;
 import org.atlas.libs.framework.i18n.I18nService;
@@ -27,6 +26,7 @@ import org.atlas.libs.framework.saga.core.annotation.StartSaga;
 import org.atlas.libs.framework.saga.core.command.SagaCommandResult;
 import org.atlas.libs.framework.saga.core.entity.SagaEntity;
 import org.atlas.libs.framework.saga.core.orchestrator.SagaOrchestrator;
+import org.atlas.libs.framework.security.SecurityContextUtil;
 import org.atlas.libs.framework.template.ResolveTemplateException;
 import org.atlas.libs.framework.template.TemplateService;
 import org.atlas.libs.framework.util.JsonUtil;
@@ -37,6 +37,10 @@ import org.atlas.services.order.domain.error.DomainError;
 import org.atlas.services.order.domain.exception.DomainException;
 import org.atlas.services.order.port.in.cart.service.CartService;
 import org.atlas.services.order.port.out.repository.OrderRepository;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Saga(
     sagaName = "checkout",
@@ -150,10 +154,12 @@ public class CheckoutSaga {
           () -> {
             // Clear cart
             String userId = order.getUser().getId();
+
+            // Set Principal into context
             Principal principal = Principal.builder()
                 .userId(userId)
                 .build();
-            AuthContext.set(principal);
+            SecurityContextUtil.setContext(principal);
 
             cartService.clearCart();
             log.info("Cleared cart successfully: orderId={}, userId={}", order.getId(), userId);
