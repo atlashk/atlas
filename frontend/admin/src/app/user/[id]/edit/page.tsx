@@ -1,6 +1,6 @@
 "use client";
 
-import { identityApi } from "@/api/authorization.api";
+import { authorizationApi } from "@/api/authorization.api";
 import AdminLayout from "@/components/layout/AdminLayout";
 import {
   AlertDialog,
@@ -75,7 +75,7 @@ function AdminUserEditPage() {
 
     setIsLoadingUserRoles(true);
     try {
-      const response = await identityApi.retrieveUserRoles();
+      const response = await authorizationApi.retrieveUserRoles();
       if (response.success) {
         setUserRoles(response.data || {});
       } else {
@@ -108,7 +108,7 @@ function AdminUserEditPage() {
 
       setIsLoadingUser(true);
       try {
-        const response = await identityApi.retrieveUser(userId);
+        const response = await authorizationApi.retrieveUser(userId);
         if (response.success) {
           const userData = response.data;
           setUser(userData);
@@ -149,7 +149,7 @@ function AdminUserEditPage() {
     };
 
     try {
-      const response = await identityApi.updateUser(userId, payload);
+      const response = await authorizationApi.updateUser(userId, payload);
       if (response.success) {
         toast.success("User updated successfully");
       } else {
@@ -174,7 +174,7 @@ function AdminUserEditPage() {
 
     setIsResettingPassword(true);
     try {
-      const response = await identityApi.resetUserPassword(userId);
+      const response = await authorizationApi.resetUserPassword(userId);
       if (response.success) {
         toast.success("Password reset successfully");
         setIsResetDialogOpen(false);

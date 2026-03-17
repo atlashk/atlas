@@ -14,12 +14,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
-@RestControllerAdvice(basePackages = {
-    "org.atlas.services.identity.api.rest"
-})
+@RestControllerAdvice(basePackages = "org.atlas.platform.authorization.spring.api.rest")
 @RequiredArgsConstructor
 @Slf4j
-public class AuthExceptionHandler {
+public class AuthorizationExceptionHandler {
 
   @ExceptionHandler(BadCredentialsException.class)
   @ResponseStatus(HttpStatus.UNAUTHORIZED)

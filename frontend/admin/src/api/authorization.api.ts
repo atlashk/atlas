@@ -43,7 +43,7 @@ export class AuthorizationApi extends BaseApi {
   }
 
   async retrieveReferenceData(type: string): Promise<ApiResponse<Record<string, string>>> {
-    return this.get<Record<string, string>>(`/reference-data?type=${type}`);
+    return this.get<Record<string, string>>(`/public/reference-data?type=${type}`);
   }
 
   async retrieveUserRoles(): Promise<ApiResponse<Record<string, string>>> {

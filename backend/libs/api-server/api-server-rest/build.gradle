@@ -34,9 +34,6 @@ dependencies {
     // OpenAPI UI
     api 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2'
 
-    // JWT
-    api project(':libs.jwt')
-
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

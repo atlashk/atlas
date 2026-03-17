@@ -9,14 +9,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.cryptography.HashingUtil;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.domain.shared.order.OrderStatus;
-import org.atlas.libs.framework.internal.identity.client.UserApiClient;
-import org.atlas.libs.framework.internal.identity.model.RetrieveUserListInput;
-import org.atlas.libs.framework.internal.identity.model.UserOutput;
 import org.atlas.libs.framework.lock.LockService;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.saga.checkout.CheckoutSagaData;
 import org.atlas.libs.framework.saga.core.context.SagaContext;
 import org.atlas.libs.framework.saga.core.orchestrator.SagaOrchestrator;
+import org.atlas.libs.framework.security.Principal;
 import org.atlas.libs.framework.security.SecurityContextUtil;
 import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.libs.framework.sequencegenerator.SequenceType;
@@ -44,7 +42,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class OrderServiceImpl implements OrderService {
 
   private final OrderRepository orderRepository;
-  private final UserApiClient userApiClient;
   private final CartService cartService;
   private final LockService lockService;
   private final SagaOrchestrator sagaOrchestrator;
@@ -78,7 +75,6 @@ public class OrderServiceImpl implements OrderService {
   public String checkout(CheckoutInput input) {
     // Retrieve user
     String userId = SecurityContextUtil.requirePrincipal().getUserId();
-    UserOutput user = retrieveUser(userId);
 
     // Retrieve cart
     List<CartItemEntity> cartItems = cartService.retrieveCart();
@@ -98,7 +94,7 @@ public class OrderServiceImpl implements OrderService {
 
     try {
       // Insert new order into DB
-      OrderEntity order = newOrder(input, user, cartItems);
+      OrderEntity order = newOrder(input, cartItems);
       orderRepository.insert(order);
       log.info("Order created successfully for user {}", userId);
 
@@ -117,15 +113,6 @@ public class OrderServiceImpl implements OrderService {
     }
   }
 
-  private UserOutput retrieveUser(String userId) {
-    RetrieveUserListInput request = new RetrieveUserListInput(List.of(userId));
-    List<UserOutput> users = userApiClient.call(request);
-    if (CollectionUtil.isEmpty(users)) {
-      throw new DomainException(CommonDomainError.BAD_REQUEST, "User not found");
-    }
-    return users.get(0);
-  }
-
   private String obtainLockKey(String userId, List<CartItemEntity> cartItems) {
     StringBuilder signature = new StringBuilder();
     cartItems.stream().sorted(
@@ -136,13 +123,14 @@ public class OrderServiceImpl implements OrderService {
     return String.format("checkout:%s:%s", userId, hash);
   }
 
-  private OrderEntity newOrder(CheckoutInput input, UserOutput user, List<CartItemEntity> cartItems) {
+  private OrderEntity newOrder(CheckoutInput input, List<CartItemEntity> cartItems) {
     OrderEntity order = new OrderEntity();
     order.setId(sequenceGenerator.generate(SequenceType.ORDER));
     order.setStatus(OrderStatus.AWAITING_STOCK_RESERVATION);
 
     // User
-    order.setUser(OrderMapper.INSTANCE.toUserSnapshot(user));
+    Principal principal = SecurityContextUtil.requirePrincipal();
+    order.setUser(OrderMapper.INSTANCE.toUserSnapshot(principal));
 
     // Address
     order.setAddress(OrderMapper.INSTANCE.toAddress(input.getAddress()));

@@ -1,7 +1,7 @@
 package org.atlas.services.order.application.order.mapper;
 
-import org.atlas.libs.framework.internal.identity.model.UserOutput;
 import org.atlas.libs.framework.saga.checkout.CheckoutSagaData;
+import org.atlas.libs.framework.security.Principal;
 import org.atlas.services.order.domain.entity.CartItemEntity;
 import org.atlas.services.order.domain.entity.OrderEntity;
 import org.atlas.services.order.domain.entity.OrderEntity.Address;
@@ -23,7 +23,8 @@ public interface OrderMapper {
 
   OrderRepository.FindOrderCriteria toFindOrderCriteria(RetrieveOrderListInput input);
 
-  UserSnapshot toUserSnapshot(UserOutput response);
+  @Mapping(target = "id", source = "userId")
+  UserSnapshot toUserSnapshot(Principal principal);
 
   ProductSnapshot toProductSnapshot(CartItemEntity.Product product);
 

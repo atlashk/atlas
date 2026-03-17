@@ -40,9 +40,6 @@ dependencies {
     // Supports HTTP handling
     api project(':libs.api.server.rest')
 
-    // JWT
-    api project(':libs.jwt')
-
     // Lombok
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"

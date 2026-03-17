@@ -11,7 +11,7 @@ import org.atlas.libs.framework.security.CustomClaim;
 import org.atlas.libs.framework.security.Principal;
 import org.atlas.libs.framework.security.SecurityContextUtil;
 import org.atlas.libs.framework.util.StringUtil;
-import org.atlas.libs.jwt.JwtUtil;
+import org.atlas.libs.framework.security.JwtUtil;
 import org.springframework.grpc.server.GlobalServerInterceptor;
 import org.springframework.stereotype.Component;
 

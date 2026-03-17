@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.framework.domain.entity.DomainEntity;
 import org.atlas.libs.framework.domain.shared.identity.UserRole;
+import org.atlas.libs.framework.security.Principal;
 
 @Getter
 @Setter
@@ -32,4 +33,15 @@ public class UserEntity extends DomainEntity {
   private String password;
 
   private UserRole role;
+
+  public Principal toPrincipal() {
+    return Principal.builder()
+        .userId(id)
+        .firstName(firstName)
+        .lastName(lastName)
+        .email(email)
+        .phone(phone)
+        .userRole(role)
+        .build();
+  }
 }

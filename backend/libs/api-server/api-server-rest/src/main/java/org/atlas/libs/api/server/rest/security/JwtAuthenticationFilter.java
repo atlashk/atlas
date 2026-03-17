@@ -10,7 +10,7 @@ import org.atlas.libs.framework.domain.shared.identity.UserRole;
 import org.atlas.libs.framework.security.CustomClaim;
 import org.atlas.libs.framework.security.Principal;
 import org.atlas.libs.framework.util.StringUtil;
-import org.atlas.libs.jwt.JwtUtil;
+import org.atlas.libs.framework.security.JwtUtil;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

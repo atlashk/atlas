@@ -7,13 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.cryptography.HashingUtil;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.kvstore.KvStoreService;
+import org.atlas.libs.framework.security.JwtUtil;
+import org.atlas.libs.framework.security.Principal;
 import org.atlas.libs.framework.security.SecurityConstant;
 import org.atlas.libs.framework.security.SecurityContextUtil;
 import org.atlas.libs.framework.util.LegacyDateUtil;
 import org.atlas.libs.framework.util.StringUtil;
-import org.atlas.libs.jwt.IssueTokenInput;
-import org.atlas.libs.jwt.JwtUtil;
-import org.atlas.platform.authorization.spring.application.core.UserDetailsImpl;
 import org.atlas.platform.authorization.domain.entity.UserEntity;
 import org.atlas.platform.authorization.domain.error.DomainError;
 import org.atlas.platform.authorization.domain.exception.DomainException;
@@ -27,6 +26,7 @@ import org.atlas.platform.authorization.port.in.authentication.model.RefreshToke
 import org.atlas.platform.authorization.port.in.authentication.model.RefreshTokenOutput;
 import org.atlas.platform.authorization.port.in.authentication.service.AuthenticationService;
 import org.atlas.platform.authorization.port.out.repository.UserRepository;
+import org.atlas.platform.authorization.spring.application.core.UserDetailsImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.ott.GenerateOneTimeTokenRequest;
@@ -66,13 +66,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     // Reissue tokens
     UserEntity user = userRepository.findById(userId)
         .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
-    IssueTokenInput issueTokenInput = IssueTokenInput.builder()
-        .userId(user.getId())
-        .role(user.getRole())
-        .build();
-    String accessToken = JwtUtil.issueAccessToken(issueTokenInput);
-    String refreshToken = JwtUtil.issueRefreshToken(issueTokenInput);
-
+    Principal principal = user.toPrincipal();
+    String accessToken = JwtUtil.issueAccessToken(principal);
+    String refreshToken = JwtUtil.issueRefreshToken(principal);
     return new RefreshTokenOutput(accessToken, refreshToken);
   }
 
@@ -127,12 +123,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private LoginOutput doLogin(Authentication authenticationToken) throws Exception {
     Authentication authentication = authenticationManager.authenticate(authenticationToken);
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-    IssueTokenInput issueTokenInput = IssueTokenInput.builder()
-        .userId(userDetails.getId())
-        .role(userDetails.getRole())
-        .build();
-    String accessToken = JwtUtil.issueAccessToken(issueTokenInput);
-    String refreshToken = JwtUtil.issueRefreshToken(issueTokenInput);
+    UserEntity user = userRepository.findById(userDetails.getId())
+        .orElseThrow(() -> new DomainException(DomainError.USER_NOT_FOUND));
+    Principal principal = user.toPrincipal();
+    String accessToken = JwtUtil.issueAccessToken(principal);
+    String refreshToken = JwtUtil.issueRefreshToken(principal);
     return new LoginOutput(accessToken, refreshToken);
   }
 }

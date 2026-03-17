@@ -1,9 +1,9 @@
+import { authorizationApi } from "@/api/authorization.api";
 import type { ChangePasswordRequest, LoginRequest, User } from "@/interfaces/identity.interface";
-import { createLogger } from "@/utils/logger";
 import { clearAuthCookies, getCookie, isValidToken, setCookie } from "@/utils/cookies";
+import { createLogger } from "@/utils/logger";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { identityApi } from "@/api/authorization.api";
 
 const AUTH_STORAGE_KEYS = {
   USER_STORE: 'user-store',
@@ -57,7 +57,7 @@ export const useUserStore = create<UserStore>()(
         set({ loading: true, error: null });
         
         try {
-          const response = await identityApi.login(request);
+          const response = await authorizationApi.login(request);
 
           if (response.success && response.data) {
             setCookie(AUTH_STORAGE_KEYS.ACCESS_TOKEN, response.data.accessToken);
@@ -116,7 +116,7 @@ export const useUserStore = create<UserStore>()(
         set({ profileLoading: true, error: null });
         
         try {
-          const result = await identityApi.retrieveProfile();
+          const result = await authorizationApi.retrieveProfile();
           
           if (result.success && result.data) {
             set({
@@ -153,7 +153,7 @@ export const useUserStore = create<UserStore>()(
       changePassword: async (request: ChangePasswordRequest) => {
         logger.info("Change password initiated");
         try {
-          const result = await identityApi.changePassword(request);
+          const result = await authorizationApi.changePassword(request);
           if (result.success) {
             logger.info("Change password completed");
             return { success: true };
@@ -172,7 +172,7 @@ export const useUserStore = create<UserStore>()(
       logout: async () => {
         logger.info('Logout initiated');
         try {
-          await identityApi.logout();
+          await authorizationApi.logout();
           logger.info('Logout completed');
         } catch (error) {
           logger.error('Logout error', error);

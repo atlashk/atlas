@@ -44,6 +44,7 @@ dependencies {
     }
     
     // Observability
+    implementation project(':libs.observability.actuator')
     switch (rootProject.ext.appStack['observability.logging.framework']) {
         case 'logback':
             implementation project(':libs.observability.logging.logback')

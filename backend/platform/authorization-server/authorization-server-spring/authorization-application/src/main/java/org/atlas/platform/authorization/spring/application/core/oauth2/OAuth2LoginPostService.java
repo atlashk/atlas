@@ -4,11 +4,11 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.domain.shared.identity.UserRole;
 import org.atlas.libs.framework.security.FederatedIdentityProvider;
+import org.atlas.libs.framework.security.JwtUtil;
+import org.atlas.libs.framework.security.Principal;
 import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.libs.framework.util.StringUtil;
-import org.atlas.libs.jwt.IssueTokenInput;
-import org.atlas.libs.jwt.JwtUtil;
 import org.atlas.platform.authorization.domain.entity.FederatedIdentityEntity;
 import org.atlas.platform.authorization.domain.entity.UserEntity;
 import org.atlas.platform.authorization.domain.error.DomainError;
@@ -31,14 +31,10 @@ public class OAuth2LoginPostService {
   public LoginOutput loginWithFederatedIdentity(FederatedIdentityProvider provider,
       OAuth2UserInfo oAuth2UserInfo) throws Exception {
     UserEntity user = resolveUser(provider, oAuth2UserInfo);
-    IssueTokenInput issueTokenInput = IssueTokenInput.builder()
-        .userId(user.getId())
-        .role(user.getRole())
-        .build();
-
+    Principal principal = user.toPrincipal();
     return new LoginOutput(
-        JwtUtil.issueAccessToken(issueTokenInput),
-        JwtUtil.issueRefreshToken(issueTokenInput)
+        JwtUtil.issueAccessToken(principal),
+        JwtUtil.issueRefreshToken(principal)
     );
   }
 

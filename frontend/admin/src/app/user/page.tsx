@@ -1,7 +1,7 @@
 "use client";
 
 import { Metadata } from "@/api/apiClient";
-import { identityApi } from "@/api/authorization.api";
+import { authorizationApi } from "@/api/authorization.api";
 import AdminLayout from "@/components/layout/AdminLayout";
 import {
   AlertDialog,
@@ -80,7 +80,7 @@ const AdminUserListPage: React.FC = () => {
 
     setIsLoadingUserRoles(true);
     try {
-      const response = await identityApi.retrieveUserRoles();
+      const response = await authorizationApi.retrieveUserRoles();
       if (response.success) {
         setUserRoles(response.data || {});
       } else {
@@ -117,7 +117,7 @@ const AdminUserListPage: React.FC = () => {
           }
         });
 
-        const response = await identityApi.retrieveUserList(apiFilters);
+        const response = await authorizationApi.retrieveUserList(apiFilters);
 
         if (response.success) {
           setUsers(response.data || []);
@@ -199,7 +199,7 @@ const AdminUserListPage: React.FC = () => {
     if (!deleteTarget || isDeleting) return;
     setIsDeleting(true);
     try {
-      const response = await identityApi.deleteUser(deleteTarget.id);
+      const response = await authorizationApi.deleteUser(deleteTarget.id);
       if (response.success) {
         toast.success("User deleted successfully");
         const targetPage =

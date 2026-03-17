@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/reference-data")
+@RequestMapping("/api/public/reference-data")
 @Validated
 @RequiredArgsConstructor
 public class ReferenceDataController {

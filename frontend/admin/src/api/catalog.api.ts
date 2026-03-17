@@ -17,15 +17,15 @@ export class CatalogApi extends BaseApi {
   }
 
   async retrieveAllBrand(): Promise<ApiResponse<Brand[]>> {
-    return this.get<Brand[]>("/brands");
+    return this.get<Brand[]>("/public/brands");
   }
 
   async retrieveAllCategory(): Promise<ApiResponse<Category[]>> {
-    return this.get<Category[]>("/categories");
+    return this.get<Category[]>("/public/categories");
   }
 
   async retrieveReferenceData(type: string): Promise<ApiResponse<Record<string, string>>> {
-    return this.get<Record<string, string>>(`/reference-data?type=${type}`);
+    return this.get<Record<string, string>>(`/public/reference-data?type=${type}`);
   }
 
   async retrieveProductTypes(): Promise<ApiResponse<Record<string, string>>> {

@@ -1,6 +1,6 @@
 "use client";
 
-import { identityApi } from "@/api/index.api";
+import { authorizationApi } from "@/api/index.api";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -84,7 +84,7 @@ const Register: React.FC = () => {
 
     try {
       setIsRegistering(true);
-      await identityApi.register(request);
+      await authorizationApi.register(request);
       toast.success("Registration successful!");
       form.reset();
       setTimeout(goToLogin, 1000);
