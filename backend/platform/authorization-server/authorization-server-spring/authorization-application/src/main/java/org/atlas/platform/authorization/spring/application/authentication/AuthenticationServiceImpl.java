@@ -60,8 +60,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   @Override
   @Transactional(readOnly = true)
   public RefreshTokenOutput refreshToken(RefreshTokenInput input) throws Exception {
-    // Parse refresh token and extract userId (subject)
-    String userId = JwtUtil.extractSubject(input.getRefreshToken());
+    String userId = JwtUtil.extractSubjectVerified(input.getRefreshToken());
 
     // Reissue tokens
     UserEntity user = userRepository.findById(userId)

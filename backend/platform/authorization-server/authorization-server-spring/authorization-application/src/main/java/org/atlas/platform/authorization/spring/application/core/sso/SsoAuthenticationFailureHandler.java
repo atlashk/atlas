@@ -1,4 +1,4 @@
-package org.atlas.platform.authorization.spring.application.core.oauth2;
+package org.atlas.platform.authorization.spring.application.core.sso;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
-public class OAuth2AuthenticationFailureHandler implements AuthenticationFailureHandler {
+public class SsoAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
   @Value("${app.oauth2.callback-url:http://localhost:8000/login/callback}")
   private String callbackUrl;

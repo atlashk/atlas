@@ -1,6 +1,6 @@
 "use client";
 
-import { catalogApi, identityApi, orderApi } from "@/api/index.api";
+import { catalogApi, authorizationApi, orderApi } from "@/api/index.api";
 import AdminLayout from "@/components/layout/AdminLayout";
 import {
   Card,
@@ -70,7 +70,7 @@ const Dashboard: React.FC = () => {
         revenueResponse,
         monthlyResponse,
       ] = await Promise.all([
-        identityApi.retrieveTotalUserCount(),
+        authorizationApi.retrieveTotalUserCount(),
         catalogApi.retrieveTotalProductCount(),
         orderApi.retrieveTotalOrderCount(),
         orderApi.retrieveTotalRevenue(),

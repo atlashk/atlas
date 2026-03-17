@@ -20,8 +20,7 @@ public class ApiSecurityConfig {
 
   @Bean
   @Order(1)
-  public SecurityFilterChain apiSecurityFilterChain(
-      HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+  public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
     return http
         .securityMatcher("/api/**")
         .csrf(AbstractHttpConfigurer::disable)

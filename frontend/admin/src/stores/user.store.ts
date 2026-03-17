@@ -1,6 +1,6 @@
 import { authorizationApi } from "@/api/authorization.api";
 import type { ChangePasswordRequest, LoginRequest, User } from "@/interfaces/identity.interface";
-import { clearAuthCookies, getCookie, isValidToken, setCookie } from "@/utils/cookies";
+import { clearAuthCookies, deleteCookie, getCookie, isValidToken, setCookie } from "@/utils/cookies";
 import { createLogger } from "@/utils/logger";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -26,6 +26,10 @@ interface UserActions {
 
   login: (
     credentials: LoginRequest
+  ) => Promise<{ success: boolean; errorMessage?: string }>;
+  loginWithTokens: (
+    accessToken: string,
+    refreshToken?: string | null
   ) => Promise<{ success: boolean; errorMessage?: string }>;
   fetchProfile: () => Promise<void>;
   changePassword: (
@@ -91,6 +95,41 @@ export const useUserStore = create<UserStore>()(
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : "Login failed";
           logger.error('Login failed', error);
+          set({
+            error: errorMessage,
+            loading: false,
+          });
+          return { success: false, errorMessage };
+        }
+      },
+
+      loginWithTokens: async (accessToken: string, refreshToken?: string | null) => {
+        set({ loading: true, error: null });
+
+        try {
+          setCookie(AUTH_STORAGE_KEYS.ACCESS_TOKEN, accessToken);
+          if (refreshToken) {
+            setCookie(AUTH_STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+          } else {
+            deleteCookie(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
+          }
+
+          set({
+            accessToken,
+            profile: null,
+            loading: false,
+          });
+
+          try {
+            await get().fetchProfile();
+            return { success: true };
+          } catch (profileError) {
+            logger.warn('Token login successful but failed to fetch user profile', profileError);
+            return { success: true };
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : "Token login failed";
+          logger.error('Token login failed', error);
           set({
             error: errorMessage,
             loading: false,

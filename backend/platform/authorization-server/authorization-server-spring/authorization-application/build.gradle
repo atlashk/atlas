@@ -40,6 +40,9 @@ dependencies {
     // Supports HTTP handling
     api project(':libs.api.server.rest')
 
+    // Supports OAuth2 login page
+    api project(':libs.template.thymeleaf')
+
     // Lombok
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"

@@ -5,6 +5,7 @@ import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -55,6 +56,10 @@ public class JwtUtil {
 
   public static String extractSubject(String token) {
     return extractClaims(token).getSubject();
+  }
+
+  public static String extractSubjectVerified(String token) {
+    return extractClaimsVerified(token).getSubject();
   }
 
   public static Date extractExpiresAt(String token) {
@@ -136,6 +141,26 @@ public class JwtUtil {
       return SignedJWT.parse(token).getJWTClaimsSet();
     } catch (ParseException e) {
       throw new IllegalArgumentException("Invalid JWT token", e);
+    }
+  }
+
+  private static JWTClaimsSet extractClaimsVerified(String token) {
+    try {
+      SignedJWT signedJwt = SignedJWT.parse(token);
+      RSAPublicKey rsaPublicKey = RsaKeyLoader.loadPublicKey(RSA_PUBLIC_KEY_PATH);
+      if (!signedJwt.verify(new RSASSAVerifier(rsaPublicKey))) {
+        throw new IllegalArgumentException("Invalid JWT signature");
+      }
+      JWTClaimsSet claimsSet = signedJwt.getJWTClaimsSet();
+      Date expiresAt = claimsSet.getExpirationTime();
+      if (expiresAt == null || expiresAt.before(LegacyDateUtil.now())) {
+        throw new IllegalArgumentException("JWT token expired");
+      }
+      return claimsSet;
+    } catch (ParseException e) {
+      throw new IllegalArgumentException("Invalid JWT token", e);
+    } catch (IOException | InvalidKeySpecException | JOSEException e) {
+      throw new IllegalArgumentException("Cannot verify JWT token", e);
     }
   }
 }

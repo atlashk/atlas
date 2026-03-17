@@ -1,4 +1,4 @@
-package org.atlas.platform.authorization.spring.application.core.oauth2;
+package org.atlas.platform.authorization.spring.application.core.sso;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class OAuth2LoginPostService {
+public class SsoLoginPostService {
 
   private final UserRepository userRepository;
   private final FederatedIdentityRepository federatedIdentityRepository;

@@ -11,3 +11,47 @@ spring:
               - https://www.googleapis.com/auth/userinfo.email
               - https://www.googleapis.com/auth/userinfo.profile
               - openid
+      authorizationserver:
+        client:
+          storefront:
+            registration:
+              client-id: ${OAUTH2_AUTHORIZATION_STOREFRONT_CLIENT_ID:storefront-oidc-client}
+              client-authentication-methods:
+              # SPA public client cannot safely keep a secret in browser, so use "none" + PKCE
+                - none
+              authorization-grant-types:
+                - authorization_code
+                - refresh_token
+              redirect-uris:
+                - ${OAUTH2_AUTHORIZATION_STOREFRONT_REDIRECT_URI:http://localhost:8000/login/callback}
+              post-logout-redirect-uris:
+                - ${OAUTH2_AUTHORIZATION_STOREFRONT_POST_LOGOUT_REDIRECT_URI:http://localhost:8000/login}
+              scopes:
+                - openid
+                - profile
+                - email
+                - phone
+                - offline_access
+            require-proof-key: true
+            require-authorization-consent: true
+          admin:
+            registration:
+              client-id: ${OAUTH2_AUTHORIZATION_ADMIN_CLIENT_ID:admin-oidc-client}
+              client-authentication-methods:
+              # SPA public client cannot safely keep a secret in browser, so use "none" + PKCE
+                - none
+              authorization-grant-types:
+                - authorization_code
+                - refresh_token
+              redirect-uris:
+                - ${OAUTH2_AUTHORIZATION_ADMIN_REDIRECT_URI:http://localhost:8001/login/callback}
+              post-logout-redirect-uris:
+                - ${OAUTH2_AUTHORIZATION_ADMIN_POST_LOGOUT_REDIRECT_URI:http://localhost:8001/login}
+              scopes:
+                - openid
+                - profile
+                - email
+                - phone
+                - offline_access
+            require-proof-key: true
+            require-authorization-consent: true

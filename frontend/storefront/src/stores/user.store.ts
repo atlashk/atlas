@@ -1,6 +1,6 @@
 import { authorizationApi } from "@/api/index.api";
 import type { ChangePasswordRequest, LoginRequest, User } from "@/interfaces/identity.interface";
-import { clearAuthCookies, getCookie, isValidToken, setCookie } from "@/utils/cookies";
+import { clearAuthCookies, deleteCookie, getCookie, isValidToken, setCookie } from "@/utils/cookies";
 import { createLogger } from "@/utils/logger";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -30,7 +30,7 @@ interface UserActions {
   ) => Promise<{ success: boolean; errorMessage?: string }>;
   loginWithTokens: (
     accessToken: string,
-    refreshToken: string
+    refreshToken?: string | null
   ) => Promise<{ success: boolean; errorMessage?: string }>;
   fetchProfile: () => Promise<void>;
   changePassword: (
@@ -104,12 +104,16 @@ export const useUserStore = create<UserStore>()(
         }
       },
 
-      loginWithTokens: async (accessToken: string, refreshToken: string) => {
+      loginWithTokens: async (accessToken: string, refreshToken?: string | null) => {
         set({ loading: true, error: null });
 
         try {
           setCookie(AUTH_STORAGE_KEYS.ACCESS_TOKEN, accessToken);
-          setCookie(AUTH_STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+          if (refreshToken) {
+            setCookie(AUTH_STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+          } else {
+            deleteCookie(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
+          }
 
           set({
             accessToken,

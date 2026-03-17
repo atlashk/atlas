@@ -1,4 +1,4 @@
-package org.atlas.platform.authorization.spring.application.core.oauth2;
+package org.atlas.platform.authorization.spring.application.core.sso;
 
 import org.atlas.libs.framework.security.FederatedIdentityProvider;
 import org.springframework.security.oauth2.core.user.OAuth2User;

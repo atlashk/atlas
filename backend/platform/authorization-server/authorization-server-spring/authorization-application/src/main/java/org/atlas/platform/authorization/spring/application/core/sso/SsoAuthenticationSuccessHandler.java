@@ -1,4 +1,4 @@
-package org.atlas.platform.authorization.spring.application.core.oauth2;
+package org.atlas.platform.authorization.spring.application.core.sso;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,9 +22,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 @RequiredArgsConstructor
-public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
+public class SsoAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
-  private final OAuth2LoginPostService oAuth2LoginPostService;
+  private final SsoLoginPostService ssoLoginPostService;
   private final List<OAuth2UserInfoExtractor> oAuth2UserInfoExtractors;
 
   @Value("${app.oauth2.callback-url:http://localhost:8000/login/callback}")
@@ -54,7 +54,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
     }
 
     try {
-      LoginOutput loginOutput = oAuth2LoginPostService.loginWithFederatedIdentity(
+      LoginOutput loginOutput = ssoLoginPostService.loginWithFederatedIdentity(
           provider, oAuth2UserInfo);
       String redirectUrl = UriComponentsBuilder.fromUriString(callbackUrl)
           .queryParam("accessToken", loginOutput.getAccessToken())

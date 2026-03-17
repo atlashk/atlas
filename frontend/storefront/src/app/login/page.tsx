@@ -22,6 +22,11 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import {
+  createOAuth2AuthorizationUrl,
+  executeJwtLoginFlow,
+  resolveAuthorizationBaseUrl,
+} from "./login.flows";
 import { withGuestOnly } from "../../hoc/withAuth";
 import { useUserStore } from "../../stores/user.store";
 
@@ -33,6 +38,10 @@ const formSchema = z.object({
     .string()
     .min(1, { message: "Password is required." }),
 });
+
+const OAUTH2_CLIENT_ID = "storefront-oidc-client";
+const OAUTH2_PKCE_VERIFIER_STORAGE_KEY = "oauth2_pkce_verifier_storefront";
+const OAUTH2_STATE_STORAGE_KEY = "oauth2_state_storefront";
 
 const Login: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState("");
@@ -64,28 +73,15 @@ const Login: React.FC = () => {
         email: values.email,
         password: values.password,
       };
-
-      const response = await login(credentials);
-
-      if (response.success) {
+      const result = await executeJwtLoginFlow(login, credentials, getRedirectUrl);
+      if (result.success) {
         toast.success("Login successful!");
-
-        // Add a small delay to ensure tokens are properly set before redirect
         await new Promise((resolve) => setTimeout(resolve, 100));
-
-        // Check if there's a redirect URL from the middleware
-        const redirectUrl = getRedirectUrl();
-
-        if (redirectUrl) {
-          // Use the redirect URL from middleware
-          console.log("Redirecting to original destination:", redirectUrl);
-          router.push(redirectUrl);
-        } else {
-          console.log("No redirect URL, letting useGuestRedirect handle redirect");
+        if (result.redirectUrl) {
+          router.push(result.redirectUrl);
         }
       } else {
-        const message = response.errorMessage || "Login failed. Please check your credentials.";
-        setErrorMessage(message);
+        setErrorMessage(result.errorMessage);
       }
     } catch {
       const message = "An unexpected error occurred. Please try again.";
@@ -95,25 +91,35 @@ const Login: React.FC = () => {
     }
   };
 
-  const onGoogleLogin = () => {
+  const persistRedirectUrl = () => {
     const redirectUrl = getRedirectUrl();
     if (redirectUrl) {
       sessionStorage.setItem("auth_redirect", redirectUrl);
     }
-    const oauthAuthorizationBaseUrl = (() => {
-      try {
-        const url = new URL(AUTHORIZATION_API_BASE_URL);
-        if (
-          url.protocol === "http:" &&
-          (url.hostname === "127.0.0.1" || url.hostname === "0.0.0.0")
-        ) {
-          url.hostname = "localhost";
-        }
-        return url.toString().replace(/\/$/, "");
-      } catch {
-        return AUTHORIZATION_API_BASE_URL.replace(/\/$/, "");
-      }
-    })();
+  };
+
+  const onOAuth2Login = async () => {
+    persistRedirectUrl();
+    const oauthAuthorizationBaseUrl = resolveAuthorizationBaseUrl(
+      AUTHORIZATION_API_BASE_URL
+    );
+    const redirectUri = `${window.location.origin}/login/callback`;
+    const authorizeUrl = await createOAuth2AuthorizationUrl({
+      authorizationBaseUrl: oauthAuthorizationBaseUrl,
+      clientId: OAUTH2_CLIENT_ID,
+      scope: "openid profile email phone offline_access",
+      redirectUri,
+      pkceVerifierStorageKey: OAUTH2_PKCE_VERIFIER_STORAGE_KEY,
+      stateStorageKey: OAUTH2_STATE_STORAGE_KEY,
+    });
+    window.location.href = authorizeUrl;
+  };
+
+  const onGoogleLogin = () => {
+    persistRedirectUrl();
+    const oauthAuthorizationBaseUrl = resolveAuthorizationBaseUrl(
+      AUTHORIZATION_API_BASE_URL
+    );
     window.location.href = `${oauthAuthorizationBaseUrl}/oauth2/authorization/google`;
   };
 
@@ -257,6 +263,23 @@ const Login: React.FC = () => {
                   </Link>
                 </p>
               </div>
+
+              <div className="relative py-1">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                size="lg"
+                disabled={isLoggingIn}
+                onClick={onOAuth2Login}
+              >
+                OAuth2 Login
+              </Button>
 
               <div className="relative py-1">
                 <div className="absolute inset-0 flex items-center">

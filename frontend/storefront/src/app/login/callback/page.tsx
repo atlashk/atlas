@@ -3,21 +3,43 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { AUTHORIZATION_API_BASE_URL } from "@/config/env.config";
 import { useUserStore } from "@/stores/user.store";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import {
+  clearPkceState,
+  exchangeAuthorizationCodeForTokens,
+  executeSsoLoginFlow,
+  resolveAuthorizationBaseUrl,
+  resolveInitialSsoErrorMessage,
+  resolvePkceVerifier,
+  resolveProviderLabel,
+} from "../login.flows";
+
+const OAUTH2_CLIENT_ID = "storefront-oidc-client";
+const OAUTH2_PKCE_VERIFIER_STORAGE_KEY = "oauth2_pkce_verifier_storefront";
+const OAUTH2_STATE_STORAGE_KEY = "oauth2_state_storefront";
 
 const LoginCallback: React.FC = () => {
   const searchParams = useSearchParams();
+  const provider = searchParams.get("provider");
+  const code = searchParams.get("code");
+  const state = searchParams.get("state");
   const ssoError = searchParams.get("ssoError");
+  const oauth2Error = searchParams.get("error");
   const accessToken = searchParams.get("accessToken");
   const refreshToken = searchParams.get("refreshToken");
-  const initialErrorMessage = ssoError
-    ? "Google login failed. Please try again."
-    : (!accessToken || !refreshToken)
-      ? "Missing SSO tokens. Please try login again."
-      : "";
+  const providerLabel = resolveProviderLabel(provider);
+  const initialErrorMessage = resolveInitialSsoErrorMessage({
+    providerLabel,
+    ssoError,
+    oauth2Error,
+    accessToken,
+    refreshToken,
+    code,
+  });
 
   const [errorMessage, setErrorMessage] = useState(initialErrorMessage);
   const [isProcessing, setIsProcessing] = useState(!initialErrorMessage);
@@ -34,27 +56,81 @@ const LoginCallback: React.FC = () => {
     if (initialErrorMessage) {
       return;
     }
-    if (!accessToken || !refreshToken) {
-      return;
-    }
-
     const completeSsoLogin = async () => {
-      const response = await loginWithTokens(accessToken, refreshToken);
+      const oauthAuthorizationBaseUrl = resolveAuthorizationBaseUrl(
+        AUTHORIZATION_API_BASE_URL
+      );
 
-      if (response.success) {
-        toast.success("Google login successful!");
+      let resolvedAccessToken = accessToken;
+      let resolvedRefreshToken = refreshToken;
+
+      if (!resolvedAccessToken || !resolvedRefreshToken) {
+        if (!code || !state) {
+          setErrorMessage("Missing OAuth2 authorization response. Please try login again.");
+          setIsProcessing(false);
+          return;
+        }
+        const codeVerifier = resolvePkceVerifier(
+          state,
+          OAUTH2_STATE_STORAGE_KEY,
+          OAUTH2_PKCE_VERIFIER_STORAGE_KEY
+        );
+        if (!codeVerifier) {
+          setErrorMessage("Invalid OAuth2 state. Please try login again.");
+          setIsProcessing(false);
+          return;
+        }
+        const redirectUri = `${window.location.origin}/login/callback`;
+        try {
+          const exchangedTokens = await exchangeAuthorizationCodeForTokens({
+            authorizationBaseUrl: oauthAuthorizationBaseUrl,
+            clientId: OAUTH2_CLIENT_ID,
+            code,
+            redirectUri,
+            codeVerifier,
+          });
+          resolvedAccessToken = exchangedTokens.accessToken || null;
+          resolvedRefreshToken = exchangedTokens.refreshToken || null;
+        } catch (error) {
+          setErrorMessage(
+            error instanceof Error
+              ? error.message
+              : "OAuth2 token exchange failed."
+          );
+          setIsProcessing(false);
+          return;
+        }
+      }
+
+      if (!resolvedAccessToken) {
+        setErrorMessage("Missing OAuth2 access token. Please try login again.");
+        setIsProcessing(false);
+        return;
+      }
+
+      const result = await executeSsoLoginFlow(
+        loginWithTokens,
+        resolvedAccessToken,
+        resolvedRefreshToken
+      );
+      if (result.success) {
+        toast.success(`${providerLabel} login successful!`);
+        clearPkceState(
+          OAUTH2_STATE_STORAGE_KEY,
+          OAUTH2_PKCE_VERIFIER_STORAGE_KEY
+        );
         const redirectUrl = sessionStorage.getItem("auth_redirect");
         sessionStorage.removeItem("auth_redirect");
         router.push(redirectUrl || "/");
         return;
       }
 
-      setErrorMessage(response.errorMessage || "Google login failed.");
+      setErrorMessage(result.errorMessage);
       setIsProcessing(false);
     };
 
     void completeSsoLogin();
-  }, [accessToken, initialErrorMessage, loginWithTokens, refreshToken, router]);
+  }, [accessToken, code, initialErrorMessage, loginWithTokens, oauth2Error, providerLabel, refreshToken, router, state]);
 
   return (
     <div className="flex items-center justify-center min-h-screen px-4">
@@ -63,7 +139,7 @@ const LoginCallback: React.FC = () => {
           <div className="text-center space-y-3">
             <Spinner className="mx-auto text-blue-600" />
             <p className="text-sm text-muted-foreground">
-              Processing Google login...
+              {`Processing ${providerLabel} login...`}
             </p>
           </div>
         ) : (
