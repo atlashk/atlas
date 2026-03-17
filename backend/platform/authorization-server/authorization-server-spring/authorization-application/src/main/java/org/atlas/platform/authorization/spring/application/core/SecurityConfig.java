@@ -5,6 +5,7 @@ import org.atlas.platform.authorization.spring.application.core.oauth2.OAuth2Aut
 import org.atlas.platform.authorization.spring.application.core.oauth2.OAuth2AuthenticationSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
@@ -12,7 +13,6 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.authentication.ott.OneTimeTokenAuthenticationProvider;
 import org.springframework.security.authentication.ott.OneTimeTokenService;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -22,11 +22,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-@EnableMethodSecurity(
-    securedEnabled = true, // Enables @Secured annotation
-    jsr250Enabled = true,  // Enables @RolesAllowed annotation
-    prePostEnabled = true  // Enables @PreAuthorize, @PostAuthorize, @PreFilter, @PostFilter annotations
-)
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -36,8 +31,14 @@ public class SecurityConfig {
   private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
   @Bean
+  @Order(2)
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     return http
+        .securityMatcher(
+            "/authentication/**", // Default flow
+            "/oauth2/**",         // OAuth2 authorization
+            "/login/oauth2/**"    // OAuth2 callback
+        )
         .csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(auth ->
             auth.anyRequest().permitAll())

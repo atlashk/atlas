@@ -112,6 +112,11 @@ spring:
               lower-case-service-id: true
   reactor:
     context-propagation: auto # Enable tracing context propagation for WebFlux
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${AUTHORIZATION_SERVER:localhost:8901}/.well-known/jwks.json
 
 springdoc:
   api-docs:

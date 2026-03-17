@@ -5,6 +5,7 @@ import java.util.Optional;
 import lombok.experimental.UtilityClass;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.domain.exception.BaseDomainException;
+import org.atlas.libs.framework.domain.shared.identity.UserRole;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -34,5 +35,13 @@ public class SecurityContextUtil {
         principal, null, principal.getAuthorities());
     context.setAuthentication(authentication);
     SecurityContextHolder.setContext(context);
+  }
+  
+  public static void setContextForSystemAdmin() {
+    Principal principal = Principal.builder()
+        .userId("system")
+        .userRole(UserRole.ADMIN)
+        .build();
+    SecurityContextUtil.setContext(principal);
   }
 }

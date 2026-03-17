@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.config.ApplicationConfigService;
 import org.atlas.libs.framework.domain.shared.identity.UserRole;
+import org.atlas.libs.framework.security.Principal;
+import org.atlas.libs.framework.security.SecurityContextUtil;
 import org.atlas.platform.authorization.port.in.user.model.admin.CreateUserInput;
 import org.atlas.platform.authorization.port.in.user.service.UserAdminService;
 import org.springframework.boot.SpringApplication;
@@ -24,6 +26,9 @@ public class UserDataInitializer {
   @EventListener(ApplicationReadyEvent.class)
   @Transactional
   public void initialize(ApplicationReadyEvent event) {
+    // Set context first
+    SecurityContextUtil.setContextForSystemAdmin();
+
     try {
       if (!userAdminService.existsUser("admin@atlas.org")) {
         createAdminUser();

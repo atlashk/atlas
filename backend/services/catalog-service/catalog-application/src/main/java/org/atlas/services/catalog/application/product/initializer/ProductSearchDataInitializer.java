@@ -1,4 +1,4 @@
-package org.atlas.services.catalog.application.product.hook;
+package org.atlas.services.catalog.application.product.initializer;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -9,9 +9,9 @@ import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.PagingUtil;
 import org.atlas.libs.framework.util.SleepUtil;
 import org.atlas.services.catalog.domain.entity.ProductEntity;
-import org.atlas.services.catalog.port.out.search.SearchService;
-import org.atlas.services.catalog.port.out.search.SearchIndex;
 import org.atlas.services.catalog.port.out.repository.ProductRepository;
+import org.atlas.services.catalog.port.out.search.SearchIndex;
+import org.atlas.services.catalog.port.out.search.SearchService;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;

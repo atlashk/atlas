@@ -1,4 +1,4 @@
-package org.atlas.services.catalog.application.product.hook;
+package org.atlas.services.catalog.application.product.initializer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

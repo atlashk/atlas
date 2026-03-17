@@ -2,9 +2,7 @@ package org.atlas.libs.api.server.rest.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -12,12 +10,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableMethodSecurity(
-    securedEnabled = true, // Enables @Secured annotation
-    jsr250Enabled = true,  // Enables @RolesAllowed annotation
-    prePostEnabled = true  // Enables @PreAuthorize, @PostAuthorize, @PreFilter, @PostFilter annotations
-)
-public class SecurityConfig {
+public class ApiSecurityConfig {
 
   @Bean
   public JwtAuthenticationFilter jwtAuthenticationFilter() {
@@ -25,8 +18,8 @@ public class SecurityConfig {
   }
 
   @Bean
-  @Order(Ordered.HIGHEST_PRECEDENCE)
-  public SecurityFilterChain apiFilterChain(
+  @Order(1)
+  public SecurityFilterChain apiSecurityFilterChain(
       HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
     return http
         .securityMatcher("/api/**")
