@@ -1,4 +1,4 @@
-package org.atlas.services.gateway.spring.reactive.util;
+package org.atlas.services.gateway.reactive.security;
 
 import java.nio.charset.StandardCharsets;
 import lombok.experimental.UtilityClass;

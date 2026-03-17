@@ -25,13 +25,11 @@ repositories {
 }
 
 dependencies {
-    // Framework
-    implementation project(':libs.framework')
-
     // Spring Cloud Config Server
     implementation 'org.springframework.cloud:spring-cloud-config-server'
 
     // Observability
+    implementation project(':libs.observability.actuator')
     switch (rootProject.ext.appStack['observability.logging.framework']) {
         case 'logback':
             implementation project(':libs.observability.logging.logback')
@@ -48,19 +46,10 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported observability.metrics: ${rootProject.ext.appStack['observability.metrics']}")
     }
-    switch (rootProject.ext.appStack['observability.tracing']) {
-        case 'none':
-            break
-        case 'zipkin':
-            implementation project(':libs.observability.tracing.zipkin')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported observability.tracing: ${rootProject.ext.appStack['observability.tracing']}")
-    }
-    
-    // Lombok
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
+    // No need tracing
+
+    // YAML loader
+    implementation project(':libs.yaml-loader')
 }
 
 dependencyManagement {

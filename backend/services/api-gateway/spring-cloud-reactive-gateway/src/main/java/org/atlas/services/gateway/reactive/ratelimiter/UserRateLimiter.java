@@ -1,4 +1,4 @@
-package org.atlas.services.gateway.spring.reactive.ratelimiter;
+package org.atlas.services.gateway.reactive.ratelimiter;
 
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;

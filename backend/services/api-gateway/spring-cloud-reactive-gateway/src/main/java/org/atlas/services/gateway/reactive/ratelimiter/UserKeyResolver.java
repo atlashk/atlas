@@ -1,9 +1,9 @@
-package org.atlas.services.gateway.spring.reactive.ratelimiter;
+package org.atlas.services.gateway.reactive.ratelimiter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.util.StringUtil;
-import org.atlas.services.gateway.spring.reactive.util.IpAddressUtil;
+import org.atlas.services.gateway.reactive.util.IpAddressUtil;
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;

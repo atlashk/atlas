@@ -25,9 +25,6 @@ repositories {
 }
 
 dependencies {
-    // Framework
-    implementation project(':libs.framework')
-
     // Spring Cloud Eureka Server
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
 
@@ -49,19 +46,10 @@ dependencies {
         default:
             throw new IllegalArgumentException("Unsupported observability.metrics: ${rootProject.ext.appStack['observability.metrics']}")
     }
-    switch (rootProject.ext.appStack['observability.tracing']) {
-        case 'none':
-            break
-        case 'zipkin':
-            implementation project(':libs.observability.tracing.zipkin')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported observability.tracing: ${rootProject.ext.appStack['observability.tracing']}")
-    }
+    // No need tracing
 
-    // Lombok
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
+    // YAML loader
+    implementation project(':libs.yaml-loader')
 }
 
 dependencyManagement {

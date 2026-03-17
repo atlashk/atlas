@@ -1,24 +1,3 @@
-management:
-  endpoints:
-    web:
-      exposure:
-        # Spring Cloud Gateway: gateway,refresh,routes
-        # curl -X GET http://<gateway-host>:<port>/actuator/gateway/routes
-        # curl -X POST http://<gateway-host>:<port>/actuator/gateway/refresh
-        include: health,info,prometheus,gateway,refresh,routes
-  endpoint:
-    gateway:
-      access: unrestricted
-    health:
-      probes:
-        enabled: true
-      show-details: always
-  health:
-    livenessstate:
-      enabled: true
-    readinessstate:
-      enabled: true
-
 server:
   port: 8080
 
@@ -117,6 +96,11 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${AUTHORIZATION_SERVER:localhost:8901}/.well-known/jwks.json
+
+management:
+  endpoint:
+    gateway:
+      access: unrestricted
 
 springdoc:
   api-docs:

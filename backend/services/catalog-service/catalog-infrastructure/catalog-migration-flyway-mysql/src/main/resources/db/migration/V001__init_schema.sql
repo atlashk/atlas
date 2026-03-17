@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS product
     type         VARCHAR(20)   NOT NULL,
     price        DECIMAL(9, 2) NOT NULL,
     published_at DATETIME      NOT NULL,
-    in_stock     TINYINT(1)    NOT NULL,
+    in_stock     TINYINT       NOT NULL,
     brand_id     VARCHAR(64)   NOT NULL,
     version      BIGINT DEFAULT 0,
     created_at   DATETIME      NOT NULL,

@@ -188,6 +188,10 @@ project(':libs.template.freemarker').projectDir = file('libs/template/template-f
 include(':libs.template.thymeleaf')
 project(':libs.template.thymeleaf').projectDir = file('libs/template/template-thymeleaf')
 
+// YAML loader
+include(':libs.yaml-loader')
+project(':libs.yaml-loader').projectDir = file('libs/yaml-loader')
+
 // =================================================================================================
 // Services
 // =================================================================================================

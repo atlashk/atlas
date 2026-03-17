@@ -10,7 +10,7 @@ import io.grpc.Metadata;
 import io.grpc.MethodDescriptor;
 import io.grpc.Status;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.measurement.StopWatch;
+import org.atlas.libs.framework.util.StopWatch;
 import org.springframework.grpc.client.GlobalClientInterceptor;
 import org.springframework.stereotype.Component;
 

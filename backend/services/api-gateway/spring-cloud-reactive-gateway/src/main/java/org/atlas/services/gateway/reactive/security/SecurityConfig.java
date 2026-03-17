@@ -1,4 +1,4 @@
-package org.atlas.services.gateway.spring.reactive.security;
+package org.atlas.services.gateway.reactive.security;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;

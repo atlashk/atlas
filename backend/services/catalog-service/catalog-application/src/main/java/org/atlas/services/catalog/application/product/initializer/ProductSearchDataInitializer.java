@@ -3,7 +3,7 @@ package org.atlas.services.catalog.application.product.initializer;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.measurement.StopWatch;
+import org.atlas.libs.framework.util.StopWatch;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.PagingUtil;

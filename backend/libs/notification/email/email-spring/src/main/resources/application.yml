@@ -1,9 +1,9 @@
-management:
-  health:
-    mail:
-      enabled: false
-
 spring:
   mail:
     host: ${MAIL_SERVER_HOST:localhost}
     port: 25
+
+management:
+  health:
+    mail:
+      enabled: false

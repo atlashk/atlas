@@ -1,4 +1,4 @@
-package org.atlas.services.gateway.spring.reactive.security;
+package org.atlas.services.gateway.reactive.security;
 
 import org.atlas.libs.framework.api.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.domain.error.CommonDomainError;

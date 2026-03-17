@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.config.ApplicationConfigService;
-import org.atlas.libs.framework.measurement.StopWatch;
+import org.atlas.libs.framework.util.StopWatch;
 import org.atlas.libs.framework.observability.metrics.ApiLatencyMetricsCollector;
 import org.springframework.core.annotation.Order;
 import org.springframework.lang.Nullable;

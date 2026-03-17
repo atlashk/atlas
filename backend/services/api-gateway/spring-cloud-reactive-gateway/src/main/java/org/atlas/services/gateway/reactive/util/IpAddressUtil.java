@@ -1,4 +1,4 @@
-package org.atlas.services.gateway.spring.reactive.util;
+package org.atlas.services.gateway.reactive.util;
 
 import java.net.InetSocketAddress;
 import lombok.experimental.UtilityClass;

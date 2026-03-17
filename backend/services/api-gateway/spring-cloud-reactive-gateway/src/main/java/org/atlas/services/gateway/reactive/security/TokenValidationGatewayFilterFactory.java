@@ -1,11 +1,11 @@
-package org.atlas.services.gateway.spring.reactive.security;
+package org.atlas.services.gateway.reactive.security;
 
 import org.atlas.libs.framework.api.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.cryptography.HashingUtil;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.kvstore.ReactiveKvStoreService;
 import org.atlas.libs.framework.security.SecurityConstant;
-import org.atlas.services.gateway.spring.reactive.util.HttpUtil;
+import org.atlas.services.gateway.reactive.util.HttpUtil;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;

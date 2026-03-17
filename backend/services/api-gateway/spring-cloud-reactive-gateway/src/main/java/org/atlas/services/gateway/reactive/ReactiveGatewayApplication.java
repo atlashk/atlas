@@ -1,13 +1,13 @@
-package org.atlas.platform.authorization.bootstrap;
+package org.atlas.services.gateway.reactive;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
 @SpringBootApplication(scanBasePackages = "org.atlas")
-public class AuthorizationServerApplication {
+public class ReactiveGatewayApplication {
 
   public static void main(String[] args) {
-    new SpringApplicationBuilder(AuthorizationServerApplication.class)
+    new SpringApplicationBuilder(ReactiveGatewayApplication.class)
         .initializers(new org.atlas.libs.yamlloader.YamlLoader())
         .run(args);
   }

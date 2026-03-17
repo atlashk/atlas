@@ -1,4 +1,4 @@
-package org.atlas.services.gateway.spring.reactive.document;
+package org.atlas.services.gateway.reactive.document;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;

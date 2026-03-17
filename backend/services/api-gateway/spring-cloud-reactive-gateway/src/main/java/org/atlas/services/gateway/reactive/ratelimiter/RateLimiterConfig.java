@@ -1,4 +1,4 @@
-package org.atlas.services.gateway.spring.reactive.ratelimiter;
+package org.atlas.services.gateway.reactive.ratelimiter;
 
 import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
 import org.springframework.context.annotation.Bean;

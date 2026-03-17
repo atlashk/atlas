@@ -1,4 +1,4 @@
-package org.atlas.libs.framework.bootstrap;
+package org.atlas.libs.yamlloader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.util.MapUtil;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +17,7 @@ import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.util.CollectionUtils;
 import org.yaml.snakeyaml.Yaml;
 
 /**
@@ -25,7 +25,7 @@ import org.yaml.snakeyaml.Yaml;
  */
 @Configuration
 @Slf4j
-public class YamlConfigLoader implements
+public class YamlLoader implements
     ApplicationContextInitializer<ConfigurableApplicationContext> {
 
   private static final String YAML_PATTERN = "classpath*:/application.yaml";
@@ -123,7 +123,7 @@ public class YamlConfigLoader implements
     try (InputStream inputStream = resource.getInputStream()) {
       Yaml yaml = new Yaml();
       Map<String, Object> yamlMap = yaml.load(inputStream);
-      if (MapUtil.isEmpty(yamlMap)) {
+      if (CollectionUtils.isEmpty(yamlMap)) {
         return Optional.empty();
       }
 

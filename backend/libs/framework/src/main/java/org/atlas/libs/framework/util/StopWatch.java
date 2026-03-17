@@ -1,4 +1,4 @@
-package org.atlas.libs.framework.measurement;
+package org.atlas.libs.framework.util;
 
 import java.util.concurrent.locks.ReentrantLock;
 

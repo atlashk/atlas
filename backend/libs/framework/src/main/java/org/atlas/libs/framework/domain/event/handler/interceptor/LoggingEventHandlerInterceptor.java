@@ -2,7 +2,7 @@ package org.atlas.libs.framework.domain.event.handler.interceptor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.event.DomainEvent;
-import org.atlas.libs.framework.measurement.StopWatch;
+import org.atlas.libs.framework.util.StopWatch;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 

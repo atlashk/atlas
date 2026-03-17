@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.measurement.StopWatch;
+import org.atlas.libs.framework.util.StopWatch;
 import org.atlas.libs.framework.util.ArrayUtil;
 import org.atlas.libs.framework.util.CollectionUtil;
 
