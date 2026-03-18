@@ -122,54 +122,6 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     }
   }, [isLoadingProductTypes, productTypes]);
 
-  // Load brands data
-  const loadBrands = useCallback(async () => {
-    try {
-      setIsLoadingBrands(true);
-      setBrandsError(null);
-
-      const brandsResponse = await catalogApi.retrieveAllBrand();
-
-      if (!brandsResponse.success) {
-        throw new Error(brandsResponse.errorMessage || "Failed to load brands");
-      }
-
-      setBrands(brandsResponse.data || []);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to load brands";
-      setBrandsError(errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setIsLoadingBrands(false);
-    }
-  }, []);
-
-  // Load categories data
-  const loadCategories = useCallback(async () => {
-    try {
-      setIsLoadingCategories(true);
-      setCategoriesError(null);
-
-      const categoriesResponse = await catalogApi.retrieveAllCategory();
-
-      if (!categoriesResponse.success) {
-        throw new Error(
-          categoriesResponse.errorMessage || "Failed to load categories"
-        );
-      }
-
-      setCategories(categoriesResponse.data || []);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to load categories";
-      setCategoriesError(errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setIsLoadingCategories(false);
-    }
-  }, []);
-
   // Products state
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
@@ -400,7 +352,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
 
   const handleSearch = useCallback(() => {
     // Copy form filter to applied filter and reset to first page
-    setAppliedFilter((prev) => ({ ...formFilter, page: 1 }));
+    setAppliedFilter({ ...formFilter, page: 1 });
   }, [formFilter]);
 
   const handleDelete = useCallback(

@@ -122,7 +122,7 @@ services:
       - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
 
-{{#hasService "authorization" "keycloak"}}
+{{#hasService "idp" "keycloak"}}
   keycloak:
     container_name: keycloak
     image: quay.io/keycloak/keycloak:26.5.4
@@ -406,11 +406,11 @@ services:
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-atlas}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-Atlas@123456}
       {{/hasService}}
-      {{#hasService "authorization" "keycloak"}}
+      {{#hasService "idp" "keycloak"}}
       - KEYCLOAK_BASE_URL=http://keycloak:8080
       - KEYCLOAK_REALM=${KEYCLOAK_REALM:-default}
-      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-default-auth}
-      - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET:-9cvF5MPJnwfhEOCwNnQ79RmlkckAsDCj}
+      - KEYCLOAK_ADMIN_CLIENT_ID=${KEYCLOAK_ADMIN_CLIENT_ID:-admin-client}
+      - KEYCLOAK_ADMIN_CLIENT_SECRET=${KEYCLOAK_ADMIN_CLIENT_SECRET:-9cvF5MPJnwfhEOCwNnQ79RmlkckAsDCj}
       {{/hasService}}
       {{#hasService "observability.tracing" "zipkin"}}
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
@@ -766,7 +766,7 @@ services:
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       {{/hasService}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
-      {{#hasService "authorization" "spring"}}
+      {{#hasService "idp" "spring"}}
       - JWK_SET_URI=http://authorization-server:8901/.well-known/jwks.json
       {{/hasService}}
     volumes:

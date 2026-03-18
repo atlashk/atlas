@@ -75,16 +75,16 @@ spec:
                 configMapKeyRef:
                   name: {{ lower $.Release.Name }}-keycloak-config
                   key: keycloak-realm
-            - name: KEYCLOAK_CLIENT_ID
+            - name: KEYCLOAK_ADMIN_CLIENT_ID
               valueFrom:
                 configMapKeyRef:
                   name: {{ lower $.Release.Name }}-keycloak-config
-                  key: keycloak-client-id
-            - name: KEYCLOAK_CLIENT_SECRET
+                  key: keycloak-admin-client-id
+            - name: KEYCLOAK_ADMIN_CLIENT_SECRET
               valueFrom:
                 configMapKeyRef:
                   name: {{ lower $.Release.Name }}-keycloak-config
-                  key: keycloak-client-secret
+                  key: keycloak-admin-client-secret
             {{- end }}
             {{- if eq .Values.appStack.observability.tracing "zipkin" }}
             - name: ZIPKIN_ENDPOINT

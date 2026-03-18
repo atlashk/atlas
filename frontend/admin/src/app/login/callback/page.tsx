@@ -17,9 +17,9 @@ import {
   resolvePkceVerifier,
 } from "../login.flows";
 
-const OAUTH2_CLIENT_ID = "admin-oidc-client";
-const OAUTH2_PKCE_VERIFIER_STORAGE_KEY = "oauth2_pkce_verifier_admin";
-const OAUTH2_STATE_STORAGE_KEY = "oauth2_state_admin";
+const OAUTH2_CLIENT_ID = "web-client";
+const OAUTH2_PKCE_VERIFIER_STORAGE_KEY = "oauth2_pkce_verifier_web";
+const OAUTH2_STATE_STORAGE_KEY = "oauth2_state_web";
 
 const LoginCallback: React.FC = () => {
   const searchParams = useSearchParams();

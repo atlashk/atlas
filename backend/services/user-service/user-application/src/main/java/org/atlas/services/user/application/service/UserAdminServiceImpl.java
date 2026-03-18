@@ -7,6 +7,9 @@ import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.libs.framework.util.StringUtil;
+import org.atlas.services.user.application.mapper.UserAdminMapper;
+import org.atlas.services.user.domain.entity.UserEntity;
+import org.atlas.services.user.domain.error.UserDomainError;
 import org.atlas.services.user.port.in.model.admin.CreateUserInput;
 import org.atlas.services.user.port.in.model.admin.RetrieveUserListInput;
 import org.atlas.services.user.port.in.model.admin.UpdateUserInput;
@@ -15,9 +18,6 @@ import org.atlas.services.user.port.in.service.UserAdminService;
 import org.atlas.services.user.port.out.idp.IdpService;
 import org.atlas.services.user.port.out.repository.UserRepository;
 import org.atlas.services.user.port.out.repository.UserRepository.FindUserCriteria;
-import org.atlas.services.user.application.mapper.UserAdminMapper;
-import org.atlas.services.user.domain.entity.UserEntity;
-import org.atlas.services.user.domain.error.UserDomainError;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -64,7 +64,12 @@ public class UserAdminServiceImpl implements UserAdminService {
     // Synchronize user to IdP if available
     IdpService idpService = idpServiceProvider.getIfAvailable();
     if (idpService != null) {
-      idpService.createUser(user, input.getPassword());
+      // Create new user if not exist
+      if (idpService.existsByEmail(input.getEmail())) {
+        idpService.updateUser(user);
+      } else {
+        idpService.createUser(user, input.getPassword());
+      }
     }
 
     return user.getId();

@@ -1,6 +1,5 @@
 "use client";
 
-import { authorizationApi } from "@/api/authorization.api";
 import { userApi } from "@/api/user.api";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";

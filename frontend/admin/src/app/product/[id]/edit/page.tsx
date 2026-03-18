@@ -164,7 +164,6 @@ function AdminProductEditPage() {
     };
 
     const loadProductTypes = async () => {
-      if (isLoadingProductTypes || Object.keys(productTypes).length > 0) return;
       setIsLoadingProductTypes(true);
       try {
         const response = await catalogApi.retrieveProductTypes();
@@ -291,13 +290,6 @@ function AdminProductEditPage() {
     } catch {
       toast.error("Failed to update product");
     }
-  };
-
-  const formatStatusLabel = (status: string): string => {
-    return status
-      .split("_")
-      .map((word) => word.charAt(0) + word.slice(1).toLowerCase())
-      .join(" ");
   };
 
   if (isLoadingProduct) {

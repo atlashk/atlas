@@ -26,4 +26,9 @@ public class KeycloakIdpAdapter implements IdpService {
   public void deleteUser(String idpUserId) {
     keycloakUserClient.deleteUser(idpUserId);
   }
+
+  @Override
+  public boolean existsByEmail(String email) {
+    return keycloakUserClient.existsByEmail(email);
+  }
 }

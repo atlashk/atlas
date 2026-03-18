@@ -13,6 +13,6 @@ public class KeycloakProps {
 
   private String baseUrl;
   private String realm;
-  private String clientId;
-  private String clientSecret;
+  private String adminClientId;
+  private String adminClientSecret;
 }

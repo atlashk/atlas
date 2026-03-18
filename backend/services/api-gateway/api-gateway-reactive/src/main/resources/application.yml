@@ -19,6 +19,21 @@ spring:
             pool:
               max-idle-time: 45m   # Allow connections to stay idle longer for SSE/WebSocket
           routes:
+            # User service
+            - id: user-service
+              uri: ${USER_SERVICE_URI:lb://user-service}
+              predicates:
+                - Path=/services/user/api/**
+              filters:
+                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+                - TokenValidation
+                - RewritePath=/services/user/api/(?<segment>.*), /api/${segment}
+            - id: user-service-api-docs
+              uri: ${USER_SERVICE_URI:lb://user-service}
+              predicates:
+                - Path=/api-docs/user-service
+              filters:
+                - RewritePath=/api-docs/user-service, /api-docs
             # Catalog service
             - id: catalog-service
               uri: ${CATALOG_SERVICE_URI:lb://catalog-service}

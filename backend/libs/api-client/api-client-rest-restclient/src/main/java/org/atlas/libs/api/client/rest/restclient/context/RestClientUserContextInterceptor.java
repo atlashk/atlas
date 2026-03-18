@@ -15,7 +15,7 @@ public class RestClientUserContextInterceptor implements ClientHttpRequestInterc
   public ClientHttpResponse intercept(HttpRequest request, byte[] body,
       ClientHttpRequestExecution execution) throws IOException {
     Principal principal = SecurityContextUtil.getPrincipal();
-    if (principal != null) {
+    if (principal != null && !request.getHeaders().containsHeader(HttpHeaders.AUTHORIZATION)) {
       request.getHeaders().set(HttpHeaders.AUTHORIZATION, "Bearer " + principal.getAccessToken());
     }
     return execution.execute(request, body);

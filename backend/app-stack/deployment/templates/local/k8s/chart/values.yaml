@@ -269,8 +269,8 @@ keycloak:
       memory: 2Gi
   config:
     realm: default
-    clientId: default-auth
-    clientSecret: 9cvF5MPJnwfhEOCwNnQ79RmlkckAsDCj
+    adminClientId: admin-client
+    adminClientSecret: 9cvF5MPJnwfhEOCwNnQ79RmlkckAsDCj
   secret:
     adminUsername: *defaultUsername
     adminPassword: *defaultPassword

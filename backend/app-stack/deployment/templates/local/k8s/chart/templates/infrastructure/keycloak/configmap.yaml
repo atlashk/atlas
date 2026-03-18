@@ -10,8 +10,8 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 data:
   keycloak-realm: {{ .Values.keycloak.config.realm | quote }}
-  keycloak-client-id: {{ .Values.keycloak.config.clientId | quote }}
-  keycloak-client-secret: {{ .Values.keycloak.config.clientSecret | quote }}
+  keycloak-admin-client-id: {{ .Values.keycloak.config.adminClientId | quote }}
+  keycloak-admin-client-secret: {{ .Values.keycloak.config.adminClientSecret | quote }}
 ---
 apiVersion: v1
 kind: ConfigMap

@@ -41,8 +41,8 @@ public class KeycloakAdminTokenProvider {
 
     MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
     form.add("grant_type", OAuth2Constant.GRANT_TYPE_CLIENT_CREDENTIALS);
-    form.add("client_id", keycloakProps.getClientId());
-    form.add("client_secret", keycloakProps.getClientSecret());
+    form.add("client_id", keycloakProps.getAdminClientId());
+    form.add("client_secret", keycloakProps.getAdminClientSecret());
 
     Map<String, Object> response = restClient.post()
         .uri(url)
@@ -54,7 +54,7 @@ public class KeycloakAdminTokenProvider {
     if (response != null) {
       this.accessToken = (String) response.get("access_token");
       Integer expiresIn = (Integer) response.get("expires_in");
-      this.tokenExpiry = Instant.now().plusSeconds(expiresIn != null ? expiresIn : 300);
+      this.tokenExpiry = Instant.now().plusSeconds(expiresIn != null ? expiresIn : 900);
       log.debug("Refreshed admin token, expires in {} seconds", expiresIn);
     }
   }

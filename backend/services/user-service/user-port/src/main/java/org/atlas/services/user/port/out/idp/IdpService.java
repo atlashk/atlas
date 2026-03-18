@@ -9,4 +9,6 @@ public interface IdpService {
   void updateUser(UserEntity user);
 
   void deleteUser(String idpUserId);
+
+  boolean existsByEmail(String email);
 }

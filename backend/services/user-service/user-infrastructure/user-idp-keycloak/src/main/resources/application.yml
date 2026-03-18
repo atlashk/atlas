@@ -3,5 +3,5 @@ app:
     keycloak:
       base-url: ${KEYCLOAK_BASE_URL:http://localhost:8443}
       realm: ${KEYCLOAK_REALM:default}
-      client-id: ${KEYCLOAK_CLIENT_ID:default-auth}
-      client-secret: ${KEYCLOAK_CLIENT_SECRET:9cvF5MPJnwfhEOCwNnQ79RmlkckAsDCj}
+      admin-client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:admin-client}
+      admin-client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:9cvF5MPJnwfhEOCwNnQ79RmlkckAsDCj}

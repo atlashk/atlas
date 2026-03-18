@@ -39,8 +39,8 @@ public class RestClientConfig {
     try {
       return RestClient.builder()
           .requestFactory(createRequestFactory())
-          .requestInterceptor(new RestClientLoggingInterceptor())
           .requestInterceptor(new RestClientUserContextInterceptor())
+          .requestInterceptor(new RestClientLoggingInterceptor())    
           .build();
     } catch (NoSuchAlgorithmException | KeyManagementException e) {
       throw new RuntimeException("Failed to create request factory", e);

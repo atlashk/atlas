@@ -31,16 +31,68 @@
   },
   "clients": [
     {
-      "clientId": "default-auth",
-      "name": "default-auth",
+      "clientId": "admin-client",
+      "name": "admin-client",
       "enabled": true,
       "protocol": "openid-connect",
       "publicClient": false,
       "clientAuthenticatorType": "client-secret",
       "secret": "9cvF5MPJnwfhEOCwNnQ79RmlkckAsDCj",
-      "serviceAccountsEnabled": true,
-      "directAccessGrantsEnabled": true,
       "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "defaultClientScopes": [
+        "basic",
+        "profile",
+        "email",
+        "phone",
+        "roles"
+      ]
+    },
+    {
+      "clientId": "web-storefront-client",
+      "name": "web-storefront-client",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://localhost:8000/login/callback"
+      ],
+      "webOrigins": [
+        "*"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "defaultClientScopes": [
+        "basic",
+        "profile",
+        "email",
+        "phone",
+        "roles"
+      ]
+    },
+        {
+      "clientId": "web-admin-client",
+      "name": "web-admin-client",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://localhost:8001/login/callback"
+      ],
+      "webOrigins": [
+        "*"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
       "defaultClientScopes": [
         "basic",
         "profile",
@@ -52,9 +104,9 @@
   ],
   "users": [
     {
-      "username": "service-account-default-auth",
+      "username": "service-account-admin-client",
       "enabled": true,
-      "serviceAccountClientId": "default-auth",
+      "serviceAccountClientId": "admin-client",
       "clientRoles": {
         "realm-management": [
           "view-users",

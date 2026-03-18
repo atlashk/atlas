@@ -1,11 +1,14 @@
 package org.atlas.services.user.infrastructure.idp.client;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.shared.user.UserRole;
+import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.user.domain.entity.UserEntity;
 import org.atlas.services.user.infrastructure.idp.config.KeycloakProps;
@@ -15,6 +18,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 @RequiredArgsConstructor
@@ -125,6 +129,37 @@ public class KeycloakUserClient {
       throw new KeycloakClientException(
           String.format("Failed to delete Keycloak user: userId=%s, reason=%s",
               userId, e.getMessage()));
+    }
+  }
+
+  public boolean existsByEmail(String email) {
+    String url = UriComponentsBuilder
+        .fromUriString(keycloakProps.getBaseUrl())
+        .path("/admin/realms/{realm}/users")
+        .queryParam("email", email)
+        .queryParam("exact", true)
+        .buildAndExpand(keycloakProps.getRealm())
+        .toUriString();
+
+    try {
+      List<?> users = restClient.get()
+          .uri(url)
+          .headers(keycloakClientHelper.buildHeaders())
+          .retrieve()
+          .onStatus(HttpStatusCode::isError, (request, response) -> {
+            throw new KeycloakClientException(
+                String.format("Failed to check Keycloak user by email: email=%s, status=%d",
+                    email, response.getStatusCode().value()));
+          })
+          .body(List.class);
+
+      return CollectionUtil.isNotEmpty(users);
+    } catch (KeycloakClientException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new KeycloakClientException(
+          String.format("Failed to check Keycloak user by email: email=%s, reason=%s",
+              email, e.getMessage()));
     }
   }
 

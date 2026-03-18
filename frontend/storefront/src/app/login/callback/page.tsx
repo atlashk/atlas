@@ -3,7 +3,8 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { AUTHORIZATION_API_BASE_URL } from "@/config/env.config";
+import { AUTHORIZATION_API_BASE_URL, IDP } from "@/config/env.config";
+import { initKeycloakOnCallback } from "@/lib/keycloak";
 import { useUserStore } from "@/stores/user.store";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
@@ -18,7 +19,7 @@ import {
   resolveProviderLabel,
 } from "../login.flows";
 
-const OAUTH2_CLIENT_ID = "storefront-oidc-client";
+const OAUTH2_CLIENT_ID = "web-client";
 const OAUTH2_PKCE_VERIFIER_STORAGE_KEY = "oauth2_pkce_verifier_storefront";
 const OAUTH2_STATE_STORAGE_KEY = "oauth2_state_storefront";
 
@@ -31,7 +32,8 @@ const LoginCallback: React.FC = () => {
   const oauth2Error = searchParams.get("error");
   const accessToken = searchParams.get("accessToken");
   const refreshToken = searchParams.get("refreshToken");
-  const providerLabel = resolveProviderLabel(provider);
+  const isKeycloakIdp = IDP.toLowerCase() === "keycloak";
+  const providerLabel = isKeycloakIdp ? "Keycloak" : resolveProviderLabel(provider);
   const initialErrorMessage = resolveInitialSsoErrorMessage({
     providerLabel,
     ssoError,
@@ -64,7 +66,21 @@ const LoginCallback: React.FC = () => {
       let resolvedAccessToken = accessToken;
       let resolvedRefreshToken = refreshToken;
 
-      if (!resolvedAccessToken || !resolvedRefreshToken) {
+      if (isKeycloakIdp && !resolvedAccessToken) {
+        try {
+          const keycloakTokens = await initKeycloakOnCallback();
+          if (keycloakTokens) {
+            resolvedAccessToken = keycloakTokens.accessToken;
+            resolvedRefreshToken = keycloakTokens.refreshToken;
+          }
+        } catch {
+          setErrorMessage("Keycloak token initialization failed.");
+          setIsProcessing(false);
+          return;
+        }
+      }
+
+      if (!resolvedAccessToken) {
         if (!code || !state) {
           setErrorMessage("Missing OAuth2 authorization response. Please try login again.");
           setIsProcessing(false);
@@ -130,7 +146,7 @@ const LoginCallback: React.FC = () => {
     };
 
     void completeSsoLogin();
-  }, [accessToken, code, initialErrorMessage, loginWithTokens, oauth2Error, providerLabel, refreshToken, router, state]);
+  }, [accessToken, code, initialErrorMessage, isKeycloakIdp, loginWithTokens, oauth2Error, providerLabel, refreshToken, router, state]);
 
   return (
     <div className="flex items-center justify-center min-h-screen px-4">

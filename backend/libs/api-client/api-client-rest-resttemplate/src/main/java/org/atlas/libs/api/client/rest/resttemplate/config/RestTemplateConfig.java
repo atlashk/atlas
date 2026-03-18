@@ -48,8 +48,8 @@ public class RestTemplateConfig {
         })
         .connectTimeout(apiClientRestProps.getConnectTimeoutDuration())
         .readTimeout(apiClientRestProps.getReadTimeoutDuration())
-        .additionalInterceptors(new RestClientLoggingInterceptor())
         .additionalInterceptors(new RestClientUserContextInterceptor())
+        .additionalInterceptors(new RestClientLoggingInterceptor())
         .build();
   }
 

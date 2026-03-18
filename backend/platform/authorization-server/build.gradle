@@ -104,8 +104,8 @@ dependencies {
             throw new IllegalArgumentException("Unsupported observability.tracing: ${rootProject.ext.appStack['observability.tracing']}")
     }
 
-    // Sequence generator
-    implementation project(':libs.sequence-generator')
+    // Sequence generator (without migration)
+    implementation project(':libs.sequence-generator.core')
 
     // Service discovery
     switch (rootProject.ext.appStack['service-discovery']) {
