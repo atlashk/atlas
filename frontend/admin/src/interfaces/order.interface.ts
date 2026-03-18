@@ -1,5 +1,5 @@
 import type { Product } from "./catalog.interface";
-import type { User } from "./identity.interface";
+import type { User } from "./user.interface";
 
 export interface Order {
   id: string;

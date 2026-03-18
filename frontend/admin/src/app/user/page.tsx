@@ -42,7 +42,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { withRequireAdmin } from "@/hoc/withAuth";
-import type { ListUserFilters, User } from "@/interfaces/identity.interface";
+import type { ListUserFilters, User } from "@/interfaces/user.interface";
 import { Edit, Loader2, Plus, RotateCcw, Search, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -60,7 +60,7 @@ const AdminUserListPage: React.FC = () => {
     firstName: undefined,
     lastName: undefined,
     email: undefined,
-    phoneNumber: undefined,
+    phone: undefined,
     role: undefined,
     page: 1,
     size: 20,
@@ -154,7 +154,7 @@ const AdminUserListPage: React.FC = () => {
       firstName: undefined,
       lastName: undefined,
       email: undefined,
-      phoneNumber: undefined,
+      phone: undefined,
       role: undefined,
       page: 1,
       size: 20,
@@ -305,14 +305,14 @@ const AdminUserListPage: React.FC = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phoneNumber">Phone Number</Label>
+                <Label htmlFor="phone">Phone</Label>
                 <Input
                   type="text"
-                  id="phoneNumber"
-                  placeholder="Enter phone number"
-                  value={filters.phoneNumber || ""}
+                  id="phone"
+                  placeholder="Enter phone"
+                  value={filters.phone || ""}
                   onChange={(e) =>
-                    handleFilterChange("phoneNumber", e.target.value || undefined)
+                    handleFilterChange("phone", e.target.value || undefined)
                   }
                 />
               </div>
@@ -374,9 +374,9 @@ const AdminUserListPage: React.FC = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>ID</TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Phone</TableHead>
+                      <TableHead>Full Name</TableHead>
+                      <TableHead>Email Address</TableHead>
+                      <TableHead>Phone Number</TableHead>
                       <TableHead>Role</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -401,7 +401,7 @@ const AdminUserListPage: React.FC = () => {
                               : "N/A"}
                           </TableCell>
                           <TableCell>{user.email || "N/A"}</TableCell>
-                          <TableCell>{user.phoneNumber || "N/A"}</TableCell>
+                          <TableCell>{user.phone || "N/A"}</TableCell>
                           <TableCell>
                             <Badge
                               variant={

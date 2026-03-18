@@ -6,7 +6,7 @@ import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.api.grpc.MetadataKeys;
-import org.atlas.libs.framework.domain.shared.identity.UserRole;
+import org.atlas.libs.framework.domain.shared.user.UserRole;
 import org.atlas.libs.framework.security.CustomClaim;
 import org.atlas.libs.framework.security.Principal;
 import org.atlas.libs.framework.security.SecurityContextUtil;

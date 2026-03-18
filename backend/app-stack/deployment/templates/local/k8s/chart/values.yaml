@@ -173,13 +173,13 @@ global:
 # --------------------------------------------------------------------------------------------------
 
 appStack:
-  authorization: keycloak
   datasource: mysql
   file:
     csv: opencsv
     excel: poi
     pdf: pdfbox
   search: elasticsearch
+  idp: spring
   internal: rest
   kvStore: redis
   messaging: kafka
@@ -445,9 +445,9 @@ zipkin:
 # Application
 # --------------------------------------------------------------------------------------------------
 
-identitySvc:
+userSvc:
   image:
-    repository: identity-service
+    repository: user-service
     tag: latest
   resources:
     requests:
@@ -456,12 +456,9 @@ identitySvc:
     limits:
       cpu: 500m
       memory: 1Gi
-  config:
-    oauth2RedirectBaseUrl: http://localhost:8080
   service:
     ports:
       http: 8081
-      grpc: 50051
 
 catalogSvc:
   image:
@@ -523,6 +520,21 @@ paymentSvc:
   service:
     ports:
       http: 8085
+
+authorizationServer:
+  image:
+    repository: authorization-server
+    tag: latest
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+  service:
+    ports:
+      http: 8901
 
 apiGateway:
   image:

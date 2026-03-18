@@ -91,14 +91,10 @@ spec:
                   key: password
             {{- end }}
             {{- if eq .Values.appStack.internal "grpc" }}
-            - name: API_CLIENT_GRPC_IDENTITY_SERVICE_ADDRESS
-              value: "static://{{ lower $.Release.Name }}-identity-service:{{ .Values.identitySvc.service.ports.grpc }}"
             - name: API_CLIENT_GRPC_CATALOG_SERVICE_ADDRESS
               value: "static://{{ lower $.Release.Name }}-catalog-service:{{ .Values.catalogSvc.service.ports.grpc }}"
             {{- end }}
             {{- if eq .Values.appStack.internal "rest" }}
-            - name: INTERNAL_REST_IDENTITY_SERVICE_BASE_URL
-              value: "http://{{ lower $.Release.Name }}-identity-service:{{ .Values.identitySvc.service.ports.http }}"
             - name: INTERNAL_REST_CATALOG_SERVICE_BASE_URL
               value: "http://{{ lower $.Release.Name }}-catalog-service:{{ .Values.catalogSvc.service.ports.http }}"
             {{- end }}

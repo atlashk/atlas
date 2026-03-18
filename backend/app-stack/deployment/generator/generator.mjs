@@ -260,7 +260,7 @@ function shouldSkipFileByPath(filePath, context) {
   const normalizedPath = filePath.replace(/\\/g, '/');
   
   // Skip specific service configs based on stack
-  const authorization = stackValue('authorization');
+  const idp = stackValue('idp');
   if (normalizedPath.includes('/files/keycloak/') && authorization !== 'keycloak') return true;
 
   const datasource = stackValue('datasource');

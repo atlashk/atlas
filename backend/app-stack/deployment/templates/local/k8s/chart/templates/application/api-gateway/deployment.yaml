@@ -28,8 +28,8 @@ spec:
             - name: http
               containerPort: 8080
           env:
-            - name: IDENTITY_SERVICE_URI
-              value: "http://{{ lower $.Release.Name }}-identity-service:{{ .Values.identitySvc.service.ports.http }}"
+            - name: USER_SERVICE_URI
+              value: "http://{{ lower $.Release.Name }}-user-service:{{ .Values.userSvc.service.ports.http }}"
             - name: CATALOG_SERVICE_URI
               value: "http://{{ lower $.Release.Name }}-catalog-service:{{ .Values.catalogSvc.service.ports.http }}"
             - name: INVENTORY_SERVICE_URI
@@ -44,18 +44,9 @@ spec:
             - name: REDIS_PORT
               value: {{ .Values.redis.service.ports.redis | quote }}
             {{- end }}
-            {{- if eq .Values.appStack.identity "jwt" }}
+            {{- if eq .Values.appStack.idp "spring" }}
             - name: JWK_SET_URI
-              value: "http://{{ lower $.Release.Name }}-identity-service:{{ .Values.identitySvc.service.ports.http }}/.well-known/jwks.json"
-            {{- end }}
-            {{- if eq .Values.appStack.identity "keycloak" }}
-            - name: KEYCLOAK_BASE_URL
-              value: "http://{{ lower $.Release.Name }}-keycloak:{{ .Values.keycloak.service.ports.http }}"
-            - name: KEYCLOAK_REALM
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ lower $.Release.Name }}-keycloak-config
-                  key: keycloak-realm
+              value: "http://{{ lower $.Release.Name }}-authorization-server:{{ .Values.authorizationServer.service.ports.http }}/.well-known/jwks.json"
             {{- end }}
             {{- if eq .Values.appStack.observability.tracing "zipkin" }}
             - name: ZIPKIN_ENDPOINT

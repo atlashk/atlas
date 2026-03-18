@@ -6,8 +6,9 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.cryptography.HashingUtil;
+import org.atlas.libs.framework.security.cryptography.HashingUtil;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
+import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.libs.framework.domain.shared.order.OrderStatus;
 import org.atlas.libs.framework.lock.LockService;
 import org.atlas.libs.framework.paging.PagingResult;
@@ -25,8 +26,7 @@ import org.atlas.services.order.domain.entity.OrderEntity;
 import org.atlas.services.order.domain.entity.OrderEntity.OrderItem;
 import org.atlas.services.order.domain.entity.OrderEntity.PaymentSnapshot;
 import org.atlas.services.order.domain.entity.OrderEntity.ProductSnapshot;
-import org.atlas.services.order.domain.error.DomainError;
-import org.atlas.services.order.domain.exception.DomainException;
+import org.atlas.services.order.domain.error.OrderDomainError;
 import org.atlas.services.order.port.in.cart.service.CartService;
 import org.atlas.services.order.port.in.order.model.CheckoutInput;
 import org.atlas.services.order.port.in.order.model.RetrieveOrderListInput;
@@ -61,7 +61,7 @@ public class OrderServiceImpl implements OrderService {
     String userId = SecurityContextUtil.requirePrincipal().getUserId();
 
     OrderEntity order = orderRepository.findById(id)
-        .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(OrderDomainError.ORDER_NOT_FOUND.getErrorCode(), OrderDomainError.ORDER_NOT_FOUND.getMessageCode()));
 
     if (!Objects.equals(order.getUser().getId(), userId)) {
       throw new DomainException(CommonDomainError.FORBIDDEN);
@@ -79,7 +79,7 @@ public class OrderServiceImpl implements OrderService {
     // Retrieve cart
     List<CartItemEntity> cartItems = cartService.retrieveCart();
     if (CollectionUtil.isEmpty(cartItems)) {
-      throw new DomainException(DomainError.CART_EMPTY);
+      throw new DomainException(OrderDomainError.CART_EMPTY);
     }
 
     // Checkout idempotence guarantee

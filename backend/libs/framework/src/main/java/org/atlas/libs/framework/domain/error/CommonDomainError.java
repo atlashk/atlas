@@ -6,7 +6,7 @@ import org.atlas.libs.framework.http.HttpStatusCode;
 
 @Getter
 @RequiredArgsConstructor
-public enum CommonDomainError {
+public enum CommonDomainError implements DomainError {
 
   DEFAULT(HttpStatusCode.INTERNAL_SERVER_ERROR.getCode(), "error.commons.default"),
   BAD_REQUEST(HttpStatusCode.BAD_REQUEST.getCode(), "error.commons.bad_request"),
@@ -18,9 +18,4 @@ public enum CommonDomainError {
 
   private final int errorCode;
   private final String messageCode;
-
-  @Override
-  public String toString() {
-    return String.format("%d %s", errorCode, name());
-  }
 }

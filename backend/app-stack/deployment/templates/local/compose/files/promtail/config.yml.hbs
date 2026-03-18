@@ -18,13 +18,13 @@ scrape_configs:
           service_name: eureka-server
           __path__: /var/log/eureka-server/*.log
   {{/hasService}}
-  - job_name: identity-service
+  - job_name: user-service
     static_configs:
       - targets:
           - localhost
         labels:
-          service_name: identity-service
-          __path__: /var/log/identity-service/*.log
+          service_name: user-service
+          __path__: /var/log/user-service/*.log
   - job_name: catalog-service
     static_configs:
       - targets:
@@ -53,6 +53,15 @@ scrape_configs:
         labels:
           service_name: payment-service
           __path__: /var/log/payment-service/*.log
+  {{#hasService "idp" "spring" }}
+  - job_name: authorization-server
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          service_name: authorization-server
+          __path__: /var/log/authorization-server/*.log
+  {{/hasService}}
   - job_name: api-gateway
     static_configs:
       - targets:

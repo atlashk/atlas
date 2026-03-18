@@ -12,12 +12,15 @@ readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly CHART_DIR="$SCRIPT_DIR/chart"
 
 readonly SERVICES=(
-  identity-service
+  user-service
   catalog-service
   inventory-service
   order-service
   payment-service
   api-gateway
+  {{#hasService "idp" "spring"}}
+  authorization-server
+  {{/hasService}}
 )
 
 REMOVE_IMAGES=false

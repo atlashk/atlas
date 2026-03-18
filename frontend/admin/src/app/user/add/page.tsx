@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { withRequireAdmin } from "@/hoc/withAuth";
-import type { RegisterRequest } from "@/interfaces/identity.interface";
+import type { CreateUserRequest } from "@/interfaces/user.interface";
 import { PASSWORD_REGEX, PASSWORD_REQUIREMENTS_MESSAGE } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2 } from "lucide-react";
@@ -36,7 +36,7 @@ const userSchema = z
     firstName: z.string().min(1, "First name is required."),
     lastName: z.string().min(1, "Last name is required."),
     email: z.email("Please enter a valid email address."),
-    phoneNumber: z.string().optional(),
+    phone: z.string().optional(),
     password: z
       .string()
       .min(1, "Password is required.")
@@ -64,7 +64,7 @@ function AdminUserAddPage() {
       firstName: "",
       lastName: "",
       email: "",
-      phoneNumber: "",
+      phone: "",
       password: "",
       confirmPassword: "",
       role: "USER",
@@ -98,13 +98,13 @@ function AdminUserAddPage() {
   }, [loadUserRoles]);
 
   const onSubmit = async (values: UserCreateFormData) => {
-    const request: RegisterRequest & { role?: string } = {
+    const request: CreateUserRequest = {
       firstName: values.firstName,
       lastName: values.lastName,
       email: values.email,
-      phoneNumber: values.phoneNumber || undefined,
+      phone: values.phone || undefined,
       password: values.password,
-      role: values.role,
+      role: values.role
     };
 
     try {
@@ -199,9 +199,9 @@ function AdminUserAddPage() {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email *</FormLabel>
+                        <FormLabel>Email Address *</FormLabel>
                         <FormControl>
-                          <Input {...field} type="email" placeholder="Enter email" />
+                          <Input {...field} type="email" placeholder="Enter email address" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -209,7 +209,7 @@ function AdminUserAddPage() {
                   />
                   <FormField
                     control={form.control}
-                    name="phoneNumber"
+                    name="phone"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Phone Number</FormLabel>

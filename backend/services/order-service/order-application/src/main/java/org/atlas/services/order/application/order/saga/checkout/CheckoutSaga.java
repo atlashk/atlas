@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.async.AsyncUtil;
 import org.atlas.libs.framework.config.ApplicationConfigService;
 import org.atlas.libs.framework.constant.Services;
+import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.libs.framework.security.Principal;
 import org.atlas.libs.framework.domain.shared.order.OrderStatus;
 import org.atlas.libs.framework.file.FileUtil;
@@ -33,14 +34,9 @@ import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.order.domain.entity.OrderEntity;
 import org.atlas.services.order.domain.entity.OrderEntity.CancellationReason;
-import org.atlas.services.order.domain.error.DomainError;
-import org.atlas.services.order.domain.exception.DomainException;
+import org.atlas.services.order.domain.error.OrderDomainError;
 import org.atlas.services.order.port.in.cart.service.CartService;
 import org.atlas.services.order.port.out.repository.OrderRepository;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 @Saga(
     sagaName = "checkout",
@@ -68,7 +64,7 @@ public class CheckoutSaga {
   public void handleReserveStockReply(SagaEntity saga, SagaCommandResult sagaCommandResult) {
     // Update order
     OrderEntity order = orderRepository.findBySagaId(saga.getId())
-        .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(OrderDomainError.ORDER_NOT_FOUND));
     if (sagaCommandResult.isSuccess()) {
       order.setStatus(OrderStatus.AWAITING_PAYMENT_INITIALIZED);
     } else {
@@ -92,7 +88,7 @@ public class CheckoutSaga {
   @SagaCommandReplyHandler(command = CheckoutCommand.INITIALIZE_PAYMENT)
   public void handleInitializePaymentReply(SagaEntity saga, SagaCommandResult sagaCommandResult) {
     OrderEntity order = orderRepository.findBySagaId(saga.getId())
-        .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(OrderDomainError.ORDER_NOT_FOUND));
 
     if (sagaCommandResult.isSuccess()) {
       InitializePaymentCommandMetadata metadata = JsonUtil.JSON_MAPPER.convertValue(
@@ -128,7 +124,7 @@ public class CheckoutSaga {
   public void handleProcessPaymentReply(SagaEntity saga, SagaCommandResult sagaCommandResult) {
     // Update order
     OrderEntity order = orderRepository.findBySagaId(saga.getId())
-        .orElseThrow(() -> new DomainException(DomainError.ORDER_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(OrderDomainError.ORDER_NOT_FOUND));
 
     ProcessPaymentCommandMetadata metadata = JsonUtil.JSON_MAPPER.convertValue(
         sagaCommandResult.getMetadata(), ProcessPaymentCommandMetadata.class);

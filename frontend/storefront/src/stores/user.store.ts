@@ -1,5 +1,5 @@
 import { authorizationApi } from "@/api/index.api";
-import type { ChangePasswordRequest, LoginRequest, User } from "@/interfaces/identity.interface";
+import type { ChangePasswordRequest, LoginRequest, User } from "@/interfaces/user.interface";
 import { clearAuthCookies, deleteCookie, getCookie, isValidToken, setCookie } from "@/utils/cookies";
 import { createLogger } from "@/utils/logger";
 import { create } from "zustand";

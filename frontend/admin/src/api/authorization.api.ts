@@ -1,4 +1,4 @@
-import type { ChangePasswordRequest, ListUserFilters, LoginRequest, LoginResponse, RegisterRequest, User } from "@/interfaces/identity.interface";
+import type { ChangePasswordRequest, ListUserFilters, LoginRequest, LoginResponse, RegisterRequest, User } from "@/interfaces/user.interface";
 import { AUTHORIZATION_API_BASE_URL } from "@/config/env.config";
 import { ApiResponse } from "./apiClient";
 import { BaseApi } from "./base.api";
@@ -38,7 +38,7 @@ export class AuthorizationApi extends BaseApi {
     if (filters.firstName) payload.firstName = filters.firstName;
     if (filters.lastName) payload.lastName = filters.lastName;
     if (filters.email) payload.email = filters.email;
-    if (filters.phoneNumber) payload.phoneNumber = filters.phoneNumber;
+    if (filters.phone) payload.phone = filters.phone;
     return this.post<User[]>("/users/admin/list", payload);
   }
 

@@ -5,7 +5,7 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class Services {
 
-  public static final String IDENTITY_SERVICE = "identity";
+  public static final String USER_SERVICE = "user";
   public static final String CATALOG_SERVICE = "catalog";
   public static final String INVENTORY_SERVICE = "inventory";
   public static final String ORDER_SERVICE = "order";

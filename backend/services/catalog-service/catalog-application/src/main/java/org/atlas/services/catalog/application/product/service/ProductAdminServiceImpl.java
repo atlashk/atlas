@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.cache.CacheService;
 import org.atlas.libs.framework.domain.event.contract.catalog.ProductCreatedEvent;
+import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
@@ -16,8 +17,7 @@ import org.atlas.services.catalog.application.product.constant.ProductConstant;
 import org.atlas.services.catalog.application.product.mapper.ProductAdminMapper;
 import org.atlas.services.catalog.application.product.mapper.ProductEventMapper;
 import org.atlas.services.catalog.domain.entity.ProductEntity;
-import org.atlas.services.catalog.domain.error.DomainError;
-import org.atlas.services.catalog.domain.exception.DomainException;
+import org.atlas.services.catalog.domain.error.CatalogDomainError;
 import org.atlas.services.catalog.port.in.product.model.admin.CreateProductInput;
 import org.atlas.services.catalog.port.in.product.model.admin.ExportProductInput;
 import org.atlas.services.catalog.port.in.product.model.admin.ImportProductInput;
@@ -77,7 +77,7 @@ public class ProductAdminServiceImpl implements ProductAdminService {
   @Transactional(readOnly = true)
   public ProductEntity retrieveProduct(String id) {
     ProductEntity product = productRepository.findById(id)
-        .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(CatalogDomainError.PRODUCT_NOT_FOUND));
 
     // Set image
     product.setImage(productImageService.getImage(product.getId()));
@@ -126,7 +126,7 @@ public class ProductAdminServiceImpl implements ProductAdminService {
     // Update product in DB
     ProductEntity product = input.getProduct();
     ProductEntity existingProduct = productRepository.findById(product.getId())
-        .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(CatalogDomainError.PRODUCT_NOT_FOUND));
     ProductAdminMapper.INSTANCE.merge(product, existingProduct);
     productRepository.update(product);
     log.debug("Product updated in database: id={}", product.getId());
@@ -159,7 +159,7 @@ public class ProductAdminServiceImpl implements ProductAdminService {
 
     // Delete product from DB
     ProductEntity product = productRepository.findById(id)
-        .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(CatalogDomainError.PRODUCT_NOT_FOUND));
     productRepository.deleteById(product.getId());
     log.debug("Product deleted from database: id={}", product.getId());
 
@@ -199,7 +199,7 @@ public class ProductAdminServiceImpl implements ProductAdminService {
           throw new UnsupportedOperationException("Unsupported file type: " + input.getFileType());
     }
     if (CollectionUtil.isEmpty(rows)) {
-      throw new DomainException(DomainError.NO_IMPORTED_PRODUCT);
+      throw new DomainException(CatalogDomainError.NO_IMPORTED_PRODUCT);
     }
 
     try {
@@ -219,7 +219,7 @@ public class ProductAdminServiceImpl implements ProductAdminService {
       });
       log.info("Imported {} products", rows.size());
     } catch (Exception e) {
-      throw new DomainException(DomainError.FAILED_TO_IMPORT_PRODUCT, e.getMessage());
+      throw new DomainException(CatalogDomainError.FAILED_TO_IMPORT_PRODUCT, e.getMessage());
     }
   }
 

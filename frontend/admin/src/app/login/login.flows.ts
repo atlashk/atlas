@@ -1,4 +1,4 @@
-import { LoginRequest } from "@/interfaces/identity.interface";
+import { LoginRequest } from "@/interfaces/user.interface";
 
 export type FlowResult =
   | { success: true; redirectUrl?: string | null }

@@ -2,10 +2,10 @@ package org.atlas.services.inventory.application.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.services.inventory.application.mapper.StockAdminMapper;
 import org.atlas.services.inventory.domain.entity.StockEntity;
-import org.atlas.services.inventory.domain.error.DomainError;
-import org.atlas.services.inventory.domain.exception.DomainException;
+import org.atlas.services.inventory.domain.error.InventoryDomainError;
 import org.atlas.services.inventory.port.in.model.StockOutput;
 import org.atlas.services.inventory.port.in.service.StockAdminService;
 import org.atlas.services.inventory.port.out.repository.StockRepository;
@@ -38,6 +38,6 @@ public class StockAdminServiceImpl implements StockAdminService {
 
   private StockEntity getStock(String productId) {
     return stockRepository.findByProductId(productId)
-        .orElseThrow(() -> new DomainException(DomainError.STOCK_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(InventoryDomainError.STOCK_NOT_FOUND));
   }
 }

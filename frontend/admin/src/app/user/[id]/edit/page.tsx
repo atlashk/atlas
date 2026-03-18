@@ -31,7 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { withRequireAdmin } from "@/hoc/withAuth";
-import type { RegisterRequest, User } from "@/interfaces/identity.interface";
+import type { UpdateUserRequest, User } from "@/interfaces/user.interface";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -142,7 +142,7 @@ function AdminUserEditPage() {
       return;
     }
 
-    const payload: Partial<RegisterRequest> & { role?: string } = {
+    const payload: Partial<UpdateUserRequest> = {
       firstName: values.firstName,
       lastName: values.lastName,
       role: values.role,

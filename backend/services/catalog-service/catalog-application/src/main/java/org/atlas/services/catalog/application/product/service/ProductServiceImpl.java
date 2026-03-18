@@ -4,19 +4,19 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.cache.Cache;
+import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.services.catalog.application.product.mapper.ProductMapper;
 import org.atlas.services.catalog.domain.entity.ProductEntity;
-import org.atlas.services.catalog.domain.error.DomainError;
-import org.atlas.services.catalog.domain.exception.DomainException;
+import org.atlas.services.catalog.domain.error.CatalogDomainError;
 import org.atlas.services.catalog.port.in.product.model.RetrieveProductListInput;
 import org.atlas.services.catalog.port.in.product.model.RetrieveProductListInput.Mode;
 import org.atlas.services.catalog.port.in.product.service.ProductImageService;
 import org.atlas.services.catalog.port.in.product.service.ProductService;
-import org.atlas.services.catalog.port.out.search.SearchService;
-import org.atlas.services.catalog.port.out.search.SearchProductCriteria;
 import org.atlas.services.catalog.port.out.repository.ProductRepository;
+import org.atlas.services.catalog.port.out.search.SearchProductCriteria;
+import org.atlas.services.catalog.port.out.search.SearchService;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
@@ -76,7 +76,7 @@ public class ProductServiceImpl implements ProductService {
   public ProductEntity retrieveProduct(String productId) throws Exception {
     // Get from DB
     ProductEntity product = productRepository.findById(productId)
-        .orElseThrow(() -> new DomainException(DomainError.PRODUCT_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(CatalogDomainError.PRODUCT_NOT_FOUND));
 
     // Set image
     product.setImage(productImageService.getImage(product.getId()));

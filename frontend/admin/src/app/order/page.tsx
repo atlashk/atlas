@@ -442,7 +442,7 @@ const OrderList: React.FC = () => {
                                     </div>
                                     <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
                                       <span className="text-sm font-medium text-gray-600 min-w-[120px]">
-                                        Email
+                                        Email Address
                                       </span>
                                       {order.user?.email ?? "N/A"}
                                     </div>
@@ -450,7 +450,7 @@ const OrderList: React.FC = () => {
                                       <span className="text-sm font-medium text-gray-600 min-w-[120px]">
                                         Phone Number
                                       </span>
-                                      {order.user?.phoneNumber ?? "N/A"}
+                                      {order.user?.phone ?? "N/A"}
                                     </div>
                                   </div>
 

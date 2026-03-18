@@ -4,7 +4,7 @@ import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.config.ApplicationConfigService;
-import org.atlas.libs.framework.cryptography.EncryptionUtil;
+import org.atlas.libs.framework.security.cryptography.EncryptionUtil;
 import org.atlas.libs.framework.util.StringUtil;
 import org.springframework.beans.factory.InitializingBean;
 

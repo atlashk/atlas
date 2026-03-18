@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.shared.payment.PaymentStatus;
 import org.atlas.libs.framework.http.HttpStatusCode;
 import org.atlas.libs.framework.util.JsonUtil;
-import org.atlas.libs.framework.random.RandomUtil;
+import org.atlas.libs.framework.util.RandomUtil;
 import org.atlas.services.payment.domain.entity.nextaction.UsePaymentElement;
 import org.atlas.services.payment.port.out.gateway.exception.PaymentGatewayException;
 import org.atlas.services.payment.port.out.gateway.method.Card;

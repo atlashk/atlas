@@ -13,15 +13,18 @@ readonly COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
 readonly GRADLEW="$PROJECT_ROOT/backend/gradlew"
 
 readonly SERVICES=(
-  "identity-service:$PROJECT_ROOT/backend/services/identity-service/identity-bootstrap"
+  "user-service:$PROJECT_ROOT/backend/services/user-service/user-bootstrap"
   "catalog-service:$PROJECT_ROOT/backend/services/catalog-service/catalog-bootstrap"
   "inventory-service:$PROJECT_ROOT/backend/services/inventory-service/inventory-bootstrap"
   "order-service:$PROJECT_ROOT/backend/services/order-service/order-bootstrap"
   "payment-service:$PROJECT_ROOT/backend/services/payment-service/payment-bootstrap"
   "api-gateway:$PROJECT_ROOT/backend/services/api-gateway/spring-cloud-gateway/spring-cloud-gateway-server"
-{{#hasService "service-discovery" "eureka"}}
+  {{#hasService "service-discovery" "eureka"}}
   "eureka-server:$PROJECT_ROOT/backend/platform/discovery-server/eureka-server"
-{{/hasService}}
+  {{/hasService}}
+  {{#hasService "idp" "spring"}}
+  "authorization-server:$PROJECT_ROOT/backend/platform/authorization-server"
+  {{/hasService}}
 )
 
 SECONDS=0

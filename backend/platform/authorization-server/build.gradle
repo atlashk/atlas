@@ -1,0 +1,153 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version "${springBootPluginVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagementPluginVersion}"
+    id 'idea'
+}
+
+group = 'org.atlas'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // User domain
+    // ---------------------------------------------------------------------------------------------
+
+    // Datasource
+    switch (rootProject.ext.appStack['datasource']) {
+        case 'mysql':
+            implementation project(':services.user.datasource.mysql')
+            break
+        case 'postgres':
+            implementation project(':services.user.datasource.postgres')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported datasource: ${rootProject.ext.appStack['datasource']}")
+    }
+
+    // Persistence
+    switch (rootProject.ext.appStack.persistence) {
+        case 'jpa':
+            implementation project(':services.user.persistence.jpa')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported persistence: ${rootProject.ext.appStack.persistence}")
+    }
+
+    // Core libs
+    // ---------------------------------------------------------------------------------------------
+
+    // Spring Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // OAuth2 Authorization Server
+    implementation 'org.springframework.boot:spring-boot-starter-security-oauth2-authorization-server'
+
+    // OAuth2 Client (supports SSO login)
+    implementation 'org.springframework.boot:spring-boot-starter-security-oauth2-client'
+
+    // Infrastructure
+    // ---------------------------------------------------------------------------------------------
+
+    // REST server
+    implementation project(':libs.api.server.rest')
+
+    // KV store
+    switch (rootProject.ext.appStack['kv-store']) {
+        case 'redis':
+            implementation project(':libs.kv-store.redis')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported kv-store: ${rootProject.ext.appStack['kv-store']}")
+    }
+
+    // Observability
+    implementation project(':libs.observability.actuator')
+    switch (rootProject.ext.appStack['observability.logging.framework']) {
+        case 'logback':
+            implementation project(':libs.observability.logging.logback')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported observability.logging.framework: ${rootProject.ext.appStack['observability.logging.framework']}")
+    }
+    switch (rootProject.ext.appStack['observability.metrics']) {
+        case 'none':
+            break;
+        case 'prometheus':
+            implementation project(':libs.observability.metrics.prometheus')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported observability.metrics: ${rootProject.ext.appStack['observability.metrics']}")
+    }
+    switch (rootProject.ext.appStack['observability.tracing']) {
+        case 'none':
+            break
+        case 'zipkin':
+            implementation project(':libs.observability.tracing.zipkin')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported observability.tracing: ${rootProject.ext.appStack['observability.tracing']}")
+    }
+
+    // Sequence generator
+    implementation project(':libs.sequence-generator')
+
+    // Service discovery
+    switch (rootProject.ext.appStack['service-discovery']) {
+        case 'none':
+            break
+        case 'eureka':
+            implementation project(':libs.discovery-client.eureka')
+            break
+        case 'kubernetes':
+            implementation project(':libs.discovery-client.kubernetes')
+            break
+        default:
+            throw new IllegalArgumentException("Unsupported service-discovery: ${rootProject.ext.appStack['service-discovery']}")
+    }
+
+    // Supports OAuth2 login page
+    implementation project(':libs.template.thymeleaf')
+
+    // Lombok
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    // Mapstruct
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.grpc:spring-grpc-dependencies:${springGrpcVersion}"
+    }
+}
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}

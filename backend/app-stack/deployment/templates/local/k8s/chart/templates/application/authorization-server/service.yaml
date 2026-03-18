@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ lower $.Release.Name }}-authorization-server
+  labels:
+    app.kubernetes.io/name: authorization-server
+    app.kubernetes.io/instance: {{ lower $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  selector:
+    app.kubernetes.io/name: authorization-server
+    app.kubernetes.io/instance: {{ lower $.Release.Name }}
+  type: {{ .Values.global.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.authorizationServer.service.ports.http }}
+      targetPort: http

@@ -6,13 +6,13 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.cache.CacheService;
+import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.libs.framework.security.SecurityContextUtil;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.services.order.application.cart.aggregator.CartAggregator;
 import org.atlas.services.order.application.cart.constant.CartConstant;
 import org.atlas.services.order.domain.entity.CartItemEntity;
-import org.atlas.services.order.domain.error.DomainError;
-import org.atlas.services.order.domain.exception.DomainException;
+import org.atlas.services.order.domain.error.OrderDomainError;
 import org.atlas.services.order.port.in.cart.service.CartService;
 import org.atlas.services.order.port.out.repository.CartRepository;
 import org.springframework.stereotype.Service;
@@ -80,7 +80,7 @@ public class CartServiceImpl implements CartService {
     }
     boolean allProductsAreValid = cartAggregator.aggregate(cartItems);
     if (!allProductsAreValid) {
-      throw new DomainException(DomainError.CART_ITEM_NOT_FOUND);
+      throw new DomainException(OrderDomainError.CART_ITEM_NOT_FOUND);
     }
     cacheService.put(CartConstant.CART_CACHE, userId, cartItems);
     return cartItems;

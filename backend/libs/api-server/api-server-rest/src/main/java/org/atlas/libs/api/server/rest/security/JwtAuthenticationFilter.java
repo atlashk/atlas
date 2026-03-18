@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import org.atlas.libs.api.server.rest.util.IpAddressUtil;
-import org.atlas.libs.framework.domain.shared.identity.UserRole;
+import org.atlas.libs.framework.domain.shared.user.UserRole;
 import org.atlas.libs.framework.security.CustomClaim;
 import org.atlas.libs.framework.security.Principal;
 import org.atlas.libs.framework.util.StringUtil;

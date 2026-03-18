@@ -3,10 +3,10 @@ package org.atlas.services.payment.application.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.payment.domain.entity.PaymentGatewayEntity;
-import org.atlas.services.payment.domain.error.DomainError;
-import org.atlas.services.payment.domain.exception.DomainException;
+import org.atlas.services.payment.domain.error.PaymentDomainError;
 import org.atlas.services.payment.port.in.model.RetrievePaymentGatewayInput;
 import org.atlas.services.payment.port.in.service.PaymentGatewayService;
 import org.atlas.services.payment.port.out.gateway.service.PaymentGatewayIntegrationService;
@@ -35,12 +35,12 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
   public PaymentGatewayEntity retrievePaymentGateway(RetrievePaymentGatewayInput input) {
     if (input.getId() != null) {
       return paymentGatewayRepository.findById(input.getId())
-          .orElseThrow(() -> new DomainException(DomainError.PAYMENT_GATEWAY_NOT_FOUND));
+          .orElseThrow(() -> new DomainException(PaymentDomainError.PAYMENT_GATEWAY_NOT_FOUND));
     } else if (StringUtil.isNotBlank(input.getCode())) {
       return paymentGatewayRepository.findByCode(input.getCode().toUpperCase())
-          .orElseThrow(() -> new DomainException(DomainError.PAYMENT_GATEWAY_NOT_FOUND));
+          .orElseThrow(() -> new DomainException(PaymentDomainError.PAYMENT_GATEWAY_NOT_FOUND));
     } else {
-      throw new DomainException(DomainError.PAYMENT_GATEWAY_NOT_FOUND);
+      throw new DomainException(PaymentDomainError.PAYMENT_GATEWAY_NOT_FOUND);
     }
   }
 
@@ -54,7 +54,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
       return applicationContext.getBean(
           paymentGatewayIntegrationServiceBeanName, PaymentGatewayIntegrationService.class);
     } catch (NoSuchBeanDefinitionException e) {
-      throw new DomainException(DomainError.PAYMENT_GATEWAY_NOT_FOUND);
+      throw new DomainException(PaymentDomainError.PAYMENT_GATEWAY_NOT_FOUND);
     }
   }
 }

@@ -1,0 +1,39 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'eureka-server-metrics'
+    static_configs:
+      - targets: [ 'eureka-server:8761' ]
+    metrics_path: '/actuator/prometheus'
+  - job_name: 'user-service-metrics'
+    static_configs:
+      - targets: [ 'user-service:8081' ]
+    metrics_path: '/actuator/prometheus'
+  - job_name: 'catalog-service-metrics'
+    static_configs:
+      - targets: [ 'catalog-service:8082' ]
+    metrics_path: '/actuator/prometheus'
+  - job_name: 'inventory-service-metrics'
+    static_configs:
+      - targets: [ 'inventory-service:8083' ]
+    metrics_path: '/actuator/prometheus'
+  - job_name: 'order-service-metrics'
+    static_configs:
+      - targets: [ 'order-service:8084' ]
+    metrics_path: '/actuator/prometheus'
+  - job_name: 'payment-service-metrics'
+    static_configs:
+      - targets: [ 'payment-service:8085' ]
+    metrics_path: '/actuator/prometheus'
+  {{#hasService "idp" "spring"}}
+  - job_name: 'authorization-server-metrics'
+    static_configs:
+      - targets: [ 'authorization-server:8901' ]
+    metrics_path: '/actuator/prometheus'
+  {{/hasService}}
+  - job_name: 'api-gateway-metrics'
+    static_configs:
+      - targets: [ 'api-gateway:8080' ]
+    metrics_path: '/actuator/prometheus'

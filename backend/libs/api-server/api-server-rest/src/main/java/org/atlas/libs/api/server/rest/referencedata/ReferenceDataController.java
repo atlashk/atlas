@@ -6,7 +6,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
-import org.atlas.libs.framework.domain.exception.BaseDomainException;
+import org.atlas.libs.framework.domain.exception.DomainException;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +29,7 @@ public class ReferenceDataController {
       @RequestParam String type) {
     Map<String, String> responseData = referenceDataService.retrieveReferenceData(type);
     if (responseData == null) {
-      throw new BaseDomainException(CommonDomainError.BAD_REQUEST, "Unknown reference data type: " + type);
+      throw new DomainException(CommonDomainError.BAD_REQUEST, "Unknown reference data type: " + type);
     }
     return ApiResponseWrapper.success(responseData);
   }

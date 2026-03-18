@@ -3,7 +3,7 @@ package org.atlas.libs.api.server.grpc.error;
 import io.grpc.Status;
 import io.grpc.StatusException;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.domain.exception.BaseDomainException;
+import org.atlas.libs.framework.domain.exception.DomainException;
 import org.springframework.grpc.server.exception.GrpcExceptionHandler;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +15,7 @@ public class GrpcGlobalExceptionHandler implements GrpcExceptionHandler {
   public StatusException handleException(Throwable exception) {
     log.error("Occurred an exception", exception);
     Status status;
-    if (exception instanceof BaseDomainException) {
+    if (exception instanceof DomainException) {
       status = Status.INTERNAL
           .withDescription(exception.getMessage())
           .withCause(exception);

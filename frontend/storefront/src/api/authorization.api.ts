@@ -1,4 +1,4 @@
-import type { ChangePasswordRequest, LoginRequest, LoginResponse, RegisterRequest, User } from "@/interfaces/identity.interface";
+import type { ChangePasswordRequest, LoginRequest, LoginResponse, RegisterRequest, User } from "@/interfaces/user.interface";
 import { AUTHORIZATION_API_BASE_URL } from "@/config/env.config";
 import { ApiResponse } from "./apiClient";
 import { BaseApi } from "./base.api";

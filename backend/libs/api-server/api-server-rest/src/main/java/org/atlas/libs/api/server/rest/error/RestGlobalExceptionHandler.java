@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.api.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
-import org.atlas.libs.framework.domain.exception.BaseDomainException;
+import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.libs.framework.i18n.I18nService;
 import org.atlas.libs.framework.util.StringUtil;
 import org.springframework.context.MessageSourceResolvable;
@@ -29,8 +29,8 @@ public class RestGlobalExceptionHandler {
 
   private final I18nService i18nService;
 
-  @ExceptionHandler(BaseDomainException.class)
-  public ResponseEntity<ApiResponseWrapper<Void>> handle(BaseDomainException e) {
+  @ExceptionHandler(DomainException.class)
+  public ResponseEntity<ApiResponseWrapper<Void>> handle(DomainException e) {
     log.error("Domain exception: {}", e.getMessage(), e);
     // Extract error message
     String i18nMessage = i18nService.getMessage(e.getMessage());

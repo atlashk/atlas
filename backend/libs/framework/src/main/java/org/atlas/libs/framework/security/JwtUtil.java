@@ -19,7 +19,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import lombok.experimental.UtilityClass;
-import org.atlas.libs.framework.cryptography.RsaKeyLoader;
+import org.atlas.libs.framework.security.cryptography.RsaKeyLoader;
 import org.atlas.libs.framework.util.LegacyDateUtil;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.libs.framework.uuid.UUIDGenerator;
@@ -160,7 +160,7 @@ public class JwtUtil {
     } catch (ParseException e) {
       throw new IllegalArgumentException("Invalid JWT token", e);
     } catch (IOException | InvalidKeySpecException | JOSEException e) {
-      throw new IllegalArgumentException("Cannot verify JWT token", e);
+      throw new IllegalArgumentException("Could not verify JWT token", e);
     }
   }
 }

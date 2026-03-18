@@ -3,10 +3,10 @@ package org.atlas.services.inventory.infrastructure.persistence.jpa.adapter;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.libs.framework.domain.shared.inventory.InsufficientStockException;
 import org.atlas.services.inventory.domain.entity.StockEntity;
-import org.atlas.services.inventory.domain.error.DomainError;
-import org.atlas.services.inventory.domain.exception.DomainException;
+import org.atlas.services.inventory.domain.error.InventoryDomainError;
 import org.atlas.services.inventory.infrastructure.persistence.jpa.entity.JpaOptimisticStockEntity;
 import org.atlas.services.inventory.infrastructure.persistence.jpa.entity.JpaStockEntity;
 import org.atlas.services.inventory.infrastructure.persistence.jpa.mapper.JpaStockMapper;
@@ -40,7 +40,7 @@ public class JpaStockRepositoryAdapter implements StockRepository {
   @Override
   public void update(StockEntity stock) {
     JpaStockEntity jpaStock = jpaStockRepository.findByProductId(stock.getProductId())
-        .orElseThrow(() -> new DomainException(DomainError.STOCK_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(InventoryDomainError.STOCK_NOT_FOUND));
     JpaStockMapper.INSTANCE.merge(stock, jpaStock);
     jpaStockRepository.save(jpaStock);
   }
@@ -56,7 +56,7 @@ public class JpaStockRepositoryAdapter implements StockRepository {
     // Return the updated entity
     return jpaStockRepository.findByProductId(productId)
         .map(JpaStockMapper.INSTANCE::toStock)
-        .orElseThrow(() -> new DomainException(DomainError.STOCK_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(InventoryDomainError.STOCK_NOT_FOUND));
   }
 
   // TODO: Implement retry
@@ -64,7 +64,7 @@ public class JpaStockRepositoryAdapter implements StockRepository {
   public StockEntity reserveStockWithPessimisticLock(String productId, Integer quantity)
       throws InsufficientStockException {
     JpaStockEntity jpaStock = jpaStockRepository.findByProductIdWithLock(productId)
-        .orElseThrow(() -> new DomainException(DomainError.STOCK_NOT_FOUND));
+        .orElseThrow(() -> new DomainException(InventoryDomainError.STOCK_NOT_FOUND));
     if (jpaStock.getAvailableQuantity() < quantity) {
       throw new InsufficientStockException();
     }
@@ -85,7 +85,7 @@ public class JpaStockRepositoryAdapter implements StockRepository {
       throws InsufficientStockException {
     JpaOptimisticStockEntity jpaOptimisticStock =
         jpaOptimisticStockRepository.findById(productId)
-            .orElseThrow(() -> new DomainException(DomainError.STOCK_NOT_FOUND));
+            .orElseThrow(() -> new DomainException(InventoryDomainError.STOCK_NOT_FOUND));
     if (jpaOptimisticStock.getAvailableQuantity() < quantity) {
       throw new InsufficientStockException();
     }
