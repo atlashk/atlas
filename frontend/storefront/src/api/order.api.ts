@@ -39,13 +39,13 @@ async retrieveCart(): Promise<ApiResponse<CartResponse>> {
     return this.post<CartResponse>("/carts/clear");
   }
 
-  async retrieveOrderList(filters: RetrieveOrderListFilter): Promise<ApiResponse<Order[]>> {
+  async retrieveOrderList(filter: RetrieveOrderListFilter): Promise<ApiResponse<Order[]>> {
     const payload = {
-      status: filters.status,
-      startDate: filters.startDate,
-      endDate: filters.endDate,
-      page: filters.page || 1,
-      size: filters.size || 20,
+      status: filter.status,
+      startDate: filter.startDate,
+      endDate: filter.endDate,
+      page: filter.page || 1,
+      size: filter.size || 20,
     };
     return this.post<Order[], typeof payload>("/orders", payload);
   }

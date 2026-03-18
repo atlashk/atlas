@@ -1,18 +1,29 @@
 import { authorizationApi } from "@/api/index.api";
-import type { ChangePasswordRequest, LoginRequest, User } from "@/interfaces/user.interface";
-import { clearAuthCookies, deleteCookie, getCookie, isValidToken, setCookie } from "@/utils/cookies";
+import { userApi } from "@/api/user.api";
+import type {
+  ChangePasswordRequest,
+  LoginRequest,
+} from "@/interfaces/authorization.interface";
+import type { User } from "@/interfaces/user.interface";
+import {
+  clearAuthCookies,
+  deleteCookie,
+  getCookie,
+  isValidToken,
+  setCookie,
+} from "@/utils/cookies";
 import { createLogger } from "@/utils/logger";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useCartStore } from "./cart.store";
 
 const AUTH_STORAGE_KEYS = {
-  USER_STORE: 'user-store',
-  ACCESS_TOKEN: 'accessToken',
-  REFRESH_TOKEN: 'refreshToken',
+  USER_STORE: "user-store",
+  ACCESS_TOKEN: "accessToken",
+  REFRESH_TOKEN: "refreshToken",
 } as const;
 
-const logger = createLogger('UserStore');
+const logger = createLogger("UserStore");
 
 interface UserState {
   profile: User | null;
@@ -26,15 +37,15 @@ interface UserActions {
   isAuthenticated: () => boolean;
 
   login: (
-    credentials: LoginRequest
+    credentials: LoginRequest,
   ) => Promise<{ success: boolean; errorMessage?: string }>;
   loginWithTokens: (
     accessToken: string,
-    refreshToken?: string | null
+    refreshToken?: string | null,
   ) => Promise<{ success: boolean; errorMessage?: string }>;
   fetchProfile: () => Promise<void>;
   changePassword: (
-    request: ChangePasswordRequest
+    request: ChangePasswordRequest,
   ) => Promise<{ success: boolean; errorMessage?: string }>;
   logout: () => void;
   clearError: () => void;
@@ -60,13 +71,19 @@ export const useUserStore = create<UserStore>()(
 
       login: async (request: LoginRequest) => {
         set({ loading: true, error: null });
-        
+
         try {
           const response = await authorizationApi.login(request);
 
           if (response.success && response.data) {
-            setCookie(AUTH_STORAGE_KEYS.ACCESS_TOKEN, response.data.accessToken);
-            setCookie(AUTH_STORAGE_KEYS.REFRESH_TOKEN, response.data.refreshToken);
+            setCookie(
+              AUTH_STORAGE_KEYS.ACCESS_TOKEN,
+              response.data.accessToken,
+            );
+            setCookie(
+              AUTH_STORAGE_KEYS.REFRESH_TOKEN,
+              response.data.refreshToken,
+            );
 
             set({
               accessToken: response.data.accessToken,
@@ -78,7 +95,10 @@ export const useUserStore = create<UserStore>()(
               await get().fetchProfile();
               return { success: true };
             } catch (profileError) {
-              logger.warn('Login successful but failed to fetch user profile', profileError);
+              logger.warn(
+                "Login successful but failed to fetch user profile",
+                profileError,
+              );
               return {
                 success: true,
               };
@@ -94,8 +114,9 @@ export const useUserStore = create<UserStore>()(
             };
           }
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : "Login failed";
-          logger.error('Login failed', error);
+          const errorMessage =
+            error instanceof Error ? error.message : "Login failed";
+          logger.error("Login failed", error);
           set({
             error: errorMessage,
             loading: false,
@@ -104,7 +125,10 @@ export const useUserStore = create<UserStore>()(
         }
       },
 
-      loginWithTokens: async (accessToken: string, refreshToken?: string | null) => {
+      loginWithTokens: async (
+        accessToken: string,
+        refreshToken?: string | null,
+      ) => {
         set({ loading: true, error: null });
 
         try {
@@ -125,12 +149,16 @@ export const useUserStore = create<UserStore>()(
             await get().fetchProfile();
             return { success: true };
           } catch (profileError) {
-            logger.warn('SSO login successful but failed to fetch user profile', profileError);
+            logger.warn(
+              "SSO login successful but failed to fetch user profile",
+              profileError,
+            );
             return { success: true };
           }
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : "SSO login failed";
-          logger.error('SSO login failed', error);
+          const errorMessage =
+            error instanceof Error ? error.message : "SSO login failed";
+          logger.error("SSO login failed", error);
           set({
             error: errorMessage,
             loading: false,
@@ -141,23 +169,23 @@ export const useUserStore = create<UserStore>()(
 
       fetchProfile: async () => {
         const { profileLoading, accessToken } = get();
-        
+
         if (!isValidToken(accessToken)) {
-          logger.info('No valid token, skipping profile fetch');
-          return;
-        }
-        
-        if (profileLoading) {
-          logger.info('Profile fetch already in progress');
+          logger.info("No valid token, skipping profile fetch");
           return;
         }
 
-        logger.info('Fetching user profile...');
+        if (profileLoading) {
+          logger.info("Profile fetch already in progress");
+          return;
+        }
+
+        logger.info("Fetching user profile...");
         set({ profileLoading: true, error: null });
-        
+
         try {
-          const result = await authorizationApi.retrieveProfile();
-          
+          const result = await userApi.retrieveProfile();
+
           if (result.success && result.data) {
             set({
               profile: result.data,
@@ -165,8 +193,8 @@ export const useUserStore = create<UserStore>()(
               error: null,
             });
           } else {
-            logger.error('Failed to fetch profile', result.errorMessage);
-            set({ 
+            logger.error("Failed to fetch profile", result.errorMessage);
+            set({
               profileLoading: false,
               error: result.errorMessage,
             });
@@ -177,10 +205,13 @@ export const useUserStore = create<UserStore>()(
             });
           }
         } catch (error) {
-          logger.error('Profile fetch error', error);
-          set({ 
+          logger.error("Profile fetch error", error);
+          set({
             profileLoading: false,
-            error: error instanceof Error ? error.message : 'Failed to load user profile',
+            error:
+              error instanceof Error
+                ? error.message
+                : "Failed to load user profile",
           });
           clearAuthCookies();
           set({
@@ -199,33 +230,37 @@ export const useUserStore = create<UserStore>()(
             return { success: true };
           }
           logger.warn("Change password failed", result.errorMessage);
-          return { success: false, errorMessage: result.errorMessage || "Change password failed" };
+          return {
+            success: false,
+            errorMessage: result.errorMessage || "Change password failed",
+          };
         } catch (error) {
           logger.error("Change password error", error);
           return {
             success: false,
-            errorMessage: error instanceof Error ? error.message : "Change password failed",
+            errorMessage:
+              error instanceof Error ? error.message : "Change password failed",
           };
         }
       },
 
       logout: async () => {
-        logger.info('Logout initiated');
+        logger.info("Logout initiated");
         try {
           await authorizationApi.logout();
-          logger.info('Logout completed');
+          logger.info("Logout completed");
         } catch (error) {
-          logger.error('Logout error', error);
+          logger.error("Logout error", error);
         }
         clearAuthCookies();
-        
+
         try {
           const { clearCartState } = useCartStore.getState();
           clearCartState();
         } catch (error) {
-          logger.warn('Failed to clear cart state during logout', error);
+          logger.warn("Failed to clear cart state during logout", error);
         }
-        
+
         set({
           profile: null,
           accessToken: null,
@@ -233,11 +268,11 @@ export const useUserStore = create<UserStore>()(
           error: null,
           profileLoading: false,
         });
-        
-        logger.info('Logout completed, redirecting to login');
-        
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login';
+
+        logger.info("Logout completed, redirecting to login");
+
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
         }
       },
 
@@ -257,26 +292,29 @@ export const useUserStore = create<UserStore>()(
       },
 
       initializeFromCookies: () => {
-        logger.info('Initializing from cookies...');
-        
+        logger.info("Initializing from cookies...");
+
         const cookieAccessToken = getCookie(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
         const { accessToken } = get();
-        
+
         if (isValidToken(cookieAccessToken) && !accessToken) {
-          logger.info('Syncing valid tokens from cookies to store');
+          logger.info("Syncing valid tokens from cookies to store");
           set({
             accessToken: cookieAccessToken,
           });
         } else if (!isValidToken(cookieAccessToken) && accessToken) {
-          logger.info('Cookies invalid, clearing store');
+          logger.info("Cookies invalid, clearing store");
           set({
             accessToken: null,
             profile: null,
           });
-        } else if (isValidToken(cookieAccessToken) && isValidToken(accessToken)) {
-          logger.info('Store and cookies are in sync');
+        } else if (
+          isValidToken(cookieAccessToken) &&
+          isValidToken(accessToken)
+        ) {
+          logger.info("Store and cookies are in sync");
         } else {
-          logger.info('No valid tokens found');
+          logger.info("No valid tokens found");
         }
       },
     }),
@@ -287,6 +325,6 @@ export const useUserStore = create<UserStore>()(
         accessToken: state.accessToken,
         profile: state.profile,
       }),
-    }
-  )
+    },
+  ),
 );

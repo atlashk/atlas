@@ -61,7 +61,7 @@ export interface OrderStatusResponse {
   cancellationReason?: string;
 }
 
-export interface RetrieveOrderFilter {
+export interface RetrieveOrderListFilter {
   id?: string;
   userId?: string;
   productId?: string;

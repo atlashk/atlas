@@ -32,7 +32,7 @@ export interface Category {
   name: string;
 }
 
-export interface RetrieveProductListFilters {
+export interface RetrieveProductListFilter {
   id?: string;
   keyword?: string;
   type?: string;
@@ -82,7 +82,7 @@ export interface ImportProductRequest {
   fileType: FileType;
 }
 
-export interface ExportProductFilters {
+export interface ExportProductFilter {
   id?: string;
   keyword?: string;
   type?: string;

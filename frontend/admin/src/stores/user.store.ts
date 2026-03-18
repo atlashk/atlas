@@ -1,5 +1,7 @@
 import { authorizationApi } from "@/api/authorization.api";
-import type { ChangePasswordRequest, LoginRequest, User } from "@/interfaces/user.interface";
+import { userApi } from "@/api/user.api";
+import type { ChangePasswordRequest, LoginRequest } from "@/interfaces/authorization.interface";
+import type { User } from "@/interfaces/user.interface";
 import { clearAuthCookies, deleteCookie, getCookie, isValidToken, setCookie } from "@/utils/cookies";
 import { createLogger } from "@/utils/logger";
 import { create } from "zustand";
@@ -155,7 +157,7 @@ export const useUserStore = create<UserStore>()(
         set({ profileLoading: true, error: null });
         
         try {
-          const result = await authorizationApi.retrieveProfile();
+          const result = await userApi.retrieveProfile();
           
           if (result.success && result.data) {
             set({

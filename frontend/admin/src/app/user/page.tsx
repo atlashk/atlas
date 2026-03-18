@@ -1,7 +1,7 @@
 "use client";
 
 import { Metadata } from "@/api/apiClient";
-import { authorizationApi } from "@/api/authorization.api";
+import { userApi } from "@/api/user.api";
 import AdminLayout from "@/components/layout/AdminLayout";
 import {
   AlertDialog,
@@ -42,7 +42,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { withRequireAdmin } from "@/hoc/withAuth";
-import type { ListUserFilters, User } from "@/interfaces/user.interface";
+import type { RetrieveUserListFilter, User } from "@/interfaces/user.interface";
 import { Edit, Loader2, Plus, RotateCcw, Search, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -55,7 +55,7 @@ const AdminUserListPage: React.FC = () => {
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [userRoles, setUserRoles] = useState<Record<string, string>>({});
   const [isLoadingUserRoles, setIsLoadingUserRoles] = useState(false);
-  const [filters, setFilters] = useState<ListUserFilters>({
+  const [filter, setFilter] = useState<RetrieveUserListFilter>({
     id: undefined,
     firstName: undefined,
     lastName: undefined,
@@ -80,7 +80,7 @@ const AdminUserListPage: React.FC = () => {
 
     setIsLoadingUserRoles(true);
     try {
-      const response = await authorizationApi.retrieveUserRoles();
+      const response = await userApi.retrieveUserRoles();
       if (response.success) {
         setUserRoles(response.data || {});
       } else {
@@ -97,27 +97,27 @@ const AdminUserListPage: React.FC = () => {
     }
   }, [isLoadingUserRoles, userRoles]);
 
-  const applyFilters = useCallback(
-    async (page: number, currentFilters?: ListUserFilters) => {
+  const applyFilter = useCallback(
+    async (page: number, currentFilter?: RetrieveUserListFilter) => {
       setIsLoadingUsers(true);
       try {
-        const filtersToUse = currentFilters || filters;
-        const updatedFilters = { ...filtersToUse, page };
-        setFilters(updatedFilters);
+        const filterToUse = currentFilter || filter;
+        const updatedFilter = { ...filterToUse, page };
+        setFilter(updatedFilter);
         setMetadata((prev) => ({ ...prev, currentPage: page }));
 
-        const apiFilters: ListUserFilters = { ...updatedFilters };
-        Object.keys(apiFilters).forEach((key) => {
-          const typedKey = key as keyof ListUserFilters;
+        const apiFilter: RetrieveUserListFilter = { ...updatedFilter };
+        Object.keys(apiFilter).forEach((key) => {
+          const typedKey = key as keyof RetrieveUserListFilter;
           if (
-            apiFilters[typedKey] === "" ||
-            apiFilters[typedKey] === undefined
+            apiFilter[typedKey] === "" ||
+            apiFilter[typedKey] === undefined
           ) {
-            delete apiFilters[typedKey];
+            delete apiFilter[typedKey];
           }
         });
 
-        const response = await authorizationApi.retrieveUserList(apiFilters);
+        const response = await userApi.retrieveUserList(apiFilter);
 
         if (response.success) {
           setUsers(response.data || []);
@@ -136,20 +136,20 @@ const AdminUserListPage: React.FC = () => {
         setIsLoadingUsers(false);
       }
     },
-    [filters]
+    [filter]
   );
 
   const changePage = useCallback(
     (newPage: number) => {
       if (newPage >= 1 && newPage <= metadata.totalPages) {
-        applyFilters(newPage);
+        applyFilter(newPage);
       }
     },
-    [metadata.totalPages, applyFilters]
+    [metadata.totalPages, applyFilter]
   );
 
-  const resetFilters = useCallback(() => {
-    const resetFiltersData: ListUserFilters = {
+  const resetFilter = useCallback(() => {
+    const resetFilterData: RetrieveUserListFilter = {
       id: undefined,
       firstName: undefined,
       lastName: undefined,
@@ -159,23 +159,23 @@ const AdminUserListPage: React.FC = () => {
       page: 1,
       size: 20,
     };
-    setFilters(resetFiltersData);
-    applyFilters(1, resetFiltersData);
-  }, [applyFilters]);
+    setFilter(resetFilterData);
+    applyFilter(1, resetFilterData);
+  }, [applyFilter]);
 
   const handleFilterChange = useCallback(
     (
-      field: keyof ListUserFilters,
+      field: keyof RetrieveUserListFilter,
       value: string | number | boolean | undefined
     ) => {
-      setFilters((prev) => ({ ...prev, [field]: value }));
+      setFilter((prev) => ({ ...prev, [field]: value }));
     },
     []
   );
 
   const handleSearch = useCallback(() => {
-    applyFilters(1);
-  }, [applyFilters]);
+    applyFilter(1);
+  }, [applyFilter]);
 
   const openCreateUser = useCallback(() => {
     router.push("/user/add");
@@ -199,7 +199,7 @@ const AdminUserListPage: React.FC = () => {
     if (!deleteTarget || isDeleting) return;
     setIsDeleting(true);
     try {
-      const response = await authorizationApi.deleteUser(deleteTarget.id);
+      const response = await userApi.deleteUser(deleteTarget.id);
       if (response.success) {
         toast.success("User deleted successfully");
         const targetPage =
@@ -207,7 +207,7 @@ const AdminUserListPage: React.FC = () => {
             ? metadata.currentPage - 1
             : metadata.currentPage;
         closeDeleteDialog();
-        applyFilters(targetPage);
+        applyFilter(targetPage);
       } else {
         toast.error(response.errorMessage || "Failed to delete user");
       }
@@ -223,7 +223,7 @@ const AdminUserListPage: React.FC = () => {
     isDeleting,
     users.length,
     metadata.currentPage,
-    applyFilters,
+    applyFilter,
     closeDeleteDialog,
   ]);
 
@@ -235,10 +235,10 @@ const AdminUserListPage: React.FC = () => {
     isInitialized.current = true;
 
     const initializeData = async () => {
-      await applyFilters(1);
+      await applyFilter(1);
     };
     initializeData();
-  }, [applyFilters]);
+  }, [applyFilter]);
 
   useEffect(() => {
     loadUserRoles();
@@ -249,7 +249,7 @@ const AdminUserListPage: React.FC = () => {
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>User Filters</CardTitle>
+            <CardTitle>User Filter</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -259,7 +259,7 @@ const AdminUserListPage: React.FC = () => {
                   type="text"
                   id="userId"
                   placeholder="Enter user ID"
-                  value={filters.id || ""}
+                  value={filter.id || ""}
                   onChange={(e) =>
                     handleFilterChange(
                       "id",
@@ -274,7 +274,7 @@ const AdminUserListPage: React.FC = () => {
                   type="text"
                   id="firstName"
                   placeholder="Enter first name"
-                  value={filters.firstName || ""}
+                  value={filter.firstName || ""}
                   onChange={(e) =>
                     handleFilterChange("firstName", e.target.value || undefined)
                   }
@@ -286,7 +286,7 @@ const AdminUserListPage: React.FC = () => {
                   type="text"
                   id="lastName"
                   placeholder="Enter last name"
-                  value={filters.lastName || ""}
+                  value={filter.lastName || ""}
                   onChange={(e) =>
                     handleFilterChange("lastName", e.target.value || undefined)
                   }
@@ -298,7 +298,7 @@ const AdminUserListPage: React.FC = () => {
                   type="text"
                   id="email"
                   placeholder="Enter email"
-                  value={filters.email || ""}
+                  value={filter.email || ""}
                   onChange={(e) =>
                     handleFilterChange("email", e.target.value || undefined)
                   }
@@ -310,7 +310,7 @@ const AdminUserListPage: React.FC = () => {
                   type="text"
                   id="phone"
                   placeholder="Enter phone"
-                  value={filters.phone || ""}
+                  value={filter.phone || ""}
                   onChange={(e) =>
                     handleFilterChange("phone", e.target.value || undefined)
                   }
@@ -319,7 +319,7 @@ const AdminUserListPage: React.FC = () => {
               <div className="space-y-2">
                 <Label htmlFor="role">Role</Label>
                 <Select
-                  value={filters.role}
+                  value={filter.role}
                   onValueChange={(value) => handleFilterChange("role", value)}
                 >
                   <SelectTrigger>
@@ -342,7 +342,7 @@ const AdminUserListPage: React.FC = () => {
               </Button>
               <Button
                 variant="outline"
-                onClick={resetFilters}
+                onClick={resetFilter}
                 disabled={isLoadingUsers}
               >
                 <RotateCcw className="h-4 w-4 mr-2" />

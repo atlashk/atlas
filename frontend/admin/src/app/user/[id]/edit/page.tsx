@@ -1,6 +1,7 @@
 "use client";
 
 import { authorizationApi } from "@/api/authorization.api";
+import { userApi } from "@/api/user.api";
 import AdminLayout from "@/components/layout/AdminLayout";
 import {
   AlertDialog,
@@ -75,7 +76,7 @@ function AdminUserEditPage() {
 
     setIsLoadingUserRoles(true);
     try {
-      const response = await authorizationApi.retrieveUserRoles();
+      const response = await userApi.retrieveUserRoles();
       if (response.success) {
         setUserRoles(response.data || {});
       } else {
@@ -108,7 +109,7 @@ function AdminUserEditPage() {
 
       setIsLoadingUser(true);
       try {
-        const response = await authorizationApi.retrieveUser(userId);
+        const response = await userApi.retrieveUser(userId);
         if (response.success) {
           const userData = response.data;
           setUser(userData);
@@ -142,14 +143,14 @@ function AdminUserEditPage() {
       return;
     }
 
-    const payload: Partial<UpdateUserRequest> = {
+    const payload: UpdateUserRequest = {
       firstName: values.firstName,
       lastName: values.lastName,
       role: values.role,
     };
 
     try {
-      const response = await authorizationApi.updateUser(userId, payload);
+      const response = await userApi.updateUser(userId, payload);
       if (response.success) {
         toast.success("User updated successfully");
       } else {

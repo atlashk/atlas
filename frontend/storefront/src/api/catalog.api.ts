@@ -21,17 +21,17 @@ export class CatalogApi extends BaseApi {
   }
 
   async retrieveProductList(
-    filters: Partial<RetrieveProductListFilter> = {}
+    filter: Partial<RetrieveProductListFilter> = {}
   ): Promise<ApiResponse<Product[]>> {
     const payload: RetrieveProductListFilter = {
-      page: filters.page || 1,
-      size: filters.size || 20,
-      keyword: filters.keyword || undefined,
-      minPrice: filters.minPrice,
-      maxPrice: filters.maxPrice,
-      brandId: filters.brandId || undefined,
-      categoryIds: filters.categoryIds?.length ? filters.categoryIds : undefined,
-      mode: filters.mode || "DATABASE",
+      page: filter.page || 1,
+      size: filter.size || 20,
+      keyword: filter.keyword || undefined,
+      minPrice: filter.minPrice,
+      maxPrice: filter.maxPrice,
+      brandId: filter.brandId || undefined,
+      categoryIds: filter.categoryIds?.length ? filter.categoryIds : undefined,
+      mode: filter.mode || "DATABASE",
     };
     return this.post<Product[], RetrieveProductListFilter>("/products/list", payload);
   }

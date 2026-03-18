@@ -33,7 +33,7 @@ import {
 import { withRequireAdmin } from "@/hoc/withAuth";
 import {
   type Order,
-  type RetrieveOrderFilter,
+  type RetrieveOrderListFilter,
 } from "@/interfaces/order.interface";
 import { formatCurrency, formatDate } from "@/utils/formatter.util";
 import {
@@ -60,7 +60,7 @@ const OrderList: React.FC = () => {
     {}
   );
   const [isLoadingOrderStatuses, setIsLoadingOrderStatuses] = useState(false);
-  const [filters, setFilters] = useState<RetrieveOrderFilter>({
+  const [filter, setFilter] = useState<RetrieveOrderListFilter>({
     id: undefined,
     userId: undefined,
     productId: undefined,
@@ -124,28 +124,28 @@ const OrderList: React.FC = () => {
     }
   }, [isLoadingOrderStatuses, orderStatuses]);
 
-  const applyFilters = useCallback(
-    async (page: number, currentFilters?: RetrieveOrderFilter) => {
+  const applyFilter = useCallback(
+    async (page: number, currentFilter?: RetrieveOrderListFilter) => {
       setIsLoadingOrders(true);
       try {
-        const filtersToUse = currentFilters || filters;
-        const updatedFilters = { ...filtersToUse, page };
-        setFilters(updatedFilters);
+        const filterToUse = currentFilter || filter;
+        const updatedFilter = { ...filterToUse, page };
+        setFilter(updatedFilter);
         setMetadata((prev) => ({ ...prev, currentPage: page }));
 
-        // Clean filters for API call - remove empty or undefined values
-        const apiFilters: RetrieveOrderFilter = { ...updatedFilters };
-        Object.keys(apiFilters).forEach((key) => {
-          const typedKey = key as keyof RetrieveOrderFilter;
+        // Clean filter for API call - remove empty or undefined values
+        const apiFilter: RetrieveOrderListFilter = { ...updatedFilter };
+        Object.keys(apiFilter).forEach((key) => {
+          const typedKey = key as keyof RetrieveOrderListFilter;
           if (
-            apiFilters[typedKey] === "" ||
-            apiFilters[typedKey] === undefined
+            apiFilter[typedKey] === "" ||
+            apiFilter[typedKey] === undefined
           ) {
-            delete apiFilters[typedKey];
+            delete apiFilter[typedKey];
           }
         });
 
-        const response = await orderApi.retrieveOrderList(apiFilters);
+        const response = await orderApi.retrieveOrderList(apiFilter);
 
         if (response.success) {
           setOrders(response.data || []);
@@ -164,20 +164,20 @@ const OrderList: React.FC = () => {
         setIsLoadingOrders(false);
       }
     },
-    [filters]
+    [filter]
   );
 
   const changePage = useCallback(
     (newPage: number) => {
       if (newPage >= 1 && newPage <= metadata.totalPages) {
-        applyFilters(newPage);
+        applyFilter(newPage);
       }
     },
-    [metadata.totalPages, applyFilters]
+    [metadata.totalPages, applyFilter]
   );
 
-  const resetFilters = useCallback(() => {
-    const resetFiltersData: RetrieveOrderFilter = {
+  const resetFilter = useCallback(() => {
+    const resetFilterData: RetrieveOrderListFilter = {
       id: undefined,
       userId: undefined,
       productId: undefined,
@@ -187,30 +187,30 @@ const OrderList: React.FC = () => {
       page: 1,
       size: 20,
     };
-    setFilters(resetFiltersData);
+    setFilter(resetFilterData);
     setDateError(null);
-    applyFilters(1, resetFiltersData);
-  }, [applyFilters]);
+    applyFilter(1, resetFilterData);
+  }, [applyFilter]);
 
   const handleFilterChange = useCallback(
     (
-      field: keyof RetrieveOrderFilter,
+      field: keyof RetrieveOrderListFilter,
       value: string | number | boolean | undefined
     ) => {
-      setFilters((prev) => ({ ...prev, [field]: value }));
+      setFilter((prev) => ({ ...prev, [field]: value }));
     },
     []
   );
 
   const handleSearch = useCallback(() => {
-    const error = getDateRangeError(filters.startDate, filters.endDate);
+    const error = getDateRangeError(filter.startDate, filter.endDate);
     if (error) {
       setDateError(error);
       toast.error(error);
       return;
     }
-    applyFilters(1);
-  }, [applyFilters, filters.endDate, filters.startDate, getDateRangeError]);
+    applyFilter(1);
+  }, [applyFilter, filter.endDate, filter.startDate, getDateRangeError]);
 
   // Load reference data and initial list on mount
   useEffect(() => {
@@ -223,18 +223,18 @@ const OrderList: React.FC = () => {
     }
 
     isInitialized.current = true;
-    applyFilters(1);
-  }, [applyFilters]);
+    applyFilter(1);
+  }, [applyFilter]);
 
   useEffect(() => {
-    setDateError(getDateRangeError(filters.startDate, filters.endDate));
-  }, [filters.endDate, filters.startDate, getDateRangeError]);
+    setDateError(getDateRangeError(filter.startDate, filter.endDate));
+  }, [filter.endDate, filter.startDate, getDateRangeError]);
 
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Order Filters</CardTitle>
+          <CardTitle>Order Filter</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -244,7 +244,7 @@ const OrderList: React.FC = () => {
                 type="text"
                 id="orderId"
                 placeholder="Enter order ID"
-                value={filters.id ?? ""}
+                value={filter.id ?? ""}
                 onChange={(e) =>
                   handleFilterChange("id", e.target.value || undefined)
                 }
@@ -256,7 +256,7 @@ const OrderList: React.FC = () => {
                 type="text"
                 id="userId"
                 placeholder="Enter user ID"
-                value={filters.userId ?? ""}
+                value={filter.userId ?? ""}
                 onChange={(e) =>
                   handleFilterChange("userId", e.target.value || undefined)
                 }
@@ -268,7 +268,7 @@ const OrderList: React.FC = () => {
                 type="text"
                 id="productId"
                 placeholder="Enter product ID"
-                value={filters.productId ?? ""}
+                value={filter.productId ?? ""}
                 onChange={(e) =>
                   handleFilterChange("productId", e.target.value || undefined)
                 }
@@ -282,7 +282,7 @@ const OrderList: React.FC = () => {
               <Input
                 type="date"
                 id="startDate"
-                value={filters.startDate || ""}
+                value={filter.startDate || ""}
                 onChange={(e) =>
                   handleFilterChange("startDate", e.target.value || undefined)
                 }
@@ -293,7 +293,7 @@ const OrderList: React.FC = () => {
               <Input
                 type="date"
                 id="endDate"
-                value={filters.endDate || ""}
+                value={filter.endDate || ""}
                 onChange={(e) =>
                   handleFilterChange("endDate", e.target.value || undefined)
                 }
@@ -302,7 +302,7 @@ const OrderList: React.FC = () => {
             <div className="space-y-2">
               <Label htmlFor="status">Order Status</Label>
               <Select
-                value={filters.status || ""}
+                value={filter.status || ""}
                 onValueChange={(value) => handleFilterChange("status", value)}
                 disabled={isLoadingOrderStatuses}
               >
@@ -337,7 +337,7 @@ const OrderList: React.FC = () => {
             </Button>
             <Button
               variant="outline"
-              onClick={resetFilters}
+              onClick={resetFilter}
               disabled={isLoadingOrders}
             >
               <RotateCcw className="h-4 w-4 mr-2" />

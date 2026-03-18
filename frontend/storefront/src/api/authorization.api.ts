@@ -1,5 +1,5 @@
-import type { ChangePasswordRequest, LoginRequest, LoginResponse, RegisterRequest, User } from "@/interfaces/user.interface";
 import { AUTHORIZATION_API_BASE_URL } from "@/config/env.config";
+import type { ChangePasswordRequest, LoginRequest, LoginResponse } from "@/interfaces/authorization.interface";
 import { ApiResponse } from "./apiClient";
 import { BaseApi } from "./base.api";
 
@@ -22,14 +22,6 @@ export class AuthorizationApi extends BaseApi {
 
   async changePassword(request: ChangePasswordRequest): Promise<ApiResponse<void>> {
     return this.post<void>("/authentication/change-password", request);
-  }
-
-  async retrieveProfile(): Promise<ApiResponse<User>> {
-    return this.get<User>("/users/profile");
-  }
-
-  async register(userData: RegisterRequest): Promise<ApiResponse<void>> {
-    return this.post<void>("/users/register", userData);
   }
 }
 

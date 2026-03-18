@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { AUTHORIZATION_API_BASE_URL } from "@/config/env.config";
-import { LoginRequest } from "@/interfaces/user.interface";
+import { LoginRequest } from "@/interfaces/authorization.interface";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import Link from "next/link";

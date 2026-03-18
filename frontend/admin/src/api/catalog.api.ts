@@ -3,8 +3,8 @@ import {
   type Brand,
   type Category,
   type CreateProductRequest,
-  type ExportProductFilters,
-  type RetrieveProductListFilters,
+  type ExportProductFilter,
+  type RetrieveProductListFilter,
   type Product,
   type UpdateProductRequest
 } from "@/interfaces/catalog.interface";
@@ -33,9 +33,9 @@ export class CatalogApi extends BaseApi {
   }
 
   async retrieveProductList(
-    filters: RetrieveProductListFilters
+    filter: RetrieveProductListFilter
   ): Promise<ApiResponse<Product[]>> {
-    return this.post<Product[], RetrieveProductListFilters>("/products/admin/list", filters); 
+    return this.post<Product[], RetrieveProductListFilter>("/products/admin/list", filter); 
   }
 
   async retrieveProduct(id: string): Promise<ApiResponse<Product>> {
@@ -87,8 +87,8 @@ export class CatalogApi extends BaseApi {
     return this.post<void>(`/products/admin/import`, formData);
   }
 
-  async exportProduct(filters: ExportProductFilters): Promise<void> {
-    const response = await this.postBlob("/products/admin/export", filters);
+  async exportProduct(filter: ExportProductFilter): Promise<void> {
+    const response = await this.postBlob("/products/admin/export", filter);
 
     const blob = new Blob([response.data], {
       type: response.headers["content-type"] || "application/octet-stream",
@@ -121,14 +121,14 @@ export class CatalogApi extends BaseApi {
           filename = `export-product-${new Date()
             .toISOString()
             .slice(0, 19)
-            .replace(/[:-]/g, "")}.${extensionMap[filters.fileType]}`;
+            .replace(/[:-]/g, "")}.${extensionMap[filter.fileType]}`;
         }
       }
     } else {
       filename = `export-product-${new Date()
         .toISOString()
         .slice(0, 19)
-        .replace(/[:-]/g, "")}.${extensionMap[filters.fileType]}`;
+        .replace(/[:-]/g, "")}.${extensionMap[filter.fileType]}`;
     }
 
     const url = window.URL.createObjectURL(blob);

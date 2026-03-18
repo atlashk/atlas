@@ -7,7 +7,7 @@ export interface User {
   role: string;
 }
 
-export interface RetrieveUserListFilters {
+export interface RetrieveUserListFilter {
   id?: string;
   firstName?: string;
   lastName?: string;

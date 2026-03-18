@@ -1,6 +1,7 @@
 "use client";
 
 import { authorizationApi } from "@/api/authorization.api";
+import { userApi } from "@/api/user.api";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -76,7 +77,7 @@ function AdminUserAddPage() {
 
     setIsLoadingUserRoles(true);
     try {
-      const response = await authorizationApi.retrieveUserRoles();
+      const response = await userApi.retrieveUserRoles();
       if (response.success) {
         setUserRoles(response.data || {});
       } else {
@@ -108,7 +109,7 @@ function AdminUserAddPage() {
     };
 
     try {
-      const response = await authorizationApi.createUser(request);
+      const response = await userApi.createUser(request);
       if (response.success) {
         toast.success("User created successfully");
         router.push("/user");

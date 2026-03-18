@@ -46,9 +46,9 @@ import {
   FileType,
   type Brand,
   type Category,
-  type ExportProductFilters,
+  type ExportProductFilter,
   type Product,
-  type RetrieveProductListFilters,
+  type RetrieveProductListFilter,
 } from "@/interfaces/catalog.interface";
 import { formatCurrency } from "@/utils/formatter.util";
 import { getProductImageUrl } from "@/utils/productImage.util";
@@ -180,7 +180,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
   const [stockProductId, setStockProductId] = useState<string | null>(null);
 
   // Filter state - current form values being edited by user (UI only)
-  const [formFilters, setFormFilters] = useState<RetrieveProductListFilters>({
+  const [formFilter, setFormFilter] = useState<RetrieveProductListFilter>({
     id: undefined,
     keyword: undefined,
     type: undefined,
@@ -195,8 +195,8 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     size: 20,
   });
 
-  // Applied filters - used for API calls (only updated when Search is clicked)
-  const [appliedFilters, setAppliedFilters] = useState<RetrieveProductListFilters>({
+  // Applied filter - used for API calls (only updated when Search is clicked)
+  const [appliedFilter, setAppliedFilter] = useState<RetrieveProductListFilter>({
     id: undefined,
     keyword: undefined,
     type: undefined,
@@ -213,16 +213,16 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
 
   // Reload products function for external use
   const reloadProducts = useCallback(() => {
-    // Force reload by updating applied filters with current values
-    setAppliedFilters((prev) => ({ ...prev }));
+    // Force reload by updating applied filter with current values
+    setAppliedFilter((prev) => ({ ...prev }));
   }, []);
 
   const goToPage = useCallback((page: number) => {
-    setAppliedFilters((prev) => ({ ...prev, page }));
+    setAppliedFilter((prev) => ({ ...prev, page }));
   }, []);
 
-  const resetProductFilters = useCallback(() => {
-    const resetFilters = {
+  const resetProductFilter = useCallback(() => {
+    const resetFilter = {
       id: undefined,
       keyword: undefined,
       minPrice: undefined,
@@ -236,8 +236,8 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
       page: 1,
       size: 20,
     };
-    setFormFilters(resetFilters);
-    setAppliedFilters(resetFilters);
+    setFormFilter(resetFilter);
+    setAppliedFilter(resetFilter);
   }, []);
 
   const handleActiveStateChange = useCallback(() => {
@@ -251,7 +251,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     } else {
       inStock = undefined;
     }
-    setFormFilters((prev) => ({ ...prev, inStock }));
+    setFormFilter((prev) => ({ ...prev, inStock }));
   }, [activeStates.inStock, activeStates.outOfStock]);
 
   useEffect(() => {
@@ -267,10 +267,10 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     [pagination, goToPage]
   );
 
-  const resetFilters = useCallback(() => {
+  const resetFilter = useCallback(() => {
     setActiveStates({ inStock: true, outOfStock: true });
-    resetProductFilters();
-  }, [resetProductFilters]);
+    resetProductFilter();
+  }, [resetProductFilter]);
 
   // Initial data loading
   useEffect(() => {
@@ -325,12 +325,12 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
       // Mark as initialized and trigger initial product load
       isInitialized.current = true;
       // Force a filter update to trigger product loading
-      setAppliedFilters((prev) => ({ ...prev }));
+      setAppliedFilter((prev) => ({ ...prev }));
     };
     initializeData();
   }, [loadProductTypes]); // Empty dependency array to run only once
 
-  // Reload products when applied filters change (including initial load)
+  // Reload products when applied filter change (including initial load)
   useEffect(() => {
     // Don't fetch on initial mount until initialization is complete
     if (!isInitialized.current) {
@@ -342,19 +342,19 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
         setIsLoadingProducts(true);
         setProductsError(null);
 
-        // Clean up empty or undefined filters for API call
-        const apiFilters: RetrieveProductListFilters = { ...appliedFilters };
-        Object.keys(apiFilters).forEach((key) => {
-          const typedKey = key as keyof RetrieveProductListFilters;
+        // Clean up empty or undefined filter for API call
+        const apiFilter: RetrieveProductListFilter = { ...appliedFilter };
+        Object.keys(apiFilter).forEach((key) => {
+          const typedKey = key as keyof RetrieveProductListFilter;
           if (
-            apiFilters[typedKey] === "" ||
-            apiFilters[typedKey] === undefined
+            apiFilter[typedKey] === "" ||
+            apiFilter[typedKey] === undefined
           ) {
-            delete apiFilters[typedKey];
+            delete apiFilter[typedKey];
           }
         });
 
-        const response = await catalogApi.retrieveProductList(apiFilters);
+        const response = await catalogApi.retrieveProductList(apiFilter);
 
         if (!response.success) {
           throw new Error(response.errorMessage || "Failed to load products");
@@ -375,22 +375,22 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     };
 
     fetchProducts();
-  }, [appliedFilters]);
+  }, [appliedFilter]);
 
   // Filter update functions
   const updateFormFilter = useCallback(
-    <K extends keyof RetrieveProductListFilters>(
+    <K extends keyof RetrieveProductListFilter>(
       key: K,
-      value: RetrieveProductListFilters[K]
+      value: RetrieveProductListFilter[K]
     ) => {
-      setFormFilters((prev) => ({ ...prev, [key]: value }));
+      setFormFilter((prev) => ({ ...prev, [key]: value }));
     },
     []
   );
 
   const handleFilterChange = useCallback(
     (
-      field: keyof RetrieveProductListFilters,
+      field: keyof RetrieveProductListFilter,
       value: string | number | boolean | undefined | number[]
     ) => {
       updateFormFilter(field, value);
@@ -399,9 +399,9 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
   );
 
   const handleSearch = useCallback(() => {
-    // Copy form filters to applied filters and reset to first page
-    setAppliedFilters((prev) => ({ ...formFilters, page: 1 }));
-  }, [formFilters]);
+    // Copy form filter to applied filter and reset to first page
+    setAppliedFilter((prev) => ({ ...formFilter, page: 1 }));
+  }, [formFilter]);
 
   const handleDelete = useCallback(
     async (productId: string) => {
@@ -437,20 +437,20 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
 
       setIsExporting(true);
       try {
-        const exportFilters: ExportProductFilters = {
-          id: appliedFilters.id,
-          keyword: appliedFilters.keyword,
-          minPrice: appliedFilters.minPrice,
-          maxPrice: appliedFilters.maxPrice,
-          type: appliedFilters.type,
-          startPublishedDate: appliedFilters.startPublishedDate,
-          endPublishedDate: appliedFilters.endPublishedDate,
-          inStock: appliedFilters.inStock,
-          brandId: appliedFilters.brandId,
-          categoryIds: appliedFilters.categoryIds?.map(String),
+        const exportFilter: ExportProductFilter = {
+          id: appliedFilter.id,
+          keyword: appliedFilter.keyword,
+          minPrice: appliedFilter.minPrice,
+          maxPrice: appliedFilter.maxPrice,
+          type: appliedFilter.type,
+          startPublishedDate: appliedFilter.startPublishedDate,
+          endPublishedDate: appliedFilter.endPublishedDate,
+          inStock: appliedFilter.inStock,
+          brandId: appliedFilter.brandId,
+          categoryIds: appliedFilter.categoryIds?.map(String),
           fileType: FileType[fileType.toUpperCase() as keyof typeof FileType],
         };
-        await catalogApi.exportProduct(exportFilters);
+        await catalogApi.exportProduct(exportFilter);
         toast.success(
           `Products exported successfully as ${fileType.toUpperCase()}`
         );
@@ -460,7 +460,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
         setIsExporting(false);
       }
     },
-    [isExporting, appliedFilters]
+    [isExporting, appliedFilter]
   );
 
   const handleImportClick = useCallback(() => {
@@ -519,7 +519,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Product Filters</CardTitle>
+          <CardTitle>Product Filter</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -529,7 +529,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                 type="text"
                 id="productId"
                 placeholder="Enter product ID"
-                value={formFilters.id ?? ""}
+                value={formFilter.id ?? ""}
                 onChange={(e) =>
                   handleFilterChange("id", e.target.value || undefined)
                 }
@@ -542,7 +542,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                 type="text"
                 id="keyword"
                 placeholder="Search by product name, description, or an attribute"
-                value={formFilters.keyword || ""}
+                value={formFilter.keyword || ""}
                 onChange={(e) =>
                   handleFilterChange("keyword", e.target.value || undefined)
                 }
@@ -552,7 +552,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
             <div className="space-y-2">
               <Label htmlFor="productType">Product Type</Label>
               <Select
-                value={formFilters.type || ""}
+                value={formFilter.type || ""}
                 onValueChange={(value) => handleFilterChange("type", value)}
                 disabled={isLoadingProductTypes}
               >
@@ -578,7 +578,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                 step="0.01"
                 id="minPrice"
                 placeholder="Min price"
-                value={formFilters.minPrice || ""}
+                value={formFilter.minPrice || ""}
                 onChange={(e) =>
                   handleFilterChange(
                     "minPrice",
@@ -595,7 +595,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                 step="0.01"
                 id="maxPrice"
                 placeholder="Max price"
-                value={formFilters.maxPrice || ""}
+                value={formFilter.maxPrice || ""}
                 onChange={(e) =>
                   handleFilterChange(
                     "maxPrice",
@@ -611,7 +611,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                 type="date"
                 id="startPublishedDate"
                 placeholder="Start Published date"
-                value={formFilters.startPublishedDate || ""}
+                value={formFilter.startPublishedDate || ""}
                 onChange={(e) =>
                   handleFilterChange(
                     "startPublishedDate",
@@ -627,7 +627,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                 type="date"
                 id="endPublishedDate"
                 placeholder="End Published date"
-                value={formFilters.endPublishedDate || ""}
+                value={formFilter.endPublishedDate || ""}
                 onChange={(e) =>
                   handleFilterChange(
                     "endPublishedDate",
@@ -681,7 +681,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                 <>
                   <Select
                     disabled={!brands.length}
-                    value={formFilters.brandId || ""}
+                    value={formFilter.brandId || ""}
                     onValueChange={(value) =>
                       handleFilterChange("brandId", value)
                     }
@@ -726,9 +726,9 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                         className="w-full justify-between font-normal"
                         disabled={!categories.length}
                       >
-                        {formFilters.categoryIds &&
-                          formFilters.categoryIds.length > 0
-                          ? `${formFilters.categoryIds.length} categories selected`
+                        {formFilter.categoryIds &&
+                          formFilter.categoryIds.length > 0
+                          ? `${formFilter.categoryIds.length} categories selected`
                           : "All Categories"}
                       </Button>
                     </DropdownMenuTrigger>
@@ -739,7 +739,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                         )
                         .map((category) => {
                           const isChecked =
-                            formFilters.categoryIds?.includes(category.id) ||
+                            formFilter.categoryIds?.includes(category.id) ||
                             false;
                           return (
                             <DropdownMenuCheckboxItem
@@ -747,7 +747,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                               checked={isChecked}
                               onCheckedChange={(checked) => {
                                 const currentCategories =
-                                  formFilters.categoryIds || [];
+                                  formFilter.categoryIds || [];
                                 if (checked) {
                                   handleFilterChange("categoryIds", [
                                     ...currentCategories,
@@ -790,7 +790,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
             </Button>
             <Button
               variant="outline"
-              onClick={resetFilters}
+              onClick={resetFilter}
               disabled={isLoading}
             >
               <RotateCcw className="w-4 h-4" />
