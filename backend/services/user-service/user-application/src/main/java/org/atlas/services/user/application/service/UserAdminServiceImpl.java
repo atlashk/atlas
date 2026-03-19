@@ -123,8 +123,8 @@ public class UserAdminServiceImpl implements UserAdminService {
       throw new DomainException(UserDomainError.EMAIL_ALREADY_EXISTS);
     }
 
-    if (StringUtil.isNotBlank(input.getPhone()) &&
-        userRepository.existsByPhone(input.getPhone())) {
+    if (StringUtil.isNotBlank(input.getPhoneNumber()) &&
+        userRepository.existsByPhoneNumber(input.getPhoneNumber())) {
       throw new DomainException(UserDomainError.PHONE_NUMBER_ALREADY_EXISTS);
     }
   }

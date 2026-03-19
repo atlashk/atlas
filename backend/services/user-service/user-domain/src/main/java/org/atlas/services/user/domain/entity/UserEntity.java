@@ -27,7 +27,7 @@ public class UserEntity extends DomainEntity {
 
   private String email;
 
-  private String phone;
+  private String phoneNumber;
 
   // Hashed password
   private String password;
@@ -42,7 +42,7 @@ public class UserEntity extends DomainEntity {
         .firstName(firstName)
         .lastName(lastName)
         .email(email)
-        .phone(phone)
+        .phoneNumber(phoneNumber)
         .userRole(role)
         .build();
   }

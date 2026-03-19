@@ -1,4 +1,4 @@
-package org.atlas.libs.framework.security;
+package org.atlas.libs.framework.security.jwt;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
@@ -19,6 +19,8 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import lombok.experimental.UtilityClass;
+import org.atlas.libs.framework.security.Principal;
+import org.atlas.libs.framework.security.SecurityConstant;
 import org.atlas.libs.framework.security.cryptography.RsaKeyLoader;
 import org.atlas.libs.framework.util.LegacyDateUtil;
 import org.atlas.libs.framework.util.StringUtil;
@@ -54,6 +56,10 @@ public class JwtUtil {
     return authorizationHeader.substring(BEARER_PREFIX.length()).trim();
   }
 
+  public static String extractIssuer(String token) {
+    return extractClaims(token).getIssuer();
+  }
+
   public static String extractSubject(String token) {
     return extractClaims(token).getSubject();
   }
@@ -67,30 +73,36 @@ public class JwtUtil {
   }
 
   @SuppressWarnings("unchecked")
-  public static <T> Optional<T> extractClaim(String token, CustomClaim claim) {
+  public static <T> Optional<T> extractClaim(String token, String claimName, Class<T> clazz) {
     JWTClaimsSet claimsSet = extractClaims(token);
-    Object value = claimsSet.getClaim(claim.getClaimName());
+    Object value = claimsSet.getClaim(claimName);
     if (value == null) {
       return Optional.empty();
     }
 
-    Class<?> claimType = claim.getClazz();
-    if (claimType.isEnum()) {
+    if (clazz.isEnum()) {
       String enumName = String.valueOf(value);
       try {
-        return Optional.of((T) Enum.valueOf((Class<Enum>) claimType.asSubclass(Enum.class), enumName));
+        return Optional.of(
+            (T) Enum.valueOf((Class<Enum>) clazz.asSubclass(Enum.class), enumName));
       } catch (IllegalArgumentException ignored) {
         return Optional.empty();
       }
     }
 
-    if (claimType.isInstance(value)) {
+    if (clazz.isInstance(value)) {
       return Optional.of((T) value);
     }
     return Optional.empty();
   }
 
-  private static String issueToken(Principal principal, long expirationTimeSeconds, boolean includeCustomClaims)
+  @SuppressWarnings("unchecked")
+  public static <T> Optional<T> extractClaim(String token, Claim claim) {
+    return extractClaim(token, claim.getClaimName(), (Class<T>) claim.getClazz());
+  }
+
+  private static String issueToken(Principal principal, long expirationTimeSeconds,
+      boolean includeCustomClaims)
       throws IOException, InvalidKeySpecException, JOSEException {
     Date issuedAt = LegacyDateUtil.now();
     Date expiresAt = new Date(issuedAt.getTime() + expirationTimeSeconds * 1000);
@@ -103,12 +115,12 @@ public class JwtUtil {
         .expirationTime(expiresAt);
 
     if (includeCustomClaims) {
-      putClaimIfNotBlank(claimsBuilder, CustomClaim.FIRST_NAME, principal.getFirstName());
-      putClaimIfNotBlank(claimsBuilder, CustomClaim.LAST_NAME, principal.getLastName());
-      putClaimIfNotBlank(claimsBuilder, CustomClaim.EMAIL, principal.getEmail());
-      putClaimIfNotBlank(claimsBuilder, CustomClaim.PHONE, principal.getPhone());
+      putClaimIfNotBlank(claimsBuilder, Claim.FIRST_NAME, principal.getFirstName());
+      putClaimIfNotBlank(claimsBuilder, Claim.LAST_NAME, principal.getLastName());
+      putClaimIfNotBlank(claimsBuilder, Claim.EMAIL, principal.getEmail());
+      putClaimIfNotBlank(claimsBuilder, Claim.PHONE_NUMBER, principal.getPhoneNumber());
       if (principal.getUserRole() != null) {
-        claimsBuilder.claim(CustomClaim.USER_ROLE.getClaimName(), principal.getUserRole().name());
+        claimsBuilder.claim(Claim.USER_ROLE.getClaimName(), principal.getUserRole().name());
       }
     }
 
@@ -116,7 +128,7 @@ public class JwtUtil {
   }
 
   private static void putClaimIfNotBlank(
-      JWTClaimsSet.Builder claimsBuilder, CustomClaim claim, String value) {
+      JWTClaimsSet.Builder claimsBuilder, Claim claim, String value) {
     if (StringUtil.isNotBlank(value)) {
       claimsBuilder.claim(claim.getClaimName(), value);
     }
@@ -132,7 +144,8 @@ public class JwtUtil {
             .keyID(SecurityConstant.JWKS_KEY_ID)
             .build(),
         claimsSet);
-    signedJWT.sign(new RSASSASigner(new RSAKey.Builder(rsaPublicKey).privateKey(rsaPrivateKey).build()));
+    signedJWT.sign(
+        new RSASSASigner(new RSAKey.Builder(rsaPublicKey).privateKey(rsaPrivateKey).build()));
     return signedJWT.serialize();
   }
 

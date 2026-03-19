@@ -24,7 +24,7 @@ public interface UserRepository {
 
   boolean existsByEmail(String email);
 
-  boolean existsByPhone(String phone);
+  boolean existsByPhoneNumber(String phoneNumber);
 
   Long countAll();
 
@@ -49,7 +49,7 @@ public interface UserRepository {
 
     private String email;
 
-    private String phone;
+    private String phoneNumber;
 
     private UserRole role;
   }

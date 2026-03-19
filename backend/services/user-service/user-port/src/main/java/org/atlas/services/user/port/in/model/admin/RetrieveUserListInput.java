@@ -22,8 +22,8 @@ public class RetrieveUserListInput {
   private String lastName;
 
   private String email;
-
-  private String phone;
+ 
+  private String phoneNumber;
 
   private UserRole role;
 

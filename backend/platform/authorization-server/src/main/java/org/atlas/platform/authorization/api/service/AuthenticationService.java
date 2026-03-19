@@ -8,7 +8,7 @@ import org.atlas.libs.framework.security.cryptography.HashingUtil;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.libs.framework.kvstore.KvStoreService;
-import org.atlas.libs.framework.security.JwtUtil;
+import org.atlas.libs.framework.security.jwt.JwtUtil;
 import org.atlas.libs.framework.security.Principal;
 import org.atlas.libs.framework.security.SecurityConstant;
 import org.atlas.libs.framework.security.SecurityContextUtil;

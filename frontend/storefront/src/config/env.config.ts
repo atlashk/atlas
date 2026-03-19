@@ -8,11 +8,19 @@ export const ENV_CONFIG = {
    * API Base URL - defaults to localhost:8080 if not set
    */
   API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080',
+
+  /**
+   * IdP - Spring
+   */
   AUTHORIZATION_API_BASE_URL: process.env.NEXT_PUBLIC_AUTHORIZATION_API_BASE_URL || 'http://localhost:8081',
+  
+  /**
+   * IdP - Keycloak
+   */
   IDP: process.env.NEXT_PUBLIC_IDP || 'keycloak',
   KEYCLOAK_URL: process.env.NEXT_PUBLIC_KEYCLOAK_URL || process.env.NEXT_PUBLIC_AUTHORIZATION_API_BASE_URL || 'http://localhost:8901',
   KEYCLOAK_REALM: process.env.NEXT_PUBLIC_KEYCLOAK_REALM || 'master',
-  KEYCLOAK_CLIENT_ID: process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID || 'web-client',
+  KEYCLOAK_CLIENT_ID: process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID || 'web-storefront-client',
 
   /**
    * Stripe Publishable Key

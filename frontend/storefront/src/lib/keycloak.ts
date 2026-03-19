@@ -10,7 +10,7 @@ let keycloakInitialized = false;
 let keycloakInitPromise: Promise<boolean> | null = null;
 
 const getCallbackRedirectUri = () =>
-  `${window.location.origin}/login/callback`;
+  `${window.location.origin}/login/keycloak/callback`;
 
 const getInitPromise = (keycloak: Keycloak) => {
   if (!keycloakInitPromise) {
@@ -60,4 +60,35 @@ export const initKeycloakOnCallback = async () => {
     accessToken: keycloak.token,
     refreshToken: keycloak.refreshToken || null
   };
+};
+
+export const refreshTokenWithKeycloak = async () => {
+  const keycloak = getKeycloakInstance();
+  try {
+    if (!keycloakInitialized) {
+      keycloakInitialized = await getInitPromise(keycloak);
+    }
+  } catch {}
+  if (!keycloak.authenticated || !keycloak.refreshToken) {
+    throw new Error("Keycloak is not authenticated");
+  }
+  await keycloak.updateToken(30);
+  if (!keycloak.token) {
+    throw new Error("Keycloak failed to refresh token");
+  }
+  return {
+    accessToken: keycloak.token,
+    refreshToken: keycloak.refreshToken || null
+  };
+};
+
+export const logoutWithKeycloak = async () => {
+  const keycloak = getKeycloakInstance();
+  try {
+    if (!keycloakInitialized) {
+      keycloakInitialized = await getInitPromise(keycloak);
+    }
+  } catch {}
+  const redirectUri = `${window.location.origin}`;
+  await keycloak.logout({ redirectUri });
 };

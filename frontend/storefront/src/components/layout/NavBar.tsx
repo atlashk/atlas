@@ -11,17 +11,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { IDP } from "@/config/env.config";
-import { loginWithKeycloak } from "@/lib/keycloak";
 import { useCartStore } from "@/stores/cart.store";
 import { useUserStore } from "@/stores/user.store";
 import { KeyRound, LogOut, Package, ShoppingCart, User } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { logoutWithKeycloak } from "@/lib/keycloak";
 
 export default function NavBar() {
-  const { profile, logout } = useUserStore();
-  const { getCartItemCount, loadCart } = useCartStore();
+  const { profile, logout, clearAuthState } = useUserStore();
+  const { getCartItemCount, loadCart, clearCartState } = useCartStore();
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const router = useRouter();
 
   const cartItemCount = getCartItemCount();
 
@@ -38,16 +40,18 @@ export default function NavBar() {
       : profile?.email || "User";
 
   const handleLogout = async () => {
+    if (IDP.toLowerCase() === "keycloak") {
+      clearAuthState();
+      clearCartState();
+      await logoutWithKeycloak();
+      return;
+    }
     await logout();
   };
 
   const handleLogin = async () => {
-    if (IDP.toLowerCase() === "keycloak") {
-      const redirectUrl = `${window.location.pathname}${window.location.search}`;
-      await loginWithKeycloak(redirectUrl);
-      return;
-    }
-    window.location.href = "/login";
+    const target = IDP.toLowerCase() === "keycloak" ? "/login/keycloak" : "/login";
+    router.push(target);
   };
 
   return (

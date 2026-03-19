@@ -158,7 +158,7 @@ export const clearPkceState = (stateStorageKey: string, verifierStorageKey: stri
   sessionStorage.removeItem(verifierStorageKey);
 };
 
-export const executeSsoLoginFlow = async (
+export const executeOAuth2LoginFlow = async (
   loginWithTokensAction: (
     accessToken: string,
     refreshToken?: string | null

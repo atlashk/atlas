@@ -39,9 +39,9 @@ const formSchema = z.object({
     .min(1, { message: "Password is required." }),
 });
 
-const OAUTH2_CLIENT_ID = "web-client";
-const OAUTH2_PKCE_VERIFIER_STORAGE_KEY = "oauth2_pkce_verifier_web";
-const OAUTH2_STATE_STORAGE_KEY = "oauth2_state_web";
+const OAUTH2_CLIENT_ID = "web-admin-client";
+const OAUTH2_PKCE_VERIFIER_STORAGE_KEY = "oauth2_pkce_verifier_admin";
+const OAUTH2_STATE_STORAGE_KEY = "oauth2_state_admin";
 
 const Login: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState("");

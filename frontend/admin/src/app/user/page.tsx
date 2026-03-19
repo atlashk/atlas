@@ -60,7 +60,7 @@ const AdminUserListPage: React.FC = () => {
     firstName: undefined,
     lastName: undefined,
     email: undefined,
-    phone: undefined,
+    phoneNumber: undefined,
     role: undefined,
     page: 1,
     size: 20,
@@ -154,7 +154,7 @@ const AdminUserListPage: React.FC = () => {
       firstName: undefined,
       lastName: undefined,
       email: undefined,
-      phone: undefined,
+      phoneNumber: undefined,
       role: undefined,
       page: 1,
       size: 20,
@@ -305,14 +305,14 @@ const AdminUserListPage: React.FC = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phoneNumber">Phone Number</Label>
                 <Input
                   type="text"
-                  id="phone"
+                  id="phoneNumber"
                   placeholder="Enter phone"
-                  value={filter.phone || ""}
+                  value={filter.phoneNumber || ""}
                   onChange={(e) =>
-                    handleFilterChange("phone", e.target.value || undefined)
+                    handleFilterChange("phoneNumber", e.target.value || undefined)
                   }
                 />
               </div>
@@ -401,7 +401,7 @@ const AdminUserListPage: React.FC = () => {
                               : "N/A"}
                           </TableCell>
                           <TableCell>{user.email || "N/A"}</TableCell>
-                          <TableCell>{user.phone || "N/A"}</TableCell>
+                          <TableCell>{user.phoneNumber || "N/A"}</TableCell>
                           <TableCell>
                             <Badge
                               variant={

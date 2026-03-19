@@ -36,7 +36,7 @@ const userSchema = z
     firstName: z.string().min(1, "First name is required."),
     lastName: z.string().min(1, "Last name is required."),
     email: z.email("Please enter a valid email address."),
-    phone: z.string().optional(),
+    phoneNumber: z.string().optional(),
     password: z
       .string()
       .min(1, "Password is required.")
@@ -64,7 +64,7 @@ function AdminUserAddPage() {
       firstName: "",
       lastName: "",
       email: "",
-      phone: "",
+      phoneNumber: "",
       password: "",
       confirmPassword: "",
       role: "USER",
@@ -102,7 +102,7 @@ function AdminUserAddPage() {
       firstName: values.firstName,
       lastName: values.lastName,
       email: values.email,
-      phone: values.phone || undefined,
+      phoneNumber: values.phoneNumber || undefined,
       password: values.password,
       role: values.role
     };
@@ -209,7 +209,7 @@ function AdminUserAddPage() {
                   />
                   <FormField
                     control={form.control}
-                    name="phone"
+                    name="phoneNumber"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Phone Number</FormLabel>

@@ -17,8 +17,8 @@ public class UserOutput {
   private String id;
 
   private String email;
-
-  private String phone;
+ 
+  private String phoneNumber;
 
   private String firstName;
 

@@ -21,7 +21,7 @@ export class UserApi extends BaseApi {
     if (filters.firstName) payload.firstName = filters.firstName;
     if (filters.lastName) payload.lastName = filters.lastName;
     if (filters.email) payload.email = filters.email;
-    if (filters.phone) payload.phone = filters.phone;
+    if (filters.phoneNumber) payload.phoneNumber = filters.phoneNumber;
     return this.post<User[]>("/users/admin/list", payload);
   }
 

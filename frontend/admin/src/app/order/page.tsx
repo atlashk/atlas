@@ -450,7 +450,7 @@ const OrderList: React.FC = () => {
                                       <span className="text-sm font-medium text-gray-600 min-w-[120px]">
                                         Phone Number
                                       </span>
-                                      {order.user?.phone ?? "N/A"}
+                                      {order.user?.phoneNumber ?? "N/A"}
                                     </div>
                                   </div>
 

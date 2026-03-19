@@ -12,18 +12,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { AUTHORIZATION_API_BASE_URL } from "@/config/env.config";
+import { AUTHORIZATION_API_BASE_URL, KEYCLOAK_CLIENT_ID, IDP } from "@/config/env.config";
+import { withGuestOnly } from "@/hoc/withAuth";
 import { LoginRequest } from "@/interfaces/authorization.interface";
+import { useUserStore } from "@/stores";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { withGuestOnly } from "../../hoc/withAuth";
-import { useUserStore } from "../../stores/user.store";
 import {
   createOAuth2AuthorizationUrl,
   executeJwtLoginFlow,
@@ -39,7 +39,7 @@ const formSchema = z.object({
     .min(1, { message: "Password is required." }),
 });
 
-const OAUTH2_CLIENT_ID = "web-client";
+const OAUTH2_CLIENT_ID = KEYCLOAK_CLIENT_ID;
 const OAUTH2_PKCE_VERIFIER_STORAGE_KEY = "oauth2_pkce_verifier_storefront";
 const OAUTH2_STATE_STORAGE_KEY = "oauth2_state_storefront";
 
@@ -49,12 +49,12 @@ const Login: React.FC = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const { login } = useUserStore();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  // Get redirect parameter from URL
-  const getRedirectUrl = () => {
-    return searchParams.get("redirect");
-  };
+  useEffect(() => {
+    if (IDP.toLowerCase() === "keycloak") {
+      router.replace("/login/keycloak");
+    }
+  }, [router]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -73,13 +73,11 @@ const Login: React.FC = () => {
         email: values.email,
         password: values.password,
       };
-      const result = await executeJwtLoginFlow(login, credentials, getRedirectUrl);
+      const result = await executeJwtLoginFlow(login, credentials, () => null);
       if (result.success) {
         toast.success("Login successful!");
         await new Promise((resolve) => setTimeout(resolve, 100));
-        if (result.redirectUrl) {
-          router.push(result.redirectUrl);
-        }
+        router.push("/");
       } else {
         setErrorMessage(result.errorMessage);
       }
@@ -91,20 +89,12 @@ const Login: React.FC = () => {
     }
   };
 
-  const persistRedirectUrl = () => {
-    const redirectUrl = getRedirectUrl();
-    if (redirectUrl) {
-      sessionStorage.setItem("auth_redirect", redirectUrl);
-    }
-  };
-
   const onOAuth2Login = async () => {
-    persistRedirectUrl();
     const oauthAuthorizationBaseUrl = resolveAuthorizationBaseUrl(
       AUTHORIZATION_API_BASE_URL
     );
     const redirectUri = `${window.location.origin}/login/callback`;
-    const authorizeUrl = await createOAuth2AuthorizationUrl({
+    window.location.href = await createOAuth2AuthorizationUrl({
       authorizationBaseUrl: oauthAuthorizationBaseUrl,
       clientId: OAUTH2_CLIENT_ID,
       scope: "openid profile email phone offline_access",
@@ -112,11 +102,9 @@ const Login: React.FC = () => {
       pkceVerifierStorageKey: OAUTH2_PKCE_VERIFIER_STORAGE_KEY,
       stateStorageKey: OAUTH2_STATE_STORAGE_KEY,
     });
-    window.location.href = authorizeUrl;
   };
 
   const onGoogleLogin = () => {
-    persistRedirectUrl();
     const oauthAuthorizationBaseUrl = resolveAuthorizationBaseUrl(
       AUTHORIZATION_API_BASE_URL
     );

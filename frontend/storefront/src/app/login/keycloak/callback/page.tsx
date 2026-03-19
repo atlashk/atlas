@@ -3,43 +3,35 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { AUTHORIZATION_API_BASE_URL, KEYCLOAK_CLIENT_ID } from "@/config/env.config";
+import { initKeycloakOnCallback } from "@/lib/keycloak";
 import { useUserStore } from "@/stores/user.store";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   clearPkceState,
-  exchangeAuthorizationCodeForTokens,
   executeOAuth2LoginFlow,
-  resolveAuthorizationBaseUrl,
-  resolveInitialSsoErrorMessage,
-  resolvePkceVerifier,
-  resolveProviderLabel,
-} from "../login.flows";
+  resolveInitialSsoErrorMessage
+} from "../../login.flows";
 
-const OAUTH2_CLIENT_ID = KEYCLOAK_CLIENT_ID;
 const OAUTH2_PKCE_VERIFIER_STORAGE_KEY = "oauth2_pkce_verifier_storefront";
 const OAUTH2_STATE_STORAGE_KEY = "oauth2_state_storefront";
 
-const LoginCallback: React.FC = () => {
+const KeycloakCallback: React.FC = () => {
   const searchParams = useSearchParams();
-  const provider = searchParams.get("provider");
-  const code = searchParams.get("code");
-  const state = searchParams.get("state");
   const ssoError = searchParams.get("ssoError");
   const oauth2Error = searchParams.get("error");
   const accessToken = searchParams.get("accessToken");
   const refreshToken = searchParams.get("refreshToken");
   
-  const providerLabel = resolveProviderLabel(provider);
+  const providerLabel = "Keycloak";
   const initialErrorMessage = resolveInitialSsoErrorMessage({
     providerLabel,
     ssoError,
     oauth2Error,
     accessToken,
     refreshToken,
-    code,
+    code: searchParams.get("code"), // code might still be present in query but handled by keycloak-js
   });
 
   const [errorMessage, setErrorMessage] = useState(initialErrorMessage);
@@ -57,54 +49,29 @@ const LoginCallback: React.FC = () => {
     if (initialErrorMessage) {
       return;
     }
-    const completeSsoLogin = async () => {
-      const oauthAuthorizationBaseUrl = resolveAuthorizationBaseUrl(
-        AUTHORIZATION_API_BASE_URL
-      );
 
+    const completeKeycloakLogin = async () => {
       let resolvedAccessToken = accessToken;
       let resolvedRefreshToken = refreshToken;
 
+      // Keycloak specific initialization if tokens are not already in URL
       if (!resolvedAccessToken) {
-        if (!code || !state) {
-          setErrorMessage("Missing OAuth2 authorization response. Please try login again.");
-          setIsProcessing(false);
-          return;
-        }
-        const codeVerifier = resolvePkceVerifier(
-          state,
-          OAUTH2_STATE_STORAGE_KEY,
-          OAUTH2_PKCE_VERIFIER_STORAGE_KEY
-        );
-        if (!codeVerifier) {
-          setErrorMessage("Invalid OAuth2 state. Please try login again.");
-          setIsProcessing(false);
-          return;
-        }
-        const redirectUri = `${window.location.origin}/login/callback`;
         try {
-          const exchangedTokens = await exchangeAuthorizationCodeForTokens({
-            authorizationBaseUrl: oauthAuthorizationBaseUrl,
-            clientId: OAUTH2_CLIENT_ID,
-            code,
-            redirectUri,
-            codeVerifier,
-          });
-          resolvedAccessToken = exchangedTokens.accessToken || null;
-          resolvedRefreshToken = exchangedTokens.refreshToken || null;
+          const keycloakTokens = await initKeycloakOnCallback();
+          if (keycloakTokens) {
+            resolvedAccessToken = keycloakTokens.accessToken;
+            resolvedRefreshToken = keycloakTokens.refreshToken;
+          }
         } catch (error) {
-          setErrorMessage(
-            error instanceof Error
-              ? error.message
-              : "OAuth2 token exchange failed."
-          );
+          console.error("Keycloak callback error:", error);
+          setErrorMessage("Keycloak token initialization failed.");
           setIsProcessing(false);
           return;
         }
       }
 
       if (!resolvedAccessToken) {
-        setErrorMessage("Missing OAuth2 access token. Please try login again.");
+        setErrorMessage("Missing Keycloak access token. Please try login again.");
         setIsProcessing(false);
         return;
       }
@@ -114,6 +81,7 @@ const LoginCallback: React.FC = () => {
         resolvedAccessToken,
         resolvedRefreshToken
       );
+
       if (result.success) {
         toast.success(`${providerLabel} login successful!`);
         clearPkceState(
@@ -130,8 +98,8 @@ const LoginCallback: React.FC = () => {
       setIsProcessing(false);
     };
 
-    void completeSsoLogin();
-  }, [accessToken, code, initialErrorMessage, loginWithTokens, oauth2Error, providerLabel, refreshToken, router, state]);
+    void completeKeycloakLogin();
+  }, [accessToken, initialErrorMessage, loginWithTokens, refreshToken, router]);
 
   return (
     <div className="flex items-center justify-center min-h-screen px-4">
@@ -158,4 +126,4 @@ const LoginCallback: React.FC = () => {
   );
 };
 
-export default LoginCallback;
+export default KeycloakCallback;

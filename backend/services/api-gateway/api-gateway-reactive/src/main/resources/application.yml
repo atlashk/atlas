@@ -110,7 +110,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: ${AUTHORIZATION_SERVER_BASE_URL:http://localhost:8901}/.well-known/jwks.json
+          jwk-set-uri: ${JWK_SET_URI:http://localhost:8901/.well-known/jwks.json}
 
 management:
   endpoint:

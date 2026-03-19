@@ -31,7 +31,7 @@ public class UserResponse {
   private String email;
 
   @Schema(description = "Phone number of the user", example = "+1234567890")
-  private String phone;
+  private String phoneNumber;
 
   @Schema(description = "Role of the user")
   private UserRole role;

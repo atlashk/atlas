@@ -30,7 +30,7 @@ spring:
               redirect-uris:
                 - ${OAUTH2_AUTHORIZATION_WEB_STOREFRONT_REDIRECT_URI:http://localhost:8000/login/callback}
               post-logout-redirect-uris:
-                - ${OAUTH2_AUTHORIZATION_WEB_STOREFRONT_POST_LOGOUT_REDIRECT_URI:http://localhost:8000/login}
+                - ${OAUTH2_AUTHORIZATION_WEB_STOREFRONT_POST_LOGOUT_REDIRECT_URI:http://localhost:8000}
               scopes:
                 - openid
                 - profile
@@ -51,7 +51,7 @@ spring:
               redirect-uris:
                 - ${OAUTH2_AUTHORIZATION_WEB_ADMIN_REDIRECT_URI:http://localhost:8001/login/callback}
               post-logout-redirect-uris:
-                - ${OAUTH2_AUTHORIZATION_WEB_ADMIN_POST_LOGOUT_REDIRECT_URI:http://localhost:8001/login}
+                - ${OAUTH2_AUTHORIZATION_WEB_ADMIN_POST_LOGOUT_REDIRECT_URI:http://localhost:8001}
               scopes:
                 - openid
                 - profile

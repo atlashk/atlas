@@ -11,7 +11,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.config.ApplicationConfigService;
 import org.atlas.libs.framework.security.cryptography.RsaKeyLoader;
-import org.atlas.libs.framework.security.CustomClaim;
+import org.atlas.libs.framework.security.jwt.Claim;
 import org.atlas.libs.framework.security.SecurityConstant;
 import org.atlas.platform.authorization.core.sso.SsoAuthenticationFailureHandler;
 import org.atlas.platform.authorization.core.sso.SsoAuthenticationSuccessHandler;
@@ -33,7 +33,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
@@ -185,16 +184,16 @@ public class AuthorizationSecurityConfig {
       UserEntity user = optionalUser.get();
       context.getClaims().subject(user.getId());
       if (context.getAuthorizedScopes().contains("profile")) {
-        context.getClaims().claim(CustomClaim.FIRST_NAME.getClaimName(), user.getFirstName());
-        context.getClaims().claim(CustomClaim.LAST_NAME.getClaimName(), user.getLastName());
+        context.getClaims().claim(Claim.FIRST_NAME.getClaimName(), user.getFirstName());
+        context.getClaims().claim(Claim.LAST_NAME.getClaimName(), user.getLastName());
       }
       if (context.getAuthorizedScopes().contains("email")) {
-        context.getClaims().claim(CustomClaim.EMAIL.getClaimName(), user.getEmail());
+        context.getClaims().claim(Claim.EMAIL.getClaimName(), user.getEmail());
       }
       if (context.getAuthorizedScopes().contains("phone")) {
-        context.getClaims().claim(CustomClaim.PHONE.getClaimName(), user.getPhone());
+        context.getClaims().claim(Claim.PHONE_NUMBER.getClaimName(), user.getPhoneNumber());
       }
-      context.getClaims().claim(CustomClaim.USER_ROLE.getClaimName(), user.getRole());
+      context.getClaims().claim(Claim.USER_ROLE.getClaimName(), user.getRole());
     };
   }
 

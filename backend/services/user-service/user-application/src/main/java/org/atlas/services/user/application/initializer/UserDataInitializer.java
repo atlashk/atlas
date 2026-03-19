@@ -49,7 +49,7 @@ public class UserDataInitializer {
         .firstName("John")
         .lastName("Doe")
         .email("admin@atlas.org")
-        .phone("0987654321")
+        .phoneNumber("0987654321")
         .role(UserRole.ADMIN)
         .build();
     userAdminService.createUser(input);
@@ -62,7 +62,7 @@ public class UserDataInitializer {
         .firstName("Demo")
         .lastName("User")
         .email("demo@atlas.org")
-        .phone("0123456789")
+        .phoneNumber("0123456789")
         .role(UserRole.USER)
         .build();
     userAdminService.createUser(input);

@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 public enum KeycloakUserAttribute {
 
-  PHONE("phone"),
+  PHONE_NUMBER("phoneNumber"),
   ;
 
   private final String name;

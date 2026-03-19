@@ -3,7 +3,7 @@ package org.atlas.platform.authorization.core;
 import java.time.Instant;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.atlas.libs.framework.security.JwtUtil;
+import org.atlas.libs.framework.security.jwt.JwtUtil;
 import org.atlas.libs.framework.security.Principal;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.user.port.out.repository.UserRepository;

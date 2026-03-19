@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS users
     first_name  VARCHAR(255) NOT NULL,
     last_name   VARCHAR(255) NOT NULL,
     email       VARCHAR(255) NOT NULL UNIQUE,
-    phone       VARCHAR(255) UNIQUE,
+    phone_number       VARCHAR(255) UNIQUE,
     password    VARCHAR(255), -- Password can be NULL for users authenticated via external providers
     role        VARCHAR(20)  NOT NULL,
     idp_user_id VARCHAR(255),

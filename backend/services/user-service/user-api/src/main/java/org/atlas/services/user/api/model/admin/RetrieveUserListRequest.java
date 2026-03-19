@@ -32,7 +32,7 @@ public class RetrieveUserListRequest {
   private String email;
 
   @Schema(description = "Phone number", example = "+1234567890")
-  private String phone;
+  private String phoneNumber;
 
   @Schema(description = "User role", example = "USER")
   private UserRole role;

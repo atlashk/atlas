@@ -29,7 +29,7 @@ public class CreateUserRequest {
   private String email;
 
   @Schema(description = "Phone number of the new user", example = "+1234567890")
-  private String phone;
+  private String phoneNumber;
 
   @NotBlank
   @Pattern(regexp = Patterns.PASSWORD, message = "{error.user.invalid_password}")

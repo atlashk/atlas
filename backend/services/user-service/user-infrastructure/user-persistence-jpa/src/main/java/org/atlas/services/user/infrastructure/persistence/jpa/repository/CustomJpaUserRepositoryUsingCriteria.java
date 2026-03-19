@@ -92,9 +92,9 @@ public class CustomJpaUserRepositoryUsingCriteria implements CustomJpaUserReposi
       spec.addFilter(QueryFilter.of("email", criteria.getEmail().trim(), QueryOperator.LIKE));
     }
 
-    if (StringUtil.isNotBlank(criteria.getPhone())) {
+    if (StringUtil.isNotBlank(criteria.getPhoneNumber())) {
       spec.addFilter(
-          QueryFilter.of("phone", criteria.getPhone().trim(), QueryOperator.LIKE));
+          QueryFilter.of("phoneNumber", criteria.getPhoneNumber().trim(), QueryOperator.LIKE));
     }
 
     if (criteria.getRole() != null) {

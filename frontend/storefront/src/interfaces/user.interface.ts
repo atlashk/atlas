@@ -3,7 +3,7 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  phone?: string;
+  phoneNumber?: string;
   role: string;
 }
 
@@ -12,5 +12,5 @@ export interface RegisterRequest {
   firstName: string;
   lastName: string;
   email: string;
-  phone?: string;
+  phoneNumber?: string;
 }

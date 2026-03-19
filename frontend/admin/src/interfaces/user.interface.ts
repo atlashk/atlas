@@ -3,7 +3,7 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  phone?: string;
+  phoneNumber?: string;
   role: string;
 }
 
@@ -12,7 +12,7 @@ export interface RetrieveUserListFilter {
   firstName?: string;
   lastName?: string;
   email?: string;
-  phone?: string;
+  phoneNumber?: string;
   role?: string;
   page: number;
   size: number;
@@ -22,7 +22,7 @@ export interface CreateUserRequest {
   firstName: string;
   lastName: string;
   email: string;
-  phone?: string;
+  phoneNumber?: string;
   password: string;
   role: string;
 }

@@ -48,6 +48,10 @@ spec:
             - name: JWK_SET_URI
               value: "http://{{ lower $.Release.Name }}-authorization-server:{{ .Values.authorizationServer.service.ports.http }}/.well-known/jwks.json"
             {{- end }}
+            {{- if eq .Values.appStack.idp "keycloak" }}
+            - name: JWK_SET_URI
+              value: "http://{{ lower $.Release.Name }}-keycloak:{{ .Values.keycloak.service.ports.http }}/realms/{{ .Values.keycloak.config.realm }}/protocol/openid-connect/certs"
+            {{- end }}
             {{- if eq .Values.appStack.observability.tracing "zipkin" }}
             - name: ZIPKIN_ENDPOINT
               value: "http://{{ lower $.Release.Name }}-zipkin:{{ .Values.zipkin.service.ports.http }}/api/v2/spans"

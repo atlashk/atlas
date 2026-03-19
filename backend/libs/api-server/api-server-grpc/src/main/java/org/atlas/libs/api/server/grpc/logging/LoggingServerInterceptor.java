@@ -5,11 +5,14 @@ import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.core.annotation.Order;
 import org.springframework.grpc.server.GlobalServerInterceptor;
 import org.springframework.stereotype.Component;
 
 @Component
 @GlobalServerInterceptor
+@Order(0)
 @Slf4j
 public class LoggingServerInterceptor implements ServerInterceptor {
 

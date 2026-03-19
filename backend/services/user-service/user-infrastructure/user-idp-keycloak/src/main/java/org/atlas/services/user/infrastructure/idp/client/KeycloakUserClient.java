@@ -170,12 +170,10 @@ public class KeycloakUserClient {
     payload.put("lastName", StringUtil.defaultIfBlank(user.getLastName(), StringUtil.EMPTY));
     payload.put("email", StringUtil.defaultIfBlank(user.getEmail(), StringUtil.EMPTY));
     payload.put("enabled", true);
-
     payload.put("attributes", Map.of(
-        KeycloakUserAttribute.PHONE.getName(),
-        List.of(StringUtil.defaultIfBlank(user.getPhone(), StringUtil.EMPTY))
+        KeycloakUserAttribute.PHONE_NUMBER.getName(),
+        List.of(StringUtil.defaultIfBlank(user.getPhoneNumber(), StringUtil.EMPTY))
     ));
-
     return payload;
   }
 

@@ -36,7 +36,7 @@ const formSchema = z
     email: z.email({
       message: "Please enter a valid email address.",
     }),
-    phone: z.string().optional(),
+    phoneNumber: z.string().optional(),
     password: z
       .string()
       .min(1, { message: "Password is required." })
@@ -61,7 +61,7 @@ const Register: React.FC = () => {
       firstName: "",
       lastName: "",
       email: "",
-      phone: "",
+      phoneNumber: "",
       password: "",
       confirmPassword: "",
     },
@@ -78,7 +78,7 @@ const Register: React.FC = () => {
       firstName: values.firstName,
       lastName: values.lastName,
       email: values.email,
-      phone: values.phone || undefined,
+      phoneNumber: values.phoneNumber || undefined,
       password: values.password,
     };
 
@@ -188,10 +188,10 @@ const Register: React.FC = () => {
 
               <FormField
                 control={form.control}
-                name="phone"
+                name="phoneNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone</FormLabel>
+                    <FormLabel>Phone Number</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />

@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.libs.framework.domain.shared.user.UserRole;
 import org.atlas.libs.framework.security.FederatedIdentityProvider;
-import org.atlas.libs.framework.security.JwtUtil;
+import org.atlas.libs.framework.security.jwt.JwtUtil;
 import org.atlas.libs.framework.security.Principal;
 import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.libs.framework.sequencegenerator.SequenceType;
