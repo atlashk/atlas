@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/sidebar";
 import ChangePasswordDialog from "@/components/layout/ChangePasswordDialog";
 import { useUserStore } from "@/stores/user.store";
+import { IDP } from "@/config/env.config";
+import { logoutWithKeycloak } from "@/lib/keycloak";
 import { KeyRound, LogOut, Package, ShoppingCart, User as UserIcon, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -94,7 +96,7 @@ function AppSidebar() {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
-  const { profile, logout } = useUserStore();
+  const { profile, logout, clearAuthState } = useUserStore();
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
   const displayName = useMemo(() => {
@@ -104,6 +106,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }, [profile]);
 
   const handleLogout = async () => {
+    if (IDP.toLowerCase() === "keycloak") {
+      clearAuthState();
+      await logoutWithKeycloak();
+      return;
+    }
     await logout();
   };
 

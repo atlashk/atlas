@@ -1,6 +1,7 @@
 import { clearAuthCookies, getCookie, isValidToken, setCookie } from '@/utils/cookies';
 import axios, { AxiosError } from "axios";
-import { API_BASE_URL, AUTHORIZATION_API_BASE_URL } from '@/config/env.config';
+import { API_BASE_URL, AUTHORIZATION_API_BASE_URL, IDP } from '@/config/env.config';
+import { refreshTokenWithKeycloak } from "@/lib/keycloak";
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -203,6 +204,19 @@ function redirectToLogin(): void {
 
 async function performTokenRefresh(refreshToken: string): Promise<string> {
   try {
+    if (IDP.toLowerCase() === "keycloak") {
+      const tokens = await refreshTokenWithKeycloak();
+      const newAccessToken = tokens.accessToken;
+      const newRefreshToken = tokens.refreshToken;
+      if (!newAccessToken) {
+        throw new Error("Invalid Keycloak refresh: missing access token");
+      }
+      setCookie("accessToken", newAccessToken);
+      if (newRefreshToken) {
+        setCookie("refreshToken", newRefreshToken);
+      }
+      return newAccessToken;
+    }
     const response = await axios.post(
       `${AUTHORIZATION_API_BASE_URL}/api/authentication/refresh-token`,
       { refreshToken },

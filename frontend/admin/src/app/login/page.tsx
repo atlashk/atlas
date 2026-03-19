@@ -12,13 +12,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { AUTHORIZATION_API_BASE_URL } from "@/config/env.config";
+import { AUTHORIZATION_API_BASE_URL, IDP } from "@/config/env.config";
 import { LoginRequest } from "@/interfaces/authorization.interface";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -49,6 +49,12 @@ const Login: React.FC = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const { login } = useUserStore();
   const router = useRouter();
+
+  useEffect(() => {
+    if (IDP.toLowerCase() === "keycloak") {
+      router.replace("/login/keycloak");
+    }
+  }, [router]);
 
   // Get redirect parameter from URL
   const getRedirectUrl = () => {
