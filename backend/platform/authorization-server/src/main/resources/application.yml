@@ -18,9 +18,9 @@ spring:
               - openid
       authorizationserver:
         client:
-          web-storefront-client:
+          web-client:
             registration:
-              client-id: web-storefront-client
+              client-id: web-client
               client-authentication-methods:
               # SPA public client cannot safely keep a secret in browser, so use "none" + PKCE
                 - none
@@ -28,30 +28,9 @@ spring:
                 - authorization_code
                 - refresh_token
               redirect-uris:
-                - ${OAUTH2_AUTHORIZATION_WEB_STOREFRONT_REDIRECT_URI:http://localhost:8000/login/callback}
+                - ${OAUTH2_AUTHORIZATION_WEB_CLIENT_REDIRECT_URI:http://localhost:8000/login/callback}
               post-logout-redirect-uris:
-                - ${OAUTH2_AUTHORIZATION_WEB_STOREFRONT_POST_LOGOUT_REDIRECT_URI:http://localhost:8000}
-              scopes:
-                - openid
-                - profile
-                - email
-                - phone
-                - offline_access
-            require-proof-key: true
-            require-authorization-consent: true
-          web-admin-client:
-            registration:
-              client-id: web-admin-client
-              client-authentication-methods:
-                # SPA public client cannot safely keep a secret in browser, so use "none" + PKCE
-                - none
-              authorization-grant-types:
-                - authorization_code
-                - refresh_token
-              redirect-uris:
-                - ${OAUTH2_AUTHORIZATION_WEB_ADMIN_REDIRECT_URI:http://localhost:8001/login/callback}
-              post-logout-redirect-uris:
-                - ${OAUTH2_AUTHORIZATION_WEB_ADMIN_POST_LOGOUT_REDIRECT_URI:http://localhost:8001}
+                - ${OAUTH2_AUTHORIZATION_WEB_CLIENT_POST_LOGOUT_REDIRECT_URI:http://localhost:8000}
               scopes:
                 - openid
                 - profile
@@ -62,5 +41,5 @@ spring:
             require-authorization-consent: true
 
 springdoc:
-  packages-to-scan: org.atlas.platform.authorization
+  packages-to-scan: org.atlas.platform.authorization.api
 

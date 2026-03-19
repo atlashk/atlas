@@ -70,8 +70,7 @@ Shared backend capabilities are implemented as reusable Gradle modules under `ba
 │   ├── install.sh
 │   └── uninstall.sh
 ├── frontend/
-│   ├── storefront/                    # customer app (port 8000)
-│   └── admin/                         # admin app (port 8001)
+│   └── all/                           # unified frontend app (port 8000)
 └── README.md
 ```
 
@@ -131,33 +130,25 @@ cd backend
 
 ### Frontend
 
-Both frontend apps read:
+Frontend app reads:
 
 - `NEXT_PUBLIC_API_BASE_URL` (default `http://localhost:8080`)
 - `NEXT_PUBLIC_AUTHORIZATION_API_BASE_URL` (default `http://localhost:8901`)
 
-Storefront:
+Unified frontend:
 
 ```bash
-cd frontend/storefront
+cd frontend/all
 npm install
 npm run dev
 ```
 
 Open: http://localhost:8000
 
-Admin:
-
-```bash
-cd frontend/admin
-npm install
-npm run dev
-```
-
-Open: http://localhost:8001
+Main storefront routes stay under `/`, `/cart`, `/checkout`, `/order-history`, `/login`, `/register`.
+Admin routes are namespaced under `/admin/**` (for example: `/admin/dashboard`).
 
 Default seeded users:
-
 - Admin: `admin@atlas.org` / `Atlas@123456`
 - User: `demo@atlas.org` / `Atlas@123456`
 

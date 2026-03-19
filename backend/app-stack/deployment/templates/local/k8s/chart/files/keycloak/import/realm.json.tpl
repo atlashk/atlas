@@ -50,42 +50,19 @@
       ]
     },
     {
-      "clientId": "{{ .Values.keycloak.config.clients.webStorefrontClient.clientId }}",
-      "name": "{{ .Values.keycloak.config.clients.webStorefrontClient.clientId }}",
+      "clientId": "{{ .Values.keycloak.config.clients.webClient.clientId }}",
+      "name": "{{ .Values.keycloak.config.clients.webClient.clientId }}",
       "enabled": true,
       "protocol": "openid-connect",
       "publicClient": true,
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": false,
-      "redirectUris": {{ .Values.keycloak.config.clients.webStorefrontClient.redirectUris | toJson }},
-      "webOrigins": {{ .Values.keycloak.config.clients.webStorefrontClient.webOrigins | toJson }},
+      "redirectUris": {{ .Values.keycloak.config.clients.webClient.redirectUris | toJson }},
+      "webOrigins": {{ .Values.keycloak.config.clients.webClient.webOrigins | toJson }},
       "attributes": {
         "pkce.code.challenge.method": "S256",
-        "post.logout.redirect.uris": {{ join " " .Values.keycloak.config.clients.webStorefrontClient.postLogoutRedirectUris | quote }}
-      },
-      "defaultClientScopes": [
-        "basic",
-        "profile",
-        "email",
-        "phone",
-        "roles"
-      ]
-    },
-    {
-      "clientId": "{{ .Values.keycloak.config.clients.webAdminClient.clientId }}",
-      "name": "{{ .Values.keycloak.config.clients.webAdminClient.clientId }}",
-      "enabled": true,
-      "protocol": "openid-connect",
-      "publicClient": true,
-      "standardFlowEnabled": true,
-      "directAccessGrantsEnabled": false,
-      "serviceAccountsEnabled": false,
-      "redirectUris": {{ .Values.keycloak.config.clients.webAdminClient.redirectUris | toJson }},
-      "webOrigins": {{ .Values.keycloak.config.clients.webAdminClient.webOrigins | toJson }},
-      "attributes": {
-        "pkce.code.challenge.method": "S256",
-        "post.logout.redirect.uris": {{ join " " .Values.keycloak.config.clients.webAdminClient.postLogoutRedirectUris | quote }}
+        "post.logout.redirect.uris": {{ join " " .Values.keycloak.config.clients.webClient.postLogoutRedirectUris | quote }}
       },
       "defaultClientScopes": [
         "basic",

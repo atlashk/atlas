@@ -50,8 +50,8 @@
       ]
     },
     {
-      "clientId": "web-storefront-client",
-      "name": "web-storefront-client",
+      "clientId": "web-client",
+      "name": "web-client",
       "enabled": true,
       "protocol": "openid-connect",
       "publicClient": true,
@@ -67,33 +67,6 @@
       "attributes": {
         "pkce.code.challenge.method": "S256",
         "post.logout.redirect.uris": "http://localhost:8000"
-      },
-      "defaultClientScopes": [
-        "basic",
-        "profile",
-        "email",
-        "phone",
-        "roles"
-      ]
-    },
-    {
-      "clientId": "web-admin-client",
-      "name": "web-admin-client",
-      "enabled": true,
-      "protocol": "openid-connect",
-      "publicClient": true,
-      "standardFlowEnabled": true,
-      "directAccessGrantsEnabled": false,
-      "serviceAccountsEnabled": false,
-      "redirectUris": [
-        "http://localhost:8001/login/keycloak/callback"
-      ],
-      "webOrigins": [
-        "*"
-      ],
-      "attributes": {
-        "pkce.code.challenge.method": "S256",
-        "post.logout.redirect.uris": "http://localhost:8001"
       },
       "defaultClientScopes": [
         "basic",

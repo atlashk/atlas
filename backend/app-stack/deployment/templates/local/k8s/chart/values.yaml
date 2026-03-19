@@ -273,20 +273,12 @@ keycloak:
       adminClient:
         clientId: admin-client
         clientSecret: 9cvF5MPJnwfhEOCwNnQ79RmlkckAsDCj
-      webStorefrontClient:
-        clientId: web-storefront-client
+      webClient:
+        clientId: web-client
         redirectUris:
           - http://localhost:8000/login/keycloak/callback
         postLogoutRedirectUris:
           - http://localhost:8000
-        webOrigins:
-          - "*"
-      webAdminClient:
-        clientId: web-admin-client
-        redirectUris:
-          - http://localhost:8001/login/keycloak/callback
-        postLogoutRedirectUris:
-          - http://localhost:8001
         webOrigins:
           - "*"
   secret:
