@@ -112,6 +112,10 @@ project(':libs.observability.metrics.prometheus').projectDir = file('libs/observ
 include(':libs.observability.tracing.zipkin')
 project(':libs.observability.tracing.zipkin').projectDir = file('libs/observability/tracing/tracing-zipkin')
 
+// Observability::OpenTelemetry
+include(':libs.observability.opentelemetry')
+project(':libs.observability.opentelemetry').projectDir = file('libs/observability/observability-opentelemetry')
+
 // Outbox
 include(':libs.outbox')
 project(':libs.outbox').projectDir = file('libs/outbox')

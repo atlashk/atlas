@@ -5,7 +5,7 @@ plugins {
     id 'idea'
 }
 
-group = 'org.atlas'
+group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 
 java {
@@ -14,28 +14,15 @@ java {
     }
 }
 
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
-}
-
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    // Framework
-    api project(':libs.framework')
+    api 'org.springframework.boot:spring-boot-starter-actuator'
+    api 'org.springframework.boot:spring-boot-starter-opentelemetry'
 
-    // REST server
-    api 'org.springframework.boot:spring-boot-starter-webmvc'
-
-    // OpenAPI UI
-    api 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2'
-
-    // Observability
-    api project(':libs.observability.opentelemetry')
+    api 'io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0:2.26.0-alpha'
     
     // Lombok
     compileOnly 'org.projectlombok:lombok'
@@ -49,7 +36,6 @@ bootJar {
 jar {
     enabled = true
 }
-
 
 idea {
     module {

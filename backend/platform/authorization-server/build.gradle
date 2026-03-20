@@ -77,32 +77,33 @@ dependencies {
     }
 
     // Observability
-    implementation project(':libs.observability.actuator')
-    switch (rootProject.ext.appStack['observability.logging.framework']) {
-        case 'logback':
-            implementation project(':libs.observability.logging.logback')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported observability.logging.framework: ${rootProject.ext.appStack['observability.logging.framework']}")
-    }
-    switch (rootProject.ext.appStack['observability.metrics']) {
-        case 'none':
-            break;
-        case 'prometheus':
-            implementation project(':libs.observability.metrics.prometheus')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported observability.metrics: ${rootProject.ext.appStack['observability.metrics']}")
-    }
-    switch (rootProject.ext.appStack['observability.tracing']) {
-        case 'none':
-            break
-        case 'zipkin':
-            implementation project(':libs.observability.tracing.zipkin')
-            break
-        default:
-            throw new IllegalArgumentException("Unsupported observability.tracing: ${rootProject.ext.appStack['observability.tracing']}")
-    }
+//    implementation project(':libs.observability.actuator')
+//    switch (rootProject.ext.appStack['observability.logging.framework']) {
+//        case 'logback':
+//            implementation project(':libs.observability.logging.logback')
+//            break
+//        default:
+//            throw new IllegalArgumentException("Unsupported observability.logging.framework: ${rootProject.ext.appStack['observability.logging.framework']}")
+//    }
+//    switch (rootProject.ext.appStack['observability.metrics']) {
+//        case 'none':
+//            break;
+//        case 'prometheus':
+//            implementation project(':libs.observability.metrics.prometheus')
+//            break
+//        default:
+//            throw new IllegalArgumentException("Unsupported observability.metrics: ${rootProject.ext.appStack['observability.metrics']}")
+//    }
+//    switch (rootProject.ext.appStack['observability.tracing']) {
+//        case 'none':
+//            break
+//        case 'zipkin':
+//            implementation project(':libs.observability.tracing.zipkin')
+//            break
+//        default:
+//            throw new IllegalArgumentException("Unsupported observability.tracing: ${rootProject.ext.appStack['observability.tracing']}")
+//    }
+    implementation project(':libs.observability.opentelemetry')
 
     // Sequence generator (without migration)
     implementation project(':libs.sequence-generator.core')
