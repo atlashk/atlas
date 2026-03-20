@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.constant.CommonConstant;
 import org.atlas.libs.framework.domain.shared.payment.PaymentStatus;
+import org.atlas.libs.framework.observability.tracing.TracingService;
 import org.atlas.libs.framework.saga.checkout.CheckoutCommand;
 import org.atlas.libs.framework.saga.checkout.CheckoutSagaData;
 import org.atlas.libs.framework.saga.checkout.InitializePaymentCommandMetadata;
@@ -13,6 +14,7 @@ import org.atlas.libs.framework.saga.core.context.SagaContext;
 import org.atlas.libs.framework.saga.core.messaging.payload.SagaCommand;
 import org.atlas.libs.framework.util.ExceptionUtil;
 import org.atlas.libs.framework.util.JsonUtil;
+import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.payment.domain.entity.PaymentGatewayEntity;
 import org.atlas.services.payment.port.in.model.CreatePaymentInput;
 import org.atlas.services.payment.port.in.model.RetrievePaymentGatewayInput;
@@ -31,6 +33,7 @@ public class InitializePaymentCommandHandler {
 
   private final PaymentGatewayService paymentGatewayService;
   private final PaymentService paymentService;
+  private final TracingService tracingService;
 
   @SagaCommandHandler(command = CheckoutCommand.INITIALIZE_PAYMENT)
   public SagaCommandResult initializePayment(SagaCommand sagaCommand) {
@@ -55,6 +58,8 @@ public class InitializePaymentCommandHandler {
     // Create new payment entity
     final String userId = checkoutSagaData.getUser().getId();
     final String orderId = checkoutSagaData.getOrderId();
+    final String currentTraceId = tracingService.getCurrentTraceId();
+    final String currentSpanId = tracingService.getCurrentSpanId();
     CreatePaymentInput createPaymentInput = CreatePaymentInput.builder()
         .userId(userId)
         .orderId(orderId)
@@ -63,6 +68,8 @@ public class InitializePaymentCommandHandler {
         .currency(CommonConstant.DEFAULT_CURRENCY)
         .paymentGatewayId(paymentGateway.getId())
         .status(PaymentStatus.PENDING)
+        .traceId(StringUtil.defaultIfBlank(currentTraceId, null))
+        .spanId(StringUtil.defaultIfBlank(currentSpanId, null))
         .build();
     String paymentId = paymentService.createPayment(createPaymentInput);
 

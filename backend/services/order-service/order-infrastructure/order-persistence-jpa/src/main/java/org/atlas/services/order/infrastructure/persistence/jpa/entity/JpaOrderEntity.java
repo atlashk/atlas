@@ -56,9 +56,9 @@ public class JpaOrderEntity extends JpaBaseEntity {
   @Convert(converter = StringCryptoConverter.class)
   private String userEmail;
 
-  @Column(name = "user_phone")
+  @Column(name = "user_phone_number")
   @Convert(converter = StringCryptoConverter.class)
-  private String userPhone;
+  private String userPhoneNumber;
 
   @Column(name = "address_street")
   private String addressStreet;
@@ -82,6 +82,9 @@ public class JpaOrderEntity extends JpaBaseEntity {
 
   @Column(name = "amount")
   private BigDecimal amount;
+
+  @Column(name = "trace_id")
+  private String traceId;
 
   @Column(name = "payment_gateway_id")
   private Integer paymentGatewayId;

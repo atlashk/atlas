@@ -23,4 +23,8 @@ public class CreatePaymentEventInput {
   private String headers;
 
   private PaymentEventStatus status;
+
+  private String traceId;
+
+  private String spanId;
 }

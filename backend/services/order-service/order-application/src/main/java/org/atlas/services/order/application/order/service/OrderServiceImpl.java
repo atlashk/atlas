@@ -6,17 +6,18 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.security.cryptography.HashingUtil;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
 import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.libs.framework.domain.shared.order.OrderStatus;
 import org.atlas.libs.framework.lock.LockService;
+import org.atlas.libs.framework.observability.tracing.TracingService;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.saga.checkout.CheckoutSagaData;
 import org.atlas.libs.framework.saga.core.context.SagaContext;
 import org.atlas.libs.framework.saga.core.orchestrator.SagaOrchestrator;
 import org.atlas.libs.framework.security.Principal;
 import org.atlas.libs.framework.security.SecurityContextUtil;
+import org.atlas.libs.framework.security.cryptography.HashingUtil;
 import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.libs.framework.util.CollectionUtil;
@@ -44,6 +45,7 @@ public class OrderServiceImpl implements OrderService {
   private final OrderRepository orderRepository;
   private final CartService cartService;
   private final LockService lockService;
+  private final TracingService tracingService;
   private final SagaOrchestrator sagaOrchestrator;
   private final SequenceGenerator sequenceGenerator;
 
@@ -127,6 +129,7 @@ public class OrderServiceImpl implements OrderService {
     OrderEntity order = new OrderEntity();
     order.setId(sequenceGenerator.generate(SequenceType.ORDER));
     order.setStatus(OrderStatus.AWAITING_STOCK_RESERVATION);
+    order.setTraceId(tracingService.getCurrentTraceId());
 
     // User
     Principal principal = SecurityContextUtil.requirePrincipal();

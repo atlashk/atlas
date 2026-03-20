@@ -50,4 +50,8 @@ public class PaymentEntity extends DomainEntity {
   private String error;
 
   private String cancellationReason;
+
+  private String traceId;
+
+  private String spanId;
 }

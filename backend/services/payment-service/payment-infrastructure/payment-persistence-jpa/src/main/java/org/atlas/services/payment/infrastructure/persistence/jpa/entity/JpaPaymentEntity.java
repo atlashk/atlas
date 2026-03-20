@@ -70,4 +70,10 @@ public class JpaPaymentEntity extends JpaBaseEntity {
 
   @Column(name = "cancellation_reason")
   private String cancellationReason;
+
+  @Column(name = "trace_id")
+  private String traceId;
+
+  @Column(name = "span_id")
+  private String spanId;
 }

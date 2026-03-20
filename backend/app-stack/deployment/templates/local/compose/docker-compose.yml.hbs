@@ -333,6 +333,47 @@ services:
       - {{dotenv.PROJECT_NAME}}-network
 {{/hasService}}
 
+{{#hasService "observability.tracing" "opentelemetry"}}
+  tempo:
+    container_name: tempo
+    image: grafana/tempo:main
+    ports:
+      - "3200:3200"
+      - "4317:4317"
+    command:
+      - -config.file=/etc/tempo.yaml
+    volumes:
+      - tempo-data:/var/tempo
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:3200/ready"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 300s
+    networks:
+      - {{dotenv.PROJECT_NAME}}-network
+
+  otel-collector:
+    container_name: otel-collector
+    image: otel/opentelemetry-collector-contrib:latest
+    ports:
+      - "4318:4318"
+    volumes:
+      - ./files/opentelemetry/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    command:
+      - --config=/etc/otelcol-contrib/config.yaml
+    depends_on:
+      - tempo
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:13133/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      - {{dotenv.PROJECT_NAME}}-network
+{{/hasService}}
+
 {{#hasGrafana}}
   grafana:
     container_name: grafana
@@ -415,6 +456,9 @@ services:
       {{#hasService "observability.tracing" "zipkin"}}
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       {{/hasService}}
+      {{#hasService "observability.tracing" "opentelemetry"}}
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
+      {{/hasService}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
     volumes:
       - user-service-log:/var/log/user-service
@@ -485,6 +529,9 @@ services:
       {{#hasService "observability.tracing" "zipkin"}}
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       {{/hasService}}
+      {{#hasService "observability.tracing" "opentelemetry"}}
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
+      {{/hasService}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
     volumes:
       - catalog-service-log:/var/log/catalog-service
@@ -548,6 +595,9 @@ services:
       {{#hasService "observability.tracing" "zipkin"}}
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       {{/hasService}}
+      {{#hasService "observability.tracing" "opentelemetry"}}
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
+      {{/hasService}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
     volumes:
       - inventory-service-log:/var/log/inventory-service
@@ -606,6 +656,9 @@ services:
       {{/hasService}}
       {{#hasService "observability.tracing" "zipkin"}}
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+      {{/hasService}}
+      {{#hasService "observability.tracing" "opentelemetry"}}
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
       {{/hasService}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
       {{#hasService "internal" "grpc"}}
@@ -671,6 +724,9 @@ services:
       {{/hasService}}
       {{#hasService "observability.tracing" "zipkin"}}
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+      {{/hasService}}
+      {{#hasService "observability.tracing" "opentelemetry"}}
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
       {{/hasService}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
       - PAYMENT_SIMULATOR_WEBHOOK_URL=http://api-gateway:8080/services/payment/api/webhook/simulator
@@ -765,6 +821,9 @@ services:
       {{#hasService "observability.tracing" "zipkin"}}
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       {{/hasService}}
+      {{#hasService "observability.tracing" "opentelemetry"}}
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
+      {{/hasService}}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
       {{#hasService "idp" "spring"}}
       - JWK_SET_URI=http://authorization-server:8901/.well-known/jwks.json
@@ -816,6 +875,9 @@ volumes:
 {{#hasService "observability.logging.stack" "loki"}}
   loki-data:
   promtail-data:
+{{/hasService}}
+{{#hasService "observability.tracing" "opentelemetry"}}
+  tempo-data:
 {{/hasService}}
 {{#hasGrafana}}
   grafana-data:

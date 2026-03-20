@@ -1,14 +1,12 @@
-package org.atlas.libs.api.server.rest.tracing;
+package org.atlas.libs.api.server.rest.observability.tracing;
 
-import io.micrometer.tracing.TraceContext;
-import io.micrometer.tracing.Tracer;
-import jakarta.annotation.Nullable;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
+import org.atlas.libs.framework.observability.tracing.TracingService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -16,20 +14,15 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 class TraceIdFilter extends OncePerRequestFilter {
 
-  private final Tracer tracer;
+  private final TracingService tracingService;
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
-    String traceId = getTraceId();
+    String traceId = tracingService.getCurrentTraceId();
     if (traceId != null) {
       response.setHeader("X-Trace-Id", traceId);
     }
     filterChain.doFilter(request, response);
-  }
-
-  private @Nullable String getTraceId() {
-    TraceContext context = this.tracer.currentTraceContext().context();
-    return context != null ? context.traceId() : null;
   }
 }

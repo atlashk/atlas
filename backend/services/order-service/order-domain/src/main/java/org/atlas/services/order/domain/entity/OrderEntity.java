@@ -42,6 +42,10 @@ public class OrderEntity extends DomainEntity {
 
   private String cancellationReason;
 
+  private String traceId;
+
+  private String spanId;
+
   public void calculateOrderAmount() {
     this.amount = BigDecimal.ZERO;
     if (CollectionUtil.isEmpty(orderItems)) {

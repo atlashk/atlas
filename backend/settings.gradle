@@ -108,13 +108,12 @@ project(':libs.observability.logging.logback').projectDir = file('libs/observabi
 include(':libs.observability.metrics.prometheus')
 project(':libs.observability.metrics.prometheus').projectDir = file('libs/observability/metrics/metrics-prometheus')
 
-// Observability::Tracing
+// Observability::Tracing::OpenTelemetry
+include(':libs.observability.tracing.opentelemetry')
+project(':libs.observability.tracing.opentelemetry').projectDir = file('libs/observability/tracing/tracing-opentelemetry')
+// Observability::Tracing::Zipkin
 include(':libs.observability.tracing.zipkin')
 project(':libs.observability.tracing.zipkin').projectDir = file('libs/observability/tracing/tracing-zipkin')
-
-// Observability::OpenTelemetry
-include(':libs.observability.opentelemetry')
-project(':libs.observability.opentelemetry').projectDir = file('libs/observability/observability-opentelemetry')
 
 // Outbox
 include(':libs.outbox')

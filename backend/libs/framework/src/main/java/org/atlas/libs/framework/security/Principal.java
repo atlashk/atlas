@@ -36,6 +36,9 @@ public class Principal {
   }
 
   public List<GrantedAuthority> getAuthorities() {
+    if (userRole == null) {
+      return Collections.emptyList();
+    }
     return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + userRole.name()));
   }
 }

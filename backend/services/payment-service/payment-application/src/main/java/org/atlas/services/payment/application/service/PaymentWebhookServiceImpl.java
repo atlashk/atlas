@@ -1,17 +1,21 @@
 package org.atlas.services.payment.application.service;
 
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.TraceContext;
+import io.micrometer.tracing.Tracer;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.async.AsyncUtil;
 import org.atlas.libs.framework.domain.shared.payment.PaymentStatus;
 import org.atlas.libs.framework.http.HttpStatusCode;
-import org.atlas.libs.framework.util.JsonUtil;
+import org.atlas.libs.framework.observability.tracing.TracingService;
 import org.atlas.libs.framework.saga.checkout.CheckoutCommand;
 import org.atlas.libs.framework.saga.checkout.ProcessPaymentCommandMetadata;
 import org.atlas.libs.framework.saga.core.command.SagaCommandResult;
 import org.atlas.libs.framework.saga.core.messaging.SagaMessagePublisher;
 import org.atlas.libs.framework.saga.core.messaging.payload.SagaCommandReply;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.services.payment.domain.entity.PaymentEntity;
 import org.atlas.services.payment.domain.entity.PaymentEventStatus;
 import org.atlas.services.payment.domain.entity.PaymentGatewayEntity;
@@ -38,6 +42,7 @@ public class PaymentWebhookServiceImpl implements PaymentWebhookService {
   private final PaymentEventService paymentEventService;
   private final PaymentService paymentService;
   private final SagaMessagePublisher sagaMessagePublisher;
+  private final TracingService tracingService;
 
   @Override
   @Transactional
@@ -100,54 +105,57 @@ public class PaymentWebhookServiceImpl implements PaymentWebhookService {
         final String paymentId = handleResult.getPaymentId();
         PaymentEntity payment = paymentService.retrievePayment(paymentId);
 
-        // Update payment
-        UpdatePaymentInput updatePaymentInput = new UpdatePaymentInput();
-        updatePaymentInput.setId(paymentId);
-        switch (handleResult.getStatus()) {
-          case SUCCEEDED -> {
-            updatePaymentInput.setPaymentMethod(handleResult.getPaymentMethod());
-            updatePaymentInput.setPaymentMethodDetails(
-                JsonUtil.toJson(handleResult.getPaymentMethodDetails()));
-            updatePaymentInput.setStatus(PaymentStatus.SUCCEEDED);
-          }
-          case FAILED -> {
-            updatePaymentInput.setStatus(PaymentStatus.FAILED);
-            updatePaymentInput.setError(handleResult.getError());
-          }
-          case CANCELED -> {
-            updatePaymentInput.setStatus(PaymentStatus.CANCELED);
-            updatePaymentInput.setCancellationReason(handleResult.getCancellationReason());
-          }
-          default -> updatePaymentInput.setStatus(PaymentStatus.UNKNOWN);
-        }
-        paymentService.updatePayment(updatePaymentInput);
+        tracingService.joinSpan(payment.getTraceId(), payment.getSpanId(),
+            "saga.checkout.command.payment.webhook", () -> {
+              // Update payment
+              UpdatePaymentInput updatePaymentInput = new UpdatePaymentInput();
+              updatePaymentInput.setId(paymentId);
+              switch (handleResult.getStatus()) {
+                case SUCCEEDED -> {
+                  updatePaymentInput.setPaymentMethod(handleResult.getPaymentMethod());
+                  updatePaymentInput.setPaymentMethodDetails(
+                      JsonUtil.toJson(handleResult.getPaymentMethodDetails()));
+                  updatePaymentInput.setStatus(PaymentStatus.SUCCEEDED);
+                }
+                case FAILED -> {
+                  updatePaymentInput.setStatus(PaymentStatus.FAILED);
+                  updatePaymentInput.setError(handleResult.getError());
+                }
+                case CANCELED -> {
+                  updatePaymentInput.setStatus(PaymentStatus.CANCELED);
+                  updatePaymentInput.setCancellationReason(handleResult.getCancellationReason());
+                }
+                default -> updatePaymentInput.setStatus(PaymentStatus.UNKNOWN);
+              }
+              paymentService.updatePayment(updatePaymentInput);
 
-        // Publish saga command reply message
-        SagaCommandReply.SagaCommandReplyBuilder sagaCommandReplyBuilder = SagaCommandReply.builder()
-            .sagaId(payment.getSagaId())
-            .sagaName("checkout")
-            .sagaCommandName(CheckoutCommand.PROCESS_PAYMENT);
-        SagaCommandResult sagaCommandResult = null;
-        switch (handleResult.getStatus()) {
-          case SUCCEEDED -> sagaCommandResult = SagaCommandResult.success(
-              ProcessPaymentCommandMetadata.builder()
-                  .paymentStatus(PaymentStatus.SUCCEEDED)
-                  .paymentMethod(updatePaymentInput.getPaymentMethod())
-                  .paymentMethodDetails(updatePaymentInput.getPaymentMethodDetails())
-                  .build());
-          case FAILED -> sagaCommandResult = SagaCommandResult.failure(
-              updatePaymentInput.getError(),
-              ProcessPaymentCommandMetadata.builder()
-                  .paymentStatus(PaymentStatus.FAILED)
-                  .build());
-          case CANCELED -> sagaCommandResult = SagaCommandResult.failure(
-              updatePaymentInput.getCancellationReason(),
-              ProcessPaymentCommandMetadata.builder()
-                  .paymentStatus(PaymentStatus.CANCELED)
-                  .build());
-        }
-        sagaCommandReplyBuilder.sagaCommandResult(sagaCommandResult);
-        sagaMessagePublisher.publish(sagaCommandReplyBuilder.build());
+              // Publish saga command reply message
+              SagaCommandReply.SagaCommandReplyBuilder sagaCommandReplyBuilder = SagaCommandReply.builder()
+                  .sagaId(payment.getSagaId())
+                  .sagaName("checkout")
+                  .sagaCommandName(CheckoutCommand.PROCESS_PAYMENT);
+              SagaCommandResult sagaCommandResult = null;
+              switch (handleResult.getStatus()) {
+                case SUCCEEDED -> sagaCommandResult = SagaCommandResult.success(
+                    ProcessPaymentCommandMetadata.builder()
+                        .paymentStatus(PaymentStatus.SUCCEEDED)
+                        .paymentMethod(updatePaymentInput.getPaymentMethod())
+                        .paymentMethodDetails(updatePaymentInput.getPaymentMethodDetails())
+                        .build());
+                case FAILED -> sagaCommandResult = SagaCommandResult.failure(
+                    updatePaymentInput.getError(),
+                    ProcessPaymentCommandMetadata.builder()
+                        .paymentStatus(PaymentStatus.FAILED)
+                        .build());
+                case CANCELED -> sagaCommandResult = SagaCommandResult.failure(
+                    updatePaymentInput.getCancellationReason(),
+                    ProcessPaymentCommandMetadata.builder()
+                        .paymentStatus(PaymentStatus.CANCELED)
+                        .build());
+              }
+              sagaCommandReplyBuilder.sagaCommandResult(sagaCommandResult);
+              sagaMessagePublisher.publish(sagaCommandReplyBuilder.build());
+            });
       });
     }
 

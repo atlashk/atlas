@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS cart_item
     user_id    VARCHAR(64) NOT NULL,
     product_id VARCHAR(64) NOT NULL,
     quantity   INT         NOT NULL,
-    created_at TIMESTAMP    NOT NULL,
+    created_at TIMESTAMP   NOT NULL,
     updated_at TIMESTAMP
 );
 CREATE UNIQUE INDEX idx_user_id_product_id ON cart_item (user_id, product_id);
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS orders
     user_first_name        VARCHAR(255)   NOT NULL,
     user_last_name         VARCHAR(255)   NOT NULL,
     user_email             VARCHAR(255)   NOT NULL,
-    user_phone      VARCHAR(255),
+    user_phone_number      VARCHAR(255),
     address_street         VARCHAR(255)   NOT NULL,
     address_city           VARCHAR(100)   NOT NULL,
     address_country        CHAR(2)        NOT NULL,
@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS orders
     payment_method_details TEXT,
     payment_transaction_id VARCHAR(255),
     cancellation_reason    VARCHAR(255),
+    trace_id               VARCHAR(64),
     created_at             TIMESTAMP      NOT NULL,
     updated_at             TIMESTAMP
 );

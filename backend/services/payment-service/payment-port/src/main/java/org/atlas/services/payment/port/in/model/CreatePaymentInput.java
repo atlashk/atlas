@@ -28,4 +28,8 @@ public class CreatePaymentInput {
   private Integer paymentGatewayId;
 
   private PaymentStatus status;
+
+  private String traceId;
+
+  private String spanId;
 }

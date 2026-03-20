@@ -9,16 +9,18 @@ export const ENV_CONFIG = {
    */
   API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080',
 
+  
+  IDP: process.env.NEXT_PUBLIC_IDP || 'spring',
+
   /**
    * IdP - Spring
    */
-  AUTHORIZATION_API_BASE_URL: process.env.NEXT_PUBLIC_AUTHORIZATION_API_BASE_URL || 'http://localhost:8081',
-  
+  AUTHORIZATION_API_BASE_URL: process.env.NEXT_PUBLIC_AUTHORIZATION_API_BASE_URL || 'http://localhost:8901',
+
   /**
    * IdP - Keycloak
    */
-  IDP: process.env.NEXT_PUBLIC_IDP || 'keycloak',
-  KEYCLOAK_URL: process.env.NEXT_PUBLIC_KEYCLOAK_URL || process.env.NEXT_PUBLIC_AUTHORIZATION_API_BASE_URL || 'http://localhost:8901',
+  KEYCLOAK_URL: process.env.NEXT_PUBLIC_KEYCLOAK_URL || 'http://localhost:8443',
   KEYCLOAK_REALM: process.env.NEXT_PUBLIC_KEYCLOAK_REALM || 'master',
   KEYCLOAK_CLIENT_ID: process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID || 'web-client',
 

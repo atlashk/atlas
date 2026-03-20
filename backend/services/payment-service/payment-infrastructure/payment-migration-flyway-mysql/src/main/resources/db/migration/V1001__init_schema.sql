@@ -24,6 +24,8 @@ CREATE TABLE IF NOT EXISTS payment
     next_action            JSON,
     error                  VARCHAR(500),
     cancellation_reason    VARCHAR(500),
+    trace_id               VARCHAR(64),
+    span_id                VARCHAR(32),
     created_at             DATETIME       NOT NULL,
     updated_at             DATETIME,
     INDEX idx_user_id (user_id),
