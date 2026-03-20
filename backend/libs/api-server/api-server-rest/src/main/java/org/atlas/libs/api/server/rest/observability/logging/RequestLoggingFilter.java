@@ -1,4 +1,4 @@
-package org.atlas.libs.api.server.rest.logging;
+package org.atlas.libs.api.server.rest.observability.logging;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
