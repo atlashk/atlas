@@ -174,9 +174,9 @@ function registerHelpers() {
     // Grafana is shown when any of these services are enabled
     const hasPrometheus = stackValue('observability.metrics') === 'prometheus';
     const hasLoki = stackValue('observability.logging.stack') === 'loki';
-    const hasZipkin = stackValue('observability.tracing') === 'zipkin';
+    const hasTempo = stackValue('observability.tracing') === 'tempo';
 
-    const result = hasPrometheus || hasLoki || hasZipkin;
+    const result = hasPrometheus || hasLoki || hasTempo;
     return result ? options.fn(this) : options.inverse(this);
   });
 }
@@ -282,6 +282,13 @@ function shouldSkipFileByPath(filePath, context) {
   
   const notificationEmail = stackValue('notification.email');
   if (normalizedPath.includes('/files/smtp4dev/') && notificationEmail !== 'spring') return true;
+
+  const observabilityMetrics = stackValue('observability.metrics');
+  const grafanaDashboardPaths = [
+    '/files/grafana/dashboards',
+    '/files/grafana/provisioning/dashboards/'
+  ];
+  if (observabilityMetrics !== 'prometheus' && grafanaDashboardPaths.some(p => normalizedPath.includes(p))) return true;
 
   return false;
 }

@@ -3,7 +3,7 @@
 {{- if or 
       (eq ($observability.metrics | default "") "prometheus")
       (eq (($observability.logging | default dict).stack | default "") "loki")
-      (eq ($observability.tracing | default "") "zipkin")
+      (eq ($observability.tracing | default "") "tempo")
 }}
 true
 {{- end -}}

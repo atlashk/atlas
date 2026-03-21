@@ -191,7 +191,7 @@ appStack:
       stack: loki
       framework: logback
     metrics: prometheus
-    tracing: zipkin
+    tracing: tempo
   persistence: jpa
   redis: standalone
   scheduler: quartz
@@ -436,6 +436,41 @@ smtp4dev:
     ports:
       http: 80
       smtp: 25
+
+tempo:
+  image:
+    repository: grafana/tempo
+    tag: 2.9.1
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  service:
+    ports:
+      http: 3200
+      grpc: 9095
+      otlpGrpc: 4317
+      otlpHttp: 4318
+
+otelCollector:
+  image:
+    repository: otel/opentelemetry-collector-contrib
+    tag: latest
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  service:
+    ports:
+      otlpGrpc: 4317
+      otlpHttp: 4318
+      health: 13133
 
 zipkin:
   image:

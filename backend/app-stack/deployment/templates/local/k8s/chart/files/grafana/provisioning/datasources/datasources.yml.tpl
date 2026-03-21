@@ -26,3 +26,14 @@ datasources:
       httpMethod: POST
     secureJsonData: { }
 {{- end }}
+{{- if eq .Values.appStack.observability.tracing "tempo" }}
+  - name: Tempo
+    type: tempo
+    access: proxy
+    url: http://{{ lower $.Release.Name }}-tempo:3200
+    uid: DS_TEMPO
+    editable: true
+    jsonData:
+      httpMethod: GET
+    secureJsonData: { }
+{{- end }}

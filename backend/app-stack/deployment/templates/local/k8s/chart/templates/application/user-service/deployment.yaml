@@ -90,6 +90,10 @@ spec:
             - name: ZIPKIN_ENDPOINT
               value: "http://{{ lower $.Release.Name }}-zipkin:{{ .Values.zipkin.service.ports.http }}/api/v2/spans"
             {{- end }}
+            {{- if eq .Values.appStack.observability.tracing "tempo" }}
+            - name: OTEL_COLLECTOR_TRACES_ENDPOINT
+              value: "http://{{ lower $.Release.Name }}-otel-collector:{{ .Values.otelCollector.service.ports.otlpHttp }}/v1/traces"
+            {{- end }}
           startupProbe:
             httpGet:
               path: /actuator/health/liveness

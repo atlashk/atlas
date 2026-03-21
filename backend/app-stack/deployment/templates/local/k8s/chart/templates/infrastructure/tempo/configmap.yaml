@@ -1,0 +1,14 @@
+{{- if eq .Values.appStack.observability.tracing "tempo" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ lower $.Release.Name }}-tempo
+  labels:
+    app.kubernetes.io/name: tempo
+    app.kubernetes.io/instance: {{ lower $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+data:
+  config.yaml: |
+{{ tpl (.Files.Get "files/tempo/tempo-config.yaml.tpl") . | indent 4 }}
+{{- end }}

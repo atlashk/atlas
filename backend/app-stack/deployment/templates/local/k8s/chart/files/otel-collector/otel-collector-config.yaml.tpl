@@ -2,12 +2,14 @@ receivers:
   otlp:
     protocols:
       grpc:
+        endpoint: 0.0.0.0:{{ .Values.otelCollector.service.ports.otlpGrpc }}
       http:
+        endpoint: 0.0.0.0:{{ .Values.otelCollector.service.ports.otlpHttp }}
 processors:
   batch:
 exporters:
   otlp:
-    endpoint: tempo:4317
+    endpoint: {{ lower $.Release.Name }}-tempo:{{ .Values.tempo.service.ports.otlpGrpc }}
     tls:
       insecure: true
   debug:
