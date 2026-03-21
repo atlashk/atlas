@@ -14,8 +14,8 @@ import {
   resolveInitialSsoErrorMessage
 } from "../../login.flows";
 
-const OAUTH2_PKCE_VERIFIER_STORAGE_KEY = "oauth2_pkce_verifier_storefront";
-const OAUTH2_STATE_STORAGE_KEY = "oauth2_state_storefront";
+const OAUTH2_PKCE_VERIFIER_STORAGE_KEY = "oauth2_pkce_verifier";
+const OAUTH2_STATE_STORAGE_KEY = "oauth2_state";
 
 const KeycloakCallback: React.FC = () => {
   const searchParams = useSearchParams();
