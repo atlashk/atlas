@@ -15,7 +15,7 @@ observability:
     stack: none
     framework: logback
   metrics: none
-  tracing: tempo
+  tracing: none
 persistence: jpa
 redis: standalone
 scheduler: quartz

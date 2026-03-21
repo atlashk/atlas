@@ -411,27 +411,6 @@ services:
 {{/hasGrafana}}
 
 {{#unless infraOnly}}
-  eureka-server:
-    container_name: eureka-server
-    image: {{dotenv.PROJECT_NAME}}/eureka-server:latest
-    build:
-      context: ../../platform/discovery-server/eureka-server
-      dockerfile: Dockerfile
-    ports:
-      - "8761:8761"
-    environment:
-      - SPRING_PROFILES_ACTIVE=dev
-    volumes:
-      - eureka-server-log:/var/log/eureka-server
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8761/actuator/health/liveness"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 180s
-    networks:
-      - {{dotenv.PROJECT_NAME}}-network
-
   user-service:
     container_name: user-service
     image: {{dotenv.PROJECT_NAME}}/user-service:latest
@@ -757,6 +736,27 @@ services:
     networks:
       - {{dotenv.PROJECT_NAME}}-network
 
+  eureka-server:
+    container_name: eureka-server
+    image: {{dotenv.PROJECT_NAME}}/eureka-server:latest
+    build:
+      context: ../../platform/discovery-server/eureka-server
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+    volumes:
+      - eureka-server-log:/var/log/eureka-server
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8761/actuator/health/liveness"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 180s
+    networks:
+      - {{dotenv.PROJECT_NAME}}-network
+
   {{#hasService "idp" "spring"}}
   authorization-server:
     container_name: authorization-server
@@ -813,7 +813,7 @@ services:
     container_name: api-gateway
     image: {{dotenv.PROJECT_NAME}}/api-gateway:latest
     build:
-      context: ../../services/api-gateway/spring-cloud-gateway/spring-cloud-gateway-server
+      context: ../../services/api-gateway/api-gateway-reactive
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
@@ -888,11 +888,12 @@ volumes:
   grafana-data:
 {{/hasGrafana}}
 {{#unless infraOnly}}
-  eureka-server-log:
-  authorization-server-log:
+  user-service-log:
   catalog-service-log:
   inventory-service-log:
   order-service-log:
   payment-service-log:
+  eureka-server-log:
+  authorization-server-log:
   api-gateway-log:
 {{/unless}}

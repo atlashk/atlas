@@ -20,7 +20,7 @@ readonly SERVICES=(
   "inventory-service:$PROJECT_ROOT/backend/services/inventory-service/inventory-bootstrap"
   "order-service:$PROJECT_ROOT/backend/services/order-service/order-bootstrap"
   "payment-service:$PROJECT_ROOT/backend/services/payment-service/payment-bootstrap"
-  "api-gateway:$PROJECT_ROOT/backend/services/api-gateway/spring-cloud-gateway/spring-cloud-gateway-server"
+  "api-gateway:$PROJECT_ROOT/backend/services/api-gateway/api-gateway-reactive"
   {{#hasService "idp" "spring"}}
   "authorization-server:$PROJECT_ROOT/backend/platform/authorization-server"
   {{/hasService}}

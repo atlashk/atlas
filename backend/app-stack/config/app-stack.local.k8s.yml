@@ -15,7 +15,7 @@ observability:
     stack: loki
     framework: logback
   metrics: prometheus
-  tracing: zipkin
+  tracing: tempo
 persistence: jpa
 redis: standalone
 scheduler: quartz

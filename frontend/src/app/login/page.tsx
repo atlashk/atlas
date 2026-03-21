@@ -12,7 +12,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { AUTHORIZATION_API_BASE_URL, KEYCLOAK_CLIENT_ID, IDP } from "@/config/env.config";
+import { AUTHORIZATION_API_BASE_URL, IDP, OAUTH2_CLIENT_ID } from "@/config/env.config";
 import { withGuestOnly } from "@/hoc/withAuth";
 import { LoginRequest } from "@/interfaces/authorization.interface";
 import { useUserStore } from "@/stores";
@@ -39,7 +39,6 @@ const formSchema = z.object({
     .min(1, { message: "Password is required." }),
 });
 
-const OAUTH2_CLIENT_ID = KEYCLOAK_CLIENT_ID;
 const OAUTH2_PKCE_VERIFIER_STORAGE_KEY = "oauth2_pkce_verifier_storefront";
 const OAUTH2_STATE_STORAGE_KEY = "oauth2_state_storefront";
 

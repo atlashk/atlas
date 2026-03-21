@@ -3,7 +3,7 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { AUTHORIZATION_API_BASE_URL, KEYCLOAK_CLIENT_ID } from "@/config/env.config";
+import { AUTHORIZATION_API_BASE_URL, OAUTH2_CLIENT_ID } from "@/config/env.config";
 import { useUserStore } from "@/stores/user.store";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
@@ -18,9 +18,8 @@ import {
   resolveProviderLabel,
 } from "../login.flows";
 
-const OAUTH2_CLIENT_ID = KEYCLOAK_CLIENT_ID;
-const OAUTH2_PKCE_VERIFIER_STORAGE_KEY = "oauth2_pkce_verifier_storefront";
-const OAUTH2_STATE_STORAGE_KEY = "oauth2_state_storefront";
+const OAUTH2_PKCE_VERIFIER_STORAGE_KEY = "oauth2_pkce_verifier";
+const OAUTH2_STATE_STORAGE_KEY = "oauth2_state";
 
 const LoginCallback: React.FC = () => {
   const searchParams = useSearchParams();

@@ -16,6 +16,7 @@ export const ENV_CONFIG = {
    * IdP - Spring
    */
   AUTHORIZATION_API_BASE_URL: process.env.NEXT_PUBLIC_AUTHORIZATION_API_BASE_URL || 'http://localhost:8901',
+  OAUTH2_CLIENT_ID: process.env.NEXT_PUBLIC_OAUTH2_CLIENT_ID || 'web-client',
 
   /**
    * IdP - Keycloak
@@ -33,8 +34,9 @@ export const ENV_CONFIG = {
 // Export individual constants for convenience
 export const {
   API_BASE_URL,
-  AUTHORIZATION_API_BASE_URL,
   IDP,
+  AUTHORIZATION_API_BASE_URL,
+  OAUTH2_CLIENT_ID,
   KEYCLOAK_URL,
   KEYCLOAK_REALM,
   KEYCLOAK_CLIENT_ID,
