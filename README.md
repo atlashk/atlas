@@ -152,84 +152,131 @@ Default seeded users:
 - Admin: `admin@atlas.org` / `Atlas@123456`
 - User: `demo@atlas.org` / `Atlas@123456`
 
-## Runtime Components (Docker Compose full stack)
+## Architecture
 
-### Application services
+### System Components
+
+**Microservices**
+
+| Component | Responsibility | Default URL |
+| --- | --- | --- |
+| API Gateway | Routing, security, aggregated OpenAPI docs | http://localhost:8080 |
+| User Service | User management | http://localhost:8081 |
+| Catalog Service | Product catalog management | http://localhost:8082 |
+| Inventory Service | Stock management | http://localhost:8083 |
+| Order Service | Order management. Checkout saga orchestrator. | http://localhost:8084 |
+| Payment Service | Payment processing | http://localhost:8085 |
+
+**Platform**
 
 | Component | Responsibility | URL |
 | --- | --- | --- |
-| API Gateway | edge routing and security entrypoint | http://localhost:8080 |
-| User Service | user management and profile domain | http://localhost:8081 |
-| Catalog Service | product catalog and admin product APIs | http://localhost:8082 |
-| Inventory Service | stock management | http://localhost:8083 |
-| Order Service | checkout orchestration (Saga) | http://localhost:8084 |
-| Payment Service | payment flow and webhook handling | http://localhost:8085 |
+| Eureka Server | Service discovery for microservices (not used in Kubernetes) | http://localhost:8761 |
 | Authorization Server | OAuth2/OIDC + token issuing | http://localhost:8901 |
-| Eureka Server | service discovery | http://localhost:8761 |
+| Config Server | Centralized configuration for microservices (not used now) | http://localhost:8888 |
 
-### Infrastructure services
-
-| Component | Exposed ports |
-| --- | --- |
-| MySQL | 3306 |
-| PostgreSQL | 5432 |
-| Redis | 6379 |
-| Kafka | 9092 |
-| RabbitMQ | 5672, 15672 |
-| Elasticsearch | 9200, 9300 |
-| MinIO | 9000, 9001 |
-| smtp4dev | 5000, 25 |
-| Prometheus | 9090 |
-| Loki | 3100 |
-| Promtail | 9080 |
-| Zipkin | 9411 |
-| Grafana | 3000 |
-| Keycloak (optional profile path) | 8443 |
-
-Common default credentials for local infra are `atlas` / `Atlas@123456` unless overridden by environment variables.
-
-## App Stack
-
-An app stack is a named configuration profile in `backend/app-stack/config/` that drives both:
-
-1. **Gradle module composition** (which adapters/libraries are included)
-2. **Deployment rendering** (Docker Compose or Kubernetes manifests)
-
-### Built-in stacks
-
-| Stack | Deployment target | Behavior |
+| Component | Responsibility | Exposed Ports |
 | --- | --- | --- |
-| `local.dev` | Docker Compose | infrastructure-focused profile (default) |
-| `local.compose` | Docker Compose | full local stack |
-| `local.k8s` | Helm chart on Kubernetes | full local Kubernetes profile |
+| MySQL | Database | 3306 (MySQL SQL endpoint) |
+| PostgreSQL | Database | 5432 (PostgreSQL SQL endpoint) |
+| Redis | Key-value store | 6379 (Redis TCP endpoint) |
+| Kafka | Messaging platform | 9092 (client/broker), 9093 (controller) |
+| RabbitMQ | Messaging platform | 5672 (AMQP), 15672 (management UI/API) |
+| Elasticsearch | Search engine | 9200 (REST API), 9300 (transport/internal cluster communication) |
+| MinIO | S3-compatible object storage | 9000 (S3 API), 9001 (admin console) |
+| smtp4dev | Local email testing server | 5000 (web UI), 25 (SMTP) |
+| Keycloak | Identity provider | 8443 (mapped to container 8080 HTTP app port) |
+| Prometheus | Metrics scraping and storage | 9090 (Prometheus UI/API) |
+| Loki | Log aggregation backend | 3100 (Loki HTTP API) |
+| Promtail | Log shipping agent | 9080 (Promtail readiness endpoint, internal) |
+| Zipkin | Distributed tracing backend | 9411 (Zipkin UI/API) |
+| Tempo | Distributed tracing backend | 3200 (Tempo query/API), 4317 (OTLP gRPC ingest) |
+| OpenTelemetry Collector | Collector for telemetry pipeline | 4318 (OTLP HTTP ingest) |
+| Grafana | Observability visualization dashboards | 3000 (Grafana UI/API) |
 
-### Supported capability keys
+Default credentials: `atlas` / `Atlas@123456`
 
-| Capability key | Supported options |
-| --- | --- |
-| `datasource` | `mysql`, `postgres` |
-| `file.csv` | `opencsv` |
-| `file.excel` | `poi`, `easyexcel` |
-| `file.pdf` | `pdfbox` |
-| `idp` | `spring`, `keycloak` |
-| `internal` | `rest`, `grpc` |
-| `kv-store` | `redis` |
-| `messaging` | `kafka`, `rabbitmq` |
-| `migration` | `flyway` |
-| `notification.email` | `spring`, `sendgrid` |
-| `observability.logging.framework` | `logback` |
-| `observability.logging.stack` | `none`, `loki` |
-| `observability.metrics` | `none`, `prometheus` |
-| `observability.tracing` | `none`, `zipkin` |
-| `persistence` | `jpa` |
-| `redis` | `standalone`, `cluster` |
-| `scheduler` | `spring`, `quartz` |
-| `search` | `elasticsearch` |
-| `service-discovery` | `none`, `eureka`, `kubernetes` |
-| `storage` | `minio`, `filesystem` |
-| `template` | `freemarker`, `thymeleaf` |
+**Frontend**
 
-## Checkout Flow (High-level)
+| Component | Responsibility | Exposed Ports |
+| --- | --- | --- |
+| Storefront | Customer-facing web store | 8000 |
+| Admin | Product catalog and order management | 8001 |
+
+### App Stack
+
+Atlas provides an **app-stack** mechanism. Each app stack is a named profile that controls:
+
+1. Which options are selected for **backend capabilities** (datasource, messaging, storage, observability, etc.), via a YAML configuration file under `backend/app-stack/config/` (for example: `app-stack.local.compose.yml`).
+
+List of options for each capability:
+
+| Capability | Options | Description |
+|---|---|---|
+| `datasource` | `mysql` \| `postgres` | Primary database engine |
+| `file.csv` | `opencsv` | CSV processing library |
+| `file.excel` | `poi` \| `easyexcel` | Excel read/write library |
+| `file.pdf` | `pdfbox` | PDF generation/processing library |
+| `idp` | `spring` \| `keycloak` | Identity provider |
+| `internal` | `rest` \| `grpc` | Service-to-service communication protocol |
+| `kv-store` | `redis` | Key-value store service |
+| `messaging` | `kafka` \| `rabbitmq` | Messaging service |
+| `migration` | `flyway` | Database schema migration tool |
+| `notification.email` | `spring` \| `sendgrid` | Outbound email delivery provider |
+| `observability.logging.framework` | `logback` | Application logging framework |
+| `observability.logging.stack` | `none` \| `loki` | Centralized log aggregation stack |
+| `observability.metrics` | `none` \| `prometheus` | Metrics scraping tool |
+| `observability.tracing` | `none` \| `zipkin` \| `tempo` | Distributed tracing tool |
+| `persistence` | `jpa` | Persistence access style for data layer |
+| `redis` | `standalone` \| `cluster` | Redis deployment topology |
+| `scheduler` | `spring` \| `quartz` | Scheduled job execution engine |
+| `service-discovery` | `eureka` \| `kubernetes` | Service registration and discovery |
+| `search` | `elasticsearch` | Full-text search service |
+| `storage` | `minio` \| `filesystem` | Object/file storage service |
+| `template` | `freemarker` \| `thymeleaf` | Server-side template engine |
+
+2. Which **deployment type** is targeted (Docker Compose, Kubernetes, etc.). This is driven by [Handlebars](https://handlebarsjs.com/) **templates** under `backend/app-stack/deployment/templates/` (for example: `backend/app-stack/deployment/templates/local/compose/`).
+
+The followings are built-in app stacks:
+
+| App stack | Deployment Type | How to run |
+| --- | --- | --- |
+| `local.compose` | Docker Compose (default) | `./install.sh` |
+| `local.dev` | Docker Compose (without microservices, useful for development in IDE) | `./install.sh --app-stack=local.dev` |
+| `local.k8s` | Kubernetes using Helm chart | `./install.sh --app-stack=local.k8s` |
+
+So, how does it work?
+
+```mermaid
+flowchart TB
+  CFG["app-stack config YAML<br/>backend/app-stack/config/app-stack.*.yml"]
+
+  subgraph Installation["Installation"]
+    INST_TPL["Find Handlebars templates"]
+    INST_GEN["Generate manifests into backend/dist folder"]
+    INST_BUILD["Build artifacts and Docker images"]
+    INST_DEPLOY["Deploy (Docker compose, Kubernetes, etc.)"]
+
+    INST_TPL --> INST_GEN
+    INST_GEN --> INST_BUILD
+    INST_BUILD --> INST_DEPLOY
+  end
+
+  subgraph Build["Gradle build"]
+    GRADLE["Load config into ext.appStack variable"]
+    SELECT["Select Gradle module based on ext.appStack value"]
+    ARTIFACTS["Build artifacts"]
+
+    GRADLE --> SELECT
+    SELECT --> ARTIFACTS
+  end
+
+  CFG --> GRADLE
+  CFG --> INST_TPL
+  INST_BUILD --> GRADLE
+```
+
+### Checkout Flow (High-level)
 
 ```mermaid
 sequenceDiagram
@@ -256,10 +303,11 @@ sequenceDiagram
 
 ## Contributing
 
-- Issues and pull requests are welcome
-- Keep modules aligned with DDD and clean architectural boundaries
-- Prefer adding adapters over introducing domain-level coupling
+- Issues and PRs are welcome
+- Keep modules aligned with DDD/Clean Architecture
+- Prefer adding adapters over changing domain logic
 
 ## License
 
-- No `LICENSE` file is currently included in this repository
+- No LICENSE file is included in this repository
+- Add a `LICENSE` file if you plan to distribute the code
