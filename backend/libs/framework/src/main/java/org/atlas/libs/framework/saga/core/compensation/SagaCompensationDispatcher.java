@@ -93,30 +93,34 @@ public class SagaCompensationDispatcher {
     CachedHandlerMethod cachedHandlerMethod = cachedHandlerMethods.get(
         sagaCompensation.getSagaCommandName());
     if (cachedHandlerMethod == null) {
-      log.warn("No compensation handler found for saga command {}",
-          sagaCompensation.getSagaCommandName());
+      log.warn("[sagaId={}] No compensation handler found for saga command {}",
+          sagaCompensation.getSagaId(), sagaCompensation.getSagaCommandName());
       return;
     }
 
     SagaCompensationResult sagaCompensationResult;
     try {
-      log.debug("Dispatching saga compensation {} to handler {}",
+      log.debug("[sagaId={}] Dispatching saga compensation {} to handler {}",
+          sagaCompensation.getSagaId(),
           sagaCompensation.getSagaCommandName(),
           cachedHandlerMethod.methodSignature);
       sagaCompensationResult = (SagaCompensationResult) cachedHandlerMethod.invoke(
           sagaCompensation);
       if (sagaCompensationResult.isSuccess()) {
-        log.info("Successfully executed saga compensation handler {}",
+        log.info("[sagaId={}] Successfully executed saga compensation handler {}",
+            sagaCompensation.getSagaId(),
             cachedHandlerMethod.methodSignature);
       } else {
-        log.error("Failed to execute saga compensation handler {}: {}",
-            cachedHandlerMethod.methodSignature, sagaCompensationResult.getError());
+        log.error("[sagaId={}] Failed to execute saga compensation handler {}: {}",
+            sagaCompensation.getSagaId(), cachedHandlerMethod.methodSignature,
+            sagaCompensationResult.getError());
       }
     } catch (Exception e) {
       Throwable cause = ExceptionUtil.getRootCause(e);
       sagaCompensationResult = SagaCompensationResult.failure(cause);
-      log.error("Failed to execute saga compensation handler {}: {}",
-          cachedHandlerMethod.methodSignature, sagaCompensationResult.getError(), cause);
+      log.error("[sagaId={}] Failed to execute saga compensation handler {}: {}",
+          sagaCompensation.getSagaId(), cachedHandlerMethod.methodSignature,
+          sagaCompensationResult.getError(), cause);
     }
 
     // Publish compensation reply

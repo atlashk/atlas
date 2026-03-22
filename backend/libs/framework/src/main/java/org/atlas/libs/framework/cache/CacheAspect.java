@@ -1,6 +1,7 @@
 package org.atlas.libs.framework.cache;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.atlas.libs.framework.spel.SpelParser;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
@@ -48,22 +50,22 @@ public class CacheAspect {
         : spelParser.parse(cache.key(), method, joinPoint.getArgs());
 
     // Cache-aside pattern
-    Class<?> returnType = signature.getReturnType();
-    Optional<?> cachedValueOpt = cacheService.get(cache.name(), cacheKey, returnType);
+    Type genericReturnType = method.getGenericReturnType();
+    Optional<Object> cachedValueOpt = cacheService.get(cache.name(), cacheKey, Object.class);
     if (cachedValueOpt.isPresent()) {
-      return cachedValueOpt.get();
-    }
-
-    Object result = joinPoint.proceed();
-
-    if (result != null) {
-      if (cache.ttl() == 0L) {
-        cacheService.put(cache.name(), cacheKey, result);
-      } else {
-        cacheService.put(cache.name(), cacheKey, result, cache.ttl());
+      Object cachedValue = cachedValueOpt.get();
+      // Rehydrate cached JSON-compatible data into the exact generic return type of the intercepted method.
+      return JsonUtil.toObject(cachedValue, genericReturnType);
+    } else {
+      Object result = joinPoint.proceed();
+      if (result != null) {
+        if (cache.ttl() == 0L) {
+          cacheService.put(cache.name(), cacheKey, result);
+        } else {
+          cacheService.put(cache.name(), cacheKey, result, cache.ttl());
+        }
       }
+      return result;
     }
-
-    return result;
   }
 }

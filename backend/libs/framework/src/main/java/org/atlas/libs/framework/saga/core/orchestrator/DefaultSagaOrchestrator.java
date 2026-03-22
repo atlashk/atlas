@@ -136,6 +136,22 @@ public class DefaultSagaOrchestrator implements SagaOrchestrator {
   }
 
   @Override
+  @Transactional
+  public void rollbackSaga(Integer sagaId) {
+    SagaEntity saga = findSaga(sagaId);
+
+    log.info("Started manual rollback: sagaId={}, sagaName={}, currentStatus={}",
+        sagaId, saga.getName(), saga.getStatus());
+
+    saga.setStatus(SagaStatus.FAILED);
+    sagaRepository.update(saga);
+    compensateSaga(saga);
+
+    log.info("Manual rollback published compensation events: sagaId={}, sagaName={}",
+        sagaId, saga.getName());
+  }
+
+  @Override
   public void endSaga(Integer sagaId) {
     SagaEntity saga = findSaga(sagaId);
 

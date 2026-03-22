@@ -108,28 +108,32 @@ public class SagaCommandDispatcher {
     CachedHandlerMethod cachedHandlerMethod = cachedHandlerMethods.get(
         sagaCommand.getSagaCommandName());
     if (cachedHandlerMethod == null) {
-      log.warn("No cached handler found for saga command {}", sagaCommand.getSagaCommandName());
+      log.warn("[sagaId={}] No cached handler found for saga command {}",
+          sagaCommand.getSagaId(), sagaCommand.getSagaCommandName());
       return;
     }
 
     SagaCommandResult sagaCommandResult;
     try {
-      log.debug("Dispatching saga command {} to handler {}", sagaCommand.getSagaCommandName(),
+      log.debug("[sagaId={}] Dispatching saga command {} to handler {}",
+          sagaCommand.getSagaId(), sagaCommand.getSagaCommandName(),
           cachedHandlerMethod.methodSignature);
       sagaCommandResult = (SagaCommandResult) cachedHandlerMethod.invoke(sagaCommand);
       if (sagaCommandResult.isSuccess()) {
-        log.info("Successfully executed saga command handler {}",
-            cachedHandlerMethod.methodSignature);
+        log.info("[sagaId={}] Successfully executed saga command handler {}",
+            sagaCommand.getSagaId(), cachedHandlerMethod.methodSignature);
       } else {
-        log.error("Failed to execute saga command handler {}: {}",
-            cachedHandlerMethod.methodSignature, sagaCommandResult.getError());
+        log.error("[sagaId={}] Failed to execute saga command handler {}: {}",
+            sagaCommand.getSagaId(), cachedHandlerMethod.methodSignature,
+            sagaCommandResult.getError());
       }
     } catch (Exception e) {
       Throwable cause = ExceptionUtil.getRootCause(e);
       sagaCommandResult = SagaCommandResult.failure(
           ExceptionUtil.sanitizeErrorMessage(cause.getMessage()));
-      log.error("Failed to execute saga command handler {}: {}",
-          cachedHandlerMethod.methodSignature, sagaCommandResult.getError(), cause);
+      log.error("[sagaId={}] Failed to execute saga command handler {}: {}",
+          sagaCommand.getSagaId(), cachedHandlerMethod.methodSignature,
+          sagaCommandResult.getError(), cause);
     }
 
     // Publish command reply

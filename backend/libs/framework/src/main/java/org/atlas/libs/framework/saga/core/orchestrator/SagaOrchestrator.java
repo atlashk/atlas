@@ -20,5 +20,7 @@ public interface SagaOrchestrator {
 
   void handleSagaCompensationReply(SagaCompensationReply reply);
 
+  void rollbackSaga(Integer sagaId);
+
   void endSaga(Integer sagaId);
 }

@@ -1,14 +1,17 @@
 package org.atlas.libs.framework.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JavaType;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.type.CollectionType;
 import tools.jackson.databind.type.MapType;
 
 @UtilityClass
@@ -39,9 +42,14 @@ public class JsonUtil {
     return JSON_MAPPER.readValue(json, type);
   }
 
+  public static <T> T toObject(Object obj, Type geneticType) {
+    JavaType valueType = JSON_MAPPER.getTypeFactory().constructType(geneticType);
+    return JSON_MAPPER.convertValue(obj, valueType);
+  }
+
   public static <T> List<T> toList(String json, Class<T> type) {
-    return JSON_MAPPER.readValue(json,
-        JSON_MAPPER.getTypeFactory().constructCollectionType(List.class, type));
+    CollectionType valueType = JSON_MAPPER.getTypeFactory().constructCollectionType(List.class, type);
+    return JSON_MAPPER.readValue(json, valueType);
   }
 
   public static Map<String, Object> toMap(String json) {

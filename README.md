@@ -70,7 +70,6 @@ Shared backend capabilities are implemented as reusable Gradle modules under `ba
 │   ├── install.sh
 │   └── uninstall.sh
 ├── frontend/
-│   └── all/                           # unified frontend app (port 8000)
 └── README.md
 ```
 
@@ -130,12 +129,7 @@ cd backend
 
 ### Frontend
 
-Frontend app reads:
-
-- `NEXT_PUBLIC_API_BASE_URL` (default `http://localhost:8080`)
-- `NEXT_PUBLIC_AUTHORIZATION_API_BASE_URL` (default `http://localhost:8901`)
-
-Unified frontend:
+Run:
 
 ```bash
 cd frontend/all
@@ -175,6 +169,8 @@ Default seeded users:
 | Authorization Server | OAuth2/OIDC + token issuing | http://localhost:8901 |
 | Config Server | Centralized configuration for microservices (not used now) | http://localhost:8888 |
 
+**Infrastructure**
+
 | Component | Responsibility | Exposed Ports |
 | --- | --- | --- |
 | MySQL | Database | 3306 (MySQL SQL endpoint) |
@@ -200,8 +196,7 @@ Default credentials: `atlas` / `Atlas@123456`
 
 | Component | Responsibility | Exposed Ports |
 | --- | --- | --- |
-| Storefront | Customer-facing web store | 8000 |
-| Admin | Product catalog and order management | 8001 |
+| Web application | Web application | 8000 |
 
 ### App Stack
 
@@ -235,14 +230,14 @@ List of options for each capability:
 | `storage` | `minio` \| `filesystem` | Object/file storage service |
 | `template` | `freemarker` \| `thymeleaf` | Server-side template engine |
 
-2. Which **deployment type** is targeted (Docker Compose, Kubernetes, etc.). This is driven by [Handlebars](https://handlebarsjs.com/) **templates** under `backend/app-stack/deployment/templates/` (for example: `backend/app-stack/deployment/templates/local/compose/`).
+2. Which **deployment type** is targeted (Docker Compose, Kubernetes, etc.). This is driven by **templates** under `backend/app-stack/deployment/templates/` (for example: `backend/app-stack/deployment/templates/local/compose/`).
 
 The followings are built-in app stacks:
 
 | App stack | Deployment Type | How to run |
 | --- | --- | --- |
-| `local.compose` | Docker Compose (default) | `./install.sh` |
-| `local.dev` | Docker Compose (without microservices, useful for development in IDE) | `./install.sh --app-stack=local.dev` |
+| `local.compose` | Docker Compose. Templates are written by [Handlebars](https://handlebarsjs.com/) | `./install.sh` |
+| `local.dev` | Docker Compose (without microservices, useful for development in IDE). This is the default deployment type. | `./install.sh --app-stack=local.dev` |
 | `local.k8s` | Kubernetes using Helm chart | `./install.sh --app-stack=local.k8s` |
 
 So, how does it work?

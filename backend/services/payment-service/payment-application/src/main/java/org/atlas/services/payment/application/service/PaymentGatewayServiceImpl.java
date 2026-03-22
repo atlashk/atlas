@@ -3,6 +3,7 @@ package org.atlas.services.payment.application.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.atlas.libs.framework.cache.Cache;
 import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.payment.domain.entity.PaymentGatewayEntity;
@@ -26,6 +27,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
 
   @Override
   @Transactional(readOnly = true)
+  @Cache(name = "paymentGateways")
   public List<PaymentGatewayEntity> retrievePaymentGatewayList() {
     return paymentGatewayRepository.findAll();
   }

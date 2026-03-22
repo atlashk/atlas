@@ -104,9 +104,4 @@ public class JpaStockRepositoryAdapter implements StockRepository {
   public void releaseStock(String productId, Integer quantity) {
     jpaStockRepository.releaseStock(productId, quantity);
   }
-
-  @Override
-  public void deleteByProductId(String productId) {
-    jpaStockRepository.deleteByProductId(productId);
-  }
 }

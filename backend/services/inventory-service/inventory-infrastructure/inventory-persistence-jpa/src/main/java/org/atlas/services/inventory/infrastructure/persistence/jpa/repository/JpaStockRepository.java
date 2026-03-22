@@ -46,8 +46,5 @@ public interface JpaStockRepository extends JpaBaseRepository<JpaStockEntity, St
           s.reservedQuantity = s.reservedQuantity - :quantity
       where s.productId = :productId
       """)
-  int releaseStock(@Param("id") String id, @Param("quantity") Integer quantity);
-
-  @Modifying
-  void deleteByProductId(@Param("productId") String productId);
+  int releaseStock(@Param("productId") String productId, @Param("quantity") Integer quantity);
 }

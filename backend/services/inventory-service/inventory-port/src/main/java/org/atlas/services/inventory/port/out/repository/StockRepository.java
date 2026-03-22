@@ -22,6 +22,4 @@ public interface StockRepository {
       throws InsufficientStockException;
 
   void releaseStock(String productId, Integer increment);
-
-  void deleteByProductId(String productId);
 }
