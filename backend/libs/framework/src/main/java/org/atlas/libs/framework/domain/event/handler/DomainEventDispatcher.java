@@ -27,7 +27,11 @@ public class DomainEventDispatcher {
 
     Optional<Object> domainEventHandlerOpt = handlers.values().stream()
         .filter(handler -> {
-          DomainEventHandler annotation = handler.getClass()
+          // Get the target class to handle CGLIB proxies
+          Class<?> targetClass = AopUtils.isAopProxy(handler)
+              ? AopUtils.getTargetClass(handler)
+              : handler.getClass();
+          DomainEventHandler annotation = targetClass
               .getAnnotation(DomainEventHandler.class);
           return annotation != null && eventType.equals(annotation.type());
         })
@@ -37,14 +41,14 @@ public class DomainEventDispatcher {
       // Skip handling
       return;
     }
-    Object domainEventHandler = domainEventHandlerOpt.get();
+    Object handler = domainEventHandlerOpt.get();
 
     // Get the target class to handle CGLIB proxies
-    Class<?> targetClass = AopUtils.isAopProxy(domainEventHandler)
-        ? AopUtils.getTargetClass(domainEventHandler)
-        : domainEventHandler.getClass();
+    Class<?> targetClass = AopUtils.isAopProxy(handler)
+        ? AopUtils.getTargetClass(handler)
+        : handler.getClass();
 
-    ReflectionUtil.invokeMethod(domainEventHandler, targetClass, "handle",
+    ReflectionUtil.invokeMethod(handler, targetClass, "handle",
         Map.of(domainEvent.getClass(), domainEvent));
   }
 }

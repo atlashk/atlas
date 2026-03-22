@@ -3,7 +3,9 @@ package org.atlas.services.catalog.infrastructure.messaging.kafka.consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.atlas.libs.framework.domain.event.contract.inventory.StockStatusChangedEvent;
 import org.atlas.libs.framework.domain.event.handler.DomainEventDispatcher;
+import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.libs.messaging.kafka.common.KafkaTopics;
 import org.atlas.libs.messaging.kafka.consumer.BaseKafkaMessageConsumer;
 import org.springframework.kafka.annotation.BackOff;
@@ -37,6 +39,7 @@ public class KafkaStockEventConsumer extends BaseKafkaMessageConsumer {
 
   @Override
   protected void handleMessage(Object payload) {
-    dispatcher.dispatch(payload);
+      StockStatusChangedEvent event = JsonUtil.toObject((String) payload, StockStatusChangedEvent.class);
+      dispatcher.dispatch(event);
   }
 }
