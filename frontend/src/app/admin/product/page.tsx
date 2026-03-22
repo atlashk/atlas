@@ -148,20 +148,22 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
   });
 
   // Applied filter - used for API calls (only updated when Search is clicked)
-  const [appliedFilter, setAppliedFilter] = useState<RetrieveProductListFilter>({
-    id: undefined,
-    keyword: undefined,
-    type: undefined,
-    minPrice: undefined,
-    maxPrice: undefined,
-    startPublishedDate: undefined,
-    endPublishedDate: undefined,
-    inStock: undefined,
-    brandId: undefined,
-    categoryIds: undefined,
-    page: 1,
-    size: 20,
-  });
+  const [appliedFilter, setAppliedFilter] = useState<RetrieveProductListFilter>(
+    {
+      id: undefined,
+      keyword: undefined,
+      type: undefined,
+      minPrice: undefined,
+      maxPrice: undefined,
+      startPublishedDate: undefined,
+      endPublishedDate: undefined,
+      inStock: undefined,
+      brandId: undefined,
+      categoryIds: undefined,
+      page: 1,
+      size: 20,
+    },
+  );
 
   // Reload products function for external use
   const reloadProducts = useCallback(() => {
@@ -216,7 +218,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
         goToPage(newPage);
       }
     },
-    [pagination, goToPage]
+    [pagination, goToPage],
   );
 
   const resetFilter = useCallback(() => {
@@ -240,7 +242,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
         const brandsResponse = await catalogApi.retrieveAllBrand();
         if (!brandsResponse.success) {
           throw new Error(
-            brandsResponse.errorMessage || "Failed to load brands"
+            brandsResponse.errorMessage || "Failed to load brands",
           );
         }
         setBrands(brandsResponse.data || []);
@@ -259,7 +261,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
         const categoriesResponse = await catalogApi.retrieveAllCategory();
         if (!categoriesResponse.success) {
           throw new Error(
-            categoriesResponse.errorMessage || "Failed to load categories"
+            categoriesResponse.errorMessage || "Failed to load categories",
           );
         }
         setCategories(categoriesResponse.data || []);
@@ -298,10 +300,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
         const apiFilter: RetrieveProductListFilter = { ...appliedFilter };
         Object.keys(apiFilter).forEach((key) => {
           const typedKey = key as keyof RetrieveProductListFilter;
-          if (
-            apiFilter[typedKey] === "" ||
-            apiFilter[typedKey] === undefined
-          ) {
+          if (apiFilter[typedKey] === "" || apiFilter[typedKey] === undefined) {
             delete apiFilter[typedKey];
           }
         });
@@ -333,21 +332,21 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
   const updateFormFilter = useCallback(
     <K extends keyof RetrieveProductListFilter>(
       key: K,
-      value: RetrieveProductListFilter[K]
+      value: RetrieveProductListFilter[K],
     ) => {
       setFormFilter((prev) => ({ ...prev, [key]: value }));
     },
-    []
+    [],
   );
 
   const handleFilterChange = useCallback(
     (
       field: keyof RetrieveProductListFilter,
-      value: string | number | boolean | undefined | Array<string | number>
+      value: string | number | boolean | undefined | Array<string | number>,
     ) => {
       updateFormFilter(field, value);
     },
-    [updateFormFilter]
+    [updateFormFilter],
   );
 
   const handleSearch = useCallback(() => {
@@ -367,7 +366,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
         toast.error("Failed to delete product");
       }
     },
-    [reloadProducts]
+    [reloadProducts],
   );
 
   const closeStockDialog = useCallback(() => {
@@ -375,13 +374,10 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
     setStockProductId(null);
   }, []);
 
-  const openStockDialog = useCallback(
-    (productId: string) => {
-      setIsStockDialogOpen(true);
-      setStockProductId(productId);
-    },
-    []
-  );
+  const openStockDialog = useCallback((productId: string) => {
+    setIsStockDialogOpen(true);
+    setStockProductId(productId);
+  }, []);
 
   const handleExport = useCallback(
     async (fileType: "csv" | "excel" | "pdf") => {
@@ -404,7 +400,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
         };
         await catalogApi.exportProduct(exportFilter);
         toast.success(
-          `Products exported successfully as ${fileType.toUpperCase()}`
+          `Products exported successfully as ${fileType.toUpperCase()}`,
         );
       } catch {
         toast.error("Failed to export products");
@@ -412,7 +408,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
         setIsExporting(false);
       }
     },
-    [isExporting, appliedFilter]
+    [isExporting, appliedFilter],
   );
 
   const handleImportClick = useCallback(() => {
@@ -534,7 +530,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                 onChange={(e) =>
                   handleFilterChange(
                     "minPrice",
-                    e.target.value ? Number(e.target.value) : undefined
+                    e.target.value ? Number(e.target.value) : undefined,
                   )
                 }
               />
@@ -551,7 +547,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                 onChange={(e) =>
                   handleFilterChange(
                     "maxPrice",
-                    e.target.value ? Number(e.target.value) : undefined
+                    e.target.value ? Number(e.target.value) : undefined,
                   )
                 }
               />
@@ -567,7 +563,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                 onChange={(e) =>
                   handleFilterChange(
                     "startPublishedDate",
-                    e.target.value || undefined
+                    e.target.value || undefined,
                   )
                 }
               />
@@ -583,7 +579,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                 onChange={(e) =>
                   handleFilterChange(
                     "endPublishedDate",
-                    e.target.value || undefined
+                    e.target.value || undefined,
                   )
                 }
               />
@@ -679,7 +675,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                         disabled={!categories.length}
                       >
                         {formFilter.categoryIds &&
-                          formFilter.categoryIds.length > 0
+                        formFilter.categoryIds.length > 0
                           ? `${formFilter.categoryIds.length} categories selected`
                           : "All Categories"}
                       </Button>
@@ -687,7 +683,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                     <DropdownMenuContent className="w-64">
                       {categories
                         ?.filter(
-                          (category): category is Category => category != null
+                          (category): category is Category => category != null,
                         )
                         .map((category) => {
                           const isChecked =
@@ -709,8 +705,8 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                                   handleFilterChange(
                                     "categoryIds",
                                     currentCategories.filter(
-                                      (id) => id !== category.id
-                                    )
+                                      (id) => id !== category.id,
+                                    ),
                                   );
                                 }
                               }}
@@ -790,7 +786,9 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                       <TableRow key={product.id}>
                         <TableCell>{product.id}</TableCell>
                         <TableCell>{product.name}</TableCell>
-                        <TableCell>{productTypes[product.type] || "Unknown"}</TableCell>
+                        <TableCell>
+                          {productTypes[product.type] || "Unknown"}
+                        </TableCell>
                         <TableCell>
                           <Image
                             src={getProductImageUrl(product.image)}
@@ -802,7 +800,9 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                           />
                         </TableCell>
                         <TableCell>{formatCurrency(product.price)}</TableCell>
-                        <TableCell>{product.inStock ? "In Stock" : "Out of Stock"}</TableCell>
+                        <TableCell>
+                          {product.inStock ? "In Stock" : "Out of Stock"}
+                        </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Button
@@ -892,8 +892,8 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                       1,
                       Math.min(
                         pagination.totalPages - 4,
-                        pagination.currentPage - 2
-                      )
+                        pagination.currentPage - 2,
+                      ),
                     ) + i;
 
                   if (pageNumber <= pagination.totalPages) {
@@ -913,7 +913,7 @@ const ProductList: React.FC<ProductListProps> = ({ className = "" }) => {
                     );
                   }
                   return null;
-                }
+                },
               )}
 
               <PaginationItem>

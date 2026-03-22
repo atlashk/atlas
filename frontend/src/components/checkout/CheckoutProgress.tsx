@@ -4,7 +4,10 @@ import { NextActionHandler } from "@/components/payment/NextActionHandler";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { OrderStatusResponse } from "@/interfaces/order.interface";
-import { PaymentGatewayResponse, PaymentNextAction } from "@/interfaces/payment.interface";
+import {
+  PaymentGatewayResponse,
+  PaymentNextAction,
+} from "@/interfaces/payment.interface";
 import { useCartStore } from "@/stores/cart.store";
 import { CheckCircle, CreditCard, Loader2, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -49,11 +52,11 @@ export const CheckoutProgress = React.memo(function CheckoutProgress({
   startPolling,
   stopPolling,
 }: CheckoutProgressProps) {
-
   const router = useRouter();
   const { clearCartState } = useCartStore();
-  const isSimulatorGateway = selectedPaymentGateway?.code?.toUpperCase() === "SIMULATOR";
-  
+  const isSimulatorGateway =
+    selectedPaymentGateway?.code?.toUpperCase() === "SIMULATOR";
+
   // Ref to prevent multiple payment completion calls
   const paymentCompletedRef = useRef(false);
 
@@ -62,7 +65,7 @@ export const CheckoutProgress = React.memo(function CheckoutProgress({
     if (orderStatus?.status === "FULFILLED") {
       // Stop polling immediately
       stopPolling();
-      
+
       // Clear cart state immediately (no API call needed)
       clearCartState();
     } else if (orderStatus?.status === "CANCELED") {
@@ -88,7 +91,10 @@ export const CheckoutProgress = React.memo(function CheckoutProgress({
   const handlePaymentComplete = () => {
     onPaymentComplete();
     // Only restart polling if order is not in final state
-    if (orderStatus?.status !== "FULFILLED" && orderStatus?.status !== "CANCELED") {
+    if (
+      orderStatus?.status !== "FULFILLED" &&
+      orderStatus?.status !== "CANCELED"
+    ) {
       startPolling();
     }
   };
@@ -97,7 +103,10 @@ export const CheckoutProgress = React.memo(function CheckoutProgress({
     toast.error(`Payment failed: ${errorMessage}`);
     onPaymentError(errorMessage);
     // Only restart polling if order is not in final state
-    if (orderStatus?.status !== "FULFILLED" && orderStatus?.status !== "CANCELED") {
+    if (
+      orderStatus?.status !== "FULFILLED" &&
+      orderStatus?.status !== "CANCELED"
+    ) {
       startPolling();
     }
   };
@@ -114,7 +123,9 @@ export const CheckoutProgress = React.memo(function CheckoutProgress({
     <div className="text-center space-y-4">
       <Loader2 className="w-10 h-10 text-blue-500 mx-auto animate-spin" />
       <h2 className="text-lg font-semibold">Processing your order...</h2>
-      <p className="text-gray-600">Please wait while we process your payment.</p>
+      <p className="text-gray-600">
+        Please wait while we process your payment.
+      </p>
       <p className="text-sm text-gray-500">Order ID: {orderId}</p>
     </div>
   );
@@ -140,7 +151,8 @@ export const CheckoutProgress = React.memo(function CheckoutProgress({
           ) : (
             <>
               {/* Prioritize final order states over payment actions */}
-              {orderStatus?.status === "FULFILLED" || orderStatus?.status === "CANCELED" ? (
+              {orderStatus?.status === "FULFILLED" ||
+              orderStatus?.status === "CANCELED" ? (
                 // Order Status Logic (merged from OrderStatus component)
                 <>
                   {isLoading || !orderStatus ? (

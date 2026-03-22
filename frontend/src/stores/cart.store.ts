@@ -17,12 +17,12 @@ interface CartActions {
   removeFromCart: (productId: string) => Promise<boolean>;
   updateQuantity: (productId: string, quantity: number) => Promise<boolean>;
   clearCart: () => Promise<boolean>;
-  
+
   // Computed values
   getCartItemCount: () => number;
   getCartTotal: () => number;
   getItemTotal: (productId: string) => number;
-  
+
   // Internal state management
   setCart: (cart: CartResponse | null) => void;
   setLoading: (loading: boolean) => void;
@@ -68,19 +68,24 @@ export const useCartStore = create<CartStore>()((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       const response = await orderApi.retrieveCart();
-      
+
       if (response.success && response.data) {
-        set({ cart: response.data, error: null, isIntentionallyCleared: false });
+        set({
+          cart: response.data,
+          error: null,
+          isIntentionallyCleared: false,
+        });
       } else {
         // Set error but don't clear cart if we had one before
         const errorMessage = response.errorMessage || "Failed to load cart";
         set({ error: errorMessage });
-        console.warn('Failed to load cart:', errorMessage);
+        console.warn("Failed to load cart:", errorMessage);
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       set({ error: errorMessage });
-      console.error('Cart API error:', errorMessage);
+      console.error("Cart API error:", errorMessage);
     } finally {
       set({ isLoading: false });
     }
@@ -95,7 +100,7 @@ export const useCartStore = create<CartStore>()((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       const response = await orderApi.addCartItem({ productId, quantity });
-      
+
       if (response.success && response.data) {
         set({ cart: response.data, isIntentionallyCleared: false });
         return true;
@@ -104,7 +109,8 @@ export const useCartStore = create<CartStore>()((set, get) => ({
         return false;
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       set({ error: errorMessage });
       return false;
     } finally {
@@ -121,16 +127,19 @@ export const useCartStore = create<CartStore>()((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       const response = await orderApi.removeCartItem(productId);
-      
+
       if (response.success && response.data) {
         set({ cart: response.data, isIntentionallyCleared: false });
         return true;
       } else {
-        set({ error: response.errorMessage || "Failed to remove item from cart" });
+        set({
+          error: response.errorMessage || "Failed to remove item from cart",
+        });
         return false;
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       set({ error: errorMessage });
       return false;
     } finally {
@@ -152,17 +161,22 @@ export const useCartStore = create<CartStore>()((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       // Send final quantity to API
-      const response = await orderApi.updateCartItem(productId, { quantity: newQuantity });
-      
+      const response = await orderApi.updateCartItem(productId, {
+        quantity: newQuantity,
+      });
+
       if (response.success && response.data) {
         set({ cart: response.data, isIntentionallyCleared: false });
         return true;
       } else {
-        set({ error: response.errorMessage || "Failed to update item quantity" });
+        set({
+          error: response.errorMessage || "Failed to update item quantity",
+        });
         return false;
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       set({ error: errorMessage });
       return false;
     } finally {
@@ -179,7 +193,7 @@ export const useCartStore = create<CartStore>()((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       const response = await orderApi.clearCart();
-      
+
       if (response.success && response.data) {
         set({ cart: response.data, isIntentionallyCleared: false });
         return true;
@@ -188,7 +202,8 @@ export const useCartStore = create<CartStore>()((set, get) => ({
         return false;
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       set({ error: errorMessage });
       return false;
     } finally {
@@ -213,7 +228,9 @@ export const useCartStore = create<CartStore>()((set, get) => ({
   getItemTotal: (productId: string) => {
     const { cart } = get();
     if (!cart) return 0;
-    const item = cart.cartItems.find((cartItem) => cartItem.product.id === productId);
+    const item = cart.cartItems.find(
+      (cartItem) => cartItem.product.id === productId,
+    );
     return item ? item.product.price * item.quantity : 0;
   },
 
@@ -236,7 +253,12 @@ export const useCartStore = create<CartStore>()((set, get) => ({
 
   // Clear cart state locally (for logout)
   clearCartState: () => {
-    set({ cart: null, error: null, isLoading: false, isIntentionallyCleared: true });
+    set({
+      cart: null,
+      error: null,
+      isLoading: false,
+      isIntentionallyCleared: true,
+    });
   },
 
   resetIntentionallyCleared: () => {

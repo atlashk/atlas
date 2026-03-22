@@ -12,7 +12,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { AUTHORIZATION_API_BASE_URL, IDP, OAUTH2_CLIENT_ID } from "@/config/env.config";
+import {
+  AUTHORIZATION_API_BASE_URL,
+  IDP,
+  OAUTH2_CLIENT_ID,
+} from "@/config/env.config";
 import { withGuestOnly } from "@/hoc/withAuth";
 import { LoginRequest } from "@/interfaces/authorization.interface";
 import { useUserStore } from "@/stores";
@@ -34,9 +38,7 @@ const formSchema = z.object({
   email: z.email({
     message: "Email is required.",
   }),
-  password: z
-    .string()
-    .min(1, { message: "Password is required." }),
+  password: z.string().min(1, { message: "Password is required." }),
 });
 
 const OAUTH2_PKCE_VERIFIER_STORAGE_KEY = "oauth2_pkce_verifier";
@@ -90,7 +92,7 @@ const Login: React.FC = () => {
 
   const onOAuth2Login = async () => {
     const oauthAuthorizationBaseUrl = resolveAuthorizationBaseUrl(
-      AUTHORIZATION_API_BASE_URL
+      AUTHORIZATION_API_BASE_URL,
     );
     const redirectUri = `${window.location.origin}/login/callback`;
     window.location.href = await createOAuth2AuthorizationUrl({
@@ -105,7 +107,7 @@ const Login: React.FC = () => {
 
   const onGoogleLogin = () => {
     const oauthAuthorizationBaseUrl = resolveAuthorizationBaseUrl(
-      AUTHORIZATION_API_BASE_URL
+      AUTHORIZATION_API_BASE_URL,
     );
     window.location.href = `${oauthAuthorizationBaseUrl}/oauth2/authorization/google`;
   };
@@ -204,7 +206,9 @@ const Login: React.FC = () => {
                           size="icon-xs"
                           className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                           aria-label={
-                            isPasswordVisible ? "Hide password" : "Show password"
+                            isPasswordVisible
+                              ? "Hide password"
+                              : "Show password"
                           }
                           onClick={() =>
                             setIsPasswordVisible((current) => !current)

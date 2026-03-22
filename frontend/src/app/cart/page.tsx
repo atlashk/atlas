@@ -4,18 +4,34 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import { withAuth } from '@/hoc/withAuth';
+import { withAuth } from "@/hoc/withAuth";
 import { CartItemResponse } from "@/interfaces";
 import { useCartStore } from "@/stores/cart.store";
 import { formatCurrency } from "@/utils/formatter.util";
-import { ArrowLeft, CreditCard, Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  CreditCard,
+  Minus,
+  Plus,
+  ShoppingCart,
+  Trash2,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 function CartPage() {
   const router = useRouter();
-  const { cart, loadCart, updateQuantity, removeFromCart, clearCart, isLoading: cartLoading, getCartTotal, resetIntentionallyCleared } = useCartStore();
-  
+  const {
+    cart,
+    loadCart,
+    updateQuantity,
+    removeFromCart,
+    clearCart,
+    isLoading: cartLoading,
+    getCartTotal,
+    resetIntentionallyCleared,
+  } = useCartStore();
+
   const [updating, setUpdating] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
 
@@ -28,7 +44,10 @@ function CartPage() {
     }
   }, [cart, cartLoading, loadCart, resetIntentionallyCleared]);
 
-  const handleUpdateQuantity = async (productId: string, newQuantity: number) => {
+  const handleUpdateQuantity = async (
+    productId: string,
+    newQuantity: number,
+  ) => {
     try {
       setUpdating(true);
       await updateQuantity(productId, newQuantity);
@@ -64,7 +83,7 @@ function CartPage() {
   const handleCheckout = async () => {
     try {
       setCheckingOut(true);
-      
+
       // Redirect to checkout page
       router.push("/checkout");
     } catch (error) {
@@ -98,9 +117,7 @@ function CartPage() {
           <div className="p-2 bg-primary/10 rounded-lg">
             <ShoppingCart className="h-6 w-6 text-primary" />
           </div>
-          <h3 className="text-2xl font-bold text-gray-900">
-            Shopping Cart
-          </h3>
+          <h3 className="text-2xl font-bold text-gray-900">Shopping Cart</h3>
         </div>
 
         {isEmpty ? (
@@ -109,7 +126,11 @@ function CartPage() {
               <h3 className="text-xl font-semibold text-gray-800 mb-4">
                 Your cart is empty
               </h3>
-              <Button onClick={() => router.push("/")} size="lg" className="px-8">
+              <Button
+                onClick={() => router.push("/")}
+                size="lg"
+                className="px-8"
+              >
                 <ArrowLeft className="h-4 w-4" />
                 Continue Shopping
               </Button>
@@ -136,26 +157,43 @@ function CartPage() {
               </CardHeader>
               <CardContent className="space-y-3 pt-0">
                 {cartItems.map((item: CartItemResponse) => (
-                  <div key={item.product.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100 hover:shadow-sm transition-shadow">
+                  <div
+                    key={item.product.id}
+                    className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100 hover:shadow-sm transition-shadow"
+                  >
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 truncate">{item.product.name}</h3>
+                      <h3 className="font-semibold text-gray-900 truncate">
+                        {item.product.name}
+                      </h3>
                       <div className="flex items-center gap-2 mt-2">
-                        <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+                        <Badge
+                          variant="secondary"
+                          className="bg-blue-100 text-blue-800 hover:bg-blue-100"
+                        >
                           {formatCurrency(item.product.price)}
                         </Badge>
-                        {item.product.categories && item.product.categories.length > 0 && (
-                          <Badge variant="outline" className="border-gray-300 text-gray-600">
-                            {item.product.categories[0].name}
-                          </Badge>
-                        )}
+                        {item.product.categories &&
+                          item.product.categories.length > 0 && (
+                            <Badge
+                              variant="outline"
+                              className="border-gray-300 text-gray-600"
+                            >
+                              {item.product.categories[0].name}
+                            </Badge>
+                          )}
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-1 bg-white rounded-lg border border-gray-200 p-1">
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleUpdateQuantity(item.product.id, item.quantity - 1)}
+                        onClick={() =>
+                          handleUpdateQuantity(
+                            item.product.id,
+                            item.quantity - 1,
+                          )
+                        }
                         disabled={updating}
                         className="h-8 w-8 p-0 hover:bg-gray-100"
                       >
@@ -167,14 +205,19 @@ function CartPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleUpdateQuantity(item.product.id, item.quantity + 1)}
+                        onClick={() =>
+                          handleUpdateQuantity(
+                            item.product.id,
+                            item.quantity + 1,
+                          )
+                        }
                         disabled={updating}
                         className="h-8 w-8 p-0 hover:bg-gray-100"
                       >
                         <Plus className="h-3 w-3" />
                       </Button>
                     </div>
-                    
+
                     <div className="flex items-center gap-3">
                       <p className="font-bold text-lg text-gray-900 min-w-0">
                         {formatCurrency(item.product.price * item.quantity)}
@@ -194,42 +237,46 @@ function CartPage() {
               </CardContent>
             </Card>
 
-             {/* Total and Checkout */}
-             <Card className="shadow-sm border-0 bg-white sticky bottom-4">
-               <CardContent className="p-6">
-                 <div className="flex items-center justify-between mb-6">
-                   <span className="text-xl font-semibold text-gray-700">Total:</span>
-                   <span className="text-xl font-bold text-gray-900">{formatCurrency(totalAmount)}</span>
-                 </div>
-                 <div className="flex gap-3">
-                   <Button
-                     onClick={() => router.push("/")}
-                     variant="outline"
-                     className="flex-1"
-                   >
-                     <ArrowLeft className="h-5 w-5 mr-2" />
-                     Continue Shopping
-                   </Button>
-                   <Button
-                     onClick={handleCheckout}
-                     disabled={checkingOut}
-                     className="flex-1"
-                   >
-                     {checkingOut ? (
-                       <div className="flex items-center gap-2">
-                         <Spinner className="text-blue-600" />
-                         Processing...
-                       </div>
-                     ) : (
-                       <>
-                         <CreditCard className="h-5 w-5 mr-2" />
-                         Proceed to Checkout
-                       </>
-                     )}
-                   </Button>
-                 </div>
-               </CardContent>
-             </Card>
+            {/* Total and Checkout */}
+            <Card className="shadow-sm border-0 bg-white sticky bottom-4">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <span className="text-xl font-semibold text-gray-700">
+                    Total:
+                  </span>
+                  <span className="text-xl font-bold text-gray-900">
+                    {formatCurrency(totalAmount)}
+                  </span>
+                </div>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => router.push("/")}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <ArrowLeft className="h-5 w-5 mr-2" />
+                    Continue Shopping
+                  </Button>
+                  <Button
+                    onClick={handleCheckout}
+                    disabled={checkingOut}
+                    className="flex-1"
+                  >
+                    {checkingOut ? (
+                      <div className="flex items-center gap-2">
+                        <Spinner className="text-blue-600" />
+                        Processing...
+                      </div>
+                    ) : (
+                      <>
+                        <CreditCard className="h-5 w-5 mr-2" />
+                        Proceed to Checkout
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
       </div>
@@ -237,5 +284,7 @@ function CartPage() {
   );
 }
 
-// Export with authentication HOC that requires USER role
-export default withAuth(CartPage, { requireAuth: true, allowedRoles: ['USER'] });
+export default withAuth(CartPage, {
+  requireAuth: true,
+  allowedRoles: ["USER", "ADMIN"],
+});

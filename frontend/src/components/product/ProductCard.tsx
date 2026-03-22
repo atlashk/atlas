@@ -1,10 +1,10 @@
-import React from 'react';
-import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Product } from '@/interfaces';
-import { formatCurrency } from '@/utils/formatter.util';
-import { getProductImageUrl } from '@/utils/productImage.util';
-import Image from 'next/image';
+import React from "react";
+import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Product } from "@/interfaces";
+import { formatCurrency } from "@/utils/formatter.util";
+import { getProductImageUrl } from "@/utils/productImage.util";
+import Image from "next/image";
 
 interface ProductCardProps {
   product: Product;
@@ -15,7 +15,7 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({
   product,
   onProductClick,
-  onAddToCart
+  onAddToCart,
 }) => {
   return (
     <Card className="hover:shadow-md transition-shadow duration-200 overflow-hidden p-0">
@@ -41,10 +41,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </p>
       </CardContent>
       <CardFooter className="p-3 pt-0">
-        <Button
-          onClick={() => onAddToCart(product)}
-          className="w-full"
-        >
+        <Button onClick={() => onAddToCart(product)} className="w-full">
           Add to Cart
         </Button>
       </CardFooter>

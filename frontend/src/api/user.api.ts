@@ -3,7 +3,7 @@ import {
   RegisterRequest,
   RetrieveUserListFilter,
   UpdateUserRequest,
-  User
+  User,
 } from "@/interfaces";
 import { ApiResponse } from "./apiClient";
 import { BaseApi } from "./base.api";
@@ -21,7 +21,9 @@ export class UserApi extends BaseApi {
     return this.post<void>("/users/register", userData);
   }
 
-  async retrieveUserList(filters: RetrieveUserListFilter): Promise<ApiResponse<User[]>> {
+  async retrieveUserList(
+    filters: RetrieveUserListFilter,
+  ): Promise<ApiResponse<User[]>> {
     const payload: Record<string, unknown> = {
       page: filters.page || 1,
       size: filters.size || 20,
@@ -35,8 +37,12 @@ export class UserApi extends BaseApi {
     return this.post<User[]>("/users/admin/list", payload);
   }
 
-  async retrieveReferenceData(type: string): Promise<ApiResponse<Record<string, string>>> {
-    return this.get<Record<string, string>>(`/public/reference-data?type=${type}`);
+  async retrieveReferenceData(
+    type: string,
+  ): Promise<ApiResponse<Record<string, string>>> {
+    return this.get<Record<string, string>>(
+      `/public/reference-data?type=${type}`,
+    );
   }
 
   async retrieveUserRoles(): Promise<ApiResponse<Record<string, string>>> {
@@ -51,7 +57,10 @@ export class UserApi extends BaseApi {
     return this.post<void>("/users/admin", request);
   }
 
-  async updateUser(id: string, request: UpdateUserRequest): Promise<ApiResponse<void>> {
+  async updateUser(
+    id: string,
+    request: UpdateUserRequest,
+  ): Promise<ApiResponse<void>> {
     return this.put<void>(`/users/admin/${id}`, request);
   }
 

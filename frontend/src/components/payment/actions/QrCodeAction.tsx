@@ -46,7 +46,8 @@ export function QrCodeAction({
           <QrCode className="w-12 h-12 mx-auto text-blue-500" />
           <h3 className="text-lg font-semibold">Scan QR Code to Pay</h3>
           <p className="text-gray-600">
-            Scan the QR code with your mobile banking app or &ldquo;e-wallet&rdquo; to complete the payment.
+            Scan the QR code with your mobile banking app or
+            &ldquo;e-wallet&rdquo; to complete the payment.
           </p>
           <p className="text-sm text-gray-500">Order ID: {orderId}</p>
 
@@ -86,7 +87,9 @@ export function QrCodeAction({
             <p className="text-sm font-medium">Instructions:</p>
             <ol className="text-sm text-gray-600 text-left space-y-1">
               <li>1. Open your mobile banking app</li>
-              <li>2. Select &ldquo;Scan QR Code&rdquo; or &ldquo;Pay by QR&rdquo;</li>
+              <li>
+                2. Select &ldquo;Scan QR Code&rdquo; or &ldquo;Pay by QR&rdquo;
+              </li>
               <li>3. Point your camera at the QR code above</li>
               <li>4. Confirm the payment amount</li>
               <li>5. Complete the payment</li>

@@ -28,10 +28,10 @@ export function DeeplinkAction({
 
     try {
       setIsOpening(true);
-      
+
       // Try to open the deeplink
       window.location.href = deeplinkUrl;
-      
+
       // Reset the loading state after a delay
       setTimeout(() => {
         setIsOpening(false);
@@ -85,9 +85,7 @@ export function DeeplinkAction({
         <div className="text-center space-y-4">
           <CreditCard className="w-12 h-12 mx-auto text-blue-500" />
           <h3 className="text-lg font-semibold">Open {appName}</h3>
-          <p className="text-gray-600">
-            Complete your payment using {appName}
-          </p>
+          <p className="text-gray-600">Complete your payment using {appName}</p>
           <p className="text-sm text-gray-500">Order ID: {orderId}</p>
 
           <div className="space-y-3">

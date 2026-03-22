@@ -6,7 +6,7 @@ import type {
   Order,
   OrderStatusResponse,
   RetrieveOrderListFilter,
-  UpdateCartItemRequest
+  UpdateCartItemRequest,
 } from "@/interfaces/order.interface";
 import { ApiResponse } from "./apiClient";
 import { BaseApi } from "./base.api";
@@ -16,17 +16,19 @@ export class OrderApi extends BaseApi {
     super("/services/order/api");
   }
 
-async retrieveCart(): Promise<ApiResponse<CartResponse>> {
+  async retrieveCart(): Promise<ApiResponse<CartResponse>> {
     return this.get<CartResponse>("/carts");
   }
 
-  async addCartItem(request: AddCartItemRequest): Promise<ApiResponse<CartResponse>> {
+  async addCartItem(
+    request: AddCartItemRequest,
+  ): Promise<ApiResponse<CartResponse>> {
     return this.post<CartResponse>("/carts/items/add", request);
   }
 
   async updateCartItem(
     productId: string,
-    request: UpdateCartItemRequest
+    request: UpdateCartItemRequest,
   ): Promise<ApiResponse<CartResponse>> {
     return this.post<CartResponse>(`/carts/items/${productId}/update`, request);
   }
@@ -39,7 +41,9 @@ async retrieveCart(): Promise<ApiResponse<CartResponse>> {
     return this.post<CartResponse>("/carts/clear");
   }
 
-  async retrieveOrderList(filter: RetrieveOrderListFilter): Promise<ApiResponse<Order[]>> {
+  async retrieveOrderList(
+    filter: RetrieveOrderListFilter,
+  ): Promise<ApiResponse<Order[]>> {
     const payload = {
       status: filter.status,
       startDate: filter.startDate,
@@ -50,7 +54,9 @@ async retrieveCart(): Promise<ApiResponse<CartResponse>> {
     return this.post<Order[], typeof payload>("/orders", payload);
   }
 
-  async retrieveAdminOrderList(filters: RetrieveOrderListFilter): Promise<ApiResponse<Order[]>> {
+  async retrieveAdminOrderList(
+    filters: RetrieveOrderListFilter,
+  ): Promise<ApiResponse<Order[]>> {
     const payload = {
       id: filters.id ? filters.id.toString() : undefined,
       orderId: filters.orderId ? filters.orderId.toString() : undefined,
@@ -66,21 +72,27 @@ async retrieveCart(): Promise<ApiResponse<CartResponse>> {
   }
 
   async checkout(
-    data: CheckoutRequest
+    data: CheckoutRequest,
   ): Promise<ApiResponse<CheckoutResponse>> {
     return this.post<CheckoutResponse>("/orders/checkout", data);
   }
 
-  async retrieveOrderStatus(orderId: string): Promise<ApiResponse<OrderStatusResponse>> {
+  async retrieveOrderStatus(
+    orderId: string,
+  ): Promise<ApiResponse<OrderStatusResponse>> {
     return this.get<OrderStatusResponse>(`/orders/${orderId}/status`);
   }
 
-  async retrieveReferenceData(type: string): Promise<ApiResponse<Record<string, string>>> {
-    return this.get<Record<string, string>>(`/public/reference-data?type=${type}`);
+  async retrieveReferenceData(
+    type: string,
+  ): Promise<ApiResponse<Record<string, string>>> {
+    return this.get<Record<string, string>>(
+      `/public/reference-data?type=${type}`,
+    );
   }
 
   async retrieveOrderStatuses(): Promise<ApiResponse<Record<string, string>>> {
-    return this.retrieveReferenceData('ORDER_STATUS');
+    return this.retrieveReferenceData("ORDER_STATUS");
   }
 
   async retrieveTotalOrderCount(): Promise<ApiResponse<number>> {
@@ -95,7 +107,7 @@ async retrieveCart(): Promise<ApiResponse<CartResponse>> {
     ApiResponse<{ year: number; month: number; totalRevenue: number }[]>
   > {
     return this.get<{ year: number; month: number; totalRevenue: number }[]>(
-      "/orders/admin/statistics/monthly"
+      "/orders/admin/statistics/monthly",
     );
   }
 }

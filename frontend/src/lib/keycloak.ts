@@ -1,7 +1,7 @@
 import {
   KEYCLOAK_CLIENT_ID,
   KEYCLOAK_REALM,
-  KEYCLOAK_URL
+  KEYCLOAK_URL,
 } from "@/config/env.config";
 import Keycloak from "keycloak-js";
 
@@ -18,7 +18,7 @@ const getInitPromise = (keycloak: Keycloak) => {
       pkceMethod: "S256",
       responseMode: "query",
       checkLoginIframe: false,
-      redirectUri: getCallbackRedirectUri()
+      redirectUri: getCallbackRedirectUri(),
     });
   }
   return keycloakInitPromise;
@@ -29,7 +29,7 @@ const getKeycloakInstance = () => {
     keycloakInstance = new Keycloak({
       url: KEYCLOAK_URL,
       realm: KEYCLOAK_REALM,
-      clientId: KEYCLOAK_CLIENT_ID
+      clientId: KEYCLOAK_CLIENT_ID,
     });
   }
   return keycloakInstance;
@@ -44,7 +44,7 @@ export const loginWithKeycloak = async (redirectPath?: string | null) => {
     sessionStorage.setItem("auth_redirect", redirectPath);
   }
   await keycloak.login({
-    redirectUri: getCallbackRedirectUri()
+    redirectUri: getCallbackRedirectUri(),
   });
 };
 
@@ -58,7 +58,7 @@ export const initKeycloakOnCallback = async () => {
   }
   return {
     accessToken: keycloak.token,
-    refreshToken: keycloak.refreshToken || null
+    refreshToken: keycloak.refreshToken || null,
   };
 };
 
@@ -78,7 +78,7 @@ export const refreshTokenWithKeycloak = async () => {
   }
   return {
     accessToken: keycloak.token,
-    refreshToken: keycloak.refreshToken || null
+    refreshToken: keycloak.refreshToken || null,
   };
 };
 

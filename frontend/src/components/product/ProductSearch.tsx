@@ -92,7 +92,7 @@ const ProductSearch: React.FC = () => {
     <K extends keyof SearchFilters>(key: K, value: SearchFilters[K]) => {
       setFormFilters((prev) => ({ ...prev, [key]: value }));
     },
-    []
+    [],
   );
 
   const resetFilters = useCallback(() => {
@@ -111,7 +111,7 @@ const ProductSearch: React.FC = () => {
       const numValue = value ? parseFloat(value) : undefined;
       updateFilter(key, numValue);
     },
-    [updateFilter]
+    [updateFilter],
   );
 
   const changeCategory = useCallback((categoryId: string) => {
@@ -157,7 +157,7 @@ const ProductSearch: React.FC = () => {
 
       if (!categoriesResponse.success) {
         throw new Error(
-          categoriesResponse.errorMessage || "Failed to load categories"
+          categoriesResponse.errorMessage || "Failed to load categories",
         );
       }
 
@@ -176,7 +176,7 @@ const ProductSearch: React.FC = () => {
     async (
       filters: SearchFilters = {},
       page: number = 1,
-      pageSize: number = 20
+      pageSize: number = 20,
     ) => {
       try {
         setIsLoadingProducts(true);
@@ -217,7 +217,7 @@ const ProductSearch: React.FC = () => {
         setIsLoadingProducts(false);
       }
     },
-    []
+    [],
   );
 
   // Go to specific page
@@ -225,7 +225,7 @@ const ProductSearch: React.FC = () => {
     (page: number) => {
       loadProducts(committedSearchFilters, page, pagination.pageSize);
     },
-    [loadProducts, committedSearchFilters, pagination.pageSize]
+    [loadProducts, committedSearchFilters, pagination.pageSize],
   );
 
   const changePage = (newPage: number) => {
@@ -239,15 +239,19 @@ const ProductSearch: React.FC = () => {
     try {
       setIsLoadingProductDetails(true);
       const response = await catalogApi.retrieveProduct(productId);
-      
+
       if (!response.success) {
-        throw new Error(response.errorMessage || "Failed to load product details");
+        throw new Error(
+          response.errorMessage || "Failed to load product details",
+        );
       }
-      
+
       setSelectedProduct(response.data);
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to load product details";
+        error instanceof Error
+          ? error.message
+          : "Failed to load product details";
       toast.error(errorMessage);
       setSelectedProduct(null);
     } finally {
@@ -267,7 +271,7 @@ const ProductSearch: React.FC = () => {
 
       try {
         const success = await addToCart(product.id, 1);
-        
+
         if (success) {
           toast.success(`${product.name} added to cart`);
         } else {
@@ -278,14 +282,17 @@ const ProductSearch: React.FC = () => {
         console.error(error);
       }
     },
-    [addToCart, isAuthenticated, router]
+    [addToCart, isAuthenticated, router],
   );
 
-  const handleProductClick = useCallback((product: Product) => {
-    setIsModalOpen(true);
-    setSelectedProduct(null); // Clear previous product
-    loadProductDetails(product.id); // Load full details
-  }, [loadProductDetails]);
+  const handleProductClick = useCallback(
+    (product: Product) => {
+      setIsModalOpen(true);
+      setSelectedProduct(null); // Clear previous product
+      loadProductDetails(product.id); // Load full details
+    },
+    [loadProductDetails],
+  );
 
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
@@ -354,8 +361,7 @@ const ProductSearch: React.FC = () => {
     setCommittedSearchFilters(formFilters);
     // Only load products, not static data
     loadProducts(formFilters, 1, pagination.pageSize);
-  }, [formFilters, loadProducts, pagination.pageSize]
-  );
+  }, [formFilters, loadProducts, pagination.pageSize]);
 
   return (
     <div className="grid grid-cols-12 gap-6">
@@ -367,194 +373,187 @@ const ProductSearch: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-                {/* Search Input */}
-                <div>
-                  <Label htmlFor="keyword" className="mb-2">
-                    Product Keyword
-                  </Label>
-                  <Input
-                    id="keyword"
-                    type="text"
-                    placeholder="Product name, description, attributes, etc."
-                    value={formFilters.keyword || ""}
-                    onChange={(e) => updateFilter("keyword", e.target.value)}
-                  />
-                </div>
-
-                {/* Price Range */}
-                 <div>
-                   <Label className="mb-2">
-                     Price Range
-                   </Label>
-                   <div className="grid grid-cols-2 gap-3">
-                     <div>
-                       <Input
-                         type="number"
-                         placeholder="Min Price"
-                         min="0"
-                         step="0.01"
-                         value={formFilters.minPrice || ""}
-                         onChange={(e) =>
-                           updateNumericFilter("minPrice", e.target.value)
-                         }
-                       />
-                     </div>
-                     <div>
-                       <Input
-                         type="number"
-                         placeholder="Max Price"
-                         min="0"
-                         step="0.01"
-                         value={formFilters.maxPrice || ""}
-                         onChange={(e) =>
-                           updateNumericFilter("maxPrice", e.target.value)
-                         }
-                       />
-                     </div>
-                   </div>
-                 </div>
-
-                {/* Brand Filter */}
-                <div>
-                  <Label htmlFor="brand" className="mb-2">
-                    Brand
-                  </Label>
-                  {isLoadingBrands ? (
-                    <div className="flex justify-center py-3">
-                      <Spinner className="text-blue-600" />
-                    </div>
-                  ) : (
-                    <>
-                      <Select
-                        disabled={!brands.length}
-                        value={formFilters.brandId || "all"}
-                        onValueChange={(value) =>
-                          updateFilter(
-                            "brandId",
-                            value === "all" ? "" : value
-                          )
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="All Brands" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Brands</SelectItem>
-                          {brands.map((brand) => (
-                            <SelectItem
-                              key={brand.id}
-                              value={brand.id.toString()}
-                            >
-                              {brand.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {!brands.length && (
-                        <div className="text-gray-500 text-sm mt-1">
-                          No brands available
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-
-                {/* Category Filter */}
-                <div>
-                  <Label htmlFor="category" className="mb-2">
-                    Categories
-                  </Label>
-                  {isLoadingCategories ? (
-                    <div className="flex justify-center py-3">
-                      <Spinner className="text-blue-600" />
-                    </div>
-                  ) : (
-                    <>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="w-full justify-between font-normal"
-                            disabled={!categories.length}
-                          >
-                            {formFilters.categoryIds &&
-                            formFilters.categoryIds.length > 0
-                              ? `${formFilters.categoryIds.length} categories selected`
-                              : "All Categories"}
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-64">
-                          {categories.map((category) => {
-                            const categoryId = String(category.id);
-                            const isChecked =
-                              formFilters.categoryIds?.includes(categoryId) ??
-                              false;
-                            return (
-                              <DropdownMenuCheckboxItem
-                                key={category.id}
-                                checked={isChecked}
-                                onCheckedChange={() => changeCategory(categoryId)}
-                              >
-                                {category.name}
-                              </DropdownMenuCheckboxItem>
-                            );
-                          })}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                      {!categories.length && (
-                        <div className="text-gray-500 text-sm mt-1">
-                          No categories available
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-
-                {/* Search Mode */}
-                <div>
-                  <Label className="mb-2">
-                    Search Mode
-                  </Label>
-                  <RadioGroup
-                    value={formFilters.mode}
-                    onValueChange={(val) =>
-                      updateFilter("mode", val as "DATABASE" | "SEARCH")
-                    }
-                    className="gap-2"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem id="mode-db" value="DATABASE" />
-                      <Label htmlFor="mode-db">Database Search</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem id="mode-search" value="SEARCH" />
-                      <Label htmlFor="mode-search">Search</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-
-                {/* Action Buttons */}
-                 <div className="flex gap-3">
-                   <Button
-                     type="button"
-                     variant="default"
-                     onClick={handleSearch}
-                     disabled={isLoading}
-                   >
-                     <Search className="w-4 h-4" />
-                     Search
-                   </Button>
-                   <Button
-                     type="button"
-                     variant="outline"
-                     onClick={resetFilters}
-                     disabled={isLoading}
-                   >
-                     <RotateCcw className="w-4 h-4" />
-                     Reset
-                   </Button>
-                 </div>
+              {/* Search Input */}
+              <div>
+                <Label htmlFor="keyword" className="mb-2">
+                  Product Keyword
+                </Label>
+                <Input
+                  id="keyword"
+                  type="text"
+                  placeholder="Product name, description, attributes, etc."
+                  value={formFilters.keyword || ""}
+                  onChange={(e) => updateFilter("keyword", e.target.value)}
+                />
               </div>
+
+              {/* Price Range */}
+              <div>
+                <Label className="mb-2">Price Range</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Input
+                      type="number"
+                      placeholder="Min Price"
+                      min="0"
+                      step="0.01"
+                      value={formFilters.minPrice || ""}
+                      onChange={(e) =>
+                        updateNumericFilter("minPrice", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      type="number"
+                      placeholder="Max Price"
+                      min="0"
+                      step="0.01"
+                      value={formFilters.maxPrice || ""}
+                      onChange={(e) =>
+                        updateNumericFilter("maxPrice", e.target.value)
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Brand Filter */}
+              <div>
+                <Label htmlFor="brand" className="mb-2">
+                  Brand
+                </Label>
+                {isLoadingBrands ? (
+                  <div className="flex justify-center py-3">
+                    <Spinner className="text-blue-600" />
+                  </div>
+                ) : (
+                  <>
+                    <Select
+                      disabled={!brands.length}
+                      value={formFilters.brandId || "all"}
+                      onValueChange={(value) =>
+                        updateFilter("brandId", value === "all" ? "" : value)
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="All Brands" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Brands</SelectItem>
+                        {brands.map((brand) => (
+                          <SelectItem
+                            key={brand.id}
+                            value={brand.id.toString()}
+                          >
+                            {brand.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {!brands.length && (
+                      <div className="text-gray-500 text-sm mt-1">
+                        No brands available
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Category Filter */}
+              <div>
+                <Label htmlFor="category" className="mb-2">
+                  Categories
+                </Label>
+                {isLoadingCategories ? (
+                  <div className="flex justify-center py-3">
+                    <Spinner className="text-blue-600" />
+                  </div>
+                ) : (
+                  <>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-between font-normal"
+                          disabled={!categories.length}
+                        >
+                          {formFilters.categoryIds &&
+                          formFilters.categoryIds.length > 0
+                            ? `${formFilters.categoryIds.length} categories selected`
+                            : "All Categories"}
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-64">
+                        {categories.map((category) => {
+                          const categoryId = String(category.id);
+                          const isChecked =
+                            formFilters.categoryIds?.includes(categoryId) ??
+                            false;
+                          return (
+                            <DropdownMenuCheckboxItem
+                              key={category.id}
+                              checked={isChecked}
+                              onCheckedChange={() => changeCategory(categoryId)}
+                            >
+                              {category.name}
+                            </DropdownMenuCheckboxItem>
+                          );
+                        })}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    {!categories.length && (
+                      <div className="text-gray-500 text-sm mt-1">
+                        No categories available
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Search Mode */}
+              <div>
+                <Label className="mb-2">Search Mode</Label>
+                <RadioGroup
+                  value={formFilters.mode}
+                  onValueChange={(val) =>
+                    updateFilter("mode", val as "DATABASE" | "SEARCH")
+                  }
+                  className="gap-2"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem id="mode-db" value="DATABASE" />
+                    <Label htmlFor="mode-db">Database Search</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem id="mode-search" value="SEARCH" />
+                    <Label htmlFor="mode-search">Search</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="default"
+                  onClick={handleSearch}
+                  disabled={isLoading}
+                >
+                  <Search className="w-4 h-4" />
+                  Search
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={resetFilters}
+                  disabled={isLoading}
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Reset
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -583,7 +582,9 @@ const ProductSearch: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-center text-gray-500 py-8">No products found.</p>
+              <p className="text-center text-gray-500 py-8">
+                No products found.
+              </p>
             )}
           </CardContent>
         </Card>
@@ -606,7 +607,7 @@ const ProductSearch: React.FC = () => {
 
                 {Array.from(
                   { length: pagination.totalPages },
-                  (_, i) => i + 1
+                  (_, i) => i + 1,
                 ).map((page) => (
                   <PaginationItem key={page}>
                     <PaginationLink

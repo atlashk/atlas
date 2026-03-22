@@ -33,12 +33,12 @@ function AdminProductDetailsPage() {
       if (response.success) {
         setProduct(response.data);
       } else {
-        toast.error(response.errorMessage || 'Product not found');
-        router.push('/admin/product');
+        toast.error(response.errorMessage || "Product not found");
+        router.push("/admin/product");
       }
     } catch {
-      toast.error('Failed to load product');
-      router.push('/admin/product');
+      toast.error("Failed to load product");
+      router.push("/admin/product");
     } finally {
       setIsLoading(false);
     }
@@ -48,7 +48,7 @@ function AdminProductDetailsPage() {
     if (isInitialized.current) {
       return;
     }
-    
+
     isInitialized.current = true;
     loadProduct();
   }, [loadProduct]);
@@ -63,7 +63,9 @@ function AdminProductDetailsPage() {
     if (confirm("Are you sure you want to delete this product?")) {
       setIsDeleting(true);
       try {
-        const response = await catalogApi.deleteProduct((product as Product).id);
+        const response = await catalogApi.deleteProduct(
+          (product as Product).id,
+        );
         if (response.success) {
           toast.success("Product deleted successfully!");
           router.push("/admin/product");
@@ -154,7 +156,9 @@ function AdminProductDetailsPage() {
                   )}
                 </div>
 
-                <h2 className="text-2xl font-bold mb-3">{(product as Product).name}</h2>
+                <h2 className="text-2xl font-bold mb-3">
+                  {(product as Product).name}
+                </h2>
 
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -172,10 +176,11 @@ function AdminProductDetailsPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Published Date:</span>
                     <span className="text-sm">
-                      {(product as Product).publishedAt 
-                        ? new Date((product as Product).publishedAt!).toLocaleDateString()
-                        : 'Not set'
-                      }
+                      {(product as Product).publishedAt
+                        ? new Date(
+                            (product as Product).publishedAt!,
+                          ).toLocaleDateString()
+                        : "Not set"}
                     </span>
                   </div>
 
@@ -199,7 +204,11 @@ function AdminProductDetailsPage() {
                         <Badge key={category.id} variant="secondary">
                           {category.name}
                         </Badge>
-                      )) || <span className="text-sm text-gray-500">No categories</span>}
+                      )) || (
+                        <span className="text-sm text-gray-500">
+                          No categories
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -216,7 +225,8 @@ function AdminProductDetailsPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm leading-relaxed">
-                  {(product as Product).details?.description || "No description available."}
+                  {(product as Product).details?.description ||
+                    "No description available."}
                 </p>
               </CardContent>
             </Card>

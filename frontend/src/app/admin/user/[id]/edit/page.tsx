@@ -288,7 +288,7 @@ function AdminUserEditPage() {
                                 <SelectItem key={roleKey} value={roleKey}>
                                   {roleLabel}
                                 </SelectItem>
-                              )
+                              ),
                             )}
                           </SelectContent>
                         </Select>
@@ -318,7 +318,11 @@ function AdminUserEditPage() {
             </Card>
 
             <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={() => router.back()}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.back()}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>

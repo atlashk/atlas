@@ -27,7 +27,7 @@ export function usePaymentProcessing() {
         setIsLoading(false);
       }
     },
-    [handleApiError, clearError]
+    [handleApiError, clearError],
   );
 
   const memoizedReturn = useMemo(
@@ -37,7 +37,7 @@ export function usePaymentProcessing() {
       fetchPaymentNextAction,
       clearError,
     }),
-    [isLoading, error, fetchPaymentNextAction, clearError]
+    [isLoading, error, fetchPaymentNextAction, clearError],
   );
 
   return memoizedReturn;

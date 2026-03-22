@@ -31,10 +31,8 @@ export function useNextActionHandler({
       setError(errorMessage);
       onPaymentError?.(errorMessage);
     },
-    [onPaymentError]
+    [onPaymentError],
   );
-
-
 
   const startProcessing = useCallback(() => {
     setIsProcessing(true);
@@ -48,10 +46,7 @@ export function useNextActionHandler({
 
     switch (nextAction.type) {
       case "USE_PAYMENT_ELEMENT":
-        return !!(
-          nextAction.clientSecret &&
-          nextAction.publishableKey
-        );
+        return !!(nextAction.clientSecret && nextAction.publishableKey);
       case "REDIRECT_URL":
         return !!nextAction.url;
       case "DEEPLINK":

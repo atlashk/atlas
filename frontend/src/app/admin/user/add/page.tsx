@@ -104,7 +104,7 @@ function AdminUserAddPage() {
       email: values.email,
       phoneNumber: values.phoneNumber || undefined,
       password: values.password,
-      role: values.role
+      role: values.role,
     };
 
     try {
@@ -160,7 +160,7 @@ function AdminUserAddPage() {
                                 <SelectItem key={roleKey} value={roleKey}>
                                   {roleLabel}
                                 </SelectItem>
-                              )
+                              ),
                             )}
                           </SelectContent>
                         </Select>
@@ -201,7 +201,11 @@ function AdminUserAddPage() {
                       <FormItem>
                         <FormLabel>Email Address *</FormLabel>
                         <FormControl>
-                          <Input {...field} type="email" placeholder="Enter email address" />
+                          <Input
+                            {...field}
+                            type="email"
+                            placeholder="Enter email address"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -259,7 +263,11 @@ function AdminUserAddPage() {
             </Card>
 
             <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={() => router.back()}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.back()}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>

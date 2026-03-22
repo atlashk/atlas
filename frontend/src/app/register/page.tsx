@@ -17,7 +17,16 @@ import { withGuestOnly } from "@/hoc/withAuth";
 import { RegisterRequest } from "@/interfaces";
 import { PASSWORD_REGEX, PASSWORD_REQUIREMENTS_MESSAGE } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Lock, Mail, Phone, User, UserPlus } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Loader2,
+  Lock,
+  Mail,
+  Phone,
+  User,
+  UserPlus,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -43,7 +52,9 @@ const formSchema = z
       .refine((value) => PASSWORD_REGEX.test(value), {
         message: PASSWORD_REQUIREMENTS_MESSAGE,
       }),
-    confirmPassword: z.string().min(1, { message: "Confirm password is required." }),
+    confirmPassword: z
+      .string()
+      .min(1, { message: "Confirm password is required." }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -53,6 +64,9 @@ const formSchema = z
 const Register: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
+    useState(false);
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -220,10 +234,30 @@ const Register: React.FC = () => {
                           <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                           <Input
                             {...field}
-                            type="password"
-                            className="pl-10"
+                            type={isPasswordVisible ? "text" : "password"}
+                            className="pl-10 pr-10"
                             placeholder="Create password"
                           />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-xs"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            aria-label={
+                              isPasswordVisible
+                                ? "Hide password"
+                                : "Show password"
+                            }
+                            onClick={() =>
+                              setIsPasswordVisible((current) => !current)
+                            }
+                          >
+                            {isPasswordVisible ? (
+                              <EyeOff className="size-4" />
+                            ) : (
+                              <Eye className="size-4" />
+                            )}
+                          </Button>
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -242,10 +276,32 @@ const Register: React.FC = () => {
                           <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                           <Input
                             {...field}
-                            type="password"
-                            className="pl-10"
+                            type={
+                              isConfirmPasswordVisible ? "text" : "password"
+                            }
+                            className="pl-10 pr-10"
                             placeholder="Confirm password"
                           />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-xs"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            aria-label={
+                              isConfirmPasswordVisible
+                                ? "Hide password"
+                                : "Show password"
+                            }
+                            onClick={() =>
+                              setIsConfirmPasswordVisible((current) => !current)
+                            }
+                          >
+                            {isConfirmPasswordVisible ? (
+                              <EyeOff className="size-4" />
+                            ) : (
+                              <Eye className="size-4" />
+                            )}
+                          </Button>
                         </div>
                       </FormControl>
                       <FormMessage />

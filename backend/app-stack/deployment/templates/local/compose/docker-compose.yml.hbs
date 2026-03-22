@@ -443,7 +443,7 @@ services:
       {{#hasService "observability.tracing" "tempo"}}
       - OTEL_COLLECTOR_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
       {{/hasService}}
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://eureka-server:8761/eureka/
     volumes:
       - user-service-log:/var/log/user-service
     healthcheck:
@@ -516,7 +516,7 @@ services:
       {{#hasService "observability.tracing" "tempo"}}
       - OTEL_COLLECTOR_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
       {{/hasService}}
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://eureka-server:8761/eureka/
     volumes:
       - catalog-service-log:/var/log/catalog-service
     healthcheck:
@@ -582,7 +582,7 @@ services:
       {{#hasService "observability.tracing" "tempo"}}
       - OTEL_COLLECTOR_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
       {{/hasService}}
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://eureka-server:8761/eureka/
     volumes:
       - inventory-service-log:/var/log/inventory-service
     healthcheck:
@@ -644,7 +644,7 @@ services:
       {{#hasService "observability.tracing" "tempo"}}
       - OTEL_COLLECTOR_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
       {{/hasService}}
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://eureka-server:8761/eureka/
       {{#hasService "internal" "grpc"}}
       - API_CLIENT_GRPC_CATALOG_SERVICE_ADDRESS=static://catalog-service:50052
       {{/hasService}}
@@ -712,7 +712,7 @@ services:
       {{#hasService "observability.tracing" "tempo"}}
       - OTEL_COLLECTOR_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
       {{/hasService}}
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://eureka-server:8761/eureka/
       - PAYMENT_SIMULATOR_WEBHOOK_URL=http://api-gateway:8080/services/payment/api/webhook/simulator
     volumes:
       - payment-service-log:/var/log/payment-service
@@ -785,7 +785,7 @@ services:
       {{#hasService "observability.tracing" "zipkin"}}
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       {{/hasService}}
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://eureka-server:8761/eureka/
     volumes:
       - authorization-server-log:/var/log/authorization-server
     healthcheck:
@@ -829,7 +829,7 @@ services:
       {{#hasService "observability.tracing" "tempo"}}
       - OTEL_COLLECTOR_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
       {{/hasService}}
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://eureka-server:8761/eureka/
       {{#hasService "idp" "spring"}}
       - JWK_SET_URI=http://authorization-server:8901/.well-known/jwks.json
       {{/hasService}}

@@ -3,12 +3,7 @@
 import { catalogApi, orderApi } from "@/api/index.api";
 import { userApi } from "@/api/user.api";
 import AdminLayout from "@/components/layout/AdminLayout";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
@@ -80,7 +75,9 @@ const Dashboard: React.FC = () => {
 
       setStats({
         totalUserCount: usersResponse.success ? usersResponse.data || 0 : 0,
-        totalProductCount: productsResponse.success ? productsResponse.data || 0 : 0,
+        totalProductCount: productsResponse.success
+          ? productsResponse.data || 0
+          : 0,
         totalOrderCount: ordersResponse.success ? ordersResponse.data || 0 : 0,
         totalRevenue: revenueResponse.success ? revenueResponse.data || 0 : 0,
       });
@@ -136,7 +133,7 @@ const Dashboard: React.FC = () => {
   ];
 
   const years = Array.from(new Set(monthlyStats.map((m) => m.year))).sort(
-    (a, b) => b - a
+    (a, b) => b - a,
   );
 
   const filteredMonthly = monthlyStats
@@ -221,7 +218,9 @@ const Dashboard: React.FC = () => {
               href="/admin/order"
               className="text-2xl font-bold text-primary hover:underline underline-offset-4"
             >
-              {loading ? "Loading..." : formatCurrency(displayStats.totalRevenue)}
+              {loading
+                ? "Loading..."
+                : formatCurrency(displayStats.totalRevenue)}
             </Link>
           </CardContent>
         </Card>
@@ -230,7 +229,9 @@ const Dashboard: React.FC = () => {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <div>
-            <CardTitle className="text-sm font-medium">Revenue by Month</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Revenue by Month
+            </CardTitle>
           </div>
           <div className="w-[140px]">
             <Select
@@ -288,7 +289,8 @@ const Dashboard: React.FC = () => {
           <div className="flex w-full items-start gap-2 text-sm">
             <div className="grid gap-2">
               <div className="flex items-center gap-2 leading-none font-medium">
-                {selectedYear !== null ? selectedYear : ""} <TrendingUp className="h-4 w-4" />
+                {selectedYear !== null ? selectedYear : ""}{" "}
+                <TrendingUp className="h-4 w-4" />
               </div>
               <div className="text-muted-foreground flex items-center gap-2 leading-none">
                 {selectedYear !== null && chartData.length

@@ -6,7 +6,7 @@ import {
   type ExportProductFilter,
   type Product,
   type RetrieveProductListFilter,
-  type UpdateProductRequest
+  type UpdateProductRequest,
 } from "@/interfaces/catalog.interface";
 import { ApiResponse } from "./apiClient";
 import { BaseApi } from "./base.api";
@@ -25,7 +25,7 @@ export class CatalogApi extends BaseApi {
   }
 
   async retrievePublicProductList(
-    filter: Partial<RetrieveProductListFilter> = {}
+    filter: Partial<RetrieveProductListFilter> = {},
   ): Promise<ApiResponse<Product[]>> {
     const payload: RetrieveProductListFilter = {
       page: filter.page || 1,
@@ -37,15 +37,24 @@ export class CatalogApi extends BaseApi {
       categoryIds: filter.categoryIds?.length ? filter.categoryIds : undefined,
       mode: filter.mode || "DATABASE",
     };
-    return this.post<Product[], RetrieveProductListFilter>("/public/products/list", payload);
+    return this.post<Product[], RetrieveProductListFilter>(
+      "/public/products/list",
+      payload,
+    );
   }
 
-  async retrievePublicProduct(productId: string): Promise<ApiResponse<Product>> {
+  async retrievePublicProduct(
+    productId: string,
+  ): Promise<ApiResponse<Product>> {
     return this.get<Product>(`/public/products/${productId}`);
   }
 
-  async retrieveReferenceData(type: string): Promise<ApiResponse<Record<string, string>>> {
-    return this.get<Record<string, string>>(`/public/reference-data?type=${type}`);
+  async retrieveReferenceData(
+    type: string,
+  ): Promise<ApiResponse<Record<string, string>>> {
+    return this.get<Record<string, string>>(
+      `/public/reference-data?type=${type}`,
+    );
   }
 
   async retrieveProductTypes(): Promise<ApiResponse<Record<string, string>>> {
@@ -53,9 +62,12 @@ export class CatalogApi extends BaseApi {
   }
 
   async retrieveAdminProductList(
-    filter: RetrieveProductListFilter
+    filter: RetrieveProductListFilter,
   ): Promise<ApiResponse<Product[]>> {
-    return this.post<Product[], RetrieveProductListFilter>("/products/admin/list", filter);
+    return this.post<Product[], RetrieveProductListFilter>(
+      "/products/admin/list",
+      filter,
+    );
   }
 
   async retrieveAdminProduct(productId: string): Promise<ApiResponse<Product>> {
@@ -64,12 +76,12 @@ export class CatalogApi extends BaseApi {
 
   async createProduct(
     data: CreateProductRequest,
-    imageFile?: File
+    imageFile?: File,
   ): Promise<ApiResponse<string>> {
     const formData = new FormData();
     formData.append(
       "request",
-      new Blob([JSON.stringify(data)], { type: "application/json" })
+      new Blob([JSON.stringify(data)], { type: "application/json" }),
     );
     if (imageFile) {
       formData.append("image", imageFile);
@@ -79,12 +91,12 @@ export class CatalogApi extends BaseApi {
 
   async updateProduct(
     data: UpdateProductRequest,
-    imageFile?: File
+    imageFile?: File,
   ): Promise<ApiResponse<void>> {
     const formData = new FormData();
     formData.append(
       "request",
-      new Blob([JSON.stringify(data)], { type: "application/json" })
+      new Blob([JSON.stringify(data)], { type: "application/json" }),
     );
     if (imageFile) {
       formData.append("image", imageFile);
@@ -98,7 +110,7 @@ export class CatalogApi extends BaseApi {
 
   async importProduct(
     file: File,
-    fileType: FileType
+    fileType: FileType,
   ): Promise<ApiResponse<void>> {
     const formData = new FormData();
     formData.append("file", file);
@@ -167,7 +179,7 @@ export class CatalogApi extends BaseApi {
   }
 
   async retrieveProductList(
-    filter: Partial<RetrieveProductListFilter> = {}
+    filter: Partial<RetrieveProductListFilter> = {},
   ): Promise<ApiResponse<Product[]>> {
     return this.retrievePublicProductList(filter);
   }

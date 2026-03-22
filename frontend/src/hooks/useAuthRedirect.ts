@@ -1,8 +1,8 @@
 "use client";
 
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { useUserStore } from '@/stores/user.store';
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useUserStore } from "@/stores/user.store";
 
 interface UseAuthRedirectOptions {
   requireAuth?: boolean;
@@ -17,8 +17,8 @@ interface UseAuthRedirectOptions {
 export function useAuthRedirect(options: UseAuthRedirectOptions = {}) {
   const {
     requireAuth = false,
-    redirectUnauthenticated = '/login',
-    allowedRoles = []
+    redirectUnauthenticated = "/login",
+    allowedRoles = [],
   } = options;
 
   const router = useRouter();
@@ -27,7 +27,7 @@ export function useAuthRedirect(options: UseAuthRedirectOptions = {}) {
   useEffect(() => {
     // Wait for both auth state and profile to load
     if (loading || profileLoading) {
-      console.log('[useAuthRedirect] Waiting for auth state to load...');
+      console.log("[useAuthRedirect] Waiting for auth state to load...");
       return;
     }
 
@@ -35,7 +35,7 @@ export function useAuthRedirect(options: UseAuthRedirectOptions = {}) {
 
     const userRole = profile?.role;
 
-    console.log('[useAuthRedirect] Checking access:', {
+    console.log("[useAuthRedirect] Checking access:", {
       isUserAuthenticated,
       requireAuth,
       userRole,
@@ -43,21 +43,43 @@ export function useAuthRedirect(options: UseAuthRedirectOptions = {}) {
 
     // Handle unauthenticated users
     if (requireAuth && !isUserAuthenticated) {
-      console.log('[useAuthRedirect] User not authenticated, redirecting to login');
+      console.log(
+        "[useAuthRedirect] User not authenticated, redirecting to login",
+      );
       const currentPath = window.location.pathname;
       const redirectUrl = `${redirectUnauthenticated}?redirect=${encodeURIComponent(currentPath)}`;
       router.push(redirectUrl);
       return;
     }
 
-    if (isUserAuthenticated && allowedRoles.length > 0 && userRole && !allowedRoles.includes(userRole)) {
+    if (
+      isUserAuthenticated &&
+      allowedRoles.length > 0 &&
+      userRole &&
+      !allowedRoles.includes(userRole)
+    ) {
       router.push("/admin/dashboard");
     }
-  }, [loading, profileLoading, isAuthenticated, profile?.role, router, requireAuth, redirectUnauthenticated, allowedRoles]);
+  }, [
+    loading,
+    profileLoading,
+    isAuthenticated,
+    profile?.role,
+    router,
+    requireAuth,
+    redirectUnauthenticated,
+    allowedRoles,
+  ]);
 
   const isUserAuthenticated = isAuthenticated();
   const userRole = profile?.role;
-  const isUnauthorized = !loading && !profileLoading && isUserAuthenticated && !!userRole && allowedRoles.length > 0 && !allowedRoles.includes(userRole);
+  const isUnauthorized =
+    !loading &&
+    !profileLoading &&
+    isUserAuthenticated &&
+    !!userRole &&
+    allowedRoles.length > 0 &&
+    !allowedRoles.includes(userRole);
 
   return {
     isLoading: loading || profileLoading,
@@ -67,10 +89,15 @@ export function useAuthRedirect(options: UseAuthRedirectOptions = {}) {
       if (loading || profileLoading) return false;
 
       if (requireAuth && !isUserAuthenticated) return false;
-      if (allowedRoles.length > 0 && userRole && !allowedRoles.includes(userRole)) return false;
+      if (
+        allowedRoles.length > 0 &&
+        userRole &&
+        !allowedRoles.includes(userRole)
+      )
+        return false;
 
       return true;
-    }
+    },
   };
 }
 
@@ -85,16 +112,16 @@ export function useGuestRedirect() {
   useEffect(() => {
     // Wait for both loading states
     if (loading || profileLoading) {
-      console.log('[useGuestRedirect] Waiting for auth state to load...');
+      console.log("[useGuestRedirect] Waiting for auth state to load...");
       return;
     }
 
     const isUserAuthenticated = isAuthenticated();
     const userRole = profile?.role;
 
-    console.log('[useGuestRedirect] Checking guest access:', { 
+    console.log("[useGuestRedirect] Checking guest access:", {
       isUserAuthenticated,
-      userRole
+      userRole,
     });
 
     if (isUserAuthenticated) {
@@ -108,6 +135,6 @@ export function useGuestRedirect() {
 
   return {
     isLoading: loading || profileLoading,
-    shouldRedirect: isAuthenticated()
+    shouldRedirect: isAuthenticated(),
   };
 }

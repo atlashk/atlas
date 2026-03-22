@@ -117,7 +117,8 @@ export function RedirectAction({
 
           {isRedirecting && (
             <p className="text-sm text-gray-500">
-              If you are not redirected automatically, please check your browser settings.
+              If you are not redirected automatically, please check your browser
+              settings.
             </p>
           )}
         </div>

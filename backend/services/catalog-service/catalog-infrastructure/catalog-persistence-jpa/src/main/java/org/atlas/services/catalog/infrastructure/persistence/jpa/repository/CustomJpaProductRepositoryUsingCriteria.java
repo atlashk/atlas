@@ -98,13 +98,11 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
 
     // Keyword
     if (StringUtil.isNotBlank(criteria.getKeyword())) {
-      String lowercaseKeyword = "%" + criteria.getKeyword().toLowerCase() + "%";
+      String keyword = criteria.getKeyword().trim();
       spec.addFilter(QueryFilter.or(
-          QueryFilter.Condition.of("lower(name)", lowercaseKeyword, QueryOperator.LIKE),
-          QueryFilter.Condition.of("lower(detail.description)", lowercaseKeyword,
-              QueryOperator.LIKE),
-          QueryFilter.Condition.of("lower(attributes.value)", lowercaseKeyword,
-              QueryOperator.LIKE)));
+          QueryFilter.Condition.of("name", keyword, QueryOperator.LIKE),
+          QueryFilter.Condition.of("details.description", keyword, QueryOperator.LIKE),
+          QueryFilter.Condition.of("attributes.value", keyword, QueryOperator.LIKE)));
     }
 
     // Type

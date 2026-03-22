@@ -109,10 +109,7 @@ const AdminUserListPage: React.FC = () => {
         const apiFilter: RetrieveUserListFilter = { ...updatedFilter };
         Object.keys(apiFilter).forEach((key) => {
           const typedKey = key as keyof RetrieveUserListFilter;
-          if (
-            apiFilter[typedKey] === "" ||
-            apiFilter[typedKey] === undefined
-          ) {
+          if (apiFilter[typedKey] === "" || apiFilter[typedKey] === undefined) {
             delete apiFilter[typedKey];
           }
         });
@@ -136,7 +133,7 @@ const AdminUserListPage: React.FC = () => {
         setIsLoadingUsers(false);
       }
     },
-    [filter]
+    [filter],
   );
 
   const changePage = useCallback(
@@ -145,7 +142,7 @@ const AdminUserListPage: React.FC = () => {
         applyFilter(newPage);
       }
     },
-    [metadata.totalPages, applyFilter]
+    [metadata.totalPages, applyFilter],
   );
 
   const resetFilter = useCallback(() => {
@@ -166,11 +163,11 @@ const AdminUserListPage: React.FC = () => {
   const handleFilterChange = useCallback(
     (
       field: keyof RetrieveUserListFilter,
-      value: string | number | boolean | undefined
+      value: string | number | boolean | undefined,
     ) => {
       setFilter((prev) => ({ ...prev, [field]: value }));
     },
-    []
+    [],
   );
 
   const handleSearch = useCallback(() => {
@@ -181,9 +178,12 @@ const AdminUserListPage: React.FC = () => {
     router.push("/admin/user/add");
   }, [router]);
 
-  const openEditUser = useCallback((user: User) => {
-    router.push(`/admin/user/${user.id}/edit`);
-  }, [router]);
+  const openEditUser = useCallback(
+    (user: User) => {
+      router.push(`/admin/user/${user.id}/edit`);
+    },
+    [router],
+  );
 
   const openDeleteDialog = useCallback((user: User) => {
     setDeleteTarget(user);
@@ -263,7 +263,7 @@ const AdminUserListPage: React.FC = () => {
                   onChange={(e) =>
                     handleFilterChange(
                       "id",
-                      e.target.value ? parseInt(e.target.value) : undefined
+                      e.target.value ? parseInt(e.target.value) : undefined,
                     )
                   }
                 />
@@ -312,7 +312,10 @@ const AdminUserListPage: React.FC = () => {
                   placeholder="Enter phone"
                   value={filter.phoneNumber || ""}
                   onChange={(e) =>
-                    handleFilterChange("phoneNumber", e.target.value || undefined)
+                    handleFilterChange(
+                      "phoneNumber",
+                      e.target.value || undefined,
+                    )
                   }
                 />
               </div>
@@ -460,7 +463,9 @@ const AdminUserListPage: React.FC = () => {
                 Cancel
               </AlertDialogCancel>
               <AlertDialogAction onClick={confirmDelete} disabled={isDeleting}>
-                {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isDeleting && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 Delete
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -500,8 +505,8 @@ const AdminUserListPage: React.FC = () => {
                         1,
                         Math.min(
                           metadata.totalPages - 4,
-                          metadata.currentPage - 2
-                        )
+                          metadata.currentPage - 2,
+                        ),
                       ) + i;
 
                     if (pageNumber <= metadata.totalPages) {
@@ -521,7 +526,7 @@ const AdminUserListPage: React.FC = () => {
                       );
                     }
                     return null;
-                  }
+                  },
                 )}
 
                 <PaginationItem>

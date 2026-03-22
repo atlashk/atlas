@@ -11,7 +11,7 @@ export abstract class BaseApi {
   protected async get<T>(endpoint: string): Promise<ApiResponse<T>> {
     try {
       const response: AxiosResponse<ApiResponse<T>> = await apiClient.get(
-        `${this.baseUrl}${endpoint}`
+        `${this.baseUrl}${endpoint}`,
       );
       return response.data;
     } catch (error) {
@@ -21,12 +21,12 @@ export abstract class BaseApi {
 
   protected async post<T, K = unknown>(
     endpoint: string,
-    data?: K
+    data?: K,
   ): Promise<ApiResponse<T>> {
     try {
       const response: AxiosResponse<ApiResponse<T>> = await apiClient.post(
         `${this.baseUrl}${endpoint}`,
-        data
+        data,
       );
       return response.data;
     } catch (error) {
@@ -36,12 +36,12 @@ export abstract class BaseApi {
 
   protected async put<T, K = unknown>(
     endpoint: string,
-    data?: K
+    data?: K,
   ): Promise<ApiResponse<T>> {
     try {
       const response: AxiosResponse<ApiResponse<T>> = await apiClient.put(
         `${this.baseUrl}${endpoint}`,
-        data
+        data,
       );
       return response.data;
     } catch (error) {
@@ -52,7 +52,7 @@ export abstract class BaseApi {
   protected async delete<T>(endpoint: string): Promise<ApiResponse<T>> {
     try {
       const response: AxiosResponse<ApiResponse<T>> = await apiClient.delete(
-        `${this.baseUrl}${endpoint}`
+        `${this.baseUrl}${endpoint}`,
       );
       return response.data;
     } catch (error) {
@@ -68,7 +68,7 @@ export abstract class BaseApi {
 
   protected async postBlob<K = unknown>(
     endpoint: string,
-    data?: K
+    data?: K,
   ): Promise<AxiosResponse<Blob>> {
     return await apiClient.post(`${this.baseUrl}${endpoint}`, data, {
       responseType: "blob",
@@ -77,7 +77,8 @@ export abstract class BaseApi {
 
   private handleError<T>(error: unknown): ApiResponse<T> {
     console.error("Service error:", error);
-    const fallbackMessage = error instanceof Error ? error.message : "An error occurred";
+    const fallbackMessage =
+      error instanceof Error ? error.message : "An error occurred";
 
     if (
       typeof error === "object" &&
@@ -94,7 +95,8 @@ export abstract class BaseApi {
 
         const errorMessage = apiResponseData.errorMessage || fallbackMessage;
 
-        const errorCode = apiResponseData.errorCode ??
+        const errorCode =
+          apiResponseData.errorCode ??
           (statusCode !== undefined ? String(statusCode) : undefined);
 
         return {

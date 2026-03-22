@@ -27,7 +27,9 @@ const StockDialog: React.FC<StockDialogProps> = ({
   productId,
   onClose,
 }) => {
-  const [stockData, setStockData] = useState<RetrieveStockResponse | null>(null);
+  const [stockData, setStockData] = useState<RetrieveStockResponse | null>(
+    null,
+  );
   const [availableQuantityInput, setAvailableQuantityInput] = useState("");
   const [isLoadingStock, setIsLoadingStock] = useState(false);
   const [isUpdatingStock, setIsUpdatingStock] = useState(false);
@@ -114,7 +116,7 @@ const StockDialog: React.FC<StockDialogProps> = ({
       if (refreshed.success) {
         setStockData(refreshed.data);
         setAvailableQuantityInput(
-          String(refreshed.data?.availableQuantity ?? availableQuantity)
+          String(refreshed.data?.availableQuantity ?? availableQuantity),
         );
       } else {
         setStockData((prev) => (prev ? { ...prev, availableQuantity } : prev));
@@ -186,7 +188,9 @@ const StockDialog: React.FC<StockDialogProps> = ({
           </Button>
           <Button
             onClick={handleUpdateAvailableQuantity}
-            disabled={!productId || !stockData || isLoadingStock || isUpdatingStock}
+            disabled={
+              !productId || !stockData || isLoadingStock || isUpdatingStock
+            }
           >
             {isUpdatingStock && <Spinner className="mr-2" />}
             Save

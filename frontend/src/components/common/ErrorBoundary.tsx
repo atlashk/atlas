@@ -28,7 +28,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("ErrorBoundary caught an error:", error, errorInfo);
-    
+
     // Call the optional onError callback
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
@@ -53,13 +53,16 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="flex justify-center mb-4">
               <AlertTriangle className="h-12 w-12 text-destructive" />
             </div>
-            <CardTitle className="text-destructive">Something went wrong</CardTitle>
+            <CardTitle className="text-destructive">
+              Something went wrong
+            </CardTitle>
           </CardHeader>
           <CardContent className="text-center space-y-4">
             <p className="text-muted-foreground">
-              An unexpected error occurred. Please try refreshing the page or contact support if the problem persists.
+              An unexpected error occurred. Please try refreshing the page or
+              contact support if the problem persists.
             </p>
-            
+
             {process.env.NODE_ENV === "development" && this.state.error && (
               <details className="text-left bg-muted p-3 rounded text-sm">
                 <summary className="cursor-pointer font-medium mb-2">
@@ -71,7 +74,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 </pre>
               </details>
             )}
-            
+
             <div className="flex gap-2 justify-center">
               <Button onClick={this.handleRetry} variant="outline">
                 <RefreshCw className="h-4 w-4 mr-2" />

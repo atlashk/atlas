@@ -26,24 +26,33 @@ export function useCheckoutState() {
     setState(initialState);
   }, []);
 
-  const setOrderId = useCallback((orderId: string | null) => {
-    updateState({ orderId });
-  }, [updateState]);
+  const setOrderId = useCallback(
+    (orderId: string | null) => {
+      updateState({ orderId });
+    },
+    [updateState],
+  );
 
-  const setIsCheckingOut = useCallback((isCheckingOut: boolean) => {
-    updateState({ isCheckingOut });
-  }, [updateState]);
+  const setIsCheckingOut = useCallback(
+    (isCheckingOut: boolean) => {
+      updateState({ isCheckingOut });
+    },
+    [updateState],
+  );
 
   const setPaymentNextAction = useCallback(
     (paymentNextAction: PaymentNextAction | null) => {
       updateState({ paymentNextAction });
     },
-    [updateState]
+    [updateState],
   );
 
-  const setIsProcessingPayment = useCallback((isProcessingPayment: boolean) => {
-    updateState({ isProcessingPayment });
-  }, [updateState]);
+  const setIsProcessingPayment = useCallback(
+    (isProcessingPayment: boolean) => {
+      updateState({ isProcessingPayment });
+    },
+    [updateState],
+  );
 
   const memoizedReturn = useMemo(
     () => ({
@@ -63,7 +72,7 @@ export function useCheckoutState() {
       setIsCheckingOut,
       setPaymentNextAction,
       setIsProcessingPayment,
-    ]
+    ],
   );
 
   return memoizedReturn;

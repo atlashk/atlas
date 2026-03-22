@@ -63,7 +63,7 @@ const productSchema = z.object({
       id: z.number().optional(),
       name: z.string().min(1, "Attribute name is required"),
       value: z.string().min(1, "Attribute value is required"),
-    })
+    }),
   ),
 });
 
@@ -73,7 +73,9 @@ function AdminProductEditPage() {
   const router = useRouter();
   const params = useParams();
   const productIdParam = params.id;
-  const productId = Array.isArray(productIdParam) ? productIdParam[0] : productIdParam;
+  const productId = Array.isArray(productIdParam)
+    ? productIdParam[0]
+    : productIdParam;
   const hasInitializedStaticData = useRef(false);
   const [isLoadingProduct, setIsLoadingProduct] = useState(true);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -129,7 +131,9 @@ function AdminProductEditPage() {
         const brandsResponse = await catalogApi.retrieveAllBrand();
 
         if (!brandsResponse.success) {
-          throw new Error(brandsResponse.errorMessage || "Failed to load brands");
+          throw new Error(
+            brandsResponse.errorMessage || "Failed to load brands",
+          );
         }
 
         setBrands(brandsResponse.data || []);
@@ -149,7 +153,7 @@ function AdminProductEditPage() {
 
         if (!categoriesResponse.success) {
           throw new Error(
-            categoriesResponse.errorMessage || "Failed to load categories"
+            categoriesResponse.errorMessage || "Failed to load categories",
           );
         }
 
@@ -174,7 +178,9 @@ function AdminProductEditPage() {
         }
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Failed to load product types";
+          error instanceof Error
+            ? error.message
+            : "Failed to load product types";
         toast.error(errorMessage);
       } finally {
         setIsLoadingProductTypes(false);
@@ -198,23 +204,29 @@ function AdminProductEditPage() {
     const loadProduct = async () => {
       setIsLoadingProduct(true);
       try {
-        const productResponse = await catalogApi.retrieveAdminProduct(productId);
+        const productResponse =
+          await catalogApi.retrieveAdminProduct(productId);
 
         if (productResponse.success) {
           const productData = productResponse.data;
           setProduct(productData);
 
-          const publishedAtDate = new Date(productData.publishedAt || new Date());
+          const publishedAtDate = new Date(
+            productData.publishedAt || new Date(),
+          );
           const formattedDate = publishedAtDate.toISOString().slice(0, 16);
 
           form.reset({
             id: productData.id,
             name: productData.name,
-            type: productData.type, 
+            type: productData.type,
             price: productData.price,
             publishedAt: formattedDate,
             brandId: productData.brand?.id?.toString() || "",
-            categoryIds: productData.categories?.map((cat: Category) => cat.id.toString()) || [],
+            categoryIds:
+              productData.categories?.map((cat: Category) =>
+                cat.id.toString(),
+              ) || [],
             image: productData.image || "",
             details: {
               description: productData.details?.description || "",
@@ -280,7 +292,10 @@ function AdminProductEditPage() {
         publishedAt: new Date(data.publishedAt).toISOString(),
       };
 
-      const response = await catalogApi.updateProduct(formData, imageFile ?? undefined);
+      const response = await catalogApi.updateProduct(
+        formData,
+        imageFile ?? undefined,
+      );
 
       if (response.success) {
         toast.success("Product updated successfully!");
@@ -348,7 +363,11 @@ function AdminProductEditPage() {
                   <FormField
                     control={form.control}
                     name="name"
-                    render={({ field }: { field: ControllerRenderProps<ProductFormData, "name"> }) => (
+                    render={({
+                      field,
+                    }: {
+                      field: ControllerRenderProps<ProductFormData, "name">;
+                    }) => (
                       <FormItem>
                         <FormLabel>Product Name *</FormLabel>
                         <FormControl>
@@ -362,7 +381,11 @@ function AdminProductEditPage() {
                   <FormField
                     control={form.control}
                     name="price"
-                    render={({ field }: { field: ControllerRenderProps<ProductFormData, "price"> }) => (
+                    render={({
+                      field,
+                    }: {
+                      field: ControllerRenderProps<ProductFormData, "price">;
+                    }) => (
                       <FormItem>
                         <FormLabel>Price *</FormLabel>
                         <FormControl>
@@ -376,7 +399,9 @@ function AdminProductEditPage() {
                               step="0.01"
                               min="0"
                               className="pl-8"
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                              onChange={(
+                                e: React.ChangeEvent<HTMLInputElement>,
+                              ) =>
                                 field.onChange(parseFloat(e.target.value) || 0)
                               }
                             />
@@ -390,7 +415,11 @@ function AdminProductEditPage() {
                   <FormField
                     control={form.control}
                     name="type"
-                    render={({ field }: { field: ControllerRenderProps<ProductFormData, "type"> }) => (
+                    render={({
+                      field,
+                    }: {
+                      field: ControllerRenderProps<ProductFormData, "type">;
+                    }) => (
                       <FormItem>
                         <FormLabel>Product Type *</FormLabel>
                         <Select
@@ -404,11 +433,13 @@ function AdminProductEditPage() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {Object.entries(productTypes).map(([typeKey, typeLabel]) => (
-                              <SelectItem key={typeKey} value={typeKey}>
-                                {typeLabel}
-                              </SelectItem>
-                            ))}
+                            {Object.entries(productTypes).map(
+                              ([typeKey, typeLabel]) => (
+                                <SelectItem key={typeKey} value={typeKey}>
+                                  {typeLabel}
+                                </SelectItem>
+                              ),
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -419,7 +450,14 @@ function AdminProductEditPage() {
                   <FormField
                     control={form.control}
                     name="publishedAt"
-                    render={({ field }: { field: ControllerRenderProps<ProductFormData, "publishedAt"> }) => (
+                    render={({
+                      field,
+                    }: {
+                      field: ControllerRenderProps<
+                        ProductFormData,
+                        "publishedAt"
+                      >;
+                    }) => (
                       <FormItem>
                         <FormLabel>Published Date *</FormLabel>
                         <FormControl>
@@ -433,7 +471,11 @@ function AdminProductEditPage() {
                   <FormField
                     control={form.control}
                     name="brandId"
-                    render={({ field }: { field: ControllerRenderProps<ProductFormData, "brandId"> }) => (
+                    render={({
+                      field,
+                    }: {
+                      field: ControllerRenderProps<ProductFormData, "brandId">;
+                    }) => (
                       <FormItem>
                         <FormLabel>Brand *</FormLabel>
                         <Select
@@ -471,7 +513,14 @@ function AdminProductEditPage() {
                   <FormField
                     control={form.control}
                     name="categoryIds"
-                    render={({ field }: { field: ControllerRenderProps<ProductFormData, "categoryIds"> }) => (
+                    render={({
+                      field,
+                    }: {
+                      field: ControllerRenderProps<
+                        ProductFormData,
+                        "categoryIds"
+                      >;
+                    }) => (
                       <FormItem>
                         <FormLabel>Categories *</FormLabel>
                         {isLoadingCategories ? (
@@ -497,7 +546,8 @@ function AdminProductEditPage() {
                             <DropdownMenuContent className="w-64">
                               {categories.map((category) => {
                                 const categoryId = category.id.toString();
-                                const isChecked = field.value.includes(categoryId);
+                                const isChecked =
+                                  field.value.includes(categoryId);
                                 return (
                                   <DropdownMenuCheckboxItem
                                     key={category.id}
@@ -511,8 +561,8 @@ function AdminProductEditPage() {
                                       } else {
                                         field.onChange(
                                           field.value.filter(
-                                            (id) => id !== categoryId
-                                          )
+                                            (id) => id !== categoryId,
+                                          ),
                                         );
                                       }
                                     }}
@@ -571,7 +621,14 @@ function AdminProductEditPage() {
                 <FormField
                   control={form.control}
                   name="details.description"
-                  render={({ field }: { field: ControllerRenderProps<ProductFormData, "details.description"> }) => (
+                  render={({
+                    field,
+                  }: {
+                    field: ControllerRenderProps<
+                      ProductFormData,
+                      "details.description"
+                    >;
+                  }) => (
                     <FormItem>
                       <FormLabel>Description *</FormLabel>
                       <FormControl>
@@ -605,7 +662,14 @@ function AdminProductEditPage() {
                       <FormField
                         control={form.control}
                         name={`attributes.${index}.name`}
-                        render={({ field }: { field: ControllerRenderProps<ProductFormData, `attributes.${number}.name`> }) => (
+                        render={({
+                          field,
+                        }: {
+                          field: ControllerRenderProps<
+                            ProductFormData,
+                            `attributes.${number}.name`
+                          >;
+                        }) => (
                           <FormItem className="flex-1">
                             <FormLabel>Attribute Name</FormLabel>
                             <FormControl>
@@ -621,7 +685,14 @@ function AdminProductEditPage() {
                       <FormField
                         control={form.control}
                         name={`attributes.${index}.value`}
-                        render={({ field }: { field: ControllerRenderProps<ProductFormData, `attributes.${number}.value`> }) => (
+                        render={({
+                          field,
+                        }: {
+                          field: ControllerRenderProps<
+                            ProductFormData,
+                            `attributes.${number}.value`
+                          >;
+                        }) => (
                           <FormItem className="flex-1">
                             <FormLabel>Attribute Value</FormLabel>
                             <FormControl>

@@ -28,6 +28,8 @@ spec:
             - name: http
               containerPort: 8080
           env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: {{ .Values.global.springProfilesActive | quote }}
             - name: USER_SERVICE_URI
               value: "http://{{ lower $.Release.Name }}-user-service:{{ .Values.userSvc.service.ports.http }}"
             - name: CATALOG_SERVICE_URI

@@ -1,6 +1,15 @@
-import { clearAuthCookies, getCookie, isValidToken, setCookie } from '@/utils/cookies';
+import {
+  clearAuthCookies,
+  getCookie,
+  isValidToken,
+  setCookie,
+} from "@/utils/cookies";
 import axios, { AxiosError } from "axios";
-import { API_BASE_URL, AUTHORIZATION_API_BASE_URL, IDP } from '@/config/env.config';
+import {
+  API_BASE_URL,
+  AUTHORIZATION_API_BASE_URL,
+  IDP,
+} from "@/config/env.config";
 import { refreshTokenWithKeycloak } from "@/lib/keycloak";
 
 export interface ApiResponse<T> {
@@ -52,20 +61,20 @@ const apiClient = axios.create({
 
 // Helper function to get token from cookies
 const getAccessTokenFromCookies = (): string | null => {
-  return getCookie('accessToken');
+  return getCookie("accessToken");
 };
 
 const getRefreshTokenFromCookies = (): string | null => {
-  return getCookie('refreshToken');
+  return getCookie("refreshToken");
 };
 
 const shouldSkipAuthRedirect = (requestUrl?: string): boolean => {
   if (!requestUrl) return false;
   try {
     const pathname = new URL(requestUrl, AUTHORIZATION_API_BASE_URL).pathname;
-    return pathname === '/api/users/profile';
+    return pathname === "/api/users/profile";
   } catch {
-    return requestUrl.includes('/api/users/profile');
+    return requestUrl.includes("/api/users/profile");
   }
 };
 
@@ -75,7 +84,7 @@ const isUnauthorizedRefreshError = (error: unknown): boolean => {
   const status = error.response?.status;
   const apiErrorCode = error.response?.data?.errorCode;
 
-  return status === 401 || apiErrorCode === '401' || apiErrorCode === 401;
+  return status === 401 || apiErrorCode === "401" || apiErrorCode === 401;
 };
 
 apiClient.interceptors.request.use(
@@ -95,7 +104,7 @@ apiClient.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 apiClient.interceptors.response.use(
@@ -130,7 +139,7 @@ apiClient.interceptors.response.use(
         if (!shouldSkipAuthRedirect(originalRequest.url)) {
           redirectToLogin();
         }
-        return Promise.reject(new Error('Maximum refresh retries exceeded'));
+        return Promise.reject(new Error("Maximum refresh retries exceeded"));
       }
 
       const refreshToken = getRefreshTokenFromCookies();
@@ -149,11 +158,11 @@ apiClient.interceptors.response.use(
       try {
         const newAccessToken = await refreshPromise;
         processQueue(null, newAccessToken);
-        
+
         if (originalRequest.headers) {
           originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
         }
-        
+
         refreshRetryCount = 0;
         return apiClient(originalRequest);
       } catch (refreshError) {
@@ -169,7 +178,7 @@ apiClient.interceptors.response.use(
 
         refreshRetryCount++;
         processQueue(refreshError as Error, null);
-        
+
         if (refreshRetryCount >= MAX_REFRESH_RETRIES) {
           clearAuthCookies();
           if (!shouldSkipAuthRedirect(originalRequest.url)) {
@@ -177,7 +186,7 @@ apiClient.interceptors.response.use(
           }
           refreshRetryCount = 0;
         }
-        
+
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
@@ -186,17 +195,17 @@ apiClient.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 // Helper functions
 function redirectToLogin(): void {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return;
   }
 
-  if (window.location.pathname !== '/login') {
-    window.location.href = '/login';
+  if (window.location.pathname !== "/login") {
+    window.location.href = "/login";
   }
 }
 
@@ -221,20 +230,21 @@ async function performTokenRefresh(refreshToken: string): Promise<string> {
       {
         timeout: 10000,
         headers: {
-          'Content-Type': 'application/json'
-        }
-      }
+          "Content-Type": "application/json",
+        },
+      },
     );
 
-    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data.data;
-    
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+      response.data.data;
+
     if (!newAccessToken || !newRefreshToken) {
-      throw new Error('Invalid refresh response: missing tokens');
+      throw new Error("Invalid refresh response: missing tokens");
     }
-    
-    setCookie('accessToken', newAccessToken);
-    setCookie('refreshToken', newRefreshToken);
-    
+
+    setCookie("accessToken", newAccessToken);
+    setCookie("refreshToken", newRefreshToken);
+
     return newAccessToken;
   } catch (error) {
     if (isUnauthorizedRefreshError(error)) {
@@ -242,7 +252,7 @@ async function performTokenRefresh(refreshToken: string): Promise<string> {
       redirectToLogin();
     }
 
-    console.error('Token refresh failed:', error);
+    console.error("Token refresh failed:", error);
     throw error;
   }
 }

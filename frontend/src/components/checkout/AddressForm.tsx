@@ -230,7 +230,7 @@ const COUNTRIES = [
 
 // Map for O(1) code -> name lookup
 const COUNTRY_MAP: Record<string, string> = Object.fromEntries(
-  COUNTRIES.map((c) => [c.code, c.name])
+  COUNTRIES.map((c) => [c.code, c.name]),
 );
 
 export interface Address {
@@ -258,7 +258,7 @@ export const AddressForm = React.memo<AddressFormProps>(function AddressForm({
         [field]: value,
       });
     },
-    [address, onAddressChange]
+    [address, onAddressChange],
   );
 
   return (
@@ -366,7 +366,7 @@ const CountryCombobox: React.FC<CountryComboboxProps> = ({
     if (!q) return COUNTRIES;
     return COUNTRIES.filter(
       (c) =>
-        c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q)
+        c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q),
     );
   }, [query]);
 
@@ -389,7 +389,7 @@ const CountryCombobox: React.FC<CountryComboboxProps> = ({
       onChange(code);
       setOpen(false);
     },
-    [onChange]
+    [onChange],
   );
 
   // Virtual scrolling: only render visible items + buffer
@@ -405,7 +405,7 @@ const CountryCombobox: React.FC<CountryComboboxProps> = ({
     const start = Math.max(0, Math.floor(scrollTop / itemHeight) - buffer);
     const end = Math.min(
       filtered.length,
-      Math.ceil((scrollTop + clientHeight) / itemHeight) + buffer
+      Math.ceil((scrollTop + clientHeight) / itemHeight) + buffer,
     );
 
     setVisibleRange({ start, end });
@@ -447,28 +447,35 @@ const CountryCombobox: React.FC<CountryComboboxProps> = ({
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
-        <div 
+        <div
           ref={scrollRef}
           className="max-h-64 overflow-y-auto"
           onScroll={handleScroll}
         >
           {filtered.length > 0 ? (
-            <div style={{ height: `${filtered.length * 36}px`, position: 'relative' }}>
-              {filtered.slice(visibleRange.start, visibleRange.end).map((c, idx) => (
-                <div
-                  key={c.code}
-                  style={{
-                    position: 'absolute',
-                    top: `${(visibleRange.start + idx) * 36}px`,
-                    width: '100%',
-                  }}
-                >
-                  <CountryItem
-                    country={c}
-                    onClick={() => handleCountryClick(c.code)}
-                  />
-                </div>
-              ))}
+            <div
+              style={{
+                height: `${filtered.length * 36}px`,
+                position: "relative",
+              }}
+            >
+              {filtered
+                .slice(visibleRange.start, visibleRange.end)
+                .map((c, idx) => (
+                  <div
+                    key={c.code}
+                    style={{
+                      position: "absolute",
+                      top: `${(visibleRange.start + idx) * 36}px`,
+                      width: "100%",
+                    }}
+                  >
+                    <CountryItem
+                      country={c}
+                      onClick={() => handleCountryClick(c.code)}
+                    />
+                  </div>
+                ))}
             </div>
           ) : (
             <div className="px-2 py-3 text-sm text-muted-foreground">

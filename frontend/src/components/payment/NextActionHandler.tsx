@@ -3,7 +3,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 
 import { useNextActionHandler } from "@/hooks/useNextActionHandler";
-import { PaymentGatewayResponse, PaymentNextAction } from "@/interfaces/payment.interface";
+import {
+  PaymentGatewayResponse,
+  PaymentNextAction,
+} from "@/interfaces/payment.interface";
 import { AlertCircle, CreditCard } from "lucide-react";
 import {
   DeeplinkAction,
@@ -122,12 +125,7 @@ export function NextActionHandler({
       );
 
     case "QR_CODE":
-      return (
-        <QrCodeAction
-          qrCodeData={nextAction.content}
-          orderId={orderId}
-        />
-      );
+      return <QrCodeAction qrCodeData={nextAction.content} orderId={orderId} />;
 
     case "DEEPLINK":
       return (

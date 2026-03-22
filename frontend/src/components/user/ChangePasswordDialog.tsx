@@ -21,7 +21,8 @@ import { Input } from "@/components/ui/input";
 import { PASSWORD_REGEX, PASSWORD_REQUIREMENTS_MESSAGE } from "@/lib/utils";
 import { useUserStore } from "@/stores/user.store";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -50,6 +51,9 @@ export default function ChangePasswordDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const { changePassword, logout } = useUserStore();
+  const [isOldPasswordVisible, setIsOldPasswordVisible] = useState(false);
+  const [isNewPasswordVisible, setIsNewPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
 
   const form = useForm<z.infer<typeof changePasswordSchema>>({
     resolver: zodResolver(changePasswordSchema),
@@ -102,7 +106,30 @@ export default function ChangePasswordDialog({
                 <FormItem>
                   <FormLabel>Current password</FormLabel>
                   <FormControl>
-                    <Input {...field} type="password" autoComplete="current-password" />
+                    <div className="relative">
+                      <Input
+                        {...field}
+                        type={isOldPasswordVisible ? "text" : "password"}
+                        autoComplete="current-password"
+                        className="pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        aria-label={isOldPasswordVisible ? "Hide password" : "Show password"}
+                        onClick={() =>
+                          setIsOldPasswordVisible((current) => !current)
+                        }
+                      >
+                        {isOldPasswordVisible ? (
+                          <EyeOff className="size-4" />
+                        ) : (
+                          <Eye className="size-4" />
+                        )}
+                      </Button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -116,7 +143,30 @@ export default function ChangePasswordDialog({
                 <FormItem>
                   <FormLabel>New password</FormLabel>
                   <FormControl>
-                    <Input {...field} type="password" autoComplete="new-password" />
+                    <div className="relative">
+                      <Input
+                        {...field}
+                        type={isNewPasswordVisible ? "text" : "password"}
+                        autoComplete="new-password"
+                        className="pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        aria-label={isNewPasswordVisible ? "Hide password" : "Show password"}
+                        onClick={() =>
+                          setIsNewPasswordVisible((current) => !current)
+                        }
+                      >
+                        {isNewPasswordVisible ? (
+                          <EyeOff className="size-4" />
+                        ) : (
+                          <Eye className="size-4" />
+                        )}
+                      </Button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -130,7 +180,32 @@ export default function ChangePasswordDialog({
                 <FormItem>
                   <FormLabel>Confirm new password</FormLabel>
                   <FormControl>
-                    <Input {...field} type="password" autoComplete="new-password" />
+                    <div className="relative">
+                      <Input
+                        {...field}
+                        type={isConfirmPasswordVisible ? "text" : "password"}
+                        autoComplete="new-password"
+                        className="pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        aria-label={
+                          isConfirmPasswordVisible ? "Hide password" : "Show password"
+                        }
+                        onClick={() =>
+                          setIsConfirmPasswordVisible((current) => !current)
+                        }
+                      >
+                        {isConfirmPasswordVisible ? (
+                          <EyeOff className="size-4" />
+                        ) : (
+                          <Eye className="size-4" />
+                        )}
+                      </Button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -149,7 +149,7 @@ export function StripeForm({
 }: StripeFormProps) {
   const stripePromise = useMemo(
     () => (publishableKey ? loadStripe(publishableKey) : null),
-    [publishableKey]
+    [publishableKey],
   );
 
   // Use useMemo to optimize Elements options
@@ -169,7 +169,7 @@ export function StripeForm({
         },
       },
     }),
-    [clientSecret]
+    [clientSecret],
   );
 
   if (!stripePromise) {

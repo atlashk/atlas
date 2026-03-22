@@ -2,12 +2,15 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { PaymentGatewayResponse, PaymentNextAction } from "@/interfaces/payment.interface";
+import {
+  PaymentGatewayResponse,
+  PaymentNextAction,
+} from "@/interfaces/payment.interface";
 import { StripeForm } from "../StripeForm";
 
 // Supported payment gateway codes
 const SUPPORTED_PAYMENT_GATEWAYS = ["STRIPE", "SIMULATOR"] as const;
-type PaymentGatewayCode = typeof SUPPORTED_PAYMENT_GATEWAYS[number];
+type PaymentGatewayCode = (typeof SUPPORTED_PAYMENT_GATEWAYS)[number];
 
 interface PaymentElementActionProps {
   nextAction: PaymentNextAction;
@@ -29,16 +32,20 @@ export function PaymentElementAction({
   onPaymentError,
 }: PaymentElementActionProps) {
   // Check if gateway is supported
-  const gatewayCode = selectedPaymentGateway?.code?.toUpperCase() as PaymentGatewayCode;
-  const isSupported = gatewayCode && SUPPORTED_PAYMENT_GATEWAYS.includes(gatewayCode);
-  
+  const gatewayCode =
+    selectedPaymentGateway?.code?.toUpperCase() as PaymentGatewayCode;
+  const isSupported =
+    gatewayCode && SUPPORTED_PAYMENT_GATEWAYS.includes(gatewayCode);
+
   // Different gateways have different requirements
   const requiresPublishableKey = gatewayCode === "STRIPE";
-  const hasRequiredConfig = requiresPublishableKey ? !!nextAction.publishableKey : true;
-  
+  const hasRequiredConfig = requiresPublishableKey
+    ? !!nextAction.publishableKey
+    : true;
+
   if (!isSupported || !hasRequiredConfig) {
-    const errorMessage = !isSupported 
-      ? `The payment gateway "${selectedPaymentGateway?.name || 'Unknown'}" is not supported yet.`
+    const errorMessage = !isSupported
+      ? `The payment gateway "${selectedPaymentGateway?.name || "Unknown"}" is not supported yet.`
       : "Missing required payment configuration.";
 
     return (
@@ -48,14 +55,10 @@ export function PaymentElementAction({
             <h3 className="text-lg font-semibold text-red-600">
               Payment Configuration Error
             </h3>
-            <p className="text-gray-600">
-              {errorMessage}
-            </p>
+            <p className="text-gray-600">{errorMessage}</p>
             <p className="text-sm text-gray-500">Order ID: {orderId}</p>
             <Button
-              onClick={() =>
-                onPaymentError?.(errorMessage)
-              }
+              onClick={() => onPaymentError?.(errorMessage)}
               variant="outline"
               className="w-full"
             >
@@ -87,10 +90,10 @@ export function PaymentElementAction({
             }}
           />
         );
-      
+
       case "SIMULATOR":
         return null;
-      
+
       default:
         return (
           <Card>
@@ -109,7 +112,8 @@ export function PaymentElementAction({
       <div className="text-center">
         <h3 className="text-lg font-semibold">Complete Your Payment</h3>
         <p className="text-sm text-gray-500 mt-2">
-          Order ID: {orderId} | Gateway: {selectedPaymentGateway?.name || gatewayCode}
+          Order ID: {orderId} | Gateway:{" "}
+          {selectedPaymentGateway?.name || gatewayCode}
         </p>
       </div>
 

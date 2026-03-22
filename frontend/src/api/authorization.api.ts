@@ -1,5 +1,9 @@
 import { AUTHORIZATION_API_BASE_URL } from "@/config/env.config";
-import type { ChangePasswordRequest, LoginRequest, LoginResponse } from "@/interfaces/authorization.interface";
+import type {
+  ChangePasswordRequest,
+  LoginRequest,
+  LoginResponse,
+} from "@/interfaces/authorization.interface";
 import { ApiResponse } from "./apiClient";
 import { BaseApi } from "./base.api";
 
@@ -12,15 +16,21 @@ export class AuthorizationApi extends BaseApi {
     return this.post<LoginResponse>("/authentication/login", request);
   }
 
-  async refreshToken(refreshToken: string): Promise<ApiResponse<LoginResponse>> {
-    return this.post<LoginResponse>("/authentication/refresh-token", { refreshToken });
+  async refreshToken(
+    refreshToken: string,
+  ): Promise<ApiResponse<LoginResponse>> {
+    return this.post<LoginResponse>("/authentication/refresh-token", {
+      refreshToken,
+    });
   }
 
   async logout(): Promise<ApiResponse<void>> {
     return this.post<void>("/authentication/logout");
   }
 
-  async changePassword(request: ChangePasswordRequest): Promise<ApiResponse<void>> {
+  async changePassword(
+    request: ChangePasswordRequest,
+  ): Promise<ApiResponse<void>> {
     return this.post<void>("/authentication/change-password", request);
   }
 

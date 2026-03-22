@@ -169,6 +169,8 @@ global:
     username: &defaultUsername YXRsYXM=
     password: &defaultPassword QXRsYXNAMTIzNDU2
 
+  springProfilesActive: dev
+
 # App stack config
 # --------------------------------------------------------------------------------------------------
 

@@ -717,5 +717,5 @@ const OrderHistoryPageWrapper: React.FC = () => {
 // Export with authentication HOC that requires USER role
 export default withAuth(OrderHistoryPageWrapper, {
   requireAuth: true,
-  allowedRoles: ["USER"],
+  allowedRoles: ["USER", "ADMIN"],
 });

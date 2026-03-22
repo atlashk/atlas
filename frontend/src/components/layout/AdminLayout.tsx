@@ -25,13 +25,20 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-  SidebarTrigger
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import ChangePasswordDialog from "@/components/user/ChangePasswordDialog";
 import { useUserStore } from "@/stores/user.store";
 import { IDP } from "@/config/env.config";
 import { logoutWithKeycloak } from "@/lib/keycloak";
-import { KeyRound, LogOut, Package, ShoppingCart, User as UserIcon, Users } from "lucide-react";
+import {
+  KeyRound,
+  LogOut,
+  Package,
+  ShoppingCart,
+  User as UserIcon,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useMemo, useState } from "react";
@@ -60,7 +67,7 @@ const menuItems = [
 
 function AppSidebar() {
   const pathname = usePathname();
-  
+
   return (
     <Sidebar>
       {/* Logo Section */}
@@ -71,7 +78,7 @@ function AppSidebar() {
           </div>
         </Link>
       </div>
-      
+
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
@@ -101,7 +108,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   const displayName = useMemo(() => {
     if (!profile) return "Account";
-    if (profile.firstName && profile.lastName) return `${profile.firstName} ${profile.lastName}`;
+    if (profile.firstName && profile.lastName)
+      return `${profile.firstName} ${profile.lastName}`;
     return profile.email || "Account";
   }, [profile]);
 
@@ -117,40 +125,40 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const handleOpenChangePassword = () => {
     setIsChangePasswordOpen(true);
   };
-  
+
   // Function to get breadcrumb text based on current path
   const getBreadcrumbText = () => {
     switch (pathname) {
-      case '/':
-      case '/admin':
-      case '/admin/dashboard':
-        return 'Dashboard';
-      case '/admin/user':
-        return 'User Management';
-      case '/admin/product':
-        return 'Product Management';
-      case '/admin/order':
-        return 'Order Management';
+      case "/":
+      case "/admin":
+      case "/admin/dashboard":
+        return "Dashboard";
+      case "/admin/user":
+        return "User Management";
+      case "/admin/product":
+        return "Product Management";
+      case "/admin/order":
+        return "Order Management";
       default:
-        if (pathname.startsWith('/admin/product/')) {
-          if (pathname.includes('/edit')) {
-            return 'Edit Product';
+        if (pathname.startsWith("/admin/product/")) {
+          if (pathname.includes("/edit")) {
+            return "Edit Product";
           }
-          if (pathname.endsWith('/add')) {
-            return 'Add Product';
+          if (pathname.endsWith("/add")) {
+            return "Add Product";
           }
-          return 'Product Details';
+          return "Product Details";
         }
-        if (pathname.startsWith('/admin/user/')) {
-          if (pathname.includes('/edit')) {
-            return 'Edit User';
+        if (pathname.startsWith("/admin/user/")) {
+          if (pathname.includes("/edit")) {
+            return "Edit User";
           }
-          if (pathname.endsWith('/add')) {
-            return 'Add User';
+          if (pathname.endsWith("/add")) {
+            return "Add User";
           }
-          return 'User Management';
+          return "User Management";
         }
-        return 'Dashboard';
+        return "Dashboard";
     }
   };
 
@@ -165,7 +173,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbPage className="font-semibold">{getBreadcrumbText()}</BreadcrumbPage>
+                  <BreadcrumbPage className="font-semibold">
+                    {getBreadcrumbText()}
+                  </BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -194,13 +204,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </header>
         <div className="flex flex-col h-full">
           <div className="flex-1 flex flex-col">
-            <div className="flex-1 p-4">
-              {children}
-            </div>
+            <div className="flex-1 p-4">{children}</div>
           </div>
         </div>
       </SidebarInset>
-      <ChangePasswordDialog open={isChangePasswordOpen} onOpenChange={setIsChangePasswordOpen} />
+      <ChangePasswordDialog
+        open={isChangePasswordOpen}
+        onOpenChange={setIsChangePasswordOpen}
+      />
     </SidebarProvider>
   );
 }

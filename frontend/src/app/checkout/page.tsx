@@ -4,7 +4,7 @@ import { orderApi } from "@/api/order.api";
 import { CheckoutForm } from "@/components/checkout/CheckoutForm";
 import { CheckoutProgress } from "@/components/checkout/CheckoutProgress";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
-import { withAuth } from '@/hoc/withAuth';
+import { withAuth } from "@/hoc/withAuth";
 import { useCheckoutState } from "@/hooks/useCheckoutState";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { useOrderStatusPolling } from "@/hooks/useOrderStatusPolling";
@@ -56,7 +56,9 @@ function CheckoutPageContent() {
     country: "",
     postalCode: "",
   });
-  const [addressErrors, setAddressErrors] = useState<Record<string, string>>({});
+  const [addressErrors, setAddressErrors] = useState<Record<string, string>>(
+    {},
+  );
 
   // Ref to prevent multiple payment completion calls
   const paymentCompletedRef = useRef(false);
@@ -85,18 +87,18 @@ function CheckoutPageContent() {
       paymentCompletedRef.current = false;
 
       // Only load cart if we don't have it yet and not currently loading
-       if (!cart && !isCartLoading) {
-         try {
-           await loadCart();
-         } catch (error) {
-           console.error("Failed to load cart data:", error);
-           toast.error("Failed to load cart data");
-         }
-       }
-     };
+      if (!cart && !isCartLoading) {
+        try {
+          await loadCart();
+        } catch (error) {
+          console.error("Failed to load cart data:", error);
+          toast.error("Failed to load cart data");
+        }
+      }
+    };
 
-     loadData();
-   }, [cart, isCartLoading, loadCart]);
+    loadData();
+  }, [cart, isCartLoading, loadCart]);
 
   // Get actual cart total
   const cartTotal = getCartTotal();
@@ -146,7 +148,7 @@ function CheckoutPageContent() {
 
   const validateAddress = () => {
     const errors: Record<string, string> = {};
-    
+
     if (!address.street.trim()) {
       errors.street = "Street address is required";
     }
@@ -159,7 +161,7 @@ function CheckoutPageContent() {
     if (!address.postalCode.trim()) {
       errors.postalCode = "Postal code is required";
     }
-    
+
     setAddressErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -200,9 +202,9 @@ function CheckoutPageContent() {
     if (paymentCompletedRef.current) {
       return;
     }
-    
+
     paymentCompletedRef.current = true;
-    
+
     // Toast is now handled by CheckoutProgress when order status becomes FULFILLED
     // Clear cart state when payment is complete
     useCartStore.getState().clearCartState();
@@ -286,4 +288,7 @@ function CheckoutPageWrapper() {
 }
 
 // Export with authentication HOC that requires USER role
-export default withAuth(CheckoutPageWrapper, { requireAuth: true, allowedRoles: ['USER'] });
+export default withAuth(CheckoutPageWrapper, {
+  requireAuth: true,
+  allowedRoles: ["USER", "ADMIN"],
+});

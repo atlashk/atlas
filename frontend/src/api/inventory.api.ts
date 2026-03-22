@@ -16,17 +16,19 @@ export class InventoryApi extends BaseApi {
     super("/services/inventory/api");
   }
 
-  async retrieveStock(productId: string): Promise<ApiResponse<RetrieveStockResponse>> {
+  async retrieveStock(
+    productId: string,
+  ): Promise<ApiResponse<RetrieveStockResponse>> {
     return this.get<RetrieveStockResponse>(`/stocks/admin/${productId}`);
   }
 
   async updateAvailableQuantity(
     productId: string,
-    request: UpdateAvailableQuantityRequest
+    request: UpdateAvailableQuantityRequest,
   ): Promise<ApiResponse<void>> {
     return this.put<void, UpdateAvailableQuantityRequest>(
       `/stocks/admin/${productId}/available-quantity`,
-      request
+      request,
     );
   }
 }

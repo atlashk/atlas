@@ -43,6 +43,8 @@ spec:
               containerPort: {{ .Values.catalogSvc.service.ports.grpc }}
             {{- end }}
           env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: {{ .Values.global.springProfilesActive | quote }}
             {{- if eq .Values.appStack.datasource "mysql" }}
             - name: DB_URL
               value: "jdbc:mysql://{{ lower $.Release.Name }}-mysql:{{ .Values.mysql.service.ports.mysql }}/db_catalog?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"

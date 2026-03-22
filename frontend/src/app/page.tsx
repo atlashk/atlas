@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React, { Suspense } from 'react';
-import { ProductSearch } from '../components/product';
-import { Spinner } from '../components/ui/spinner';
-import { useAuthRedirect } from '@/hooks/useAuthRedirect';
+import React, { Suspense } from "react";
+import { ProductSearch } from "../components/product";
+import { Spinner } from "../components/ui/spinner";
+import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 
 const StoreFront: React.FC = () => {
   const isHydrated = true;

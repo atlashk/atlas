@@ -41,7 +41,9 @@ const productSchema = z.object({
   type: z.string().min(1, "Product type is required"),
   price: z.number().min(0, "Price must be greater than or equal to 0"),
   publishedAt: z.string().min(1, "Published at date is required"),
-  initialQuantity: z.number().min(0, "Initial quantity must be greater than or equal to 0"),
+  initialQuantity: z
+    .number()
+    .min(0, "Initial quantity must be greater than or equal to 0"),
   brandId: z.string().min(1, "Please select a brand"),
   categoryIds: z
     .array(z.string())
@@ -53,7 +55,7 @@ const productSchema = z.object({
     z.object({
       name: z.string().min(1, "Attribute name is required"),
       value: z.string().min(1, "Attribute value is required"),
-    })
+    }),
   ),
 });
 
@@ -106,7 +108,7 @@ function AdminProductAddPage() {
 
       if (!categoriesResponse.success) {
         throw new Error(
-          categoriesResponse.errorMessage || "Failed to load categories"
+          categoriesResponse.errorMessage || "Failed to load categories",
         );
       }
 
@@ -194,7 +196,7 @@ function AdminProductAddPage() {
     try {
       // Filter out empty attributes
       const filteredAttributes = data.attributes.filter(
-        (attr) => attr.name.trim() && attr.value.trim()
+        (attr) => attr.name.trim() && attr.value.trim(),
       );
 
       const formData: CreateProductRequest = {
@@ -203,7 +205,10 @@ function AdminProductAddPage() {
         publishedAt: new Date(data.publishedAt).toISOString(),
       };
 
-      const response = await catalogApi.createProduct(formData, imageFile ?? undefined);
+      const response = await catalogApi.createProduct(
+        formData,
+        imageFile ?? undefined,
+      );
 
       if (response.success) {
         toast.success("Product created successfully!");
@@ -295,11 +300,13 @@ function AdminProductAddPage() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {Object.entries(productTypes).map(([typeKey, typeLabel]) => (
-                              <SelectItem key={typeKey} value={typeKey}>
-                                {typeLabel}
-                              </SelectItem>
-                            ))}
+                            {Object.entries(productTypes).map(
+                              ([typeKey, typeLabel]) => (
+                                <SelectItem key={typeKey} value={typeKey}>
+                                  {typeLabel}
+                                </SelectItem>
+                              ),
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -394,7 +401,7 @@ function AdminProductAddPage() {
                             </span>
                           </div>
                         ) : (
-                          <Select value="placeholder" onValueChange={() => { }}>
+                          <Select value="placeholder" onValueChange={() => {}}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue>
@@ -408,34 +415,35 @@ function AdminProductAddPage() {
                               {categories.map((category) => {
                                 const categoryId = category.id.toString();
                                 return (
-                                <label
-                                  key={category.id}
-                                  className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                    checked={field.value.includes(categoryId)}
-                                    onChange={(e) => {
-                                      if (e.target.checked) {
-                                        field.onChange([
-                                          ...field.value,
-                                          categoryId,
-                                        ]);
-                                      } else {
-                                        field.onChange(
-                                          field.value.filter(
-                                            (id) => id !== categoryId
-                                          )
-                                        );
-                                      }
-                                    }}
-                                  />
-                                  <span className="text-sm">
-                                    {category.name}
-                                  </span>
-                                </label>
-                              )})}
+                                  <label
+                                    key={category.id}
+                                    className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                      checked={field.value.includes(categoryId)}
+                                      onChange={(e) => {
+                                        if (e.target.checked) {
+                                          field.onChange([
+                                            ...field.value,
+                                            categoryId,
+                                          ]);
+                                        } else {
+                                          field.onChange(
+                                            field.value.filter(
+                                              (id) => id !== categoryId,
+                                            ),
+                                          );
+                                        }
+                                      }}
+                                    />
+                                    <span className="text-sm">
+                                      {category.name}
+                                    </span>
+                                  </label>
+                                );
+                              })}
                             </SelectContent>
                           </Select>
                         )}

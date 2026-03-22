@@ -1,12 +1,14 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { orderApi } from '@/api/order.api';
-import { OrderStatusResponse } from '@/interfaces/order.interface';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { orderApi } from "@/api/order.api";
+import { OrderStatusResponse } from "@/interfaces/order.interface";
 
 const POLLING_INTERVAL_MS = 2000;
 const MAX_POLLING_DURATION_MS = 15 * 60 * 1000;
 
 export function useOrderStatusPolling(orderId: string | null) {
-  const [orderStatus, setOrderStatus] = useState<OrderStatusResponse | null>(null);
+  const [orderStatus, setOrderStatus] = useState<OrderStatusResponse | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -41,19 +43,19 @@ export function useOrderStatusPolling(orderId: string | null) {
 
     try {
       const response = await orderApi.retrieveOrderStatus(currentOrderId);
-      
+
       if (response.success && response.data) {
         orderStatusRef.current = response.data;
         setOrderStatus(response.data);
 
-        if (['FULFILLED', 'CANCELED'].includes(response.data.status)) {
+        if (["FULFILLED", "CANCELED"].includes(response.data.status)) {
           setIsLoading(false);
           stopPolling();
           return;
         }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : "Unknown error");
       setIsLoading(false);
       stopPolling();
     }
@@ -69,8 +71,10 @@ export function useOrderStatusPolling(orderId: string | null) {
     stopPolling();
     isPollingRef.current = true;
     timeoutRef.current = setTimeout(() => {
-      if (orderStatusRef.current?.status !== 'FULFILLED') {
-        setError('Order processing timed out after 15 minutes. Please try again or check your order history.');
+      if (orderStatusRef.current?.status !== "FULFILLED") {
+        setError(
+          "Order processing timed out after 15 minutes. Please try again or check your order history.",
+        );
         setIsLoading(false);
         stopPolling();
       }
@@ -110,7 +114,8 @@ export function useOrderStatusPolling(orderId: string | null) {
   }, [orderId, schedulePolling, stopPolling]);
 
   // Helper function to check if payment processing is needed
-  const needsPaymentProcessing = orderStatus?.status === 'AWAITING_PAYMENT_PROCESSED';
+  const needsPaymentProcessing =
+    orderStatus?.status === "AWAITING_PAYMENT_PROCESSED";
 
   return {
     orderStatus,
@@ -119,6 +124,6 @@ export function useOrderStatusPolling(orderId: string | null) {
     needsPaymentProcessing,
     startPolling,
     stopPolling,
-    reset
+    reset,
   };
 }

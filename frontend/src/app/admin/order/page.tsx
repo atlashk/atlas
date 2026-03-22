@@ -57,7 +57,7 @@ const OrderList: React.FC = () => {
   const [isLoadingOrders, setIsLoadingOrders] = useState(true);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [orderStatuses, setOrderStatuses] = useState<Record<string, string>>(
-    {}
+    {},
   );
   const [isLoadingOrderStatuses, setIsLoadingOrderStatuses] = useState(false);
   const [filter, setFilter] = useState<RetrieveOrderListFilter>({
@@ -93,14 +93,14 @@ const OrderList: React.FC = () => {
         ? "Start date cannot be after end date"
         : null;
     },
-    []
+    [],
   );
 
   const toggleDetails = useCallback(
     (orderId: string) => {
       setSelectedOrderId(selectedOrderId === orderId ? null : orderId);
     },
-    [selectedOrderId]
+    [selectedOrderId],
   );
 
   const loadOrderStatuses = useCallback(async () => {
@@ -137,10 +137,7 @@ const OrderList: React.FC = () => {
         const apiFilter: RetrieveOrderListFilter = { ...updatedFilter };
         Object.keys(apiFilter).forEach((key) => {
           const typedKey = key as keyof RetrieveOrderListFilter;
-          if (
-            apiFilter[typedKey] === "" ||
-            apiFilter[typedKey] === undefined
-          ) {
+          if (apiFilter[typedKey] === "" || apiFilter[typedKey] === undefined) {
             delete apiFilter[typedKey];
           }
         });
@@ -164,7 +161,7 @@ const OrderList: React.FC = () => {
         setIsLoadingOrders(false);
       }
     },
-    [filter]
+    [filter],
   );
 
   const changePage = useCallback(
@@ -173,7 +170,7 @@ const OrderList: React.FC = () => {
         applyFilter(newPage);
       }
     },
-    [metadata.totalPages, applyFilter]
+    [metadata.totalPages, applyFilter],
   );
 
   const resetFilter = useCallback(() => {
@@ -195,11 +192,11 @@ const OrderList: React.FC = () => {
   const handleFilterChange = useCallback(
     (
       field: keyof RetrieveOrderListFilter,
-      value: string | number | boolean | undefined
+      value: string | number | boolean | undefined,
     ) => {
       setFilter((prev) => ({ ...prev, [field]: value }));
     },
-    []
+    [],
   );
 
   const handleSearch = useCallback(() => {
@@ -315,7 +312,7 @@ const OrderList: React.FC = () => {
                       <SelectItem key={statusKey} value={statusKey}>
                         {statusLabel}
                       </SelectItem>
-                    )
+                    ),
                   )}
                 </SelectContent>
               </Select>
@@ -500,7 +497,7 @@ const OrderList: React.FC = () => {
                                                 </TableCell>
                                                 <TableCell className="text-gray-700">
                                                   {formatCurrency(
-                                                    item.product.price
+                                                    item.product.price,
                                                   )}
                                                 </TableCell>
                                                 <TableCell className="text-center">
@@ -509,11 +506,11 @@ const OrderList: React.FC = () => {
                                                 <TableCell className="font-semibold text-gray-900">
                                                   {formatCurrency(
                                                     item.product.price *
-                                                      item.quantity
+                                                      item.quantity,
                                                   )}
                                                 </TableCell>
                                               </TableRow>
-                                            )
+                                            ),
                                           )}
                                         </TableBody>
                                       </Table>
@@ -693,8 +690,8 @@ const OrderList: React.FC = () => {
                       1,
                       Math.min(
                         metadata.totalPages - 4,
-                        metadata.currentPage - 2
-                      )
+                        metadata.currentPage - 2,
+                      ),
                     ) + i;
 
                   if (pageNumber <= metadata.totalPages) {
@@ -714,7 +711,7 @@ const OrderList: React.FC = () => {
                     );
                   }
                   return null;
-                }
+                },
               )}
 
               <PaginationItem>
