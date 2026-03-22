@@ -29,20 +29,21 @@ Shared backend capabilities are implemented as reusable Gradle modules under `ba
 
 ### Backend
 
-- **Core**: Java 17, Spring Boot 4.0.3, Spring Cloud 2025.1.0, Gradle multi-module
-- **API & Communication**: Spring MVC REST, Spring Cloud Gateway (WebFlux), gRPC, springdoc OpenAPI
-- **Security**: Spring Security, OAuth2 Authorization Server, JWT, optional Keycloak adapter
-- **Data & Infra**: MySQL/PostgreSQL, Redis, Kafka/RabbitMQ, Elasticsearch, MinIO
-- **Patterns**: Saga, Outbox, modular adapters selected by app-stack
-- **Observability**: Actuator, Logback, Prometheus, Loki/Promtail, Zipkin, Grafana
-- **Utilities**: Flyway, Quartz, MapStruct, Lombok
+- **Core**: Java 17, Spring Boot 4.0.3, Spring Cloud 2025.1.0.
+- **API & Communication**: REST, gRPC, OpenAPI, Spring Cloud Gateway Reactive.
+- **Security**: Spring Security, JWT, OAuth2, Keycloak.
+- **Data & Infra**: MySQL, PostgreSQL, Redis, Kafka, RabbitMQ, Elasticsearch, MinIO.
+- **Containerization**: Docker, Docker Compose, Kubernetes, Helm.
+- **Observability**: Actuator, Logback, Loki/Promtail, Prometheus, OpenTelemetry collector, Tempo, Zipkin, Grafana.
+- **Patterns**: Hexagonal, Saga Orchestration, Outbox pattern, etc.
+- **Utilities**: Jackson3, Flyway, Quartz, MapStruct, Lombok.
 
 ### Frontend
 
 - **Framework**: Next.js 16.1.6 (React 19.2.3), TypeScript
-- **UI**: Tailwind CSS v4, shadcn/ui, Radix/Base UI
-- **State & Forms**: Zustand, React Hook Form, Zod
-- **API**: Axios
+- **UI**: Tailwind CSS v4, shadcn/ui, Radix/Base UI.
+- **Form and Validation**: React Hook Form, Zod.
+- **State Management**: Zustand.
 
 ## Project Structure
 
@@ -204,7 +205,7 @@ Atlas provides an **app-stack** mechanism. Each app stack is a named profile tha
 
 1. Which options are selected for **backend capabilities** (datasource, messaging, storage, observability, etc.), via a YAML configuration file under `backend/app-stack/config/` (for example: `app-stack.local.compose.yml`).
 
-List of options for each capability:
+List of options for each capability sorted alphabetically:
 
 | Capability | Options | Description |
 |---|---|---|
@@ -220,13 +221,13 @@ List of options for each capability:
 | `notification.email` | `spring` \| `sendgrid` | Outbound email delivery provider |
 | `observability.logging.framework` | `logback` | Application logging framework |
 | `observability.logging.stack` | `none` \| `loki` | Centralized log aggregation stack |
-| `observability.metrics` | `none` \| `prometheus` | Metrics scraping tool |
-| `observability.tracing` | `none` \| `zipkin` \| `tempo` | Distributed tracing tool |
+| `observability.metrics` | `none` \| `prometheus` | Metrics scraping and storage |
+| `observability.tracing` | `none` \| `zipkin` \| `tempo` | Distributed tracing backend |
 | `persistence` | `jpa` | Persistence access style for data layer |
 | `redis` | `standalone` \| `cluster` | Redis deployment topology |
 | `scheduler` | `spring` \| `quartz` | Scheduled job execution engine |
-| `service-discovery` | `eureka` \| `kubernetes` | Service registration and discovery |
-| `search` | `elasticsearch` | Full-text search service |
+| `service-discovery` | `eureka` \| `kubernetes` | Service discovery |
+| `search` | `elasticsearch` | Full-text search engine |
 | `storage` | `minio` \| `filesystem` | Object/file storage service |
 | `template` | `freemarker` \| `thymeleaf` | Server-side template engine |
 
@@ -237,7 +238,7 @@ The followings are built-in app stacks:
 | App stack | Deployment Type | How to run |
 | --- | --- | --- |
 | `local.compose` | Docker Compose. Templates are written by [Handlebars](https://handlebarsjs.com/) | `./install.sh` |
-| `local.dev` | Docker Compose (without microservices, useful for development in IDE). This is the default deployment type. | `./install.sh --app-stack=local.dev` |
+| `local.dev` | Similar to `local.compose`, but only includes infrastructure services. Used for development and debugging. This is the default deployment type. | `./install.sh --app-stack=local.dev` |
 | `local.k8s` | Kubernetes using Helm chart | `./install.sh --app-stack=local.k8s` |
 
 So, how does it work?
