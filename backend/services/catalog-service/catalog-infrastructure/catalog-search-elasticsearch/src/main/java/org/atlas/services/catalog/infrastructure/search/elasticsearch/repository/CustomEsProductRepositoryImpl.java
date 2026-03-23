@@ -9,7 +9,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import lombok.RequiredArgsConstructor;
 import org.atlas.services.catalog.infrastructure.search.elasticsearch.document.EsProduct;
-import org.atlas.services.catalog.port.out.search.SearchProductCriteria;
+import org.atlas.services.catalog.port.out.search.ProductSearchService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
@@ -19,12 +19,11 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class CustomEsProductRepositoryImpl implements
-    CustomEsProductRepository {
+public class CustomEsProductRepositoryImpl implements CustomEsProductRepository {
 
   private final ElasticsearchOperations elasticsearchOperations;
 
-  public SearchHits<EsProduct> search(SearchProductCriteria criteria,
+  public SearchHits<EsProduct> search(ProductSearchService.SearchCriteria criteria,
       Pageable pageable) {
     // Build dynamic search query using NativeQuery with Elasticsearch Java client
     NativeQueryBuilder queryBuilder = NativeQuery.builder();

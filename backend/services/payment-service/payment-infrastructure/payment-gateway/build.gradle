@@ -40,7 +40,6 @@ jar {
     enabled = true
 }
 
-
 idea {
     module {
         downloadJavadoc = true

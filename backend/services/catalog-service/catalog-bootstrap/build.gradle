@@ -47,6 +47,12 @@ dependencyManagement {
 
 dependencyManagement {
   imports {
+    mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
+  }
+}
+
+dependencyManagement {
+  imports {
     mavenBom "org.springframework.grpc:spring-grpc-dependencies:${springGrpcVersion}"
   }
 }

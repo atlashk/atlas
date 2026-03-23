@@ -45,12 +45,6 @@ dependencyManagement {
     }
 }
 
-dependencyManagement {
-  imports {
-    mavenBom "org.springframework.grpc:spring-grpc-dependencies:${springGrpcVersion}"
-  }
-}
-
 idea {
     module {
         downloadJavadoc = true

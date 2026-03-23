@@ -103,7 +103,6 @@ dependencyManagement {
     }
 }
 
-
 idea {
     module {
         downloadJavadoc = true

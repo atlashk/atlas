@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -12,6 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.framework.domain.entity.DomainEntity;
+import org.atlas.libs.framework.util.CollectionUtil;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -69,5 +71,21 @@ public class ProductEntity extends DomainEntity {
       categories = new ArrayList<>();
     }
     categories.add(category);
+  }
+  
+  public String getBrandName() {
+    if (brand == null) {
+      return null;
+    }
+    return brand.getName();
+  }
+  
+  public String getCategoryNames() {
+    if (CollectionUtil.isEmpty(categories)) {
+      return null;
+    }
+    return categories.stream()
+        .map(CategoryEntity::getName)
+        .collect(Collectors.joining(","));
   }
 }

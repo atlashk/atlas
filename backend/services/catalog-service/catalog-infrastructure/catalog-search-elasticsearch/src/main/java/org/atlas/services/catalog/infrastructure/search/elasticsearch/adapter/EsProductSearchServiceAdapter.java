@@ -9,9 +9,7 @@ import org.atlas.services.catalog.domain.entity.ProductEntity;
 import org.atlas.services.catalog.infrastructure.search.elasticsearch.document.EsProduct;
 import org.atlas.services.catalog.infrastructure.search.elasticsearch.mapper.EsProductMapper;
 import org.atlas.services.catalog.infrastructure.search.elasticsearch.repository.EsProductRepository;
-import org.atlas.services.catalog.port.out.search.SearchIndex;
-import org.atlas.services.catalog.port.out.search.SearchProductCriteria;
-import org.atlas.services.catalog.port.out.search.SearchService;
+import org.atlas.services.catalog.port.out.search.ProductSearchService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -21,23 +19,23 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class EsSearchServiceAdapter implements SearchService {
+public class EsProductSearchServiceAdapter implements ProductSearchService {
 
   private final EsProductRepository elasticsearchProductRepository;
   private final ElasticsearchOperations elasticsearchOperations;
 
+  private static final String INDEX_NAME = "product";
+
+  /**
+   * Create index if not exist
+   */
   @Override
-  public boolean createIndex(SearchIndex index) {
-    if (index == null) {
-      throw new IllegalArgumentException("Search index cannot be null");
-    }
-
-    IndexOperations indexOps = createIndexOperation(index);
-
+  public boolean createIndex() {
+    IndexOperations indexOps = elasticsearchOperations.indexOps(EsProduct.class);
     if (!indexOps.exists()) {
       boolean created = indexOps.create();
       if (!created) {
-        throw new RuntimeException("Failed to create search index: " + index);
+        throw new RuntimeException("Failed to create search index: " + INDEX_NAME);
       }
 
       indexOps.putMapping();
@@ -48,13 +46,12 @@ public class EsSearchServiceAdapter implements SearchService {
   }
 
   @Override
-  public long countDocuments(SearchIndex index) {
+  public long countDocuments() {
     return elasticsearchProductRepository.count();
   }
 
   @Override
-  public PagingResult<String> search(SearchProductCriteria criteria,
-      PagingRequest pagingRequest) {
+  public PagingResult<String> search(SearchCriteria criteria, PagingRequest pagingRequest) {
     Pageable pageable = PageRequest.of(pagingRequest.getPage(), pagingRequest.getSize());
 
     SearchHits<EsProduct> searchHits = elasticsearchProductRepository.search(criteria,
@@ -94,16 +91,5 @@ public class EsSearchServiceAdapter implements SearchService {
             String.format("Product %s does not exist in search index", productId)));
 
     elasticsearchProductRepository.deleteById(esProduct.getId());
-  }
-
-  private IndexOperations createIndexOperation(SearchIndex index) {
-    IndexOperations indexOperations;
-    if (SearchIndex.PRODUCT.equals(index)) {
-      indexOperations = elasticsearchOperations.indexOps(EsProduct.class);
-    } else {
-      throw new UnsupportedOperationException(
-          String.format("Search index %s is not supported yet", index));
-    }
-    return indexOperations;
   }
 }

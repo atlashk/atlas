@@ -3,15 +3,14 @@ package org.atlas.services.catalog.application.product.initializer;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.libs.framework.util.StopWatch;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.PagingUtil;
 import org.atlas.libs.framework.util.SleepUtil;
+import org.atlas.libs.framework.util.StopWatch;
 import org.atlas.services.catalog.domain.entity.ProductEntity;
 import org.atlas.services.catalog.port.out.repository.ProductRepository;
-import org.atlas.services.catalog.port.out.search.SearchIndex;
-import org.atlas.services.catalog.port.out.search.SearchService;
+import org.atlas.services.catalog.port.out.search.ProductSearchService;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -20,12 +19,12 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConditionalOnBean(SearchService.class)
+@ConditionalOnBean(ProductSearchService.class)
 @RequiredArgsConstructor
 @Slf4j
 public class ProductSearchDataInitializer {
 
-  private final ObjectProvider<SearchService> searchServiceProvider;
+  private final ObjectProvider<ProductSearchService> searchServiceProvider;
   private final ProductRepository productRepository;
 
   private static final int BATCH_SIZE = 100;
@@ -33,8 +32,8 @@ public class ProductSearchDataInitializer {
   @EventListener(ApplicationReadyEvent.class)
   public void initialize(ApplicationReadyEvent event) {
     try {
-      SearchService searchService = searchServiceProvider.getIfAvailable();
-      if (searchService != null) {
+      ProductSearchService productSearchService = searchServiceProvider.getIfAvailable();
+      if (productSearchService != null) {
         initializeSearchData();
       }
     } catch (Exception e) {
@@ -45,16 +44,16 @@ public class ProductSearchDataInitializer {
   }
 
   private void initializeSearchData() {
-    SearchService searchService = searchServiceProvider.getObject();
+    ProductSearchService productSearchService = searchServiceProvider.getObject();
 
     // Create index if not exist
-    boolean createdIndex = searchService.createIndex(SearchIndex.PRODUCT);
+    boolean createdIndex = productSearchService.createIndex();
     if (!createdIndex) {
       log.info("Index of product has been created");
     }
 
     // Count documents to determine if initialization is needed
-    long documentCount = searchService.countDocuments(SearchIndex.PRODUCT);
+    long documentCount = productSearchService.countDocuments();
     if (documentCount > 0) {
       log.info("Product data has been already initialized");
       return;
@@ -93,7 +92,7 @@ public class ProductSearchDataInitializer {
         }
 
         // Initialize product batch to search engine
-        searchService.saveAll(products);
+        productSearchService.saveAll(products);
         initializedCount += products.size();
 
         batchStopWatch.stop();

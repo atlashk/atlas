@@ -35,7 +35,7 @@ import org.atlas.services.catalog.port.out.file.model.ProductWriteRow;
 import org.atlas.services.catalog.port.out.file.pdf.ProductPdfWriter;
 import org.atlas.services.catalog.port.out.messaging.ProductEventMessagePublisher;
 import org.atlas.services.catalog.port.out.repository.ProductRepository;
-import org.atlas.services.catalog.port.out.search.SearchService;
+import org.atlas.services.catalog.port.out.search.ProductSearchService;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -51,7 +51,7 @@ public class ProductAdminServiceImpl implements ProductAdminService {
   private final ProductImageService productImageService;
   private final SequenceGenerator sequenceGenerator;
   private final ProductEventMessagePublisher productEventMessagePublisher;
-  private final ObjectProvider<SearchService> searchServiceProvider;
+  private final ObjectProvider<ProductSearchService> searchServiceProvider;
   private final CacheService cacheService;
   private final ProductCsvReader productCsvReader;
   private final ProductExcelReader productExcelReader;
@@ -108,9 +108,9 @@ public class ProductAdminServiceImpl implements ProductAdminService {
     log.debug("Product image uploaded: id={}", product.getId());
 
     // Create search document (if search service is available)
-    SearchService searchService = searchServiceProvider.getIfAvailable();
-    if (searchService != null) {
-      searchService.save(product);
+    ProductSearchService productSearchService = searchServiceProvider.getIfAvailable();
+    if (productSearchService != null) {
+      productSearchService.save(product);
       log.debug("Search document created for product: id={}", product.getId());
     }
 
@@ -139,9 +139,9 @@ public class ProductAdminServiceImpl implements ProductAdminService {
     }
 
     // Update search document (if search service is available)
-    SearchService searchService = searchServiceProvider.getIfAvailable();
-    if (searchService != null) {
-      searchService.save(product);
+    ProductSearchService productSearchService = searchServiceProvider.getIfAvailable();
+    if (productSearchService != null) {
+      productSearchService.save(product);
       log.debug("Search document updated for product: id={}", product.getId());
     }
 
@@ -174,9 +174,9 @@ public class ProductAdminServiceImpl implements ProductAdminService {
     log.debug("Product image deleted: id={}", product.getId());
 
     // Delete search document (if search service is available)
-    SearchService searchService = searchServiceProvider.getIfAvailable();
-    if (searchService != null) {
-      searchService.delete(product.getId());
+    ProductSearchService productSearchService = searchServiceProvider.getIfAvailable();
+    if (productSearchService != null) {
+      productSearchService.delete(product.getId());
       log.debug("Search document deleted for product: id={}", product.getId());
     }
 

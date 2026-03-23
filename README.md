@@ -29,14 +29,14 @@ Shared backend capabilities are implemented as reusable Gradle modules under `ba
 
 ### Backend
 
-- **Core**: Java 17, Spring Boot 4.0.3, Spring Cloud 2025.1.0.
+- **Core**: Java 17, Spring Boot 4.0.4, Spring Cloud 2025.1.0.
+- **Architecture & Patterns**: Hexagonal, Microservices, Saga Orchestration, Outbox pattern, etc.
 - **API & Communication**: REST, gRPC, OpenAPI, Spring Cloud Gateway Reactive.
 - **Security**: Spring Security, JWT, OAuth2, Keycloak.
 - **Data & Infra**: MySQL, PostgreSQL, Redis, Kafka, RabbitMQ, Elasticsearch, MinIO.
 - **Containerization**: Docker, Docker Compose, Kubernetes, Helm.
 - **Observability**: Actuator, Logback, Loki/Promtail, Prometheus, OpenTelemetry collector, Tempo, Zipkin, Grafana.
-- **Patterns**: Hexagonal, Saga Orchestration, Outbox pattern, etc.
-- **Utilities**: Jackson3, Flyway, Quartz, MapStruct, Lombok.
+- **Utilities**: Jackson 3, Flyway, Quartz, MapStruct, Lombok.
 
 ### Frontend
 
