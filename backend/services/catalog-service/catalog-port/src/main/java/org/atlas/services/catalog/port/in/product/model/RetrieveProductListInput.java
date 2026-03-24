@@ -36,6 +36,5 @@ public class RetrieveProductListInput {
 
     DATABASE, // Database dynamic search
     SEARCH, // Full-text search
-    LLM, // LLM models
   }
 }

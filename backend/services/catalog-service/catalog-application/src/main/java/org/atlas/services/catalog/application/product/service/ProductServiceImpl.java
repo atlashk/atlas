@@ -1,6 +1,7 @@
 package org.atlas.services.catalog.application.product.service;
 
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.cache.Cache;
@@ -11,10 +12,9 @@ import org.atlas.services.catalog.application.product.mapper.ProductMapper;
 import org.atlas.services.catalog.domain.entity.ProductEntity;
 import org.atlas.services.catalog.domain.error.CatalogDomainError;
 import org.atlas.services.catalog.port.in.product.model.RetrieveProductListInput;
+import org.atlas.services.catalog.port.in.product.model.RetrieveProductListInput.Mode;
 import org.atlas.services.catalog.port.in.product.service.ProductImageService;
 import org.atlas.services.catalog.port.in.product.service.ProductService;
-import org.atlas.services.catalog.port.out.ai.rag.model.ChatInput;
-import org.atlas.services.catalog.port.out.ai.rag.service.ProductRagService;
 import org.atlas.services.catalog.port.out.repository.ProductRepository;
 import org.atlas.services.catalog.port.out.search.ProductSearchService;
 import org.springframework.beans.factory.ObjectProvider;
@@ -28,23 +28,14 @@ public class ProductServiceImpl implements ProductService {
   private final ProductRepository productRepository;
   private final ProductImageService productImageService;
   private final ObjectProvider<ProductSearchService> searchServiceProvider;
-  private final ProductRagService productRagService;
-
-  private static final String PROMPT_TEMPLATE = """
-      Given the customer input below, recommend the most relevant products.
-      Focus on matching needs, preferences, and constraints (price).
-      Return a concise list of products with brief reasons for each recommendation.
-      
-      Customer input: {input}
-      """;
 
   @Override
   public PagingResult<ProductEntity> retrieveProductList(RetrieveProductListInput input) {
     PagingResult<ProductEntity> productPage;
-    switch (input.getMode()) {
-      case SEARCH -> productPage = retrieveBySearch(input);
-      case LLM -> productPage = retrieveByLLM(input.getKeyword());
-      default -> productPage = retrieveByDatabase(input);
+    if (Objects.requireNonNull(input.getMode()) == Mode.SEARCH) {
+      productPage = retrieveBySearch(input);
+    } else {
+      productPage = retrieveByDatabase(input);
     }
 
     attachImages(productPage);
@@ -58,30 +49,22 @@ public class ProductServiceImpl implements ProductService {
       log.warn("Search service is not available, fallback to database query");
       return retrieveByDatabase(input);
     }
+
     ProductSearchService.SearchProductCriteria criteria =
         ProductMapper.INSTANCE.toSearchProductCriteria(input);
     PagingResult<String> matchedProductIdsPage = productSearchService.search(criteria,
         input.getPagingRequest());
+
     if (matchedProductIdsPage.checkEmpty()) {
       return PagingResult.empty();
     }
+
     List<ProductEntity> products = productRepository.findByIdIn(
         matchedProductIdsPage.getData());
     if (CollectionUtil.isEmpty(products)) {
       return PagingResult.empty();
     }
     return PagingResult.of(products, matchedProductIdsPage.getPagination());
-  }
-
-  private PagingResult<ProductEntity> retrieveByLLM(String question) {
-    ChatInput input = ChatInput.builder()
-        .question(question)
-        .topK(5)
-        .similarityThreshold(0.7)
-        .build();
-    String chatResponse = productRagService.chat(input, PROMPT_TEMPLATE);
-    log.info("Chat response: {}", chatResponse);
-    return PagingResult.empty();
   }
 
   private PagingResult<ProductEntity> retrieveByDatabase(RetrieveProductListInput input) {

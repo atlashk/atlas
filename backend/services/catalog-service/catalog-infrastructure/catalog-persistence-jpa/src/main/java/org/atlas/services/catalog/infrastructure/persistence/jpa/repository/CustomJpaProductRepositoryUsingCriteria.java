@@ -133,9 +133,6 @@ public class CustomJpaProductRepositoryUsingCriteria implements CustomJpaProduct
     // In stock
     if (criteria.getInStock() != null) {
       spec.addFilter(QueryFilter.of("inStock", criteria.getInStock(), QueryOperator.EQUAL));
-    } else {
-      // Default to only show in-stock products
-      spec.addFilter(QueryFilter.of("inStock", true, QueryOperator.EQUAL));
     }
 
     // Brand

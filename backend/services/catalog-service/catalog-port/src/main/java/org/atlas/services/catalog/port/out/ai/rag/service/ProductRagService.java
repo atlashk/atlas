@@ -4,5 +4,5 @@ import org.atlas.services.catalog.port.out.ai.rag.model.ChatInput;
 
 public interface ProductRagService {
 
-  String chat(ChatInput input, String promptTemplate);
+  String chat(ChatInput input);
 }

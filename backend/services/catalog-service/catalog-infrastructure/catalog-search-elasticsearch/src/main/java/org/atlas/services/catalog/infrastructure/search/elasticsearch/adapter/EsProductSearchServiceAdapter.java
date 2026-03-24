@@ -51,7 +51,7 @@ public class EsProductSearchServiceAdapter implements ProductSearchService {
   }
 
   @Override
-  public PagingResult<String> search(SearchCriteria criteria, PagingRequest pagingRequest) {
+  public PagingResult<String> search(SearchProductCriteria criteria, PagingRequest pagingRequest) {
     Pageable pageable = PageRequest.of(pagingRequest.getPage(), pagingRequest.getSize());
 
     SearchHits<EsProduct> searchHits = elasticsearchProductRepository.search(criteria,

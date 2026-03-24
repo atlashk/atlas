@@ -14,6 +14,10 @@ import lombok.Setter;
 public class ChatInput {
 
   private String question;
+
+  @Builder.Default
   private Integer topK = 5;
-  private Double similarityThreshold = 0.7;
+
+  @Builder.Default
+  private Double similarityThreshold = 0.8;
 }

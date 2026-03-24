@@ -15,6 +15,8 @@ import org.atlas.services.catalog.api.rest.product.model.RetrieveProductListRequ
 import org.atlas.services.catalog.domain.entity.ProductEntity;
 import org.atlas.services.catalog.port.in.product.model.RetrieveProductListInput;
 import org.atlas.services.catalog.port.in.product.service.ProductService;
+import org.atlas.services.catalog.port.out.ai.rag.model.ChatInput;
+import org.atlas.services.catalog.port.out.ai.rag.service.ProductRagService;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProductController {
 
   private final ProductService productService;
+  private final ProductRagService productRagService;
 
   @PostMapping(value = "/list", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve a list of products based on various filters")
@@ -45,6 +48,16 @@ public class ProductController {
     PagingResult<ProductResponse> responseData = MapperUtil.mapPage(productPage,
         ProductMapper.INSTANCE::toProductResponse);
     return ApiResponseWrapper.successPage(responseData);
+  }
+
+  @PostMapping(value = "/chat", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Chat with product RAG service")
+  public ApiResponseWrapper<String> chat(
+      @Parameter(description = "Request object containing chat input", required = true)
+      @RequestBody ChatInput input
+  ) {
+    String responseData = productRagService.chat(input);
+    return ApiResponseWrapper.success(responseData);
   }
 
   @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

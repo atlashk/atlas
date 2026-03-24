@@ -41,20 +41,30 @@
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>
   </logger>
+
   <logger additivity="false" level="DEBUG" name="reactor.netty.http.client">
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>
   </logger>
+
+  <!-- Spring Security -->
   <logger additivity="false" level="DEBUG" name="org.springframework.security">
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>
   </logger>
+
   <!-- Spring Cloud Gateway -->
   <logger additivity="false" level="INFO" name="org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository">
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>
   </logger>
   <logger additivity="false" level="INFO" name="org.springframework.security.web.server.util.matcher">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+  </logger>
+
+  <!-- Spring AI -->
+  <logger additivity="false" level="DEBUG" name="org.springframework.ai.chat.client.advisor">
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>
   </logger>

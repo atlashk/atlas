@@ -25,14 +25,19 @@ public class ProductVectorStoreServiceImpl implements ProductVectorStoreService 
   }
 
   private Document toDocument(ProductEntity product) {
+    String content = "Product Name: %s. Type: %s. Price: %s. Brand: %s. Category: %s. Description: %s"
+        .formatted(
+            product.getName(),
+            product.getType(),
+            product.getPrice(),
+            product.getBrandName(),
+            product.getCategoryNames(),
+            product.getDetails().getDescription()
+        );
+
     return Document.builder()
-        .id(product.getId())
-        .text(product.getDetails().getDescription())
-        .metadata("name", product.getName())
-        .metadata("type", product.getType().toString())
-        .metadata("price", product.getPrice())
-        .metadata("brand", product.getBrandName())
-        .metadata("categories", product.getCategoryNames())
+        .text(content)
+        .metadata("productId", product.getId())
         .build();
   }
 }
