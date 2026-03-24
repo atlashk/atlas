@@ -1,9 +1,8 @@
-# Base configurations
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,prometheus,gateway
+        include: health,info,metrics,prometheus,gateway
   endpoint:
     health:
       probes:

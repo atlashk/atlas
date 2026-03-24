@@ -413,7 +413,7 @@ services:
 {{#hasService "ai.vectorstore.qdrant" "true"}}
   qdrant:
     container_name: qdrant
-    image: qdrant/qdrant:v1.17
+    image: qdrant/qdrant:v1.13.0
     ports:
       - "6333:6333" # HTTP port
       - "6334:6334" # gRPC port

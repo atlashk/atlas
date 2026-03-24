@@ -25,32 +25,21 @@ repositories {
 }
 
 dependencies {
-    // Port
-    api project(':services.catalog.port')
+    // Framework
+    api project(':libs.framework')
 
-    // AI::RAG
-    api 'org.springframework.ai:spring-ai-advisors-vector-store'
-
-    // AI::Model
-//    api project(':libs.ai.model.ollama')
-    api project(':libs.ai.model.openai')
-
-    // AI::Vector Store
-    api project(':libs.ai.vectorstore.qdrant')
+    // OpenAI model
+    api 'org.springframework.ai:spring-ai-starter-model-openai'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-
-    // Mapstruct
-    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
-    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 }
 
 dependencyManagement {
-    imports {
-        mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
-    }
+  imports {
+    mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
+  }
 }
 
 bootJar {

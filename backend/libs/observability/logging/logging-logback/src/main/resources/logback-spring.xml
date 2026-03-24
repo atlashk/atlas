@@ -12,7 +12,7 @@
       </layout>
     </encoder>
   </appender>
-  
+
   <!-- Rolling file adapter -->
   <appender class="ch.qos.logback.core.rolling.RollingFileAppender" name="FILE">
     <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">

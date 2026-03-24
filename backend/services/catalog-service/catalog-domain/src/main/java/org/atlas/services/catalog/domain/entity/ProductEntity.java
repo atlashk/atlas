@@ -72,20 +72,4 @@ public class ProductEntity extends DomainEntity {
     }
     categories.add(category);
   }
-  
-  public String getBrandName() {
-    if (brand == null) {
-      return null;
-    }
-    return brand.getName();
-  }
-  
-  public String getCategoryNames() {
-    if (CollectionUtil.isEmpty(categories)) {
-      return null;
-    }
-    return categories.stream()
-        .map(CategoryEntity::getName)
-        .collect(Collectors.joining(","));
-  }
 }

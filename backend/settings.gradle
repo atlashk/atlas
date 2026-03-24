@@ -10,11 +10,13 @@ project(':libs.framework').projectDir = file('libs/framework')
 
 // AI::Model
 include(':libs.ai.model.ollama')
-project(':libs.ai.model.ollama').projectDir = file('libs/ai/model/model-ollama')
+project(':libs.ai.model.ollama').projectDir = file('libs/ai/model/ai-model-ollama')
+include(':libs.ai.model.openai')
+project(':libs.ai.model.openai').projectDir = file('libs/ai/model/ai-model-openai')
 
 // AI::Vector Store
 include(':libs.ai.vectorstore.qdrant')
-project(':libs.ai.vectorstore.qdrant').projectDir = file('libs/ai/vectorstore/vectorstore-qdrant')
+project(':libs.ai.vectorstore.qdrant').projectDir = file('libs/ai/vectorstore/ai-vectorstore-qdrant')
 
 // API Client
 include(':libs.api.client.grpc')
