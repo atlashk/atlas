@@ -8,6 +8,7 @@ import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.services.catalog.port.out.ai.rag.model.ChatInput;
 import org.atlas.services.catalog.port.out.ai.rag.service.ProductRagService;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
@@ -28,6 +29,9 @@ public class ProductRagServiceImpl implements ProductRagService {
     this.vectorStore = vectorStore;
   }
 
+  /**
+   * Refer <a href="https://www.promptingguide.ai/introduction/examples.en#question-answering">Question Answering prompt technique</a>.
+   */
   private static final String PROMPT_TEMPLATE = """
       You are a helpful assistant. Use the following information to answer the question in detail. Please use a friendly and professional tone. Please acknowledge the question and relate the answer back to it.\s
       If the answer is not in the provided information, say "I don't know."
@@ -37,66 +41,6 @@ public class ProductRagServiceImpl implements ProductRagService {
       
       Answer:
       """;
-
-//  public String chat(ChatInput input) {
-//    // Build prompt from template
-//    PromptTemplate customPromptTemplate = PromptTemplate.builder()
-//        .renderer(StTemplateRenderer.builder()
-//            .startDelimiterToken('<')
-//            .endDelimiterToken('>')
-//            .build())
-//        .template("""
-//            <query>
-//
-//            Context information is below.
-//
-//            ---------------------
-//            <question_answer_context>
-//            ---------------------
-//
-//            Given the context information and no prior knowledge, answer the query.
-//
-//            Follow these rules:
-//
-//            1. If the answer is not in the context, just say that you don't know.
-//            2. Avoid statements like "Based on the context..." or "The provided information...".
-//            """)
-//        .build();
-//
-//    // Search request
-//    SearchRequest.Builder searchRequestBuilder = SearchRequest.builder();
-//    if (input.getTopK() != null) {
-//      searchRequestBuilder.topK(input.getTopK());
-//    }
-//    if (input.getSimilarityThreshold() != null) {
-//      searchRequestBuilder.similarityThreshold(input.getSimilarityThreshold());
-//    }
-//    SearchRequest searchRequest = searchRequestBuilder.build();
-//
-//    // Debug vector store
-//    SearchRequest searchRequest2 = SearchRequest.builder()
-//        .query(input.getQuestion())
-//        .topK(input.getTopK())
-//        .similarityThreshold(input.getSimilarityThreshold())
-//        .build();
-//    List<Document> docs = vectorStore.similaritySearch(searchRequest2);
-//    log.info("Found {} document", docs.size());
-//    for (Document document : docs) {
-//      log.info("Found document: {}", document.getMetadata().get("productId"));
-//    }
-//
-//    // Advisor
-//    QuestionAnswerAdvisor qaAdvisor = QuestionAnswerAdvisor.builder(vectorStore)
-//        .promptTemplate(customPromptTemplate)
-//        .searchRequest(searchRequest)
-//        .build();
-//
-//    return ChatClient.builder(chatModel).build()
-//        .prompt(input.getQuestion())
-//        .advisors(qaAdvisor)
-//        .call()
-//        .content();
-//  }
 
   public String chat(ChatInput input) {
     // 1. Retrieve similar documents
@@ -120,9 +64,9 @@ public class ProductRagServiceImpl implements ProductRagService {
 
     // 2. Augment the prompt
     SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(PROMPT_TEMPLATE);
-    Prompt prompt = new Prompt(List.of(
-        systemPromptTemplate.createMessage(Map.of("context", context)),
-        new UserMessage(input.getQuestion())));
+    Message systemMessage = systemPromptTemplate.createMessage(Map.of("context", context));
+    Message userMessage = new UserMessage(input.getQuestion());
+    Prompt prompt = new Prompt(List.of(systemMessage, userMessage));
 
     // 3. Generate the response
     return chatClient.prompt(prompt).call().content();
