@@ -6,18 +6,6 @@
 include(':libs.framework')
 project(':libs.framework').projectDir = file('libs/framework')
 
-// AI
-
-// AI::Model
-include(':libs.ai.model.ollama')
-project(':libs.ai.model.ollama').projectDir = file('libs/ai/model/ai-model-ollama')
-include(':libs.ai.model.openai')
-project(':libs.ai.model.openai').projectDir = file('libs/ai/model/ai-model-openai')
-
-// AI::Vector Store
-include(':libs.ai.vectorstore.qdrant')
-project(':libs.ai.vectorstore.qdrant').projectDir = file('libs/ai/vectorstore/ai-vectorstore-qdrant')
-
 // API Client
 include(':libs.api.client.grpc')
 project(':libs.api.client.grpc').projectDir = file('libs/api-client/api-client-grpc')
@@ -263,8 +251,8 @@ project(':services.catalog.api.grpc').projectDir = file('services/catalog-servic
 
 include(':services.catalog.infrastructure')
 project(':services.catalog.infrastructure').projectDir = file('services/catalog-service/catalog-infrastructure')
-include(':services.catalog.ai.rag')
-project(':services.catalog.ai.rag').projectDir = file('services/catalog-service/catalog-infrastructure/catalog-ai-rag')
+include(':services.catalog.ai.chatbot')
+project(':services.catalog.ai.chatbot').projectDir = file('services/catalog-service/catalog-infrastructure/catalog-ai-chatbot')
 include(':services.catalog.datasource.mysql')
 project(':services.catalog.datasource.mysql').projectDir = file('services/catalog-service/catalog-infrastructure/catalog-datasource-mysql')
 include(':services.catalog.datasource.postgres')

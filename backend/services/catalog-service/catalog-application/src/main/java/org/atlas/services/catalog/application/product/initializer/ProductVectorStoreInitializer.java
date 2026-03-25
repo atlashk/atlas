@@ -9,12 +9,11 @@ import org.atlas.libs.framework.util.PagingUtil;
 import org.atlas.libs.framework.util.SleepUtil;
 import org.atlas.libs.framework.util.StopWatch;
 import org.atlas.services.catalog.domain.entity.ProductEntity;
-import org.atlas.services.catalog.port.out.ai.rag.service.ProductVectorStoreService;
+import org.atlas.services.catalog.port.out.ai.chatbot.service.ProductVectorStoreService;
 import org.atlas.services.catalog.port.out.repository.ProductRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
 
 //@Component
 @RequiredArgsConstructor

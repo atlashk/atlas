@@ -1,0 +1,49 @@
+spring:
+  ai:
+    # ----------------------------------------------------------------------------------------------
+    # Models
+    # ----------------------------------------------------------------------------------------------
+    # Ollama model
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      embedding:
+        options:
+          model: nomic-embed-text
+      chat:
+        options:
+          model: llama3.2
+    # OpenAI model
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      embedding:
+        options:
+          model: text-embedding-3-small
+      chat:
+        options:
+          model: gpt-5-mini
+
+    # ----------------------------------------------------------------------------------------------
+    # Chat
+    # ----------------------------------------------------------------------------------------------
+    chat:
+      memory:
+        repository:
+          jdbc:
+            # Refer schema here https://github.com/spring-projects/spring-ai/tree/main/memory/repository/spring-ai-model-chat-memory-repository-jdbc/src/main/resources/org/springframework/ai/chat/memory/repository/jdbc
+            initialize-schema: always
+
+    # ----------------------------------------------------------------------------------------------
+    # Vector stores
+    # ----------------------------------------------------------------------------------------------
+    vectorstore:
+      # Qdrant
+      qdrant:
+        host: ${QDRANT_HOST:localhost}
+        port: ${QDRANT_PORT:6334}
+        api-key: ${QDRANT_API_KEY:}
+        collection-name: ${QDRANT_COLLECTION_NAME:catalog}
+        use-tls: false
+        initialize-schema: true
+
+app:
+  chatbot:
