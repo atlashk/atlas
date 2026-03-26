@@ -251,8 +251,8 @@ project(':services.catalog.api.grpc').projectDir = file('services/catalog-servic
 
 include(':services.catalog.infrastructure')
 project(':services.catalog.infrastructure').projectDir = file('services/catalog-service/catalog-infrastructure')
-include(':services.catalog.ai.chatbot')
-project(':services.catalog.ai.chatbot').projectDir = file('services/catalog-service/catalog-infrastructure/catalog-ai-chatbot')
+include(':services.catalog.chatbot')
+project(':services.catalog.chatbot').projectDir = file('services/catalog-service/catalog-infrastructure/catalog-chatbot')
 include(':services.catalog.datasource.mysql')
 project(':services.catalog.datasource.mysql').projectDir = file('services/catalog-service/catalog-infrastructure/catalog-datasource-mysql')
 include(':services.catalog.datasource.postgres')

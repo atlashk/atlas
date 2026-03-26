@@ -53,3 +53,26 @@ CREATE TABLE IF NOT EXISTS product_category
     category_id VARCHAR(64) NOT NULL,
     PRIMARY KEY (product_id, category_id)
 );
+
+CREATE TABLE IF NOT EXISTS conversation
+(
+    id         VARCHAR(36)  PRIMARY KEY,
+    user_id    VARCHAR(64)  NOT NULL,
+    title      VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP    NOT NULL,
+    updated_at TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS message
+(
+    id              VARCHAR(36) PRIMARY KEY,
+    conversation_id VARCHAR(36) NOT NULL,
+    message_type    VARCHAR(20) NOT NULL,
+    sender_type     VARCHAR(20) NOT NULL,
+    user_id         VARCHAR(64) NOT NULL,
+    text            TEXT,
+    created_at      TIMESTAMP   NOT NULL,
+    updated_at      TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_message_conversation_id ON message (conversation_id);

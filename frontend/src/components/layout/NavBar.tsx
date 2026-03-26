@@ -17,6 +17,7 @@ import {
   House,
   KeyRound,
   LogOut,
+  MessageCircle,
   Package,
   Shield,
   ShoppingCart,
@@ -168,6 +169,14 @@ export default function NavBar() {
                 <Shield className="h-4 w-4" />
                 <span>Admin Console</span>
               </Button>
+            )}
+
+            {profile && (
+              <Link href="/chatbot">
+                <Button variant="ghost" size="icon" className="relative">
+                  <MessageCircle className="h-5 w-5" />
+                </Button>
+              </Link>
             )}
 
             {/* Cart */}
