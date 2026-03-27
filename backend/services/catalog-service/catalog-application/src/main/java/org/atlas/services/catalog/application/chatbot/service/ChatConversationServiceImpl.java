@@ -7,20 +7,20 @@ import org.atlas.libs.framework.security.SecurityContextUtil;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.libs.framework.uuid.UUIDGenerator;
 import org.atlas.services.catalog.domain.entity.chatbot.ChatConversationEntity;
-import org.atlas.services.catalog.port.in.chatbot.model.SendMessageInput;
+import org.atlas.services.catalog.port.in.chatbot.model.ChatSendMessageInput;
 import org.atlas.services.catalog.port.in.chatbot.model.SendMessageOutput;
-import org.atlas.services.catalog.port.in.chatbot.service.ConversationService;
-import org.atlas.services.catalog.port.in.chatbot.service.MessageService;
+import org.atlas.services.catalog.port.in.chatbot.service.ChatConversationService;
+import org.atlas.services.catalog.port.in.chatbot.service.ChatMessageService;
 import org.atlas.services.catalog.port.out.repository.chatbot.ConversationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class ConversationServiceImpl implements ConversationService {
+public class ChatConversationServiceImpl implements ChatConversationService {
 
   private final ConversationRepository conversationRepository;
-  private final MessageService messageService;
+  private final ChatMessageService chatMessageService;
 
   private static final int TITLE_MAX_LENGTH = 50;
 
@@ -33,24 +33,24 @@ public class ConversationServiceImpl implements ConversationService {
 
   @Override
   @Transactional
-  public SendMessageOutput startConversation(SendMessageInput input) {
+  public SendMessageOutput startConversation(ChatSendMessageInput startConversationInput) {
     String userId = SecurityContextUtil.requirePrincipal().getUserId();
 
     // Create new conversation
     ChatConversationEntity conversation = ChatConversationEntity.builder()
         .id(UUIDGenerator.generate())
         .userId(userId)
-        .title(StringUtil.limitLength(input.getText(), TITLE_MAX_LENGTH))
+        .title(StringUtil.limitLength(startConversationInput.getText(), TITLE_MAX_LENGTH))
         .build();
     conversationRepository.insert(conversation);
 
     // Send first message
-    SendMessageInput sendMessageInput = SendMessageInput.builder()
+    ChatSendMessageInput sendMessageInput = ChatSendMessageInput.builder()
         .conversationId(conversation.getId())
-        .messageType(input.getMessageType())
-        .text(input.getText())
+        .messageType(startConversationInput.getMessageType())
+        .text(startConversationInput.getText())
         .build();
-    SendMessageOutput sendMessageOutput = messageService.sendMessage(sendMessageInput);
+    SendMessageOutput sendMessageOutput = chatMessageService.sendMessage(sendMessageInput);
 
     return SendMessageOutput.builder()
         .conversationId(conversation.getId())
@@ -66,6 +66,6 @@ public class ConversationServiceImpl implements ConversationService {
     conversationRepository.delete(conversationId);
 
     // Delete messages of conversation
-    messageService.deleteAllMessages(conversationId);
+    chatMessageService.deleteAllMessages(conversationId);
   }
 }

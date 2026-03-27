@@ -16,7 +16,7 @@ import org.atlas.services.catalog.domain.entity.chatbot.SenderType;
 @Builder
 @Getter
 @Setter
-public class MessageResponse {
+public class ChatMessageResponse {
 
   @Schema(description = "Unique identifier of the message", example = "01HV4Y8D4NZQFW5QYVZ53D8J9K")
   private String id;

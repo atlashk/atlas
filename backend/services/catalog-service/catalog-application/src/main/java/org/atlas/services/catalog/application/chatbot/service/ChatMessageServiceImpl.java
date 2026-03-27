@@ -5,7 +5,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.error.CommonDomainError;
-import org.atlas.libs.framework.domain.error.DomainError;
 import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.security.SecurityContextUtil;
@@ -13,9 +12,9 @@ import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.libs.framework.uuid.UUIDGenerator;
 import org.atlas.services.catalog.domain.entity.chatbot.ChatMessageEntity;
 import org.atlas.services.catalog.domain.entity.chatbot.SenderType;
-import org.atlas.services.catalog.port.in.chatbot.model.SendMessageInput;
+import org.atlas.services.catalog.port.in.chatbot.model.ChatSendMessageInput;
 import org.atlas.services.catalog.port.in.chatbot.model.SendMessageOutput;
-import org.atlas.services.catalog.port.in.chatbot.service.MessageService;
+import org.atlas.services.catalog.port.in.chatbot.service.ChatMessageService;
 import org.atlas.services.catalog.port.out.ai.chatbot.model.ChatInput;
 import org.atlas.services.catalog.port.out.ai.chatbot.model.ChatOutput;
 import org.atlas.services.catalog.port.out.ai.chatbot.service.RagService;
@@ -26,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class MessageServiceImpl implements MessageService {
+public class ChatMessageServiceImpl implements ChatMessageService {
 
   private final MessageRepository messageRepository;
   private final RagService ragService;
@@ -58,7 +57,7 @@ public class MessageServiceImpl implements MessageService {
 
   @Override
   @Transactional
-  public SendMessageOutput sendMessage(SendMessageInput sendMessageInput) {
+  public SendMessageOutput sendMessage(ChatSendMessageInput sendMessageInput) {
     String userId = SecurityContextUtil.requirePrincipal().getUserId();
 
     if (StringUtil.isBlank(sendMessageInput.getConversationId())) {

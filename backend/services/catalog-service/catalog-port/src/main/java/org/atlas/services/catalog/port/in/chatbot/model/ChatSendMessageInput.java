@@ -12,7 +12,7 @@ import org.atlas.services.catalog.domain.entity.chatbot.MessageType;
 @Builder
 @Getter
 @Setter
-public class SendMessageInput {
+public class ChatSendMessageInput {
 
   private String conversationId;
 

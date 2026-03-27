@@ -9,15 +9,15 @@ import org.atlas.libs.framework.api.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingRequest.SortOrder;
 import org.atlas.libs.framework.util.MapperUtil;
-import org.atlas.services.catalog.api.rest.chatbot.mapper.MessageMapper;
-import org.atlas.services.catalog.api.rest.chatbot.model.MessageResponse;
-import org.atlas.services.catalog.api.rest.chatbot.model.RetrieveMessageListRequest;
-import org.atlas.services.catalog.api.rest.chatbot.model.SendMessageRequest;
-import org.atlas.services.catalog.api.rest.chatbot.model.SendMessageResponse;
+import org.atlas.services.catalog.api.rest.chatbot.mapper.ChatMessageMapper;
+import org.atlas.services.catalog.api.rest.chatbot.model.ChatMessageResponse;
+import org.atlas.services.catalog.api.rest.chatbot.model.RetrieveChatMessageListRequest;
+import org.atlas.services.catalog.api.rest.chatbot.model.SendChatMessageRequest;
+import org.atlas.services.catalog.api.rest.chatbot.model.SendChatMessageResponse;
 import org.atlas.services.catalog.domain.entity.chatbot.ChatMessageEntity;
-import org.atlas.services.catalog.port.in.chatbot.model.SendMessageInput;
+import org.atlas.services.catalog.port.in.chatbot.model.ChatSendMessageInput;
 import org.atlas.services.catalog.port.in.chatbot.model.SendMessageOutput;
-import org.atlas.services.catalog.port.in.chatbot.service.MessageService;
+import org.atlas.services.catalog.port.in.chatbot.service.ChatMessageService;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,34 +31,34 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/chatbot/messages")
 @Validated
 @RequiredArgsConstructor
-public class MessageController {
+public class ChatMessageController {
 
-  private final MessageService messageService;
+  private final ChatMessageService chatMessageService;
 
   @PostMapping(value = "/list", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve message list by conversation")
-  public ApiResponseWrapper<List<MessageResponse>> retrieveMessageList(
+  public ApiResponseWrapper<List<ChatMessageResponse>> retrieveMessageList(
       @Parameter(description = "Request object containing conversation ID and pagination", required = true)
-      @Valid @RequestBody RetrieveMessageListRequest request
+      @Valid @RequestBody RetrieveChatMessageListRequest request
   ) {
     PagingRequest pagingRequest = PagingRequest.of(request.getPage() - 1, request.getSize(),
         "createdAt", SortOrder.DESC);
-    List<ChatMessageEntity> messages = messageService.retrieveMessageList(
+    List<ChatMessageEntity> messages = chatMessageService.retrieveMessageList(
         request.getConversationId(), pagingRequest);
-    List<MessageResponse> responseData = MapperUtil.mapList(messages,
-        MessageMapper.INSTANCE::toMessageResponse);
+    List<ChatMessageResponse> responseData = MapperUtil.mapList(messages,
+        ChatMessageMapper.INSTANCE::toMessageResponse);
     return ApiResponseWrapper.success(responseData);
   }
 
   @PostMapping(value = "/send", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Send a message to chatbot")
-  public ApiResponseWrapper<SendMessageResponse> sendMessage(
+  public ApiResponseWrapper<SendChatMessageResponse> sendMessage(
       @Parameter(description = "Request object containing message data", required = true)
-      @Valid @RequestBody SendMessageRequest request
+      @Valid @RequestBody SendChatMessageRequest request
   ) {
-    SendMessageInput input = MessageMapper.INSTANCE.toSendMessageInput(request);
-    SendMessageOutput output = messageService.sendMessage(input);
-    SendMessageResponse responseData = MessageMapper.INSTANCE.toSendMessageResponse(output);
+    ChatSendMessageInput input = ChatMessageMapper.INSTANCE.toSendMessageInput(request);
+    SendMessageOutput output = chatMessageService.sendMessage(input);
+    SendChatMessageResponse responseData = ChatMessageMapper.INSTANCE.toSendMessageResponse(output);
     return ApiResponseWrapper.success(responseData);
   }
 
@@ -67,7 +67,7 @@ public class MessageController {
   public ApiResponseWrapper<Void> deleteAllMessages(
       @Parameter(name = "conversationId", description = "The unique identifier of the conversation", example = "01HV4Y7G2D2Q17W0P1D3YH7G8N", required = true)
       @PathVariable String conversationId) {
-    messageService.deleteAllMessages(conversationId);
+    chatMessageService.deleteAllMessages(conversationId);
     return ApiResponseWrapper.success();
   }
 }

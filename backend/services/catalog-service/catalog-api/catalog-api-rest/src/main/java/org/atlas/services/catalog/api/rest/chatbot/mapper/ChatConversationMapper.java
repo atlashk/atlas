@@ -1,15 +1,15 @@
 package org.atlas.services.catalog.api.rest.chatbot.mapper;
 
-import org.atlas.services.catalog.api.rest.chatbot.model.ConversationResponse;
+import org.atlas.services.catalog.api.rest.chatbot.model.ChatConversationResponse;
 import org.atlas.services.catalog.domain.entity.chatbot.ChatConversationEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface ConversationMapper {
+public interface ChatConversationMapper {
 
-  ConversationMapper INSTANCE = Mappers.getMapper(ConversationMapper.class);
+  ChatConversationMapper INSTANCE = Mappers.getMapper(ChatConversationMapper.class);
 
-  ConversationResponse toConversationResponse(ChatConversationEntity conversation);
+  ChatConversationResponse toConversationResponse(ChatConversationEntity conversation);
 }

@@ -8,20 +8,23 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Schema(description = "Response object for chatbot reply")
+@Schema(description = "Response object for a conversation")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Getter
 @Setter
-public class SendMessageResponse {
+public class ChatConversationResponse {
 
   @Schema(description = "Unique identifier of the conversation", example = "01HV4Y7G2D2Q17W0P1D3YH7G8N")
-  private String conversationId;
+  private String id;
 
-  @Schema(description = "Assistant message content", example = "Here are some options under $500.")
-  private String text;
+  @Schema(description = "Title of the conversation", example = "How to return my product?")
+  private String title;
 
-  @Schema(description = "Assistant message creation time", example = "2026-03-26T10:21:30")
+  @Schema(description = "Conversation creation time", example = "2026-03-26T10:15:30")
   private LocalDateTime createdAt;
+
+  @Schema(description = "Conversation last update time", example = "2026-03-26T10:18:45")
+  private LocalDateTime updatedAt;
 }

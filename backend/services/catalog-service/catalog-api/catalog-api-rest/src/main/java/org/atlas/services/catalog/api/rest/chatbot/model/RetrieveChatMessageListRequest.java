@@ -17,7 +17,7 @@ import org.atlas.libs.framework.constant.CommonConstant;
 @Builder
 @Getter
 @Setter
-public class RetrieveMessageListRequest {
+public class RetrieveChatMessageListRequest {
 
   @NotBlank
   @Schema(description = "Conversation ID", example = "01HV4Y7G2D2Q17W0P1D3YH7G8N")

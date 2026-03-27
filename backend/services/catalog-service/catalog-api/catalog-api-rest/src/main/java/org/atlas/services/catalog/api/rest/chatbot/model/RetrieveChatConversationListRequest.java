@@ -16,7 +16,7 @@ import org.atlas.libs.framework.constant.CommonConstant;
 @Builder
 @Getter
 @Setter
-public class RetrieveConversationListRequest {
+public class RetrieveChatConversationListRequest {
 
   @Positive
   @Min(1)
