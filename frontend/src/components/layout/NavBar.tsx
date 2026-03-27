@@ -1,6 +1,5 @@
 "use client";
 
-import ChangePasswordDialog from "@/components/user/ChangePasswordDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,14 +9,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import ChangePasswordDialog from "@/components/user/ChangePasswordDialog";
 import { IDP } from "@/config/env.config";
+import { logoutWithKeycloak } from "@/lib/keycloak";
 import { useCartStore } from "@/stores/cart.store";
 import { useUserStore } from "@/stores/user.store";
 import {
+  BotMessageSquare,
   House,
   KeyRound,
   LogOut,
-  MessageCircle,
   Package,
   Shield,
   ShoppingCart,
@@ -26,7 +27,6 @@ import {
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { logoutWithKeycloak } from "@/lib/keycloak";
 
 export default function NavBar() {
   const { profile, logout, clearAuthState } = useUserStore();
@@ -171,14 +171,6 @@ export default function NavBar() {
               </Button>
             )}
 
-            {profile && (
-              <Link href="/chatbot">
-                <Button variant="ghost" size="icon" className="relative">
-                  <MessageCircle className="h-5 w-5" />
-                </Button>
-              </Link>
-            )}
-
             {/* Cart */}
             <Link href="/cart">
               <Button variant="ghost" size="icon" className="relative">
@@ -191,6 +183,13 @@ export default function NavBar() {
                     {cartItemCount}
                   </Badge>
                 )}
+              </Button>
+            </Link>
+
+            {/* Chatbot */}
+            <Link href="/chatbot">
+              <Button variant="ghost" size="icon" className="relative">
+                <BotMessageSquare className="h-5 w-5" />
               </Button>
             </Link>
 

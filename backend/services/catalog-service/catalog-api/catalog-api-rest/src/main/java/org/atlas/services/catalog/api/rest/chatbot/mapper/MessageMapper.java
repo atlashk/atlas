@@ -3,7 +3,7 @@ package org.atlas.services.catalog.api.rest.chatbot.mapper;
 import org.atlas.services.catalog.api.rest.chatbot.model.MessageResponse;
 import org.atlas.services.catalog.api.rest.chatbot.model.SendMessageRequest;
 import org.atlas.services.catalog.api.rest.chatbot.model.SendMessageResponse;
-import org.atlas.services.catalog.domain.entity.chatbot.MessageEntity;
+import org.atlas.services.catalog.domain.entity.chatbot.ChatMessageEntity;
 import org.atlas.services.catalog.port.in.chatbot.model.SendMessageInput;
 import org.atlas.services.catalog.port.in.chatbot.model.SendMessageOutput;
 import org.mapstruct.Mapper;
@@ -15,7 +15,7 @@ public interface MessageMapper {
 
   MessageMapper INSTANCE = Mappers.getMapper(MessageMapper.class);
 
-  MessageResponse toMessageResponse(MessageEntity message);
+  MessageResponse toMessageResponse(ChatMessageEntity message);
 
   SendMessageInput toSendMessageInput(SendMessageRequest request);
 

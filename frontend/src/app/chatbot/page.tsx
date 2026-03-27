@@ -25,8 +25,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { withAuth } from "@/hoc/withAuth";
 import type { Conversation, Message } from "@/interfaces/chatbot.interface";
 import { cn } from "@/lib/utils";
-import { Bot, MessageCircle, MoreHorizontal, Send, Trash2, User } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState, type UIEvent } from "react";
+import { Bot, BotMessageSquare, MoreHorizontal, Send, Trash2, User } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState, type UIEvent } from "react";
 import { toast } from "sonner";
 
 const CONVERSATION_PAGE_SIZE = 20;
@@ -42,11 +42,17 @@ function ChatbotPage() {
   const [isLoadingMoreConversations, setIsLoadingMoreConversations] = useState(false);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<UiMessage[]>([]);
+  const [messagePage, setMessagePage] = useState(1);
+  const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+  const [isLoadingMoreMessages, setIsLoadingMoreMessages] = useState(false);
   const [messageInput, setMessageInput] = useState("");
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [conversationToDelete, setConversationToDelete] = useState<Conversation | null>(null);
   const [isDeletingConversation, setIsDeletingConversation] = useState(false);
+  const messageContainerRef = useRef<HTMLDivElement | null>(null);
+  const selectedConversationIdRef = useRef<string | null>(null);
+  const latestMessageRequestRef = useRef(0);
 
   const selectedConversation = useMemo(
     () => conversations.find((conversation) => conversation.id === selectedConversationId) || null,
@@ -59,6 +65,17 @@ function ChatbotPage() {
       return "";
     }
     return date.toLocaleString();
+  }, []);
+
+  const sortMessagesByCreatedAtAsc = useCallback((list: UiMessage[]) => {
+    return [...list].sort((firstMessage, secondMessage) => {
+      const firstTimestamp = new Date(firstMessage.createdAt).getTime();
+      const secondTimestamp = new Date(secondMessage.createdAt).getTime();
+      if (Number.isNaN(firstTimestamp) || Number.isNaN(secondTimestamp)) {
+        return 0;
+      }
+      return firstTimestamp - secondTimestamp;
+    });
   }, []);
 
   const retrieveConversations = useCallback(
@@ -95,29 +112,95 @@ function ChatbotPage() {
     [],
   );
 
-  const retrieveMessages = useCallback(async (conversationId: string) => {
-    setIsLoadingMessages(true);
+  const scrollMessagesToBottom = useCallback(() => {
+    const container = messageContainerRef.current;
+    if (!container) {
+      return;
+    }
+    container.scrollTop = container.scrollHeight;
+  }, []);
+
+  const retrieveMessages = useCallback(async (conversationId: string, page: number, appendOlder: boolean) => {
+    const requestId = latestMessageRequestRef.current + 1;
+    latestMessageRequestRef.current = requestId;
+    const isLatestRequest = () =>
+      latestMessageRequestRef.current === requestId &&
+      selectedConversationIdRef.current === conversationId;
+
+    if (appendOlder) {
+      setIsLoadingMoreMessages(true);
+    } else {
+      setIsLoadingMessages(true);
+    }
     try {
       const response = await chatbotApi.retrieveMessageList({
         conversationId,
-        page: 1,
+        page,
         size: MESSAGE_PAGE_SIZE,
       });
       if (!response.success || !response.data) {
+        if (!isLatestRequest()) {
+          return;
+        }
         toast.error(response.errorMessage || "Failed to load messages");
-        setMessages([]);
+        if (!appendOlder) {
+          setMessages([]);
+          setMessagePage(1);
+          setHasMoreMessages(false);
+        }
         return;
       }
-      setMessages(response.data);
+      if (!isLatestRequest()) {
+        return;
+      }
+      const normalizedMessages = sortMessagesByCreatedAtAsc(response.data);
+      if (appendOlder) {
+        const container = messageContainerRef.current;
+        const previousScrollHeight = container?.scrollHeight ?? 0;
+        const previousScrollTop = container?.scrollTop ?? 0;
+        setMessages((previous) => {
+          const previousIds = new Set(previous.map((message) => message.id));
+          const uniqueOlderMessages = normalizedMessages.filter(
+            (message) => !previousIds.has(message.id),
+          );
+          return sortMessagesByCreatedAtAsc([...uniqueOlderMessages, ...previous]);
+        });
+        requestAnimationFrame(() => {
+          const currentContainer = messageContainerRef.current;
+          if (!currentContainer) {
+            return;
+          }
+          const scrollDelta = currentContainer.scrollHeight - previousScrollHeight;
+          currentContainer.scrollTop = previousScrollTop + scrollDelta;
+        });
+      } else {
+        setMessages(normalizedMessages);
+        requestAnimationFrame(() => {
+          scrollMessagesToBottom();
+        });
+      }
+      setMessagePage(page);
+      setHasMoreMessages(response.data.length === MESSAGE_PAGE_SIZE);
     } catch (error) {
+      if (!isLatestRequest()) {
+        return;
+      }
       const errorMessage =
         error instanceof Error ? error.message : "Failed to load messages";
       toast.error(errorMessage);
-      setMessages([]);
+      if (!appendOlder) {
+        setMessages([]);
+        setMessagePage(1);
+        setHasMoreMessages(false);
+      }
     } finally {
+      if (!isLatestRequest()) {
+        return;
+      }
       setIsLoadingMessages(false);
+      setIsLoadingMoreMessages(false);
     }
-  }, []);
+  }, [scrollMessagesToBottom, sortMessagesByCreatedAtAsc]);
 
   const loadInitialData = useCallback(async () => {
     await retrieveConversations(1, false);
@@ -128,12 +211,52 @@ function ChatbotPage() {
   }, [loadInitialData]);
 
   useEffect(() => {
+    selectedConversationIdRef.current = selectedConversationId;
+  }, [selectedConversationId]);
+
+  useEffect(() => {
+    latestMessageRequestRef.current += 1;
     if (!selectedConversationId) {
       setMessages([]);
+      setMessagePage(1);
+      setHasMoreMessages(false);
+      setIsLoadingMessages(false);
+      setIsLoadingMoreMessages(false);
       return;
     }
-    void retrieveMessages(selectedConversationId);
+    setMessagePage(1);
+    setHasMoreMessages(true);
+    void retrieveMessages(selectedConversationId, 1, false);
   }, [selectedConversationId, retrieveMessages]);
+
+  const handleLoadMoreMessages = useCallback(async () => {
+    if (
+      !selectedConversationId ||
+      !hasMoreMessages ||
+      isLoadingMessages ||
+      isLoadingMoreMessages
+    ) {
+      return;
+    }
+    await retrieveMessages(selectedConversationId, messagePage + 1, true);
+  }, [
+    hasMoreMessages,
+    isLoadingMessages,
+    isLoadingMoreMessages,
+    messagePage,
+    retrieveMessages,
+    selectedConversationId,
+  ]);
+
+  const handleMessageScroll = useCallback(
+    async (event: UIEvent<HTMLDivElement>) => {
+      const target = event.currentTarget;
+      if (target.scrollTop < 120) {
+        await handleLoadMoreMessages();
+      }
+    },
+    [handleLoadMoreMessages],
+  );
 
   const handleLoadMoreConversations = useCallback(async () => {
     if (!hasMoreConversations || isLoadingMoreConversations || isLoadingConversations) {
@@ -200,7 +323,8 @@ function ChatbotPage() {
     try {
       if (!selectedConversationId) {
         const startResponse = await chatbotApi.startConversation({
-          firstMessage: content,
+          messageType: "TEXT",
+          text: content,
         });
         if (!startResponse.success || !startResponse.data) {
           toast.error(startResponse.errorMessage || "Failed to start conversation");
@@ -248,6 +372,9 @@ function ChatbotPage() {
         };
 
         setMessages([userMessage, assistantMessage]);
+        requestAnimationFrame(() => {
+          scrollMessagesToBottom();
+        });
         return;
       }
 
@@ -261,6 +388,9 @@ function ChatbotPage() {
       };
 
       setMessages((previous) => [...previous, temporaryUserMessage]);
+      requestAnimationFrame(() => {
+        scrollMessagesToBottom();
+      });
 
       const response = await chatbotApi.sendMessage({
         conversationId: selectedConversationId,
@@ -285,7 +415,10 @@ function ChatbotPage() {
       };
 
       setMessages((previous) => [...previous, assistantMessage]);
-      await retrieveMessages(selectedConversationId);
+      requestAnimationFrame(() => {
+        scrollMessagesToBottom();
+      });
+      await retrieveMessages(selectedConversationId, 1, false);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to send message";
@@ -298,6 +431,7 @@ function ChatbotPage() {
     isSendingMessage,
     messageInput,
     retrieveMessages,
+    scrollMessagesToBottom,
     selectedConversationId,
   ]);
 
@@ -306,12 +440,12 @@ function ChatbotPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <MessageCircle className="h-5 w-5" />
+            <BotMessageSquare className="h-5 w-5" />
             <span>Chatbot Assistant</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[320px_1fr]">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(340px,380px)_1fr]">
             <div className="border rounded-md">
               <div className="border-b px-4 py-3 font-medium">Conversations</div>
               <ScrollArea className="h-[70vh]">
@@ -343,13 +477,13 @@ function ChatbotPage() {
                               className="min-w-0 flex-1 text-left"
                             >
                               <p className="truncate text-sm font-medium">{conversation.title || "Untitled conversation"}</p>
-                              <p className="mt-1 text-xs text-gray-500">
+                              <p className="mt-1 truncate text-xs text-gray-500">
                                 {formatTimestamp(conversation.updatedAt || conversation.createdAt)}
                               </p>
                             </button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-7 w-7">
+                                <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0">
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
@@ -377,12 +511,15 @@ function ChatbotPage() {
               </ScrollArea>
             </div>
 
-            <div className="border rounded-md flex flex-col h-[70vh]">
+            <div className="border rounded-md flex flex-col h-[70vh] min-h-0 overflow-hidden">
               <div className="border-b px-4 py-3 font-medium">
                 {selectedConversation?.title || "New conversation"}
               </div>
-              <ScrollArea className="flex-1">
-                <div className="h-full overflow-y-auto px-4 py-3 space-y-3">
+              <div
+                ref={messageContainerRef}
+                onScroll={handleMessageScroll}
+                className="flex-1 min-h-0 overflow-y-auto px-4 py-3 space-y-3"
+              >
                   {isLoadingMessages ? (
                     <div className="flex h-20 items-center justify-center">
                       <Spinner className="text-blue-600 h-5 w-5" />
@@ -434,8 +571,12 @@ function ChatbotPage() {
                       );
                     })
                   )}
-                </div>
-              </ScrollArea>
+                  {isLoadingMoreMessages && !isLoadingMessages && (
+                    <div className="flex justify-center py-2">
+                      <Spinner className="text-blue-600 h-5 w-5" />
+                    </div>
+                  )}
+              </div>
               <div className="border-t p-3">
                 <div className="flex items-end gap-2">
                   <Textarea

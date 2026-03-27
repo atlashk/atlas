@@ -7,13 +7,14 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.api.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.paging.PagingRequest;
+import org.atlas.libs.framework.paging.PagingRequest.SortOrder;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.catalog.api.rest.chatbot.mapper.MessageMapper;
 import org.atlas.services.catalog.api.rest.chatbot.model.MessageResponse;
 import org.atlas.services.catalog.api.rest.chatbot.model.RetrieveMessageListRequest;
 import org.atlas.services.catalog.api.rest.chatbot.model.SendMessageRequest;
 import org.atlas.services.catalog.api.rest.chatbot.model.SendMessageResponse;
-import org.atlas.services.catalog.domain.entity.chatbot.MessageEntity;
+import org.atlas.services.catalog.domain.entity.chatbot.ChatMessageEntity;
 import org.atlas.services.catalog.port.in.chatbot.model.SendMessageInput;
 import org.atlas.services.catalog.port.in.chatbot.model.SendMessageOutput;
 import org.atlas.services.catalog.port.in.chatbot.service.MessageService;
@@ -40,9 +41,10 @@ public class MessageController {
       @Parameter(description = "Request object containing conversation ID and pagination", required = true)
       @Valid @RequestBody RetrieveMessageListRequest request
   ) {
-    PagingRequest pagingRequest = PagingRequest.of(request.getPage() - 1, request.getSize());
-    List<MessageEntity> messages = messageService.retrieveMessageList(request.getConversationId(),
-        pagingRequest);
+    PagingRequest pagingRequest = PagingRequest.of(request.getPage() - 1, request.getSize(),
+        "createdAt", SortOrder.DESC);
+    List<ChatMessageEntity> messages = messageService.retrieveMessageList(
+        request.getConversationId(), pagingRequest);
     List<MessageResponse> responseData = MapperUtil.mapList(messages,
         MessageMapper.INSTANCE::toMessageResponse);
     return ApiResponseWrapper.success(responseData);

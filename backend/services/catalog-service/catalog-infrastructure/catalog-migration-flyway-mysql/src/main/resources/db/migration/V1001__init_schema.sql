@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS product_category
     PRIMARY KEY (product_id, category_id)
 ) ENGINE = InnoDB;
 
-CREATE TABLE IF NOT EXISTS conversation
+CREATE TABLE IF NOT EXISTS chat_conversation
 (
     id         VARCHAR(36)  NOT NULL PRIMARY KEY,
     user_id    VARCHAR(64)  NOT NULL,
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS conversation
     updated_at DATETIME
 ) ENGINE = InnoDB;
 
-CREATE TABLE IF NOT EXISTS message
+CREATE TABLE IF NOT EXISTS chat_message
 (
     id              VARCHAR(36)  NOT NULL PRIMARY KEY,
     conversation_id VARCHAR(36)  NOT NULL,

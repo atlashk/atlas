@@ -1,5 +1,3 @@
-import type { ApiResponse } from "./apiClient";
-import { BaseApi } from "./base.api";
 import type {
   Conversation,
   Message,
@@ -7,8 +5,9 @@ import type {
   RetrieveMessageListRequest,
   SendMessageRequest,
   SendMessageResponse,
-  StartConversationRequest,
 } from "@/interfaces/chatbot.interface";
+import type { ApiResponse } from "./apiClient";
+import { BaseApi } from "./base.api";
 
 export class ChatbotApi extends BaseApi {
   constructor() {
@@ -22,7 +21,7 @@ export class ChatbotApi extends BaseApi {
   }
 
   async startConversation(
-    request: StartConversationRequest,
+    request: SendMessageRequest,
   ): Promise<ApiResponse<SendMessageResponse>> {
     return this.post<SendMessageResponse>("/chatbot/conversations/start", request);
   }

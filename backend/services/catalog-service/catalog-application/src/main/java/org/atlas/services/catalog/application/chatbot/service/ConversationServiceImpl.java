@@ -6,7 +6,7 @@ import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.security.SecurityContextUtil;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.libs.framework.uuid.UUIDGenerator;
-import org.atlas.services.catalog.domain.entity.chatbot.ConversationEntity;
+import org.atlas.services.catalog.domain.entity.chatbot.ChatConversationEntity;
 import org.atlas.services.catalog.port.in.chatbot.model.SendMessageInput;
 import org.atlas.services.catalog.port.in.chatbot.model.SendMessageOutput;
 import org.atlas.services.catalog.port.in.chatbot.service.ConversationService;
@@ -26,7 +26,7 @@ public class ConversationServiceImpl implements ConversationService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<ConversationEntity> retrieveConversationList(PagingRequest pagingRequest) {
+  public List<ChatConversationEntity> retrieveConversationList(PagingRequest pagingRequest) {
     String userId = SecurityContextUtil.requirePrincipal().getUserId();
     return conversationRepository.findByUserId(userId, pagingRequest);
   }
@@ -37,7 +37,7 @@ public class ConversationServiceImpl implements ConversationService {
     String userId = SecurityContextUtil.requirePrincipal().getUserId();
 
     // Create new conversation
-    ConversationEntity conversation = ConversationEntity.builder()
+    ChatConversationEntity conversation = ChatConversationEntity.builder()
         .id(UUIDGenerator.generate())
         .userId(userId)
         .title(StringUtil.limitLength(input.getText(), TITLE_MAX_LENGTH))
@@ -47,6 +47,7 @@ public class ConversationServiceImpl implements ConversationService {
     // Send first message
     SendMessageInput sendMessageInput = SendMessageInput.builder()
         .conversationId(conversation.getId())
+        .messageType(input.getMessageType())
         .text(input.getText())
         .build();
     SendMessageOutput sendMessageOutput = messageService.sendMessage(sendMessageInput);

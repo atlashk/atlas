@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 @UtilityClass
-public class PagingConverter {
+public class JpaPagingUtil {
 
   public static Pageable convert(PagingRequest pagingRequest) {
     if (pagingRequest.hasSort()) {

@@ -4,10 +4,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.atlas.libs.framework.domain.error.CommonDomainError;
+import org.atlas.libs.framework.domain.error.DomainError;
+import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.security.SecurityContextUtil;
+import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.libs.framework.uuid.UUIDGenerator;
-import org.atlas.services.catalog.domain.entity.chatbot.MessageEntity;
+import org.atlas.services.catalog.domain.entity.chatbot.ChatMessageEntity;
 import org.atlas.services.catalog.domain.entity.chatbot.SenderType;
 import org.atlas.services.catalog.port.in.chatbot.model.SendMessageInput;
 import org.atlas.services.catalog.port.in.chatbot.model.SendMessageOutput;
@@ -47,7 +51,7 @@ public class MessageServiceImpl implements MessageService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<MessageEntity> retrieveMessageList(String conversationId,
+  public List<ChatMessageEntity> retrieveMessageList(String conversationId,
       PagingRequest pagingRequest) {
     return messageRepository.findByConversationId(conversationId, pagingRequest);
   }
@@ -57,8 +61,12 @@ public class MessageServiceImpl implements MessageService {
   public SendMessageOutput sendMessage(SendMessageInput sendMessageInput) {
     String userId = SecurityContextUtil.requirePrincipal().getUserId();
 
+    if (StringUtil.isBlank(sendMessageInput.getConversationId())) {
+      throw new DomainException(CommonDomainError.BAD_REQUEST, "conversationId must not be blank");
+    }
+
     // Save input message
-    MessageEntity inputMessage = MessageEntity.builder()
+    ChatMessageEntity inputMessage = ChatMessageEntity.builder()
         .id(UUIDGenerator.generate())
         .conversationId(sendMessageInput.getConversationId())
         .messageType(sendMessageInput.getMessageType())
@@ -84,7 +92,7 @@ public class MessageServiceImpl implements MessageService {
       sendMessageInput.getConversationId(), userId, chatOutput.getInputTokens(), chatOutput.getOutputTokens());
 
     // Save output message
-    MessageEntity outputMessage = MessageEntity.builder()
+    ChatMessageEntity outputMessage = ChatMessageEntity.builder()
         .id(UUIDGenerator.generate())
         .conversationId(sendMessageInput.getConversationId())
         .messageType(sendMessageInput.getMessageType())
@@ -96,7 +104,7 @@ public class MessageServiceImpl implements MessageService {
 
     return SendMessageOutput.builder()
         .text(outputMessage.getText())
-        .createdAt(outputMessage.getCreatedAt())
+        .createdAt(LocalDateTime.now())
         .build();
   }
 

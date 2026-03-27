@@ -2,13 +2,13 @@ package org.atlas.services.catalog.port.out.repository.chatbot;
 
 import java.util.List;
 import org.atlas.libs.framework.paging.PagingRequest;
-import org.atlas.services.catalog.domain.entity.chatbot.MessageEntity;
+import org.atlas.services.catalog.domain.entity.chatbot.ChatMessageEntity;
 
 public interface MessageRepository {
 
-  List<MessageEntity> findByConversationId(String conversationId, PagingRequest pagingRequest);
+  List<ChatMessageEntity> findByConversationId(String conversationId, PagingRequest pagingRequest);
 
-  void insert(MessageEntity messageEntity);
+  void insert(ChatMessageEntity chatMessage);
 
   void deleteByConversationId(String conversationId);
 }

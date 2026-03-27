@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS product_category
     PRIMARY KEY (product_id, category_id)
 );
 
-CREATE TABLE IF NOT EXISTS conversation
+CREATE TABLE IF NOT EXISTS chat_conversation
 (
     id         VARCHAR(36)  PRIMARY KEY,
     user_id    VARCHAR(64)  NOT NULL,
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS conversation
     updated_at TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS message
+CREATE TABLE IF NOT EXISTS chat_message
 (
     id              VARCHAR(36) PRIMARY KEY,
     conversation_id VARCHAR(36) NOT NULL,

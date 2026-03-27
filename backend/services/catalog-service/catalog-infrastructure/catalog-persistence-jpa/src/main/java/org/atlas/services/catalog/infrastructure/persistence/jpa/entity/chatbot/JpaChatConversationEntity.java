@@ -1,4 +1,4 @@
-package org.atlas.services.catalog.infrastructure.persistence.jpa.entity;
+package org.atlas.services.catalog.infrastructure.persistence.jpa.entity.chatbot;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,14 +13,14 @@ import lombok.Setter;
 import org.atlas.libs.persistence.jpa.entity.JpaBaseEntity;
 
 @Entity
-@Table(name = "conversation")
+@Table(name = "chat_conversation")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
-public class JpaConversationEntity extends JpaBaseEntity {
+public class JpaChatConversationEntity extends JpaBaseEntity {
 
   @Id
   @Column(name = "id")

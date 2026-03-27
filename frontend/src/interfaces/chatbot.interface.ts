@@ -10,10 +10,6 @@ export interface Conversation {
   updatedAt: string;
 }
 
-export interface StartConversationRequest {
-  firstMessage: string;
-}
-
 export interface RetrieveMessageListRequest {
   conversationId: string;
   page: number;
@@ -21,7 +17,7 @@ export interface RetrieveMessageListRequest {
 }
 
 export interface SendMessageRequest {
-  conversationId: string;
+  conversationId?: string;
   messageType: string;
   text: string;
 }

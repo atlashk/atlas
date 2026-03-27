@@ -14,12 +14,18 @@ import org.atlas.libs.framework.domain.entity.DomainEntity;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
-public class ConversationEntity extends DomainEntity {
+public class ChatMessageEntity extends DomainEntity {
 
   @EqualsAndHashCode.Include
   private String id;
 
+  private String conversationId;
+
+  private MessageType messageType;
+
+  private SenderType senderType;
+
   private String userId;
 
-  private String title;
+  private String text;
 }

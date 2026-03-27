@@ -3,6 +3,7 @@ package org.atlas.services.catalog.infrastructure.ai.chatbot.service;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.util.NullUtil;
@@ -10,7 +11,6 @@ import org.atlas.services.catalog.port.out.ai.chatbot.model.ChatInput;
 import org.atlas.services.catalog.port.out.ai.chatbot.model.ChatOutput;
 import org.atlas.services.catalog.port.out.ai.chatbot.service.RagService;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
@@ -23,19 +23,12 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class RagServiceImpl implements RagService {
 
   private final ChatClient chatClient;
   private final VectorStore vectorStore;
-
-  public RagServiceImpl(ChatClient.Builder chatClientBuilder, ChatMemory chatMemory,
-      VectorStore vectorStore) {
-    this.chatClient = chatClientBuilder
-        .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
-        .build();
-    this.vectorStore = vectorStore;
-  }
 
   @Override
   public ChatOutput chat(ChatInput input) {
@@ -73,6 +66,7 @@ public class RagServiceImpl implements RagService {
 
     // Obtain input & output tokens
     ChatResponse chatResponse = callResponseSpec.chatResponse();
+    String message = getMessage(chatResponse);
     Integer inputTokens = null;
     Integer outputTokens = null;
     if (chatResponse != null) {
@@ -81,10 +75,17 @@ public class RagServiceImpl implements RagService {
     }
 
     return ChatOutput.builder()
-        .message(callResponseSpec.content())
+        .message(message)
         .inputTokens(inputTokens)
         .outputTokens(outputTokens)
         .build();
+  }
+
+  private String getMessage(ChatResponse chatResponse) {
+    if (chatResponse == null || chatResponse.getResult() == null) {
+      return null;
+    }
+    return chatResponse.getResult().getOutput().getText();
   }
 
   private Integer toInteger(Number value) {

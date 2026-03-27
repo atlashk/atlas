@@ -16,6 +16,9 @@ import lombok.Setter;
 @Setter
 public class SendMessageResponse {
 
+  @Schema(description = "Unique identifier of the conversation", example = "01HV4Y7G2D2Q17W0P1D3YH7G8N")
+  private String conversationId;
+
   @Schema(description = "Assistant message content", example = "Here are some options under $500.")
   private String text;
 

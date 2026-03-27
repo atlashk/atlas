@@ -32,7 +32,7 @@ dependencies {
     api 'org.springframework.ai:spring-ai-advisors-vector-store'
 
     // Chat & embedding models
-//    api 'org.springframework.ai:spring-ai-starter-model-ollama'
+    api 'org.springframework.ai:spring-ai-starter-model-ollama'
     api 'org.springframework.ai:spring-ai-starter-model-openai'
 
     // Chat memory
