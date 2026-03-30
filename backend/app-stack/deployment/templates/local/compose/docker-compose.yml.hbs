@@ -440,6 +440,7 @@ services:
       - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://eureka-server:8761/eureka/
       {{#hasService "datasource" "mysql"}}
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db_user?createDatabaseIfNotExist=true
       - SPRING_DATASOURCE_USERNAME=${MYSQL_USER:-atlas}
@@ -462,7 +463,6 @@ services:
       {{#hasService "observability.tracing" "tempo"}}
       - OTEL_COLLECTOR_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
       {{/hasService}}
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://eureka-server:8761/eureka/
     volumes:
       - user-service-log:/var/log/user-service
     healthcheck:
@@ -495,6 +495,11 @@ services:
       - "8082:8082"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://eureka-server:8761/eureka/
+      {{#hasService "ai.vectorstore" "qdrant"}}
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6334
+      {{/hasService}}
       {{#hasService "datasource" "mysql"}}
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db_catalog?createDatabaseIfNotExist=true
       - SPRING_DATASOURCE_USERNAME=${MYSQL_USER:-atlas}
@@ -535,7 +540,6 @@ services:
       {{#hasService "observability.tracing" "tempo"}}
       - OTEL_COLLECTOR_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
       {{/hasService}}
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://eureka-server:8761/eureka/
     volumes:
       - catalog-service-log:/var/log/catalog-service
     healthcheck:
@@ -572,6 +576,7 @@ services:
       - "8083:8083"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://eureka-server:8761/eureka/
       {{#hasService "datasource" "mysql"}}
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db_inventory?createDatabaseIfNotExist=true
       - SPRING_DATASOURCE_USERNAME=${MYSQL_USER:-atlas}
@@ -601,7 +606,6 @@ services:
       {{#hasService "observability.tracing" "tempo"}}
       - OTEL_COLLECTOR_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
       {{/hasService}}
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://eureka-server:8761/eureka/
     volumes:
       - inventory-service-log:/var/log/inventory-service
     healthcheck:
@@ -634,6 +638,7 @@ services:
       - "8084:8084"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://eureka-server:8761/eureka/
       {{#hasService "datasource" "mysql"}}
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db_order?createDatabaseIfNotExist=true
       - SPRING_DATASOURCE_USERNAME=${MYSQL_USER:-atlas}
@@ -663,7 +668,6 @@ services:
       {{#hasService "observability.tracing" "tempo"}}
       - OTEL_COLLECTOR_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
       {{/hasService}}
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://eureka-server:8761/eureka/
       {{#hasService "internal" "grpc"}}
       - API_CLIENT_GRPC_CATALOG_SERVICE_ADDRESS=static://catalog-service:50052
       {{/hasService}}
@@ -702,6 +706,7 @@ services:
       - "8085:8085"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://eureka-server:8761/eureka/
       {{#hasService "datasource" "mysql"}}
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db_payment?createDatabaseIfNotExist=true
       - SPRING_DATASOURCE_USERNAME=${MYSQL_USER:-atlas}
@@ -731,7 +736,6 @@ services:
       {{#hasService "observability.tracing" "tempo"}}
       - OTEL_COLLECTOR_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
       {{/hasService}}
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://eureka-server:8761/eureka/
       - PAYMENT_SIMULATOR_WEBHOOK_URL=http://api-gateway:8080/services/payment/api/webhook/simulator
     volumes:
       - payment-service-log:/var/log/payment-service
@@ -787,6 +791,7 @@ services:
       - "8901:8901"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://eureka-server:8761/eureka/
       {{#hasService "datasource" "mysql"}}
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db_user?createDatabaseIfNotExist=true
       - SPRING_DATASOURCE_USERNAME=${MYSQL_USER:-atlas}
@@ -804,7 +809,6 @@ services:
       {{#hasService "observability.tracing" "zipkin"}}
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       {{/hasService}}
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://eureka-server:8761/eureka/
     volumes:
       - authorization-server-log:/var/log/authorization-server
     healthcheck:
@@ -838,6 +842,7 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://eureka-server:8761/eureka/
       {{#hasService "kv-store" "redis"}}
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
@@ -848,7 +853,6 @@ services:
       {{#hasService "observability.tracing" "tempo"}}
       - OTEL_COLLECTOR_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
       {{/hasService}}
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://eureka-server:8761/eureka/
       {{#hasService "idp" "spring"}}
       - JWK_SET_URI=http://authorization-server:8901/.well-known/jwks.json
       {{/hasService}}

@@ -175,6 +175,9 @@ global:
 # --------------------------------------------------------------------------------------------------
 
 appStack:
+  ai:
+    vectorstore:
+      qdrant: false
   datasource: mysql
   file:
     csv: opencsv
@@ -388,6 +391,22 @@ promtail:
       cpu: 100m
       memory: 128Mi
   serviceAccount: promtail
+
+qdrant:
+  image:
+    repository: qdrant/qdrant
+    tag: v1.13.0
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  service:
+    ports:
+      http: 6333
+      grpc: 6334
 
 rabbitmq:
   image:
