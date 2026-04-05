@@ -23,7 +23,7 @@ terraform {
   # backend "s3" {
   #   bucket         = "atlas-terraform-state"   # <-- replace with your bucket name
   #   key            = "atlas/eks/terraform.tfstate"
-  #   region         = "ap-southeast-1"
+  #   region         = "us-east-1"
   #   dynamodb_table = "atlas-terraform-state-lock"
   #   encrypt        = true
   # }

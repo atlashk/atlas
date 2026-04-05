@@ -52,7 +52,7 @@ aws configure
 Enter the following when prompted:
 - **AWS Access Key ID** — found in AWS Console → IAM → Users → Security credentials
 - **AWS Secret Access Key** — obtained at the same time as the Access Key
-- **Default region name** — `ap-southeast-1` (Singapore)
+- **Default region name** — `us-east-1` (Singapore)
 - **Default output format** — `json`
 
 > **Security note:** Never commit your Access Key to git. In production environments, use IAM Roles instead of Access Keys.
@@ -74,7 +74,7 @@ cd backend/scripts/terraform/eks
 cp terraform.tfvars.example terraform.tfvars
 ```
 
-Open `terraform.tfvars` and adjust values as needed. The defaults are already configured for a **dev** environment in the **Singapore (ap-southeast-1)** region.
+Open `terraform.tfvars` and adjust values as needed. The defaults are already configured for a **dev** environment in the **Singapore (us-east-1)** region.
 
 ---
 
@@ -134,8 +134,8 @@ Once complete, you will see output similar to:
 
 ```
 cluster_name      = "atlas-dev"
-cluster_endpoint  = "https://XXXX.gr7.ap-southeast-1.eks.amazonaws.com"
-configure_kubectl = "aws eks update-kubeconfig --region ap-southeast-1 --name atlas-dev"
+cluster_endpoint  = "https://XXXX.gr7.us-east-1.eks.amazonaws.com"
+configure_kubectl = "aws eks update-kubeconfig --region us-east-1 --name atlas-dev"
 ```
 
 ---
@@ -145,7 +145,7 @@ configure_kubectl = "aws eks update-kubeconfig --region ap-southeast-1 --name at
 Copy the command from the `configure_kubectl` output and run it:
 
 ```bash
-aws eks update-kubeconfig --region ap-southeast-1 --name atlas-dev
+aws eks update-kubeconfig --region us-east-1 --name atlas-dev
 ```
 
 Verify the connection:
@@ -158,7 +158,7 @@ You should see a list of nodes (approximately 7 nodes with the default configura
 
 ```
 NAME                                           STATUS   ROLES    AGE   VERSION
-ip-10-0-xxx.ap-southeast-1.compute.internal   Ready    <none>   5m    v1.31.x
+ip-10-0-xxx.us-east-1.compute.internal   Ready    <none>   5m    v1.31.x
 ...
 ```
 
@@ -201,8 +201,8 @@ When working in a team, store Terraform state in S3 instead of locally. Create t
 # Create the S3 bucket for state storage
 aws s3api create-bucket \
   --bucket atlas-terraform-state \
-  --region ap-southeast-1 \
-  --create-bucket-configuration LocationConstraint=ap-southeast-1
+  --region us-east-1 \
+  --create-bucket-configuration LocationConstraint=us-east-1
 
 # Enable versioning (allows rollback if state is corrupted)
 aws s3api put-bucket-versioning \
@@ -215,7 +215,7 @@ aws dynamodb create-table \
   --attribute-definitions AttributeName=LockID,AttributeType=S \
   --key-schema AttributeName=LockID,KeyType=HASH \
   --billing-mode PAY_PER_REQUEST \
-  --region ap-southeast-1
+  --region us-east-1
 ```
 
 After creating these resources, uncomment the `backend "s3"` block in `versions.tf` and run `terraform init` again.

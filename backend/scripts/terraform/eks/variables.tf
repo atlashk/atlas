@@ -3,9 +3,9 @@
 # ==============================================================
 
 variable "aws_region" {
-  description = "AWS region to deploy the EKS cluster (e.g. ap-southeast-1 = Singapore)"
+  description = "AWS region to deploy the EKS cluster (e.g. us-east-1 = Singapore)"
   type        = string
-  default     = "ap-southeast-1"
+  default     = "us-east-1"
 }
 
 variable "project_name" {
