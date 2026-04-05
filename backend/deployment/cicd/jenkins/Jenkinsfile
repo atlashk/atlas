@@ -28,7 +28,8 @@ pipeline {
                 'inventory-service',
                 'payment-service',
                 'user-service',
-                'api-gateway'
+                'api-gateway',
+                'authorization-server'
             ],
             description: 'Backend service to build and deploy'
         )
@@ -68,17 +69,15 @@ pipeline {
         K8S_NAMESPACE       = "atlas-${params.ENVIRONMENT}"
 
         // Helm
-        HELM_CHART_DIR      = 'backend/app-stack/deployment/templates/local/k8s/chart'
-        HELM_RELEASE_NAME   = "atlas-${params.SERVICE_NAME}"
-        HELM_VALUES_FILE    = "backend/app-stack/config/app-stack.local.k8s.yml"
+        HELM_CHART_DIR      = 'backend/deployment/helm'
+        HELM_RELEASE_NAME   = "atlas-${params.ENVIRONMENT}"
+        HELM_VALUES_FILE    = 'backend/deployment/helm/values.yaml'
 
-        // Gradle module prefix derived from service name
-        // e.g. catalog-service  → services.catalog.bootstrap
-        //      api-gateway       → services.api-gateway.bootstrap
-        GRADLE_MODULE       = ":services.${params.SERVICE_NAME.replace('-service', '').replace('-', '.')}.bootstrap"
+        // Gradle module — resolved in the Preparation stage
+        GRADLE_MODULE       = ''
 
-        // Dockerfile path
-        SERVICE_DIR         = "backend/services/${params.SERVICE_NAME}/${params.SERVICE_NAME.replace('-service', '')}-bootstrap"
+        // Dockerfile path — resolved in the Preparation stage
+        SERVICE_DIR         = ''
     }
 
     options {
@@ -95,6 +94,19 @@ pipeline {
         // =====================================================================
             steps {
                 script {
+                    // Resolve Gradle module and SERVICE_DIR
+                    // e.g. catalog-service       → :services.catalog.bootstrap
+                    //      api-gateway            → :services.api-gateway.bootstrap
+                    //      authorization-server   → :platform.authorization-server.bootstrap
+                    if (params.SERVICE_NAME == 'authorization-server') {
+                        env.GRADLE_MODULE = ':platform.authorization-server.bootstrap'
+                        env.SERVICE_DIR   = 'backend/platform/authorization-server'
+                    } else {
+                        def moduleId = params.SERVICE_NAME.replace('-service', '')
+                        env.GRADLE_MODULE = ":services.${moduleId}.bootstrap"
+                        env.SERVICE_DIR   = "backend/services/${params.SERVICE_NAME}/${moduleId}-bootstrap"
+                    }
+
                     // Resolve image tag: param > git short SHA
                     env.RESOLVED_TAG = params.IMAGE_TAG?.trim()
                         ? params.IMAGE_TAG.trim()
@@ -120,7 +132,7 @@ pipeline {
         }
 
         // =====================================================================
-        stage('Build') {
+        stage('Gradle Build') {
         // =====================================================================
             steps {
                 dir('backend') {
@@ -229,8 +241,8 @@ pipeline {
                         def helmCmd = """
                             helm upgrade --install ${HELM_RELEASE_NAME} ${HELM_CHART_DIR} \
                                 --namespace ${K8S_NAMESPACE} \
-                                --set global.image.registry=${ECR_REGISTRY} \
-                                --set global.image.repository=${ECR_REPOSITORY} \
+                                --values ${HELM_VALUES_FILE} \\
+                                --set global.image.registry=${ECR_REGISTRY} \\
                                 --set global.image.tag=${env.RESOLVED_TAG} \
                                 --set global.image.pullPolicy=Always \
                                 --atomic \
@@ -250,7 +262,7 @@ pipeline {
             steps {
                 withAWS(credentials: env.AWS_CREDENTIALS_ID, region: env.AWS_REGION) {
                     sh """
-                        kubectl rollout status deployment/${HELM_RELEASE_NAME} \
+                        kubectl rollout status deployment/${HELM_RELEASE_NAME}-${params.SERVICE_NAME} \\
                             --namespace ${K8S_NAMESPACE} \
                             --timeout=120s
                     """

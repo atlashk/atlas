@@ -1,3 +1,4 @@
+{{- if eq .Values.appStack.idp "spring" }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -117,3 +118,4 @@ spec:
         - name: authorization-server-logs
           emptyDir: {} # Log volume changed to emptyDir for Promtail compatibility
       terminationGracePeriodSeconds: 30
+{{- end }}

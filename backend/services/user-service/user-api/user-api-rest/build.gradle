@@ -25,7 +25,19 @@ repositories {
 }
 
 dependencies {
-    api project(':services.user.api.rest')
+    // Port
+    api project(':services.user.port')
+
+    // REST server
+    api project(':libs.api.server.rest')
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Mapstruct
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 }
 
 bootJar {

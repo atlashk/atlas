@@ -2,7 +2,7 @@
 set -euo pipefail
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly DIST_DIR="$SCRIPT_DIR/dist"
+readonly DIST_DIR="$SCRIPT_DIR/local/dist"
 readonly UNINSTALL_SCRIPT="$DIST_DIR/uninstall.sh"
 
 # Default options

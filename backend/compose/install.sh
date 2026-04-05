@@ -7,9 +7,9 @@ set -euo pipefail
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly BACKEND_DIR="$SCRIPT_DIR"
-readonly CONFIG_DIR="$BACKEND_DIR/app-stack/config"
-readonly DIST_DIR="$BACKEND_DIR/dist"
-readonly GENERATE_TEMPLATES_SCRIPT="$BACKEND_DIR/generate-templates.sh"
+readonly CONFIG_DIR="$BACKEND_DIR/app-stack"
+readonly DIST_DIR="$BACKEND_DIR/local/dist"
+readonly GENERATE_TEMPLATES_SCRIPT="$BACKEND_DIR/local/generate-templates.sh"
 
 APP_STACK="local.dev"
 SKIP_BUILD=false

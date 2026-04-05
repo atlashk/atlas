@@ -3,9 +3,9 @@ set -euo pipefail
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly BACKEND_DIR="$SCRIPT_DIR"
-readonly CONFIG_DIR="$BACKEND_DIR/app-stack/config"
-readonly GENERATOR_DIR="$BACKEND_DIR/app-stack/deployment/generator"
-readonly TEMPLATES_DIR="$BACKEND_DIR/app-stack/deployment/templates"
+readonly CONFIG_DIR="$BACKEND_DIR/app-stack"
+readonly GENERATOR_DIR="$BACKEND_DIR/local/generator"
+readonly TEMPLATES_DIR="$BACKEND_DIR/local/templates"
 
 APP_STACK="local.dev"
 OUT_DIR="$BACKEND_DIR/dist"
@@ -24,7 +24,7 @@ Usage: $0 [OPTIONS]
 Generate Atlas templates into a dist directory (no installation is executed).
 
 Options:
-  --app-stack=<name>    Pick config/app-stack.<name>.yml (default: local.compose)
+  --app-stack=<name>    Pick app-stack.<name>.yml (default: local.compose)
   --out-dir=<path>      Output directory (default: backend/dist)
   --no-normalize        Skip line endings normalization
   -h, --help            Show this help message

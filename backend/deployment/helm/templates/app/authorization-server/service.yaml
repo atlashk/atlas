@@ -1,3 +1,4 @@
+{{- if eq .Values.appStack.idp "spring" }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -16,3 +17,4 @@ spec:
     - name: http
       port: {{ .Values.authorizationServer.service.ports.http }}
       targetPort: http
+{{- end }}

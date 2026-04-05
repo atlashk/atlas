@@ -210,6 +210,8 @@ project(':services.user.application').projectDir = file('services/user-service/u
 
 include(':services.user.api')
 project(':services.user.api').projectDir = file('services/user-service/user-api')
+include(':services.user.api.rest')
+project(':services.user.api.rest').projectDir = file('services/user-service/user-api/user-api-rest')
 
 include(':services.user.infrastructure')
 project(':services.user.infrastructure').projectDir = file('services/user-service/user-infrastructure')
@@ -361,9 +363,9 @@ project(':services.order.scheduler.quartz').projectDir = file('services/order-se
 include(':services.order.bootstrap')
 project(':services.order.bootstrap').projectDir = file('services/order-service/order-bootstrap')
 
-// =================================================================================================
+// -------------------------------------------------------------------------------------------------
 // Payment Service
-// =================================================================================================
+// -------------------------------------------------------------------------------------------------
 
 include(':services.payment.domain')
 project(':services.payment.domain').projectDir = file('services/payment-service/payment-domain')

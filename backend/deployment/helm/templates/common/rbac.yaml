@@ -12,9 +12,10 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+kind: Role
 metadata:
   name: {{ lower $.Release.Name }}-{{ .Values.global.serviceAccount.name }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: common
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
@@ -34,9 +35,10 @@ rules:
       - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+kind: RoleBinding
 metadata:
   name: {{ lower $.Release.Name }}-{{ .Values.global.serviceAccount.name }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: common
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
@@ -47,6 +49,6 @@ subjects:
     name: {{ lower $.Release.Name }}-{{ .Values.global.serviceAccount.name }}
     namespace: {{ .Release.Namespace }}
 roleRef:
-  kind: ClusterRole
+  kind: Role
   name: {{ lower $.Release.Name }}-{{ .Values.global.serviceAccount.name }}
   apiGroup: rbac.authorization.k8s.io
