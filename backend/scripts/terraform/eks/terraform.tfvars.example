@@ -40,10 +40,10 @@ system_node_group = {
 }
 
 # ------------------------------------------------------------------
-# Node Group: application — runs the microservices
+# Node Group: app — runs the microservices
 # t3.large: 2 vCPU, 8 GB RAM
 # ------------------------------------------------------------------
-application_node_group = {
+app_node_group = {
   instance_types = ["t3.large"]
   min_size       = 1
   max_size       = 2
@@ -52,10 +52,10 @@ application_node_group = {
 }
 
 # ------------------------------------------------------------------
-# Node Group: infrastructure — runs MySQL, Redis, Kafka, ES, MinIO...
+# Node Group: infra — runs MySQL, Redis, Kafka, ES, MinIO...
 # t3.large: 2 vCPU, 8 GB RAM
 # ------------------------------------------------------------------
-infrastructure_node_group = {
+infra_node_group = {
   instance_types = ["t3.large"]
   min_size       = 1
   max_size       = 2

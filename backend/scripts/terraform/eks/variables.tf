@@ -73,22 +73,22 @@ variable "system_node_group" {
   })
   default = {
     instance_types = ["t3.medium"]
-    min_size       = 2
-    max_size       = 4
-    desired_size   = 2
+    min_size       = 1
+    max_size       = 2
+    desired_size   = 1
     disk_size_gb   = 20
   }
 }
 
 # ==============================================================
-# Node Group: Application
+# Node Group: app
 # Purpose: runs the Atlas microservices
 #   api-gateway, catalog-service, inventory-service,
 #   order-service, payment-service, user-service,
 #   authorization-server, config-server, discovery-server
 # ==============================================================
 
-variable "application_node_group" {
+variable "app_node_group" {
   description = "Configuration for the microservices node group"
   type = object({
     instance_types = list(string)
@@ -99,22 +99,22 @@ variable "application_node_group" {
   })
   default = {
     instance_types = ["t3.large"]
-    min_size       = 2
-    max_size       = 10
-    desired_size   = 3
-    disk_size_gb   = 50
+    min_size       = 1
+    max_size       = 2
+    desired_size   = 1
+    disk_size_gb   = 30
   }
 }
 
 # ==============================================================
-# Node Group: Infrastructure
+# Node Group: infra
 # Purpose: runs stateful services
 #   MySQL, Redis, Kafka, Elasticsearch, MinIO,
 #   Loki, Prometheus, Tempo
 # Larger instances required due to higher RAM/disk demands
 # ==============================================================
 
-variable "infrastructure_node_group" {
+variable "infra_node_group" {
   description = "Configuration for the stateful infrastructure services node group"
   type = object({
     instance_types = list(string)
@@ -124,10 +124,10 @@ variable "infrastructure_node_group" {
     disk_size_gb   = number
   })
   default = {
-    instance_types = ["t3.xlarge"]
-    min_size       = 2
-    max_size       = 6
-    desired_size   = 2
-    disk_size_gb   = 100
+    instance_types = ["t3.large"]
+    min_size       = 1
+    max_size       = 2
+    desired_size   = 1
+    disk_size_gb   = 30
   }
 }

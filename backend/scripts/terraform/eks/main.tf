@@ -121,46 +121,46 @@ module "eks" {
       }
     }
 
-    # ── NODE GROUP: application ─────────────────────────────
+    # ── NODE GROUP: app ─────────────────────────────
     # Runs the Atlas microservices:
     #   api-gateway, catalog-service, inventory-service,
     #   order-service, payment-service, user-service,
     #   authorization-server, config-server, discovery-server
-    application = {
-      name           = "${local.cluster_name}-application"
-      instance_types = var.application_node_group.instance_types
-      min_size       = var.application_node_group.min_size
-      max_size       = var.application_node_group.max_size
-      desired_size   = var.application_node_group.desired_size
-      disk_size      = var.application_node_group.disk_size_gb
+    app = {
+      name           = "${local.cluster_name}-app"
+      instance_types = var.app_node_group.instance_types
+      min_size       = var.app_node_group.min_size
+      max_size       = var.app_node_group.max_size
+      desired_size   = var.app_node_group.desired_size
+      disk_size      = var.app_node_group.disk_size_gb
 
       labels = {
-        role = "application"
+        role = "app"
       }
     }
 
-    # ── NODE GROUP: infrastructure ──────────────────────────
+    # ── NODE GROUP: infra ──────────────────────────
     # Runs stateful services:
     #   MySQL, Redis, Kafka, Elasticsearch, MinIO,
     #   Loki, Prometheus, Tempo
-    # Taint "dedicated=infrastructure:NoSchedule" ensures only
+    # Taint "dedicated=infra:NoSchedule" ensures only
     # Pods with a matching toleration are scheduled here
-    infrastructure = {
-      name           = "${local.cluster_name}-infrastructure"
-      instance_types = var.infrastructure_node_group.instance_types
-      min_size       = var.infrastructure_node_group.min_size
-      max_size       = var.infrastructure_node_group.max_size
-      desired_size   = var.infrastructure_node_group.desired_size
-      disk_size      = var.infrastructure_node_group.disk_size_gb
+    infra = {
+      name          = "${local.cluster_name}-infra"
+      instance_types = var.infra_node_group.instance_types
+      min_size       = var.infra_node_group.min_size
+      max_size       = var.infra_node_group.max_size
+      desired_size   = var.infra_node_group.desired_size
+      disk_size      = var.infra_node_group.disk_size_gb
 
       labels = {
-        role = "infrastructure"
+        role = "infra"
       }
 
       taints = {
         dedicated = {
           key    = "dedicated"
-          value  = "infrastructure"
+          value  = "infra"
           effect = "NO_SCHEDULE"
         }
       }

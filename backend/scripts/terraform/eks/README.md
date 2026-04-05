@@ -10,9 +10,9 @@ This script provisions an **Amazon EKS cluster** on AWS to run all microservices
 AWS VPC (10.0.0.0/16)
 ├── Public Subnet  × N AZ  → ALB (Ingress Load Balancer)
 └── Private Subnet × N AZ  → EKS Node Groups
-                                ├── system         (t3.medium)  — Kubernetes add-ons
-                                ├── application    (t3.large)   — Microservices
-                                └── infrastructure (t3.large)   — MySQL, Redis, Kafka, ES, MinIO...
+                                ├── system    (t3.medium)  — Kubernetes add-ons
+                                ├── app       (t3.large)   — Microservices
+                                └── infra     (t3.large)   — MySQL, Redis, Kafka, ES, MinIO...
 ```
 
 The following EKS **Managed Add-ons** are pre-installed:
@@ -71,11 +71,6 @@ If you see `Account`, `UserId`, and `Arn` in the output, you are good to go.
 
 ```bash
 cd backend/scripts/terraform/eks
-
-# Windows (PowerShell)
-Copy-Item terraform.tfvars.example terraform.tfvars
-
-# Linux / macOS
 cp terraform.tfvars.example terraform.tfvars
 ```
 

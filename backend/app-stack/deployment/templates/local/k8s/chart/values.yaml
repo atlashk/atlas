@@ -170,24 +170,24 @@ global:
 # Configure nodeSelector and tolerations per node group.
 # Set to empty ({} or []) to disable scheduling constraints — useful for local/minikube environments.
 nodeGroups:
-  application:
-    # Schedule all microservice Pods onto nodes labelled role=application.
+  app:
+    # Schedule all microservice Pods onto nodes labelled role=app.
     # Set to {} to disable.
     nodeSelector:
-      role: application
-    # Tolerations for the application node group. Empty by default.
+      role: app
+    # Tolerations for the app node group. Empty by default.
     tolerations: []
-  infrastructure:
-    # Schedule all stateful service Pods onto nodes labelled role=infrastructure.
+  infra:
+    # Schedule all stateful service Pods onto nodes labelled role=infra.
     # Set to {} to disable.
     nodeSelector:
-      role: infrastructure
-    # Toleration matching the EKS node group taint: dedicated=infrastructure:NoSchedule
+      role: infra
+    # Toleration matching the EKS node group taint: dedicated=infra:NoSchedule
     # Set to [] to disable.
     tolerations:
       - key: dedicated
         operator: Equal
-        value: infrastructure
+        value: infra
         effect: NoSchedule
 
   secret:
@@ -229,7 +229,7 @@ appStack:
   storage: minio
   template: freemarker
 
-# Infrastructure
+# Infra
 # --------------------------------------------------------------------------------------------------
 
 elasticsearch:
@@ -533,7 +533,7 @@ zipkin:
     ports:
       http: 9411
 
-# Application
+# App
 # --------------------------------------------------------------------------------------------------
 
 userSvc:
