@@ -12,7 +12,7 @@ AWS VPC (10.0.0.0/16)
 └── Private Subnet × N AZ  → EKS Node Groups
                                 ├── system         (t3.medium)  — Kubernetes add-ons
                                 ├── application    (t3.large)   — Microservices
-                                └── infrastructure (t3.xlarge)  — MySQL, Redis, Kafka, ES, MinIO...
+                                └── infrastructure (t3.large)   — MySQL, Redis, Kafka, ES, MinIO...
 ```
 
 The following EKS **Managed Add-ons** are pre-installed:
@@ -120,8 +120,8 @@ terraform plan -out=atlas-eks.tfplan
 ## Step 5 — Apply (provision the infrastructure)
 
 > **Cost warning:** This step will incur **real AWS charges**. Estimated cost for the default configuration (dev, Singapore):
-> - 3× t3.medium + 3× t3.large + 2× t3.xlarge ≈ **~$0.50–0.70/hour**
-> - NAT Gateway ≈ **~$0.05/hour**
+> - 1× t3.medium + 2× t3.large ≈ **~$0.24/hour**
+> - NAT Gateway ≈ **~$0.06/hour**
 >
 > Remember to **destroy** the cluster when you are done to avoid ongoing charges.
 
@@ -138,9 +138,9 @@ Type `yes` when prompted. Cluster creation takes approximately **10–15 minutes
 Once complete, you will see output similar to:
 
 ```
-cluster_name      = "atlas-dev-eks"
+cluster_name      = "atlas-dev"
 cluster_endpoint  = "https://XXXX.gr7.ap-southeast-1.eks.amazonaws.com"
-configure_kubectl = "aws eks update-kubeconfig --region ap-southeast-1 --name atlas-dev-eks"
+configure_kubectl = "aws eks update-kubeconfig --region ap-southeast-1 --name atlas-dev"
 ```
 
 ---
@@ -150,7 +150,7 @@ configure_kubectl = "aws eks update-kubeconfig --region ap-southeast-1 --name at
 Copy the command from the `configure_kubectl` output and run it:
 
 ```bash
-aws eks update-kubeconfig --region ap-southeast-1 --name atlas-dev-eks
+aws eks update-kubeconfig --region ap-southeast-1 --name atlas-dev
 ```
 
 Verify the connection:
@@ -208,7 +208,7 @@ helm repo update
 
 helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   -n kube-system \
-  --set clusterName=atlas-dev-eks \
+  --set clusterName=atlas-dev \
   --set serviceAccount.create=true \
   --set "serviceAccount.annotations.eks\.amazonaws\.com/role-arn=<ARN_from_output_above>"
 ```

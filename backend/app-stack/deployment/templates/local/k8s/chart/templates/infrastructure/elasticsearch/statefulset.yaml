@@ -21,6 +21,7 @@ spec:
         app.kubernetes.io/name: elasticsearch
         app.kubernetes.io/instance: {{ lower $.Release.Name }}
     spec:
+      {{- include "atlas.nodeSelector.infrastructure" . | nindent 6 }}
       containers:
         - name: elasticsearch
           image: "{{ .Values.elasticsearch.image.repository }}:{{ .Values.elasticsearch.image.tag }}"

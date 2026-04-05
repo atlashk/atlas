@@ -21,6 +21,7 @@ spec:
         app.kubernetes.io/name: zipkin
         app.kubernetes.io/instance: {{ lower $.Release.Name }}
     spec:
+      {{- include "atlas.nodeSelector.infrastructure" . | nindent 6 }}
       containers:
         - name: zipkin
           image: "{{ .Values.zipkin.image.repository }}:{{ .Values.zipkin.image.tag }}"

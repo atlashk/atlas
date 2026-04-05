@@ -21,6 +21,7 @@ spec:
         app.kubernetes.io/name: postgres
         app.kubernetes.io/instance: {{ lower $.Release.Name }}
     spec:
+      {{- include "atlas.nodeSelector.infrastructure" . | nindent 6 }}
       containers:
         - name: postgres
           image: "{{ .Values.postgres.image.repository }}:{{ .Values.postgres.image.tag }}"

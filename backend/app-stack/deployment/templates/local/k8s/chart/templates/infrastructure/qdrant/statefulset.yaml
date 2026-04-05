@@ -24,6 +24,7 @@ spec:
         app.kubernetes.io/name: qdrant
         app.kubernetes.io/instance: {{ lower $.Release.Name }}
     spec:
+      {{- include "atlas.nodeSelector.infrastructure" . | nindent 6 }}
       containers:
         - name: qdrant
           image: "{{ .Values.qdrant.image.repository }}:{{ .Values.qdrant.image.tag }}"

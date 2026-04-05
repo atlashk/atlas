@@ -19,6 +19,7 @@ spec:
         app.kubernetes.io/name: user-service
         app.kubernetes.io/instance: {{ lower $.Release.Name }}
     spec:
+      {{- include "atlas.nodeSelector.application" . | nindent 6 }}
       serviceAccountName: {{ lower $.Release.Name }}-{{ .Values.global.serviceAccount.name }}
       {{- $deps := list -}}
       {{- if eq .Values.appStack.datasource "mysql" -}}

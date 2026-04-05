@@ -21,6 +21,7 @@ spec:
         app.kubernetes.io/name: loki
         app.kubernetes.io/instance: {{ lower $.Release.Name }}
     spec:
+      {{- include "atlas.nodeSelector.infrastructure" . | nindent 6 }}
       containers:
         - name: loki
           image: "{{ .Values.loki.image.repository }}:{{ .Values.loki.image.tag }}"
