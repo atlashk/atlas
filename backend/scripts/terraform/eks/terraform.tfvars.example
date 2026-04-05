@@ -1,0 +1,64 @@
+# ==============================================================
+# Copy this file to terraform.tfvars and fill in your values
+#   cp terraform.tfvars.example terraform.tfvars
+#
+# WARNING: Do NOT commit terraform.tfvars to git
+#          (already listed in .gitignore)
+# ==============================================================
+
+# AWS region to deploy into
+# Recommended: ap-southeast-1 (Singapore) — low latency for Southeast Asia
+aws_region = "ap-southeast-1"
+
+# Project name — appears in the name of every AWS resource
+project_name = "atlas"
+
+# Deployment environment: "dev" | "staging" | "production"
+environment = "dev"
+
+# Kubernetes version
+kubernetes_version = "1.31"
+
+# Number of Availability Zones (2 or 3)
+# dev: 2 AZs to reduce cost
+# production: 3 AZs for higher availability
+availability_zones_count = 2
+
+# VPC CIDR block
+vpc_cidr = "10.0.0.0/16"
+
+# ------------------------------------------------------------------
+# Node Group: system — runs Kubernetes add-ons
+# t3.medium: 2 vCPU, 4 GB RAM
+# ------------------------------------------------------------------
+system_node_group = {
+  instance_types = ["t3.medium"]
+  min_size       = 2
+  max_size       = 4
+  desired_size   = 2
+  disk_size_gb   = 20
+}
+
+# ------------------------------------------------------------------
+# Node Group: application — runs the microservices
+# t3.large: 2 vCPU, 8 GB RAM
+# ------------------------------------------------------------------
+application_node_group = {
+  instance_types = ["t3.large"]
+  min_size       = 1
+  max_size       = 2
+  desired_size   = 1
+  disk_size_gb   = 30
+}
+
+# ------------------------------------------------------------------
+# Node Group: infrastructure — runs MySQL, Redis, Kafka, ES, MinIO...
+# t3.large: 2 vCPU, 8 GB RAM
+# ------------------------------------------------------------------
+infrastructure_node_group = {
+  instance_types = ["t3.large"]
+  min_size       = 1
+  max_size       = 2
+  desired_size   = 1
+  disk_size_gb   = 30
+}

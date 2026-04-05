@@ -1,0 +1,26 @@
+# File này chứa giá trị thực (có thể chứa secret) — KHÔNG commit lên git
+terraform.tfvars
+
+# Thư mục Terraform tạo ra khi chạy — không cần commit
+.terraform/
+.terraform.lock.hcl
+
+# State file — chứa toàn bộ trạng thái hạ tầng của bạn
+# Nếu dùng S3 backend (khuyến nghị) thì các file này không tồn tại local
+terraform.tfstate
+terraform.tfstate.backup
+*.tfstate
+*.tfstate.*
+
+# Kết quả plan
+*.tfplan
+
+# File tạm
+*.tmp
+*.bak
+crash.log
+crash.*.log
+
+# Nếu dùng .env để quản lý biến môi trường
+.env
+.env.*
