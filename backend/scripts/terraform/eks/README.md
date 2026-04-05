@@ -169,52 +169,6 @@ ip-10-0-xxx.ap-southeast-1.compute.internal   Ready    <none>   5m    v1.31.x
 
 ---
 
-## Step 7 — Deploy microservices
-
-### 7.1 Use node labels in your manifests (optional but recommended)
-
-The node labels are already configured by Terraform. When writing Kubernetes manifests for your services, use `nodeSelector` or `nodeAffinity` to schedule Pods on the correct node group:
-
-**Microservice** → node group `application`:
-```yaml
-nodeSelector:
-  role: application
-```
-
-**Stateful service** (MySQL, Redis...) → node group `infrastructure`:
-```yaml
-nodeSelector:
-  role: infrastructure
-tolerations:
-  - key: dedicated
-    operator: Equal
-    value: infrastructure
-    effect: NoSchedule
-```
-
-### 7.2 Install the AWS Load Balancer Controller (required for Ingress)
-
-Get the IAM Role ARN from the Terraform output:
-
-```bash
-terraform output aws_load_balancer_controller_role_arn
-```
-
-Install via Helm:
-
-```bash
-helm repo add eks https://aws.github.io/eks-charts
-helm repo update
-
-helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
-  -n kube-system \
-  --set clusterName=atlas-dev \
-  --set serviceAccount.create=true \
-  --set "serviceAccount.annotations.eks\.amazonaws\.com/role-arn=<ARN_from_output_above>"
-```
-
----
-
 ## Destroy the cluster (when no longer needed)
 
 > **Warning:** This command permanently deletes **all** provisioned infrastructure and **cannot be undone**.

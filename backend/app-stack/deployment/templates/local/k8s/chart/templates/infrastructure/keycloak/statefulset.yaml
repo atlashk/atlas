@@ -21,7 +21,14 @@ spec:
         app.kubernetes.io/name: keycloak
         app.kubernetes.io/instance: {{ lower $.Release.Name }}
     spec:
-      {{- include "atlas.nodeSelector.infrastructure" . | nindent 6 }}
+      {{- with .Values.nodeGroups.infrastructure.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeGroups.infrastructure.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- $deps := list -}}
       {{- if eq .Values.appStack.datasource "mysql" -}}
       {{- $deps = append $deps (dict "name" "mysql" "host" (printf "%s-mysql" (lower $.Release.Name)) "port" .Values.mysql.service.ports.mysql) -}}

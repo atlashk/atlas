@@ -20,7 +20,14 @@ spec:
         app.kubernetes.io/name: grafana
         app.kubernetes.io/instance: {{ lower $.Release.Name }}
     spec:
-      {{- include "atlas.nodeSelector.infrastructure" . | nindent 6 }}
+      {{- with .Values.nodeGroups.infrastructure.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeGroups.infrastructure.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: grafana
           image: "{{ .Values.grafana.image.repository }}:{{ .Values.grafana.image.tag }}"

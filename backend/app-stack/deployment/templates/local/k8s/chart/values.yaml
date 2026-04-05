@@ -165,6 +165,31 @@ global:
 
   affinity: {}
 
+# Node Group scheduling
+# --------------------------------------------------------------------------------------------------
+# Configure nodeSelector and tolerations per node group.
+# Set to empty ({} or []) to disable scheduling constraints — useful for local/minikube environments.
+nodeGroups:
+  application:
+    # Schedule all microservice Pods onto nodes labelled role=application.
+    # Set to {} to disable.
+    nodeSelector:
+      role: application
+    # Tolerations for the application node group. Empty by default.
+    tolerations: []
+  infrastructure:
+    # Schedule all stateful service Pods onto nodes labelled role=infrastructure.
+    # Set to {} to disable.
+    nodeSelector:
+      role: infrastructure
+    # Toleration matching the EKS node group taint: dedicated=infrastructure:NoSchedule
+    # Set to [] to disable.
+    tolerations:
+      - key: dedicated
+        operator: Equal
+        value: infrastructure
+        effect: NoSchedule
+
   secret:
     username: &defaultUsername YXRsYXM=
     password: &defaultPassword QXRsYXNAMTIzNDU2

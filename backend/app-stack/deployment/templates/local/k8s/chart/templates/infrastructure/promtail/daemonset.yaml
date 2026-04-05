@@ -21,7 +21,10 @@ spec:
         app.kubernetes.io/name: promtail
         app.kubernetes.io/instance: {{ lower $.Release.Name }}
     spec:
-      {{- include "atlas.tolerations.infrastructure" . | nindent 6 }}
+      {{- with .Values.nodeGroups.infrastructure.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       serviceAccountName: {{ lower $.Release.Name }}-{{ .Values.promtail.serviceAccount }}
       {{- $deps := list -}}
       {{- $deps = append $deps (dict "name" "loki" "host" (printf "%s-loki" (lower $.Release.Name)) "port" .Values.loki.service.ports.http) -}}

@@ -21,7 +21,14 @@ spec:
         app.kubernetes.io/name: mysql
         app.kubernetes.io/instance: {{ lower $.Release.Name }}
     spec:
-      {{- include "atlas.nodeSelector.infrastructure" . | nindent 6 }}
+      {{- with .Values.nodeGroups.infrastructure.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeGroups.infrastructure.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: mysql
           image: "{{ .Values.mysql.image.repository }}:{{ .Values.mysql.image.tag }}"
