@@ -1,0 +1,278 @@
+// =============================================================================
+// Jenkins Pipeline: Build & Deploy Backend Service to AWS EKS
+// =============================================================================
+// Prerequisites (Jenkins credentials):
+//   - AWS_CREDENTIALS_ID   : AWS credentials (access key / secret key)
+//
+// Required tools on Jenkins agent:
+//   - JDK 17, Gradle
+//   - Docker
+//   - AWS CLI v2
+//   - kubectl
+//   - Helm 3
+// =============================================================================
+
+pipeline {
+
+    agent any
+
+    // -------------------------------------------------------------------------
+    // Parameters — choose service, env and image tag at trigger time
+    // -------------------------------------------------------------------------
+    parameters {
+        choice(
+            name: 'SERVICE_NAME',
+            choices: [
+                'catalog-service',
+                'order-service',
+                'inventory-service',
+                'payment-service',
+                'user-service',
+                'api-gateway'
+            ],
+            description: 'Backend service to build and deploy'
+        )
+        string(
+            name: 'IMAGE_TAG',
+            defaultValue: '',
+            description: 'Docker image tag (leave blank to use git short SHA)'
+        )
+        choice(
+            name: 'ENVIRONMENT',
+            choices: ['dev', 'stg', 'prd'],
+            description: 'Target deployment environment'
+        )
+        booleanParam(
+            name: 'SKIP_TESTS',
+            defaultValue: false,
+            description: 'Skip unit/integration tests'
+        )
+    }
+
+    // -------------------------------------------------------------------------
+    // Environment — edit these to match your AWS / EKS setup
+    // -------------------------------------------------------------------------
+    environment {
+        // AWS
+        AWS_REGION          = 'us-east-1'                             // AWS region where ECR and EKS are located
+        AWS_ACCOUNT_ID      = credentials('AWS_ACCOUNT_ID')           // Jenkins secret text
+        AWS_CREDENTIALS_ID  = 'aws-credentials'                       // Jenkins AWS credentials ID
+
+        // ECR
+        ECR_REGISTRY        = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+        ECR_REPOSITORY      = "atlas/${params.SERVICE_NAME}"
+        FULL_IMAGE_NAME     = "${ECR_REGISTRY}/${ECR_REPOSITORY}"
+
+        // EKS
+        EKS_CLUSTER_NAME    = "atlas-${params.ENVIRONMENT}"
+        K8S_NAMESPACE       = "atlas-${params.ENVIRONMENT}"
+
+        // Helm
+        HELM_CHART_DIR      = 'backend/app-stack/deployment/templates/local/k8s/chart'
+        HELM_RELEASE_NAME   = "atlas-${params.SERVICE_NAME}"
+        HELM_VALUES_FILE    = "backend/app-stack/config/app-stack.local.k8s.yml"
+
+        // Gradle module prefix derived from service name
+        // e.g. catalog-service  → services.catalog.bootstrap
+        //      api-gateway       → services.api-gateway.bootstrap
+        GRADLE_MODULE       = ":services.${params.SERVICE_NAME.replace('-service', '').replace('-', '.')}.bootstrap"
+
+        // Dockerfile path
+        SERVICE_DIR         = "backend/services/${params.SERVICE_NAME}/${params.SERVICE_NAME.replace('-service', '')}-bootstrap"
+    }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '20'))
+        timestamps()
+        timeout(time: 30, unit: 'MINUTES')
+        ansiColor('xterm')
+    }
+
+    stages {
+
+        // =====================================================================
+        stage('Preparation') {
+        // =====================================================================
+            steps {
+                script {
+                    // Resolve image tag: param > git short SHA
+                    env.RESOLVED_TAG = params.IMAGE_TAG?.trim()
+                        ? params.IMAGE_TAG.trim()
+                        : sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+
+                    env.FULL_IMAGE_WITH_TAG = "${env.FULL_IMAGE_NAME}:${env.RESOLVED_TAG}"
+
+                    echo "Service      : ${params.SERVICE_NAME}"
+                    echo "Environment  : ${params.ENVIRONMENT}"
+                    echo "Gradle module: ${env.GRADLE_MODULE}"
+                    echo "Image        : ${env.FULL_IMAGE_WITH_TAG}"
+                    echo "EKS cluster  : ${env.EKS_CLUSTER_NAME}"
+                }
+            }
+        }
+
+        // =====================================================================
+        stage('Checkout') {
+        // =====================================================================
+            steps {
+                checkout scm
+            }
+        }
+
+        // =====================================================================
+        stage('Build') {
+        // =====================================================================
+            steps {
+                dir('backend') {
+                    script {
+                        def gradleCmd = "./gradlew ${env.GRADLE_MODULE}:bootJar"
+                        if (params.SKIP_TESTS) {
+                            gradleCmd += ' -x test'
+                        }
+                        gradleCmd += ' --no-daemon --parallel --info'
+
+                        sh gradleCmd
+                    }
+                }
+            }
+            post {
+                always {
+                    junit(
+                        testResults: 'backend/**/build/test-results/**/*.xml',
+                        allowEmptyResults: true
+                    )
+                }
+            }
+        }
+
+        // =====================================================================
+        stage('Docker: Build & Push to ECR') {
+        // =====================================================================
+            steps {
+                withAWS(credentials: env.AWS_CREDENTIALS_ID, region: env.AWS_REGION) {
+                    script {
+                        // Authenticate Docker to ECR
+                        sh """
+                            aws ecr get-login-password --region ${AWS_REGION} \
+                                | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+                        """
+
+                        // Create ECR repository if it does not exist
+                        sh """
+                            aws ecr describe-repositories \
+                                --repository-names ${ECR_REPOSITORY} \
+                                --region ${AWS_REGION} \
+                            || aws ecr create-repository \
+                                --repository-name ${ECR_REPOSITORY} \
+                                --region ${AWS_REGION} \
+                                --image-scanning-configuration scanOnPush=true \
+                                --encryption-configuration encryptionType=AES256
+                        """
+
+                        // Build image
+                        sh """
+                            docker build \
+                                --file ${SERVICE_DIR}/Dockerfile \
+                                --build-arg BUILD_DATE=\$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+                                --build-arg VCS_REF=${env.RESOLVED_TAG} \
+                                --build-arg SERVICE_NAME=${params.SERVICE_NAME} \
+                                --tag ${env.FULL_IMAGE_WITH_TAG} \
+                                --tag ${env.FULL_IMAGE_NAME}:latest \
+                                ${SERVICE_DIR}
+                        """
+
+                        // Push both tags
+                        sh """
+                            docker push ${env.FULL_IMAGE_WITH_TAG}
+                            docker push ${env.FULL_IMAGE_NAME}:latest
+                        """
+                    }
+                }
+            }
+            post {
+                always {
+                    // Clean up local image to save disk space on the agent
+                    sh """
+                        docker rmi ${env.FULL_IMAGE_WITH_TAG} || true
+                        docker rmi ${env.FULL_IMAGE_NAME}:latest || true
+                    """
+                }
+            }
+        }
+
+        // =====================================================================
+        stage('Configure kubectl for EKS') {
+        // =====================================================================
+            steps {
+                withAWS(credentials: env.AWS_CREDENTIALS_ID, region: env.AWS_REGION) {
+                    sh """
+                        aws eks update-kubeconfig \
+                            --region ${AWS_REGION} \
+                            --name ${EKS_CLUSTER_NAME}
+                    """
+                }
+            }
+        }
+
+        // =====================================================================
+        stage('Deploy to EKS via Helm') {
+        // =====================================================================
+            steps {
+                withAWS(credentials: env.AWS_CREDENTIALS_ID, region: env.AWS_REGION) {
+                    script {
+                        // Ensure namespace exists
+                        sh """
+                            kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml \
+                                | kubectl apply -f -
+                        """
+
+                        def helmCmd = """
+                            helm upgrade --install ${HELM_RELEASE_NAME} ${HELM_CHART_DIR} \
+                                --namespace ${K8S_NAMESPACE} \
+                                --set global.image.registry=${ECR_REGISTRY} \
+                                --set global.image.repository=${ECR_REPOSITORY} \
+                                --set global.image.tag=${env.RESOLVED_TAG} \
+                                --set global.image.pullPolicy=Always \
+                                --atomic \
+                                --timeout 5m \
+                                --cleanup-on-fail
+                        """
+
+                        sh helmCmd
+                    }
+                }
+            }
+        }
+
+        // =====================================================================
+        stage('Verify Rollout') {
+        // =====================================================================
+            steps {
+                withAWS(credentials: env.AWS_CREDENTIALS_ID, region: env.AWS_REGION) {
+                    sh """
+                        kubectl rollout status deployment/${HELM_RELEASE_NAME} \
+                            --namespace ${K8S_NAMESPACE} \
+                            --timeout=120s
+                    """
+                }
+            }
+        }
+
+    }
+
+    // -------------------------------------------------------------------------
+    // Post actions
+    // -------------------------------------------------------------------------
+    post {
+        success {
+            echo "Pipeline completed successfully."
+            echo "Image deployed: ${env.FULL_IMAGE_WITH_TAG}"
+        }
+        failure {
+            echo "Pipeline failed. Check stage logs above."
+        }
+        always {
+            cleanWs()
+        }
+    }
+}
