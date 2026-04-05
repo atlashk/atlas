@@ -99,7 +99,7 @@ pipeline {
                     //      api-gateway            → :services.api-gateway.bootstrap
                     //      authorization-server   → :platform.authorization-server.bootstrap
                     if (params.SERVICE_NAME == 'authorization-server') {
-                        env.GRADLE_MODULE = ':platform.authorization-server.bootstrap'
+                        env.GRADLE_MODULE = ':platform.authorization-server'
                         env.SERVICE_DIR   = 'backend/platform/authorization-server'
                     } else {
                         def moduleId = params.SERVICE_NAME.replace('-service', '')
