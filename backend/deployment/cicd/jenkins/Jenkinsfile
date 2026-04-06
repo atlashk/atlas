@@ -82,12 +82,6 @@ pipeline {
         HELM_CHART_DIR      = 'backend/deployment/helm'
         HELM_RELEASE_NAME   = "atlas-${params.ENVIRONMENT}"
         HELM_VALUES_FILE    = 'backend/deployment/helm/values.yaml'
-
-        // Gradle module — resolved in the Preparation stage
-        GRADLE_MODULE       = 'unset'
-
-        // Dockerfile path — resolved in the Preparation stage
-        SERVICE_DIR         = 'unset'
     }
 
     options {
