@@ -13,18 +13,10 @@ terraform {
   }
 
   # -------------------------------------------------------
-  # Remote State
-  # Run `deployment/terraform/eks/init` first to create the
-  # S3 bucket and DynamoDB table, then uncomment this block
-  # and run `terraform init -migrate-state`.
+  # Remote State — values are injected by install.eks.sh
+  # via -backend-config flags at `terraform init` time.
   # -------------------------------------------------------
-  # backend "s3" {
-  #   bucket         = "atlas-terraform-state"
-  #   key            = "atlas/eks/terraform.tfstate"
-  #   region         = "us-east-1"
-  #   dynamodb_table = "atlas-terraform-state-lock"
-  #   encrypt        = true
-  # }
+  backend "s3" {}
 }
 
 # -------------------------------------------------------
