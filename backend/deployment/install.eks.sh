@@ -139,8 +139,6 @@ run_cluster() {
 
     TF_CLUSTER_NAME=$(terraform output -raw cluster_name)
     TF_CONFIGURE_KUBECTL=$(terraform output -raw configure_kubectl)
-    EBS_CSI_ROLE_ARN=$(terraform output -raw ebs_csi_driver_role_arn)
-    ALB_CONTROLLER_ROLE_ARN=$(terraform output -raw aws_load_balancer_controller_role_arn)
 
     popd > /dev/null
 
@@ -173,11 +171,9 @@ run_helm() {
     helm upgrade --install "${HELM_RELEASE_NAME}" "${HELM_CHART_DIR}" \
         --namespace "${HELM_NAMESPACE}" \
         --create-namespace \
-        --set global.ebsCsiDriverRoleArn="${EBS_CSI_ROLE_ARN}" \
-        --set global.awsLoadBalancerControllerRoleArn="${ALB_CONTROLLER_ROLE_ARN}" \
         --values "${HELM_CHART_DIR}/values.yaml" \
         --wait \
-        --timeout 15m
+        --timeout 30m
 
     log_success "Helm release '${HELM_RELEASE_NAME}' deployed successfully"
 }

@@ -231,17 +231,8 @@ module "ebs_csi_irsa" {
 # IAM Role for AWS Load Balancer Controller (IRSA)
 # ==============================================================
 # The AWS Load Balancer Controller creates an ALB when you deploy
-# an Ingress resource. This IAM role allows the controller to
-# create and manage ALBs on AWS.
-#
-# After terraform apply, install the controller via Helm:
-#   helm repo add eks https://aws.github.io/eks-charts
-#   helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
-#     -n kube-system \
-#     --set clusterName=<cluster-name> \
-#     --set serviceAccount.create=true \
-#     --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=<role-arn>
-# (The role ARN is printed in the output: aws_load_balancer_controller_role_arn)
+# an Ingress resource with ingressClassName: alb. This IAM role
+# allows the controller to create and manage ALBs on AWS.
 # ==============================================================
 
 module "aws_load_balancer_controller_irsa" {
@@ -259,4 +250,52 @@ module "aws_load_balancer_controller_irsa" {
   }
 
   tags = local.common_tags
+}
+
+# ==============================================================
+# AWS Load Balancer Controller — installed via Helm
+# ==============================================================
+# Reads Kubernetes Ingress resources (ingressClassName: alb) and
+# provisions an ALB on AWS. Uses IRSA (the role above) to call AWS
+# APIs without node-level credentials.
+# ==============================================================
+
+resource "helm_release" "aws_load_balancer_controller" {
+  name       = "aws-load-balancer-controller"
+  repository = "https://aws.github.io/eks-charts"
+  chart      = "aws-load-balancer-controller"
+  namespace  = "kube-system"
+  version    = "~> 1.8"
+
+  # Required: tell the controller which cluster to manage
+  set {
+    name  = "clusterName"
+    value = module.eks.cluster_name
+  }
+
+  # Create the ServiceAccount and annotate it with the IRSA role
+  set {
+    name  = "serviceAccount.create"
+    value = "true"
+  }
+  set {
+    name  = "serviceAccount.name"
+    value = "aws-load-balancer-controller"
+  }
+  set {
+    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = module.aws_load_balancer_controller_irsa.iam_role_arn
+  }
+
+  # Scope the controller to the correct region and VPC
+  set {
+    name  = "region"
+    value = var.aws_region
+  }
+  set {
+    name  = "vpcId"
+    value = module.vpc.vpc_id
+  }
+
+  depends_on = [module.eks]
 }

@@ -641,3 +641,33 @@ apiGateway:
   service:
     ports:
       http: 8080
+  # ── ALB Ingress ─────────────────────────────────────────────────────────────
+  # Creates an ALB that routes directly to the api-gateway Pods (target-type: ip).
+  # The AWS Load Balancer Controller must be installed in the cluster (via Terraform).
+  ingress:
+    # Set to true to expose the api-gateway via an ALB.
+    enabled: false
+
+    # Public hostname — must match the DNS record pointing to the ALB
+    # (e.g. api.example.com). When empty, the ALB auto-generated DNS name
+    # (*.elb.amazonaws.com) is used.
+    host: ""
+
+    # Extra ALB annotations (merged with the defaults above).
+    # See: https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/guide/ingress/annotations/
+    # e.g.:
+    #   alb.ingress.kubernetes.io/healthcheck-path: /actuator/health
+    annotations: {}
+
+    alb:
+      # ALB scheme: internet-facing (public ALB) or internal (VPC-only ALB)
+      scheme: internet-facing
+      # ACM certificate ARN for HTTPS termination at the ALB.
+      # When set: ALB listens on HTTP (80) + HTTPS (443) and redirects HTTP → HTTPS (301).
+      # When empty: HTTP-only on port 80.
+      #
+      #   aws acm list-certificates --region <region>
+      #
+      # certificateArn: "arn:aws:acm:us-east-1:123456789012:certificate/xxxx"
+      certificateArn: ""
+

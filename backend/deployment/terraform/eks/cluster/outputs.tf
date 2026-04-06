@@ -31,6 +31,11 @@ output "configure_kubectl" {
   value       = "aws eks update-kubeconfig --region ${var.aws_region} --name ${module.eks.cluster_name}"
 }
 
+output "get_alb_dns" {
+  description = "Run this command to retrieve the ALB DNS name after deploying the Helm chart (apiGateway.ingress.enabled=true)"
+  value       = "kubectl get ingress -n <release-namespace> <release-name>-api-gateway -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'"
+}
+
 # ==============================================================
 # VPC information
 # ==============================================================
