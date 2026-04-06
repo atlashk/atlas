@@ -84,10 +84,10 @@ pipeline {
         HELM_VALUES_FILE    = 'backend/deployment/helm/values.yaml'
 
         // Gradle module — resolved in the Preparation stage
-        GRADLE_MODULE       = ''
+        GRADLE_MODULE       = 'unset'
 
         // Dockerfile path — resolved in the Preparation stage
-        SERVICE_DIR         = ''
+        SERVICE_DIR         = 'unset'
     }
 
     options {
@@ -151,6 +151,8 @@ pipeline {
             steps {
                 dir('backend') {
                     script {
+                        sh 'chmod +x gradlew'
+
                         def gradleCmd = "./gradlew ${env.GRADLE_MODULE}:bootJar"
                         if (params.SKIP_TESTS) {
                             gradleCmd += ' -x test'

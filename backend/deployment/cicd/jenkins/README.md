@@ -181,7 +181,7 @@ Go to **Manage Jenkins > System Configuration > Plugins > Available plugins** an
 | Plugin | Purpose |
 |---|---|
 | **Pipeline** | Run Declarative Pipelines |
-| **Git** | Checkout source code from SCM |
+| **Git Parameter** | Assign a git branch, tag, pull request, or revision number as a parameter in your builds |
 | **Amazon Web Services SDK** | Provides the `withAWS()` step |
 | **AWS Credentials** | Allows storing Amazon IAM credentials within the Jenkins Credentials API. |
 | **JUnit** | Publish test results |
@@ -259,7 +259,7 @@ Go to **Manage Jenkins > Security > Credentials > System > Global credentials > 
    - **Script Path**: `backend/deployment/cicd/jenkins/Jenkinsfile`
 5. Click **Save**
 
-> On the very first save, click **Build Now** once so Jenkins loads the `parameters` block from the Jenkinsfile. This initial build may fail � that is expected. From the second run onward, the parameter form will appear.
+> On the very first save, click **Build Now** once so Jenkins loads the `parameters` block from the Jenkinsfile. This initial build may fail that is expected. From the second run onward, the parameter form will appear.
 
 ---
 
