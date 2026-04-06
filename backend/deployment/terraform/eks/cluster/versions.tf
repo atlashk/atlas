@@ -17,11 +17,13 @@ terraform {
   }
 
   # -------------------------------------------------------
-  # Remote State (uncomment once the S3 bucket is created)
-  # Strongly recommended for team collaboration & state safety
+  # Remote State
+  # Run `deployment/terraform/eks/init` first to create the
+  # S3 bucket and DynamoDB table, then uncomment this block
+  # and run `terraform init -migrate-state`.
   # -------------------------------------------------------
   # backend "s3" {
-  #   bucket         = "atlas-terraform-state"   # <-- replace with your bucket name
+  #   bucket         = "atlas-terraform-state"
   #   key            = "atlas/eks/terraform.tfstate"
   #   region         = "us-east-1"
   #   dynamodb_table = "atlas-terraform-state-lock"

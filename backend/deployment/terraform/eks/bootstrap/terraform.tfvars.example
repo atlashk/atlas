@@ -1,0 +1,19 @@
+# ==============================================================
+# Copy this file to terraform.tfvars and fill in your values
+#   cp terraform.tfvars.example terraform.tfvars
+#
+# WARNING: Do NOT commit terraform.tfvars to git
+#          (already listed in .gitignore)
+# ==============================================================
+
+# AWS region where the S3 bucket and DynamoDB table will live.
+# Must match the region used in all other Terraform modules.
+aws_region = "us-east-1"
+
+# Project name — prefix for all resource names
+project_name = "atlas"
+
+# (Optional) Unique suffix to avoid S3 bucket name conflicts.
+# S3 bucket names must be globally unique across all AWS accounts.
+# Uncomment and set a short random string if you get a "BucketAlreadyExists" error.
+# state_bucket_suffix = "a1b2c3"

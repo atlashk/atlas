@@ -12,6 +12,11 @@ terraform.tfstate.backup
 *.tfstate
 *.tfstate.*
 
+# Ngoại lệ: module init/ dùng local state (chỉ quản lý S3 bucket + DynamoDB table)
+# Commit file này để cả team có thể quản lý tài nguyên bootstrap.
+!init/terraform.tfstate
+!init/terraform.tfstate.backup
+
 # Kết quả plan
 *.tfplan
 

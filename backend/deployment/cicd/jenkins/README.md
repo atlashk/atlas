@@ -73,10 +73,11 @@ Refer: https://www.jenkins.io/doc/book/installing/linux/
 # Update the system
 sudo apt update && sudo apt upgrade -y
 
-# Install Java 17 (Jenkins requires Java 11+)
-sudo apt install -y fontconfig openjdk-17-jre
+# Install Java 17 JDK (JDK is required — JRE alone is not enough for Gradle Toolchain)
+sudo apt install -y fontconfig openjdk-17-jdk
 
 java -version   # expected: openjdk 17.x.x
+javac -version  # expected: javac 17.x.x
 
 # Add the Jenkins apt repository
 sudo wget -O /etc/apt/keyrings/jenkins-keyring.asc \
@@ -160,17 +161,42 @@ helm version
 
 ### 3.5 Gradle
 
-The pipeline uses the Gradle Wrapper (`./gradlew`), so a system-wide Gradle installation is **not required**. JDK 17 must be available for the `jenkins` user:
+The pipeline uses the Gradle Wrapper (`./gradlew`), so a system-wide Gradle installation is **not required**. However, **JDK 17** (not just JRE) must be available for the `jenkins` user, as Gradle Toolchain requires `javac`:
 
 ```bash
+# Verify both java and javac are available
 sudo -u jenkins java -version
+sudo -u jenkins javac -version
 ```
 
-If `JAVA_HOME` is not set, add it to `/etc/environment`:
+If `javac` is missing, install the full JDK:
 
 ```bash
-export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+sudo apt install -y openjdk-17-jdk
 ```
+
+If `JAVA_HOME` is not set, add it to `/etc/environment` (applies system-wide, including the `jenkins` user):
+
+```bash
+# Find the exact JDK path
+sudo update-java-alternatives -l
+# e.g. output: java-1.17.0-openjdk-amd64  1711  /usr/lib/jvm/java-1.17.0-openjdk-amd64
+
+# Set JAVA_HOME in /etc/environment
+echo 'JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-amd64' | sudo tee -a /etc/environment
+
+# Reload environment variables
+source /etc/environment
+
+# Verify
+sudo -u jenkins printenv JAVA_HOME
+# expected: /usr/lib/jvm/java-1.17.0-openjdk-amd64
+
+# Restart Jenkins to pick up the new env var
+sudo systemctl restart jenkins
+```
+
+> **Note:** Do **not** use `export` in `/etc/environment` — it uses simple `KEY=VALUE` format without the `export` keyword.
 
 ---
 
@@ -181,9 +207,10 @@ Go to **Manage Jenkins > System Configuration > Plugins > Available plugins** an
 | Plugin | Purpose |
 |---|---|
 | **Pipeline** | Run Declarative Pipelines |
-| **Git Parameter** | Assign a git branch, tag, pull request, or revision number as a parameter in your builds |
-| **Amazon Web Services SDK** | Provides the `withAWS()` step |
-| **AWS Credentials** | Allows storing Amazon IAM credentials within the Jenkins Credentials API. |
+| **Git** | Git SCM |
+| **Git Parameter** | Show branch/tag dropdown in Build with Parameters |
+| **Pipeline: AWS Steps** | Provides the `withAWS()` step |
+| **AWS Credentials** | Store Amazon IAM credentials in Jenkins Credentials API |
 | **JUnit** | Publish test results |
 | **Timestamper** | Add timestamps to build logs |
 
@@ -330,6 +357,24 @@ K8S_NAMESPACE    = "atlas-${params.ENVIRONMENT}"
 ---
 
 ## 10. Troubleshooting
+
+### Gradle Toolchain: `Cannot find a Java installation matching languageVersion=17`
+
+This error occurs when only JRE is installed. Gradle Toolchain requires the full JDK (needs `javac`):
+
+```bash
+# Check if javac is available
+sudo -u jenkins javac -version
+
+# If not found, install the full JDK
+sudo apt install -y openjdk-17-jdk
+
+# Verify
+sudo -u jenkins javac -version   # expected: javac 17.x.x
+
+# Restart Jenkins
+sudo systemctl restart jenkins
+```
 
 ### Jenkins cannot find `docker`
 
