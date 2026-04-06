@@ -124,7 +124,7 @@ run_cluster() {
     pushd "${TF_CLUSTER_DIR}" > /dev/null
 
     log_info "terraform init"
-    terraform init -input=false -migrate-state \
+    terraform init -input=false -migrate-state -force-copy \
         -backend-config="bucket=${TF_BOOTSTRAP_BUCKET}" \
         -backend-config="key=${HELM_RELEASE_NAME}/eks/terraform.tfstate" \
         -backend-config="region=${TF_BOOTSTRAP_REGION}" \
