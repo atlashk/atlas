@@ -256,10 +256,49 @@ run_bootstrap_destroy() {
     log_info "terraform init"
     terraform init -input=false
 
-    log_warn "The S3 bucket must be empty before it can be deleted."
-    log_warn "Emptying bucket: ${TF_BOOTSTRAP_BUCKET} (region: ${TF_BOOTSTRAP_REGION})"
-    aws s3 rm "s3://${TF_BOOTSTRAP_BUCKET}" --recursive --region "${TF_BOOTSTRAP_REGION}" || \
-        log_warn "Could not empty bucket (it may already be empty)"
+    # S3 versioning is enabled on the bucket, so we must delete all object
+    # versions and delete markers — not just current objects — before Terraform
+    # can remove the bucket.
+    log_warn "Emptying versioned bucket: ${TF_BOOTSTRAP_BUCKET} (region: ${TF_BOOTSTRAP_REGION})"
+
+    local versions
+    while true; do
+        versions=$(aws s3api list-object-versions \
+            --bucket "${TF_BOOTSTRAP_BUCKET}" \
+            --region "${TF_BOOTSTRAP_REGION}" \
+            --query '{Objects: Versions[].{Key:Key,VersionId:VersionId}}' \
+            --output json 2>/dev/null || echo '{"Objects":[]}')
+
+        local count
+        count=$(echo "${versions}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d.get('Objects') or []))")
+        [[ "${count}" -eq 0 ]] && break
+
+        log_info "Deleting ${count} object version(s)..."
+        echo "${versions}" | aws s3api delete-objects \
+            --bucket "${TF_BOOTSTRAP_BUCKET}" \
+            --region "${TF_BOOTSTRAP_REGION}" \
+            --delete "$(cat)" > /dev/null
+    done
+
+    while true; do
+        versions=$(aws s3api list-object-versions \
+            --bucket "${TF_BOOTSTRAP_BUCKET}" \
+            --region "${TF_BOOTSTRAP_REGION}" \
+            --query '{Objects: DeleteMarkers[].{Key:Key,VersionId:VersionId}}' \
+            --output json 2>/dev/null || echo '{"Objects":[]}')
+
+        local count
+        count=$(echo "${versions}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d.get('Objects') or []))")
+        [[ "${count}" -eq 0 ]] && break
+
+        log_info "Deleting ${count} delete marker(s)..."
+        echo "${versions}" | aws s3api delete-objects \
+            --bucket "${TF_BOOTSTRAP_BUCKET}" \
+            --region "${TF_BOOTSTRAP_REGION}" \
+            --delete "$(cat)" > /dev/null
+    done
+
+    log_success "Bucket emptied (all versions and delete markers removed)"
 
     log_info "terraform destroy"
     terraform destroy -input=false -auto-approve
