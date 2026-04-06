@@ -119,8 +119,18 @@ read_bootstrap_outputs() {
     pushd "${TF_BOOTSTRAP_DIR}" > /dev/null
 
     log_info "Reading bootstrap outputs..."
-    TF_BOOTSTRAP_BUCKET=$(terraform output -raw state_bucket_name 2>/dev/null || echo "")
-    TF_BOOTSTRAP_REGION=$(terraform output -raw state_bucket_region 2>/dev/null || echo "")
+
+    # terraform output -raw prints warning messages to stdout (not stderr) when
+    # the state has no outputs, so sanitize the same way as read_cluster_outputs.
+    local raw_bucket raw_region
+    raw_bucket=$(terraform output -raw state_bucket_name 2>/dev/null || true)
+    raw_region=$(terraform output -raw state_bucket_region 2>/dev/null || true)
+
+    [[ "${raw_bucket}" == *"╷"* || "${raw_bucket}" == *"│"* ]] && raw_bucket=""
+    [[ "${raw_region}" == *"╷"* || "${raw_region}" == *"│"* ]] && raw_region=""
+
+    TF_BOOTSTRAP_BUCKET="${raw_bucket}"
+    TF_BOOTSTRAP_REGION="${raw_region}"
 
     popd > /dev/null
 
