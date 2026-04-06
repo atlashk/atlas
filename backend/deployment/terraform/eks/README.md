@@ -96,19 +96,13 @@ Terraform has been successfully initialized!
 
 ## Step 4 — Preview changes (plan)
 
-See what Terraform will create before actually creating anything:
-
-```bash
-terraform plan
-```
-
-Review the output to check which resources will be created. Expect around 50–70 resources total.
-
-Save the plan to a file for use in the next step (recommended):
+See what Terraform will create before actually creating anything and save the plan to a file for use in the next step (recommended):
 
 ```bash
 terraform plan -out=atlas-eks.tfplan
 ```
+
+Review the output to check which resources will be created. Expect around 50–70 resources total.
 
 ---
 

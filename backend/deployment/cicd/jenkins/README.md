@@ -67,6 +67,8 @@ This pipeline builds individual backend services, packages them as Docker images
 
 ## 2. Install Jenkins on EC2 Ubuntu
 
+Refer: https://www.jenkins.io/doc/book/installing/linux/
+
 ```bash
 # Update the system
 sudo apt update && sudo apt upgrade -y
@@ -77,15 +79,13 @@ sudo apt install -y fontconfig openjdk-17-jre
 java -version   # expected: openjdk 17.x.x
 
 # Add the Jenkins apt repository
-sudo wget -O /usr/share/keyrings/jenkins-keyring.asc \
-    https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
-
-echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
-    https://pkg.jenkins.io/debian-stable binary/" \
-    | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
-
+sudo wget -O /etc/apt/keyrings/jenkins-keyring.asc \
+  https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key
+echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc]" \
+  https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+  /etc/apt/sources.list.d/jenkins.list > /dev/null
 sudo apt update
-sudo apt install -y jenkins
+sudo apt install jenkins
 
 # Enable and start Jenkins
 sudo systemctl enable jenkins
@@ -168,71 +168,22 @@ sudo -u jenkins java -version
 
 If `JAVA_HOME` is not set, add it to `/etc/environment`:
 
-```
-JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-```
-
----
-
-## 4. Configure Jenkins
-
-### 4.1 JDK Tool Configuration
-
-1. Go to **Manage Jenkins ? Tools ? JDK installations**
-2. Click **Add JDK** and uncheck "Install automatically"
-3. Name: `JDK-17`
-4. `JAVA_HOME`: `/usr/lib/jvm/java-17-openjdk-amd64`
-5. Click **Save**
-
-### 4.2 Git
-
 ```bash
-sudo apt install -y git
-git --version
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ```
 
-Jenkins usually auto-detects Git. Verify at **Manage Jenkins ? Tools ? Git installations**.
-
 ---
 
-## 5. Create Jenkins Credentials
+## 4. Install Jenkins Plugins
 
-Go to **Manage Jenkins ? Credentials ? System ? Global credentials ? Add Credentials**.
-
-### 5.1 AWS Account ID
-
-| Field | Value |
-|---|---|
-| Kind | Secret text |
-| Secret | `<AWS_ACCOUNT_ID>` (12-digit number) |
-| ID | `AWS_ACCOUNT_ID` |
-| Description | AWS Account ID |
-
-### 5.2 AWS Access Keys
-
-| Field | Value |
-|---|---|
-| Kind | AWS Credentials |
-| ID | `aws-credentials` |
-| Access Key ID | `<IAM_ACCESS_KEY_ID>` |
-| Secret Access Key | `<IAM_SECRET_ACCESS_KEY>` |
-| Description | AWS credentials for ECR & EKS |
-
-> The credential ID `aws-credentials` must match `AWS_CREDENTIALS_ID` in the Jenkinsfile.
-
----
-
-## 6. Install Jenkins Plugins
-
-Go to **Manage Jenkins ? Plugins ? Available plugins** and install:
+Go to **Manage Jenkins > System Configuration > Plugins > Available plugins** and install:
 
 | Plugin | Purpose |
 |---|---|
 | **Pipeline** | Run Declarative Pipelines |
 | **Git** | Checkout source code from SCM |
 | **Amazon Web Services SDK** | Provides the `withAWS()` step |
-| **CloudBees AWS Credentials** | Store AWS credentials securely |
-| **AnsiColor** | Colored console output (`ansiColor('xterm')`) |
+| **AWS Credentials** | Allows storing Amazon IAM credentials within the Jenkins Credentials API. |
 | **JUnit** | Publish test results |
 | **Timestamper** | Add timestamps to build logs |
 
@@ -244,11 +195,62 @@ sudo systemctl restart jenkins
 
 ---
 
+## 5. Configure Jenkins
+
+### 5.1 JDK Tool Configuration
+
+1. Go to **Manage Jenkins > System Configuration > Tools > JDK installations**
+2. Click **Add JDK** and uncheck "Install automatically"
+3. Name: `JDK-17`
+4. `JAVA_HOME`: `/usr/lib/jvm/java-17-openjdk-amd64`
+5. Click **Save**
+
+### 5.2 Git
+
+```bash
+sudo apt install -y git
+git --version
+```
+
+Jenkins usually auto-detects Git. Verify at **Manage Jenkins > System Configuration > Tools > Git installations**.
+
+---
+
+## 6. Create Jenkins Credentials
+
+Go to **Manage Jenkins > Security > Credentials > System > Global credentials > Add Credentials**.
+
+### 6.1 AWS Account ID
+
+| Field | Value |
+|---|---|
+| Kind | Secret text |
+| Secret | `<AWS_ACCOUNT_ID>` (12-digit number) |
+| ID | `AWS_ACCOUNT_ID` |
+| Description | AWS Account ID |
+
+### 6.2 AWS Access Keys
+
+| Field | Value |
+|---|---|
+| Kind | AWS Credentials |
+| ID | `aws-credentials` |
+| Access Key ID | `<IAM_ACCESS_KEY_ID>` |
+| Secret Access Key | `<IAM_SECRET_ACCESS_KEY>` |
+| Description | AWS credentials for ECR & EKS |
+
+> The ID `aws-credentials` must match `AWS_CREDENTIALS_ID` in the Jenkinsfile.
+
+---
+
 ## 7. Create the Pipeline Job
 
-1. Jenkins Dashboard ? **New Item**
-2. Enter name: `atlas-backend-deploy`
-3. Select **Pipeline** ? **OK**
+1. Jenkins Dashboard > **New Item**
+2. Enter name: `atlas-backend`
+3. Select **Pipeline** > **OK**
+4. Under the **General** tab:
+   - Check on **Github project**
+   - Enter the project URL
 4. Under the **Pipeline** tab:
    - **Definition**: `Pipeline script from SCM`
    - **SCM**: `Git`
@@ -257,13 +259,13 @@ sudo systemctl restart jenkins
    - **Script Path**: `backend/deployment/cicd/jenkins/Jenkinsfile`
 5. Click **Save**
 
-> On the very first save, click **Build Now** once so Jenkins loads the `parameters` block from the Jenkinsfile. This initial build may fail — that is expected. From the second run onward, the parameter form will appear.
+> On the very first save, click **Build Now** once so Jenkins loads the `parameters` block from the Jenkinsfile. This initial build may fail ï¿½ that is expected. From the second run onward, the parameter form will appear.
 
 ---
 
 ## 8. Running the Pipeline
 
-1. Open the `atlas-backend-deploy` job
+1. Open the `atlas-backend` job
 2. Click **Build with Parameters**
 3. Fill in the parameters:
 

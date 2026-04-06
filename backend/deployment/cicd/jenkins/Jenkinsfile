@@ -33,6 +33,16 @@ pipeline {
             ],
             description: 'Backend service to build and deploy'
         )
+        gitParameter(
+            name: 'SELECTED_BRANCH',
+            type: 'PT_BRANCH',
+            defaultValue: 'origin/main',
+            branchFilter: 'origin/(.*)',
+            sortMode: 'ASCENDING_SMART',
+            selectedValue: 'DEFAULT',
+            useRepository: '.',
+            description: 'Branch to build and deploy'
+        )
         string(
             name: 'IMAGE_TAG',
             defaultValue: '',
@@ -84,7 +94,6 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '20'))
         timestamps()
         timeout(time: 30, unit: 'MINUTES')
-        ansiColor('xterm')
     }
 
     stages {
@@ -127,7 +136,12 @@ pipeline {
         stage('Checkout') {
         // =====================================================================
             steps {
-                checkout scm
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: params.SELECTED_BRANCH]],
+                    extensions: [],
+                    userRemoteConfigs: scm.userRemoteConfigs
+                ])
             }
         }
 
