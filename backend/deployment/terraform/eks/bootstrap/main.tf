@@ -1,16 +1,14 @@
 # ==============================================================
 # Terraform Backend Bootstrap
 #
-# Purpose: Creates the S3 bucket and DynamoDB table that will
-#          store the Terraform state for all other modules.
+# Purpose: Creates the S3 bucket that will store the Terraform
+#          state for all other modules. State locking uses S3
+#          native locking (use_lockfile=true) — no DynamoDB needed.
 #
 # Run ONCE before any other Terraform module:
-#   cd init/
+#   cd bootstrap/
 #   terraform init
 #   terraform apply
-#
-# After apply, uncomment the backend "s3" block in
-# ../cluster/versions.tf and run `terraform init -migrate-state`
 # ==============================================================
 
 # --------------------------------------------------------------
@@ -74,30 +72,4 @@ resource "aws_s3_bucket_lifecycle_configuration" "terraform_state" {
   }
 }
 
-# --------------------------------------------------------------
-# DynamoDB Table — provides state locking & consistency checks
-# --------------------------------------------------------------
-resource "aws_dynamodb_table" "terraform_state_lock" {
-  name         = local.lock_table_name
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "LockID"
 
-  attribute {
-    name = "LockID"
-    type = "S"
-  }
-
-  # Enable point-in-time recovery for safety
-  point_in_time_recovery {
-    enabled = true
-  }
-
-  lifecycle {
-    prevent_destroy = true
-  }
-
-  tags = {
-    Name        = local.lock_table_name
-    Description = "Terraform state lock table for ${var.project_name}"
-  }
-}

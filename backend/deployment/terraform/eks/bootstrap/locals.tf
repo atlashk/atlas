@@ -9,6 +9,4 @@ locals {
     "${var.project_name}-terraform-state-${var.state_bucket_suffix}"
   ) : "${var.project_name}-terraform-state"
 
-  # DynamoDB table name — must be unique within the AWS account & region.
-  lock_table_name = "${var.project_name}-terraform-state-lock"
 }

@@ -106,12 +106,11 @@ run_bootstrap() {
 
     # Capture outputs for downstream use
     TF_BOOTSTRAP_BUCKET=$(terraform output -raw state_bucket_name)
-    TF_BOOTSTRAP_TABLE=$(terraform output -raw lock_table_name)
     TF_BOOTSTRAP_REGION=$(terraform output -raw state_bucket_region)
 
     popd > /dev/null
 
-    log_success "Bootstrap complete — bucket: ${TF_BOOTSTRAP_BUCKET}, table: ${TF_BOOTSTRAP_TABLE}"
+    log_success "Bootstrap complete — bucket: ${TF_BOOTSTRAP_BUCKET}"
 }
 
 # ---------------------------------------------------------------
@@ -125,11 +124,11 @@ run_cluster() {
     pushd "${TF_CLUSTER_DIR}" > /dev/null
 
     log_info "terraform init"
-    terraform init -input=false \
+    terraform init -input=false -migrate-state \
         -backend-config="bucket=${TF_BOOTSTRAP_BUCKET}" \
         -backend-config="key=${HELM_RELEASE_NAME}/eks/terraform.tfstate" \
         -backend-config="region=${TF_BOOTSTRAP_REGION}" \
-        -backend-config="dynamodb_table=${TF_BOOTSTRAP_TABLE}" \
+        -backend-config="use_lockfile=true" \
         -backend-config="encrypt=true"
 
     log_info "terraform apply"
