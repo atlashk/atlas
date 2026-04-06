@@ -120,17 +120,17 @@ read_bootstrap_outputs() {
 
     log_info "Reading bootstrap outputs..."
 
-    # terraform output -raw prints warning messages to stdout (not stderr) when
-    # the state has no outputs, so sanitize the same way as read_cluster_outputs.
-    local raw_bucket raw_region
-    raw_bucket=$(terraform output -raw state_bucket_name 2>/dev/null || true)
-    raw_region=$(terraform output -raw state_bucket_region 2>/dev/null || true)
+    # Use -json to avoid the box-drawing warnings that -raw emits to stdout
+    # when the state is empty or an output key is missing.
+    local tf_outputs
+    tf_outputs=$(terraform output -json 2>/dev/null || echo '{}')
 
-    [[ "${raw_bucket}" == *"╷"* || "${raw_bucket}" == *"│"* ]] && raw_bucket=""
-    [[ "${raw_region}" == *"╷"* || "${raw_region}" == *"│"* ]] && raw_region=""
-
-    TF_BOOTSTRAP_BUCKET="${raw_bucket}"
-    TF_BOOTSTRAP_REGION="${raw_region}"
+    TF_BOOTSTRAP_BUCKET=$(echo "${tf_outputs}" | python3 -c \
+        "import sys,json; d=json.load(sys.stdin); print(d.get('state_bucket_name',{}).get('value',''))" \
+        2>/dev/null || true)
+    TF_BOOTSTRAP_REGION=$(echo "${tf_outputs}" | python3 -c \
+        "import sys,json; d=json.load(sys.stdin); print(d.get('state_bucket_region',{}).get('value',''))" \
+        2>/dev/null || true)
 
     popd > /dev/null
 
@@ -151,18 +151,17 @@ read_cluster_outputs() {
 
     log_info "Reading cluster outputs..."
 
-    # terraform output -raw prints warning messages to stdout (not stderr) when
-    # the state has no outputs, so we must discard lines containing Terraform's
-    # box-drawing warning characters rather than relying on the exit code alone.
-    local raw_name raw_kubectl
-    raw_name=$(terraform output -raw cluster_name 2>/dev/null || true)
-    raw_kubectl=$(terraform output -raw configure_kubectl 2>/dev/null || true)
+    # Use -json to avoid the box-drawing warnings that -raw emits to stdout
+    # when the state is empty or an output key is missing.
+    local tf_outputs
+    tf_outputs=$(terraform output -json 2>/dev/null || echo '{}')
 
-    [[ "${raw_name}"    == *"╷"* || "${raw_name}"    == *"│"* ]] && raw_name=""
-    [[ "${raw_kubectl}" == *"╷"* || "${raw_kubectl}" == *"│"* ]] && raw_kubectl=""
-
-    TF_CLUSTER_NAME="${raw_name}"
-    TF_CONFIGURE_KUBECTL="${raw_kubectl}"
+    TF_CLUSTER_NAME=$(echo "${tf_outputs}" | python3 -c \
+        "import sys,json; d=json.load(sys.stdin); print(d.get('cluster_name',{}).get('value',''))" \
+        2>/dev/null || true)
+    TF_CONFIGURE_KUBECTL=$(echo "${tf_outputs}" | python3 -c \
+        "import sys,json; d=json.load(sys.stdin); print(d.get('configure_kubectl',{}).get('value',''))" \
+        2>/dev/null || true)
 
     popd > /dev/null
 
@@ -339,7 +338,8 @@ main() {
     # Read infrastructure outputs before starting destruction
     assert_tfvars "${TF_BOOTSTRAP_DIR}"
     log_step "Reading Terraform state outputs"
-    terraform -chdir="${TF_BOOTSTRAP_DIR}" init -input=false -reconfigure &>/dev/null || true
+    # Suppress verbose init output (stdout) but keep errors visible (stderr).
+    terraform -chdir="${TF_BOOTSTRAP_DIR}" init -input=false -reconfigure >/dev/null
     read_bootstrap_outputs
 
     if [[ "${SKIP_CLUSTER}" == "false" ]]; then
@@ -349,7 +349,7 @@ main() {
             -backend-config="key=${HELM_RELEASE_NAME}/eks/terraform.tfstate" \
             -backend-config="region=${TF_BOOTSTRAP_REGION}" \
             -backend-config="use_lockfile=true" \
-            -backend-config="encrypt=true" &>/dev/null || true
+            -backend-config="encrypt=true" >/dev/null
         read_cluster_outputs
         configure_kubectl
     fi
