@@ -140,13 +140,24 @@ read_cluster_outputs() {
     pushd "${TF_CLUSTER_DIR}" > /dev/null
 
     log_info "Reading cluster outputs..."
-    TF_CLUSTER_NAME=$(terraform output -raw cluster_name 2>/dev/null || echo "")
-    TF_CONFIGURE_KUBECTL=$(terraform output -raw configure_kubectl 2>/dev/null || echo "")
+
+    # terraform output -raw prints warning messages to stdout (not stderr) when
+    # the state has no outputs, so we must discard lines containing Terraform's
+    # box-drawing warning characters rather than relying on the exit code alone.
+    local raw_name raw_kubectl
+    raw_name=$(terraform output -raw cluster_name 2>/dev/null || true)
+    raw_kubectl=$(terraform output -raw configure_kubectl 2>/dev/null || true)
+
+    [[ "${raw_name}"    == *"╷"* || "${raw_name}"    == *"│"* ]] && raw_name=""
+    [[ "${raw_kubectl}" == *"╷"* || "${raw_kubectl}" == *"│"* ]] && raw_kubectl=""
+
+    TF_CLUSTER_NAME="${raw_name}"
+    TF_CONFIGURE_KUBECTL="${raw_kubectl}"
 
     popd > /dev/null
 
     if [[ -z "${TF_CLUSTER_NAME}" ]]; then
-        log_warn "Could not read cluster name from Terraform outputs."
+        log_warn "Could not read cluster name from Terraform outputs — cluster may not be deployed."
     else
         log_info "Cluster name: ${TF_CLUSTER_NAME}"
     fi
