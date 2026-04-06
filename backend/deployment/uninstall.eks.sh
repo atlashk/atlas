@@ -6,7 +6,7 @@
 #   1. helm uninstall     — removes all Kubernetes resources
 #   2. terraform destroy  — destroys the EKS cluster + VPC +
 #                           IAM roles + node groups
-#   3. terraform destroy  — destroys the S3 bucket + DynamoDB
+#   3. terraform destroy  — destroys the S3 bucket
 #                           table for Terraform remote state
 #
 # Usage:
@@ -16,7 +16,7 @@
 # Options:
 #   --skip-helm        Skip the Helm uninstall step
 #   --skip-cluster     Skip the EKS cluster destroy step
-#   --skip-bootstrap   Skip the bootstrap (S3/DynamoDB) destroy step
+#   --skip-bootstrap   Skip the bootstrap (S3) destroy step
 #
 # Prerequisites:
 #   - terraform >= 1.9
@@ -228,7 +228,7 @@ run_cluster_destroy() {
 }
 
 # ---------------------------------------------------------------
-# Step 3 — Bootstrap destroy: S3 bucket + DynamoDB table
+# Step 3 — Bootstrap destroy: S3 bucket
 # ---------------------------------------------------------------
 run_bootstrap_destroy() {
     if [[ "${SKIP_BOOTSTRAP}" == "true" ]]; then
@@ -273,7 +273,7 @@ main() {
     log_warn "This will PERMANENTLY destroy the following resources:"
     [[ "${SKIP_HELM}"      == "false" ]] && echo "    • Helm release '${HELM_RELEASE_NAME}' and namespace '${HELM_NAMESPACE}'"
     [[ "${SKIP_CLUSTER}"   == "false" ]] && echo "    • EKS cluster, VPC, IAM roles, and node groups (Terraform)"
-    [[ "${SKIP_BOOTSTRAP}" == "false" ]] && echo "    • S3 remote-state bucket and DynamoDB lock table (Terraform)"
+    [[ "${SKIP_BOOTSTRAP}" == "false" ]] && echo "    • S3 remote-state bucket (Terraform)"
     echo ""
 
     # Read infrastructure outputs before starting destruction

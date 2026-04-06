@@ -3,7 +3,7 @@
 # install.eks.sh
 #
 # Provisions the full Atlas stack on AWS EKS:
-#   1. terraform/bootstrap — creates the S3 bucket + DynamoDB
+#   1. terraform/bootstrap — creates the S3 bucket
 #                            table for Terraform remote state
 #   2. terraform/cluster   — creates the EKS cluster + VPC +
 #                            IAM roles + node groups
@@ -89,7 +89,7 @@ assert_tfvars() {
 }
 
 # ---------------------------------------------------------------
-# Step 1 — Bootstrap: S3 bucket + DynamoDB table
+# Step 1 — Bootstrap: S3 bucket for Terraform remote state
 # ---------------------------------------------------------------
 run_bootstrap() {
     log_step "Step 1/3 — Terraform bootstrap (remote state backend)"

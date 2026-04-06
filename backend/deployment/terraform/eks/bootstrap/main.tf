@@ -17,11 +17,6 @@
 resource "aws_s3_bucket" "terraform_state" {
   bucket = local.state_bucket_name
 
-  # Prevent accidental deletion when the bucket contains state files
-  lifecycle {
-    prevent_destroy = true
-  }
-
   tags = {
     Name        = local.state_bucket_name
     Description = "Stores Terraform remote state for ${var.project_name}"
