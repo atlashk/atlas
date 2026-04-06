@@ -64,6 +64,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "terraform_state" {
     id     = "expire-old-noncurrent-versions"
     status = "Enabled"
 
+    filter {} # required by AWS provider v5 — matches all objects
+
     noncurrent_version_expiration {
       # Keep the last 10 non-current versions, delete anything older than 90 days
       newer_noncurrent_versions = 10
