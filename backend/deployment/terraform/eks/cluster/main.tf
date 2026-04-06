@@ -170,6 +170,35 @@ module "eks" {
   # Automatically grant admin permissions to the IAM identity running terraform
   enable_cluster_creator_admin_permissions = true
 
+  # ----------------------------------------------------------
+  # Additional Admin Access Entries
+  # ----------------------------------------------------------
+  # Grant cluster-admin access to every principal listed in
+  # var.admin_iam_principals (e.g. the AWS root account, break-glass
+  # IAM users, or CI/CD roles that need full kubectl access).
+  #
+  # EKS Access Entries replace the legacy aws-auth ConfigMap and
+  # support IAM users, roles, and the account root principal.
+  #
+  # Note: the root account ARN must be in the format
+  #   "arn:aws:iam::<account-id>:root"
+  # ----------------------------------------------------------
+  access_entries = {
+    for idx, arn in var.admin_iam_principals :
+    "admin-${idx}" => {
+      principal_arn = arn
+
+      policy_associations = {
+        admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
+  }
+
   tags = local.common_tags
 }
 

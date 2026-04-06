@@ -57,6 +57,24 @@ variable "availability_zones_count" {
 }
 
 # ==============================================================
+# Access Control
+# ==============================================================
+
+variable "admin_iam_principals" {
+  description = <<-EOT
+    List of IAM principal ARNs (IAM users, roles, or the root account) that will
+    receive cluster-admin (AmazonEKSClusterAdminPolicy) access via EKS Access Entries.
+
+    Examples:
+      - Root account : "arn:aws:iam::123456789012:root"
+      - IAM user     : "arn:aws:iam::123456789012:user/alice"
+      - IAM role     : "arn:aws:iam::123456789012:role/my-admin-role"
+  EOT
+  type        = list(string)
+  default     = []
+}
+
+# ==============================================================
 # Node Group: System
 # Purpose: runs Kubernetes add-ons (CoreDNS, metrics-server...)
 # Small instances — low load, not intended for business logic
