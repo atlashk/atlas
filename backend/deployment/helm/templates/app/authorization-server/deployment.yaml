@@ -42,7 +42,7 @@ spec:
       {{- include "atlas.waitFor.initContainers" (dict "deps" $deps) | nindent 6 }}
       containers:
         - name: authorization-server
-          image: "{{ if .Values.global.image.registry -}}{{ .Values.global.image.registry }}/{{ end -}}{{ .Release.Namespace }}/{{ .Values.authorizationServer.image.repository }}:{{ .Values.authorizationServer.image.tag }}"
+          image: "{{ if .Values.global.image.registry -}}{{ .Values.global.image.registry }}/{{ end -}}{{ .Values.authorizationServer.image.repository }}:{{ .Values.authorizationServer.image.tag }}"
           imagePullPolicy: {{ .Values.global.image.pullPolicy }}
           ports:
             - name: http

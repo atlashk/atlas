@@ -1,0 +1,39 @@
+# ==============================================================
+# Copy this file to terraform.tfvars and fill in your values
+#   cp terraform.tfvars.example terraform.tfvars
+#
+# WARNING: Do NOT commit terraform.tfvars to git
+#          (already listed in .gitignore)
+# ==============================================================
+
+# AWS region where ECR repositories will be created
+aws_region = "us-east-1"
+
+# Project name — used as the repository namespace prefix
+# Repositories will be named: <project_name>/<service>
+#   e.g.  atlas/api-gateway, atlas/user-service, …
+project_name = "atlas"
+
+# Application services — each entry gets its own private ECR repository
+services = [
+  "api-gateway",
+  "authorization-server",
+  "user-service",
+  "catalog-service",
+  "inventory-service",
+  "order-service",
+  "payment-service",
+]
+
+# Tag mutability: "MUTABLE" allows overwriting existing tags (e.g. 'latest'),
+# "IMMUTABLE" prevents it — recommended for production.
+image_tag_mutability = "MUTABLE"
+
+# Automatically scan pushed images for known CVEs
+scan_on_push = true
+
+# Delete untagged images after this many days (0 = disabled)
+untagged_image_expiry_days = 14
+
+# Keep only the most recent N tagged images per repository (0 = keep all)
+keep_last_n_tagged_images = 10
