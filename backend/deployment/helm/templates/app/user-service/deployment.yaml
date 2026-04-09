@@ -41,7 +41,7 @@ spec:
       {{- include "atlas.waitFor.initContainers" (dict "deps" $deps) | nindent 6 }}
       containers:
         - name: user-service
-          image: "{{ if .Values.global.image.registry -}}{{ .Values.global.image.registry }}/{{ end -}}{{ .Values.userSvc.image.repository }}:{{ .Values.userSvc.image.tag }}"
+          image: "{{ if .Values.global.image.registry -}}{{ .Values.global.image.registry }}/{{ end -}}{{ .Values.userSvc.image.repository }}:{{ .Values.userSvc.image.tag | default .Values.global.image.tag }}"
           imagePullPolicy: {{ .Values.global.image.pullPolicy }}
           ports:
             - name: http
@@ -103,6 +103,9 @@ spec:
             {{- if eq .Values.appStack.observability.tracing "tempo" }}
             - name: OTEL_COLLECTOR_TRACES_ENDPOINT
               value: "http://{{ lower $.Release.Name }}-otel-collector:{{ .Values.otelCollector.service.ports.otlpHttp }}/v1/traces"
+            {{- end }}
+            {{- with .Values.userSvc.extraEnv }}
+            {{- toYaml . | nindent 12 }}
             {{- end }}
           startupProbe:
             httpGet:

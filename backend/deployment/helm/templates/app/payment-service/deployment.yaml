@@ -38,7 +38,7 @@ spec:
       {{- include "atlas.waitFor.initContainers" (dict "deps" $deps) | nindent 6 }}
       containers:
         - name: payment-service
-          image: "{{ if .Values.global.image.registry -}}{{ .Values.global.image.registry }}/{{ end -}}{{ .Values.paymentSvc.image.repository }}:{{ .Values.paymentSvc.image.tag }}"
+          image: "{{ if .Values.global.image.registry -}}{{ .Values.global.image.registry }}/{{ end -}}{{ .Values.paymentSvc.image.repository }}:{{ .Values.paymentSvc.image.tag | default .Values.global.image.tag }}"
           imagePullPolicy: {{ .Values.global.image.pullPolicy }}
           ports:
             - name: http
@@ -110,6 +110,9 @@ spec:
             {{- end }}
             - name: PAYMENT_SIMULATOR_WEBHOOK_URL
               value: "http://{{ lower $.Release.Name }}-api-gateway:{{ .Values.apiGateway.service.ports.http }}/services/payment/api/webhook/simulator"
+            {{- with .Values.paymentSvc.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           startupProbe:
             httpGet:
               path: /actuator/health/liveness

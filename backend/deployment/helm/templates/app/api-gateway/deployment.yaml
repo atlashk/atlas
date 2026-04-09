@@ -30,8 +30,8 @@ spec:
       serviceAccountName: {{ lower $.Release.Name }}-{{ .Values.global.serviceAccount.name }}
       containers:
         - name: api-gateway
-          image: "{{ if .Values.global.image.registry -}}{{ .Values.global.image.registry }}/{{ end -}}{{ .Values.apiGateway.image.repository }}:{{ .Values.apiGateway.image.tag }}"
-          imagePullPolicy: Never
+          image: "{{ if .Values.global.image.registry -}}{{ .Values.global.image.registry }}/{{ end -}}{{ .Values.apiGateway.image.repository }}:{{ .Values.apiGateway.image.tag | default .Values.global.image.tag }}"
+          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
           ports:
             - name: http
               containerPort: 8080
@@ -69,6 +69,9 @@ spec:
             {{- if eq .Values.appStack.observability.tracing "tempo" }}
             - name: OTEL_COLLECTOR_TRACES_ENDPOINT
               value: "http://{{ lower $.Release.Name }}-otel-collector:{{ .Values.otelCollector.service.ports.otlpHttp }}/v1/traces"
+            {{- end }}
+            {{- with .Values.apiGateway.extraEnv }}
+            {{- toYaml . | nindent 12 }}
             {{- end }}
           startupProbe:
             httpGet:
