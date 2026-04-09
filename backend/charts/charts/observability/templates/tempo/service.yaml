@@ -1,0 +1,29 @@
+{{- if eq .Values.global.appStack.observability.tracing "tempo" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ lower $.Release.Name }}-tempo
+  labels:
+    app.kubernetes.io/name: tempo
+    app.kubernetes.io/instance: {{ lower $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: tempo
+    app.kubernetes.io/instance: {{ lower $.Release.Name }}
+  ports:
+    - name: http
+      port: {{ .Values.global.tempo.service.ports.http }}
+      targetPort: 3200
+    - name: grpc
+      port: {{ .Values.global.tempo.service.ports.grpc }}
+      targetPort: 9095
+    - name: otlp-grpc
+      port: {{ .Values.global.tempo.service.ports.otlpGrpc }}
+      targetPort: 4317
+    - name: otlp-http
+      port: {{ .Values.global.tempo.service.ports.otlpHttp }}
+      targetPort: 4318
+{{- end }}

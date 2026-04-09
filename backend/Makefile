@@ -248,13 +248,13 @@ push: check-prereqs
 	IMAGE_TAG=$$(git -C "$$GRADLE_ROOT" rev-parse --short HEAD 2>/dev/null || printf 'latest')
 	log_info "Image tag: $$IMAGE_TAG"
 	declare -A BUILD_CONTEXT=(
-	  [api-gateway]="$$GRADLE_ROOT/services/api-gateway"
+	  [api-gateway]="$$GRADLE_ROOT/edge/api-gateway"
+	  [authorization-server]="$$GRADLE_ROOT/edge/authorization-server"
 	  [catalog-service]="$$GRADLE_ROOT/services/catalog-service"
 	  [inventory-service]="$$GRADLE_ROOT/services/inventory-service"
 	  [order-service]="$$GRADLE_ROOT/services/order-service"
 	  [payment-service]="$$GRADLE_ROOT/services/payment-service"
 	  [user-service]="$$GRADLE_ROOT/services/user-service"
-	  [authorization-server]="$$GRADLE_ROOT/platform/authorization-server"
 	)
 	for svc in "$${!REPO_URLS[@]}"; do
 	  repo_url="$${REPO_URLS[$$svc]}"

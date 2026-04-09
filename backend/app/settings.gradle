@@ -407,35 +407,35 @@ project(':services.payment.persistence.jpa').projectDir = file('services/payment
 include(':services.payment.bootstrap')
 project(':services.payment.bootstrap').projectDir = file('services/payment-service/payment-bootstrap')
 
-// -------------------------------------------------------------------------------------------------
-// API Gateway
-// -------------------------------------------------------------------------------------------------
-
-// API Gateway::API Gateway Reactive
-include(':services.api-gateway.api-gateway-reactive')
-project(':services.api-gateway.api-gateway-reactive').projectDir = file('services/api-gateway/api-gateway-reactive')
-
 // =================================================================================================
-// Platform
+// Edge
 // =================================================================================================
 
 // -------------------------------------------------------------------------------------------------
 // Discovery Server
 // -------------------------------------------------------------------------------------------------
 
-include(':platform.discovery-server.eureka-server')
-project(':platform.discovery-server.eureka-server').projectDir = file('platform/discovery-server/eureka-server')
+include(':edge.discovery-server.eureka-server')
+project(':edge.discovery-server.eureka-server').projectDir = file('edge/discovery-server/eureka-server')
 
 // -------------------------------------------------------------------------------------------------
 // Authorization Server
 // -------------------------------------------------------------------------------------------------
 
-include(':platform.authorization-server')
-project(':platform.authorization-server').projectDir = file('platform/authorization-server')
+include(':edge.authorization-server')
+project(':edge.authorization-server').projectDir = file('edge/authorization-server')
+
+// -------------------------------------------------------------------------------------------------
+// API Gateway
+// -------------------------------------------------------------------------------------------------
+
+// API Gateway::API Gateway Reactive
+include(':edge.api-gateway.api-gateway-reactive')
+project(':edge.api-gateway.api-gateway-reactive').projectDir = file('edge/api-gateway/api-gateway-reactive')
 
 // -------------------------------------------------------------------------------------------------
 // Config Server
 // -------------------------------------------------------------------------------------------------
 
-include(':platform.config-server')
-project(':platform.config-server').projectDir = file('platform/config-server')
+include(':edge.config-server')
+project(':edge.config-server').projectDir = file('edge/config-server')

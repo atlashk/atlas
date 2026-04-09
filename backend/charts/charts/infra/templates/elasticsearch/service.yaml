@@ -1,0 +1,23 @@
+{{- if eq .Values.global.appStack.search "elasticsearch" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ lower $.Release.Name }}-elasticsearch
+  labels:
+    app.kubernetes.io/name: elasticsearch
+    app.kubernetes.io/instance: {{ lower $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: elasticsearch
+    app.kubernetes.io/instance: {{ lower $.Release.Name }}
+  ports:
+    - name: http
+      port: {{ .Values.global.elasticsearch.service.ports.http }}
+      targetPort: http
+    - name: transport
+      port: {{ .Values.global.elasticsearch.service.ports.transport }}
+      targetPort: transport
+{{- end }}

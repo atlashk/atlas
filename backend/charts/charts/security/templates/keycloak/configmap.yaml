@@ -1,0 +1,30 @@
+{{- if eq .Values.global.appStack.idp "keycloak" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ lower $.Release.Name }}-keycloak-config
+  labels:
+    app.kubernetes.io/name: keycloak
+    app.kubernetes.io/instance: {{ lower $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+data:
+  keycloak-realm: {{ .Values.keycloak.config.realm | quote }}
+  keycloak-admin-client-id: {{ .Values.keycloak.config.adminClientId | quote }}
+  keycloak-admin-client-secret: {{ .Values.keycloak.config.adminClientSecret | quote }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ lower $.Release.Name }}-keycloak-import
+  labels:
+    app.kubernetes.io/name: keycloak
+    app.kubernetes.io/instance: {{ lower $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+data:
+{{ range $path, $_ := .Files.Glob "files/keycloak/import/*.tpl" }}
+  {{ trimSuffix ".tpl" (base $path) }}: |
+{{ tpl ($.Files.Get $path) $ | nindent 4 }}
+{{- end }}
+{{- end }}

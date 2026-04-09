@@ -1,0 +1,23 @@
+{{- if eq .Values.global.appStack.storage "minio" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ lower $.Release.Name }}-minio
+  labels:
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/instance: {{ lower $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/instance: {{ lower $.Release.Name }}
+  ports:
+    - name: s3
+      port: {{ .Values.global.minio.service.ports.s3 }}
+      targetPort: s3
+    - name: console
+      port: {{ .Values.global.minio.service.ports.console }}
+      targetPort: console
+{{- end }}

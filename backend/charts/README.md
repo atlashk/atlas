@@ -1,17 +1,37 @@
 # Atlas Helm Charts
 
-Five independent Helm charts for deploying the Atlas platform onto Kubernetes.
+An **umbrella chart** that composes all Atlas subcharts. Each layer is deployed into its own dedicated Kubernetes namespace for better isolation, security, and independent lifecycle management.
 
 ```
-helm-charts/
-├── atlas-common/        ← RBAC: ServiceAccount, Role, RoleBinding
-├── atlas-data/          ← Data layer: databases, messaging, storage, identity
-│                           (mysql, postgres, kafka, rabbitmq, redis, elasticsearch,
-│                            keycloak, minio, qdrant, smtp4dev)
-├── atlas-observability/ ← Observability stack: metrics, logging, tracing
-│                           (prometheus, grafana, loki, promtail, tempo, otel-collector, zipkin)
-└── atlas-app/           ← Microservices: api-gateway, catalog-service, order-service, ...
+charts/
+├── Chart.yaml        ← Umbrella chart definition (lists all subcharts as dependencies)
+├── values.yaml       ← Single values file for ALL subcharts
+├── common/           ← Shared RBAC: Namespace, ServiceAccount, Role, RoleBinding
+├── infra/            ← Infrastructure layer (namespace: infra)
+│                         mysql, postgres, kafka, rabbitmq, redis, elasticsearch,
+│                         minio, qdrant, smtp4dev
+├── observability/    ← Observability layer (namespace: observability)
+│                         prometheus, grafana, loki, promtail, tempo,
+│                         otel-collector, zipkin
+├── security/         ← Security layer (namespace: security)
+│                         keycloak
+└── app/              ← Application layer (namespace: app)
+                          api-gateway, authorization-server,
+                          user-service, catalog-service, inventory-service,
+                          order-service, payment-service
 ```
+
+---
+
+## Namespace Layout
+
+| Subchart        | Namespace           | Contents |
+|-----------------|---------------------|----------|
+| `common`        | _(all namespaces)_  | RBAC — ServiceAccount, Role, RoleBinding |
+| `infra`         | `infra`       | MySQL, PostgreSQL, Kafka, RabbitMQ, Redis, Elasticsearch, MinIO, Qdrant, SMTP4Dev |
+| `security`      | `security`    | Keycloak |
+| `observability` | `observability` | Prometheus, Grafana, Loki, Promtail, Tempo, OpenTelemetry Collector, Zipkin |
+| `app`           | `app`         | API Gateway, Authorization Server, User, Catalog, Inventory, Order, Payment services |
 
 ---
 
@@ -19,73 +39,73 @@ helm-charts/
 
 - Kubernetes cluster ≥ 1.25
 - Helm ≥ 3.10
-- All charts must be installed **in the same namespace**.
 
 ---
 
-## Installation order
+## Installation
 
-```
-atlas-common  →  atlas-data  →  atlas-observability  →  atlas-app
-```
-
-### Step 1 – atlas-common
+### 1. Resolve subchart dependencies
 
 ```bash
-helm install atlas-common ./atlas-common \
-  --namespace atlas \
-  --create-namespace
+helm dependency update ./charts
 ```
 
-### Step 2 – atlas-data
+### 2. Install each layer into its own namespace
 
 ```bash
-helm install atlas-data ./atlas-data \
-  --namespace atlas
-```
+# Infrastructure layer
+helm install atlas-dev ./charts \
+  --namespace infra --create-namespace \
+  --set common.enabled=false \
+  --set app.enabled=false \
+  --set observability.enabled=false \
+  --set security.enabled=false
 
-### Step 3 – atlas-observability
+# Security layer
+helm install atlas-dev ./charts \
+  --namespace security --create-namespace \
+  --set common.enabled=false \
+  --set app.enabled=false \
+  --set infra.enabled=false \
+  --set observability.enabled=false
 
-```bash
-helm install atlas-observability ./atlas-observability \
-  --namespace atlas \
-  --set appReleaseName=atlas-app
-```
+# Observability layer
+helm install atlas-dev ./charts \
+  --namespace observability --create-namespace \
+  --set common.enabled=false \
+  --set app.enabled=false \
+  --set infra.enabled=false \
+  --set security.enabled=false
 
-> `appReleaseName` tells Prometheus which service hostnames to scrape from the app chart.
-
-### Step 4 – atlas-app
-
-```bash
-helm install atlas-app ./atlas-app \
-  --namespace atlas \
-  --set commonReleaseName=atlas-common \
-  --set dataReleaseName=atlas-data \
-  --set observabilityReleaseName=atlas-observability
+# Application layer (common RBAC is included here)
+helm install atlas-dev ./charts \
+  --namespace app --create-namespace \
+  --set infra.enabled=false \
+  --set observability.enabled=false \
+  --set security.enabled=false
 ```
 
 ---
 
-## Upgrading independently
+## Upgrading
 
 ```bash
-# Redeploy only app services (new image tag)
-helm upgrade atlas-app ./atlas-app \
-  --namespace atlas \
-  --set global.image.tag=2.0.0 \
-  --set commonReleaseName=atlas-common \
-  --set dataReleaseName=atlas-data \
-  --set observabilityReleaseName=atlas-observability
+# Upgrade the application layer with a new image tag
+helm upgrade atlas-dev ./charts \
+  --namespace app \
+  --set infra.enabled=false \
+  --set observability.enabled=false \
+  --set security.enabled=false \
+  --set app.global.image.tag=2.0.0
 
-# Upgrade only data layer (e.g. postgres version bump)
-helm upgrade atlas-data ./atlas-data \
-  --namespace atlas \
-  --set postgres.image.tag=15
-
-# Upgrade only observability stack
-helm upgrade atlas-observability ./atlas-observability \
-  --namespace atlas \
-  --set appReleaseName=atlas-app
+# Upgrade the infrastructure layer (e.g. bump MySQL image)
+helm upgrade atlas-dev ./charts \
+  --namespace infra \
+  --set common.enabled=false \
+  --set app.enabled=false \
+  --set observability.enabled=false \
+  --set security.enabled=false \
+  --set mysql.image.tag=8.4
 ```
 
 ---
@@ -94,10 +114,13 @@ helm upgrade atlas-observability ./atlas-observability \
 
 | Concern | Solution |
 |---|---|
-| **Data service naming** | Data services named `<dataReleaseName>-<svc>` (e.g. `atlas-data-mysql`). App chart references via `dataReleaseName` + `atlas.infra.*` helpers. |
-| **Observability service naming** | Observability services named `<observabilityReleaseName>-<svc>` (e.g. `atlas-observability-tempo`). App chart references via `observabilityReleaseName` + `atlas.infra.*` helpers. |
-| **ServiceAccount** | App pods use `serviceAccountName: <commonReleaseName>-namespace-reader`. |
-| **Secrets cross-reference** | App deployments reference Secrets by name (e.g. `atlas-data-mysql`). Kubernetes Secrets are namespace-scoped and visible to all pods in the same namespace. |
-| **Prometheus scrape targets** | `atlas-observability/files/prometheus/config.yml.tpl` uses `{{ .Values.appReleaseName }}-<svc>` to build scrape target URLs for app services. |
-| **Grafana datasources** | `datasources.yml.tpl` uses `{{ lower $.Release.Name }}-loki/prometheus/tempo` — all within the same `atlas-observability` release, no cross-chart reference needed. |
-| **Promtail → Loki** | `promtail/daemonset.yaml` wait-for uses `{{ lower $.Release.Name }}-loki` — same release, no cross-chart reference. |
+| **Per-layer namespaces** | Each subchart (`infra`, `security`, `observability`, `app`) is installed into its own dedicated namespace (`infra`, `security`, `observability`, `app`) for isolation and independent lifecycle. |
+| **Single values file** | All values live in `charts/values.yaml`. Keys are flat (e.g. `mysql.*`, `kafka.*`) and shared across subcharts. |
+| **Selective install** | Each subchart has an `enabled` condition in `Chart.yaml` — set to `false` to skip it during install/upgrade. |
+| **Common RBAC** | The `common` subchart provisions the `ServiceAccount`, `Role`, and `RoleBinding` (`namespace-reader`). It is typically deployed alongside the `app` subchart. |
+| **Cross-namespace service refs** | When using separate namespaces, app services reference infra/security/observability by their full DNS name: `<release>-<svc>.<namespace>.svc.cluster.local`. |
+| **ServiceAccount** | App pods use `serviceAccountName: <release>-namespace-reader` (provisioned by `common`). |
+| **Prometheus scrape targets** | `observability/files/prometheus/config.yml.tpl` uses `{{ lower $.Release.Name }}-<svc>` to build scrape target URLs for app services. |
+| **Grafana datasources** | `datasources.yml.tpl` uses `{{ lower $.Release.Name }}-loki/prometheus/tempo` — all within the same `observability` release. |
+| **Promtail → Loki** | `promtail/daemonset.yaml` uses `{{ lower $.Release.Name }}-loki` — same release, no cross-chart reference needed. |
+| **ALB Ingress (AWS)** | The `api-gateway` supports optional ALB ingress via `apiGateway.ingress.enabled=true` with configurable `scheme` and `certificateArn`. |

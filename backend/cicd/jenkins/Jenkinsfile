@@ -98,16 +98,16 @@ pipeline {
             steps {
                 script {
                     // Resolve Gradle module and SERVICE_DIR
-                    // e.g. catalog-service       → :services.catalog.bootstrap
-                    //      api-gateway            → :services.api-gateway.bootstrap
-                    //      authorization-server   → :platform.authorization-server.bootstrap
-                    if (params.SERVICE_NAME == 'authorization-server') {
-                        env.GRADLE_MODULE = ':platform.authorization-server'
-                        env.SERVICE_DIR   = 'backend/platform/authorization-server'
+                    if (params.SERVICE_NAME == 'api-gateway') {
+                        env.GRADLE_MODULE = ":edge.api-gateway.api-gateway-reactive"
+                        env.SERVICE_DIR   = 'backend/app/edge/api-gateway/api-gateway-reactive'
+                    } else if (params.SERVICE_NAME == 'authorization-server') {
+                        env.GRADLE_MODULE = ":edge.authorization-server"
+                        env.SERVICE_DIR   = 'backend/app/edge/authorization-server'
                     } else {
                         def moduleId = params.SERVICE_NAME.replace('-service', '')
                         env.GRADLE_MODULE = ":services.${moduleId}.bootstrap"
-                        env.SERVICE_DIR   = "backend/services/${params.SERVICE_NAME}/${moduleId}-bootstrap"
+                        env.SERVICE_DIR   = "backend/app/services/${params.SERVICE_NAME}/${moduleId}-bootstrap"
                     }
 
                     // Resolve image tag: param > git short SHA

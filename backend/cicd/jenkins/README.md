@@ -317,18 +317,6 @@ Deploy via Helm      ? helm upgrade --install
 Verify Rollout       ? kubectl rollout status
 ```
 
-### Service ? Gradle Module ? Dockerfile Path Mapping
-
-| `SERVICE_NAME` | Gradle Module | Dockerfile Path |
-|---|---|---|
-| `catalog-service` | `:services.catalog.bootstrap` | `backend/services/catalog-service/catalog-bootstrap/` |
-| `order-service` | `:services.order.bootstrap` | `backend/services/order-service/order-bootstrap/` |
-| `inventory-service` | `:services.inventory.bootstrap` | `backend/services/inventory-service/inventory-bootstrap/` |
-| `payment-service` | `:services.payment.bootstrap` | `backend/services/payment-service/payment-bootstrap/` |
-| `user-service` | `:services.user.bootstrap` | `backend/services/user-service/user-bootstrap/` |
-| `api-gateway` | `:services.api-gateway.bootstrap` | `backend/services/api-gateway/api-gateway-bootstrap/` |
-| `authorization-server` | `:platform.authorization-server.bootstrap` | `backend/platform/authorization-server/` |
-
 ---
 
 ## 9. Environment Variables to Adjust
@@ -352,69 +340,4 @@ If your cluster names follow a different convention, update:
 ```groovy
 EKS_CLUSTER_NAME = "atlas-${params.ENVIRONMENT}"
 K8S_NAMESPACE    = "atlas-${params.ENVIRONMENT}"
-```
-
----
-
-## 10. Troubleshooting
-
-### Gradle Toolchain: `Cannot find a Java installation matching languageVersion=17`
-
-This error occurs when only JRE is installed. Gradle Toolchain requires the full JDK (needs `javac`):
-
-```bash
-# Check if javac is available
-sudo -u jenkins javac -version
-
-# If not found, install the full JDK
-sudo apt install -y openjdk-17-jdk
-
-# Verify
-sudo -u jenkins javac -version   # expected: javac 17.x.x
-
-# Restart Jenkins
-sudo systemctl restart jenkins
-```
-
-### Jenkins cannot find `docker`
-
-```bash
-# Check whether jenkins is in the docker group
-groups jenkins
-
-# If not, add it and restart
-sudo usermod -aG docker jenkins
-sudo systemctl restart jenkins
-```
-
-### `./gradlew` permission denied
-
-```bash
-# Ensure gradlew has the executable bit set in the repository
-git update-index --chmod=+x backend/gradlew
-git commit -m "chore: fix gradlew executable permission"
-```
-
-### `aws: command not found` during pipeline execution
-
-AWS CLI must be on the `PATH` of the `jenkins` user:
-
-```bash
-sudo -u jenkins which aws
-# If not found, create a symlink:
-sudo ln -s /usr/local/bin/aws /usr/bin/aws
-```
-
-### `Unable to locate credentials`
-
-Verify that the credential ID in Jenkins matches `AWS_CREDENTIALS_ID = 'aws-credentials'` in the Jenkinsfile.
-
-### `kubectl rollout status` times out
-
-The deployment may be stuck in `ImagePullBackOff` or `CrashLoopBackOff`. Inspect the pods:
-
-```bash
-kubectl get pods -n atlas-<env>
-kubectl describe pod <pod-name> -n atlas-<env>
-kubectl logs <pod-name> -n atlas-<env>
 ```

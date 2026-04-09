@@ -1,0 +1,32 @@
+apiVersion: v2
+name: atlas
+description: The parent chart for the Atlas platform, which includes all sub-charts for the various layers (app, infra, security, observability)
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+
+dependencies:
+  - name: common
+    version: "1.0.0"
+    repository: "file://common"
+    condition: common.enabled
+
+  - name: app
+    version: "1.0.0"
+    repository: "file://app"
+    condition: app.enabled
+
+  - name: infra
+    version: "1.0.0"
+    repository: "file://infra"
+    condition: infra.enabled
+
+  - name: observability
+    version: "1.0.0"
+    repository: "file://observability"
+    condition: observability.enabled
+
+  - name: security
+    version: "1.0.0"
+    repository: "file://security"
+    condition: security.enabled

@@ -41,5 +41,4 @@ spring:
             require-authorization-consent: true
 
 springdoc:
-  packages-to-scan: org.atlas.platform.authorization.api
-
+  packages-to-scan: org.atlas.edge.authorization.api

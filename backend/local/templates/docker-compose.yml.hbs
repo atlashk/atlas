@@ -434,7 +434,7 @@ services:
     container_name: user-service
     image: {{dotenv.PROJECT_NAME}}/user-service:latest
     build:
-      context: ../../services/user-service/user-bootstrap
+      context: ../app/services/user-service/user-bootstrap
       dockerfile: Dockerfile
     ports:
       - "8081:8081"
@@ -489,7 +489,7 @@ services:
     container_name: catalog-service
     image: {{dotenv.PROJECT_NAME}}/catalog-service:latest
     build:
-      context: ../../services/catalog-service/catalog-bootstrap
+      context: ../app/services/catalog-service/catalog-bootstrap
       dockerfile: Dockerfile
     ports:
       - "8082:8082"
@@ -570,7 +570,7 @@ services:
     container_name: inventory-service
     image: {{dotenv.PROJECT_NAME}}/inventory-service:latest
     build:
-      context: ../../services/inventory-service/inventory-bootstrap
+      context: ../app/services/inventory-service/inventory-bootstrap
       dockerfile: Dockerfile
     ports:
       - "8083:8083"
@@ -632,7 +632,7 @@ services:
     container_name: order-service
     image: {{dotenv.PROJECT_NAME}}/order-service:latest
     build:
-      context: ../../services/order-service/order-bootstrap
+      context: ../app/services/order-service/order-bootstrap
       dockerfile: Dockerfile
     ports:
       - "8084:8084"
@@ -700,7 +700,7 @@ services:
     container_name: payment-service
     image: {{dotenv.PROJECT_NAME}}/payment-service:latest
     build:
-      context: ../../services/payment-service/payment-bootstrap
+      context: ../app/services/payment-service/payment-bootstrap
       dockerfile: Dockerfile
     ports:
       - "8085:8085"
@@ -763,7 +763,7 @@ services:
     container_name: eureka-server
     image: {{dotenv.PROJECT_NAME}}/eureka-server:latest
     build:
-      context: ../../platform/discovery-server/eureka-server
+      context: ../app/edge/discovery-server/eureka-server
       dockerfile: Dockerfile
     ports:
       - "8761:8761"
@@ -785,7 +785,7 @@ services:
     container_name: authorization-server
     image: {{dotenv.PROJECT_NAME}}/authorization-server:latest
     build:
-      context: ../../platform/authorization-server
+      context: ../app/edge/authorization-server
       dockerfile: Dockerfile
     ports:
       - "8901:8901"
@@ -836,7 +836,7 @@ services:
     container_name: api-gateway
     image: {{dotenv.PROJECT_NAME}}/api-gateway:latest
     build:
-      context: ../../services/api-gateway/api-gateway-reactive
+      context: ../app/services/api-gateway/api-gateway-reactive
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
