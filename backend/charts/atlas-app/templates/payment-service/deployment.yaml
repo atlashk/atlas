@@ -1,0 +1,145 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ lower $.Release.Name }}-payment-service
+  labels:
+    app.kubernetes.io/name: payment-service
+    app.kubernetes.io/instance: {{ lower $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  replicas: {{ .Values.global.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: payment-service
+      app.kubernetes.io/instance: {{ lower $.Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: payment-service
+        app.kubernetes.io/instance: {{ lower $.Release.Name }}
+    spec:
+      {{- with .Values.nodeGroups.app.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeGroups.app.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ .Values.commonReleaseName }}-{{ .Values.global.serviceAccount.name | default "namespace-reader" }}
+      {{- $deps := list -}}
+      {{- if eq .Values.appStack.datasource "mysql" -}}
+      {{- $deps = append $deps (dict "name" "mysql" "host" (include "atlas.infra.mysql" .) "port" .Values.mysql.service.ports.mysql) -}}
+      {{- end -}}
+      {{- if eq .Values.appStack.datasource "postgres" -}}
+      {{- $deps = append $deps (dict "name" "postgres" "host" (include "atlas.infra.postgres" .) "port" .Values.postgres.service.ports.postgres) -}}
+      {{- end -}}
+      {{- include "atlas.waitFor.initContainers" (dict "deps" $deps) | nindent 6 }}
+      containers:
+        - name: payment-service
+          image: "{{ if .Values.global.image.registry -}}{{ .Values.global.image.registry }}/{{ end -}}{{ .Values.paymentSvc.image.repository }}:{{ .Values.paymentSvc.image.tag | default .Values.global.image.tag }}"
+          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.paymentSvc.service.ports.http }}
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: {{ .Values.global.springProfilesActive | quote }}
+            {{- if eq .Values.appStack.datasource "mysql" }}
+            - name: DB_URL
+              value: "jdbc:mysql://{{ include "atlas.infra.mysql" . }}:{{ .Values.mysql.service.ports.mysql }}/db_payment?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "atlas.infra.mysql" . }}
+                  key: user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "atlas.infra.mysql" . }}
+                  key: password
+            {{- end }}
+            {{- if eq .Values.appStack.datasource "postgres" }}
+            - name: DB_URL
+              value: "jdbc:postgresql://{{ include "atlas.infra.postgres" . }}:{{ .Values.postgres.service.ports.postgres }}/db_payment"
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "atlas.infra.postgres" . }}
+                  key: user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "atlas.infra.postgres" . }}
+                  key: password
+            {{- end }}
+            {{- if eq .Values.appStack.kvStore "redis" }}
+            - name: REDIS_HOST
+              value: {{ include "atlas.infra.redis" . | quote }}
+            - name: REDIS_PORT
+              value: {{ .Values.redis.service.ports.redis | quote }}
+            {{- end }}
+            {{- if eq .Values.appStack.messaging "kafka" }}
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "{{ include "atlas.infra.kafka" . }}:{{ .Values.kafka.service.ports.kafkaInternal }}"
+            {{- end }}
+            {{- if eq .Values.appStack.messaging "rabbitmq" }}
+            - name: RABBITMQ_HOST
+              value: {{ include "atlas.infra.rabbitmq" . | quote }}
+            - name: RABBITMQ_PORT
+              value: {{ .Values.rabbitmq.service.ports.amqp | quote }}
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "atlas.infra.rabbitmq" . }}
+                  key: user
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "atlas.infra.rabbitmq" . }}
+                  key: password
+            {{- end }}
+            {{- if eq .Values.appStack.observability.tracing "zipkin" }}
+            - name: ZIPKIN_ENDPOINT
+              value: "http://{{ include "atlas.infra.zipkin" . }}:{{ .Values.zipkin.service.ports.http }}/api/v2/spans"
+            {{- end }}
+            {{- if eq .Values.appStack.observability.tracing "tempo" }}
+            - name: OTEL_COLLECTOR_TRACES_ENDPOINT
+              value: "http://{{ include "atlas.infra.otelCollector" . }}:{{ .Values.otelCollector.service.ports.otlpHttp }}/v1/traces"
+            {{- end }}
+            - name: PAYMENT_SIMULATOR_WEBHOOK_URL
+              value: "http://{{ lower $.Release.Name }}-api-gateway:{{ .Values.apiGateway.service.ports.http }}/services/payment/api/webhook/simulator"
+            {{- with .Values.paymentSvc.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            {{ toYaml .Values.paymentSvc.resources | nindent 12 }}
+          volumeMounts:
+            - name: payment-service-logs
+              mountPath: /var/log/payment-service
+      volumes:
+        - name: payment-service-logs
+          emptyDir: {}
+      terminationGracePeriodSeconds: 30

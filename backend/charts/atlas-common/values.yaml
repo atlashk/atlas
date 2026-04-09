@@ -1,0 +1,4 @@
+global:
+  serviceAccount:
+    # The name of the service account to create.
+    name: "namespace-reader"
