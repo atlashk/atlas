@@ -82,7 +82,7 @@ Instead of attaching policies to the node IAM Role, IRSA grants least-privilege 
 
 ---
 
-Go to `backend/deployment` folder.
+Go to `backend` folder.
 
 ## 1. Configure AWS credentials
 
@@ -121,9 +121,9 @@ Expected output:
 ## 2. Configure variables
 
 ```bash
-cp terraform/aws/bootstrap/terraform.tfvars.example  terraform/aws/bootstrap/terraform.tfvars
-cp terraform/aws/cluster/terraform.tfvars.example    terraform/aws/cluster/terraform.tfvars
-cp terraform/aws/repository/terraform.tfvars.example terraform/aws/repository/terraform.tfvars
+cp infra/aws/bootstrap/terraform.tfvars.example  infra/aws/bootstrap/terraform.tfvars
+cp infra/aws/cluster/terraform.tfvars.example    infra/aws/cluster/terraform.tfvars
+cp infra/aws/repository/terraform.tfvars.example infra/aws/repository/terraform.tfvars
 ```
 
 Edit each `terraform.tfvars` and fill in `aws_region`, `project_name`, etc.

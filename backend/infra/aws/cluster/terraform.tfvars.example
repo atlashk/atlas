@@ -17,7 +17,7 @@ project_name = "atlas"
 environment = "dev"
 
 # Kubernetes version
-kubernetes_version = "1.31"
+kubernetes_version = "1.35"
 
 # Number of Availability Zones (2 or 3)
 # dev: 2 AZs to reduce cost
@@ -28,37 +28,13 @@ availability_zones_count = 2
 vpc_cidr = "10.0.0.0/16"
 
 # ------------------------------------------------------------------
-# Node Group: system — runs Kubernetes add-ons
-# t3.medium: 2 vCPU, 4 GB RAM
-# ------------------------------------------------------------------
-system_node_group = {
-  instance_types = ["t3.medium"]
-  min_size       = 1
-  max_size       = 2
-  desired_size   = 1
-  disk_size_gb   = 20
-}
-
-# ------------------------------------------------------------------
-# Node Group: app — runs the microservices
+# Node Group: default — runs all workloads
 # t3.large: 2 vCPU, 8 GB RAM
 # ------------------------------------------------------------------
-app_node_group = {
+node_group = {
   instance_types = ["t3.large"]
   min_size       = 1
-  max_size       = 2
-  desired_size   = 1
-  disk_size_gb   = 30
-}
-
-# ------------------------------------------------------------------
-# Node Group: infra — runs MySQL, Redis, Kafka, ES, MinIO...
-# t3.large: 2 vCPU, 8 GB RAM
-# ------------------------------------------------------------------
-infra_node_group = {
-  instance_types = ["t3.large"]
-  min_size       = 1
-  max_size       = 2
+  max_size       = 3
   desired_size   = 1
   disk_size_gb   = 30
 }

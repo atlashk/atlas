@@ -12,18 +12,23 @@ MAKEFILE_DIR     := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST))
 TF_BOOTSTRAP_DIR := $(MAKEFILE_DIR)/infra/aws/bootstrap
 TF_CLUSTER_DIR   := $(MAKEFILE_DIR)/infra/aws/cluster
 TF_REPO_DIR      := $(MAKEFILE_DIR)/infra/aws/repository
-HELM_CHART_DIR   := $(MAKEFILE_DIR)/helm-charts
-STATE_DIR        := $(MAKEFILE_DIR)/.state
+HELM_CHART_DIR    := $(MAKEFILE_DIR)/charts
+HELM_SUBCHART_DIR := $(HELM_CHART_DIR)/charts
+STATE_DIR         := $(MAKEFILE_DIR)/.state
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Configurable defaults (override on the command line)
 # ──────────────────────────────────────────────────────────────────────────────
-HELM_RELEASE_NAME ?= atlas
-HELM_NAMESPACE    ?= atlas
+HELM_RELEASE_NAME     ?= atlas-dev
+HELM_NS_INFRA         ?= $(HELM_RELEASE_NAME)-infra
+HELM_NS_SECURITY      ?= $(HELM_RELEASE_NAME)-security
+HELM_NS_OBSERVABILITY ?= $(HELM_RELEASE_NAME)-observability
+HELM_NS_APP           ?= $(HELM_RELEASE_NAME)-app
 
 # ──────────────────────────────────────────────────────────────────────────────
 .PHONY: install uninstall help check-prereqs \
-        bootstrap cluster repository push helm \
+        bootstrap cluster repository push \
+        helm helm-common helm-infra helm-security helm-observability helm-app \
         destroy-helm destroy-repository destroy-cluster destroy-bootstrap
 
 .DEFAULT_GOAL := help
@@ -139,7 +144,12 @@ help:
 	@printf '  make cluster              Step 2: Terraform for EKS cluster creation\n'
 	@printf '  make repository           Step 3: Terraform for ECR image repositories creation\n'
 	@printf '  make push                 Step 4: Build Docker images and push to ECR\n'
-	@printf '  make helm                 Step 5: Helm install / upgrade\n'
+	@printf '  make helm                 Step 5: Helm install / upgrade (all subcharts)\n'
+	@printf '  make helm-common          Step 5a: Helm install / upgrade — common (RBAC)\n'
+	@printf '  make helm-infra           Step 5b: Helm install / upgrade — infra (databases, queues)\n'
+	@printf '  make helm-security        Step 5c: Helm install / upgrade — security (Keycloak)\n'
+	@printf '  make helm-observability   Step 5d: Helm install / upgrade — observability (metrics, logs)\n'
+	@printf '  make helm-app             Step 5e: Helm install / upgrade — app services\n'
 	@printf '\nUninstall targets\n'
 	@printf '  make uninstall            Full 4-step uninstall (helm → repository → cluster → bootstrap)\n'
 	@printf '  make destroy-helm         Step 1: Helm uninstall\n'
@@ -147,8 +157,11 @@ help:
 	@printf '  make destroy-cluster      Step 3: Destroy EKS cluster\n'
 	@printf '  make destroy-bootstrap    Step 4: Destroy S3 remote-state bucket\n'
 	@printf '\nVariables (override on command line)\n'
-	@printf '  HELM_RELEASE_NAME   Helm release name    (default: %s)\n' "$(HELM_RELEASE_NAME)"
-	@printf '  HELM_NAMESPACE      Kubernetes namespace  (default: %s)\n\n' "$(HELM_NAMESPACE)"
+	@printf '  HELM_RELEASE_NAME     Helm release name             (default: %s)\n' "$(HELM_RELEASE_NAME)"
+	@printf '  HELM_NS_INFRA         Namespace for infra           (default: %s)\n' "$(HELM_NS_INFRA)"
+	@printf '  HELM_NS_SECURITY      Namespace for security        (default: %s)\n' "$(HELM_NS_SECURITY)"
+	@printf '  HELM_NS_OBSERVABILITY Namespace for observability   (default: %s)\n' "$(HELM_NS_OBSERVABILITY)"
+	@printf '  HELM_NS_APP           Namespace for app services    (default: %s)\n\n' "$(HELM_NS_APP)"
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Prerequisite check
@@ -277,36 +290,78 @@ push: check-prereqs
 	printf '%s' "$$IMAGE_TAG" > "$(STATE_DIR)/image_tag"
 	log_ok "Registry and image tag saved to state"
 
-## Step 5: Helm — deploys Kubernetes resources (requires cluster state)
-helm: check-prereqs
+## Step 5: Helm — deploys all subcharts (common → infra → security → observability → app)
+helm: helm-common helm-infra helm-security helm-observability helm-app
+
+## Step 5a: Helm — deploys common resources (cluster-scoped RBAC)
+helm-common: check-prereqs
+	@eval "$$SHELL_HELPERS"
+	load_kubectl_state
+	configure_kubectl
+	printf '\n===> Step 5a/5 — Helm install/upgrade ($(HELM_RELEASE_NAME)-common)\n'
+	log_info "helm upgrade --install $(HELM_RELEASE_NAME)-common"
+	helm upgrade --install "$(HELM_RELEASE_NAME)-common" "$(HELM_SUBCHART_DIR)/common"
+	log_ok "Helm release '$(HELM_RELEASE_NAME)-common' deployed successfully"
+
+## Step 5b: Helm — deploys infrastructure (databases, message queues, object storage)
+helm-infra: check-prereqs
+	@eval "$$SHELL_HELPERS"
+	load_kubectl_state
+	configure_kubectl
+	printf '\n===> Step 5b/5 — Helm install/upgrade ($(HELM_RELEASE_NAME)-infra)\n'
+	log_info "helm upgrade --install $(HELM_RELEASE_NAME)-infra"
+	helm upgrade --install "$(HELM_RELEASE_NAME)-infra" "$(HELM_SUBCHART_DIR)/infra" \
+	  --namespace "$(HELM_NS_INFRA)" \
+	  --create-namespace
+	log_ok "Helm release '$(HELM_RELEASE_NAME)-infra' deployed successfully"
+
+## Step 5c: Helm — deploys security layer (Keycloak)
+helm-security: check-prereqs
+	@eval "$$SHELL_HELPERS"
+	load_kubectl_state
+	configure_kubectl
+	printf '\n===> Step 5c/5 — Helm install/upgrade ($(HELM_RELEASE_NAME)-security)\n'
+	log_info "helm upgrade --install $(HELM_RELEASE_NAME)-security"
+	helm upgrade --install "$(HELM_RELEASE_NAME)-security" "$(HELM_SUBCHART_DIR)/security" \
+	  --namespace "$(HELM_NS_SECURITY)" \
+	  --create-namespace
+	log_ok "Helm release '$(HELM_RELEASE_NAME)-security' deployed successfully"
+
+## Step 5d: Helm — deploys observability stack (Prometheus, Grafana, Loki, Tempo)
+helm-observability: check-prereqs
+	@eval "$$SHELL_HELPERS"
+	load_kubectl_state
+	configure_kubectl
+	printf '\n===> Step 5d/5 — Helm install/upgrade ($(HELM_RELEASE_NAME)-observability)\n'
+	log_info "helm upgrade --install $(HELM_RELEASE_NAME)-observability"
+	helm upgrade --install "$(HELM_RELEASE_NAME)-observability" "$(HELM_SUBCHART_DIR)/observability" \
+	  --namespace "$(HELM_NS_OBSERVABILITY)" \
+	  --create-namespace
+	log_ok "Helm release '$(HELM_RELEASE_NAME)-observability' deployed successfully"
+
+## Step 5e: Helm — deploys application services (requires cluster + push state)
+helm-app: check-prereqs
 	@eval "$$SHELL_HELPERS"
 	load_kubectl_state
 	load_push_state
 	configure_kubectl
-	printf '\n===> Step 5/5 — Helm install/upgrade ($(HELM_RELEASE_NAME))\n'
+	printf '\n===> Step 5e/5 — Helm install/upgrade ($(HELM_RELEASE_NAME)-app)\n'
 	log_info "ECR registry: $$ECR_REGISTRY"
 	log_info "Image tag:    $$IMAGE_TAG"
-	if ! kubectl get namespace "$(HELM_NAMESPACE)" &>/dev/null; then
-	  log_info "Creating namespace '$(HELM_NAMESPACE)'"
-	  kubectl create namespace "$(HELM_NAMESPACE)"
-	fi
-	log_info "helm upgrade --install $(HELM_RELEASE_NAME)"
-	helm upgrade --install "$(HELM_RELEASE_NAME)" "$(HELM_CHART_DIR)" \
-	  --namespace "$(HELM_NAMESPACE)" \
+	log_info "helm upgrade --install $(HELM_RELEASE_NAME)-app"
+	helm upgrade --install "$(HELM_RELEASE_NAME)-app" "$(HELM_SUBCHART_DIR)/app" \
+	  --namespace "$(HELM_NS_APP)" \
 	  --create-namespace \
-	  --values "$(HELM_CHART_DIR)/values.yaml" \
 	  --set global.image.registry="$$ECR_REGISTRY" \
 	  --set global.image.tag="$$IMAGE_TAG" \
-	  --set global.image.pullPolicy=Always \
-	  --wait \
-	  --timeout 30m
-	log_ok "Helm release '$(HELM_RELEASE_NAME)' deployed successfully"
+	  --set global.image.pullPolicy=Always
+	log_ok "Helm release '$(HELM_RELEASE_NAME)-app' deployed successfully"
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Individual uninstall steps
 # ══════════════════════════════════════════════════════════════════════════════
 
-## Step 1 (uninstall): Helm uninstall
+## Step 1 (uninstall): Helm uninstall (all subcharts in reverse order)
 destroy-helm:
 	@eval "$$SHELL_HELPERS"
 	if [[ -f "$(STATE_DIR)/configure_kubectl" ]]; then
@@ -315,19 +370,32 @@ destroy-helm:
 	else
 	  log_warn "configure_kubectl state not found — skipping kubectl context update"
 	fi
-	printf '\n===> Step 1/4 — Helm uninstall ($(HELM_RELEASE_NAME))\n'
-	if ! helm status "$(HELM_RELEASE_NAME)" --namespace "$(HELM_NAMESPACE)" &>/dev/null; then
-	  log_warn "Helm release '$(HELM_RELEASE_NAME)' not found in namespace '$(HELM_NAMESPACE)' — skipping"
+	printf '\n===> Step 1/4 — Helm uninstall ($(HELM_RELEASE_NAME)-*)\n'
+	uninstall_release() {
+	  local release="$$1" ns="$$2"
+	  if ! helm status "$$release" --namespace "$$ns" &>/dev/null; then
+	    log_warn "Helm release '$$release' not found in namespace '$$ns' — skipping"
+	  else
+	    log_info "helm uninstall $$release (namespace: $$ns)"
+	    helm uninstall "$$release" --namespace "$$ns"
+	    log_ok "Helm release '$$release' removed"
+	  fi
+	  if kubectl get namespace "$$ns" &>/dev/null; then
+	    log_info "Deleting namespace '$$ns'"
+	    kubectl delete namespace "$$ns" --wait=true
+	    log_ok "Namespace '$$ns' deleted"
+	  fi
+	}
+	uninstall_release "$(HELM_RELEASE_NAME)-app"           "$(HELM_NS_APP)"
+	uninstall_release "$(HELM_RELEASE_NAME)-observability" "$(HELM_NS_OBSERVABILITY)"
+	uninstall_release "$(HELM_RELEASE_NAME)-security"      "$(HELM_NS_SECURITY)"
+	uninstall_release "$(HELM_RELEASE_NAME)-infra"         "$(HELM_NS_INFRA)"
+	if helm status "$(HELM_RELEASE_NAME)-common" &>/dev/null; then
+	  log_info "helm uninstall $(HELM_RELEASE_NAME)-common"
+	  helm uninstall "$(HELM_RELEASE_NAME)-common"
+	  log_ok "Helm release '$(HELM_RELEASE_NAME)-common' removed"
 	else
-	  log_info "helm uninstall $(HELM_RELEASE_NAME)"
-	  helm uninstall "$(HELM_RELEASE_NAME)" \
-	    --namespace "$(HELM_NAMESPACE)" --wait --timeout 15m
-	  log_ok "Helm release '$(HELM_RELEASE_NAME)' removed"
-	fi
-	if kubectl get namespace "$(HELM_NAMESPACE)" &>/dev/null; then
-	  log_info "Deleting namespace '$(HELM_NAMESPACE)'"
-	  kubectl delete namespace "$(HELM_NAMESPACE)" --wait=true
-	  log_ok "Namespace '$(HELM_NAMESPACE)' deleted"
+	  log_warn "Helm release '$(HELM_RELEASE_NAME)-common' not found — skipping"
 	fi
 
 ## Step 2 (uninstall): Destroy ECR repositories (requires bootstrap state)

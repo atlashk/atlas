@@ -9,6 +9,17 @@
 # ==============================================================
 
 # --------------------------------------------------------------
+# Import existing ECR repositories into state (idempotent)
+# If a repo already exists in AWS, this prevents a creation error.
+# Requires Terraform >= 1.7 (for_each in import blocks).
+# --------------------------------------------------------------
+import {
+  for_each = local.repository_names
+  to       = aws_ecr_repository.services[each.key]
+  id       = each.value
+}
+
+# --------------------------------------------------------------
 # Private ECR repositories — one per service
 # --------------------------------------------------------------
 resource "aws_ecr_repository" "services" {
@@ -36,7 +47,9 @@ resource "aws_ecr_repository" "services" {
 # Lifecycle policies — keep repos from growing unbounded
 # --------------------------------------------------------------
 resource "aws_ecr_lifecycle_policy" "services" {
-  for_each   = aws_ecr_repository.services
+  # Only create lifecycle policies when at least one rule is configured.
+  # If both vars are 0 the rules list would be empty, which AWS rejects.
+  for_each   = (var.untagged_image_expiry_days > 0 || var.keep_last_n_tagged_images > 0) ? aws_ecr_repository.services : {}
   repository = each.value.name
 
   policy = jsonencode({
@@ -62,10 +75,10 @@ resource "aws_ecr_lifecycle_policy" "services" {
           rulePriority = 2
           description  = "Keep only the last ${var.keep_last_n_tagged_images} tagged images"
           selection = {
-            tagStatus   = "tagged"
-            tagPrefixList = [""]
-            countType   = "imageCountMoreThan"
-            countNumber = var.keep_last_n_tagged_images
+            tagStatus       = "tagged"
+            tagPatternList  = ["*"]
+            countType       = "imageCountMoreThan"
+            countNumber     = var.keep_last_n_tagged_images
           }
           action = { type = "expire" }
         }

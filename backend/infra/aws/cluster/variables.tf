@@ -32,7 +32,7 @@ variable "environment" {
 variable "kubernetes_version" {
   description = "Kubernetes version for EKS (see: https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html)"
   type        = string
-  default     = "1.31"
+  default     = "1.35"
 }
 
 # ==============================================================
@@ -75,39 +75,13 @@ variable "admin_iam_principals" {
 }
 
 # ==============================================================
-# Node Group: System
-# Purpose: runs Kubernetes add-ons (CoreDNS, metrics-server...)
-# Small instances — low load, not intended for business logic
+# Node Group: default
+# Purpose: runs all workloads — Kubernetes add-ons, microservices,
+#   and stateful services (MySQL, Redis, Kafka, ES, MinIO...)
 # ==============================================================
 
-variable "system_node_group" {
-  description = "Configuration for the Kubernetes system components node group"
-  type = object({
-    instance_types = list(string)
-    min_size       = number
-    max_size       = number
-    desired_size   = number
-    disk_size_gb   = number
-  })
-  default = {
-    instance_types = ["t3.medium"]
-    min_size       = 1
-    max_size       = 2
-    desired_size   = 1
-    disk_size_gb   = 20
-  }
-}
-
-# ==============================================================
-# Node Group: app
-# Purpose: runs the Atlas microservices
-#   api-gateway, catalog-service, inventory-service,
-#   order-service, payment-service, user-service,
-#   authorization-server, config-server, discovery-server
-# ==============================================================
-
-variable "app_node_group" {
-  description = "Configuration for the microservices node group"
+variable "node_group" {
+  description = "Configuration for the single default EKS managed node group"
   type = object({
     instance_types = list(string)
     min_size       = number
@@ -118,33 +92,7 @@ variable "app_node_group" {
   default = {
     instance_types = ["t3.large"]
     min_size       = 1
-    max_size       = 2
-    desired_size   = 1
-    disk_size_gb   = 30
-  }
-}
-
-# ==============================================================
-# Node Group: infra
-# Purpose: runs stateful services
-#   MySQL, Redis, Kafka, Elasticsearch, MinIO,
-#   Loki, Prometheus, Tempo
-# Larger instances required due to higher RAM/disk demands
-# ==============================================================
-
-variable "infra_node_group" {
-  description = "Configuration for the stateful infrastructure services node group"
-  type = object({
-    instance_types = list(string)
-    min_size       = number
-    max_size       = number
-    desired_size   = number
-    disk_size_gb   = number
-  })
-  default = {
-    instance_types = ["t3.large"]
-    min_size       = 1
-    max_size       = 2
+    max_size       = 3
     desired_size   = 1
     disk_size_gb   = 30
   }

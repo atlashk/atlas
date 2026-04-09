@@ -13,15 +13,3 @@ terraform {
   # should be committed to git so the team can manage the bucket/table.
   # Alternatively, store it manually in a secure location.
 }
-
-provider "aws" {
-  region = var.aws_region
-
-  default_tags {
-    tags = {
-      Project     = var.project_name
-      Environment = "global"
-      ManagedBy   = "Terraform"
-    }
-  }
-}
