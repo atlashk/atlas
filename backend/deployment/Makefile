@@ -33,15 +33,15 @@ HELM_NAMESPACE    ?= atlas
 # the SHELL_HELPERS variable (exported to the environment).
 # ──────────────────────────────────────────────────────────────────────────────
 define SHELL_HELPERS
-log_info()  { printf '[INFO]  %s\n' "$1"; }
-log_ok()    { printf '[OK]    %s\n' "$1"; }
-log_warn()  { printf '[WARN]  %s\n' "$1" >&2; }
-log_error() { printf '[ERROR] %s\n' "$1" >&2; }
+log_info()  { printf '[INFO]  %s\n' "$$1"; }
+log_ok()    { printf '[OK]    %s\n' "$$1"; }
+log_warn()  { printf '[WARN]  %s\n' "$$1" >&2; }
+log_error() { printf '[ERROR] %s\n' "$$1" >&2; }
 
 require_tfvars() {
-  if [[ ! -f "$1/terraform.tfvars" ]]; then
-    log_error "terraform.tfvars not found in $1"
-    log_error "cp $1/terraform.tfvars.example $1/terraform.tfvars"
+  if [[ ! -f "$$1/terraform.tfvars" ]]; then
+    log_error "terraform.tfvars not found in $$1"
+    log_error "cp $$1/terraform.tfvars.example $$1/terraform.tfvars"
     exit 1
   fi
 }
@@ -51,8 +51,8 @@ load_bootstrap_state() {
     log_error "Bootstrap state not found. Run 'make bootstrap' first."
     exit 1
   fi
-  TF_BOOTSTRAP_BUCKET=$(cat "$(STATE_DIR)/bootstrap_bucket")
-  TF_BOOTSTRAP_REGION=$(cat "$(STATE_DIR)/bootstrap_region")
+  TF_BOOTSTRAP_BUCKET=$$(cat "$(STATE_DIR)/bootstrap_bucket")
+  TF_BOOTSTRAP_REGION=$$(cat "$(STATE_DIR)/bootstrap_region")
 }
 
 load_kubectl_state() {
@@ -60,7 +60,7 @@ load_kubectl_state() {
     log_error "Cluster state not found. Run 'make cluster' first."
     exit 1
   fi
-  TF_CONFIGURE_KUBECTL=$(cat "$(STATE_DIR)/configure_kubectl")
+  TF_CONFIGURE_KUBECTL=$$(cat "$(STATE_DIR)/configure_kubectl")
 }
 
 load_push_state() {
@@ -68,59 +68,59 @@ load_push_state() {
     log_error "Push state not found. Run 'make push' first."
     exit 1
   fi
-  ECR_REGISTRY=$(cat "$(STATE_DIR)/ecr_registry")
-  IMAGE_TAG=$(cat "$(STATE_DIR)/image_tag")
+  ECR_REGISTRY=$$(cat "$(STATE_DIR)/ecr_registry")
+  IMAGE_TAG=$$(cat "$(STATE_DIR)/image_tag")
 }
 
 configure_kubectl() {
   log_info "Configuring kubectl context"
-  eval "$TF_CONFIGURE_KUBECTL"
+  eval "$$TF_CONFIGURE_KUBECTL"
   log_ok "kubectl context updated"
 }
 
 # tf_init <dir> <state-key>   (uses TF_BOOTSTRAP_BUCKET/REGION)
 tf_init() {
-  local dir="$1" key="$2"
-  log_info "terraform init ($dir)"
-  terraform -chdir="$dir" init -input=false -migrate-state -force-copy \
-    -backend-config="bucket=$TF_BOOTSTRAP_BUCKET" \
-    -backend-config="key=$(HELM_RELEASE_NAME)/$key/terraform.tfstate" \
-    -backend-config="region=$TF_BOOTSTRAP_REGION" \
+  local dir="$$1" key="$$2"
+  log_info "terraform init ($$dir)"
+  terraform -chdir="$$dir" init -input=false -migrate-state -force-copy \
+    -backend-config="bucket=$$TF_BOOTSTRAP_BUCKET" \
+    -backend-config="key=$(HELM_RELEASE_NAME)/$$key/terraform.tfstate" \
+    -backend-config="region=$$TF_BOOTSTRAP_REGION" \
     -backend-config="use_lockfile=true" \
     -backend-config="encrypt=true"
 }
 
 tf_apply() {
-  log_info "terraform apply ($1)"
-  terraform -chdir="$1" apply -input=false -auto-approve
+  log_info "terraform apply ($$1)"
+  terraform -chdir="$$1" apply -input=false -auto-approve
 }
 
 tf_destroy() {
-  log_info "terraform destroy ($1)"
-  terraform -chdir="$1" destroy -input=false -auto-approve
+  log_info "terraform destroy ($$1)"
+  terraform -chdir="$$1" destroy -input=false -auto-approve
 }
 
 # Deletes all object versions and delete markers from a versioned S3 bucket
 empty_versioned_bucket() {
-  local bucket="$1" region="$2"
-  log_warn "Emptying versioned bucket: $bucket (region: $region)"
+  local bucket="$$1" region="$$2"
+  log_warn "Emptying versioned bucket: $$bucket (region: $$region)"
   for query in \
     'Versions[].{Key:Key,VersionId:VersionId}' \
     'DeleteMarkers[].{Key:Key,VersionId:VersionId}'
   do
     while true; do
       local objects
-      objects=$(aws s3api list-object-versions \
-        --bucket "$bucket" --region "$region" \
-        --query "{Objects: $query}" --output json 2>/dev/null \
+      objects=$$(aws s3api list-object-versions \
+        --bucket "$$bucket" --region "$$region" \
+        --query "{Objects: $$query}" --output json 2>/dev/null \
         || printf '{"Objects":[]}')
       local count
-      count=$(printf '%s' "$objects" \
+      count=$$(printf '%s' "$$objects" \
         | python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d.get('Objects') or []))")
-      [[ "$count" -eq 0 ]] && break
-      log_info "Deleting $count object(s)..."
-      printf '%s' "$objects" | aws s3api delete-objects \
-        --bucket "$bucket" --region "$region" --delete "$(cat)" >/dev/null
+      [[ "$$count" -eq 0 ]] && break
+      log_info "Deleting $$count object(s)..."
+      printf '%s' "$$objects" | aws s3api delete-objects \
+        --bucket "$$bucket" --region "$$region" --delete "$$(cat)" >/dev/null
     done
   done
   log_ok "Bucket emptied (all versions and delete markers removed)"
