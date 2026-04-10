@@ -21,17 +21,27 @@ spec:
         app.kubernetes.io/name: kafka
         app.kubernetes.io/instance: {{ lower $.Release.Name }}
     spec:
+      # fsGroup ensures the PVC mounted at /var/lib/kafka/data is chowned to
+      # gid=1000 (appuser) before the container starts, preventing the
+      # "path not writable" preflight failure that causes CrashLoopBackOff.
+      securityContext:
+        fsGroup: 1000
       containers:
         - name: kafka
           image: "{{ .Values.global.kafka.image.repository }}:{{ .Values.global.kafka.image.tag }}"
           imagePullPolicy: IfNotPresent
           env:
+            # Unique broker/controller node ID within the KRaft cluster.
             - name: KAFKA_NODE_ID
               value: "1"
+            # Maps each listener name to its security protocol.
             - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
               value: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT"
+            # Addresses that brokers advertise to clients.
+            # PLAINTEXT is the internal cluster listener; PLAINTEXT_HOST is the loopback listener.
             - name: KAFKA_ADVERTISED_LISTENERS
-              value: "PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092"
+              value: "PLAINTEXT://kafka.{{ .Release.Namespace }}.svc.cluster.local:29092,PLAINTEXT_HOST://localhost:9092"
+            # Single-node cluster — all replication/ISR factors must be 1.
             - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
               value: "1"
             - name: KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS
@@ -40,24 +50,34 @@ spec:
               value: "1"
             - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
               value: "1"
+            # JMX settings for optional metrics scraping.
             - name: KAFKA_JMX_PORT
               value: "9101"
             - name: KAFKA_JMX_HOSTNAME
               value: "localhost"
+            # Run this node as both broker and controller (KRaft combined mode, no ZooKeeper).
             - name: KAFKA_PROCESS_ROLES
               value: "broker,controller"
+            # The sole controller voter; format: <nodeId>@<host>:<controllerPort>.
             - name: KAFKA_CONTROLLER_QUORUM_VOTERS
               value: "1@localhost:29093"
+            # Bind addresses for each listener:
+            #   PLAINTEXT      — internal broker-to-broker and client traffic (port 29092)
+            #   CONTROLLER     — KRaft controller traffic (port 29093, localhost only)
+            #   PLAINTEXT_HOST — external / host-level client access (port 9092)
             - name: KAFKA_LISTENERS
               value: "PLAINTEXT://0.0.0.0:29092,CONTROLLER://localhost:29093,PLAINTEXT_HOST://0.0.0.0:9092"
             - name: KAFKA_INTER_BROKER_LISTENER_NAME
               value: "PLAINTEXT"
             - name: KAFKA_CONTROLLER_LISTENER_NAMES
               value: "CONTROLLER"
+            # KRaft log directory (replaces ZooKeeper-based metadata storage).
             - name: KAFKA_LOG_DIRS
               value: "/tmp/kraft-combined-logs"
+            # Pre-generated cluster UUID required by KRaft; must be stable across restarts.
             - name: CLUSTER_ID
               value: "MkU3OEVBNTcwNTJENDM2Qk"
+            # JVM heap sizing for the Kafka broker process.
             - name: KAFKA_HEAP_OPTS
               value: "-Xmx1g -Xms512M"
             - name: KAFKA_JVM_PERFORMANCE_OPTS
@@ -71,6 +91,8 @@ spec:
               name: controller
             - containerPort: 9101
               name: jmx
+          # startupProbe gives Kafka up to 300 s (30 × 10 s) to finish initializing
+          # before liveness/readiness checks take over.
           startupProbe:
             exec:
               command:

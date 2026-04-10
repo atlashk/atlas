@@ -1,3 +1,20 @@
+{{/*
+FQDN helpers for cross-namespace service resolution.
+Services in the infra/security/observability namespaces are not reachable from the
+app namespace using short names; a fully-qualified domain name is required.
+*/}}
+{{- define "mysql.hostname" -}}mysql.{{ .Values.global.namespaces.infra }}.svc.cluster.local{{- end -}}
+{{- define "postgres.hostname" -}}postgres.{{ .Values.global.namespaces.infra }}.svc.cluster.local{{- end -}}
+{{- define "redis.hostname" -}}redis.{{ .Values.global.namespaces.infra }}.svc.cluster.local{{- end -}}
+{{- define "kafka.hostname" -}}kafka.{{ .Values.global.namespaces.infra }}.svc.cluster.local{{- end -}}
+{{- define "rabbitmq.hostname" -}}rabbitmq.{{ .Values.global.namespaces.infra }}.svc.cluster.local{{- end -}}
+{{- define "elasticsearch.hostname" -}}elasticsearch.{{ .Values.global.namespaces.infra }}.svc.cluster.local{{- end -}}
+{{- define "minio.hostname" -}}minio.{{ .Values.global.namespaces.infra }}.svc.cluster.local{{- end -}}
+{{- define "qdrant.hostname" -}}qdrant.{{ .Values.global.namespaces.infra }}.svc.cluster.local{{- end -}}
+{{- define "keycloak.hostname" -}}keycloak.{{ .Values.global.namespaces.security }}.svc.cluster.local{{- end -}}
+{{- define "zipkin.hostname" -}}zipkin.{{ .Values.global.namespaces.observability }}.svc.cluster.local{{- end -}}
+{{- define "otelCollector.hostname" -}}otel-collector.{{ .Values.global.namespaces.observability }}.svc.cluster.local{{- end -}}
+
 {{- define "atlas.waitFor.initContainers" -}}
 {{- $deps := .deps | default list -}}
 {{- if gt (len $deps) 0 -}}

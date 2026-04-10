@@ -21,6 +21,11 @@ spec:
         app.kubernetes.io/name: prometheus
         app.kubernetes.io/instance: {{ lower $.Release.Name }}
     spec:
+      # fsGroup ensures the PVC mounted at /prometheus is chowned to gid=65534
+      # (nobody — the user Prometheus runs as) before the container starts,
+      # preventing "permission denied" when creating queries.active and tsdb files.
+      securityContext:
+        fsGroup: 65534
       containers:
         - name: prometheus
           image: "{{ .Values.global.prometheus.image.repository }}:{{ .Values.global.prometheus.image.tag }}"

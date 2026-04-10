@@ -42,7 +42,7 @@ spec:
               value: "http://payment-service:{{ .Values.global.paymentSvc.service.ports.http }}"
             {{- if eq .Values.global.appStack.kvStore "redis" }}
             - name: REDIS_HOST
-              value: "redis"
+              value: {{ include "redis.hostname" . | quote }}
             - name: REDIS_PORT
               value: {{ .Values.global.redis.service.ports.redis | quote }}
             {{- end }}
@@ -52,18 +52,18 @@ spec:
             {{- end }}
             {{- if eq .Values.global.appStack.idp "keycloak" }}
             - name: JWK_SET_URI
-              value: "http://keycloak:{{ .Values.global.keycloak.service.ports.http }}/realms/{{ .Values.global.keycloak.config.realm }}/protocol/openid-connect/certs"
+              value: "http://{{ include "keycloak.hostname" . }}:{{ .Values.global.keycloak.service.ports.http }}/realms/{{ .Values.global.keycloak.config.realm }}/protocol/openid-connect/certs"
             {{- end }}
             {{- if eq .Values.global.appStack.observability.tracing "zipkin" }}
             - name: ZIPKIN_ENDPOINT
-              value: "http://zipkin:{{ .Values.global.zipkin.service.ports.http }}/api/v2/spans"
+              value: "http://{{ include "zipkin.hostname" . }}:{{ .Values.global.zipkin.service.ports.http }}/api/v2/spans"
             {{- end }}
             {{- if eq .Values.global.appStack.observability.tracing "tempo" }}
             - name: OTEL_COLLECTOR_TRACES_ENDPOINT
-              value: "http://otel-collector:{{ .Values.global.otelCollector.service.ports.otlpHttp }}/v1/traces"
+              value: "http://{{ include "otelCollector.hostname" . }}:{{ .Values.global.otelCollector.service.ports.otlpHttp }}/v1/traces"
             {{- end }}
-            {{- with .Values.global.apiGateway.extraEnv }}
-            {{- toYaml . | nindent 12 }}
+            {{- if gt (len .Values.global.apiGateway.extraEnv) 0 }}
+            {{- toYaml .Values.global.apiGateway.extraEnv | nindent 12 }}
             {{- end }}
           startupProbe:
             httpGet:

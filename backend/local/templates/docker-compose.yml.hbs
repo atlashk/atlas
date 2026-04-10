@@ -496,7 +496,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://eureka-server:8761/eureka/
-      {{#hasService "ai.vectorstore" "qdrant"}}
+      {{#hasService "ai.vectorstore.qdrant" "true"}}
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6334
       {{/hasService}}

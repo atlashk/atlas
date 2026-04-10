@@ -21,6 +21,11 @@ spec:
         app.kubernetes.io/name: loki
         app.kubernetes.io/instance: {{ lower $.Release.Name }}
     spec:
+      # fsGroup ensures the PVC mounted at /loki is chowned to gid=10001
+      # (the loki user in the official image) before the container starts,
+      # preventing permission errors writing WAL and chunk files.
+      securityContext:
+        fsGroup: 10001
       containers:
         - name: loki
           image: "{{ .Values.global.loki.image.repository }}:{{ .Values.global.loki.image.tag }}"

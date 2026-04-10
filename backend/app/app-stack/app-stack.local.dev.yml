@@ -1,6 +1,4 @@
 ai:
-  model:
-    ollama: true
   vectorstore:
     qdrant: true
 datasource: mysql

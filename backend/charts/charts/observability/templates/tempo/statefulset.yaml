@@ -21,6 +21,11 @@ spec:
         app.kubernetes.io/name: tempo
         app.kubernetes.io/instance: {{ lower $.Release.Name }}
     spec:
+      # fsGroup ensures the PVC mounted at /var/tempo is chowned to gid=10001
+      # (the tempo user in the official image) before the container starts,
+      # preventing "mkdir /var/tempo/blocks: permission denied" on startup.
+      securityContext:
+        fsGroup: 10001
       containers:
         - name: tempo
           image: "{{ .Values.global.tempo.image.repository }}:{{ .Values.global.tempo.image.tag }}"

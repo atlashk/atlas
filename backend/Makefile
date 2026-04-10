@@ -19,11 +19,13 @@ STATE_DIR         := $(MAKEFILE_DIR)/.state
 # ──────────────────────────────────────────────────────────────────────────────
 # Configurable defaults (override on the command line)
 # ──────────────────────────────────────────────────────────────────────────────
+APP_STACK             := local.k8s
 HELM_RELEASE_NAME     := atlas-dev
 HELM_NS_INFRA         := infra
 HELM_NS_SECURITY      := security
 HELM_NS_OBSERVABILITY := observability
 HELM_NS_APP           := app
+SERVICE               :=
 
 # ──────────────────────────────────────────────────────────────────────────────
 .PHONY: install uninstall help check-prereqs \
@@ -170,7 +172,9 @@ help:
 	@printf '  HELM_NS_INFRA         Namespace for infra           (default: %s)\n' "$(HELM_NS_INFRA)"
 	@printf '  HELM_NS_SECURITY      Namespace for security        (default: %s)\n' "$(HELM_NS_SECURITY)"
 	@printf '  HELM_NS_OBSERVABILITY Namespace for observability   (default: %s)\n' "$(HELM_NS_OBSERVABILITY)"
-	@printf '  HELM_NS_APP           Namespace for app services    (default: %s)\n\n' "$(HELM_NS_APP)"
+	@printf '  HELM_NS_APP           Namespace for app services    (default: %s)\n' "$(HELM_NS_APP)"
+	@printf '  APP_STACK             Gradle appStack property       (default: %s)\n' "$(APP_STACK)"
+	@printf '  SERVICE               Service to build/push (empty = all)  e.g. catalog-service\n\n'
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Prerequisite check
@@ -265,10 +269,11 @@ build:
 	)
 
 	log_info "Building jars"
-	"$(MAKEFILE_DIR)/app/gradlew" --project-dir "$(MAKEFILE_DIR)/app" build -x test
+	"$(MAKEFILE_DIR)/app/gradlew" --project-dir "$(MAKEFILE_DIR)/app" build -x test -PappStack=$(APP_STACK)
 	log_ok "Jars built"
 
 	for svc in "$${!BUILD_CONTEXT[@]}"; do
+	  [[ -n "$(SERVICE)" && "$$svc" != "$(SERVICE)" ]] && continue
 	  build_context="$${BUILD_CONTEXT[$$svc]}"
 	  if [[ ! -d "$$build_context" ]]; then
 	    log_warn "Build context not found for '$$svc' — skipping"
@@ -312,6 +317,7 @@ push: check-prereqs
 	  | python3 -c "import sys,json; [print(f'{k}={v}') for k,v in json.load(sys.stdin).items()]")
 
 	for svc in "$${!REPO_URLS[@]}"; do
+	  [[ -n "$(SERVICE)" && "$$svc" != "$(SERVICE)" ]] && continue
 	  repo_url="$${REPO_URLS[$$svc]}"
 	  if ! docker image inspect "$$svc:$$IMAGE_TAG" &>/dev/null; then
 	    log_warn "Local image '$$svc:$$IMAGE_TAG' not found — run 'make build' first — skipping"

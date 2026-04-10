@@ -171,6 +171,13 @@ global:
 
   springProfilesActive: dev
 
+  # Namespaces for cross-namespace service DNS resolution.
+  # Each sub-chart is deployed to its own namespace (see Makefile HELM_NS_* variables).
+  namespaces:
+    infra: infra
+    security: security
+    observability: observability
+
   # appStack is nested under `global` so Helm automatically propagates it to every subchart.
   # In templates, reference it as: .Values.global.appStack.<key>
   appStack:

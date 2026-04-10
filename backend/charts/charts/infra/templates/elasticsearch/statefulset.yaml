@@ -21,6 +21,11 @@ spec:
         app.kubernetes.io/name: elasticsearch
         app.kubernetes.io/instance: {{ lower $.Release.Name }}
     spec:
+      # fsGroup ensures the PVC mounted at /usr/share/elasticsearch/data is chowned
+      # to gid=1000 (elasticsearch user) before the container starts, preventing the
+      # "failed to obtain node locks / not writable" fatal error on startup.
+      securityContext:
+        fsGroup: 1000
       containers:
         - name: elasticsearch
           image: "{{ .Values.global.elasticsearch.image.repository }}:{{ .Values.global.elasticsearch.image.tag }}"

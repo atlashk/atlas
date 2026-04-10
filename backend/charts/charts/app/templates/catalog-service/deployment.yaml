@@ -22,13 +22,19 @@ spec:
       serviceAccountName: {{ .Values.global.serviceAccount.name | default "app-namespace-reader" }}
       {{- $deps := list -}}
       {{- if eq .Values.global.appStack.datasource "mysql" -}}
-      {{- $deps = append $deps (dict "name" "mysql" "host" "mysql" "port" .Values.global.mysql.service.ports.mysql) -}}
+      {{- $deps = append $deps (dict "name" "mysql" "host" (include "mysql.hostname" .) "port" .Values.global.mysql.service.ports.mysql) -}}
       {{- end -}}
       {{- if eq .Values.global.appStack.datasource "postgres" -}}
-      {{- $deps = append $deps (dict "name" "postgres" "host" "postgres" "port" .Values.global.postgres.service.ports.postgres) -}}
+      {{- $deps = append $deps (dict "name" "postgres" "host" (include "postgres.hostname" .) "port" .Values.global.postgres.service.ports.postgres) -}}
       {{- end -}}
       {{- if eq .Values.global.appStack.search "elasticsearch" -}}
-      {{- $deps = append $deps (dict "name" "elasticsearch" "host" "elasticsearch" "port" .Values.global.elasticsearch.service.ports.http) -}}
+      {{- $deps = append $deps (dict "name" "elasticsearch" "host" (include "elasticsearch.hostname" .) "port" .Values.global.elasticsearch.service.ports.http) -}}
+      {{- end -}}
+      {{- if eq .Values.global.appStack.messaging "kafka" -}}
+      {{- $deps = append $deps (dict "name" "kafka" "host" (include "kafka.hostname" .) "port" .Values.global.kafka.service.ports.kafkaInternal) -}}
+      {{- end -}}
+      {{- if .Values.global.appStack.ai.vectorstore.qdrant -}}
+      {{- $deps = append $deps (dict "name" "qdrant" "host" (include "qdrant.hostname" .) "port" .Values.global.qdrant.service.ports.grpc) -}}
       {{- end -}}
       {{- include "atlas.waitFor.initContainers" (dict "deps" $deps) | nindent 6 }}
       containers:
@@ -47,7 +53,7 @@ spec:
               value: {{ .Values.global.springProfilesActive | quote }}
             {{- if eq .Values.global.appStack.datasource "mysql" }}
             - name: DB_URL
-              value: "jdbc:mysql://mysql:{{ .Values.global.mysql.service.ports.mysql }}/db_catalog?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
+              value: "jdbc:mysql://{{ include "mysql.hostname" . }}:{{ .Values.global.mysql.service.ports.mysql }}/db_catalog?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -61,7 +67,7 @@ spec:
             {{- end }}
             {{- if eq .Values.global.appStack.datasource "postgres" }}
             - name: DB_URL
-              value: "jdbc:postgresql://postgres:{{ .Values.global.postgres.service.ports.postgres }}/db_catalog"
+              value: "jdbc:postgresql://{{ include "postgres.hostname" . }}:{{ .Values.global.postgres.service.ports.postgres }}/db_catalog"
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -75,17 +81,17 @@ spec:
             {{- end }}
             {{- if eq .Values.global.appStack.kvStore "redis" }}
             - name: REDIS_HOST
-              value: "redis"
+              value: {{ include "redis.hostname" . | quote }}
             - name: REDIS_PORT
               value: {{ .Values.global.redis.service.ports.redis | quote }}
             {{- end }}
             {{- if eq .Values.global.appStack.messaging "kafka" }}
             - name: KAFKA_BOOTSTRAP_SERVERS
-              value: "kafka:{{ .Values.global.kafka.service.ports.kafkaInternal }}"
+              value: "{{ include "kafka.hostname" . }}:{{ .Values.global.kafka.service.ports.kafkaInternal }}"
             {{- end }}
             {{- if eq .Values.global.appStack.messaging "rabbitmq" }}
             - name: RABBITMQ_HOST
-              value: "rabbitmq"
+              value: {{ include "rabbitmq.hostname" . | quote }}
             - name: RABBITMQ_PORT
               value: {{ .Values.global.rabbitmq.service.ports.amqp | quote }}
             - name: RABBITMQ_USERNAME
@@ -101,7 +107,7 @@ spec:
             {{- end }}
             {{- if eq .Values.global.appStack.search "elasticsearch" }}
             - name: ELASTICSEARCH_HOST
-              value: "elasticsearch"
+              value: {{ include "elasticsearch.hostname" . | quote }}
             - name: ELASTICSEARCH_PORT
               value: {{ .Values.global.elasticsearch.service.ports.http | quote }}
             - name: ELASTICSEARCH_USERNAME
@@ -114,7 +120,7 @@ spec:
             {{- end }}
             {{- if eq .Values.global.appStack.storage "minio" }}
             - name: MINIO_ENDPOINT
-              value: "http://minio:{{ .Values.global.minio.service.ports.s3 }}"
+              value: "http://{{ include "minio.hostname" . }}:{{ .Values.global.minio.service.ports.s3 }}"
             - name: MINIO_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
@@ -128,14 +134,20 @@ spec:
             {{- end }}
             {{- if eq .Values.global.appStack.observability.tracing "zipkin" }}
             - name: ZIPKIN_ENDPOINT
-              value: "http://zipkin:{{ .Values.global.zipkin.service.ports.http }}/api/v2/spans"
+              value: "http://{{ include "zipkin.hostname" . }}:{{ .Values.global.zipkin.service.ports.http }}/api/v2/spans"
             {{- end }}
             {{- if eq .Values.global.appStack.observability.tracing "tempo" }}
             - name: OTEL_COLLECTOR_TRACES_ENDPOINT
-              value: "http://otel-collector:{{ .Values.global.otelCollector.service.ports.otlpHttp }}/v1/traces"
+              value: "http://{{ include "otelCollector.hostname" . }}:{{ .Values.global.otelCollector.service.ports.otlpHttp }}/v1/traces"
             {{- end }}
-            {{- with .Values.global.catalogSvc.extraEnv }}
-            {{- toYaml . | nindent 12 }}
+            {{- if .Values.global.appStack.ai.vectorstore.qdrant }}
+            - name: QDRANT_HOST
+              value: {{ include "qdrant.hostname" . | quote }}
+            - name: QDRANT_PORT
+              value: {{ .Values.global.qdrant.service.ports.grpc | quote }}
+            {{- end }}
+            {{- if gt (len .Values.global.catalogSvc.extraEnv) 0 }}
+            {{- toYaml .Values.global.catalogSvc.extraEnv | nindent 12 }}
             {{- end }}
           startupProbe:
             httpGet:

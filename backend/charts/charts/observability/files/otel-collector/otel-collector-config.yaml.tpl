@@ -16,6 +16,7 @@ exporters:
     verbosity: basic
 extensions:
   health_check:
+    endpoint: 0.0.0.0:13133
 service:
   extensions: [health_check]
   pipelines:

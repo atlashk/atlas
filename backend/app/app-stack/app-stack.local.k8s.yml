@@ -23,6 +23,6 @@ persistence: jpa
 redis: standalone
 scheduler: quartz
 search: elasticsearch
-service-discovery: eureka
+service-discovery: kubernetes
 storage: minio
 template: freemarker

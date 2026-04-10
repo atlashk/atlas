@@ -23,13 +23,13 @@ spec:
       serviceAccountName: {{ .Values.global.serviceAccount.name | default "app-namespace-reader" }}
       {{- $deps := list -}}
       {{- if eq .Values.global.appStack.datasource "mysql" -}}
-      {{- $deps = append $deps (dict "name" "mysql" "host" "mysql" "port" .Values.global.mysql.service.ports.mysql) -}}
+      {{- $deps = append $deps (dict "name" "mysql" "host" (include "mysql.hostname" .) "port" .Values.global.mysql.service.ports.mysql) -}}
       {{- end -}}
       {{- if eq .Values.global.appStack.datasource "postgres" -}}
-      {{- $deps = append $deps (dict "name" "postgres" "host" "postgres" "port" .Values.global.postgres.service.ports.postgres) -}}
+      {{- $deps = append $deps (dict "name" "postgres" "host" (include "postgres.hostname" .) "port" .Values.global.postgres.service.ports.postgres) -}}
       {{- end -}}
       {{- if eq .Values.global.appStack.kvStore "redis" -}}
-      {{- $deps = append $deps (dict "name" "redis" "host" "redis" "port" .Values.global.redis.service.ports.redis) -}}
+      {{- $deps = append $deps (dict "name" "redis" "host" (include "redis.hostname" .) "port" .Values.global.redis.service.ports.redis) -}}
       {{- end -}}
       {{- include "atlas.waitFor.initContainers" (dict "deps" $deps) | nindent 6 }}
       containers:
@@ -44,7 +44,7 @@ spec:
               value: {{ .Values.global.springProfilesActive | quote }}
             {{- if eq .Values.global.appStack.datasource "mysql" }}
             - name: DB_URL
-              value: "jdbc:mysql://mysql:{{ .Values.global.mysql.service.ports.mysql }}/db_user?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
+              value: "jdbc:mysql://{{ include "mysql.hostname" . }}:{{ .Values.global.mysql.service.ports.mysql }}/db_user?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -58,7 +58,7 @@ spec:
             {{- end }}
             {{- if eq .Values.global.appStack.datasource "postgres" }}
             - name: DB_URL
-              value: "jdbc:postgresql://postgres:{{ .Values.global.postgres.service.ports.postgres }}/db_user"
+              value: "jdbc:postgresql://{{ include "postgres.hostname" . }}:{{ .Values.global.postgres.service.ports.postgres }}/db_user"
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -72,16 +72,16 @@ spec:
             {{- end }}
             {{- if eq .Values.global.appStack.kvStore "redis" }}
             - name: REDIS_HOST
-              value: "redis"
+              value: {{ include "redis.hostname" . | quote }}
             - name: REDIS_PORT
               value: {{ .Values.global.redis.service.ports.redis | quote }}
             {{- end }}
             {{- if eq .Values.global.appStack.observability.tracing "zipkin" }}
             - name: ZIPKIN_ENDPOINT
-              value: "http://zipkin:{{ .Values.global.zipkin.service.ports.http }}/api/v2/spans"
+              value: "http://{{ include "zipkin.hostname" . }}:{{ .Values.global.zipkin.service.ports.http }}/api/v2/spans"
             {{- end }}
-            {{- with .Values.global.authorizationServer.extraEnv }}
-            {{- toYaml . | nindent 12 }}
+            {{- if gt (len .Values.global.authorizationServer.extraEnv) 0 }}
+            {{- toYaml .Values.global.authorizationServer.extraEnv | nindent 12 }}
             {{- end }}
           startupProbe:
             httpGet:
