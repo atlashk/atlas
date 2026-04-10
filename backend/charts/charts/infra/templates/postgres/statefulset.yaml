@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ lower $.Release.Name }}-postgres
+  name: postgres
   labels:
     app.kubernetes.io/name: postgres
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
@@ -29,12 +29,12 @@ spec:
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ lower $.Release.Name }}-postgres
+                  name: postgres
                   key: user
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ lower $.Release.Name }}-postgres
+                  name: postgres
                   key: password
           ports:
             - name: postgres
@@ -77,7 +77,7 @@ spec:
       volumes:
         - name: postgres-init
           configMap:
-            name: {{ lower $.Release.Name }}-postgres
+            name: postgres
             defaultMode: 0755
   volumeClaimTemplates:
     - metadata:

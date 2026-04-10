@@ -1,5 +1,5 @@
 {
-  "realm": "{{ .Values.keycloak.config.realm }}",
+  "realm": "{{ .Values.global.keycloak.config.realm }}",
   "enabled": true,
   "sslRequired": "none",
   "attributes": {
@@ -31,13 +31,13 @@
   },
   "clients": [
     {
-      "clientId": "{{ .Values.keycloak.config.clients.adminClient.clientId }}",
-      "name": "{{ .Values.keycloak.config.clients.adminClient.clientId }}",
+      "clientId": "{{ .Values.global.keycloak.config.clients.adminClient.clientId }}",
+      "name": "{{ .Values.global.keycloak.config.clients.adminClient.clientId }}",
       "enabled": true,
       "protocol": "openid-connect",
       "publicClient": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "{{ .Values.keycloak.config.clients.adminClient.clientSecret }}",
+      "secret": "{{ .Values.global.keycloak.config.clients.adminClient.clientSecret }}",
       "serviceAccountsEnabled": true,
       "directAccessGrantsEnabled": false,
       "standardFlowEnabled": false,
@@ -50,19 +50,19 @@
       ]
     },
     {
-      "clientId": "{{ .Values.keycloak.config.clients.webClient.clientId }}",
-      "name": "{{ .Values.keycloak.config.clients.webClient.clientId }}",
+      "clientId": "{{ .Values.global.keycloak.config.clients.webClient.clientId }}",
+      "name": "{{ .Values.global.keycloak.config.clients.webClient.clientId }}",
       "enabled": true,
       "protocol": "openid-connect",
       "publicClient": true,
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": false,
-      "redirectUris": {{ .Values.keycloak.config.clients.webClient.redirectUris | toJson }},
-      "webOrigins": {{ .Values.keycloak.config.clients.webClient.webOrigins | toJson }},
+      "redirectUris": {{ .Values.global.keycloak.config.clients.webClient.redirectUris | toJson }},
+      "webOrigins": {{ .Values.global.keycloak.config.clients.webClient.webOrigins | toJson }},
       "attributes": {
         "pkce.code.challenge.method": "S256",
-        "post.logout.redirect.uris": {{ join " " .Values.keycloak.config.clients.webClient.postLogoutRedirectUris | quote }}
+        "post.logout.redirect.uris": {{ join " " .Values.global.keycloak.config.clients.webClient.postLogoutRedirectUris | quote }}
       },
       "defaultClientScopes": [
         "basic",
@@ -75,9 +75,9 @@
   ],
   "users": [
     {
-      "username": "service-account-{{ .Values.keycloak.config.clients.adminClient.clientId }}",
+      "username": "service-account-{{ .Values.global.keycloak.config.clients.adminClient.clientId }}",
       "enabled": true,
-      "serviceAccountClientId": "{{ .Values.keycloak.config.clients.adminClient.clientId }}",
+      "serviceAccountClientId": "{{ .Values.global.keycloak.config.clients.adminClient.clientId }}",
       "clientRoles": {
         "realm-management": [
           "view-users",

@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ lower $.Release.Name }}-grafana-data
+  name: grafana-data
   labels:
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: {{ lower $.Release.Name }}

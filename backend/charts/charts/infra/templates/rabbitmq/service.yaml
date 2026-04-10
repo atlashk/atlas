@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ lower $.Release.Name }}-rabbitmq
+  name: rabbitmq
   labels:
     app.kubernetes.io/name: rabbitmq
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
@@ -15,9 +15,9 @@ spec:
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
   ports:
     - name: amqp
-      port: {{ .Values.rabbitmq.service.ports.amqp }}
+      port: {{ .Values.global.rabbitmq.service.ports.amqp }}
       targetPort: amqp
     - name: management
-      port: {{ .Values.rabbitmq.service.ports.management }}
+      port: {{ .Values.global.rabbitmq.service.ports.management }}
       targetPort: management
 {{- end }}

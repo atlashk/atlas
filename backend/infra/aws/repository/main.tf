@@ -2,10 +2,7 @@
 # ECR Private Repositories
 #
 # Creates one private ECR repository per application service.
-# Repository names follow the pattern: <project_name>/<service>
-#   e.g.  atlas/api-gateway
-#         atlas/authorization-server
-#         atlas/user-service  …
+# Repository name = service name (e.g. api-gateway, user-service, …)
 # ==============================================================
 
 # --------------------------------------------------------------
@@ -14,18 +11,18 @@
 # Requires Terraform >= 1.7 (for_each in import blocks).
 # --------------------------------------------------------------
 import {
-  for_each = local.repository_names
+  for_each = toset(var.services)
   to       = aws_ecr_repository.services[each.key]
-  id       = each.value
+  id       = each.key
 }
 
 # --------------------------------------------------------------
 # Private ECR repositories — one per service
 # --------------------------------------------------------------
 resource "aws_ecr_repository" "services" {
-  for_each = local.repository_names
+  for_each = toset(var.services)
 
-  name                 = each.value
+  name                 = each.key
   image_tag_mutability = var.image_tag_mutability
 
   image_scanning_configuration {
@@ -38,8 +35,7 @@ resource "aws_ecr_repository" "services" {
   }
 
   tags = {
-    Name    = each.value
-    Service = each.key
+    Name = each.key
   }
 }
 

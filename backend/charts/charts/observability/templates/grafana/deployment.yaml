@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ lower $.Release.Name }}-grafana
+  name: grafana
   labels:
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
@@ -22,18 +22,18 @@ spec:
     spec:
       containers:
         - name: grafana
-          image: "{{ .Values.grafana.image.repository }}:{{ .Values.grafana.image.tag }}"
+          image: "{{ .Values.global.grafana.image.repository }}:{{ .Values.global.grafana.image.tag }}"
           imagePullPolicy: IfNotPresent
           env:
             - name: GF_SECURITY_ADMIN_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ lower $.Release.Name }}-grafana
+                  name: grafana
                   key: admin-user
             - name: GF_SECURITY_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ lower $.Release.Name }}-grafana
+                  name: grafana
                   key: admin-password
             - name: GF_PATHS_PROVISIONING
               value: "/etc/grafana/provisioning"
@@ -61,7 +61,7 @@ spec:
             failureThreshold: 3
             timeoutSeconds: 5
           resources:
-            {{ toYaml .Values.grafana.resources | nindent 12 }}
+            {{ toYaml .Values.global.grafana.resources | nindent 12 }}
           volumeMounts:
             - name: grafana-data
               mountPath: /var/lib/grafana
@@ -77,7 +77,7 @@ spec:
             claimName: grafana-data
         - name: grafana-provisioning
           configMap:
-            name: {{ lower $.Release.Name }}-grafana-provisioning
+            name: grafana-provisioning
             items:
               - key: datasources.yml
                 path: datasources/datasources.yml
@@ -85,5 +85,5 @@ spec:
                 path: dashboards/dashboards.yml
         - name: grafana-dashboards
           configMap:
-            name: {{ lower $.Release.Name }}-grafana-dashboards
+            name: grafana-dashboards
 {{- end }}

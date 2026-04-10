@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ lower $.Release.Name }}-otel-collector
+  name: otel-collector
   labels:
     app.kubernetes.io/name: otel-collector
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
@@ -62,5 +62,5 @@ spec:
       volumes:
         - name: otel-collector-config
           configMap:
-            name: {{ lower $.Release.Name }}-otel-collector
+            name: otel-collector
 {{- end }}

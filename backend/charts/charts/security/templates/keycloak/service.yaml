@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ lower $.Release.Name }}-keycloak
+  name: keycloak
   labels:
     app.kubernetes.io/name: keycloak
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
@@ -15,6 +15,6 @@ spec:
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
   ports:
     - name: http
-      port: {{ .Values.keycloak.service.ports.http }}
+      port: {{ .Values.global.keycloak.service.ports.http }}
       targetPort: http
 {{- end }}

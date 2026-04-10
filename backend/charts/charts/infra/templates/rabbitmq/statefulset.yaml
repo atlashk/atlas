@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ lower $.Release.Name }}-rabbitmq
+  name: rabbitmq
   labels:
     app.kubernetes.io/name: rabbitmq
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
@@ -23,18 +23,18 @@ spec:
     spec:
       containers:
         - name: rabbitmq
-          image: "{{ .Values.rabbitmq.image.repository }}:{{ .Values.rabbitmq.image.tag }}"
+          image: "{{ .Values.global.rabbitmq.image.repository }}:{{ .Values.global.rabbitmq.image.tag }}"
           imagePullPolicy: IfNotPresent
           env:
             - name: RABBITMQ_DEFAULT_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ lower $.Release.Name }}-rabbitmq
+                  name: rabbitmq
                   key: user
             - name: RABBITMQ_DEFAULT_PASS
               valueFrom:
                 secretKeyRef:
-                  name: {{ lower $.Release.Name }}-rabbitmq
+                  name: rabbitmq
                   key: password
           ports:
             - name: amqp
@@ -78,11 +78,11 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 3
           resources:
-            {{ toYaml .Values.rabbitmq.resources | nindent 12 }}
+            {{ toYaml .Values.global.rabbitmq.resources | nindent 12 }}
       volumes:
         - name: rabbitmq-config
           configMap:
-            name: {{ lower $.Release.Name }}-rabbitmq
+            name: rabbitmq
   volumeClaimTemplates:
     - metadata:
         name: rabbitmq-data

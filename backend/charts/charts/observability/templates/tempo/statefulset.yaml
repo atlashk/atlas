@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ lower $.Release.Name }}-tempo
+  name: tempo
   labels:
     app.kubernetes.io/name: tempo
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
@@ -67,7 +67,7 @@ spec:
       volumes:
         - name: tempo-config
           configMap:
-            name: {{ lower $.Release.Name }}-tempo
+            name: tempo
   volumeClaimTemplates:
     - metadata:
         name: tempo-data

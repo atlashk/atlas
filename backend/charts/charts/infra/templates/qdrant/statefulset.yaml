@@ -1,11 +1,8 @@
-{{- $appStack := get .Values "appStack" | default dict }}
-{{- $ai := get $appStack "ai" | default dict }}
-{{- $vectorstore := get $ai "vectorstore" | default dict }}
-{{- if (get $vectorstore "qdrant" | default false) }}
+{{- if eq .Values.global.appStack.ai.vectorstore.qdrant true }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ lower $.Release.Name }}-qdrant
+  name: qdrant
   labels:
     app.kubernetes.io/name: qdrant
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
@@ -26,7 +23,7 @@ spec:
     spec:
       containers:
         - name: qdrant
-          image: "{{ .Values.qdrant.image.repository }}:{{ .Values.qdrant.image.tag }}"
+          image: "{{ .Values.global.qdrant.image.repository }}:{{ .Values.global.qdrant.image.tag }}"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -58,7 +55,7 @@ spec:
             timeoutSeconds: 3
             failureThreshold: 3
           resources:
-            {{ toYaml .Values.qdrant.resources | nindent 12 }}
+            {{ toYaml .Values.global.qdrant.resources | nindent 12 }}
   volumeClaimTemplates:
     - metadata:
         name: qdrant-storage

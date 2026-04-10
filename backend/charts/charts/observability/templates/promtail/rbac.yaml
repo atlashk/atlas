@@ -4,7 +4,7 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ lower $.Release.Name }}-{{ .Values.global.promtail.serviceAccount }}
+  name: {{ .Values.global.promtail.serviceAccount }}
   labels:
     app.kubernetes.io/name: promtail
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
@@ -16,7 +16,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ lower $.Release.Name }}-promtail
+  name: promtail
   labels:
     app.kubernetes.io/name: promtail
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
@@ -40,7 +40,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ lower $.Release.Name }}-promtail
+  name: promtail
   labels:
     app.kubernetes.io/name: promtail
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
@@ -48,10 +48,10 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 subjects:
   - kind: ServiceAccount
-    name: {{ lower $.Release.Name }}-{{ .Values.global.promtail.serviceAccount }}
+    name: {{ .Values.global.promtail.serviceAccount }}
     namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
-  name: {{ lower $.Release.Name }}-promtail
+  name: promtail
   apiGroup: rbac.authorization.k8s.io
 {{- end }}

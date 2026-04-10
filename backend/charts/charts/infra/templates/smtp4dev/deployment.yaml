@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ lower $.Release.Name }}-smtp4dev
+  name: smtp4dev
   labels:
     app.kubernetes.io/name: smtp4dev
     app.kubernetes.io/instance: {{ lower $.Release.Name }}

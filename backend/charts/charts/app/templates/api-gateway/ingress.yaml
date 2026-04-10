@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ lower $.Release.Name }}-api-gateway
+  name: api-gateway
   labels:
     app.kubernetes.io/name: api-gateway
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
@@ -11,6 +11,9 @@ metadata:
   annotations:
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/scheme: {{ .Values.global.apiGateway.ingress.alb.scheme }}
+    {{- if .Values.global.apiGateway.ingress.alb.groupName }}
+    alb.ingress.kubernetes.io/group.name: {{ .Values.global.apiGateway.ingress.alb.groupName | quote }}
+    {{- end }}
     {{- if .Values.global.apiGateway.ingress.alb.certificateArn }}
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80},{"HTTPS": 443}]'
     alb.ingress.kubernetes.io/ssl-redirect: "443"
@@ -33,7 +36,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ lower $.Release.Name }}-api-gateway
+                name: api-gateway
                 port:
                   number: {{ .Values.global.apiGateway.service.ports.http }}
 {{- end }}

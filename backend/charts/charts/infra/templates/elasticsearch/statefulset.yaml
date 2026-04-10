@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ lower $.Release.Name }}-elasticsearch
+  name: elasticsearch
   labels:
     app.kubernetes.io/name: elasticsearch
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
@@ -29,7 +29,7 @@ spec:
             - name: ELASTIC_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ lower $.Release.Name }}-elasticsearch
+                  name: elasticsearch
                   key: password
             - name: discovery.type
               value: "single-node"

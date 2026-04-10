@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ lower $.Release.Name }}-user-service
+  name: user-service
   labels:
     app.kubernetes.io/name: user-service
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
@@ -19,16 +19,16 @@ spec:
         app.kubernetes.io/name: user-service
         app.kubernetes.io/instance: {{ lower $.Release.Name }}
     spec:
-      serviceAccountName: {{ lower $.Release.Name }}-{{ .Values.global.serviceAccount.name | default "namespace-reader" }}
+      serviceAccountName: {{ .Values.global.serviceAccount.name | default "app-namespace-reader" }}
       {{- $deps := list -}}
       {{- if eq .Values.global.appStack.datasource "mysql" -}}
-      {{- $deps = append $deps (dict "name" "mysql" "host" (printf "%s-mysql" (lower $.Release.Name)) "port" .Values.global.mysql.service.ports.mysql) -}}
+      {{- $deps = append $deps (dict "name" "mysql" "host" "mysql" "port" .Values.global.mysql.service.ports.mysql) -}}
       {{- end -}}
       {{- if eq .Values.global.appStack.datasource "postgres" -}}
-      {{- $deps = append $deps (dict "name" "postgres" "host" (printf "%s-postgres" (lower $.Release.Name)) "port" .Values.global.postgres.service.ports.postgres) -}}
+      {{- $deps = append $deps (dict "name" "postgres" "host" "postgres" "port" .Values.global.postgres.service.ports.postgres) -}}
       {{- end -}}
       {{- if eq .Values.global.appStack.idp "keycloak" -}}
-      {{- $deps = append $deps (dict "name" "keycloak" "host" (include "atlas.infra.keycloak" .) "port" .Values.keycloak.service.ports.http) -}}
+      {{- $deps = append $deps (dict "name" "keycloak" "host" (include "atlas.infra.keycloak" .) "port" .Values.global.keycloak.service.ports.http) -}}
       {{- end -}}
       {{- include "atlas.waitFor.initContainers" (dict "deps" $deps) | nindent 6 }}
       containers:
@@ -43,58 +43,58 @@ spec:
               value: {{ .Values.global.springProfilesActive | quote }}
             {{- if eq .Values.global.appStack.datasource "mysql" }}
             - name: DB_URL
-              value: "jdbc:mysql://{{ printf "%s-mysql" (lower $.Release.Name) }}:{{ .Values.global.mysql.service.ports.mysql }}/db_user?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
+              value: "jdbc:mysql://mysql:{{ .Values.global.mysql.service.ports.mysql }}/db_user?useUnicode=yes&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ printf "%s-mysql" (lower $.Release.Name) }}
+                  name: mysql
                   key: user
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ printf "%s-mysql" (lower $.Release.Name) }}
+                  name: mysql
                   key: password
             {{- end }}
             {{- if eq .Values.global.appStack.datasource "postgres" }}
             - name: DB_URL
-              value: "jdbc:postgresql://{{ printf "%s-postgres" (lower $.Release.Name) }}:{{ .Values.global.postgres.service.ports.postgres }}/db_user"
+              value: "jdbc:postgresql://postgres:{{ .Values.global.postgres.service.ports.postgres }}/db_user"
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ printf "%s-postgres" (lower $.Release.Name) }}
+                  name: postgres
                   key: user
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ printf "%s-postgres" (lower $.Release.Name) }}
+                  name: postgres
                   key: password
             {{- end }}
             {{- if eq .Values.global.appStack.idp "keycloak" }}
             - name: KEYCLOAK_BASE_URL
-              value: "http://{{ lower $.Release.Name }}-keycloak:{{ .Values.keycloak.service.ports.http }}"
+              value: "http://keycloak:{{ .Values.global.keycloak.service.ports.http }}"
             - name: KEYCLOAK_REALM
               valueFrom:
                 configMapKeyRef:
-                  name: {{ lower $.Release.Name }}-keycloak-config
+                  name: keycloak-config
                   key: keycloak-realm
             - name: KEYCLOAK_ADMIN_CLIENT_ID
               valueFrom:
                 configMapKeyRef:
-                  name: {{ lower $.Release.Name }}-keycloak-config
+                  name: keycloak-config
                   key: keycloak-admin-client-id
             - name: KEYCLOAK_ADMIN_CLIENT_SECRET
               valueFrom:
                 configMapKeyRef:
-                  name: {{ lower $.Release.Name }}-keycloak-config
+                  name: keycloak-config
                   key: keycloak-admin-client-secret
             {{- end }}
             {{- if eq .Values.global.appStack.observability.tracing "zipkin" }}
             - name: ZIPKIN_ENDPOINT
-              value: "http://{{ lower $.Release.Name }}-zipkin:{{ .Values.zipkin.service.ports.http }}/api/v2/spans"
+              value: "http://zipkin:{{ .Values.global.zipkin.service.ports.http }}/api/v2/spans"
             {{- end }}
             {{- if eq .Values.global.appStack.observability.tracing "tempo" }}
             - name: OTEL_COLLECTOR_TRACES_ENDPOINT
-              value: "http://{{ lower $.Release.Name }}-otel-collector:{{ .Values.global.otelCollector.service.ports.otlpHttp }}/v1/traces"
+              value: "http://otel-collector:{{ .Values.global.otelCollector.service.ports.otlpHttp }}/v1/traces"
             {{- end }}
             {{- with .Values.global.userSvc.extraEnv }}
             {{- toYaml . | nindent 12 }}

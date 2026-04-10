@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ lower $.Release.Name }}-kafka
+  name: kafka
   labels:
     app.kubernetes.io/name: kafka
     app.kubernetes.io/instance: {{ lower $.Release.Name }}

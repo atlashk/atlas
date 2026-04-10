@@ -33,9 +33,9 @@ vpc_cidr = "10.0.0.0/16"
 # ------------------------------------------------------------------
 node_group = {
   instance_types = ["t3.large"]
-  min_size       = 1
+  min_size       = 2
   max_size       = 3
-  desired_size   = 1
+  desired_size   = 2
   disk_size_gb   = 30
 }
 

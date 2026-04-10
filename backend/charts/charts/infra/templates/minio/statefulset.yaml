@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ lower $.Release.Name }}-minio
+  name: minio
   labels:
     app.kubernetes.io/name: minio
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
@@ -30,12 +30,12 @@ spec:
             - name: MINIO_ROOT_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ lower $.Release.Name }}-minio
+                  name: minio
                   key: root-user
             - name: MINIO_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ lower $.Release.Name }}-minio
+                  name: minio
                   key: root-password
           ports:
             - name: s3

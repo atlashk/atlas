@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ lower $.Release.Name }}-grafana
+  name: grafana
   labels:
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
@@ -15,6 +15,6 @@ spec:
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
   ports:
     - name: http
-      port: {{ .Values.grafana.service.ports.http }}
+      port: {{ .Values.global.grafana.service.ports.http }}
       targetPort: http
 {{- end }}

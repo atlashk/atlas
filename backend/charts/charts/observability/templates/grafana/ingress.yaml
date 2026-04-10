@@ -1,0 +1,42 @@
+{{- if and (eq (include "hasGrafana" .) "true") .Values.global.grafana.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: {{ lower $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/scheme: {{ .Values.global.grafana.ingress.alb.scheme }}
+    {{- if .Values.global.grafana.ingress.alb.groupName }}
+    alb.ingress.kubernetes.io/group.name: {{ .Values.global.grafana.ingress.alb.groupName | quote }}
+    {{- end }}
+    {{- if .Values.global.grafana.ingress.alb.certificateArn }}
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80},{"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/certificate-arn: {{ .Values.global.grafana.ingress.alb.certificateArn | quote }}
+    {{- else }}
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    {{- end }}
+    {{- with .Values.global.grafana.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ingressClassName: alb
+  rules:
+    - {{- if and .Values.global.grafana.ingress.host (ne .Values.global.grafana.ingress.host "") }}
+      host: {{ .Values.global.grafana.ingress.host | quote }}
+      {{- end }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana
+                port:
+                  number: {{ .Values.global.grafana.service.ports.http }}
+{{- end }}

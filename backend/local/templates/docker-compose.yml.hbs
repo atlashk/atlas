@@ -432,7 +432,7 @@ services:
 {{#unless infraOnly}}
   user-service:
     container_name: user-service
-    image: {{dotenv.PROJECT_NAME}}/user-service:latest
+    image: user-service:latest
     build:
       context: ../app/services/user-service/user-bootstrap
       dockerfile: Dockerfile
@@ -487,7 +487,7 @@ services:
 
   catalog-service:
     container_name: catalog-service
-    image: {{dotenv.PROJECT_NAME}}/catalog-service:latest
+    image: catalog-service:latest
     build:
       context: ../app/services/catalog-service/catalog-bootstrap
       dockerfile: Dockerfile
@@ -568,7 +568,7 @@ services:
 
   inventory-service:
     container_name: inventory-service
-    image: {{dotenv.PROJECT_NAME}}/inventory-service:latest
+    image: inventory-service:latest
     build:
       context: ../app/services/inventory-service/inventory-bootstrap
       dockerfile: Dockerfile
@@ -630,7 +630,7 @@ services:
 
   order-service:
     container_name: order-service
-    image: {{dotenv.PROJECT_NAME}}/order-service:latest
+    image: order-service:latest
     build:
       context: ../app/services/order-service/order-bootstrap
       dockerfile: Dockerfile
@@ -698,7 +698,7 @@ services:
 
   payment-service:
     container_name: payment-service
-    image: {{dotenv.PROJECT_NAME}}/payment-service:latest
+    image: payment-service:latest
     build:
       context: ../app/services/payment-service/payment-bootstrap
       dockerfile: Dockerfile
@@ -761,7 +761,7 @@ services:
 
   eureka-server:
     container_name: eureka-server
-    image: {{dotenv.PROJECT_NAME}}/eureka-server:latest
+    image: eureka-server:latest
     build:
       context: ../app/edge/discovery-server/eureka-server
       dockerfile: Dockerfile
@@ -783,7 +783,7 @@ services:
   {{#hasService "idp" "spring"}}
   authorization-server:
     container_name: authorization-server
-    image: {{dotenv.PROJECT_NAME}}/authorization-server:latest
+    image: authorization-server:latest
     build:
       context: ../app/edge/authorization-server
       dockerfile: Dockerfile
@@ -834,7 +834,7 @@ services:
 
   api-gateway:
     container_name: api-gateway
-    image: {{dotenv.PROJECT_NAME}}/api-gateway:latest
+    image: api-gateway:latest
     build:
       context: ../app/services/api-gateway/api-gateway-reactive
       dockerfile: Dockerfile

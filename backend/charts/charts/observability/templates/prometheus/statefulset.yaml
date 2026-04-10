@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ lower $.Release.Name }}-prometheus
+  name: prometheus
   labels:
     app.kubernetes.io/name: prometheus
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
@@ -66,7 +66,7 @@ spec:
       volumes:
         - name: prometheus-config
           configMap:
-            name: {{ lower $.Release.Name }}-prometheus
+            name: prometheus
   volumeClaimTemplates:
     - metadata:
         name: prometheus-data

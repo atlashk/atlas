@@ -9,11 +9,6 @@
 # AWS region where ECR repositories will be created
 aws_region = "us-east-1"
 
-# Project name — used as the repository namespace prefix
-# Repositories will be named: <project_name>/<service>
-#   e.g.  atlas/api-gateway, atlas/user-service, …
-project_name = "atlas"
-
 # Application services — each entry gets its own private ECR repository
 services = [
   "api-gateway",

@@ -2,21 +2,21 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ lower $.Release.Name }}-keycloak-config
+  name: keycloak-config
   labels:
     app.kubernetes.io/name: keycloak
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 data:
-  keycloak-realm: {{ .Values.keycloak.config.realm | quote }}
-  keycloak-admin-client-id: {{ .Values.keycloak.config.adminClientId | quote }}
-  keycloak-admin-client-secret: {{ .Values.keycloak.config.adminClientSecret | quote }}
+  keycloak-realm: {{ .Values.global.keycloak.config.realm | quote }}
+  keycloak-admin-client-id: {{ .Values.global.keycloak.config.adminClientId | quote }}
+  keycloak-admin-client-secret: {{ .Values.global.keycloak.config.adminClientSecret | quote }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ lower $.Release.Name }}-keycloak-import
+  name: keycloak-import
   labels:
     app.kubernetes.io/name: keycloak
     app.kubernetes.io/instance: {{ lower $.Release.Name }}

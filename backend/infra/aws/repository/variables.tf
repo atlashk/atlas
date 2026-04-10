@@ -9,7 +9,7 @@ variable "aws_region" {
 }
 
 variable "project_name" {
-  description = "Project name — used as the ECR repository namespace prefix (e.g. 'atlas')"
+  description = "Project name — used as a prefix for all AWS resource names"
   type        = string
   default     = "atlas"
 }

@@ -19,15 +19,15 @@ STATE_DIR         := $(MAKEFILE_DIR)/.state
 # ──────────────────────────────────────────────────────────────────────────────
 # Configurable defaults (override on the command line)
 # ──────────────────────────────────────────────────────────────────────────────
-HELM_RELEASE_NAME     ?= atlas-dev
-HELM_NS_INFRA         ?= $(HELM_RELEASE_NAME)-infra
-HELM_NS_SECURITY      ?= $(HELM_RELEASE_NAME)-security
-HELM_NS_OBSERVABILITY ?= $(HELM_RELEASE_NAME)-observability
-HELM_NS_APP           ?= $(HELM_RELEASE_NAME)-app
+HELM_RELEASE_NAME     := atlas-dev
+HELM_NS_INFRA         := infra
+HELM_NS_SECURITY      := security
+HELM_NS_OBSERVABILITY := observability
+HELM_NS_APP           := app
 
 # ──────────────────────────────────────────────────────────────────────────────
 .PHONY: install uninstall help check-prereqs \
-        bootstrap cluster repository push \
+        bootstrap cluster repository build push \
         helm helm-common helm-infra helm-security helm-observability helm-app \
         destroy-helm destroy-repository destroy-cluster destroy-bootstrap
 
@@ -58,6 +58,14 @@ load_bootstrap_state() {
   fi
   TF_BOOTSTRAP_BUCKET=$$(cat "$(STATE_DIR)/bootstrap_bucket")
   TF_BOOTSTRAP_REGION=$$(cat "$(STATE_DIR)/bootstrap_region")
+}
+
+load_build_state() {
+  if [[ ! -f "$(STATE_DIR)/image_tag" ]]; then
+    log_error "Build state not found. Run 'make build' first."
+    exit 1
+  fi
+  IMAGE_TAG=$$(cat "$(STATE_DIR)/image_tag")
 }
 
 load_kubectl_state() {
@@ -139,11 +147,12 @@ export SHELL_HELPERS
 help:
 	@printf '\nAtlas — Makefile for AWS\n\n'
 	@printf 'Install targets\n'
-	@printf '  make install              Full 4-step install (bootstrap → cluster → repository → push → helm)\n'
+	@printf '  make install              Full install (bootstrap → cluster → repository → build → push → helm)\n'
 	@printf '  make bootstrap            Step 1: Terraform bootstrap (S3 remote-state bucket)\n'
 	@printf '  make cluster              Step 2: Terraform for EKS cluster creation\n'
 	@printf '  make repository           Step 3: Terraform for ECR image repositories creation\n'
-	@printf '  make push                 Step 4: Build Docker images and push to ECR\n'
+	@printf '  make build                Step 4a: Build jars and Docker images locally\n'
+	@printf '  make push                 Step 4b: Push Docker images to ECR\n'
 	@printf '  make helm                 Step 5: Helm install / upgrade (all subcharts)\n'
 	@printf '  make helm-common          Step 5a: Helm install / upgrade — common (RBAC)\n'
 	@printf '  make helm-infra           Step 5b: Helm install / upgrade — infra (databases, queues)\n'
@@ -186,7 +195,7 @@ check-prereqs:
 # ══════════════════════════════════════════════════════════════════════════════
 # INSTALL — full 4-step provisioning
 # ══════════════════════════════════════════════════════════════════════════════
-install: bootstrap cluster repository push helm
+install: bootstrap cluster repository build push helm
 
 # ══════════════════════════════════════════════════════════════════════════════
 # UNINSTALL — full 4-step teardown (reverse order)
@@ -237,107 +246,141 @@ repository: check-prereqs
 	tf_apply "$(TF_REPO_DIR)"
 	log_ok "ECR repositories created"
 
-## Step 4: Build Docker images and push to ECR (requires bootstrap + repository state)
+## Step 4a: Build — compile jars and build Docker images locally
+build:
+	@eval "$$SHELL_HELPERS"
+	mkdir -p "$(STATE_DIR)"
+	printf '\n===> Step 4a — Build jars and Docker images\n'
+	IMAGE_TAG=$$(git -C "$(MAKEFILE_DIR)/.." rev-parse --short HEAD 2>/dev/null || printf 'latest')
+	log_info "Image tag: $$IMAGE_TAG"
+
+	declare -A BUILD_CONTEXT=(
+	  [api-gateway]="$(MAKEFILE_DIR)/app/edge/api-gateway/api-gateway-reactive"
+	  [authorization-server]="$(MAKEFILE_DIR)/app/edge/authorization-server"
+	  [catalog-service]="$(MAKEFILE_DIR)/app/services/catalog-service/catalog-bootstrap"
+	  [inventory-service]="$(MAKEFILE_DIR)/app/services/inventory-service/inventory-bootstrap"
+	  [order-service]="$(MAKEFILE_DIR)/app/services/order-service/order-bootstrap"
+	  [payment-service]="$(MAKEFILE_DIR)/app/services/payment-service/payment-bootstrap"
+	  [user-service]="$(MAKEFILE_DIR)/app/services/user-service/user-bootstrap"
+	)
+
+	log_info "Building jars"
+	"$(MAKEFILE_DIR)/app/gradlew" --project-dir "$(MAKEFILE_DIR)/app" build -x test
+	log_ok "Jars built"
+
+	for svc in "$${!BUILD_CONTEXT[@]}"; do
+	  build_context="$${BUILD_CONTEXT[$$svc]}"
+	  if [[ ! -d "$$build_context" ]]; then
+	    log_warn "Build context not found for '$$svc' — skipping"
+	    continue
+	  fi
+	  log_info "Building Docker image for '$$svc'"
+	  docker build --platform linux/amd64 \
+	    -t "$$svc:$$IMAGE_TAG" \
+	    -t "$$svc:latest" \
+	    "$$build_context"
+	  log_ok "'$$svc' image built"
+	done
+
+	printf '%s' "$$IMAGE_TAG" > "$(STATE_DIR)/image_tag"
+	log_ok "All images built (tag: $$IMAGE_TAG)"
+
+## Step 4b: Push — push Docker images to ECR (requires bootstrap + build state)
 push: check-prereqs
 	@eval "$$SHELL_HELPERS"
 	load_bootstrap_state
-	printf '\n===> Step 4/5 — Build & push Docker images to ECR\n'
+	printf '\n===> Step 4b — Push Docker images to ECR\n'
 	require_tfvars "$(TF_REPO_DIR)"
+	load_build_state
+	log_info "Image tag: $$IMAGE_TAG"
 
 	log_info "Fetching ECR repository URLs"
-	REGISTRY_ID=$$(terraform -chdir="$(TF_REPO_DIR)" output -raw registry_id)
+	REPO_JSON=$$(terraform -chdir="$(TF_REPO_DIR)" output -json repository_urls)
 
-	log_info "Logging in to ECR (registry: $$REGISTRY_ID)"
+	# Extract registry endpoint directly from the first repository URL
+	ECR_REGISTRY=$$(printf '%s' "$$REPO_JSON" \
+	  | python3 -c "import sys,json; d=json.load(sys.stdin); print(next(iter(d.values())).split('/')[0])")
+
+	log_info "Logging in to ECR (registry: $$ECR_REGISTRY)"
 	aws ecr get-login-password --region "$$TF_BOOTSTRAP_REGION" \
-	  | docker login --username AWS --password-stdin \
-	      "$$REGISTRY_ID.dkr.ecr.$$TF_BOOTSTRAP_REGION.amazonaws.com"
+	  | docker login --username AWS --password-stdin "$$ECR_REGISTRY"
 
 	declare -A REPO_URLS
 	while IFS='=' read -r svc url; do
 	  REPO_URLS["$$svc"]="$$url"
-	done < <(terraform -chdir="$(TF_REPO_DIR)" output -json repository_urls \
+	done < <(printf '%s' "$$REPO_JSON" \
 	  | python3 -c "import sys,json; [print(f'{k}={v}') for k,v in json.load(sys.stdin).items()]")
-	GRADLE_ROOT="$(MAKEFILE_DIR)/.."
-	IMAGE_TAG=$$(git -C "$$GRADLE_ROOT" rev-parse --short HEAD 2>/dev/null || printf 'latest')
-	log_info "Image tag: $$IMAGE_TAG"
-	declare -A BUILD_CONTEXT=(
-	  [api-gateway]="$$GRADLE_ROOT/edge/api-gateway"
-	  [authorization-server]="$$GRADLE_ROOT/edge/authorization-server"
-	  [catalog-service]="$$GRADLE_ROOT/services/catalog-service"
-	  [inventory-service]="$$GRADLE_ROOT/services/inventory-service"
-	  [order-service]="$$GRADLE_ROOT/services/order-service"
-	  [payment-service]="$$GRADLE_ROOT/services/payment-service"
-	  [user-service]="$$GRADLE_ROOT/services/user-service"
-	)
+
 	for svc in "$${!REPO_URLS[@]}"; do
 	  repo_url="$${REPO_URLS[$$svc]}"
-	  build_context="$${BUILD_CONTEXT[$$svc]:-}"
-	  if [[ -z "$$build_context" || ! -d "$$build_context" ]]; then
-	    log_warn "No build context for '$$svc' — skipping"
+	  if ! docker image inspect "$$svc:$$IMAGE_TAG" &>/dev/null; then
+	    log_warn "Local image '$$svc:$$IMAGE_TAG' not found — run 'make build' first — skipping"
 	    continue
 	  fi
-
-	  log_info "Building image for '$$svc'"
-	  docker build --platform linux/amd64 -t "$$repo_url:$$IMAGE_TAG" -t "$$repo_url:latest" "$$build_context"
-
-	  log_info "Pushing '$$svc' → $$repo_url"
+	  log_info "Tagging and pushing '$$svc' → $$repo_url"
+	  docker tag "$$svc:$$IMAGE_TAG" "$$repo_url:$$IMAGE_TAG"
+	  docker tag "$$svc:latest"      "$$repo_url:latest"
 	  docker push "$$repo_url:$$IMAGE_TAG"
 	  docker push "$$repo_url:latest"
 	  log_ok "'$$svc' pushed successfully"
 	done
-	log_ok "All images built and pushed (tag: $$IMAGE_TAG)"
-	printf '%s' "$$REGISTRY_ID.dkr.ecr.$$TF_BOOTSTRAP_REGION.amazonaws.com" > "$(STATE_DIR)/ecr_registry"
-	printf '%s' "$$IMAGE_TAG" > "$(STATE_DIR)/image_tag"
-	log_ok "Registry and image tag saved to state"
+
+	log_ok "All images pushed (tag: $$IMAGE_TAG)"
+	printf '%s' "$$ECR_REGISTRY" > "$(STATE_DIR)/ecr_registry"
+	log_ok "ECR registry saved to state"
 
 ## Step 5: Helm — deploys all subcharts (common → infra → security → observability → app)
 helm: helm-common helm-infra helm-security helm-observability helm-app
 
-## Step 5a: Helm — deploys common resources (cluster-scoped RBAC)
+## Step 5a: Helm — deploys common resources
 helm-common: check-prereqs
 	@eval "$$SHELL_HELPERS"
 	load_kubectl_state
 	configure_kubectl
-	printf '\n===> Step 5a/5 — Helm install/upgrade ($(HELM_RELEASE_NAME)-common)\n'
-	log_info "helm upgrade --install $(HELM_RELEASE_NAME)-common"
-	helm upgrade --install "$(HELM_RELEASE_NAME)-common" "$(HELM_SUBCHART_DIR)/common"
-	log_ok "Helm release '$(HELM_RELEASE_NAME)-common' deployed successfully"
+	printf '\n===> Step 5a/5 — Helm install/upgrade release '$(HELM_RELEASE_NAME)' (common)\n'
+	helm upgrade --install "$(HELM_RELEASE_NAME)" "$(HELM_SUBCHART_DIR)/common" \
+	  --values "$(HELM_CHART_DIR)/values.yaml" \
+	  --debug
+	log_ok "Helm release '$(HELM_RELEASE_NAME)' (common) deployed successfully"
 
 ## Step 5b: Helm — deploys infrastructure (databases, message queues, object storage)
 helm-infra: check-prereqs
 	@eval "$$SHELL_HELPERS"
 	load_kubectl_state
 	configure_kubectl
-	printf '\n===> Step 5b/5 — Helm install/upgrade ($(HELM_RELEASE_NAME)-infra)\n'
-	log_info "helm upgrade --install $(HELM_RELEASE_NAME)-infra"
-	helm upgrade --install "$(HELM_RELEASE_NAME)-infra" "$(HELM_SUBCHART_DIR)/infra" \
+	printf '\n===> Step 5b/5 — Helm install/upgrade release '$(HELM_RELEASE_NAME)' (infra)\n'
+	helm upgrade --install "$(HELM_RELEASE_NAME)" "$(HELM_SUBCHART_DIR)/infra" \
 	  --namespace "$(HELM_NS_INFRA)" \
-	  --create-namespace
-	log_ok "Helm release '$(HELM_RELEASE_NAME)-infra' deployed successfully"
+	  --create-namespace \
+	  --values "$(HELM_CHART_DIR)/values.yaml" \
+	  --debug
+	log_ok "Helm release '$(HELM_RELEASE_NAME)' (infra) deployed successfully"
 
 ## Step 5c: Helm — deploys security layer (Keycloak)
 helm-security: check-prereqs
 	@eval "$$SHELL_HELPERS"
 	load_kubectl_state
 	configure_kubectl
-	printf '\n===> Step 5c/5 — Helm install/upgrade ($(HELM_RELEASE_NAME)-security)\n'
-	log_info "helm upgrade --install $(HELM_RELEASE_NAME)-security"
-	helm upgrade --install "$(HELM_RELEASE_NAME)-security" "$(HELM_SUBCHART_DIR)/security" \
+	printf '\n===> Step 5c/5 — Helm install/upgrade release '$(HELM_RELEASE_NAME)' (security)\n'
+	helm upgrade --install "$(HELM_RELEASE_NAME)" "$(HELM_SUBCHART_DIR)/security" \
 	  --namespace "$(HELM_NS_SECURITY)" \
-	  --create-namespace
-	log_ok "Helm release '$(HELM_RELEASE_NAME)-security' deployed successfully"
+	  --create-namespace \
+	  --values "$(HELM_CHART_DIR)/values.yaml" \
+	  --debug
+	log_ok "Helm release '$(HELM_RELEASE_NAME)' (security) deployed successfully"
 
 ## Step 5d: Helm — deploys observability stack (Prometheus, Grafana, Loki, Tempo)
 helm-observability: check-prereqs
 	@eval "$$SHELL_HELPERS"
 	load_kubectl_state
 	configure_kubectl
-	printf '\n===> Step 5d/5 — Helm install/upgrade ($(HELM_RELEASE_NAME)-observability)\n'
-	log_info "helm upgrade --install $(HELM_RELEASE_NAME)-observability"
-	helm upgrade --install "$(HELM_RELEASE_NAME)-observability" "$(HELM_SUBCHART_DIR)/observability" \
+	printf '\n===> Step 5d/5 — Helm install/upgrade release '$(HELM_RELEASE_NAME)' (observability)\n'
+	helm upgrade --install "$(HELM_RELEASE_NAME)" "$(HELM_SUBCHART_DIR)/observability" \
 	  --namespace "$(HELM_NS_OBSERVABILITY)" \
-	  --create-namespace
-	log_ok "Helm release '$(HELM_RELEASE_NAME)-observability' deployed successfully"
+	  --create-namespace \
+	  --values "$(HELM_CHART_DIR)/values.yaml" \
+	  --debug
+	log_ok "Helm release '$(HELM_RELEASE_NAME)' (observability) deployed successfully"
 
 ## Step 5e: Helm — deploys application services (requires cluster + push state)
 helm-app: check-prereqs
@@ -345,17 +388,18 @@ helm-app: check-prereqs
 	load_kubectl_state
 	load_push_state
 	configure_kubectl
-	printf '\n===> Step 5e/5 — Helm install/upgrade ($(HELM_RELEASE_NAME)-app)\n'
-	log_info "ECR registry: $$ECR_REGISTRY"
-	log_info "Image tag:    $$IMAGE_TAG"
-	log_info "helm upgrade --install $(HELM_RELEASE_NAME)-app"
-	helm upgrade --install "$(HELM_RELEASE_NAME)-app" "$(HELM_SUBCHART_DIR)/app" \
+	printf '\n===> Step 5e/5 — Helm install/upgrade release '$(HELM_RELEASE_NAME)' (app)\n'
+		log_info "ECR registry: $$ECR_REGISTRY"
+		log_info "Image tag:    $$IMAGE_TAG"
+	helm upgrade --install "$(HELM_RELEASE_NAME)" "$(HELM_SUBCHART_DIR)/app" \
 	  --namespace "$(HELM_NS_APP)" \
 	  --create-namespace \
+	  --values "$(HELM_CHART_DIR)/values.yaml" \
 	  --set global.image.registry="$$ECR_REGISTRY" \
 	  --set global.image.tag="$$IMAGE_TAG" \
-	  --set global.image.pullPolicy=Always
-	log_ok "Helm release '$(HELM_RELEASE_NAME)-app' deployed successfully"
+	  --set global.image.pullPolicy=Always \
+	  --debug
+	log_ok "Helm release '$(HELM_RELEASE_NAME)' (app) deployed successfully"
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Individual uninstall steps
@@ -386,16 +430,16 @@ destroy-helm:
 	    log_ok "Namespace '$$ns' deleted"
 	  fi
 	}
-	uninstall_release "$(HELM_RELEASE_NAME)-app"           "$(HELM_NS_APP)"
-	uninstall_release "$(HELM_RELEASE_NAME)-observability" "$(HELM_NS_OBSERVABILITY)"
-	uninstall_release "$(HELM_RELEASE_NAME)-security"      "$(HELM_NS_SECURITY)"
-	uninstall_release "$(HELM_RELEASE_NAME)-infra"         "$(HELM_NS_INFRA)"
-	if helm status "$(HELM_RELEASE_NAME)-common" &>/dev/null; then
-	  log_info "helm uninstall $(HELM_RELEASE_NAME)-common"
-	  helm uninstall "$(HELM_RELEASE_NAME)-common"
-	  log_ok "Helm release '$(HELM_RELEASE_NAME)-common' removed"
+	uninstall_release "$(HELM_RELEASE_NAME)" "$(HELM_NS_APP)"
+	uninstall_release "$(HELM_RELEASE_NAME)" "$(HELM_NS_OBSERVABILITY)"
+	uninstall_release "$(HELM_RELEASE_NAME)" "$(HELM_NS_SECURITY)"
+	uninstall_release "$(HELM_RELEASE_NAME)" "$(HELM_NS_INFRA)"
+	if helm status "$(HELM_RELEASE_NAME)" &>/dev/null; then
+	  log_info "helm uninstall $(HELM_RELEASE_NAME)"
+	  helm uninstall "$(HELM_RELEASE_NAME)"
+	  log_ok "Helm release '$(HELM_RELEASE_NAME)' removed"
 	else
-	  log_warn "Helm release '$(HELM_RELEASE_NAME)-common' not found — skipping"
+	  log_warn "Helm release '$(HELM_RELEASE_NAME)' not found — skipping"
 	fi
 
 ## Step 2 (uninstall): Destroy ECR repositories (requires bootstrap state)

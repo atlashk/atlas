@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ lower $.Release.Name }}-api-gateway
+  name: api-gateway
   labels:
     app.kubernetes.io/name: api-gateway
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
@@ -19,7 +19,7 @@ spec:
         app.kubernetes.io/name: api-gateway
         app.kubernetes.io/instance: {{ lower $.Release.Name }}
     spec:
-      serviceAccountName: {{ lower $.Release.Name }}-{{ .Values.global.serviceAccount.name | default "namespace-reader" }}
+      serviceAccountName: {{ .Values.global.serviceAccount.name | default "app-namespace-reader" }}
       containers:
         - name: api-gateway
           image: "{{ if .Values.global.image.registry -}}{{ .Values.global.image.registry }}/{{ end -}}{{ .Values.global.apiGateway.image.repository }}:{{ .Values.global.apiGateway.image.tag | default .Values.global.image.tag }}"
@@ -31,36 +31,36 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               value: {{ .Values.global.springProfilesActive | quote }}
             - name: USER_SERVICE_URI
-              value: "http://{{ lower $.Release.Name }}-user-service:{{ .Values.global.userSvc.service.ports.http }}"
+              value: "http://user-service:{{ .Values.global.userSvc.service.ports.http }}"
             - name: CATALOG_SERVICE_URI
-              value: "http://{{ lower $.Release.Name }}-catalog-service:{{ .Values.global.catalogSvc.service.ports.http }}"
+              value: "http://catalog-service:{{ .Values.global.catalogSvc.service.ports.http }}"
             - name: INVENTORY_SERVICE_URI
-              value: "http://{{ lower $.Release.Name }}-inventory-service:{{ .Values.global.inventorySvc.service.ports.http }}"
+              value: "http://inventory-service:{{ .Values.global.inventorySvc.service.ports.http }}"
             - name: ORDER_SERVICE_URI
-              value: "http://{{ lower $.Release.Name }}-order-service:{{ .Values.global.orderSvc.service.ports.http }}"
+              value: "http://order-service:{{ .Values.global.orderSvc.service.ports.http }}"
             - name: PAYMENT_SERVICE_URI
-              value: "http://{{ lower $.Release.Name }}-payment-service:{{ .Values.global.paymentSvc.service.ports.http }}"
+              value: "http://payment-service:{{ .Values.global.paymentSvc.service.ports.http }}"
             {{- if eq .Values.global.appStack.kvStore "redis" }}
             - name: REDIS_HOST
-              value: "{{ lower $.Release.Name }}-redis"
+              value: "redis"
             - name: REDIS_PORT
               value: {{ .Values.global.redis.service.ports.redis | quote }}
             {{- end }}
             {{- if eq .Values.global.appStack.idp "spring" }}
             - name: JWK_SET_URI
-              value: "http://{{ lower $.Release.Name }}-authorization-server:{{ .Values.global.authorizationServer.service.ports.http }}/.well-known/jwks.json"
+              value: "http://authorization-server:{{ .Values.global.authorizationServer.service.ports.http }}/.well-known/jwks.json"
             {{- end }}
             {{- if eq .Values.global.appStack.idp "keycloak" }}
             - name: JWK_SET_URI
-              value: "http://{{ lower $.Release.Name }}-keycloak:{{ .Values.keycloak.service.ports.http }}/realms/{{ .Values.keycloak.config.realm }}/protocol/openid-connect/certs"
+              value: "http://keycloak:{{ .Values.global.keycloak.service.ports.http }}/realms/{{ .Values.global.keycloak.config.realm }}/protocol/openid-connect/certs"
             {{- end }}
             {{- if eq .Values.global.appStack.observability.tracing "zipkin" }}
             - name: ZIPKIN_ENDPOINT
-              value: "http://{{ lower $.Release.Name }}-zipkin:{{ .Values.zipkin.service.ports.http }}/api/v2/spans"
+              value: "http://zipkin:{{ .Values.global.zipkin.service.ports.http }}/api/v2/spans"
             {{- end }}
             {{- if eq .Values.global.appStack.observability.tracing "tempo" }}
             - name: OTEL_COLLECTOR_TRACES_ENDPOINT
-              value: "http://{{ lower $.Release.Name }}-otel-collector:{{ .Values.global.otelCollector.service.ports.otlpHttp }}/v1/traces"
+              value: "http://otel-collector:{{ .Values.global.otelCollector.service.ports.otlpHttp }}/v1/traces"
             {{- end }}
             {{- with .Values.global.apiGateway.extraEnv }}
             {{- toYaml . | nindent 12 }}

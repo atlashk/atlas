@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ lower $.Release.Name }}-loki
+  name: loki
   labels:
     app.kubernetes.io/name: loki
     app.kubernetes.io/instance: {{ lower $.Release.Name }}

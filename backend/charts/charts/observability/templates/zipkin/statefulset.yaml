@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ lower $.Release.Name }}-zipkin
+  name: zipkin
   labels:
     app.kubernetes.io/name: zipkin
     app.kubernetes.io/instance: {{ lower $.Release.Name }}
@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: zipkin
-          image: "{{ .Values.zipkin.image.repository }}:{{ .Values.zipkin.image.tag }}"
+          image: "{{ .Values.global.zipkin.image.repository }}:{{ .Values.global.zipkin.image.tag }}"
           imagePullPolicy: IfNotPresent
           env:
             - name: STORAGE_TYPE
@@ -54,5 +54,5 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 3
           resources:
-            {{ toYaml .Values.zipkin.resources | nindent 12 }}
+            {{ toYaml .Values.global.zipkin.resources | nindent 12 }}
 {{- end }}

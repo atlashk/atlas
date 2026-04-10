@@ -133,3 +133,5 @@ amplify/
 *.log.*
 logs/
 log/
+
+./state/

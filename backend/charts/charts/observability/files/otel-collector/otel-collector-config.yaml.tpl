@@ -9,7 +9,7 @@ processors:
   batch:
 exporters:
   otlp:
-    endpoint: {{ lower $.Release.Name }}-tempo:{{ .Values.global.tempo.service.ports.otlpGrpc }}
+    endpoint: tempo:{{ .Values.global.tempo.service.ports.otlpGrpc }}
     tls:
       insecure: true
   debug:
