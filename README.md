@@ -1,8 +1,8 @@
 # Atlas
 
 [![Java 17](https://img.shields.io/badge/Java-17-ED8B00?logo=openjdk&logoColor=white)](https://openjdk.org/)
-[![Spring Boot 4.0.3](https://img.shields.io/badge/Spring%20Boot-4.0.3-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
-[![Spring Cloud 2025.1.0](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-6DB33F?logo=spring&logoColor=white)](https://spring.io/projects/spring-cloud)
+[![Spring Boot 4.0.4](https://img.shields.io/badge/Spring%20Boot-4.0.4-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Spring Cloud 2025.1.1](https://img.shields.io/badge/Spring%20Cloud-2025.1.1-6DB33F?logo=spring&logoColor=white)](https://spring.io/projects/spring-cloud)
 [![Gradle](https://img.shields.io/badge/Gradle-02303A?logo=gradle&logoColor=white)](https://gradle.org/)
 [![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/compose/)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-Templates-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io/)
@@ -29,11 +29,12 @@ Shared backend capabilities are implemented as reusable Gradle modules under `ba
 
 ### Backend
 
-- **Core**: Java 17, Spring Boot 4.0.4, Spring Cloud 2025.1.0.
+- **Core**: Java 17, Spring Boot 4.0.4, Spring Cloud 2025.1.1.
 - **Architecture & Patterns**: Hexagonal, Microservices, Saga Orchestration, Outbox pattern, etc.
-- **API & Communication**: REST, gRPC, OpenAPI, Spring Cloud Gateway Reactive.
+- **API & Communication**: REST, gRPC (Spring gRPC 1.0.2), OpenAPI, Spring Cloud Gateway Reactive.
+- **AI**: Spring AI 2.0.0-M3, Qdrant vector store, Ollama, OpenAI.
 - **Security**: Spring Security, JWT, OAuth2, Keycloak.
-- **Data & Infra**: MySQL, PostgreSQL, Redis, Kafka, RabbitMQ, Elasticsearch, MinIO.
+- **Data & Infra**: MySQL, PostgreSQL, Redis, Kafka, RabbitMQ, Elasticsearch, MinIO, Qdrant.
 - **Containerization**: Docker, Docker Compose, Kubernetes, Helm.
 - **Observability**: Actuator, Logback, Loki/Promtail, Prometheus, OpenTelemetry collector, Tempo, Zipkin, Grafana.
 - **Utilities**: Jackson 3, Flyway, Quartz, MapStruct, Lombok.
@@ -50,26 +51,35 @@ Shared backend capabilities are implemented as reusable Gradle modules under `ba
 ```text
 .
 ├── backend/
-│   ├── app-stack/
-│   │   ├── config/                    # app-stack YAML profiles
-│   │   └── deployment/
-│   │       ├── generator/             # Handlebars renderer
-│   │       └── templates/             # Compose + Helm templates
-│   ├── libs/                          # reusable modules (api, data, messaging, observability, ...)
-│   ├── platform/
-│   │   ├── authorization-server/
-│   │   ├── config-server/
-│   │   └── discovery-server/
-│   │       └── eureka-server/
-│   ├── services/
-│   │   ├── api-gateway/
-│   │   ├── user-service/
-│   │   ├── catalog-service/
-│   │   ├── inventory-service/
-│   │   ├── order-service/
-│   │   └── payment-service/
-│   ├── install.sh
-│   └── uninstall.sh
+│   ├── app/                           # Gradle multi-project build
+│   │   ├── app-stack/                 # app-stack YAML profiles
+│   │   ├── edge/                      # Edge servers
+│   │   │   ├── api-gateway/
+│   │   │   ├── authorization-server/
+│   │   │   ├── config-server/
+│   │   │   └── discovery-server/
+│   │   │       └── eureka-server/
+│   │   ├── libs/                      # Reusable modules (api, data, messaging, observability, ...)
+│   │   └── services/                  # Business microservices
+│   │       ├── user-service/
+│   │       ├── catalog-service/
+│   │       ├── inventory-service/
+│   │       ├── order-service/
+│   │       └── payment-service/
+│   ├── charts/                        # Helm charts
+│   ├── cicd/                          # CI/CD pipelines
+│   │   ├── github/
+│   │   └── jenkins/
+│   ├── local/                         # Docker compose for local development
+│   │   ├── install.sh
+│   │   ├── uninstall.sh
+│   │   ├── generator/                 # Handlebars renderer
+│   │   └── templates/                 # Compose files templates
+│   └── infra/                         # Infrastructure using Terraform
+│       └── aws/
+│           ├── bootstrap/             # Remote state backend (S3)
+│           ├── cluster/               # EKS cluster + node groups + add-ons
+│           └── repository/            # ECR image repositories
 ├── frontend/
 └── README.md
 ```
@@ -88,26 +98,29 @@ On Windows, run backend shell scripts via **Git Bash** or **WSL**.
 ### Backend
 
 ```bash
-cd backend
+cd backend/local
 ./install.sh
 ```
 
 `install.sh` flow:
 
-1. Read `backend/app-stack/config/app-stack.<name>.yml` (default: `local.dev`)
-2. Render templates into `backend/dist/`
-3. Execute generated install script from `backend/dist/install.sh`
+1. Read `backend/app/app-stack/app-stack.<name>.yml` (default: `local.dev`)
+2. Render templates into `backend/local/dist/`
+3. Execute generated install script from `backend/local/dist/install.sh`:
+   - Check prerequisites (Java 17+, Docker, Docker Compose)
+   - Build JAR files via Gradle (`./gradlew clean build`) — skipped when `--app-stack=local.dev`
+   - Build Docker images for all services — skipped when `--app-stack=local.dev`
+   - Deploy via `docker compose up -d`
 
 Common flags:
-
 - `--app-stack=<name>`: choose stack profile (`local.dev`, `local.compose`, `local.k8s`)
 - `--skip-build`: skip backend and Docker image builds
-- `--debug-template`: render `backend/dist` only, skip deployment
+- `--debug-template`: render `backend/local/dist` only, skip deployment
 
 Examples:
 
 ```bash
-cd backend
+cd backend/local
 ./install.sh --app-stack=local.dev
 ./install.sh --app-stack=local.compose
 ./install.sh --app-stack=local.compose --skip-build
@@ -117,14 +130,14 @@ cd backend
 To uninstall:
 
 ```bash
-cd backend
+cd backend/local
 ./uninstall.sh
 ```
 
 To uninstall and remove application Docker images:
 
 ```bash
-cd backend
+cd backend/local
 ./uninstall.sh --remove-images
 ```
 
@@ -133,14 +146,14 @@ cd backend
 Run:
 
 ```bash
-cd frontend/all
+cd frontend
 npm install
 npm run dev
 ```
 
 Open: http://localhost:8000
 
-Main storefront routes stay under `/`, `/cart`, `/checkout`, `/order-history`, `/login`, `/register`.
+Main storefront routes stay under `/`, `/cart`, `/checkout`, `/order-history`, `/login`, `/register`, `/chatbot`.
 Admin routes are namespaced under `/admin/**` (for example: `/admin/dashboard`).
 
 Default seeded users:
@@ -190,6 +203,7 @@ Default seeded users:
 | Tempo | Distributed tracing backend | 3200 (Tempo query/API), 4317 (OTLP gRPC ingest) |
 | OpenTelemetry Collector | Collector for telemetry pipeline | 4318 (OTLP HTTP ingest) |
 | Grafana | Observability visualization dashboards | 3000 (Grafana UI/API) |
+| Qdrant | Vector database for AI/RAG workloads | 6333 (HTTP REST API), 6334 (gRPC) |
 
 Default credentials: `atlas` / `Atlas@123456`
 
@@ -203,12 +217,13 @@ Default credentials: `atlas` / `Atlas@123456`
 
 Atlas provides an **app-stack** mechanism. Each app stack is a named profile that controls:
 
-1. Which options are selected for **backend capabilities** (datasource, messaging, storage, observability, etc.), via a YAML configuration file under `backend/app-stack/config/` (for example: `app-stack.local.compose.yml`).
+1. Which options are selected for **backend capabilities** (datasource, messaging, storage, observability, etc.), via a YAML configuration file under `backend/app/app-stack/` (for example: `app-stack.local.compose.yml`).
 
 List of options for each capability sorted alphabetically:
 
 | Capability | Options | Description |
 |---|---|---|
+| `ai.vectorstore` | `qdrant` | Vector store for AI/RAG workloads |
 | `datasource` | `mysql` \| `postgres` | Primary database engine |
 | `file.csv` | `opencsv` | CSV processing library |
 | `file.excel` | `poi` \| `easyexcel` | Excel read/write library |
@@ -231,7 +246,7 @@ List of options for each capability sorted alphabetically:
 | `storage` | `minio` \| `filesystem` | Object/file storage service |
 | `template` | `freemarker` \| `thymeleaf` | Server-side template engine |
 
-2. Which **deployment type** is targeted (Docker Compose, Kubernetes, etc.). This is driven by **templates** under `backend/app-stack/deployment/templates/` (for example: `backend/app-stack/deployment/templates/local/compose/`).
+2. Which **deployment type** is targeted (Docker Compose, Kubernetes, etc.). This is driven by **templates** under `backend/local/templates/` (for example: `backend/local/templates/docker-compose.yml.hbs`).
 
 The followings are built-in app stacks:
 
@@ -245,7 +260,7 @@ So, how does it work?
 
 ```mermaid
 flowchart TB
-  CFG["app-stack config YAML<br/>backend/app-stack/config/app-stack.*.yml"]
+  CFG["app-stack config YAML<br/>backend/app/app-stack/app-stack.*.yml"]
 
   subgraph Installation["Installation"]
     INST_TPL["Find Handlebars templates"]
