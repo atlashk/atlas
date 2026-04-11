@@ -76,12 +76,12 @@ pipeline {
 
         // EKS
         EKS_CLUSTER_NAME    = "atlas-${params.ENVIRONMENT}"
-        K8S_NAMESPACE       = "atlas-${params.ENVIRONMENT}"
+        K8S_NAMESPACE       = "app"
 
         // Helm
-        HELM_CHART_DIR      = 'backend/deployment/helm'
+        HELM_CHART_DIR      = 'backend/charts'
         HELM_RELEASE_NAME   = "atlas-${params.ENVIRONMENT}"
-        HELM_VALUES_FILE    = 'backend/deployment/helm/values.yaml'
+        HELM_VALUES_FILE    = 'backend/charts/values.yaml'
     }
 
     options {
@@ -99,10 +99,10 @@ pipeline {
                 script {
                     // Resolve Gradle module and SERVICE_DIR
                     if (params.SERVICE_NAME == 'api-gateway') {
-                        env.GRADLE_MODULE = ":edge.api-gateway.api-gateway-reactive"
+                        env.GRADLE_MODULE = ':edge.api-gateway.api-gateway-reactive'
                         env.SERVICE_DIR   = 'backend/app/edge/api-gateway/api-gateway-reactive'
                     } else if (params.SERVICE_NAME == 'authorization-server') {
-                        env.GRADLE_MODULE = ":edge.authorization-server"
+                        env.GRADLE_MODULE = ':edge.authorization-server'
                         env.SERVICE_DIR   = 'backend/app/edge/authorization-server'
                     } else {
                         def moduleId = params.SERVICE_NAME.replace('-service', '')
@@ -143,7 +143,7 @@ pipeline {
         stage('Gradle Build') {
         // =====================================================================
             steps {
-                dir('backend') {
+                dir('backend/app') {
                     script {
                         sh 'chmod +x gradlew'
 
