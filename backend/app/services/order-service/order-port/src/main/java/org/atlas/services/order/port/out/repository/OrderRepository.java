@@ -13,12 +13,12 @@ import lombok.Setter;
 import org.atlas.libs.framework.domain.shared.order.OrderStatus;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
-import org.atlas.services.order.domain.entity.OrderEntity;
+import org.atlas.services.order.domain.entity.Order;
 import org.atlas.services.order.port.in.order.model.admin.MonthlyOrderAggregation;
 
 public interface OrderRepository {
 
-  PagingResult<OrderEntity> findByCriteria(FindOrderCriteria criteria, PagingRequest pagingRequest);
+  PagingResult<Order> findByCriteria(FindOrderCriteria criteria, PagingRequest pagingRequest);
 
   Long countAll();
 
@@ -26,15 +26,15 @@ public interface OrderRepository {
 
   List<MonthlyOrderAggregation> aggregateMonthlyByStatus(OrderStatus status);
 
-  Optional<OrderEntity> findById(String id);
+  Optional<Order> findById(String id);
 
-  Optional<OrderEntity> findBySagaId(Integer sagaId);
+  Optional<Order> findBySagaId(Integer sagaId);
 
-  void insert(OrderEntity order);
+  void insert(Order order);
 
-  void update(OrderEntity order);
+  void update(Order order);
 
-  List<OrderEntity> findExpiredOrders(LocalDateTime createdBefore);
+  List<Order> findExpiredOrders(LocalDateTime createdBefore);
 
   @NoArgsConstructor
   @AllArgsConstructor

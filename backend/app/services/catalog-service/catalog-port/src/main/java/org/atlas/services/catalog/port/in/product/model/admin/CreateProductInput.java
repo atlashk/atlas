@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.atlas.services.catalog.domain.entity.ProductEntity;
+import org.atlas.services.catalog.domain.entity.Product;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,7 +14,7 @@ import org.atlas.services.catalog.domain.entity.ProductEntity;
 @Setter
 public class CreateProductInput {
 
-  private ProductEntity product;
+  private Product product;
 
   private byte[] imageBytes;
 

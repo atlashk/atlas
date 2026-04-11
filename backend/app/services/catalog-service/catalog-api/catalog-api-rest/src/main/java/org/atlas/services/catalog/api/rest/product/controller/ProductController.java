@@ -12,7 +12,7 @@ import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.catalog.api.rest.product.mapper.ProductMapper;
 import org.atlas.services.catalog.api.rest.product.model.ProductResponse;
 import org.atlas.services.catalog.api.rest.product.model.RetrieveProductListRequest;
-import org.atlas.services.catalog.domain.entity.ProductEntity;
+import org.atlas.services.catalog.domain.entity.Product;
 import org.atlas.services.catalog.port.in.product.model.RetrieveProductListInput;
 import org.atlas.services.catalog.port.in.product.service.ProductService;
 import org.springframework.http.MediaType;
@@ -41,7 +41,7 @@ public class ProductController {
     RetrieveProductListInput input = ProductMapper.INSTANCE.toRetrieveProductListInput(request);
     input.setPagingRequest(PagingRequest.of(request.getPage() - 1, request.getSize()));
 
-    PagingResult<ProductEntity> productPage = productService.retrieveProductList(input);
+    PagingResult<Product> productPage = productService.retrieveProductList(input);
     PagingResult<ProductResponse> responseData = MapperUtil.mapPage(productPage,
         ProductMapper.INSTANCE::toProductResponse);
     return ApiResponseWrapper.successPage(responseData);
@@ -52,7 +52,7 @@ public class ProductController {
   public ApiResponseWrapper<ProductResponse> retrieveProduct(
       @Parameter(name = "id", description = "The unique identifier of the product.", example = "1", required = true)
       @PathVariable String id) throws Exception {
-    ProductEntity product = productService.retrieveProduct(id);
+    Product product = productService.retrieveProduct(id);
     ProductResponse responseData = ProductMapper.INSTANCE.toProductResponse(product);
     return ApiResponseWrapper.success(responseData);
   }

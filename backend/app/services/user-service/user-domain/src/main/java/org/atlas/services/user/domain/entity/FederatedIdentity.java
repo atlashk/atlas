@@ -1,4 +1,4 @@
-package org.atlas.services.catalog.domain.entity.chatbot;
+package org.atlas.services.user.domain.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,25 +7,21 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.framework.domain.entity.DomainEntity;
+import org.atlas.libs.framework.security.FederatedIdentityProvider;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
-public class ChatMessageEntity extends DomainEntity {
+public class FederatedIdentity extends DomainEntity {
 
   @EqualsAndHashCode.Include
-  private String id;
-
-  private String conversationId;
-
-  private MessageType messageType;
-
-  private SenderType senderType;
-
   private String userId;
 
-  private String text;
+  @EqualsAndHashCode.Include
+  private FederatedIdentityProvider provider;
+
+  private String providerUserId;
 }

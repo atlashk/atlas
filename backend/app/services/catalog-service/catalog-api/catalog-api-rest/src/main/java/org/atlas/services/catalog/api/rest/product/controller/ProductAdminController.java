@@ -18,7 +18,7 @@ import org.atlas.services.catalog.api.rest.product.model.admin.ExportProductRequ
 import org.atlas.services.catalog.api.rest.product.model.admin.ProductResponse;
 import org.atlas.services.catalog.api.rest.product.model.admin.RetrieveProductListRequest;
 import org.atlas.services.catalog.api.rest.product.model.admin.UpdateProductRequest;
-import org.atlas.services.catalog.domain.entity.ProductEntity;
+import org.atlas.services.catalog.domain.entity.Product;
 import org.atlas.services.catalog.port.in.product.model.admin.CreateProductInput;
 import org.atlas.services.catalog.port.in.product.model.admin.ExportProductInput;
 import org.atlas.services.catalog.port.in.product.model.admin.ImportProductInput;
@@ -59,7 +59,7 @@ public class ProductAdminController {
     RetrieveProductListInput input = ProductAdminMapper.INSTANCE.toRetrieveProductListInput(request);
     input.setPagingRequest(PagingRequest.of(request.getPage() - 1, request.getSize()));
 
-    PagingResult<ProductEntity> productPage = productAdminService.retrieveProductList(input);
+    PagingResult<Product> productPage = productAdminService.retrieveProductList(input);
     PagingResult<ProductResponse> responseData = MapperUtil.mapPage(productPage,
         ProductAdminMapper.INSTANCE::toProductResponse);
     return ApiResponseWrapper.successPage(responseData);
@@ -70,7 +70,7 @@ public class ProductAdminController {
   public ApiResponseWrapper<ProductResponse> retrieveProduct(
       @Parameter(name = "productId", description = "The unique identifier of the product", example = "PRD0000001")
       @PathVariable String productId) {
-    ProductEntity product = productAdminService.retrieveProduct(productId);
+    Product product = productAdminService.retrieveProduct(productId);
 
     ProductResponse response = ProductAdminMapper.INSTANCE.toProductResponse(product);
     return ApiResponseWrapper.success(response);
@@ -84,7 +84,7 @@ public class ProductAdminController {
       @Valid @RequestPart("request") CreateProductRequest request,
       @Parameter(description = "Product image file")
       @RequestPart(value = "image") MultipartFile imageFile) throws Exception {
-    ProductEntity product = ProductAdminMapper.INSTANCE.toProduct(request);
+    Product product = ProductAdminMapper.INSTANCE.toProduct(request);
     CreateProductInput input = CreateProductInput.builder()
         .product(product)
         .imageBytes(imageFile.getBytes())
@@ -104,7 +104,7 @@ public class ProductAdminController {
       @Valid @RequestPart("request") UpdateProductRequest request,
       @Parameter(description = "Product image file")
       @RequestPart(value = "image", required = false) MultipartFile imageFile) throws Exception {
-    ProductEntity product = ProductAdminMapper.INSTANCE.toProduct(request);
+    Product product = ProductAdminMapper.INSTANCE.toProduct(request);
     product.setId(productId);
     UpdateProductInput input = UpdateProductInput.builder()
         .product(product)

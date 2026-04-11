@@ -1,6 +1,6 @@
 package org.atlas.services.user.application.mapper;
 
-import org.atlas.services.user.domain.entity.UserEntity;
+import org.atlas.services.user.domain.entity.User;
 import org.atlas.services.user.port.in.model.ProfileOutput;
 import org.atlas.services.user.port.in.model.RegisterInput;
 import org.mapstruct.Mapper;
@@ -17,11 +17,11 @@ public interface UserMapper {
   // -----------------------------------------------------------------------------------------------
 
   @Mapping(target = "password", ignore = true)
-  UserEntity toUser(RegisterInput input);
+  User toUser(RegisterInput input);
 
   // Entity --> Output
   // -----------------------------------------------------------------------------------------------
 
   @Mapping(source = "id", target = "userId")
-  ProfileOutput toProfileOutput(UserEntity user);
+  ProfileOutput toProfileOutput(User user);
 }

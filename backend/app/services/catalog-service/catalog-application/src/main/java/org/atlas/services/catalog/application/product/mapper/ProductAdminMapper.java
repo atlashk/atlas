@@ -1,6 +1,6 @@
 package org.atlas.services.catalog.application.product.mapper;
 
-import org.atlas.services.catalog.domain.entity.ProductEntity;
+import org.atlas.services.catalog.domain.entity.Product;
 import org.atlas.services.catalog.port.in.product.model.admin.ExportProductInput;
 import org.atlas.services.catalog.port.in.product.model.admin.RetrieveProductListInput;
 import org.atlas.services.catalog.port.out.repository.ProductRepository;
@@ -18,5 +18,5 @@ public interface ProductAdminMapper {
 
   ProductRepository.FindProductCriteria toFindProductCriteria(ExportProductInput input);
 
-  void merge(ProductEntity source, @MappingTarget ProductEntity target);
+  void merge(Product source, @MappingTarget Product target);
 }

@@ -20,7 +20,7 @@ import org.atlas.libs.framework.util.CollectionUtil;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
-public class OrderEntity extends DomainEntity {
+public class Order extends DomainEntity {
 
   @EqualsAndHashCode.Include
   private String id;

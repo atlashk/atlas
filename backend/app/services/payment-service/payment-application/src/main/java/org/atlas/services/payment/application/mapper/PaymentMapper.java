@@ -1,6 +1,6 @@
 package org.atlas.services.payment.application.mapper;
 
-import org.atlas.services.payment.domain.entity.PaymentEntity;
+import org.atlas.services.payment.domain.entity.Payment;
 import org.atlas.services.payment.port.in.model.CreatePaymentInput;
 import org.atlas.services.payment.port.in.model.RetrievePaymentNextActionOutput;
 import org.atlas.services.payment.port.in.model.UpdatePaymentInput;
@@ -17,12 +17,12 @@ public interface PaymentMapper {
   // Input --> Entity
   // -----------------------------------------------------------------------------------------------
 
-  PaymentEntity toPayment(CreatePaymentInput input);
+  Payment toPayment(CreatePaymentInput input);
 
-  void merge(UpdatePaymentInput input, @MappingTarget PaymentEntity payment);
+  void merge(UpdatePaymentInput input, @MappingTarget Payment payment);
 
   // Entity --> Output
   // -----------------------------------------------------------------------------------------------
 
-  RetrievePaymentNextActionOutput toRetrievePaymentNextActionOutput(PaymentEntity payment);
+  RetrievePaymentNextActionOutput toRetrievePaymentNextActionOutput(Payment payment);
 }

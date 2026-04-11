@@ -1,10 +1,10 @@
 package org.atlas.services.catalog.infrastructure.search.elasticsearch.mapper;
 
-import org.atlas.services.catalog.domain.entity.BrandEntity;
-import org.atlas.services.catalog.domain.entity.CategoryEntity;
-import org.atlas.services.catalog.domain.entity.ProductAttributeEntity;
-import org.atlas.services.catalog.domain.entity.ProductDetailsEntity;
-import org.atlas.services.catalog.domain.entity.ProductEntity;
+import org.atlas.services.catalog.domain.entity.Brand;
+import org.atlas.services.catalog.domain.entity.Category;
+import org.atlas.services.catalog.domain.entity.ProductAttribute;
+import org.atlas.services.catalog.domain.entity.ProductDetails;
+import org.atlas.services.catalog.domain.entity.Product;
 import org.atlas.services.catalog.infrastructure.search.elasticsearch.document.EsProduct;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -21,27 +21,27 @@ public interface EsProductMapper {
 
   @Mapping(target = "id", source = "id")
   @Mapping(target = "productId", source = "id")
-  EsProduct toProductDocument(ProductEntity product);
+  EsProduct toProductDocument(Product product);
 
-  EsProduct.ProductDetails toProductDetailsDocument(ProductDetailsEntity details);
+  EsProduct.ProductDetails toProductDetailsDocument(ProductDetails details);
 
-  EsProduct.ProductAttribute toProductAttributeDocument(ProductAttributeEntity attribute);
+  EsProduct.ProductAttribute toProductAttributeDocument(ProductAttribute attribute);
 
-  EsProduct.Brand toBrandDocument(BrandEntity brand);
+  EsProduct.Brand toBrandDocument(Brand brand);
 
-  EsProduct.Category toCategoryDocument(CategoryEntity category);
+  EsProduct.Category toCategoryDocument(Category category);
 
   // Document --> Entity
   // -----------------------------------------------------------------------------------------------
 
   @Mapping(target = "id", source = "productId")
-  ProductEntity toProduct(EsProduct document);
+  Product toProduct(EsProduct document);
 
-  ProductDetailsEntity toProductDetails(EsProduct.ProductDetails details);
+  ProductDetails toProductDetails(EsProduct.ProductDetails details);
 
-  ProductAttributeEntity toProductAttribute(EsProduct.ProductAttribute attribute);
+  ProductAttribute toProductAttribute(EsProduct.ProductAttribute attribute);
 
-  BrandEntity toBrand(EsProduct.Brand brand);
+  Brand toBrand(EsProduct.Brand brand);
 
-  CategoryEntity toCategory(EsProduct.Category category);
+  Category toCategory(EsProduct.Category category);
 }

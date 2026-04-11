@@ -1,7 +1,7 @@
 package org.atlas.services.payment.api.rest.mapper;
 
 import org.atlas.services.payment.api.rest.model.PaymentGatewayResponse;
-import org.atlas.services.payment.domain.entity.PaymentGatewayEntity;
+import org.atlas.services.payment.domain.entity.PaymentGateway;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
@@ -11,5 +11,5 @@ public interface PaymentGatewayMapper {
 
   PaymentGatewayMapper INSTANCE = Mappers.getMapper(PaymentGatewayMapper.class);
 
-  PaymentGatewayResponse toPaymentGatewayResponse(PaymentGatewayEntity paymentGateway);
+  PaymentGatewayResponse toPaymentGatewayResponse(PaymentGateway paymentGateway);
 }

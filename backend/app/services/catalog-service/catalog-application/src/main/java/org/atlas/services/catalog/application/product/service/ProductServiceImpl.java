@@ -9,7 +9,7 @@ import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.services.catalog.application.product.mapper.ProductMapper;
-import org.atlas.services.catalog.domain.entity.ProductEntity;
+import org.atlas.services.catalog.domain.entity.Product;
 import org.atlas.services.catalog.domain.error.CatalogDomainError;
 import org.atlas.services.catalog.port.in.product.model.RetrieveProductListInput;
 import org.atlas.services.catalog.port.in.product.model.RetrieveProductListInput.Mode;
@@ -30,8 +30,8 @@ public class ProductServiceImpl implements ProductService {
   private final ObjectProvider<ProductSearchService> searchServiceProvider;
 
   @Override
-  public PagingResult<ProductEntity> retrieveProductList(RetrieveProductListInput input) {
-    PagingResult<ProductEntity> productPage;
+  public PagingResult<Product> retrieveProductList(RetrieveProductListInput input) {
+    PagingResult<Product> productPage;
     if (Objects.requireNonNull(input.getMode()) == Mode.SEARCH) {
       productPage = retrieveBySearch(input);
     } else {
@@ -43,7 +43,7 @@ public class ProductServiceImpl implements ProductService {
     return productPage;
   }
 
-  private PagingResult<ProductEntity> retrieveBySearch(RetrieveProductListInput input) {
+  private PagingResult<Product> retrieveBySearch(RetrieveProductListInput input) {
     ProductSearchService productSearchService = searchServiceProvider.getIfAvailable();
     if (productSearchService == null) {
       log.warn("Search service is not available, fallback to database query");
@@ -59,7 +59,7 @@ public class ProductServiceImpl implements ProductService {
       return PagingResult.empty();
     }
 
-    List<ProductEntity> products = productRepository.findByIdIn(
+    List<Product> products = productRepository.findByIdIn(
         matchedProductIdsPage.getData());
     if (CollectionUtil.isEmpty(products)) {
       return PagingResult.empty();
@@ -67,23 +67,23 @@ public class ProductServiceImpl implements ProductService {
     return PagingResult.of(products, matchedProductIdsPage.getPagination());
   }
 
-  private PagingResult<ProductEntity> retrieveByDatabase(RetrieveProductListInput input) {
+  private PagingResult<Product> retrieveByDatabase(RetrieveProductListInput input) {
     ProductRepository.FindProductCriteria criteria = ProductMapper.INSTANCE.toFindProductCriteria(
         input);
     criteria.setInStock(true);
     return productRepository.findByCriteria(criteria, input.getPagingRequest());
   }
 
-  private void attachImages(PagingResult<ProductEntity> productPage) {
+  private void attachImages(PagingResult<Product> productPage) {
     productPage.getData()
         .forEach(product -> product.setImage(productImageService.getImage(product.getId())));
   }
 
   @Override
   @Cache(name = "product", key = "#productId", ttl = 3600)
-  public ProductEntity retrieveProduct(String productId) throws Exception {
+  public Product retrieveProduct(String productId) throws Exception {
     // Get from DB
-    ProductEntity product = productRepository.findById(productId)
+    Product product = productRepository.findById(productId)
         .orElseThrow(() -> new DomainException(CatalogDomainError.PRODUCT_NOT_FOUND));
 
     // Set image

@@ -10,17 +10,17 @@ import lombok.Setter;
 import org.atlas.libs.framework.domain.shared.user.UserRole;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
-import org.atlas.services.user.domain.entity.UserEntity;
+import org.atlas.services.user.domain.entity.User;
 
 public interface UserRepository {
 
-  PagingResult<UserEntity> findByCriteria(FindUserCriteria criteria, PagingRequest pagingRequest);
+  PagingResult<User> findByCriteria(FindUserCriteria criteria, PagingRequest pagingRequest);
 
-  List<UserEntity> findByIdIn(List<String> ids);
+  List<User> findByIdIn(List<String> ids);
 
-  Optional<UserEntity> findById(String id);
+  Optional<User> findById(String id);
 
-  Optional<UserEntity> findByEmail(String email);
+  Optional<User> findByEmail(String email);
 
   boolean existsByEmail(String email);
 
@@ -28,9 +28,9 @@ public interface UserRepository {
 
   Long countAll();
 
-  void insert(UserEntity user);
+  void insert(User user);
 
-  void update(UserEntity user);
+  void update(User user);
 
   void deleteById(String id);
 

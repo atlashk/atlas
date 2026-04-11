@@ -11,7 +11,7 @@ import org.atlas.libs.framework.security.SecurityContextUtil;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.services.order.application.cart.aggregator.CartAggregator;
 import org.atlas.services.order.application.cart.constant.CartConstant;
-import org.atlas.services.order.domain.entity.CartItemEntity;
+import org.atlas.services.order.domain.entity.CartItem;
 import org.atlas.services.order.domain.error.OrderDomainError;
 import org.atlas.services.order.port.in.cart.service.CartService;
 import org.atlas.services.order.port.out.repository.CartRepository;
@@ -29,16 +29,16 @@ public class CartServiceImpl implements CartService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<CartItemEntity> retrieveCart() {
+  public List<CartItem> retrieveCart() {
     String userId = SecurityContextUtil.requirePrincipal().getUserId();
-    Optional<List<CartItemEntity>> cartCache = cacheService.getList(CartConstant.CART_CACHE, userId,
-        CartItemEntity.class);
+    Optional<List<CartItem>> cartCache = cacheService.getList(CartConstant.CART_CACHE, userId,
+        CartItem.class);
     return cartCache.orElseGet(() -> loadAndCacheCartItems(userId));
   }
 
   @Override
   @Transactional
-  public List<CartItemEntity> addCartItem(String productId, Integer quantity) {
+  public List<CartItem> addCartItem(String productId, Integer quantity) {
     String userId = SecurityContextUtil.requirePrincipal().getUserId();
     cartRepository.upsertCartItem(userId, productId, quantity);
     return loadAndCacheCartItems(userId);
@@ -46,7 +46,7 @@ public class CartServiceImpl implements CartService {
 
   @Override
   @Transactional
-  public List<CartItemEntity> updateQuantity(String productId, Integer quantity) {
+  public List<CartItem> updateQuantity(String productId, Integer quantity) {
     String userId = SecurityContextUtil.requirePrincipal().getUserId();
     if (quantity > 0) {
       cartRepository.updateQuantity(userId, productId, quantity);
@@ -58,7 +58,7 @@ public class CartServiceImpl implements CartService {
 
   @Override
   @Transactional
-  public List<CartItemEntity> removeCartItem(String productId) {
+  public List<CartItem> removeCartItem(String productId) {
     String userId = SecurityContextUtil.requirePrincipal().getUserId();
     cartRepository.removeCartItem(userId, productId);
     return loadAndCacheCartItems(userId);
@@ -66,15 +66,15 @@ public class CartServiceImpl implements CartService {
 
   @Override
   @Transactional
-  public List<CartItemEntity> clearCart() {
+  public List<CartItem> clearCart() {
     String userId = SecurityContextUtil.requirePrincipal().getUserId();
     cartRepository.removeAllCartItems(userId);
     cacheService.evict(CartConstant.CART_CACHE, userId);
     return Collections.emptyList();
   }
 
-  private List<CartItemEntity> loadAndCacheCartItems(String userId) {
-    List<CartItemEntity> cartItems = cartRepository.findByUserId(userId);
+  private List<CartItem> loadAndCacheCartItems(String userId) {
+    List<CartItem> cartItems = cartRepository.findByUserId(userId);
     if (CollectionUtil.isEmpty(cartItems)) {
       return Collections.emptyList();
     }

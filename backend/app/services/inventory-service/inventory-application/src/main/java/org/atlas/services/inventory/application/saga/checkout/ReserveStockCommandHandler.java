@@ -21,10 +21,10 @@ import org.atlas.libs.framework.saga.core.messaging.payload.SagaCompensation;
 import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.libs.framework.util.JsonUtil;
-import org.atlas.services.inventory.domain.entity.ReservationEntity;
+import org.atlas.services.inventory.domain.entity.Reservation;
 import org.atlas.services.inventory.domain.entity.ReservationStatus;
 import org.atlas.services.inventory.domain.entity.ReservationStrategy;
-import org.atlas.services.inventory.domain.entity.StockEntity;
+import org.atlas.services.inventory.domain.entity.Stock;
 import org.atlas.services.inventory.domain.error.InventoryDomainError;
 import org.atlas.services.inventory.port.out.messaging.StockEventMessagePublisher;
 import org.atlas.services.inventory.port.out.repository.ReservationRepository;
@@ -69,7 +69,7 @@ public class ReserveStockCommandHandler {
       }
 
       // Insert new reservation
-      ReservationEntity reservation = ReservationEntity.builder()
+      Reservation reservation = Reservation.builder()
           .id(sequenceGenerator.generate(SequenceType.RESERVATION))
           .orderId(checkoutSagaData.getOrderId())
           .productId(orderItem.getProduct().getId())
@@ -100,20 +100,20 @@ public class ReserveStockCommandHandler {
 
   private void reserveStockWithConstraint(String productId, Integer quantity)
       throws InsufficientStockException {
-    StockEntity reservedStock = stockRepository.reserveStockWithConstraint(productId, quantity);
+    Stock reservedStock = stockRepository.reserveStockWithConstraint(productId, quantity);
     publishOutOfStockEventIfNeeded(reservedStock);
   }
 
   private void reserveStockWithPessimisticLock(String productId, Integer quantity)
       throws InsufficientStockException {
-    StockEntity reservedStock = stockRepository.reserveStockWithPessimisticLock(productId,
+    Stock reservedStock = stockRepository.reserveStockWithPessimisticLock(productId,
         quantity);
     publishOutOfStockEventIfNeeded(reservedStock);
   }
 
   private void reserveStockWithOptimisticLock(String productId, Integer quantity)
       throws InsufficientStockException {
-    StockEntity reservedStock = stockRepository.reserveStockWithOptimisticLock(productId, quantity);
+    Stock reservedStock = stockRepository.reserveStockWithOptimisticLock(productId, quantity);
     publishOutOfStockEventIfNeeded(reservedStock);
   }
 
@@ -130,7 +130,7 @@ public class ReserveStockCommandHandler {
       }
 
       // Check stock availability
-      StockEntity stock = stockRepository.findByProductId(productId)
+      Stock stock = stockRepository.findByProductId(productId)
           .orElseThrow(() -> new DomainException(InventoryDomainError.STOCK_NOT_FOUND));
       if (stock.getAvailableQuantity() < quantity) {
         throw new InsufficientStockException();
@@ -163,11 +163,11 @@ public class ReserveStockCommandHandler {
           final String productId = orderItem.getProduct().getId();
 
           // Check reservation exists or not
-          ReservationEntity reservation = reservationRepository.findByOrderIdAndProductId(
+          Reservation reservation = reservationRepository.findByOrderIdAndProductId(
                   orderId, productId)
               .orElseThrow(() -> new DomainException(InventoryDomainError.RESERVATION_NOT_FOUND));
 
-          StockEntity stock = stockRepository.findByProductId(productId)
+          Stock stock = stockRepository.findByProductId(productId)
               .orElseThrow(() -> new DomainException(InventoryDomainError.STOCK_NOT_FOUND));
           Integer currentAvailableQuantity = stock.getAvailableQuantity();
 
@@ -190,7 +190,7 @@ public class ReserveStockCommandHandler {
     return SagaCompensationResult.success();
   }
 
-  private void publishOutOfStockEventIfNeeded(StockEntity stock) {
+  private void publishOutOfStockEventIfNeeded(Stock stock) {
     if (stock.isOutOfStock()) {
       StockStatusChangedEvent event = new StockStatusChangedEvent();
       event.setProductId(stock.getProductId());

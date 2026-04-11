@@ -16,9 +16,9 @@ import org.atlas.libs.framework.saga.core.command.SagaCommandResult;
 import org.atlas.libs.framework.saga.core.messaging.SagaMessagePublisher;
 import org.atlas.libs.framework.saga.core.messaging.payload.SagaCommandReply;
 import org.atlas.libs.framework.util.JsonUtil;
-import org.atlas.services.payment.domain.entity.PaymentEntity;
+import org.atlas.services.payment.domain.entity.Payment;
 import org.atlas.services.payment.domain.entity.PaymentEventStatus;
-import org.atlas.services.payment.domain.entity.PaymentGatewayEntity;
+import org.atlas.services.payment.domain.entity.PaymentGateway;
 import org.atlas.services.payment.port.in.model.CreatePaymentEventInput;
 import org.atlas.services.payment.port.in.model.RetrievePaymentGatewayInput;
 import org.atlas.services.payment.port.in.model.UpdatePaymentEventInput;
@@ -52,7 +52,7 @@ public class PaymentWebhookServiceImpl implements PaymentWebhookService {
         paymentGatewayCode, rawPayload, headers);
 
     // Find payment gateway
-    PaymentGatewayEntity paymentGateway = paymentGatewayService.retrievePaymentGateway(
+    PaymentGateway paymentGateway = paymentGatewayService.retrievePaymentGateway(
         RetrievePaymentGatewayInput.builder()
             .code(paymentGatewayCode)
             .build()
@@ -103,7 +103,7 @@ public class PaymentWebhookServiceImpl implements PaymentWebhookService {
       AsyncUtil.executeTask(() -> {
         // Retrieve payment
         final String paymentId = handleResult.getPaymentId();
-        PaymentEntity payment = paymentService.retrievePayment(paymentId);
+        Payment payment = paymentService.retrievePayment(paymentId);
 
         tracingService.joinSpan(payment.getTraceId(), payment.getSpanId(),
             "saga.checkout.command.payment.webhook", () -> {

@@ -1,6 +1,6 @@
 package org.atlas.services.user.application.mapper;
 
-import org.atlas.services.user.domain.entity.UserEntity;
+import org.atlas.services.user.domain.entity.User;
 import org.atlas.services.user.port.in.model.admin.CreateUserInput;
 import org.atlas.services.user.port.in.model.admin.RetrieveUserListInput;
 import org.atlas.services.user.port.in.model.admin.UpdateUserInput;
@@ -21,12 +21,12 @@ public interface UserAdminMapper {
 
   FindUserCriteria toFindUserCriteria(RetrieveUserListInput input);
 
-  UserEntity toUser(CreateUserInput input);
+  User toUser(CreateUserInput input);
 
-  void merge(UpdateUserInput input, @MappingTarget UserEntity user);
+  void merge(UpdateUserInput input, @MappingTarget User user);
 
   // Entity --> Output
   // -----------------------------------------------------------------------------------------------
 
-  UserOutput toUser(UserEntity user);
+  UserOutput toUser(User user);
 }

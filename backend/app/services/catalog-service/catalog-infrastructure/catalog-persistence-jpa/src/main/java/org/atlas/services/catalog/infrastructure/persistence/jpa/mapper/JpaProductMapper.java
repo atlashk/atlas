@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.atlas.libs.framework.util.CollectionUtil;
-import org.atlas.services.catalog.domain.entity.ProductEntity;
+import org.atlas.services.catalog.domain.entity.Product;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.entity.JpaProductAttributeEntity;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.entity.JpaProductDetailsEntity;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.entity.JpaProductEntity;
@@ -31,17 +31,17 @@ public interface JpaProductMapper {
 
   JpaProductMapper INSTANCE = Mappers.getMapper(JpaProductMapper.class);
 
-  ProductEntity toProduct(JpaProductEntity jpaProduct);
+  Product toProduct(JpaProductEntity jpaProduct);
 
   @Mapping(target = "details", ignore = true)
   @Mapping(target = "attributes", ignore = true)
-  JpaProductEntity toJpaProduct(ProductEntity product);
+  JpaProductEntity toJpaProduct(Product product);
 
   /**
-   * After mapping for {@link ProductEntity} to {@link JpaProductEntity} - handles bidirectional relationships
+   * After mapping for {@link Product} to {@link JpaProductEntity} - handles bidirectional relationships
    */
   @AfterMapping
-  default void afterToJpaProduct(@MappingTarget JpaProductEntity jpaProduct, ProductEntity product) {
+  default void afterToJpaProduct(@MappingTarget JpaProductEntity jpaProduct, Product product) {
     if (jpaProduct.getDetails() != null) {
       jpaProduct.getDetails().setProduct(jpaProduct);
     }
@@ -57,13 +57,13 @@ public interface JpaProductMapper {
 
   @Mapping(target = "details", ignore = true)
   @Mapping(target = "attributes", ignore = true)
-  void merge(ProductEntity product, @MappingTarget JpaProductEntity jpaProduct);
+  void merge(Product product, @MappingTarget JpaProductEntity jpaProduct);
 
   /**
    * After mapping for merge operation - handles complex relationship updates
    */
   @AfterMapping
-  default void afterMerge(@MappingTarget JpaProductEntity jpaProduct, ProductEntity product) {
+  default void afterMerge(@MappingTarget JpaProductEntity jpaProduct, Product product) {
     // Merge product details
     if (product.getDetails() != null) {
       if (jpaProduct.getDetails() != null) {

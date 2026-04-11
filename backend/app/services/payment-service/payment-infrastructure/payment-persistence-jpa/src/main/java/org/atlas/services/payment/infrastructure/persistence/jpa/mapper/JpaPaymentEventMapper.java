@@ -1,6 +1,6 @@
 package org.atlas.services.payment.infrastructure.persistence.jpa.mapper;
 
-import org.atlas.services.payment.domain.entity.PaymentEventEntity;
+import org.atlas.services.payment.domain.entity.PaymentEvent;
 import org.atlas.services.payment.infrastructure.persistence.jpa.entity.JpaPaymentEventEntity;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
@@ -15,7 +15,7 @@ public interface JpaPaymentEventMapper {
 
   JpaPaymentEventMapper INSTANCE = Mappers.getMapper(JpaPaymentEventMapper.class);
 
-  PaymentEventEntity toPaymentEvent(JpaPaymentEventEntity jpaPaymentEvent);
+  PaymentEvent toPaymentEvent(JpaPaymentEventEntity jpaPaymentEvent);
 
-  JpaPaymentEventEntity toJpaPaymentEvent(PaymentEventEntity paymentEvent);
+  JpaPaymentEventEntity toJpaPaymentEvent(PaymentEvent paymentEvent);
 }

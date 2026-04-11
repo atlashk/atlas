@@ -22,11 +22,11 @@ import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.services.order.application.order.mapper.OrderMapper;
-import org.atlas.services.order.domain.entity.CartItemEntity;
-import org.atlas.services.order.domain.entity.OrderEntity;
-import org.atlas.services.order.domain.entity.OrderEntity.OrderItem;
-import org.atlas.services.order.domain.entity.OrderEntity.PaymentSnapshot;
-import org.atlas.services.order.domain.entity.OrderEntity.ProductSnapshot;
+import org.atlas.services.order.domain.entity.CartItem;
+import org.atlas.services.order.domain.entity.Order;
+import org.atlas.services.order.domain.entity.Order.OrderItem;
+import org.atlas.services.order.domain.entity.Order.PaymentSnapshot;
+import org.atlas.services.order.domain.entity.Order.ProductSnapshot;
 import org.atlas.services.order.domain.error.OrderDomainError;
 import org.atlas.services.order.port.in.cart.service.CartService;
 import org.atlas.services.order.port.in.order.model.CheckoutInput;
@@ -51,7 +51,7 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   @Transactional(readOnly = true)
-  public PagingResult<OrderEntity> retrieveOrderList(RetrieveOrderListInput input) {
+  public PagingResult<Order> retrieveOrderList(RetrieveOrderListInput input) {
     OrderRepository.FindOrderCriteria criteria = OrderMapper.INSTANCE.toFindOrderCriteria(input);
     criteria.setUserId(SecurityContextUtil.requirePrincipal().getUserId());
     return orderRepository.findByCriteria(criteria, input.getPagingRequest());
@@ -62,7 +62,7 @@ public class OrderServiceImpl implements OrderService {
   public RetrieveOrderStatusOutput retrieveOrderStatus(String id) {
     String userId = SecurityContextUtil.requirePrincipal().getUserId();
 
-    OrderEntity order = orderRepository.findById(id)
+    Order order = orderRepository.findById(id)
         .orElseThrow(() -> new DomainException(OrderDomainError.ORDER_NOT_FOUND.getErrorCode(), OrderDomainError.ORDER_NOT_FOUND.getMessageCode()));
 
     if (!Objects.equals(order.getUser().getId(), userId)) {
@@ -79,7 +79,7 @@ public class OrderServiceImpl implements OrderService {
     String userId = SecurityContextUtil.requirePrincipal().getUserId();
 
     // Retrieve cart
-    List<CartItemEntity> cartItems = cartService.retrieveCart();
+    List<CartItem> cartItems = cartService.retrieveCart();
     if (CollectionUtil.isEmpty(cartItems)) {
       throw new DomainException(OrderDomainError.CART_EMPTY);
     }
@@ -96,7 +96,7 @@ public class OrderServiceImpl implements OrderService {
 
     try {
       // Insert new order into DB
-      OrderEntity order = newOrder(input, cartItems);
+      Order order = newOrder(input, cartItems);
       orderRepository.insert(order);
       log.info("Order created successfully for user {}", userId);
 
@@ -115,7 +115,7 @@ public class OrderServiceImpl implements OrderService {
     }
   }
 
-  private String obtainLockKey(String userId, List<CartItemEntity> cartItems) {
+  private String obtainLockKey(String userId, List<CartItem> cartItems) {
     StringBuilder signature = new StringBuilder();
     cartItems.stream().sorted(
             Comparator.comparing(cartItem -> cartItem.getProduct().getId())) // Sort for consistency
@@ -125,8 +125,8 @@ public class OrderServiceImpl implements OrderService {
     return String.format("checkout:%s:%s", userId, hash);
   }
 
-  private OrderEntity newOrder(CheckoutInput input, List<CartItemEntity> cartItems) {
-    OrderEntity order = new OrderEntity();
+  private Order newOrder(CheckoutInput input, List<CartItem> cartItems) {
+    Order order = new Order();
     order.setId(sequenceGenerator.generate(SequenceType.ORDER));
     order.setStatus(OrderStatus.AWAITING_STOCK_RESERVATION);
     order.setTraceId(tracingService.getCurrentTraceId());
@@ -138,7 +138,7 @@ public class OrderServiceImpl implements OrderService {
     // Address
     order.setAddress(OrderMapper.INSTANCE.toAddress(input.getAddress()));
 
-    for (CartItemEntity cartItem : cartItems) {
+    for (CartItem cartItem : cartItems) {
       ProductSnapshot product = OrderMapper.INSTANCE.toProductSnapshot(cartItem.getProduct());
 
       OrderItem orderItem = OrderItem.builder()

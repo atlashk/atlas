@@ -7,7 +7,7 @@ import org.atlas.libs.framework.api.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.catalog.api.rest.category.mapper.CategoryMapper;
 import org.atlas.services.catalog.api.rest.category.model.CategoryResponse;
-import org.atlas.services.catalog.domain.entity.CategoryEntity;
+import org.atlas.services.catalog.domain.entity.Category;
 import org.atlas.services.catalog.port.in.category.service.CategoryService;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,7 +27,7 @@ public class CategoryController {
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve a list of all categories")
   public ApiResponseWrapper<List<CategoryResponse>> retrieveAllCategory() {
-    List<CategoryEntity> categories = categoryService.retrieveAllCategory();
+    List<Category> categories = categoryService.retrieveAllCategory();
     List<CategoryResponse> responseData = MapperUtil.mapList(categories,
         CategoryMapper.INSTANCE::toCategoryResponse);
     return ApiResponseWrapper.success(responseData);

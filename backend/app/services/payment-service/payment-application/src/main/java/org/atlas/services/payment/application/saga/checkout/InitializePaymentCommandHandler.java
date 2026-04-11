@@ -15,7 +15,7 @@ import org.atlas.libs.framework.saga.core.messaging.payload.SagaCommand;
 import org.atlas.libs.framework.util.ExceptionUtil;
 import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.libs.framework.util.StringUtil;
-import org.atlas.services.payment.domain.entity.PaymentGatewayEntity;
+import org.atlas.services.payment.domain.entity.PaymentGateway;
 import org.atlas.services.payment.port.in.model.CreatePaymentInput;
 import org.atlas.services.payment.port.in.model.RetrievePaymentGatewayInput;
 import org.atlas.services.payment.port.in.model.UpdatePaymentInput;
@@ -45,7 +45,7 @@ public class InitializePaymentCommandHandler {
     }
 
     // Find payment gateway
-    PaymentGatewayEntity paymentGateway = paymentGatewayService.retrievePaymentGateway(
+    PaymentGateway paymentGateway = paymentGatewayService.retrievePaymentGateway(
         RetrievePaymentGatewayInput.builder()
             .id(checkoutSagaData.getPaymentGatewayId())
             .build()

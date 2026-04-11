@@ -7,7 +7,7 @@ import org.atlas.libs.framework.security.jwt.JwtUtil;
 import org.atlas.libs.framework.security.Principal;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.user.port.out.repository.UserRepository;
-import org.atlas.services.user.domain.entity.UserEntity;
+import org.atlas.services.user.domain.entity.User;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2RefreshToken;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
@@ -47,14 +47,14 @@ public class PublicClientRefreshTokenGenerator implements OAuth2TokenGenerator<O
     if (StringUtil.isBlank(principalName)) {
       return null;
     }
-    Optional<UserEntity> optionalUser = userRepository.findByEmail(principalName);
+    Optional<User> optionalUser = userRepository.findByEmail(principalName);
     if (optionalUser.isEmpty()) {
       optionalUser = userRepository.findById(principalName);
     }
     if (optionalUser.isEmpty()) {
       return null;
     }
-    UserEntity user = optionalUser.get();
+    User user = optionalUser.get();
     Principal principal = user.toPrincipal();
     Instant issuedAt = Instant.now();
     Instant expiresAt =

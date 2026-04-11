@@ -1,6 +1,6 @@
 package org.atlas.services.catalog.infrastructure.persistence.jpa.mapper;
 
-import org.atlas.services.catalog.domain.entity.ProductDetailsEntity;
+import org.atlas.services.catalog.domain.entity.ProductDetails;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.entity.JpaProductDetailsEntity;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
@@ -18,11 +18,11 @@ public interface JpaProductDetailsMapper {
   JpaProductDetailsMapper INSTANCE = Mappers.getMapper(JpaProductDetailsMapper.class);
 
   @Mapping(target = "product", ignore = true)
-  JpaProductDetailsEntity toJpaProductDetails(ProductDetailsEntity productDetails);
+  JpaProductDetailsEntity toJpaProductDetails(ProductDetails productDetails);
 
-  ProductDetailsEntity toProductDetails(JpaProductDetailsEntity jpaProductDetails);
+  ProductDetails toProductDetails(JpaProductDetailsEntity jpaProductDetails);
 
   @Mapping(target = "product", ignore = true)
   @Mapping(target = "productId", ignore = true)
-  void merge(ProductDetailsEntity productDetails, @MappingTarget JpaProductDetailsEntity jpaProductDetails);
+  void merge(ProductDetails productDetails, @MappingTarget JpaProductDetailsEntity jpaProductDetails);
 }

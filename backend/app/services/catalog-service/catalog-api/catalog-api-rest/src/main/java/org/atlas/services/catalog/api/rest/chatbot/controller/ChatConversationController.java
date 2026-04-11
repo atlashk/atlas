@@ -15,7 +15,7 @@ import org.atlas.services.catalog.api.rest.chatbot.model.ChatConversationRespons
 import org.atlas.services.catalog.api.rest.chatbot.model.RetrieveChatConversationListRequest;
 import org.atlas.services.catalog.api.rest.chatbot.model.SendChatMessageRequest;
 import org.atlas.services.catalog.api.rest.chatbot.model.SendChatMessageResponse;
-import org.atlas.services.catalog.domain.entity.chatbot.ChatConversationEntity;
+import org.atlas.services.catalog.domain.entity.chatbot.ChatConversation;
 import org.atlas.services.catalog.port.in.chatbot.model.ChatSendMessageInput;
 import org.atlas.services.catalog.port.in.chatbot.model.SendMessageOutput;
 import org.atlas.services.catalog.port.in.chatbot.service.ChatConversationService;
@@ -44,7 +44,7 @@ public class ChatConversationController {
   ) {
     PagingRequest pagingRequest = PagingRequest.of(request.getPage() - 1, request.getSize(),
         "createdAt", SortOrder.DESC);
-    List<ChatConversationEntity> conversations = chatConversationService.retrieveConversationList(
+    List<ChatConversation> conversations = chatConversationService.retrieveConversationList(
         pagingRequest);
     List<ChatConversationResponse> responseData = MapperUtil.mapList(conversations,
         ChatConversationMapper.INSTANCE::toConversationResponse);

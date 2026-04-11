@@ -21,7 +21,7 @@ import org.atlas.libs.framework.util.CollectionUtil;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
-public class ProductEntity extends DomainEntity {
+public class Product extends DomainEntity {
 
   @EqualsAndHashCode.Include
   private String id;
@@ -47,26 +47,26 @@ public class ProductEntity extends DomainEntity {
 
   // One-To-One
   @Valid
-  private ProductDetailsEntity details;
+  private ProductDetails details;
 
   // One-To-Many
   @Valid
-  private List<ProductAttributeEntity> attributes;
+  private List<ProductAttribute> attributes;
 
   // Many-To-One
-  private BrandEntity brand;
+  private Brand brand;
 
   // Many-To-Many
-  private List<CategoryEntity> categories;
+  private List<Category> categories;
 
-  public void addAttribute(ProductAttributeEntity attribute) {
+  public void addAttribute(ProductAttribute attribute) {
     if (attributes == null) {
       attributes = new ArrayList<>();
     }
     attributes.add(attribute);
   }
 
-  public void addCategory(CategoryEntity category) {
+  public void addCategory(Category category) {
     if (categories == null) {
       categories = new ArrayList<>();
     }

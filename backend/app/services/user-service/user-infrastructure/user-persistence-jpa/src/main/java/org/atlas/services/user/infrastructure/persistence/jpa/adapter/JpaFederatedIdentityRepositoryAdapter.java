@@ -3,7 +3,7 @@ package org.atlas.services.user.infrastructure.persistence.jpa.adapter;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.security.FederatedIdentityProvider;
-import org.atlas.services.user.domain.entity.FederatedIdentityEntity;
+import org.atlas.services.user.domain.entity.FederatedIdentity;
 import org.atlas.services.user.infrastructure.persistence.jpa.mapper.JpaFederatedIdentityMapper;
 import org.atlas.services.user.infrastructure.persistence.jpa.repository.JpaFederatedIdentityRepository;
 import org.atlas.services.user.port.out.repository.FederatedIdentityRepository;
@@ -16,21 +16,21 @@ public class JpaFederatedIdentityRepositoryAdapter implements FederatedIdentityR
   private final JpaFederatedIdentityRepository jpaFederatedIdentityRepository;
 
   @Override
-  public Optional<FederatedIdentityEntity> findByUserIdAndProvider(
+  public Optional<FederatedIdentity> findByUserIdAndProvider(
       String userId, FederatedIdentityProvider provider) {
     return jpaFederatedIdentityRepository.findByUserIdAndProvider(userId, provider)
         .map(JpaFederatedIdentityMapper.INSTANCE::toFederatedIdentity);
   }
 
   @Override
-  public Optional<FederatedIdentityEntity> findByProviderAndProviderUserId(
+  public Optional<FederatedIdentity> findByProviderAndProviderUserId(
       FederatedIdentityProvider provider, String providerUserId) {
     return jpaFederatedIdentityRepository.findByProviderAndProviderUserId(provider, providerUserId)
         .map(JpaFederatedIdentityMapper.INSTANCE::toFederatedIdentity);
   }
 
   @Override
-  public void insert(FederatedIdentityEntity federatedIdentity) {
+  public void insert(FederatedIdentity federatedIdentity) {
     jpaFederatedIdentityRepository.insert(
         JpaFederatedIdentityMapper.INSTANCE.toJpaFederatedIdentity(federatedIdentity));
   }

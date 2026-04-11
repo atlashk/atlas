@@ -11,7 +11,7 @@ import org.atlas.services.user.port.in.model.RegisterInput;
 import org.atlas.services.user.port.in.service.UserService;
 import org.atlas.services.user.port.out.repository.UserRepository;
 import org.atlas.services.user.application.mapper.UserMapper;
-import org.atlas.services.user.domain.entity.UserEntity;
+import org.atlas.services.user.domain.entity.User;
 import org.atlas.services.user.domain.error.UserDomainError;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService {
   public void register(RegisterInput input) {
     checkValidity(input);
 
-    UserEntity user = UserMapper.INSTANCE.toUser(input);
+    User user = UserMapper.INSTANCE.toUser(input);
     user.setPassword(passwordEncoder.encode(input.getPassword()));
     user.setRole(UserRole.USER);
     userRepository.insert(user);

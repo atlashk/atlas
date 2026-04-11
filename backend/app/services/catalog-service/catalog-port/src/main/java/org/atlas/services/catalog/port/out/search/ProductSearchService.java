@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
-import org.atlas.services.catalog.domain.entity.ProductEntity;
+import org.atlas.services.catalog.domain.entity.Product;
 
 public interface ProductSearchService {
 
@@ -22,9 +22,9 @@ public interface ProductSearchService {
    */
   PagingResult<String> search(SearchProductCriteria criteria, PagingRequest pagingRequest);
 
-  void save(ProductEntity product);
+  void save(Product product);
 
-  void saveAll(List<ProductEntity> products);
+  void saveAll(List<Product> products);
 
   void delete(String productId);
 

@@ -7,7 +7,7 @@ import org.atlas.libs.framework.api.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.payment.api.rest.mapper.PaymentGatewayMapper;
 import org.atlas.services.payment.api.rest.model.PaymentGatewayResponse;
-import org.atlas.services.payment.domain.entity.PaymentGatewayEntity;
+import org.atlas.services.payment.domain.entity.PaymentGateway;
 import org.atlas.services.payment.port.in.service.PaymentGatewayService;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -26,7 +26,7 @@ public class PaymentGatewayController {
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve a list of available payment gateways")
   public ApiResponseWrapper<List<PaymentGatewayResponse>> retrievePaymentGatewayList() throws Exception {
-    List<PaymentGatewayEntity> paymentGateways = paymentGatewayService.retrievePaymentGatewayList();
+    List<PaymentGateway> paymentGateways = paymentGatewayService.retrievePaymentGatewayList();
     List<PaymentGatewayResponse> responseData = MapperUtil.mapList(paymentGateways,
         PaymentGatewayMapper.INSTANCE::toPaymentGatewayResponse);
     return ApiResponseWrapper.success(responseData);

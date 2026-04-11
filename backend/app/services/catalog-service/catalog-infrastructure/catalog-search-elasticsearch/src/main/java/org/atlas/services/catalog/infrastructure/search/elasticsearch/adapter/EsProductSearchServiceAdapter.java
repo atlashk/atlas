@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.CollectionUtil;
-import org.atlas.services.catalog.domain.entity.ProductEntity;
+import org.atlas.services.catalog.domain.entity.Product;
 import org.atlas.services.catalog.infrastructure.search.elasticsearch.document.EsProduct;
 import org.atlas.services.catalog.infrastructure.search.elasticsearch.mapper.EsProductMapper;
 import org.atlas.services.catalog.infrastructure.search.elasticsearch.repository.EsProductRepository;
@@ -66,13 +66,13 @@ public class EsProductSearchServiceAdapter implements ProductSearchService {
   }
 
   @Override
-  public void save(ProductEntity product) {
+  public void save(Product product) {
     EsProduct esProduct = EsProductMapper.INSTANCE.toProductDocument(product);
     elasticsearchProductRepository.save(esProduct);
   }
 
   @Override
-  public void saveAll(List<ProductEntity> products) {
+  public void saveAll(List<Product> products) {
     if (CollectionUtil.isEmpty(products)) {
       return;
     }

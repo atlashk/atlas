@@ -16,7 +16,7 @@ import org.atlas.libs.framework.security.Principal;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
-public class UserEntity extends DomainEntity {
+public class User extends DomainEntity {
 
   @EqualsAndHashCode.Include
   private String id;

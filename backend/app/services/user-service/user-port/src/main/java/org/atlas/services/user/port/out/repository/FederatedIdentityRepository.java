@@ -2,15 +2,15 @@ package org.atlas.services.user.port.out.repository;
 
 import java.util.Optional;
 import org.atlas.libs.framework.security.FederatedIdentityProvider;
-import org.atlas.services.user.domain.entity.FederatedIdentityEntity;
+import org.atlas.services.user.domain.entity.FederatedIdentity;
 
 public interface FederatedIdentityRepository {
 
-  Optional<FederatedIdentityEntity> findByUserIdAndProvider(
+  Optional<FederatedIdentity> findByUserIdAndProvider(
       String userId, FederatedIdentityProvider provider);
 
-  Optional<FederatedIdentityEntity> findByProviderAndProviderUserId(
+  Optional<FederatedIdentity> findByProviderAndProviderUserId(
       FederatedIdentityProvider provider, String providerUserId);
 
-  void insert(FederatedIdentityEntity federatedIdentity);
+  void insert(FederatedIdentity federatedIdentity);
 }

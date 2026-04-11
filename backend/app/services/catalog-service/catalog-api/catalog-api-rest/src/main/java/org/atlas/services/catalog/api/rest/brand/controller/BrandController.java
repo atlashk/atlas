@@ -7,7 +7,7 @@ import org.atlas.libs.framework.api.rest.ApiResponseWrapper;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.catalog.api.rest.brand.mapper.BrandMapper;
 import org.atlas.services.catalog.api.rest.brand.model.BrandResponse;
-import org.atlas.services.catalog.domain.entity.BrandEntity;
+import org.atlas.services.catalog.domain.entity.Brand;
 import org.atlas.services.catalog.port.in.brand.service.BrandService;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -26,7 +26,7 @@ public class BrandController {
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve a list of all brands")
   public ApiResponseWrapper<List<BrandResponse>> retrieveAllBrand() {
-    List<BrandEntity> brands = brandService.retrieveAllBrand();
+    List<Brand> brands = brandService.retrieveAllBrand();
     List<BrandResponse> responseData = MapperUtil.mapList(brands,
         BrandMapper.INSTANCE::toBrandResponse);
     return ApiResponseWrapper.success(responseData);

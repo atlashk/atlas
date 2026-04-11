@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.config.ApplicationConfigService;
 import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.services.user.port.out.repository.UserRepository;
-import org.atlas.services.user.domain.entity.UserEntity;
+import org.atlas.services.user.domain.entity.User;
 import org.atlas.services.user.domain.error.UserDomainError;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,7 +23,7 @@ public class AuthenticationAdminService {
 
   @Transactional
   public void resetPassword(String userId) throws Exception {
-    UserEntity user = userRepository.findById(userId)
+    User user = userRepository.findById(userId)
         .orElseThrow(() -> new DomainException(UserDomainError.USER_NOT_FOUND));
 
     String defaultPassword = Optional.ofNullable(

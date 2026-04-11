@@ -11,25 +11,25 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
-import org.atlas.services.catalog.domain.entity.ProductEntity;
+import org.atlas.services.catalog.domain.entity.Product;
 import org.atlas.services.catalog.domain.entity.ProductType;
 
 public interface ProductRepository {
 
-  PagingResult<ProductEntity> findByCriteria(FindProductCriteria criteria,
+  PagingResult<Product> findByCriteria(FindProductCriteria criteria,
       PagingRequest pagingRequest);
 
   Long countAll();
 
-  List<ProductEntity> findByIdIn(List<String> ids);
+  List<Product> findByIdIn(List<String> ids);
 
-  Optional<ProductEntity> findById(String id);
+  Optional<Product> findById(String id);
 
-  void insert(ProductEntity product);
+  void insert(Product product);
 
-  void insertAll(List<ProductEntity> products);
+  void insertAll(List<Product> products);
 
-  void update(ProductEntity product);
+  void update(Product product);
 
   void deleteById(String id);
 

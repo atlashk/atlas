@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.MapperUtil;
-import org.atlas.services.catalog.domain.entity.ProductEntity;
+import org.atlas.services.catalog.domain.entity.Product;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.entity.JpaProductEntity;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.mapper.JpaProductMapper;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.repository.CustomJpaProductRepository;
@@ -24,7 +24,7 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
   private final CustomJpaProductRepository customJpaProductRepository;
 
   @Override
-  public PagingResult<ProductEntity> findByCriteria(FindProductCriteria criteria,
+  public PagingResult<Product> findByCriteria(FindProductCriteria criteria,
       PagingRequest pagingRequest) {
     long totalCount = customJpaProductRepository.countByCriteria(criteria);
     if (totalCount == 0L) {
@@ -32,19 +32,19 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
     }
     List<JpaProductEntity> jpaProducts = customJpaProductRepository.findByCriteria(criteria,
         pagingRequest);
-    List<ProductEntity> products = MapperUtil.mapList(jpaProducts,
+    List<Product> products = MapperUtil.mapList(jpaProducts,
         JpaProductMapper.INSTANCE::toProduct);
     return PagingResult.of(products, totalCount, pagingRequest);
   }
 
   @Override
-  public List<ProductEntity> findByIdIn(List<String> ids) {
+  public List<Product> findByIdIn(List<String> ids) {
     List<JpaProductEntity> jpaProducts = jpaProductRepository.findAllByIdInWithAssociations(ids);
     return MapperUtil.mapList(jpaProducts, JpaProductMapper.INSTANCE::toProduct);
   }
 
   @Override
-  public Optional<ProductEntity> findById(String id) {
+  public Optional<Product> findById(String id) {
     return jpaProductRepository.findByIdWithAssociations(id)
         .map(JpaProductMapper.INSTANCE::toProduct);
   }
@@ -55,20 +55,20 @@ public class JpaProductRepositoryAdapter implements ProductRepository {
   }
 
   @Override
-  public void insert(ProductEntity product) {
+  public void insert(Product product) {
     JpaProductEntity jpaProduct = JpaProductMapper.INSTANCE.toJpaProduct(product);
     jpaProductRepository.insert(jpaProduct);
   }
 
   @Override
-  public void insertAll(List<ProductEntity> products) {
+  public void insertAll(List<Product> products) {
     List<JpaProductEntity> jpaProducts =
         MapperUtil.mapList(products, JpaProductMapper.INSTANCE::toJpaProduct);
     jpaProductRepository.saveAll(jpaProducts);
   }
 
   @Override
-  public void update(ProductEntity product) {
+  public void update(Product product) {
     JpaProductEntity jpaProduct = jpaProductRepository.getReferenceById(product.getId());
     JpaProductMapper.INSTANCE.merge(product, jpaProduct);
     jpaProductRepository.save(jpaProduct);

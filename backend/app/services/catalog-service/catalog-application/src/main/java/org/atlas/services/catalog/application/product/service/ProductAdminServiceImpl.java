@@ -16,7 +16,7 @@ import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.catalog.application.product.constant.ProductConstant;
 import org.atlas.services.catalog.application.product.mapper.ProductAdminMapper;
 import org.atlas.services.catalog.application.product.mapper.ProductEventMapper;
-import org.atlas.services.catalog.domain.entity.ProductEntity;
+import org.atlas.services.catalog.domain.entity.Product;
 import org.atlas.services.catalog.domain.error.CatalogDomainError;
 import org.atlas.services.catalog.port.in.product.model.admin.CreateProductInput;
 import org.atlas.services.catalog.port.in.product.model.admin.ExportProductInput;
@@ -60,10 +60,10 @@ public class ProductAdminServiceImpl implements ProductAdminService {
   private final ProductPdfWriter productPdfWriter;
 
   @Override
-  public PagingResult<ProductEntity> retrieveProductList(RetrieveProductListInput input) {
+  public PagingResult<Product> retrieveProductList(RetrieveProductListInput input) {
     ProductRepository.FindProductCriteria criteria = ProductAdminMapper.INSTANCE.toFindProductCriteria(
         input);
-    PagingResult<ProductEntity> productPage = productRepository.findByCriteria(criteria,
+    PagingResult<Product> productPage = productRepository.findByCriteria(criteria,
         input.getPagingRequest());
 
     // Set image
@@ -75,8 +75,8 @@ public class ProductAdminServiceImpl implements ProductAdminService {
 
   @Override
   @Transactional(readOnly = true)
-  public ProductEntity retrieveProduct(String id) {
-    ProductEntity product = productRepository.findById(id)
+  public Product retrieveProduct(String id) {
+    Product product = productRepository.findById(id)
         .orElseThrow(() -> new DomainException(CatalogDomainError.PRODUCT_NOT_FOUND));
 
     // Set image
@@ -91,7 +91,7 @@ public class ProductAdminServiceImpl implements ProductAdminService {
     log.info("Creating product: name={}", input.getProduct().getName());
 
     // Save product to DB
-    ProductEntity product = input.getProduct();
+    Product product = input.getProduct();
     product.setId(sequenceGenerator.generate(SequenceType.PRODUCT));
     productRepository.insert(product);
     log.debug("Product saved to database: id={}", product.getId());
@@ -124,8 +124,8 @@ public class ProductAdminServiceImpl implements ProductAdminService {
     log.info("Updating product: id={}", input.getProduct().getId());
 
     // Update product in DB
-    ProductEntity product = input.getProduct();
-    ProductEntity existingProduct = productRepository.findById(product.getId())
+    Product product = input.getProduct();
+    Product existingProduct = productRepository.findById(product.getId())
         .orElseThrow(() -> new DomainException(CatalogDomainError.PRODUCT_NOT_FOUND));
     ProductAdminMapper.INSTANCE.merge(product, existingProduct);
     productRepository.update(product);
@@ -158,7 +158,7 @@ public class ProductAdminServiceImpl implements ProductAdminService {
     log.info("Deleting product: id={}", id);
 
     // Delete product from DB
-    ProductEntity product = productRepository.findById(id)
+    Product product = productRepository.findById(id)
         .orElseThrow(() -> new DomainException(CatalogDomainError.PRODUCT_NOT_FOUND));
     productRepository.deleteById(product.getId());
     log.debug("Product deleted from database: id={}", product.getId());
@@ -204,8 +204,8 @@ public class ProductAdminServiceImpl implements ProductAdminService {
 
     try {
       // Save products to DB in batch
-      List<ProductEntity> products = rows.stream().map(row -> {
-        ProductEntity product = ProductReadRowMapper.INSTANCE.toProduct(row);
+      List<Product> products = rows.stream().map(row -> {
+        Product product = ProductReadRowMapper.INSTANCE.toProduct(row);
         product.setId(sequenceGenerator.generate(SequenceType.PRODUCT));
         return product;
       }).toList();
@@ -228,7 +228,7 @@ public class ProductAdminServiceImpl implements ProductAdminService {
   public byte[] exportProduct(ExportProductInput input) throws Exception {
     ProductRepository.FindProductCriteria criteria = ProductAdminMapper.INSTANCE.toFindProductCriteria(
         input);
-    PagingResult<ProductEntity> products = productRepository.findByCriteria(criteria,
+    PagingResult<Product> products = productRepository.findByCriteria(criteria,
         PagingRequest.unpaged());
 
     // Use custom mapping method for complex attribute mapping

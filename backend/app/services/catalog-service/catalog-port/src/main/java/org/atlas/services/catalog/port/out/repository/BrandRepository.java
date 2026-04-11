@@ -1,9 +1,9 @@
 package org.atlas.services.catalog.port.out.repository;
 
 import java.util.List;
-import org.atlas.services.catalog.domain.entity.BrandEntity;
+import org.atlas.services.catalog.domain.entity.Brand;
 
 public interface BrandRepository {
 
-  List<BrandEntity> findAll();
+  List<Brand> findAll();
 }

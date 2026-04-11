@@ -17,7 +17,7 @@ import org.atlas.libs.framework.util.CollectionUtil;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
-public class CartItemEntity extends DomainEntity {
+public class CartItem extends DomainEntity {
 
   @EqualsAndHashCode.Include
   private Integer id;
@@ -35,12 +35,12 @@ public class CartItemEntity extends DomainEntity {
     return product.getPrice().multiply(BigDecimal.valueOf(quantity));
   }
 
-  public static BigDecimal totalAmount(List<CartItemEntity> cartItems) {
+  public static BigDecimal totalAmount(List<CartItem> cartItems) {
     if (CollectionUtil.isEmpty(cartItems)) {
       return BigDecimal.ZERO;
     }
     return cartItems.stream()
-        .map(CartItemEntity::getAmount)
+        .map(CartItem::getAmount)
         .reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 

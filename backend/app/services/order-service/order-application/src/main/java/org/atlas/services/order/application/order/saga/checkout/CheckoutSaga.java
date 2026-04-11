@@ -32,8 +32,8 @@ import org.atlas.libs.framework.template.ResolveTemplateException;
 import org.atlas.libs.framework.template.TemplateService;
 import org.atlas.libs.framework.util.JsonUtil;
 import org.atlas.libs.framework.util.StringUtil;
-import org.atlas.services.order.domain.entity.OrderEntity;
-import org.atlas.services.order.domain.entity.OrderEntity.CancellationReason;
+import org.atlas.services.order.domain.entity.Order;
+import org.atlas.services.order.domain.entity.Order.CancellationReason;
 import org.atlas.services.order.domain.error.OrderDomainError;
 import org.atlas.services.order.port.in.cart.service.CartService;
 import org.atlas.services.order.port.out.repository.OrderRepository;
@@ -63,7 +63,7 @@ public class CheckoutSaga {
   @SagaCommandReplyHandler(command = CheckoutCommand.RESERVE_STOCK)
   public void handleReserveStockReply(SagaEntity saga, SagaCommandResult sagaCommandResult) {
     // Update order
-    OrderEntity order = orderRepository.findBySagaId(saga.getId())
+    Order order = orderRepository.findBySagaId(saga.getId())
         .orElseThrow(() -> new DomainException(OrderDomainError.ORDER_NOT_FOUND));
     if (sagaCommandResult.isSuccess()) {
       order.setStatus(OrderStatus.AWAITING_PAYMENT_INITIALIZED);
@@ -87,7 +87,7 @@ public class CheckoutSaga {
 
   @SagaCommandReplyHandler(command = CheckoutCommand.INITIALIZE_PAYMENT)
   public void handleInitializePaymentReply(SagaEntity saga, SagaCommandResult sagaCommandResult) {
-    OrderEntity order = orderRepository.findBySagaId(saga.getId())
+    Order order = orderRepository.findBySagaId(saga.getId())
         .orElseThrow(() -> new DomainException(OrderDomainError.ORDER_NOT_FOUND));
 
     if (sagaCommandResult.isSuccess()) {
@@ -123,7 +123,7 @@ public class CheckoutSaga {
   @SagaCommandReplyHandler(command = CheckoutCommand.PROCESS_PAYMENT)
   public void handleProcessPaymentReply(SagaEntity saga, SagaCommandResult sagaCommandResult) {
     // Update order
-    OrderEntity order = orderRepository.findBySagaId(saga.getId())
+    Order order = orderRepository.findBySagaId(saga.getId())
         .orElseThrow(() -> new DomainException(OrderDomainError.ORDER_NOT_FOUND));
 
     ProcessPaymentCommandMetadata metadata = JsonUtil.JSON_MAPPER.convertValue(
@@ -177,7 +177,7 @@ public class CheckoutSaga {
     sagaOrchestrator.endSaga(saga.getId());
   }
 
-  private void sendEmailForFulfilledOrder(OrderEntity order) {
+  private void sendEmailForFulfilledOrder(Order order) {
     try {
       // Model
       Map<String, Object> model = new HashMap<>();

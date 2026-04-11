@@ -2,7 +2,7 @@ package org.atlas.services.user.infrastructure.idp.adapter;
 
 import lombok.RequiredArgsConstructor;
 import org.atlas.services.user.port.out.idp.IdpService;
-import org.atlas.services.user.domain.entity.UserEntity;
+import org.atlas.services.user.domain.entity.User;
 import org.atlas.services.user.infrastructure.idp.client.KeycloakUserClient;
 import org.springframework.stereotype.Service;
 
@@ -13,12 +13,12 @@ public class KeycloakIdpAdapter implements IdpService {
   private final KeycloakUserClient keycloakUserClient;
   
   @Override
-  public void createUser(UserEntity user, String password) {
+  public void createUser(User user, String password) {
     keycloakUserClient.createUser(user, password);
   }
 
   @Override
-  public void updateUser(UserEntity user) {
+  public void updateUser(User user) {
     keycloakUserClient.updateUser(user);
   }
 

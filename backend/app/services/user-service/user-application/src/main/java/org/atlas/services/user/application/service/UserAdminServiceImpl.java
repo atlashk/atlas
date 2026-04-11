@@ -8,7 +8,7 @@ import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.services.user.application.mapper.UserAdminMapper;
-import org.atlas.services.user.domain.entity.UserEntity;
+import org.atlas.services.user.domain.entity.User;
 import org.atlas.services.user.domain.error.UserDomainError;
 import org.atlas.services.user.port.in.model.admin.CreateUserInput;
 import org.atlas.services.user.port.in.model.admin.RetrieveUserListInput;
@@ -38,7 +38,7 @@ public class UserAdminServiceImpl implements UserAdminService {
   @Transactional(readOnly = true)
   public PagingResult<UserOutput> retrieveUserList(RetrieveUserListInput input) {
     FindUserCriteria criteria = UserAdminMapper.INSTANCE.toFindUserCriteria(input);
-    PagingResult<UserEntity> userPage = userRepository.findByCriteria(criteria,
+    PagingResult<User> userPage = userRepository.findByCriteria(criteria,
         input.getPagingRequest());
     return MapperUtil.mapPage(userPage, UserAdminMapper.INSTANCE::toUser);
   }
@@ -56,7 +56,7 @@ public class UserAdminServiceImpl implements UserAdminService {
   public String createUser(CreateUserInput input) {
     checkValidity(input);
 
-    UserEntity user = UserAdminMapper.INSTANCE.toUser(input);
+    User user = UserAdminMapper.INSTANCE.toUser(input);
     user.setId(sequenceGenerator.generate(SequenceType.USER));
     user.setPassword(passwordEncoder.encode(input.getPassword()));
     userRepository.insert(user);
@@ -78,7 +78,7 @@ public class UserAdminServiceImpl implements UserAdminService {
   @Override
   @Transactional
   public void updateUser(UpdateUserInput input) {
-    UserEntity user = userRepository.findById(input.getId())
+    User user = userRepository.findById(input.getId())
         .orElseThrow(() -> new DomainException(UserDomainError.USER_NOT_FOUND));
 
     UserAdminMapper.INSTANCE.merge(input, user);
@@ -94,7 +94,7 @@ public class UserAdminServiceImpl implements UserAdminService {
   @Override
   @Transactional
   public void deleteUser(String id) {
-    UserEntity user = userRepository.findById(id)
+    User user = userRepository.findById(id)
         .orElseThrow(() -> new DomainException(UserDomainError.USER_NOT_FOUND));
 
     userRepository.deleteById(user.getId());

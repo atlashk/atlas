@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.services.payment.application.mapper.PaymentEventMapper;
-import org.atlas.services.payment.domain.entity.PaymentEventEntity;
+import org.atlas.services.payment.domain.entity.PaymentEvent;
 import org.atlas.services.payment.domain.error.PaymentDomainError;
 import org.atlas.services.payment.port.in.model.CreatePaymentEventInput;
 import org.atlas.services.payment.port.in.model.UpdatePaymentEventInput;
@@ -23,7 +23,7 @@ public class PaymentEventServiceImpl implements PaymentEventService {
   @Override
   @Transactional
   public Integer createPaymentEvent(CreatePaymentEventInput input) {
-    PaymentEventEntity paymentEvent = PaymentEventMapper.INSTANCE.toPaymentEvent(input);
+    PaymentEvent paymentEvent = PaymentEventMapper.INSTANCE.toPaymentEvent(input);
     paymentEventRepository.insert(paymentEvent);
     return paymentEvent.getId();
   }
@@ -31,7 +31,7 @@ public class PaymentEventServiceImpl implements PaymentEventService {
   @Override
   @Transactional
   public void updatePaymentEvent(UpdatePaymentEventInput input) {
-    PaymentEventEntity payment = paymentEventRepository.findById(input.getId())
+    PaymentEvent payment = paymentEventRepository.findById(input.getId())
         .orElseThrow(() -> new DomainException(PaymentDomainError.PAYMENT_NOT_FOUND));
     PaymentEventMapper.INSTANCE.merge(input, payment);
     paymentEventRepository.update(payment);

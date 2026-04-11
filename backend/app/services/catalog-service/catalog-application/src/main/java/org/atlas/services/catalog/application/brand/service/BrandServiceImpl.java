@@ -2,7 +2,7 @@ package org.atlas.services.catalog.application.brand.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.atlas.services.catalog.domain.entity.BrandEntity;
+import org.atlas.services.catalog.domain.entity.Brand;
 import org.atlas.services.catalog.port.in.brand.service.BrandService;
 import org.atlas.services.catalog.port.out.repository.BrandRepository;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ public class BrandServiceImpl implements BrandService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<BrandEntity> retrieveAllBrand() {
+  public List<Brand> retrieveAllBrand() {
     return brandRepository.findAll();
   }
 }

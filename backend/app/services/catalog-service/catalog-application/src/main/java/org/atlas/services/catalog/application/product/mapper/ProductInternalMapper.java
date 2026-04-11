@@ -1,7 +1,7 @@
 package org.atlas.services.catalog.application.product.mapper;
 
 import org.atlas.libs.framework.internal.catalog.model.ProductOutput;
-import org.atlas.services.catalog.domain.entity.ProductEntity;
+import org.atlas.services.catalog.domain.entity.Product;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
@@ -14,5 +14,5 @@ public interface ProductInternalMapper {
   // Entity --> Output
   // -----------------------------------------------------------------------------------------------
 
-  ProductOutput toProductOutput(ProductEntity product);
+  ProductOutput toProductOutput(Product product);
 }

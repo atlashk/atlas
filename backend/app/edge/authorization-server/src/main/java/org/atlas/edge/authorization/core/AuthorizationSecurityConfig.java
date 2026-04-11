@@ -16,7 +16,7 @@ import org.atlas.libs.framework.security.SecurityConstant;
 import org.atlas.edge.authorization.core.sso.SsoAuthenticationFailureHandler;
 import org.atlas.edge.authorization.core.sso.SsoAuthenticationSuccessHandler;
 import org.atlas.services.user.port.out.repository.UserRepository;
-import org.atlas.services.user.domain.entity.UserEntity;
+import org.atlas.services.user.domain.entity.User;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -177,11 +177,11 @@ public class AuthorizationSecurityConfig {
         return;
       }
       String username = context.getPrincipal().getName();
-      Optional<UserEntity> optionalUser = userRepository.findByEmail(username);
+      Optional<User> optionalUser = userRepository.findByEmail(username);
       if (optionalUser.isEmpty()) {
         return;
       }
-      UserEntity user = optionalUser.get();
+      User user = optionalUser.get();
       context.getClaims().subject(user.getId());
       if (context.getAuthorizedScopes().contains("profile")) {
         context.getClaims().claim(Claim.FIRST_NAME.getClaimName(), user.getFirstName());

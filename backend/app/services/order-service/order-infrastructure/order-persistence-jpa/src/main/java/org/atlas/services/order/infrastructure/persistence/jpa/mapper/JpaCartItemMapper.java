@@ -1,7 +1,7 @@
 package org.atlas.services.order.infrastructure.persistence.jpa.mapper;
 
 import java.util.List;
-import org.atlas.services.order.domain.entity.CartItemEntity;
+import org.atlas.services.order.domain.entity.CartItem;
 import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaCartItemEntity;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
@@ -21,9 +21,9 @@ public interface JpaCartItemMapper {
   @Mapping(target = "id", source = "jpaCartItem.id")
   @Mapping(target = "quantity", source = "jpaCartItem.quantity")
   @Mapping(target = "userId", source = "userId")
-  CartItemEntity toCartItem(String userId, JpaCartItemEntity jpaCartItem);
+  CartItem toCartItem(String userId, JpaCartItemEntity jpaCartItem);
 
-  default List<CartItemEntity> toCartItems(String userId, List<JpaCartItemEntity> jpaCartItems) {
+  default List<CartItem> toCartItems(String userId, List<JpaCartItemEntity> jpaCartItems) {
     return jpaCartItems.stream()
         .map(jpaCartItem -> toCartItem(userId, jpaCartItem))
         .toList();

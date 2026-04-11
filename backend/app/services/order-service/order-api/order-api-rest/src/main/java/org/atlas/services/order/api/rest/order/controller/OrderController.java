@@ -16,7 +16,7 @@ import org.atlas.services.order.api.rest.order.model.CheckoutResponse;
 import org.atlas.services.order.api.rest.order.model.OrderResponse;
 import org.atlas.services.order.api.rest.order.model.RetrieveOrderListRequest;
 import org.atlas.services.order.api.rest.order.model.RetrieveOrderStatusResponse;
-import org.atlas.services.order.domain.entity.OrderEntity;
+import org.atlas.services.order.domain.entity.Order;
 import org.atlas.services.order.port.in.order.model.CheckoutInput;
 import org.atlas.services.order.port.in.order.model.RetrieveOrderListInput;
 import org.atlas.services.order.port.in.order.model.RetrieveOrderStatusOutput;
@@ -47,7 +47,7 @@ public class OrderController {
       @Valid @RequestBody RetrieveOrderListRequest request) {
     RetrieveOrderListInput input = OrderMapper.INSTANCE.toRetrieveOrderListInput(request);
     input.setPagingRequest(PagingRequest.of(request.getPage() - 1, request.getSize(), "createdAt", SortOrder.DESC));
-    PagingResult<OrderEntity> orderPage = orderService.retrieveOrderList(input);
+    PagingResult<Order> orderPage = orderService.retrieveOrderList(input);
     PagingResult<OrderResponse> responseData = MapperUtil.mapPage(orderPage,
         OrderMapper.INSTANCE::toOrderResponse);
     return ApiResponseWrapper.successPage(responseData);

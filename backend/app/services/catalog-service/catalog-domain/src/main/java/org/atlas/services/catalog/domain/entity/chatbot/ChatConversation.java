@@ -1,4 +1,4 @@
-package org.atlas.services.catalog.domain.entity;
+package org.atlas.services.catalog.domain.entity.chatbot;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,14 +14,12 @@ import org.atlas.libs.framework.domain.entity.DomainEntity;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
-public class ProductAttributeEntity extends DomainEntity {
+public class ChatConversation extends DomainEntity {
 
   @EqualsAndHashCode.Include
-  private Integer id;
+  private String id;
 
-  private String productId;
+  private String userId;
 
-  private String name;
-
-  private String value;
+  private String title;
 }

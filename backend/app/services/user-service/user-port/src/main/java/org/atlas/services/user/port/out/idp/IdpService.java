@@ -1,12 +1,12 @@
 package org.atlas.services.user.port.out.idp;
 
-import org.atlas.services.user.domain.entity.UserEntity;
+import org.atlas.services.user.domain.entity.User;
 
 public interface IdpService {
 
-  void createUser(UserEntity user, String password);
+  void createUser(User user, String password);
 
-  void updateUser(UserEntity user);
+  void updateUser(User user);
 
   void deleteUser(String idpUserId);
 

@@ -1,4 +1,4 @@
-package org.atlas.services.payment.domain.entity;
+package org.atlas.services.catalog.domain.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,20 +14,10 @@ import org.atlas.libs.framework.domain.entity.DomainEntity;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
-public class PaymentEventEntity extends DomainEntity {
+public class ProductDetails extends DomainEntity {
 
   @EqualsAndHashCode.Include
-  private Integer id;
+  private String productId;
 
-  private Integer paymentGatewayId;
-
-  private String paymentId;
-
-  private String payload;
-
-  private String headers;
-
-  private PaymentEventStatus status;
-
-  private String error;
+  private String description;
 }

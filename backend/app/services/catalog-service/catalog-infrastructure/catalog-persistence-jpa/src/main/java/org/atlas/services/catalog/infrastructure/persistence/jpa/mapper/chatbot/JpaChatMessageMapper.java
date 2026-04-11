@@ -1,6 +1,6 @@
 package org.atlas.services.catalog.infrastructure.persistence.jpa.mapper.chatbot;
 
-import org.atlas.services.catalog.domain.entity.chatbot.ChatMessageEntity;
+import org.atlas.services.catalog.domain.entity.chatbot.ChatMessage;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.entity.chatbot.JpaChatMessageEntity;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
@@ -15,7 +15,7 @@ public interface JpaChatMessageMapper {
 
   JpaChatMessageMapper INSTANCE = Mappers.getMapper(JpaChatMessageMapper.class);
 
-  JpaChatMessageEntity toJpaMessage(ChatMessageEntity message);
+  JpaChatMessageEntity toJpaMessage(ChatMessage message);
 
-  ChatMessageEntity toMessage(JpaChatMessageEntity jpaMessage);
+  ChatMessage toMessage(JpaChatMessageEntity jpaMessage);
 }

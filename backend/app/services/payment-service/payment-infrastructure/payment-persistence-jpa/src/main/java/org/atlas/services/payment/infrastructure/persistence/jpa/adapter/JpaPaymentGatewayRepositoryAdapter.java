@@ -5,7 +5,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.util.MapperUtil;
-import org.atlas.services.payment.domain.entity.PaymentGatewayEntity;
+import org.atlas.services.payment.domain.entity.PaymentGateway;
 import org.atlas.services.payment.infrastructure.persistence.jpa.entity.JpaPaymentGatewayEntity;
 import org.atlas.services.payment.infrastructure.persistence.jpa.mapper.JpaPaymentGatewayMapper;
 import org.atlas.services.payment.infrastructure.persistence.jpa.repository.JpaPaymentGatewayRepository;
@@ -20,20 +20,20 @@ public class JpaPaymentGatewayRepositoryAdapter implements PaymentGatewayReposit
   private final JpaPaymentGatewayRepository jpaPaymentGatewayRepository;
 
   @Override
-  public List<PaymentGatewayEntity> findAll() {
+  public List<PaymentGateway> findAll() {
     List<JpaPaymentGatewayEntity> jpaPaymentGateways = jpaPaymentGatewayRepository.findAll();
     return MapperUtil.mapList(jpaPaymentGateways,
         JpaPaymentGatewayMapper.INSTANCE::toPaymentGateway);
   }
 
   @Override
-  public Optional<PaymentGatewayEntity> findById(Integer id) {
+  public Optional<PaymentGateway> findById(Integer id) {
     return jpaPaymentGatewayRepository.findById(id)
         .map(JpaPaymentGatewayMapper.INSTANCE::toPaymentGateway);
   }
 
   @Override
-  public Optional<PaymentGatewayEntity> findByCode(String code) {
+  public Optional<PaymentGateway> findByCode(String code) {
     return jpaPaymentGatewayRepository.findByCode(code)
         .map(JpaPaymentGatewayMapper.INSTANCE::toPaymentGateway);
   }

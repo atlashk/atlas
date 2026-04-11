@@ -1,11 +1,11 @@
 package org.atlas.services.order.port.out.repository;
 
 import java.util.List;
-import org.atlas.services.order.domain.entity.CartItemEntity;
+import org.atlas.services.order.domain.entity.CartItem;
 
 public interface CartRepository {
 
-  List<CartItemEntity> findByUserId(String userId);
+  List<CartItem> findByUserId(String userId);
 
   void upsertCartItem(String userId, String productId, Integer quantity);
 

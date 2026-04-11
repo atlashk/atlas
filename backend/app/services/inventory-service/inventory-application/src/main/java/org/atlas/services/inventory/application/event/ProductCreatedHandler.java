@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.event.DomainEventType;
 import org.atlas.libs.framework.domain.event.contract.catalog.ProductCreatedEvent;
 import org.atlas.libs.framework.domain.event.handler.DomainEventHandler;
-import org.atlas.services.inventory.domain.entity.StockEntity;
+import org.atlas.services.inventory.domain.entity.Stock;
 import org.atlas.services.inventory.port.out.repository.StockRepository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +18,7 @@ public class ProductCreatedHandler {
   
   @Transactional
   public void handle(ProductCreatedEvent event) {
-    StockEntity stock = new StockEntity();
+    Stock stock = new Stock();
     stock.setProductId(event.getProductId());
     stock.setAvailableQuantity(event.getInitialQuantity());
     stock.setReservedQuantity(0);

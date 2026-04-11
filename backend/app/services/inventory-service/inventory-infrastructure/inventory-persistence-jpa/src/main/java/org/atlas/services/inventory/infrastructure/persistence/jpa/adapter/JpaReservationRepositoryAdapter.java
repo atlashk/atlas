@@ -2,7 +2,7 @@ package org.atlas.services.inventory.infrastructure.persistence.jpa.adapter;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.atlas.services.inventory.domain.entity.ReservationEntity;
+import org.atlas.services.inventory.domain.entity.Reservation;
 import org.atlas.services.inventory.domain.entity.ReservationStatus;
 import org.atlas.services.inventory.infrastructure.persistence.jpa.entity.JpaReservationEntity;
 import org.atlas.services.inventory.infrastructure.persistence.jpa.mapper.JpaReservationMapper;
@@ -17,20 +17,20 @@ public class JpaReservationRepositoryAdapter implements ReservationRepository {
   private final JpaReservationRepository jpaReservationRepository;
 
   @Override
-  public Optional<ReservationEntity> findByOrderIdAndProductId(String orderId, String productId) {
+  public Optional<Reservation> findByOrderIdAndProductId(String orderId, String productId) {
     return jpaReservationRepository.findByOrderIdAndProductId(orderId, productId)
         .map(JpaReservationMapper.INSTANCE::toReservation);
   }
 
   @Override
-  public void insert(ReservationEntity reservation) {
+  public void insert(Reservation reservation) {
     JpaReservationEntity jpaReservation = JpaReservationMapper.INSTANCE.toJpaReservation(reservation);
     jpaReservationRepository.insert(jpaReservation);
     reservation.setId(jpaReservation.getId());
   }
 
   @Override
-  public void update(ReservationEntity reservation) {
+  public void update(Reservation reservation) {
     JpaReservationEntity jpaReservation = JpaReservationMapper.INSTANCE.toJpaReservation(reservation);
     jpaReservationRepository.save(jpaReservation);
   }

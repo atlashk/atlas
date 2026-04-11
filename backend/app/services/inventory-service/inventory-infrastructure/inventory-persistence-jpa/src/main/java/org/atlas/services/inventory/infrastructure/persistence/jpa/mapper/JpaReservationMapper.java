@@ -1,6 +1,6 @@
 package org.atlas.services.inventory.infrastructure.persistence.jpa.mapper;
 
-import org.atlas.services.inventory.domain.entity.ReservationEntity;
+import org.atlas.services.inventory.domain.entity.Reservation;
 import org.atlas.services.inventory.infrastructure.persistence.jpa.entity.JpaReservationEntity;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
@@ -15,7 +15,7 @@ public interface JpaReservationMapper {
 
   JpaReservationMapper INSTANCE = Mappers.getMapper(JpaReservationMapper.class);
 
-  JpaReservationEntity toJpaReservation(ReservationEntity reservation);
+  JpaReservationEntity toJpaReservation(Reservation reservation);
 
-  ReservationEntity toReservation(JpaReservationEntity jpaReservation);
+  Reservation toReservation(JpaReservationEntity jpaReservation);
 }

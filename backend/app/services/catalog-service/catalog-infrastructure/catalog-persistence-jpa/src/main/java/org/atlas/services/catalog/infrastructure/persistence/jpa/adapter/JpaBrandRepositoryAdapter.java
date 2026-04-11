@@ -3,7 +3,7 @@ package org.atlas.services.catalog.infrastructure.persistence.jpa.adapter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.util.MapperUtil;
-import org.atlas.services.catalog.domain.entity.BrandEntity;
+import org.atlas.services.catalog.domain.entity.Brand;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.entity.JpaBrandEntity;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.mapper.JpaBrandMapper;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.repository.JpaBrandRepository;
@@ -17,7 +17,7 @@ public class JpaBrandRepositoryAdapter implements BrandRepository {
   private final JpaBrandRepository jpaBrandRepository;
 
   @Override
-  public List<BrandEntity> findAll() {
+  public List<Brand> findAll() {
     List<JpaBrandEntity> jpaBrands = jpaBrandRepository.findAll();
     return MapperUtil.mapList(jpaBrands, JpaBrandMapper.INSTANCE::toBrand);
   }

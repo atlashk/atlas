@@ -2,12 +2,12 @@ package org.atlas.services.order.application.order.mapper;
 
 import org.atlas.libs.framework.saga.checkout.CheckoutSagaData;
 import org.atlas.libs.framework.security.Principal;
-import org.atlas.services.order.domain.entity.CartItemEntity;
-import org.atlas.services.order.domain.entity.OrderEntity;
-import org.atlas.services.order.domain.entity.OrderEntity.Address;
-import org.atlas.services.order.domain.entity.OrderEntity.OrderItem;
-import org.atlas.services.order.domain.entity.OrderEntity.ProductSnapshot;
-import org.atlas.services.order.domain.entity.OrderEntity.UserSnapshot;
+import org.atlas.services.order.domain.entity.CartItem;
+import org.atlas.services.order.domain.entity.Order;
+import org.atlas.services.order.domain.entity.Order.Address;
+import org.atlas.services.order.domain.entity.Order.OrderItem;
+import org.atlas.services.order.domain.entity.Order.ProductSnapshot;
+import org.atlas.services.order.domain.entity.Order.UserSnapshot;
 import org.atlas.services.order.port.in.order.model.CheckoutInput;
 import org.atlas.services.order.port.in.order.model.RetrieveOrderListInput;
 import org.atlas.services.order.port.out.repository.OrderRepository;
@@ -26,13 +26,13 @@ public interface OrderMapper {
   @Mapping(target = "id", source = "userId")
   UserSnapshot toUserSnapshot(Principal principal);
 
-  ProductSnapshot toProductSnapshot(CartItemEntity.Product product);
+  ProductSnapshot toProductSnapshot(CartItem.Product product);
 
   Address toAddress(CheckoutInput.Address address);
 
   @Mapping(target = "orderId", source = "id")
   @Mapping(target = "paymentGatewayId", source = "payment.paymentGatewayId")
-  CheckoutSagaData toCheckoutSagaData(OrderEntity entity);
+  CheckoutSagaData toCheckoutSagaData(Order entity);
 
   // Don't remove it
   CheckoutSagaData.User toCheckoutSagaDataUser(UserSnapshot userSnapshot);

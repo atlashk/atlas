@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.shared.user.UserRole;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.libs.framework.util.StringUtil;
-import org.atlas.services.user.domain.entity.UserEntity;
+import org.atlas.services.user.domain.entity.User;
 import org.atlas.services.user.infrastructure.idp.config.KeycloakProps;
 import org.atlas.services.user.infrastructure.idp.enums.KeycloakUserAttribute;
 import org.atlas.services.user.infrastructure.idp.exception.KeycloakClientException;
@@ -33,7 +33,7 @@ public class KeycloakUserClient {
   /**
    * @return Keycloak created user ID
    */
-  public String createUser(UserEntity user, String password) {
+  public String createUser(User user, String password) {
     String url = String.format("%s/admin/realms/%s/users",
         keycloakProps.getBaseUrl(), keycloakProps.getRealm());
 
@@ -73,7 +73,7 @@ public class KeycloakUserClient {
     }
   }
 
-  public void updateUser(UserEntity user) {
+  public void updateUser(User user) {
     String url = String.format("%s/admin/realms/%s/users/%s",
         keycloakProps.getBaseUrl(), keycloakProps.getRealm(), user.getId());
 
@@ -163,7 +163,7 @@ public class KeycloakUserClient {
     }
   }
 
-  private Map<String, Object> buildUserPayload(UserEntity user) {
+  private Map<String, Object> buildUserPayload(User user) {
     Map<String, Object> payload = new HashMap<>();
     payload.put("username", user.getId());
     payload.put("firstName", StringUtil.defaultIfBlank(user.getFirstName(), StringUtil.EMPTY));
@@ -177,7 +177,7 @@ public class KeycloakUserClient {
     return payload;
   }
 
-  private Map<String, Object> buildUserPayload(UserEntity user, String password) {
+  private Map<String, Object> buildUserPayload(User user, String password) {
     Map<String, Object> payload = buildUserPayload(user);
 
     // Password

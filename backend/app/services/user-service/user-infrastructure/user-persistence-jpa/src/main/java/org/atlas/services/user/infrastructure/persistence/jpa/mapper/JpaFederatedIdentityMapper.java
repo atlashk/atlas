@@ -1,6 +1,6 @@
 package org.atlas.services.user.infrastructure.persistence.jpa.mapper;
 
-import org.atlas.services.user.domain.entity.FederatedIdentityEntity;
+import org.atlas.services.user.domain.entity.FederatedIdentity;
 import org.atlas.services.user.infrastructure.persistence.jpa.entity.JpaFederatedIdentityEntity;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
@@ -15,7 +15,7 @@ public interface JpaFederatedIdentityMapper {
 
   JpaFederatedIdentityMapper INSTANCE = Mappers.getMapper(JpaFederatedIdentityMapper.class);
 
-  FederatedIdentityEntity toFederatedIdentity(JpaFederatedIdentityEntity jpaFederatedIdentity);
+  FederatedIdentity toFederatedIdentity(JpaFederatedIdentityEntity jpaFederatedIdentity);
 
-  JpaFederatedIdentityEntity toJpaFederatedIdentity(FederatedIdentityEntity federatedIdentity);
+  JpaFederatedIdentityEntity toJpaFederatedIdentity(FederatedIdentity federatedIdentity);
 }

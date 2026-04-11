@@ -1,6 +1,6 @@
 package org.atlas.services.catalog.infrastructure.persistence.jpa.mapper;
 
-import org.atlas.services.catalog.domain.entity.CategoryEntity;
+import org.atlas.services.catalog.domain.entity.Category;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.entity.JpaCategoryEntity;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
@@ -15,7 +15,7 @@ public interface JpaCategoryMapper {
 
   JpaCategoryMapper INSTANCE = Mappers.getMapper(JpaCategoryMapper.class);
 
-  JpaCategoryEntity toJpaCategory(CategoryEntity category);
+  JpaCategoryEntity toJpaCategory(Category category);
 
-  CategoryEntity toCategory(JpaCategoryEntity jpaCategory);
+  Category toCategory(JpaCategoryEntity jpaCategory);
 }

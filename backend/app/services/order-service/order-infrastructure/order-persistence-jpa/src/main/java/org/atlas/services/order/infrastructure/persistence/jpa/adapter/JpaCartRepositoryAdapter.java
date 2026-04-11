@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.persistence.DatabaseType;
 import org.atlas.libs.framework.persistence.DatabaseTypeResolver;
 import org.atlas.libs.persistence.jpa.helper.JpaDatabaseTypeResolver;
-import org.atlas.services.order.domain.entity.CartItemEntity;
+import org.atlas.services.order.domain.entity.CartItem;
 import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaCartItemEntity;
 import org.atlas.services.order.infrastructure.persistence.jpa.mapper.JpaCartItemMapper;
 import org.atlas.services.order.infrastructure.persistence.jpa.repository.JpaCartRepository;
@@ -20,7 +20,7 @@ public class JpaCartRepositoryAdapter implements CartRepository {
   private final DatabaseTypeResolver databaseTypeResolver;
 
   @Override
-  public List<CartItemEntity> findByUserId(String userId) {
+  public List<CartItem> findByUserId(String userId) {
     List<JpaCartItemEntity> jpaCartItems = jpaCartRepository.findByUserId(userId);
     return JpaCartItemMapper.INSTANCE.toCartItems(userId, jpaCartItems);
   }

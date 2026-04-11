@@ -1,8 +1,8 @@
 package org.atlas.services.order.infrastructure.persistence.jpa.mapper;
 
 import org.atlas.libs.framework.util.CollectionUtil;
-import org.atlas.services.order.domain.entity.OrderEntity;
-import org.atlas.services.order.domain.entity.OrderEntity.OrderItem;
+import org.atlas.services.order.domain.entity.Order;
+import org.atlas.services.order.domain.entity.Order.OrderItem;
 import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaOrderEntity;
 import org.atlas.services.order.infrastructure.persistence.jpa.entity.JpaOrderItemEntity;
 import org.mapstruct.AfterMapping;
@@ -35,7 +35,7 @@ public interface JpaOrderMapper {
   @Mapping(target = "payment.paymentMethod", source = "paymentMethod")
   @Mapping(target = "payment.paymentMethodDetails", source = "paymentMethodDetails")
   @Mapping(target = "payment.transactionId", source = "paymentTransactionId")
-  OrderEntity toOrder(JpaOrderEntity jpaOrder);
+  Order toOrder(JpaOrderEntity jpaOrder);
 
   @Mapping(target = "product.id", source = "productId")
   @Mapping(target = "product.name", source = "productName")
@@ -57,7 +57,7 @@ public interface JpaOrderMapper {
   @Mapping(target = "paymentMethodDetails", source = "payment.paymentMethodDetails")
   @Mapping(target = "paymentTransactionId", source = "payment.transactionId")
   @Mapping(target = "orderItems", ignore = true)
-  JpaOrderEntity toJpaOrder(OrderEntity order);
+  JpaOrderEntity toJpaOrder(Order order);
 
   @Mapping(target = "productId", source = "product.id")
   @Mapping(target = "productName", source = "product.name")
@@ -66,10 +66,10 @@ public interface JpaOrderMapper {
   JpaOrderItemEntity toJpaOrderItem(OrderItem orderItem);
 
   /**
-   * After mapping for {@link OrderEntity} to {@link JpaOrderEntity} - handles bidirectional relationships
+   * After mapping for {@link Order} to {@link JpaOrderEntity} - handles bidirectional relationships
    */
   @AfterMapping
-  default void afterToJpaOrder(@MappingTarget JpaOrderEntity jpaOrder, OrderEntity order) {
+  default void afterToJpaOrder(@MappingTarget JpaOrderEntity jpaOrder, Order order) {
     if (CollectionUtil.isNotEmpty(order.getOrderItems())) {
       order.getOrderItems().forEach(orderItem -> {
         JpaOrderItemEntity jpaOrderItem = toJpaOrderItem(orderItem);

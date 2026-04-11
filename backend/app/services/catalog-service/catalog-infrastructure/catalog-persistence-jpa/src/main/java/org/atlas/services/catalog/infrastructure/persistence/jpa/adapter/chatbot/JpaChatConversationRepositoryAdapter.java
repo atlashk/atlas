@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.libs.persistence.jpa.paging.JpaPagingUtil;
-import org.atlas.services.catalog.domain.entity.chatbot.ChatConversationEntity;
+import org.atlas.services.catalog.domain.entity.chatbot.ChatConversation;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.entity.chatbot.JpaChatConversationEntity;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.mapper.chatbot.JpaChatConversationMapper;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.repository.chatbot.JpaChatConversationRepository;
@@ -20,7 +20,7 @@ public class JpaChatConversationRepositoryAdapter implements ConversationReposit
   private final JpaChatConversationRepository jpaChatConversationRepository;
 
   @Override
-  public List<ChatConversationEntity> findByUserId(String userId, PagingRequest pagingRequest) {
+  public List<ChatConversation> findByUserId(String userId, PagingRequest pagingRequest) {
     Pageable pageable = JpaPagingUtil.convert(pagingRequest);
     List<JpaChatConversationEntity> jpaConversations =
         jpaChatConversationRepository.findByUserId(userId, pageable);
@@ -29,7 +29,7 @@ public class JpaChatConversationRepositoryAdapter implements ConversationReposit
   }
 
   @Override
-  public void insert(ChatConversationEntity conversation) {
+  public void insert(ChatConversation conversation) {
     JpaChatConversationEntity jpaConversation =
         JpaChatConversationMapper.INSTANCE.toJpaConversation(conversation);
     jpaChatConversationRepository.insert(jpaConversation);

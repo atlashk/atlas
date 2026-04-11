@@ -24,7 +24,7 @@ import org.atlas.edge.authorization.api.model.RefreshTokenRequest;
 import org.atlas.edge.authorization.api.model.RefreshTokenResponse;
 import org.atlas.edge.authorization.core.UserDetailsImpl;
 import org.atlas.services.user.port.out.repository.UserRepository;
-import org.atlas.services.user.domain.entity.UserEntity;
+import org.atlas.services.user.domain.entity.User;
 import org.atlas.services.user.domain.error.UserDomainError;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -59,7 +59,7 @@ public class AuthenticationService {
     String userId = JwtUtil.extractSubjectVerified(request.getRefreshToken());
 
     // Reissue tokens
-    UserEntity user = userRepository.findById(userId)
+    User user = userRepository.findById(userId)
         .orElseThrow(() -> new DomainException(UserDomainError.USER_NOT_FOUND));
     Principal principal = user.toPrincipal();
     String accessToken = JwtUtil.issueAccessToken(principal);
@@ -89,7 +89,7 @@ public class AuthenticationService {
   @Transactional
   public void changePassword(ChangePasswordRequest request) {
     String userId = SecurityContextUtil.requirePrincipal().getUserId();
-    UserEntity user = userRepository.findById(userId)
+    User user = userRepository.findById(userId)
         .orElseThrow(() -> new DomainException(UserDomainError.USER_NOT_FOUND));
 
     if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
@@ -115,7 +115,7 @@ public class AuthenticationService {
   private LoginResponse doLogin(Authentication authenticationToken) throws Exception {
     Authentication authentication = authenticationManager.authenticate(authenticationToken);
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-    UserEntity user = userRepository.findById(userDetails.getId())
+    User user = userRepository.findById(userDetails.getId())
         .orElseThrow(() -> new DomainException(UserDomainError.USER_NOT_FOUND));
     Principal principal = user.toPrincipal();
     String accessToken = JwtUtil.issueAccessToken(principal);

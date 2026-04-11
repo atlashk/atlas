@@ -1,4 +1,4 @@
-package org.atlas.services.catalog.domain.entity;
+package org.atlas.services.inventory.domain.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,16 +8,22 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.framework.domain.entity.DomainEntity;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
-public class BrandEntity extends DomainEntity {
+public class Reservation extends DomainEntity {
 
   @EqualsAndHashCode.Include
   private String id;
 
-  private String name;
+  private String orderId;
+
+  private String productId;
+
+  private Integer quantity;
+  
+  private ReservationStatus status;
 }

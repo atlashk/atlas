@@ -1,9 +1,9 @@
 package org.atlas.services.catalog.port.out.repository;
 
 import java.util.List;
-import org.atlas.services.catalog.domain.entity.CategoryEntity;
+import org.atlas.services.catalog.domain.entity.Category;
 
 public interface CategoryRepository {
 
-  List<CategoryEntity> findAll();
+  List<Category> findAll();
 }

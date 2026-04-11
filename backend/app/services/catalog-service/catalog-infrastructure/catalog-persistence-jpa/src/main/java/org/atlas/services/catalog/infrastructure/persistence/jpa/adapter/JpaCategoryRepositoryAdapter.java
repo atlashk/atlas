@@ -3,7 +3,7 @@ package org.atlas.services.catalog.infrastructure.persistence.jpa.adapter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.util.MapperUtil;
-import org.atlas.services.catalog.domain.entity.CategoryEntity;
+import org.atlas.services.catalog.domain.entity.Category;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.entity.JpaCategoryEntity;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.mapper.JpaCategoryMapper;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.repository.JpaCategoryRepository;
@@ -17,7 +17,7 @@ public class JpaCategoryRepositoryAdapter implements CategoryRepository {
   private final JpaCategoryRepository jpaCategoryRepository;
 
   @Override
-  public List<CategoryEntity> findAll() {
+  public List<Category> findAll() {
     List<JpaCategoryEntity> jpaCategories = jpaCategoryRepository.findAll();
     return MapperUtil.mapList(jpaCategories, JpaCategoryMapper.INSTANCE::toCategory);
   }

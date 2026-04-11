@@ -12,7 +12,7 @@ import org.atlas.libs.framework.internal.catalog.model.ProductOutput;
 import org.atlas.libs.framework.internal.catalog.model.RetrieveProductListInput;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.services.order.application.cart.mapper.CartMapper;
-import org.atlas.services.order.domain.entity.CartItemEntity;
+import org.atlas.services.order.domain.entity.CartItem;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,7 +22,7 @@ public class CartAggregator {
 
   private final ProductApiClient productApiClient;
 
-  public boolean aggregate(List<CartItemEntity> cartItems) {
+  public boolean aggregate(List<CartItem> cartItems) {
     if (cartItems == null) {
       throw new IllegalArgumentException("Cart items must be provided");
     }
@@ -32,11 +32,11 @@ public class CartAggregator {
   /**
    * @return false if at least one product is no longer available
    */
-  private boolean loadProducts(List<CartItemEntity> cartItems) {
+  private boolean loadProducts(List<CartItem> cartItems) {
     List<String> productIds = cartItems.stream()
-        .map(CartItemEntity::getProduct)
+        .map(CartItem::getProduct)
         .flatMap(product -> product == null ? Stream.empty() : Stream.of(product))
-        .map(CartItemEntity.Product::getId)
+        .map(CartItem.Product::getId)
         .toList();
     RetrieveProductListInput request = new RetrieveProductListInput(productIds);
     List<ProductOutput> products = productApiClient.call(request);
@@ -50,7 +50,7 @@ public class CartAggregator {
     // Update cart item's product
     Map<String, ProductOutput> productMap = products.stream()
         .collect(Collectors.toMap(ProductOutput::getId, Function.identity()));
-    for (CartItemEntity cartItem : cartItems) {
+    for (CartItem cartItem : cartItems) {
       String productId = cartItem.getProduct().getId();
       ProductOutput product = productMap.get(productId);
       if (product != null) {

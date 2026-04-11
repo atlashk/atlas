@@ -7,10 +7,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.atlas.services.catalog.domain.entity.BrandEntity;
-import org.atlas.services.catalog.domain.entity.CategoryEntity;
-import org.atlas.services.catalog.domain.entity.ProductDetailsEntity;
-import org.atlas.services.catalog.domain.entity.ProductEntity;
+import org.atlas.services.catalog.domain.entity.Brand;
+import org.atlas.services.catalog.domain.entity.Category;
+import org.atlas.services.catalog.domain.entity.ProductDetails;
+import org.atlas.services.catalog.domain.entity.Product;
 import org.atlas.services.catalog.port.out.ai.chatbot.service.ProductVectorStoreService;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.VectorStore;
@@ -24,14 +24,14 @@ public class ProductVectorStoreServiceImpl implements ProductVectorStoreService 
   private final VectorStore vectorStore;
 
   @Override
-  public void addDocuments(List<ProductEntity> products) {
+  public void addDocuments(List<Product> products) {
     List<Document> documents = products.stream()
         .map(this::toDocument)
         .toList();
     vectorStore.add(documents);
   }
 
-  private Document toDocument(ProductEntity product) {
+  private Document toDocument(Product product) {
     List<String> parts = new ArrayList<>();
     addPart(parts, "Product Name", product.getName());
     addPart(parts, "Brand", getBrandName(product));
@@ -54,23 +54,23 @@ public class ProductVectorStoreServiceImpl implements ProductVectorStoreService 
     }
   }
 
-  private String getBrandName(ProductEntity product) {
+  private String getBrandName(Product product) {
     return Optional.ofNullable(product.getBrand())
-        .map(BrandEntity::getName)
+        .map(Brand::getName)
         .orElse(null);
   }
 
-  private String getCategoryNames(ProductEntity product) {
+  private String getCategoryNames(Product product) {
     return Optional.ofNullable(product.getCategories())
         .filter(list -> !list.isEmpty())
         .map(list -> list.stream()
-            .map(CategoryEntity::getName)
+            .map(Category::getName)
             .filter(Objects::nonNull)
             .collect(Collectors.joining(", ")))
         .orElse(null);
   }
 
-  private String getSpecs(ProductEntity product) {
+  private String getSpecs(Product product) {
     return Optional.ofNullable(product.getAttributes())
         .filter(list -> !list.isEmpty())
         .map(list -> list.stream()
@@ -80,9 +80,9 @@ public class ProductVectorStoreServiceImpl implements ProductVectorStoreService 
         .orElse(null);
   }
 
-  private String getDescription(ProductEntity product) {
+  private String getDescription(Product product) {
     return Optional.ofNullable(product.getDetails())
-        .map(ProductDetailsEntity::getDescription)
+        .map(ProductDetails::getDescription)
         .orElse(null);
   }
 }

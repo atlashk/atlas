@@ -1,9 +1,9 @@
 package org.atlas.services.catalog.port.out.ai.chatbot.service;
 
 import java.util.List;
-import org.atlas.services.catalog.domain.entity.ProductEntity;
+import org.atlas.services.catalog.domain.entity.Product;
 
 public interface ProductVectorStoreService {
 
-  void addDocuments(List<ProductEntity> products);
+  void addDocuments(List<Product> products);
 }

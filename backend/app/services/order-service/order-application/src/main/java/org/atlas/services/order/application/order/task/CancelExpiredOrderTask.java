@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.domain.shared.order.OrderStatus;
 import org.atlas.libs.framework.saga.core.orchestrator.SagaOrchestrator;
-import org.atlas.services.order.domain.entity.OrderEntity;
+import org.atlas.services.order.domain.entity.Order;
 import org.atlas.services.order.port.out.repository.OrderRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,12 +26,12 @@ public class CancelExpiredOrderTask {
   @Transactional
   public int execute() {
     LocalDateTime expiredBefore = LocalDateTime.now().minusMinutes(EXPIRATION_MINUTES);
-    List<OrderEntity> expiredOrders = orderRepository.findExpiredOrders(expiredBefore);
+    List<Order> expiredOrders = orderRepository.findExpiredOrders(expiredBefore);
     if (expiredOrders.isEmpty()) {
       return 0;
     }
 
-    for (OrderEntity order : expiredOrders) {
+    for (Order order : expiredOrders) {
       order.setStatus(OrderStatus.CANCELED);
       order.setCancellationReason(CANCELLATION_REASON);
       orderRepository.update(order);

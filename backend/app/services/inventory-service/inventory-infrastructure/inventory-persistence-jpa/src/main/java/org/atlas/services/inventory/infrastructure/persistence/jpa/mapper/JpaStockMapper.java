@@ -1,6 +1,6 @@
 package org.atlas.services.inventory.infrastructure.persistence.jpa.mapper;
 
-import org.atlas.services.inventory.domain.entity.StockEntity;
+import org.atlas.services.inventory.domain.entity.Stock;
 import org.atlas.services.inventory.infrastructure.persistence.jpa.entity.JpaOptimisticStockEntity;
 import org.atlas.services.inventory.infrastructure.persistence.jpa.entity.JpaStockEntity;
 import org.mapstruct.Builder;
@@ -20,14 +20,14 @@ public interface JpaStockMapper {
   // JPA entity --> Domain entity
   // -----------------------------------------------------------------------------------------------
 
-  StockEntity toStock(JpaStockEntity jpaStock);
+  Stock toStock(JpaStockEntity jpaStock);
 
-  StockEntity toStock(JpaOptimisticStockEntity jpaOptimisticStock);
+  Stock toStock(JpaOptimisticStockEntity jpaOptimisticStock);
 
   // Domain entity --> JPA entity
   // -----------------------------------------------------------------------------------------------
 
-  JpaStockEntity toJpaStock(StockEntity stock);
+  JpaStockEntity toJpaStock(Stock stock);
 
-  void merge(StockEntity stock, @MappingTarget JpaStockEntity jpaStock);
+  void merge(Stock stock, @MappingTarget JpaStockEntity jpaStock);
 }

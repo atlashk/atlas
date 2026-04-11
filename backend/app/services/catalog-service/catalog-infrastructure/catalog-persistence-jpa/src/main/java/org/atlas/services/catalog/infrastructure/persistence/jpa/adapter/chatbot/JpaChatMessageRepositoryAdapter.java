@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.libs.persistence.jpa.paging.JpaPagingUtil;
-import org.atlas.services.catalog.domain.entity.chatbot.ChatMessageEntity;
+import org.atlas.services.catalog.domain.entity.chatbot.ChatMessage;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.entity.chatbot.JpaChatMessageEntity;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.mapper.chatbot.JpaChatMessageMapper;
 import org.atlas.services.catalog.infrastructure.persistence.jpa.repository.chatbot.JpaChatMessageRepository;
@@ -20,7 +20,7 @@ public class JpaChatMessageRepositoryAdapter implements MessageRepository {
   private final JpaChatMessageRepository jpaMessageRepository;
 
   @Override
-  public List<ChatMessageEntity> findByConversationId(String conversationId,
+  public List<ChatMessage> findByConversationId(String conversationId,
       PagingRequest pagingRequest) {
     Pageable pageable = JpaPagingUtil.convert(pagingRequest);
     List<JpaChatMessageEntity> jpaMessages =
@@ -29,7 +29,7 @@ public class JpaChatMessageRepositoryAdapter implements MessageRepository {
   }
 
   @Override
-  public void insert(ChatMessageEntity chatMessage) {
+  public void insert(ChatMessage chatMessage) {
     JpaChatMessageEntity jpaMessage = JpaChatMessageMapper.INSTANCE.toJpaMessage(chatMessage);
     jpaMessageRepository.insert(jpaMessage);
   }

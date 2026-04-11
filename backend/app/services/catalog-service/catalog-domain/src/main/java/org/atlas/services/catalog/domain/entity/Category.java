@@ -14,7 +14,7 @@ import org.atlas.libs.framework.domain.entity.DomainEntity;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
-public class CategoryEntity extends DomainEntity {
+public class Category extends DomainEntity {
 
   @EqualsAndHashCode.Include
   private String id;

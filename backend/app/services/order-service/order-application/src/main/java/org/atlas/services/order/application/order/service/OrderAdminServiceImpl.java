@@ -13,7 +13,7 @@ import org.atlas.libs.framework.domain.shared.order.OrderStatus;
 import org.atlas.libs.framework.paging.PagingResult;
 import org.atlas.libs.framework.util.CollectionUtil;
 import org.atlas.services.order.application.order.mapper.OrderAdminMapper;
-import org.atlas.services.order.domain.entity.OrderEntity;
+import org.atlas.services.order.domain.entity.Order;
 import org.atlas.services.order.port.in.order.model.admin.MonthlyOrderAggregation;
 import org.atlas.services.order.port.in.order.model.admin.RetrieveOrderListInput;
 import org.atlas.services.order.port.in.order.service.OrderAdminService;
@@ -32,7 +32,7 @@ public class OrderAdminServiceImpl implements OrderAdminService {
 
   @Override
   @Transactional(readOnly = true)
-  public PagingResult<OrderEntity> retrieveOrderList(RetrieveOrderListInput input) {
+  public PagingResult<Order> retrieveOrderList(RetrieveOrderListInput input) {
     OrderRepository.FindOrderCriteria criteria = OrderAdminMapper.INSTANCE
         .toFindOrderCriteria(input);
     return orderRepository.findByCriteria(criteria, input.getPagingRequest());

@@ -10,7 +10,7 @@ import org.atlas.libs.framework.security.SecurityContextUtil;
 import org.atlas.libs.framework.sequencegenerator.SequenceGenerator;
 import org.atlas.libs.framework.sequencegenerator.SequenceType;
 import org.atlas.services.payment.application.mapper.PaymentMapper;
-import org.atlas.services.payment.domain.entity.PaymentEntity;
+import org.atlas.services.payment.domain.entity.Payment;
 import org.atlas.services.payment.domain.error.PaymentDomainError;
 import org.atlas.services.payment.port.in.model.CreatePaymentInput;
 import org.atlas.services.payment.port.in.model.RetrievePaymentNextActionOutput;
@@ -29,7 +29,7 @@ public class PaymentServiceImpl implements PaymentService {
   private final SequenceGenerator sequenceGenerator;
 
   @Override
-  public PaymentEntity retrievePayment(String id) {
+  public Payment retrievePayment(String id) {
     return paymentRepository.findById(id)
         .orElseThrow(() -> new DomainException(PaymentDomainError.PAYMENT_NOT_FOUND));
   }
@@ -37,7 +37,7 @@ public class PaymentServiceImpl implements PaymentService {
   @Override
   @Transactional
   public String createPayment(CreatePaymentInput input) {
-    PaymentEntity payment = PaymentMapper.INSTANCE.toPayment(input);
+    Payment payment = PaymentMapper.INSTANCE.toPayment(input);
     payment.setId(sequenceGenerator.generate(SequenceType.PAYMENT));
     paymentRepository.insert(payment);
     return payment.getId();
@@ -46,7 +46,7 @@ public class PaymentServiceImpl implements PaymentService {
   @Override
   @Transactional
   public void updatePayment(UpdatePaymentInput input) {
-    PaymentEntity payment = paymentRepository.findById(input.getId())
+    Payment payment = paymentRepository.findById(input.getId())
         .orElseThrow(() -> new DomainException(PaymentDomainError.PAYMENT_NOT_FOUND));
     PaymentMapper.INSTANCE.merge(input, payment);
     paymentRepository.update(payment);
@@ -57,7 +57,7 @@ public class PaymentServiceImpl implements PaymentService {
   public RetrievePaymentNextActionOutput retrievePaymentNextAction(String orderId) {
     String userId = SecurityContextUtil.requirePrincipal().getUserId();
 
-    PaymentEntity payment = paymentRepository.findByOrderId(orderId)
+    Payment payment = paymentRepository.findByOrderId(orderId)
         .orElseThrow(() -> new DomainException(PaymentDomainError.PAYMENT_NOT_FOUND));
 
     if (!PaymentStatus.CREATED.equals(payment.getStatus())) {

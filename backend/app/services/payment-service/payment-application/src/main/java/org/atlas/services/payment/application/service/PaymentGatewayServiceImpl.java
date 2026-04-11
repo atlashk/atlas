@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.atlas.libs.framework.cache.Cache;
 import org.atlas.libs.framework.domain.exception.DomainException;
 import org.atlas.libs.framework.util.StringUtil;
-import org.atlas.services.payment.domain.entity.PaymentGatewayEntity;
+import org.atlas.services.payment.domain.entity.PaymentGateway;
 import org.atlas.services.payment.domain.error.PaymentDomainError;
 import org.atlas.services.payment.port.in.model.RetrievePaymentGatewayInput;
 import org.atlas.services.payment.port.in.service.PaymentGatewayService;
@@ -28,13 +28,13 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
   @Override
   @Transactional(readOnly = true)
   @Cache(name = "paymentGateways")
-  public List<PaymentGatewayEntity> retrievePaymentGatewayList() {
+  public List<PaymentGateway> retrievePaymentGatewayList() {
     return paymentGatewayRepository.findAll();
   }
 
   @Override
   @Transactional(readOnly = true)
-  public PaymentGatewayEntity retrievePaymentGateway(RetrievePaymentGatewayInput input) {
+  public PaymentGateway retrievePaymentGateway(RetrievePaymentGatewayInput input) {
     if (input.getId() != null) {
       return paymentGatewayRepository.findById(input.getId())
           .orElseThrow(() -> new DomainException(PaymentDomainError.PAYMENT_GATEWAY_NOT_FOUND));
@@ -49,7 +49,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
   @Override
   @Transactional(readOnly = true)
   public PaymentGatewayIntegrationService retrievePaymentGatewayIntegrationService(
-      PaymentGatewayEntity paymentGateway) {
+      PaymentGateway paymentGateway) {
     String paymentGatewayIntegrationServiceBeanName =
         String.format("%sIntegrationService", paymentGateway.getCode().toLowerCase());
     try {

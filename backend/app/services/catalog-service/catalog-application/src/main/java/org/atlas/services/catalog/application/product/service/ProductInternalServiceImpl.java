@@ -7,7 +7,7 @@ import org.atlas.libs.framework.internal.catalog.model.ProductOutput;
 import org.atlas.libs.framework.internal.catalog.model.RetrieveProductListInput;
 import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.catalog.application.product.mapper.ProductInternalMapper;
-import org.atlas.services.catalog.domain.entity.ProductEntity;
+import org.atlas.services.catalog.domain.entity.Product;
 import org.atlas.services.catalog.port.in.product.service.ProductInternalService;
 import org.atlas.services.catalog.port.out.repository.ProductRepository;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ public class ProductInternalServiceImpl implements ProductInternalService {
 
   @Override
   public List<ProductOutput> retrieveProductList(RetrieveProductListInput input) {
-    List<ProductEntity> productList = productRepository.findByIdIn(input.getIds());
+    List<Product> productList = productRepository.findByIdIn(input.getIds());
     return MapperUtil.mapList(productList, ProductInternalMapper.INSTANCE::toProductOutput);
   }
 }

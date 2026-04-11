@@ -6,11 +6,11 @@ import org.atlas.services.catalog.api.rest.product.model.admin.ExportProductRequ
 import org.atlas.services.catalog.api.rest.product.model.admin.ProductResponse;
 import org.atlas.services.catalog.api.rest.product.model.admin.RetrieveProductListRequest;
 import org.atlas.services.catalog.api.rest.product.model.admin.UpdateProductRequest;
-import org.atlas.services.catalog.domain.entity.BrandEntity;
-import org.atlas.services.catalog.domain.entity.CategoryEntity;
-import org.atlas.services.catalog.domain.entity.ProductAttributeEntity;
-import org.atlas.services.catalog.domain.entity.ProductDetailsEntity;
-import org.atlas.services.catalog.domain.entity.ProductEntity;
+import org.atlas.services.catalog.domain.entity.Brand;
+import org.atlas.services.catalog.domain.entity.Category;
+import org.atlas.services.catalog.domain.entity.ProductAttribute;
+import org.atlas.services.catalog.domain.entity.ProductDetails;
+import org.atlas.services.catalog.domain.entity.Product;
 import org.atlas.services.catalog.port.in.product.model.admin.ExportProductInput;
 import org.atlas.services.catalog.port.in.product.model.admin.RetrieveProductListInput;
 import org.mapstruct.Mapper;
@@ -31,39 +31,39 @@ public interface ProductAdminMapper {
   @Mapping(target = "brand", source = "brandId")
   @Mapping(target = "categories", source = "categoryIds")
   @Mapping(target = "id", ignore = true)
-  ProductEntity toProduct(CreateProductRequest request);
+  Product toProduct(CreateProductRequest request);
 
-  ProductDetailsEntity toProductDetails(CreateProductRequest.ProductDetails details);
+  ProductDetails toProductDetails(CreateProductRequest.ProductDetails details);
 
-  ProductAttributeEntity toProductAttribute(CreateProductRequest.ProductAttribute attribute);
+  ProductAttribute toProductAttribute(CreateProductRequest.ProductAttribute attribute);
 
   @Mapping(target = "brand", source = "brandId")
   @Mapping(target = "categories", source = "categoryIds")
   @Mapping(target = "id", ignore = true)
-  ProductEntity toProduct(UpdateProductRequest request);
+  Product toProduct(UpdateProductRequest request);
 
-  ProductDetailsEntity toProductDetails(UpdateProductRequest.ProductDetails details);
+  ProductDetails toProductDetails(UpdateProductRequest.ProductDetails details);
 
-  ProductAttributeEntity toProductAttribute(UpdateProductRequest.ProductAttribute attribute);
+  ProductAttribute toProductAttribute(UpdateProductRequest.ProductAttribute attribute);
 
   ExportProductInput toExportProductInput(ExportProductRequest request);
 
   // Helper methods for mapping complex objects
-  default BrandEntity mapBrandId(String brandId) {
+  default Brand mapBrandId(String brandId) {
     if (brandId == null) {
       return null;
     }
-    return BrandEntity.builder()
+    return Brand.builder()
         .id(brandId)
         .build();
   }
 
-  default List<CategoryEntity> mapCategoryIds(List<String> categoryIds) {
+  default List<Category> mapCategoryIds(List<String> categoryIds) {
     if (categoryIds == null) {
       return null;
     }
     return categoryIds.stream()
-        .map(id -> CategoryEntity.builder()
+        .map(id -> Category.builder()
             .id(id)
             .build())
         .toList();
@@ -72,5 +72,5 @@ public interface ProductAdminMapper {
   // Entity/Output --> Response
   // -----------------------------------------------------------------------------------------------
 
-  ProductResponse toProductResponse(ProductEntity product);
+  ProductResponse toProductResponse(Product product);
 }

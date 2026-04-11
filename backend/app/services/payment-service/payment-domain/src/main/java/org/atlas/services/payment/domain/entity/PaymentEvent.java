@@ -1,4 +1,4 @@
-package org.atlas.services.user.domain.entity;
+package org.atlas.services.payment.domain.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,21 +7,27 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.atlas.libs.framework.domain.entity.DomainEntity;
-import org.atlas.libs.framework.security.FederatedIdentityProvider;
 
-@Getter
-@Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
-public class FederatedIdentityEntity extends DomainEntity {
+public class PaymentEvent extends DomainEntity {
 
   @EqualsAndHashCode.Include
-  private String userId;
+  private Integer id;
 
-  @EqualsAndHashCode.Include
-  private FederatedIdentityProvider provider;
+  private Integer paymentGatewayId;
 
-  private String providerUserId;
+  private String paymentId;
+
+  private String payload;
+
+  private String headers;
+
+  private PaymentEventStatus status;
+
+  private String error;
 }

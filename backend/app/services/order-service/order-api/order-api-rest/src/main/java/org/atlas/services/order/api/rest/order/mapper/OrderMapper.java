@@ -4,7 +4,7 @@ import org.atlas.services.order.api.rest.order.model.CheckoutRequest;
 import org.atlas.services.order.api.rest.order.model.OrderResponse;
 import org.atlas.services.order.api.rest.order.model.RetrieveOrderListRequest;
 import org.atlas.services.order.api.rest.order.model.RetrieveOrderStatusResponse;
-import org.atlas.services.order.domain.entity.OrderEntity;
+import org.atlas.services.order.domain.entity.Order;
 import org.atlas.services.order.port.in.order.model.CheckoutInput;
 import org.atlas.services.order.port.in.order.model.RetrieveOrderListInput;
 import org.atlas.services.order.port.in.order.model.RetrieveOrderStatusOutput;
@@ -29,17 +29,17 @@ public interface OrderMapper {
 
   RetrieveOrderStatusResponse toRetrieveOrderStatusResponse(RetrieveOrderStatusOutput output);
 
-  OrderResponse toOrderResponse(OrderEntity entity);
+  OrderResponse toOrderResponse(Order entity);
 
   // Don't remove it
-  OrderResponse.Address toOrderResponseAddress(OrderEntity.Address address);
+  OrderResponse.Address toOrderResponseAddress(Order.Address address);
 
   // Don't remove it
-  OrderResponse.OrderItem toOrderResponseOrderItem(OrderEntity.OrderItem orderItem);
+  OrderResponse.OrderItem toOrderResponseOrderItem(Order.OrderItem orderItem);
 
   // Don't remove it
-  OrderResponse.Product toOrderResponseProduct(OrderEntity.ProductSnapshot productSnapshot);
+  OrderResponse.Product toOrderResponseProduct(Order.ProductSnapshot productSnapshot);
 
   // Don't remove it
-  OrderResponse.Payment toOrderResponsePayment(OrderEntity.PaymentSnapshot paymentSnapshot);
+  OrderResponse.Payment toOrderResponsePayment(Order.PaymentSnapshot paymentSnapshot);
 }

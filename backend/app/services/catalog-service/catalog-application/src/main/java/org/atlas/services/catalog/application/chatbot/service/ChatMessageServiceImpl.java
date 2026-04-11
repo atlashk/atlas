@@ -10,7 +10,7 @@ import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.security.SecurityContextUtil;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.libs.framework.uuid.UUIDGenerator;
-import org.atlas.services.catalog.domain.entity.chatbot.ChatMessageEntity;
+import org.atlas.services.catalog.domain.entity.chatbot.ChatMessage;
 import org.atlas.services.catalog.domain.entity.chatbot.SenderType;
 import org.atlas.services.catalog.port.in.chatbot.model.ChatSendMessageInput;
 import org.atlas.services.catalog.port.in.chatbot.model.SendMessageOutput;
@@ -50,7 +50,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<ChatMessageEntity> retrieveMessageList(String conversationId,
+  public List<ChatMessage> retrieveMessageList(String conversationId,
       PagingRequest pagingRequest) {
     return messageRepository.findByConversationId(conversationId, pagingRequest);
   }
@@ -65,7 +65,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     }
 
     // Save input message
-    ChatMessageEntity inputMessage = ChatMessageEntity.builder()
+    ChatMessage inputMessage = ChatMessage.builder()
         .id(UUIDGenerator.generate())
         .conversationId(sendMessageInput.getConversationId())
         .messageType(sendMessageInput.getMessageType())
@@ -91,7 +91,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
       sendMessageInput.getConversationId(), userId, chatOutput.getInputTokens(), chatOutput.getOutputTokens());
 
     // Save output message
-    ChatMessageEntity outputMessage = ChatMessageEntity.builder()
+    ChatMessage outputMessage = ChatMessage.builder()
         .id(UUIDGenerator.generate())
         .conversationId(sendMessageInput.getConversationId())
         .messageType(sendMessageInput.getMessageType())

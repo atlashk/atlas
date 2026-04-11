@@ -13,7 +13,7 @@ import org.atlas.libs.framework.util.MapperUtil;
 import org.atlas.services.order.api.rest.order.mapper.OrderAdminMapper;
 import org.atlas.services.order.api.rest.order.model.admin.OrderResponse;
 import org.atlas.services.order.api.rest.order.model.admin.RetrieveOrderListRequest;
-import org.atlas.services.order.domain.entity.OrderEntity;
+import org.atlas.services.order.domain.entity.Order;
 import org.atlas.services.order.port.in.order.model.admin.MonthlyOrderAggregation;
 import org.atlas.services.order.port.in.order.model.admin.RetrieveOrderListInput;
 import org.atlas.services.order.port.in.order.service.OrderAdminService;
@@ -39,7 +39,7 @@ public class OrderAdminController {
       @Valid @RequestBody RetrieveOrderListRequest request) throws Exception {
     RetrieveOrderListInput input = OrderAdminMapper.INSTANCE.toRetrieveOrderListInput(request);
     input.setPagingRequest(PagingRequest.of(request.getPage() - 1, request.getSize(), "createdAt", SortOrder.DESC));
-    PagingResult<OrderEntity> orders = orderAdminService.retrieveOrderList(input);
+    PagingResult<Order> orders = orderAdminService.retrieveOrderList(input);
     PagingResult<OrderResponse> responseData = MapperUtil.mapPage(orders,
         OrderAdminMapper.INSTANCE::toOrderResponse);
     return ApiResponseWrapper.successPage(responseData);

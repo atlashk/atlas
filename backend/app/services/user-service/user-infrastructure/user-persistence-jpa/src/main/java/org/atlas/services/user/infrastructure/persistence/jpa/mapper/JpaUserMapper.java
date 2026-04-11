@@ -1,6 +1,6 @@
 package org.atlas.services.user.infrastructure.persistence.jpa.mapper;
 
-import org.atlas.services.user.domain.entity.UserEntity;
+import org.atlas.services.user.domain.entity.User;
 import org.atlas.services.user.infrastructure.persistence.jpa.entity.JpaUserEntity;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
@@ -15,7 +15,7 @@ public interface JpaUserMapper {
 
   JpaUserMapper INSTANCE = Mappers.getMapper(JpaUserMapper.class);
 
-  UserEntity toUser(JpaUserEntity jpaUser);
+  User toUser(JpaUserEntity jpaUser);
 
-  JpaUserEntity toJpaUser(UserEntity user);
+  JpaUserEntity toJpaUser(User user);
 }

@@ -9,7 +9,7 @@ import org.atlas.libs.framework.storage.StorageService;
 import org.atlas.libs.framework.util.PagingUtil;
 import org.atlas.libs.framework.util.SleepUtil;
 import org.atlas.libs.framework.util.StopWatch;
-import org.atlas.services.catalog.domain.entity.ProductEntity;
+import org.atlas.services.catalog.domain.entity.Product;
 import org.atlas.services.catalog.port.in.product.service.ProductInitializerService;
 import org.atlas.services.catalog.port.out.ai.chatbot.service.ProductVectorStoreService;
 import org.atlas.services.catalog.port.out.repository.ProductRepository;
@@ -81,9 +81,9 @@ public class ProductInitializerServiceImpl implements ProductInitializerService 
         PagingRequest pagingRequest = PagingRequest.of(batch, BATCH_SIZE);
         ProductRepository.FindProductCriteria criteria = new ProductRepository.FindProductCriteria();
 
-        PagingResult<ProductEntity> productPage = productRepository.findByCriteria(criteria,
+        PagingResult<Product> productPage = productRepository.findByCriteria(criteria,
             pagingRequest);
-        List<ProductEntity> products = productPage.getData();
+        List<Product> products = productPage.getData();
 
         if (products.isEmpty()) {
           log.warn("Empty batch encountered at page {}/{}", batch + 1, totalBatches);
@@ -146,9 +146,9 @@ public class ProductInitializerServiceImpl implements ProductInitializerService 
         PagingRequest pagingRequest = PagingRequest.of(batch, BATCH_SIZE);
         ProductRepository.FindProductCriteria criteria = new ProductRepository.FindProductCriteria();
 
-        PagingResult<ProductEntity> productPage = productRepository.findByCriteria(criteria,
+        PagingResult<Product> productPage = productRepository.findByCriteria(criteria,
             pagingRequest);
-        List<ProductEntity> products = productPage.getData();
+        List<Product> products = productPage.getData();
 
         if (products.isEmpty()) {
           log.warn("Empty batch encountered at page {}/{}", batch + 1, totalBatches);

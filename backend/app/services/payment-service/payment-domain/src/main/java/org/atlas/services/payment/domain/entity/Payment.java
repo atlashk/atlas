@@ -17,7 +17,7 @@ import org.atlas.services.payment.domain.entity.nextaction.NextAction;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
-public class PaymentEntity extends DomainEntity {
+public class Payment extends DomainEntity {
 
   @EqualsAndHashCode.Include
   private String id;

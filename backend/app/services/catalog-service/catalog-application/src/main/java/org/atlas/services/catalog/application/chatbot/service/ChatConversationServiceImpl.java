@@ -6,7 +6,7 @@ import org.atlas.libs.framework.paging.PagingRequest;
 import org.atlas.libs.framework.security.SecurityContextUtil;
 import org.atlas.libs.framework.util.StringUtil;
 import org.atlas.libs.framework.uuid.UUIDGenerator;
-import org.atlas.services.catalog.domain.entity.chatbot.ChatConversationEntity;
+import org.atlas.services.catalog.domain.entity.chatbot.ChatConversation;
 import org.atlas.services.catalog.port.in.chatbot.model.ChatSendMessageInput;
 import org.atlas.services.catalog.port.in.chatbot.model.SendMessageOutput;
 import org.atlas.services.catalog.port.in.chatbot.service.ChatConversationService;
@@ -26,7 +26,7 @@ public class ChatConversationServiceImpl implements ChatConversationService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<ChatConversationEntity> retrieveConversationList(PagingRequest pagingRequest) {
+  public List<ChatConversation> retrieveConversationList(PagingRequest pagingRequest) {
     String userId = SecurityContextUtil.requirePrincipal().getUserId();
     return conversationRepository.findByUserId(userId, pagingRequest);
   }
@@ -37,7 +37,7 @@ public class ChatConversationServiceImpl implements ChatConversationService {
     String userId = SecurityContextUtil.requirePrincipal().getUserId();
 
     // Create new conversation
-    ChatConversationEntity conversation = ChatConversationEntity.builder()
+    ChatConversation conversation = ChatConversation.builder()
         .id(UUIDGenerator.generate())
         .userId(userId)
         .title(StringUtil.limitLength(startConversationInput.getText(), TITLE_MAX_LENGTH))

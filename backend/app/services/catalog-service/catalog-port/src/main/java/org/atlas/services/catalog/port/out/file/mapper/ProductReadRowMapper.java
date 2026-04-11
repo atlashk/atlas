@@ -2,9 +2,9 @@ package org.atlas.services.catalog.port.out.file.mapper;
 
 import java.util.List;
 import org.atlas.libs.framework.util.StringUtil;
-import org.atlas.services.catalog.domain.entity.BrandEntity;
-import org.atlas.services.catalog.domain.entity.CategoryEntity;
-import org.atlas.services.catalog.domain.entity.ProductEntity;
+import org.atlas.services.catalog.domain.entity.Brand;
+import org.atlas.services.catalog.domain.entity.Category;
+import org.atlas.services.catalog.domain.entity.Product;
 import org.atlas.services.catalog.port.out.file.model.ProductReadRow;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
@@ -17,21 +17,21 @@ public interface ProductReadRowMapper {
 
   ProductReadRowMapper INSTANCE = Mappers.getMapper(ProductReadRowMapper.class);
 
-  ProductEntity toProduct(ProductReadRow row);
+  Product toProduct(ProductReadRow row);
 
   @AfterMapping
-  default void afterToProduct(ProductReadRow row, @MappingTarget ProductEntity product) {
+  default void afterToProduct(ProductReadRow row, @MappingTarget Product product) {
     // Brand
-    BrandEntity brand = new BrandEntity();
+    Brand brand = new Brand();
     brand.setId(row.getBrandId());
     product.setBrand(brand);
 
     // Categories
-    List<CategoryEntity> categories = StringUtil.split(row.getCategoryIds(), "\\|")
+    List<Category> categories = StringUtil.split(row.getCategoryIds(), "\\|")
         .stream()
         .filter(StringUtil::isNotBlank)
         .map(categoryIdStr -> {
-          CategoryEntity category = new CategoryEntity();
+          Category category = new Category();
           category.setId(categoryIdStr);
           return category;
         })

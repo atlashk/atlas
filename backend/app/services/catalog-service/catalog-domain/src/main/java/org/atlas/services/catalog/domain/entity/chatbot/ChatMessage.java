@@ -1,4 +1,4 @@
-package org.atlas.services.inventory.domain.entity;
+package org.atlas.services.catalog.domain.entity.chatbot;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,18 +14,18 @@ import org.atlas.libs.framework.domain.entity.DomainEntity;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
-public class StockEntity extends DomainEntity {
+public class ChatMessage extends DomainEntity {
 
   @EqualsAndHashCode.Include
-  private String productId;   // same id as product
+  private String id;
 
-  @Builder.Default
-  private Integer availableQuantity = 0;
+  private String conversationId;
 
-  @Builder.Default
-  private Integer reservedQuantity = 0;
-  
-  public boolean isOutOfStock() {
-    return availableQuantity <= 0;
-  }
+  private MessageType messageType;
+
+  private SenderType senderType;
+
+  private String userId;
+
+  private String text;
 }
