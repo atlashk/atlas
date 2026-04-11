@@ -2,13 +2,13 @@
 set -euo pipefail
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly BACKEND_DIR="$SCRIPT_DIR"
-readonly CONFIG_DIR="$BACKEND_DIR/app-stack"
-readonly GENERATOR_DIR="$BACKEND_DIR/local/generator"
-readonly TEMPLATES_DIR="$BACKEND_DIR/local/templates"
+readonly BACKEND_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+readonly CONFIG_DIR="$BACKEND_DIR/app/app-stack"
+readonly GENERATOR_DIR="$SCRIPT_DIR/generator"
+readonly TEMPLATES_DIR="$SCRIPT_DIR/templates"
 
 APP_STACK="local.dev"
-OUT_DIR="$BACKEND_DIR/dist"
+OUT_DIR="$SCRIPT_DIR/dist"
 NORMALIZE_LINE_ENDINGS=true
 
 info() { printf "[INFO] %s\n" "$*"; }
@@ -75,29 +75,16 @@ normalize_line_endings() {
   find "$dir" -type f -name "*.sh" -exec chmod +x {} \;
 }
 
-resolve_template_path() {
-  case "$APP_STACK" in
-    local.dev)        echo "local/compose" ;;
-    local.compose)    echo "local/compose" ;;
-    local.k8s)        echo "local/k8s" ;;
-    *)                error "Could not resolve template path for app stack: $APP_STACK" ;;
-  esac
-}
-
 generate_templates() {
   ensure_generator_deps
 
-  local template_rel_path
-  template_rel_path=$(resolve_template_path)
-  local template_dir="$TEMPLATES_DIR/$template_rel_path"
-
-  [[ -d "$template_dir" ]] || error "Templates directory not found: $template_dir"
+  [[ -d "$TEMPLATES_DIR" ]] || error "Templates directory not found: $TEMPLATES_DIR"
 
   info "Generating dist files from templates..."
   (
     cd "$GENERATOR_DIR" || exit 1
     node generator.mjs \
-      --dir "../templates/$template_rel_path" \
+      --dir "../templates" \
       --out-dir "$OUT_DIR" \
       --app-stack "$APP_STACK"
   )
