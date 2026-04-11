@@ -29,10 +29,10 @@ vpc_cidr = "10.0.0.0/16"
 
 # ------------------------------------------------------------------
 # Node Group: default — runs all workloads
-# t3.large: 2 vCPU, 8 GB RAM
+# c6i.xlarge: 4 vCPU, 8 GB RAM
 # ------------------------------------------------------------------
 node_group = {
-  instance_types = ["t3.large"]
+  instance_types = ["c6i.xlarge"]
   min_size       = 2
   max_size       = 3
   desired_size   = 2

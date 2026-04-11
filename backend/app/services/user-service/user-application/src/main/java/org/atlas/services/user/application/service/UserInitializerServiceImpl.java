@@ -1,4 +1,4 @@
-package org.atlas.services.user.application.initializer;
+package org.atlas.services.user.application.service;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -8,39 +8,34 @@ import org.atlas.libs.framework.domain.shared.user.UserRole;
 import org.atlas.libs.framework.security.SecurityContextUtil;
 import org.atlas.services.user.port.in.model.admin.CreateUserInput;
 import org.atlas.services.user.port.in.service.UserAdminService;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
+import org.atlas.services.user.port.in.service.UserInitializerService;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Component
+@Service
 @RequiredArgsConstructor
 @Slf4j
-public class UserDataInitializer {
+public class UserInitializerServiceImpl implements UserInitializerService {
 
   private final UserAdminService userAdminService;
   private final ApplicationConfigService applicationConfigService;
 
-  @EventListener(ApplicationReadyEvent.class)
+  @Async
+  @Override
   @Transactional
-  public void initialize(ApplicationReadyEvent event) {
-    // Set context first
+  public void initializeUserData() throws Exception {
     SecurityContextUtil.setContextForSystemAdmin();
 
-    try {
-      if (!userAdminService.existsUser("admin@atlas.org")) {
-        createAdminUser();
-      }
-
-      if (!userAdminService.existsUser("demo@atlas.org")) {
-        createDemoUser();
-      }
-    } catch (Exception e) {
-      // Fail-fast
-      log.error("Failed to initialize user data", e);
-      SpringApplication.exit(event.getApplicationContext());
+    if (!userAdminService.existsUser("admin@atlas.org")) {
+      createAdminUser();
     }
+
+    if (!userAdminService.existsUser("demo@atlas.org")) {
+      createDemoUser();
+    }
+
+    log.info("User data initialization completed.");
   }
 
   private void createAdminUser() throws Exception {

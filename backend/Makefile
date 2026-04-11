@@ -463,6 +463,32 @@ destroy-cluster: check-prereqs
 	@eval "$$SHELL_HELPERS"
 	load_bootstrap_state
 	printf '\n===> Step 3/4 — Terraform destroy (EKS cluster)\n'
+
+	# Delete PVCs first so the EBS CSI driver can release/delete the backing EBS volumes before the cluster is torn down. 
+	# Without this step the volumes are orphaned and must be removed manually.
+	if [[ -f "$(STATE_DIR)/configure_kubectl" ]]; then
+	  TF_CONFIGURE_KUBECTL=$$(cat "$(STATE_DIR)/configure_kubectl")
+	  configure_kubectl
+	  log_info "Deleting PVCs in all app namespaces to release EBS volumes"
+	  for ns in "$(HELM_NS_INFRA)" "$(HELM_NS_SECURITY)" "$(HELM_NS_OBSERVABILITY)" "$(HELM_NS_APP)"; do
+	    if kubectl get namespace "$$ns" &>/dev/null 2>&1; then
+	      pvc_count=$$(kubectl get pvc -n "$$ns" --no-headers 2>/dev/null | wc -l)
+	      if [[ "$$pvc_count" -gt 0 ]]; then
+	        log_info "Deleting $$pvc_count PVC(s) in namespace '$$ns'"
+	        kubectl delete pvc --all -n "$$ns" --wait=true
+	        log_ok "PVCs in namespace '$$ns' deleted"
+	      else
+	        log_info "No PVCs in namespace '$$ns' — skipping"
+	      fi
+	    else
+	      log_info "Namespace '$$ns' not found — skipping"
+	    fi
+	  done
+	  log_ok "PVC cleanup complete — EBS volumes released"
+	else
+	  log_warn "kubectl state not found — skipping PVC cleanup (check for orphaned EBS volumes manually)"
+	fi
+
 	require_tfvars "$(TF_CLUSTER_DIR)"
 	tf_init "$(TF_CLUSTER_DIR)" "eks"
 	tf_destroy "$(TF_CLUSTER_DIR)"
